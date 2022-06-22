@@ -18,8 +18,10 @@ import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.upstream.DataSource;
 import j$.util.DesugarTimeZone;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -174,6 +176,19 @@ public final class Util {
         MODEL = str3;
         DEVICE_DEBUG_INFO = str + ", " + str3 + ", " + str2 + ", " + i;
         Pattern.compile("%([A-Fa-f0-9]{2})");
+    }
+
+    public static byte[] toByteArray(InputStream inputStream) throws IOException {
+        byte[] bArr = new byte[4096];
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        while (true) {
+            int read = inputStream.read(bArr);
+            if (read != -1) {
+                byteArrayOutputStream.write(bArr, 0, read);
+            } else {
+                return byteArrayOutputStream.toByteArray();
+            }
+        }
     }
 
     public static boolean isLocalFileUri(Uri uri) {

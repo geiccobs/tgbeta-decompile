@@ -558,6 +558,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public static int UPDATE_MASK_ALL = ((((((((2 | 4) | 1) | 8) | 16) | 32) | 64) | ConnectionsManager.RequestFlagNeedQuickAck) | 256) | 1024;
     public static int DIALOG_FILTER_FLAG_ALL_CHATS = (((1 | 2) | 4) | 8) | 16;
     private static volatile MessagesController[] Instance = new MessagesController[4];
+    private static volatile Object[] lockObjects = new Object[4];
     private ConcurrentHashMap<Long, TLRPC$Chat> chats = new ConcurrentHashMap<>(100, 1.0f, 2);
     private ConcurrentHashMap<Integer, TLRPC$EncryptedChat> encryptedChats = new ConcurrentHashMap<>(10, 1.0f, 2);
     private ConcurrentHashMap<Long, TLRPC$User> users = new ConcurrentHashMap<>(100, 1.0f, 2);
@@ -1169,6 +1170,12 @@ public class MessagesController extends BaseController implements NotificationCe
         }
     }
 
+    static {
+        for (int i = 0; i < 4; i++) {
+            lockObjects[i] = new Object();
+        }
+    }
+
     /* loaded from: classes.dex */
     public static class ReadTask {
         public long dialogId;
@@ -1360,7 +1367,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public static MessagesController getInstance(int i) {
         MessagesController messagesController = Instance[i];
         if (messagesController == null) {
-            synchronized (MessagesController.class) {
+            synchronized (lockObjects[i]) {
                 messagesController = Instance[i];
                 if (messagesController == null) {
                     MessagesController[] messagesControllerArr = Instance;

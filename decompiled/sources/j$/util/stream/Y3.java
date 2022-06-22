@@ -13,7 +13,7 @@ public class Y3 extends Z3 implements j$.util.function.q {
     }
 
     /* renamed from: B */
-    public j$.util.v mo70spliterator() {
+    public j$.util.v mo71spliterator() {
         return new X3(this, 0, this.c, 0, this.b);
     }
 
@@ -41,7 +41,7 @@ public class Y3 extends Z3 implements j$.util.function.q {
         if (consumer instanceof j$.util.function.q) {
             g((j$.util.function.q) consumer);
         } else if (!Q4.a) {
-            mo70spliterator().forEachRemaining(consumer);
+            mo71spliterator().forEachRemaining(consumer);
         } else {
             Q4.a(getClass(), "{0} calling SpinedBuffer.OfLong.forEach(Consumer)");
             throw null;
@@ -50,7 +50,7 @@ public class Y3 extends Z3 implements j$.util.function.q {
 
     @Override // java.lang.Iterable
     public Iterator iterator() {
-        return j$.util.L.h(mo70spliterator());
+        return j$.util.L.h(mo71spliterator());
     }
 
     @Override // j$.util.stream.Z3

@@ -13,7 +13,7 @@ public interface AbstractC0034b extends j$.lang.e {
 
     @Override // j$.lang.e
     /* renamed from: spliterator */
-    u mo70spliterator();
+    u mo71spliterator();
 
     Stream stream();
 }

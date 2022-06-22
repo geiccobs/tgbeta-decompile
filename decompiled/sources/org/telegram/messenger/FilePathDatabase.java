@@ -19,7 +19,6 @@ public class FilePathDatabase {
     private SQLiteDatabase database;
     private final DispatchQueue dispatchQueue;
     private File shmCacheFile;
-    private File walCacheFile;
 
     public FilePathDatabase(int i) {
         this.currentAccount = i;
@@ -34,10 +33,10 @@ public class FilePathDatabase {
     }
 
     public /* synthetic */ void lambda$new$0() {
-        createDatabase(false);
+        createDatabase(0, false);
     }
 
-    public void createDatabase(boolean z) {
+    public void createDatabase(int i, boolean z) {
         File filesDirFixed = ApplicationLoader.getFilesDirFixed();
         if (this.currentAccount != 0) {
             File file = new File(filesDirFixed, "account" + this.currentAccount + "/");
@@ -55,17 +54,33 @@ public class FilePathDatabase {
             if (z2) {
                 this.database.executeFast("CREATE TABLE paths(document_id INTEGER, dc_id INTEGER, type INTEGER, path TEXT, PRIMARY KEY(document_id, dc_id, type));").stepThis().dispose();
                 this.database.executeFast("PRAGMA user_version = 1").stepThis().dispose();
+            } else {
+                int intValue = this.database.executeInt("PRAGMA user_version", new Object[0]).intValue();
+                if (BuildVars.LOGS_ENABLED) {
+                    FileLog.d("current db version = " + intValue);
+                }
+                if (intValue == 0) {
+                    throw new Exception("malformed");
+                }
             }
             if (!z) {
                 createBackup();
             }
             FileLog.d("files db created from_backup= " + z);
         } catch (Exception e) {
-            if (!z && restoreBackup()) {
-                createDatabase(true);
-            } else if (BuildVars.DEBUG_VERSION) {
-                throw new RuntimeException(e);
+            if (i < 4) {
+                if (!z && restoreBackup()) {
+                    createDatabase(i + 1, true);
+                    return;
+                }
+                this.cacheFile.delete();
+                this.shmCacheFile.delete();
+                createDatabase(i + 1, false);
             }
+            if (!BuildVars.DEBUG_VERSION) {
+                return;
+            }
+            FileLog.e(e);
         }
     }
 
@@ -99,7 +114,7 @@ public class FilePathDatabase {
         try {
             return AndroidUtilities.copyFile(file2, this.cacheFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            FileLog.e(e);
             return false;
         }
     }
@@ -133,9 +148,7 @@ public class FilePathDatabase {
             }
             queryFinalized.dispose();
         } catch (SQLiteException e) {
-            if (BuildVars.DEBUG_VERSION) {
-                throw new RuntimeException(e);
-            }
+            FileLog.e(e);
         }
         return str;
     }
@@ -148,10 +161,10 @@ public class FilePathDatabase {
                 strArr[0] = queryFinalized.stringValue(0);
             }
             queryFinalized.dispose();
-            countDownLatch.countDown();
         } catch (SQLiteException e) {
-            throw new RuntimeException(e);
+            FileLog.e(e);
         }
+        countDownLatch.countDown();
     }
 
     public void putPath(final long j, final int i, final int i2, final String str) {
@@ -178,9 +191,7 @@ public class FilePathDatabase {
                 sQLiteDatabase.executeFast("DELETE FROM paths WHERE document_id = " + j + " AND dc_id = " + i + " AND type = " + i2).stepThis().dispose();
             }
         } catch (SQLiteException e) {
-            if (BuildVars.DEBUG_VERSION) {
-                throw new RuntimeException(e);
-            }
+            FileLog.e(e);
         }
     }
 
@@ -199,14 +210,14 @@ public class FilePathDatabase {
         });
         try {
             countDownLatch.await();
-            FileLog.d("checkMediaExistance size=" + arrayList.size() + " time=" + (System.currentTimeMillis() - currentTimeMillis));
-            if (!BuildVars.DEBUG_VERSION || Thread.currentThread() != Looper.getMainLooper().getThread()) {
-                return;
-            }
-            FileLog.e(new Exception("warning, not allowed in main thread"));
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            FileLog.e(e);
         }
+        FileLog.d("checkMediaExistance size=" + arrayList.size() + " time=" + (System.currentTimeMillis() - currentTimeMillis));
+        if (!BuildVars.DEBUG_VERSION || Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            return;
+        }
+        FileLog.e(new Exception("warning, not allowed in main thread"));
     }
 
     public static /* synthetic */ void lambda$checkMediaExistance$3(ArrayList arrayList, CountDownLatch countDownLatch) {

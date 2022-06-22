@@ -94,7 +94,7 @@ abstract class AbstractC0111k2 implements j$.util.u {
                 this.a = null;
                 return false;
             }
-            uVar = a.mo68spliterator();
+            uVar = a.mo69spliterator();
         }
         this.d = uVar;
         return true;
@@ -119,18 +119,18 @@ abstract class AbstractC0111k2 implements j$.util.u {
             A1 a12 = this.a;
             int i = this.b;
             this.b = i + 1;
-            return a12.b(i).mo68spliterator();
+            return a12.b(i).mo69spliterator();
         }
         A1 b = this.a.b(this.b);
         this.a = b;
         if (b.p() == 0) {
-            j$.util.u mo68spliterator = this.a.mo68spliterator();
-            this.c = mo68spliterator;
-            return mo68spliterator.trySplit();
+            j$.util.u mo69spliterator = this.a.mo69spliterator();
+            this.c = mo69spliterator;
+            return mo69spliterator.trySplit();
         }
         this.b = 0;
         A1 a13 = this.a;
         this.b = 1;
-        return a13.b(0).mo68spliterator();
+        return a13.b(0).mo69spliterator();
     }
 }

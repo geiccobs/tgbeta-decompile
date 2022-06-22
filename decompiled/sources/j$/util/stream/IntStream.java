@@ -51,7 +51,7 @@ public interface IntStream extends AbstractC0084g {
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    p.a mo65iterator();
+    p.a mo66iterator();
 
     Object k0(j$.util.function.y yVar, j$.util.function.v vVar, BiConsumer biConsumer);
 

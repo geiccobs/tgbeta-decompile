@@ -238,7 +238,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
 
         @Override // java.util.Collection, java.lang.Iterable, java.util.Set, j$.util.AbstractC0034b, j$.lang.e
         /* renamed from: spliterator */
-        public j$.util.u mo70spliterator() {
+        public j$.util.u mo71spliterator() {
             ConcurrentHashMap concurrentHashMap = this.a;
             long m = concurrentHashMap.m();
             l[] lVarArr = concurrentHashMap.a;
@@ -517,7 +517,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
 
         @Override // java.util.Collection, java.lang.Iterable, java.util.Set, j$.util.AbstractC0034b, j$.lang.e
         /* renamed from: spliterator */
-        public j$.util.u mo70spliterator() {
+        public j$.util.u mo71spliterator() {
             ConcurrentHashMap concurrentHashMap = this.a;
             long m = concurrentHashMap.m();
             l[] lVarArr = concurrentHashMap.a;
@@ -1597,7 +1597,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
 
         @Override // java.util.Collection, java.lang.Iterable, j$.util.AbstractC0034b, j$.lang.e
         /* renamed from: spliterator */
-        public j$.util.u mo70spliterator() {
+        public j$.util.u mo71spliterator() {
             ConcurrentHashMap concurrentHashMap = this.a;
             long m = concurrentHashMap.m();
             l[] lVarArr = concurrentHashMap.a;

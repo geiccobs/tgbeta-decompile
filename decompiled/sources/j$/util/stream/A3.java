@@ -48,16 +48,16 @@ final class A3 extends AbstractC0066d {
             AbstractC0124m3 H0 = this.j.H0(this.a.s0(), t0);
             AbstractC0187y2 abstractC0187y2 = this.a;
             abstractC0187y2.o0(abstractC0187y2.v0(H0), this.b);
-            return t0.mo69a();
+            return t0.mo70a();
         }
         AbstractC0187y2 abstractC0187y22 = this.a;
         AbstractC0156s1 t02 = abstractC0187y22.t0(-1L, this.k);
         abstractC0187y22.u0(t02, this.b);
-        A1 mo69a = t02.mo69a();
-        this.n = mo69a.count();
+        A1 mo70a = t02.mo70a();
+        this.n = mo70a.count();
         this.o = true;
         this.b = null;
-        return mo69a;
+        return mo70a;
     }
 
     @Override // j$.util.stream.AbstractC0078f

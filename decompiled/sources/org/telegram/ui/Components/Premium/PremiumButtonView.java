@@ -84,6 +84,8 @@ public class PremiumButtonView extends FrameLayout {
 
     @Override // android.view.ViewGroup, android.view.View
     protected void dispatchDraw(Canvas canvas) {
+        RectF rectF = AndroidUtilities.rectTmp;
+        rectF.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
         if (this.overlayProgress != 1.0f || !this.drawOverlayColor) {
             if (this.inc) {
                 float f = this.progress + 0.016f;
@@ -99,14 +101,12 @@ public class PremiumButtonView extends FrameLayout {
                 }
             }
             PremiumGradient.getInstance().updateMainGradientMatrix(0, 0, getMeasuredWidth(), getMeasuredHeight(), this.progress * (-getMeasuredWidth()) * 0.1f, 0.0f);
-            RectF rectF = AndroidUtilities.rectTmp;
-            rectF.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
             canvas.drawRoundRect(rectF, AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), PremiumGradient.getInstance().getMainGradientPaint());
             invalidate();
         }
         if (!BuildVars.IS_BILLING_UNAVAILABLE) {
             this.flickerDrawable.setParentWidth(getMeasuredWidth());
-            this.flickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(8.0f), null);
+            this.flickerDrawable.draw(canvas, rectF, AndroidUtilities.dp(8.0f), null);
         }
         float f3 = this.overlayProgress;
         if (f3 != 0.0f && this.drawOverlayColor) {
@@ -116,10 +116,10 @@ public class PremiumButtonView extends FrameLayout {
                 this.path.addCircle(getMeasuredWidth() / 2.0f, getMeasuredHeight() / 2.0f, Math.max(getMeasuredWidth(), getMeasuredHeight()) * 1.4f * this.overlayProgress, Path.Direction.CW);
                 canvas.save();
                 canvas.clipPath(this.path);
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), this.paintOverlayPaint);
+                canvas.drawRoundRect(rectF, AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), this.paintOverlayPaint);
                 canvas.restore();
             } else {
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), this.paintOverlayPaint);
+                canvas.drawRoundRect(rectF, AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), this.paintOverlayPaint);
             }
         }
         super.dispatchDraw(canvas);
@@ -178,10 +178,10 @@ public class PremiumButtonView extends FrameLayout {
     public void updateOverlayProgress() {
         this.overlayTextView.setAlpha(this.overlayProgress);
         this.overlayTextView.setTranslationY(AndroidUtilities.dp(12.0f) * (1.0f - this.overlayProgress));
-        this.buttonTextView.setAlpha(1.0f - this.overlayProgress);
-        this.buttonTextView.setTranslationY((-AndroidUtilities.dp(12.0f)) * this.overlayProgress);
-        int i = 8;
-        this.buttonTextView.setVisibility(this.overlayProgress == 1.0f ? 8 : 0);
+        this.buttonLayout.setAlpha(1.0f - this.overlayProgress);
+        this.buttonLayout.setTranslationY((-AndroidUtilities.dp(12.0f)) * this.overlayProgress);
+        int i = 4;
+        this.buttonLayout.setVisibility(this.overlayProgress == 1.0f ? 4 : 0);
         TextView textView = this.overlayTextView;
         if (this.overlayProgress != 0.0f) {
             i = 0;

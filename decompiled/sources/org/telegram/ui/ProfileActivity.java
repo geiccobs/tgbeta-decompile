@@ -5471,7 +5471,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         ImageLocation imageLocation = this.avatarsViewPager.getImageLocation(0);
         if (imageLocation != null && imageLocation.imageType == 2) {
-            str = ImageLoader.AUTOPLAY_FILTER;
+            str = "avatar";
         }
         this.avatarImage.setForegroundImage(imageLocation, str, drawable);
     }
@@ -7396,7 +7396,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         */
         public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r20, final int r21) {
             /*
-                Method dump skipped, instructions count: 3076
+                Method dump skipped, instructions count: 3086
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ProfileActivity.ListAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");

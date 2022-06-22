@@ -1747,7 +1747,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
         } else {
             NotificationCenter.getInstance(this.currentAccount).postNotificationName(NotificationCenter.paymentFinished, new Object[0]);
             String str = this.botUser.username;
-            if ((str != null && str.equalsIgnoreCase(getMessagesController().premiumBotUsername)) || ObjectsCompat$$ExternalSyntheticBackport0.m(this.invoiceSlug, getMessagesController().premiumInvoiceSlug)) {
+            if ((str != null && str.equalsIgnoreCase(getMessagesController().premiumBotUsername)) || (this.invoiceSlug != null && getMessagesController().premiumInvoiceSlug != null && ObjectsCompat$$ExternalSyntheticBackport0.m(this.invoiceSlug, getMessagesController().premiumInvoiceSlug))) {
                 Iterator it = new ArrayList(getParentLayout().fragmentsStack).iterator();
                 while (it.hasNext()) {
                     BaseFragment baseFragment = (BaseFragment) it.next();

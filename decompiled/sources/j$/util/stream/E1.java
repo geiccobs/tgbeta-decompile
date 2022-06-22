@@ -55,7 +55,7 @@ public final class E1 implements A1 {
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.u mo68spliterator() {
+    public j$.util.u mo69spliterator() {
         Collection collection = this.a;
         return (collection instanceof AbstractC0034b ? ((AbstractC0034b) collection).stream() : AbstractC0033a.i(collection)).spliterator();
     }

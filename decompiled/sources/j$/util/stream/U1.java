@@ -10,7 +10,7 @@ public final class U1 extends T1 implements AbstractC0140p1 {
 
     @Override // j$.util.stream.AbstractC0140p1, j$.util.stream.AbstractC0156s1
     /* renamed from: a */
-    public AbstractC0166u1 mo69a() {
+    public AbstractC0166u1 mo70a() {
         if (this.b >= this.a.length) {
             return this;
         }

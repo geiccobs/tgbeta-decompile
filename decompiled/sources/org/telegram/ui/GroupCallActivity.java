@@ -6106,14 +6106,14 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             org.telegram.tgnet.TLRPC$Chat r0 = r12.currentChat
             boolean r0 = org.telegram.messenger.ChatObject.isChannelOrGiga(r0)
             if (r0 == 0) goto L81
-            r0 = 2131628968(0x7f0e13a8, float:1.8885244E38)
+            r0 = 2131628971(0x7f0e13ab, float:1.888525E38)
             java.lang.Object[] r1 = new java.lang.Object[r4]
             r1[r3] = r8
             java.lang.String r2 = "VoipChannelInviteText"
             java.lang.String r0 = org.telegram.messenger.LocaleController.formatString(r2, r0, r1)
             goto L8e
         L81:
-            r0 = 2131629056(0x7f0e1400, float:1.8885422E38)
+            r0 = 2131629059(0x7f0e1403, float:1.8885428E38)
             java.lang.Object[] r1 = new java.lang.Object[r4]
             r1[r3] = r8
             java.lang.String r2 = "VoipGroupInviteText"

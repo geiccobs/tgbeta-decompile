@@ -132,7 +132,7 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$Stream$VWRP imp
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public /* synthetic */ Iterator mo65iterator() {
+    public /* synthetic */ Iterator mo66iterator() {
         return this.a.iterator();
     }
 

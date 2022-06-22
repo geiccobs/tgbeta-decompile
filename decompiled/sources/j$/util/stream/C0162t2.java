@@ -6,7 +6,7 @@ import j$.util.function.Consumer;
 public final class C0162t2 extends C0053a4 implements A1, AbstractC0156s1 {
     @Override // j$.util.stream.AbstractC0156s1
     /* renamed from: a */
-    public A1 mo69a() {
+    public A1 mo70a() {
         return this;
     }
 
@@ -86,7 +86,7 @@ public final class C0162t2 extends C0053a4 implements A1, AbstractC0156s1 {
 
     @Override // j$.util.stream.C0053a4, java.lang.Iterable, j$.lang.e
     /* renamed from: spliterator */
-    public j$.util.u mo70spliterator() {
-        return super.mo70spliterator();
+    public j$.util.u mo71spliterator() {
+        return super.mo71spliterator();
     }
 }

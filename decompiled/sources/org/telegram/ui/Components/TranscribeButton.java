@@ -165,38 +165,9 @@ public class TranscribeButton {
     }
 
     public boolean onTouch(int i, float f, float f2) {
-        boolean z;
         if (i == 1 || i == 3) {
             if (this.pressed && i == 1) {
-                boolean z2 = this.shouldBeOpen;
-                boolean z3 = !z2;
-                if (!z2) {
-                    z = !this.loading;
-                    if (this.premium && this.parent.getMessageObject().isSent()) {
-                        setLoading(true, true);
-                    }
-                } else {
-                    setOpen(false, true);
-                    setLoading(false, true);
-                    z = true;
-                }
-                if (Build.VERSION.SDK_INT >= 21) {
-                    Drawable drawable = this.selectorDrawable;
-                    if (drawable instanceof RippleDrawable) {
-                        drawable.setState(StateSet.NOTHING);
-                        this.parent.invalidate();
-                    }
-                }
-                this.pressed = false;
-                if (z) {
-                    if (!this.premium && z3) {
-                        if (this.parent.getDelegate() != null) {
-                            this.parent.getDelegate().needShowPremiumFeatures(PremiumPreviewFragment.featureTypeToServerString(8));
-                        }
-                    } else {
-                        transcribePressed(this.parent.getMessageObject(), z3);
-                    }
-                }
+                onTap();
                 return true;
             }
             this.pressed = false;
@@ -208,14 +179,48 @@ public class TranscribeButton {
                 this.pressed = true;
             }
             if (this.pressed && Build.VERSION.SDK_INT >= 21) {
-                Drawable drawable2 = this.selectorDrawable;
-                if (drawable2 instanceof RippleDrawable) {
-                    drawable2.setHotspot(f, f2);
+                Drawable drawable = this.selectorDrawable;
+                if (drawable instanceof RippleDrawable) {
+                    drawable.setHotspot(f, f2);
                     this.selectorDrawable.setState(pressedState);
                     this.parent.invalidate();
                 }
             }
             return true;
+        }
+    }
+
+    public void onTap() {
+        boolean z = this.shouldBeOpen;
+        boolean z2 = !z;
+        boolean z3 = true;
+        if (!z) {
+            boolean z4 = !this.loading;
+            if (this.premium && this.parent.getMessageObject().isSent()) {
+                setLoading(true, true);
+            }
+            z3 = z4;
+        } else {
+            setOpen(false, true);
+            setLoading(false, true);
+        }
+        if (Build.VERSION.SDK_INT >= 21) {
+            Drawable drawable = this.selectorDrawable;
+            if (drawable instanceof RippleDrawable) {
+                drawable.setState(StateSet.NOTHING);
+                this.parent.invalidate();
+            }
+        }
+        this.pressed = false;
+        if (z3) {
+            if (!this.premium && z2) {
+                if (this.parent.getDelegate() == null) {
+                    return;
+                }
+                this.parent.getDelegate().needShowPremiumFeatures(PremiumPreviewFragment.featureTypeToServerString(8));
+                return;
+            }
+            transcribePressed(this.parent.getMessageObject(), z2);
         }
     }
 

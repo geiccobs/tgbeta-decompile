@@ -14,7 +14,7 @@ public class W3 extends Z3 implements j$.util.function.l {
     }
 
     /* renamed from: B */
-    public u.a mo70spliterator() {
+    public u.a mo71spliterator() {
         return new V3(this, 0, this.c, 0, this.b);
     }
 
@@ -36,7 +36,7 @@ public class W3 extends Z3 implements j$.util.function.l {
         if (consumer instanceof j$.util.function.l) {
             g((j$.util.function.l) consumer);
         } else if (!Q4.a) {
-            mo70spliterator().forEachRemaining(consumer);
+            mo71spliterator().forEachRemaining(consumer);
         } else {
             Q4.a(getClass(), "{0} calling SpinedBuffer.OfInt.forEach(Consumer)");
             throw null;
@@ -45,7 +45,7 @@ public class W3 extends Z3 implements j$.util.function.l {
 
     @Override // java.lang.Iterable
     public Iterator iterator() {
-        return j$.util.L.g(mo70spliterator());
+        return j$.util.L.g(mo71spliterator());
     }
 
     @Override // j$.util.function.l

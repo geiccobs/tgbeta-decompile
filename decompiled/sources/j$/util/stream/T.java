@@ -142,13 +142,13 @@ public abstract class T extends AbstractC0060c implements U {
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public final AbstractC0047n mo65iterator() {
+    public final AbstractC0047n mo66iterator() {
         return j$.util.L.f(spliterator());
     }
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public Iterator mo65iterator() {
+    public Iterator mo66iterator() {
         return j$.util.L.f(spliterator());
     }
 

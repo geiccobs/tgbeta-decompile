@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.FileLog;
 /* loaded from: classes.dex */
 public final class GapWorker implements Runnable {
     static final ThreadLocal<GapWorker> sGapWorker = new ThreadLocal<>();
@@ -209,7 +211,8 @@ public final class GapWorker implements Runnable {
         return false;
     }
 
-    private RecyclerView.ViewHolder prefetchPositionWithDeadline(RecyclerView recyclerView, int i, long j) {
+    @SuppressLint({"NotifyDataSetChanged"})
+    private RecyclerView.ViewHolder prefetchPositionWithDeadline(final RecyclerView recyclerView, int i, long j) {
         if (isPrefetchPositionAttached(recyclerView, i)) {
             return null;
         }
@@ -225,8 +228,23 @@ public final class GapWorker implements Runnable {
                 }
             }
             return tryGetViewHolderForPositionByDeadline;
+        } catch (Exception e) {
+            FileLog.e(e);
+            AndroidUtilities.runOnUIThread(new Runnable() { // from class: androidx.recyclerview.widget.GapWorker$$ExternalSyntheticLambda0
+                @Override // java.lang.Runnable
+                public final void run() {
+                    GapWorker.lambda$prefetchPositionWithDeadline$0(RecyclerView.this);
+                }
+            });
+            return null;
         } finally {
             recyclerView.onExitLayoutOrScroll(false);
+        }
+    }
+
+    public static /* synthetic */ void lambda$prefetchPositionWithDeadline$0(RecyclerView recyclerView) {
+        if (recyclerView.getAdapter() != null) {
+            recyclerView.getAdapter().notifyDataSetChanged();
         }
     }
 

@@ -45,9 +45,9 @@ abstract class AbstractC0099i2 extends AbstractC0111k2 implements j$.util.w {
         boolean tryAdvance = ((j$.util.w) this.d).tryAdvance(obj);
         if (!tryAdvance) {
             if (this.c == null && (abstractC0191z1 = (AbstractC0191z1) a(this.e)) != null) {
-                j$.util.w mo68spliterator = abstractC0191z1.mo68spliterator();
-                this.d = mo68spliterator;
-                return mo68spliterator.tryAdvance(obj);
+                j$.util.w mo69spliterator = abstractC0191z1.mo69spliterator();
+                this.d = mo69spliterator;
+                return mo69spliterator.tryAdvance(obj);
             }
             this.a = null;
         }

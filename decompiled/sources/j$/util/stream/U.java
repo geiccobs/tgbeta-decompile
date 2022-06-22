@@ -38,7 +38,7 @@ public interface U extends AbstractC0084g {
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    AbstractC0047n mo65iterator();
+    AbstractC0047n mo66iterator();
 
     void j(j$.util.function.f fVar);
 

@@ -176,13 +176,13 @@ public abstract class L0 extends AbstractC0060c implements IntStream {
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public final p.a mo65iterator() {
+    public final p.a mo66iterator() {
         return j$.util.L.g(spliterator());
     }
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public Iterator mo65iterator() {
+    public Iterator mo66iterator() {
         return j$.util.L.g(spliterator());
     }
 

@@ -112,12 +112,12 @@ public class C0053a4 extends AbstractC0072e implements Consumer, Iterable, j$.la
 
     @Override // java.lang.Iterable
     public Iterator iterator() {
-        return j$.util.L.i(mo70spliterator());
+        return j$.util.L.i(mo71spliterator());
     }
 
     @Override // java.lang.Iterable, j$.lang.e
     /* renamed from: spliterator */
-    public j$.util.u mo70spliterator() {
+    public j$.util.u mo71spliterator() {
         return new S3(this, 0, this.c, 0, this.b);
     }
 

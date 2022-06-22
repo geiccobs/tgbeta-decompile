@@ -637,9 +637,9 @@ public class EditTextBoldCursor extends EditTextEffects {
         return super.onTouchEvent(motionEvent);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:111:0x027f A[Catch: all -> 0x02a8, TryCatch #3 {all -> 0x02a8, blocks: (B:86:0x01d4, B:88:0x01d8, B:90:0x01dc, B:92:0x01ee, B:96:0x01f8, B:97:0x01fc, B:100:0x0202, B:102:0x0209, B:104:0x0211, B:105:0x0224, B:107:0x022c, B:109:0x0237, B:111:0x027f, B:113:0x0282, B:114:0x0287), top: B:197:0x01d4 }] */
+    /* JADX WARN: Removed duplicated region for block: B:111:0x027f A[Catch: all -> 0x02a8, TryCatch #3 {all -> 0x02a8, blocks: (B:86:0x01d4, B:88:0x01d8, B:90:0x01dc, B:92:0x01ee, B:96:0x01f8, B:97:0x01fc, B:100:0x0202, B:102:0x0209, B:104:0x0211, B:105:0x0224, B:107:0x022c, B:109:0x0237, B:111:0x027f, B:113:0x0282, B:114:0x0287), top: B:201:0x01d4 }] */
     /* JADX WARN: Removed duplicated region for block: B:118:0x02af A[FINALLY_INSNS] */
-    /* JADX WARN: Removed duplicated region for block: B:133:0x0336 A[Catch: all -> 0x0360, TryCatch #0 {all -> 0x0360, blocks: (B:122:0x02b9, B:124:0x02c0, B:126:0x02c8, B:127:0x02db, B:129:0x02e3, B:131:0x02ee, B:133:0x0336, B:135:0x0339, B:136:0x033e), top: B:191:0x02b9 }] */
+    /* JADX WARN: Removed duplicated region for block: B:133:0x0336 A[Catch: all -> 0x0360, TryCatch #0 {all -> 0x0360, blocks: (B:122:0x02b9, B:124:0x02c0, B:126:0x02c8, B:127:0x02db, B:129:0x02e3, B:131:0x02ee, B:133:0x0336, B:135:0x0339, B:136:0x033e), top: B:195:0x02b9 }] */
     /* JADX WARN: Removed duplicated region for block: B:140:0x0366 A[FINALLY_INSNS] */
     @Override // org.telegram.ui.Components.EditTextEffects, android.widget.TextView, android.view.View
     /*
@@ -648,7 +648,7 @@ public class EditTextBoldCursor extends EditTextEffects {
     */
     public void onDraw(android.graphics.Canvas r16) {
         /*
-            Method dump skipped, instructions count: 1160
+            Method dump skipped, instructions count: 1215
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.EditTextBoldCursor.onDraw(android.graphics.Canvas):void");

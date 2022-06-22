@@ -2688,7 +2688,7 @@ public class Theme {
         L5c:
             android.content.Context r0 = org.telegram.messenger.ApplicationLoader.applicationContext
             android.content.res.Resources r0 = r0.getResources()
-            r1 = 2131165997(0x7f07032d, float:1.7946227E38)
+            r1 = 2131165998(0x7f07032e, float:1.7946229E38)
             android.graphics.drawable.Drawable r0 = r0.getDrawable(r1)
             org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawable = r0
             r0 = 1077936128(0x40400000, float:3.0)
@@ -6411,20 +6411,23 @@ public class Theme {
                 }
                 fileInputStream.getChannel().position(j);
                 Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, null, options);
-                if ((decodeStream.getWidth() >= min && decodeStream.getHeight() >= max) || Math.max(min / decodeStream.getWidth(), max / decodeStream.getHeight()) < 1.02f) {
-                    try {
-                        fileInputStream.close();
-                    } catch (Exception unused) {
+                if (decodeStream.getWidth() < min || decodeStream.getHeight() < max) {
+                    float max2 = Math.max(min / decodeStream.getWidth(), max / decodeStream.getHeight());
+                    if (max2 >= 1.02f) {
+                        Bitmap createScaledBitmap = Bitmap.createScaledBitmap(decodeStream, (int) (decodeStream.getWidth() * max2), (int) (decodeStream.getHeight() * max2), true);
+                        decodeStream.recycle();
+                        try {
+                            fileInputStream.close();
+                        } catch (Exception unused) {
+                        }
+                        return createScaledBitmap;
                     }
-                    return decodeStream;
                 }
-                Bitmap createScaledBitmap = Bitmap.createScaledBitmap(decodeStream, min, max, true);
-                decodeStream.recycle();
                 try {
                     fileInputStream.close();
                 } catch (Exception unused2) {
                 }
-                return createScaledBitmap;
+                return decodeStream;
             } catch (Exception e) {
                 FileLog.e(e);
                 if (fileInputStream != null) {

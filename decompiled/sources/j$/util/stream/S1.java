@@ -42,7 +42,7 @@ public final class S1 extends C1 {
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.u mo68spliterator() {
+    public j$.util.u mo69spliterator() {
         return new C0105j2(this);
     }
 

@@ -10,7 +10,7 @@ public interface AbstractC0084g extends AutoCloseable {
     boolean isParallel();
 
     /* renamed from: iterator */
-    Iterator mo65iterator();
+    Iterator mo66iterator();
 
     AbstractC0084g onClose(Runnable runnable);
 

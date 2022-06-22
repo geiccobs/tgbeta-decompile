@@ -15,5 +15,5 @@ public interface AbstractC0191z1 extends A1 {
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    j$.util.w mo68spliterator();
+    j$.util.w mo69spliterator();
 }

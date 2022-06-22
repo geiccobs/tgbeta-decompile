@@ -30,7 +30,7 @@ public final /* synthetic */ class H0 implements AbstractC0084g {
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public /* synthetic */ Iterator mo65iterator() {
+    public /* synthetic */ Iterator mo66iterator() {
         return this.a.iterator();
     }
 

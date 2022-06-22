@@ -20,10 +20,11 @@ import org.telegram.ui.Components.voip.CellFlickerDrawable;
 /* loaded from: classes3.dex */
 public class PremiumLockIconView extends ImageView {
     public static int TYPE_REACTIONS = 0;
-    public static int TYPE_STICKERS = 1;
+    public static int TYPE_STICKERS_PREMIUM_LOCKED = 1;
     int color1;
     int color2;
     ImageReceiver imageReceiver;
+    private boolean locked;
     Paint oldShaderPaint;
     StarParticlesView.Drawable starParticles;
     private final int type;
@@ -176,7 +177,7 @@ public class PremiumLockIconView extends ImageView {
         }
         Color.colorToHSV(this.currentColor, this.colorFloat);
         float[] fArr = this.colorFloat;
-        fArr[1] = fArr[1] * 2.0f;
+        fArr[1] = fArr[1] * (this.locked ? 2.0f : 1.0f);
         if (fArr[2] > 0.7f) {
             fArr[2] = 0.7f;
         }
@@ -218,5 +219,11 @@ public class PremiumLockIconView extends ImageView {
     public void resetAnimation() {
         setScaleX(0.0f);
         setScaleY(0.0f);
+    }
+
+    public void setLocked(boolean z) {
+        if (this.type != TYPE_REACTIONS) {
+            setImageResource(z ? R.drawable.msg_mini_premiumlock : R.drawable.msg_mini_stickerstar);
+        }
     }
 }

@@ -31,7 +31,7 @@ public final /* synthetic */ class I0 implements BaseStream {
 
     @Override // java.util.stream.BaseStream
     public /* synthetic */ Iterator iterator() {
-        return this.a.mo65iterator();
+        return this.a.mo66iterator();
     }
 
     @Override // java.util.stream.BaseStream

@@ -96,7 +96,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
         if (consumer instanceof j$.util.function.f) {
             abstractC0166u1.g((j$.util.function.f) consumer);
         } else if (!Q4.a) {
-            ((j$.util.t) abstractC0166u1.mo68spliterator()).forEachRemaining(consumer);
+            ((j$.util.t) abstractC0166u1.mo69spliterator()).forEachRemaining(consumer);
         } else {
             Q4.a(abstractC0166u1.getClass(), "{0} calling Node.OfLong.forEachRemaining(Consumer)");
             throw null;
@@ -107,7 +107,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
         if (consumer instanceof j$.util.function.l) {
             abstractC0176w1.g((j$.util.function.l) consumer);
         } else if (!Q4.a) {
-            ((u.a) abstractC0176w1.mo68spliterator()).forEachRemaining(consumer);
+            ((u.a) abstractC0176w1.mo69spliterator()).forEachRemaining(consumer);
         } else {
             Q4.a(abstractC0176w1.getClass(), "{0} calling Node.OfInt.forEachRemaining(Consumer)");
             throw null;
@@ -118,7 +118,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
         if (consumer instanceof j$.util.function.q) {
             abstractC0186y1.g((j$.util.function.q) consumer);
         } else if (!Q4.a) {
-            ((j$.util.v) abstractC0186y1.mo68spliterator()).forEachRemaining(consumer);
+            ((j$.util.v) abstractC0186y1.mo69spliterator()).forEachRemaining(consumer);
         } else {
             Q4.a(abstractC0186y1.getClass(), "{0} calling Node.OfLong.forEachRemaining(Consumer)");
             throw null;
@@ -130,7 +130,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
             return abstractC0166u1;
         }
         long j3 = j2 - j;
-        j$.util.t tVar = (j$.util.t) abstractC0166u1.mo68spliterator();
+        j$.util.t tVar = (j$.util.t) abstractC0166u1.mo69spliterator();
         AbstractC0140p1 j4 = AbstractC0182x2.j(j3);
         j4.n(j3);
         for (int i = 0; i < j && tVar.k(C0161t1.a); i++) {
@@ -138,7 +138,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
         for (int i2 = 0; i2 < j3 && tVar.k(j4); i2++) {
         }
         j4.m();
-        return j4.mo69a();
+        return j4.mo70a();
     }
 
     public static AbstractC0176w1 o(AbstractC0176w1 abstractC0176w1, long j, long j2, j$.util.function.m mVar) {
@@ -146,7 +146,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
             return abstractC0176w1;
         }
         long j3 = j2 - j;
-        u.a aVar = (u.a) abstractC0176w1.mo68spliterator();
+        u.a aVar = (u.a) abstractC0176w1.mo69spliterator();
         AbstractC0146q1 p = AbstractC0182x2.p(j3);
         p.n(j3);
         for (int i = 0; i < j && aVar.g(C0171v1.a); i++) {
@@ -154,7 +154,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
         for (int i2 = 0; i2 < j3 && aVar.g(p); i2++) {
         }
         p.m();
-        return p.mo69a();
+        return p.mo70a();
     }
 
     public static AbstractC0186y1 p(AbstractC0186y1 abstractC0186y1, long j, long j2, j$.util.function.m mVar) {
@@ -162,7 +162,7 @@ public abstract /* synthetic */ class AbstractC0134o1 {
             return abstractC0186y1;
         }
         long j3 = j2 - j;
-        j$.util.v vVar = (j$.util.v) abstractC0186y1.mo68spliterator();
+        j$.util.v vVar = (j$.util.v) abstractC0186y1.mo69spliterator();
         AbstractC0151r1 q = AbstractC0182x2.q(j3);
         q.n(j3);
         for (int i = 0; i < j && vVar.i(C0181x1.a); i++) {
@@ -170,23 +170,23 @@ public abstract /* synthetic */ class AbstractC0134o1 {
         for (int i2 = 0; i2 < j3 && vVar.i(q); i2++) {
         }
         q.m();
-        return q.mo69a();
+        return q.mo70a();
     }
 
     public static A1 q(A1 a1, long j, long j2, j$.util.function.m mVar) {
         if (j == 0 && j2 == a1.count()) {
             return a1;
         }
-        j$.util.u mo68spliterator = a1.mo68spliterator();
+        j$.util.u mo69spliterator = a1.mo69spliterator();
         long j3 = j2 - j;
         AbstractC0156s1 d = AbstractC0182x2.d(j3, mVar);
         d.n(j3);
-        for (int i = 0; i < j && mo68spliterator.b(C0128n1.a); i++) {
+        for (int i = 0; i < j && mo69spliterator.b(C0128n1.a); i++) {
         }
-        for (int i2 = 0; i2 < j3 && mo68spliterator.b(d); i2++) {
+        for (int i2 = 0; i2 < j3 && mo69spliterator.b(d); i2++) {
         }
         d.m();
-        return d.mo69a();
+        return d.mo70a();
     }
 
     public static U r(j$.util.t tVar, boolean z) {

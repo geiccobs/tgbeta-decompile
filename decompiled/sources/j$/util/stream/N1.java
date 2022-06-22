@@ -25,7 +25,7 @@ class N1 extends AbstractC0078f {
     public Object a() {
         AbstractC0156s1 abstractC0156s1 = (AbstractC0156s1) this.i.apply(this.h.q0(this.b));
         this.h.u0(abstractC0156s1, this.b);
-        return abstractC0156s1.mo69a();
+        return abstractC0156s1.mo70a();
     }
 
     @Override // j$.util.stream.AbstractC0078f

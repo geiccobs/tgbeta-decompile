@@ -124,7 +124,7 @@ public final /* synthetic */ class P0 implements Stream {
 
     @Override // java.util.stream.BaseStream
     public /* synthetic */ Iterator iterator() {
-        return this.a.mo65iterator();
+        return this.a.mo66iterator();
     }
 
     @Override // java.util.stream.Stream

@@ -79,7 +79,7 @@ public class T1 implements AbstractC0166u1 {
 
     @Override // j$.util.stream.AbstractC0191z1, j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.w mo68spliterator() {
+    public j$.util.w mo69spliterator() {
         return j$.util.L.j(this.a, 0, this.b, 1040);
     }
 
@@ -89,7 +89,7 @@ public class T1 implements AbstractC0166u1 {
 
     @Override // j$.util.stream.AbstractC0191z1, j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.u mo68spliterator() {
+    public j$.util.u mo69spliterator() {
         return j$.util.L.j(this.a, 0, this.b, 1040);
     }
 }

@@ -1284,11 +1284,11 @@ public class AlertsCreator {
             android.app.Activity r1 = r12.getParentActivity()
             r2 = r17
             r10.<init>(r1, r2)
-            r1 = 2131627105(0x7f0e0c61, float:1.8881465E38)
+            r1 = 2131627108(0x7f0e0c64, float:1.8881471E38)
             java.lang.String r2 = "OpenUrlTitle"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             r10.setTitle(r1)
-            r1 = 2131627102(0x7f0e0c5e, float:1.8881459E38)
+            r1 = 2131627105(0x7f0e0c61, float:1.8881465E38)
             java.lang.String r2 = "OpenUrlAlert2"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             java.lang.String r2 = "%"
@@ -1308,7 +1308,7 @@ public class AlertsCreator {
         L9f:
             r10.setMessage(r11)
             r10.setMessageTextViewClickable(r9)
-            r0 = 2131627087(0x7f0e0c4f, float:1.8881429E38)
+            r0 = 2131627090(0x7f0e0c52, float:1.8881435E38)
             java.lang.String r1 = "Open"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             org.telegram.ui.Components.AlertsCreator$$ExternalSyntheticLambda27 r9 = new org.telegram.ui.Components.AlertsCreator$$ExternalSyntheticLambda27
@@ -1318,7 +1318,7 @@ public class AlertsCreator {
             r6 = r15
             r1.<init>()
             r10.setPositiveButton(r0, r9)
-            r0 = 2131624817(0x7f0e0371, float:1.8876824E38)
+            r0 = 2131624819(0x7f0e0373, float:1.8876828E38)
             java.lang.String r1 = "Cancel"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             r10.setNegativeButton(r0, r8)

@@ -1297,11 +1297,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         L45:
             r6 = 2
             java.lang.CharSequence[] r7 = new java.lang.CharSequence[r6]
-            r8 = 2131627087(0x7f0e0c4f, float:1.8881429E38)
+            r8 = 2131627090(0x7f0e0c52, float:1.8881435E38)
             java.lang.String r9 = "Open"
             java.lang.String r8 = org.telegram.messenger.LocaleController.getString(r9, r8)
             r7[r3] = r8
-            r8 = 2131625254(0x7f0e0526, float:1.887771E38)
+            r8 = 2131625256(0x7f0e0528, float:1.8877715E38)
             java.lang.String r9 = "Copy"
             java.lang.String r8 = org.telegram.messenger.LocaleController.getString(r9, r8)
             r7[r5] = r8

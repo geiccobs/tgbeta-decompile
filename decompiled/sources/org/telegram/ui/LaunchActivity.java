@@ -1797,7 +1797,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             org.telegram.ui.ActionBar.BaseFragment r0 = (org.telegram.ui.ActionBar.BaseFragment) r0     // Catch: java.lang.Exception -> Lbe
             org.telegram.ui.Components.BulletinFactory r0 = org.telegram.ui.Components.BulletinFactory.of(r0)     // Catch: java.lang.Exception -> Lbe
             java.lang.String r2 = "ChannelPostDeleted"
-            r3 = 2131624943(0x7f0e03ef, float:1.887708E38)
+            r3 = 2131624945(0x7f0e03f1, float:1.8877084E38)
             java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r2, r3)     // Catch: java.lang.Exception -> Lbe
             org.telegram.ui.Components.Bulletin r0 = r0.createErrorBulletin(r2)     // Catch: java.lang.Exception -> Lbe
             r0.show()     // Catch: java.lang.Exception -> Lbe
@@ -2909,11 +2909,11 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             r6 = move-exception
             org.telegram.messenger.FileLog.e(r6)
         La3:
-            r6 = 2131628595(0x7f0e1233, float:1.8884487E38)
+            r6 = 2131628598(0x7f0e1236, float:1.8884493E38)
             java.lang.String r7 = "Theme"
             if (r2 != r1) goto Lbf
             java.lang.String r6 = org.telegram.messenger.LocaleController.getString(r7, r6)
-            r7 = 2131628617(0x7f0e1249, float:1.8884532E38)
+            r7 = 2131628620(0x7f0e124c, float:1.8884538E38)
             java.lang.String r8 = "ThemeNotSupported"
             java.lang.String r7 = org.telegram.messenger.LocaleController.getString(r8, r7)
             org.telegram.ui.ActionBar.AlertDialog$Builder r6 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r5, r6, r7)
@@ -2921,7 +2921,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             goto Ld3
         Lbf:
             java.lang.String r6 = org.telegram.messenger.LocaleController.getString(r7, r6)
-            r7 = 2131628616(0x7f0e1248, float:1.888453E38)
+            r7 = 2131628619(0x7f0e124b, float:1.8884536E38)
             java.lang.String r8 = "ThemeNotFound"
             java.lang.String r7 = org.telegram.messenger.LocaleController.getString(r8, r7)
             org.telegram.ui.ActionBar.AlertDialog$Builder r6 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r5, r6, r7)
@@ -2987,7 +2987,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             r1 = r0
             org.telegram.messenger.FileLog.e(r1)
         L40:
-            r0 = 2131626453(0x7f0e09d5, float:1.8880143E38)
+            r0 = 2131626456(0x7f0e09d8, float:1.8880149E38)
             java.lang.String r1 = "LinkNotFound"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             org.telegram.ui.ActionBar.AlertDialog$Builder r0 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r10, r0)

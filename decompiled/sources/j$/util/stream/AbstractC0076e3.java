@@ -149,7 +149,7 @@ public abstract class AbstractC0076e3 extends AbstractC0060c implements Stream {
 
     @Override // j$.util.stream.AbstractC0084g
     /* renamed from: iterator */
-    public final Iterator mo65iterator() {
+    public final Iterator mo66iterator() {
         return j$.util.L.i(spliterator());
     }
 

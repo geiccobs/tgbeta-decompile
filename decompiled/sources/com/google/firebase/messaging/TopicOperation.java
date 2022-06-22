@@ -4,10 +4,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import com.google.android.gms.common.internal.Objects;
 import java.util.regex.Pattern;
-/* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
 /* loaded from: classes.dex */
-public final class TopicOperation {
+final class TopicOperation {
     private static final Pattern TOPIC_NAME_REGEXP = Pattern.compile("[a-zA-Z0-9-_.~%]{1,900}");
     private final String operation;
     private final String serializedString;

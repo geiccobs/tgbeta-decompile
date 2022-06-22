@@ -31,7 +31,7 @@ public class C0142p3 extends AbstractC0064c3 {
             d = B3.d(j, this.m);
             return new C4(w0, j, d);
         }
-        return !EnumC0071d4.ORDERED.d(abstractC0187y2.s0()) ? L0(abstractC0187y2.w0(uVar), this.l, this.m, q0) : ((A1) new A3(this, abstractC0187y2, uVar, C0130n3.a, this.l, this.m).invoke()).mo68spliterator();
+        return !EnumC0071d4.ORDERED.d(abstractC0187y2.s0()) ? L0(abstractC0187y2.w0(uVar), this.l, this.m, q0) : ((A1) new A3(this, abstractC0187y2, uVar, C0130n3.a, this.l, this.m).invoke()).mo69spliterator();
     }
 
     @Override // j$.util.stream.AbstractC0060c

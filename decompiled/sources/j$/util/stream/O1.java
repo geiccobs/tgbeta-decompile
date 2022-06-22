@@ -29,13 +29,13 @@ final class O1 extends R1 implements AbstractC0166u1 {
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.w mo68spliterator() {
+    public j$.util.w mo69spliterator() {
         return new C0081f2(this);
     }
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.u mo68spliterator() {
+    public j$.util.u mo69spliterator() {
         return new C0081f2(this);
     }
 }

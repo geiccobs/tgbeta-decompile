@@ -11,7 +11,7 @@ public final class C0057b2 extends D1 implements AbstractC0156s1 {
 
     @Override // j$.util.stream.AbstractC0156s1
     /* renamed from: a */
-    public A1 mo69a() {
+    public A1 mo70a() {
         if (this.b >= this.a.length) {
             return this;
         }

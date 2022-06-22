@@ -28,6 +28,7 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$ChatPhoto;
 import org.telegram.tgnet.TLRPC$Document;
+import org.telegram.tgnet.TLRPC$Photo;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.tgnet.TLRPC$UserFull;
 import org.telegram.tgnet.TLRPC$UserProfilePhoto;
@@ -374,6 +375,8 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         BitmapDrawable bitmapDrawable;
         TLRPC$ChatPhoto tLRPC$ChatPhoto;
         ImageLocation imageLocation;
+        TLRPC$Photo tLRPC$Photo;
+        ArrayList<TLRPC$VideoSize> arrayList;
         Object obj2 = obj == null ? tLObject : obj;
         setUseRoundForThumbDrawable(true);
         ImageLocation imageLocation2 = null;
@@ -389,7 +392,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                     if (userFull == null) {
                         MessagesController.getInstance(this.currentAccount).loadFullUser(tLRPC$User, this.currentGuid, false);
                     }
-                    if (userFull != null && !userFull.profile_photo.video_sizes.isEmpty()) {
+                    if (userFull != null && (tLRPC$Photo = userFull.profile_photo) != null && (arrayList = tLRPC$Photo.video_sizes) != null && !arrayList.isEmpty()) {
                         TLRPC$VideoSize tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(0);
                         while (true) {
                             if (i >= userFull.profile_photo.video_sizes.size()) {

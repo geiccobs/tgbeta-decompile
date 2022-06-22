@@ -6,7 +6,7 @@ import j$.util.function.Consumer;
 public final class C0129n2 extends Y3 implements AbstractC0186y1, AbstractC0151r1 {
     @Override // j$.util.stream.Y3
     public j$.util.v B() {
-        return super.mo70spliterator();
+        return super.mo71spliterator();
     }
 
     /* renamed from: C */
@@ -26,13 +26,13 @@ public final class C0129n2 extends Y3 implements AbstractC0186y1, AbstractC0151r
 
     @Override // j$.util.stream.AbstractC0151r1, j$.util.stream.AbstractC0156s1
     /* renamed from: a */
-    public A1 mo69a() {
+    public A1 mo70a() {
         return this;
     }
 
     @Override // j$.util.stream.AbstractC0151r1, j$.util.stream.AbstractC0156s1
     /* renamed from: a */
-    public AbstractC0186y1 mo69a() {
+    public AbstractC0186y1 mo70a() {
         return this;
     }
 
@@ -105,13 +105,13 @@ public final class C0129n2 extends Y3 implements AbstractC0186y1, AbstractC0151r
 
     @Override // j$.util.stream.Y3, j$.util.stream.Z3, java.lang.Iterable, j$.lang.e
     /* renamed from: spliterator */
-    public j$.util.w mo70spliterator() {
-        return super.mo70spliterator();
+    public j$.util.w mo71spliterator() {
+        return super.mo71spliterator();
     }
 
     @Override // j$.util.stream.Y3, j$.util.stream.Z3, java.lang.Iterable, j$.lang.e
     /* renamed from: spliterator */
-    public j$.util.u mo70spliterator() {
-        return super.mo70spliterator();
+    public j$.util.u mo71spliterator() {
+        return super.mo71spliterator();
     }
 }

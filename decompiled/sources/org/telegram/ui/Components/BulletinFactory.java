@@ -264,7 +264,7 @@ public final class BulletinFactory {
             r1 = 5
             r2 = 4
             r3 = 3
-            r4 = 2131627043(0x7f0e0c23, float:1.888134E38)
+            r4 = 2131627046(0x7f0e0c26, float:1.8881345E38)
             java.lang.String r5 = "NotificationsMutedForHint"
             r6 = 2
             r7 = 0
@@ -286,14 +286,14 @@ public final class BulletinFactory {
             r10.<init>()
             throw r10
         L36:
-            r11 = 2131627068(0x7f0e0c3c, float:1.888139E38)
+            r11 = 2131627071(0x7f0e0c3f, float:1.8881396E38)
             java.lang.String r12 = "NotificationsUnmutedHint"
             java.lang.String r11 = org.telegram.messenger.LocaleController.getString(r12, r11)
             r12 = 0
             r13 = 0
             goto L7e
         L42:
-            r11 = 2131627044(0x7f0e0c24, float:1.8881341E38)
+            r11 = 2131627047(0x7f0e0c27, float:1.8881347E38)
             java.lang.String r12 = "NotificationsMutedHint"
             java.lang.String r11 = org.telegram.messenger.LocaleController.getString(r12, r11)
             goto L7c

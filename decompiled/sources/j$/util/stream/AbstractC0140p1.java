@@ -4,5 +4,5 @@ package j$.util.stream;
 public interface AbstractC0140p1 extends AbstractC0156s1, AbstractC0106j3 {
     @Override // j$.util.stream.AbstractC0156s1
     /* renamed from: a */
-    AbstractC0166u1 mo69a();
+    AbstractC0166u1 mo70a();
 }

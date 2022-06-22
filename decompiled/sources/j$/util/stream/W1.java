@@ -32,13 +32,13 @@ final class W1 extends AbstractC0051a2 implements AbstractC0166u1 {
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.w mo68spliterator() {
+    public j$.util.w mo69spliterator() {
         return j$.util.L.b();
     }
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
-    public j$.util.u mo68spliterator() {
+    public j$.util.u mo69spliterator() {
         return j$.util.L.b();
     }
 }

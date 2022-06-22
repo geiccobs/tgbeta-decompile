@@ -18,9 +18,9 @@ final class C0105j2 extends AbstractC0111k2 {
         boolean b = this.d.b(consumer);
         if (!b) {
             if (this.c == null && (a = a(this.e)) != null) {
-                j$.util.u mo68spliterator = a.mo68spliterator();
-                this.d = mo68spliterator;
-                return mo68spliterator.b(consumer);
+                j$.util.u mo69spliterator = a.mo69spliterator();
+                this.d = mo69spliterator;
+                return mo69spliterator.b(consumer);
             }
             this.a = null;
         }

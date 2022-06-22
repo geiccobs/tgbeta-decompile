@@ -171,7 +171,7 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
             android.app.Activity r0 = r6.getParentActivity()
             if (r0 == 0) goto L51
             android.app.Activity r0 = r6.getParentActivity()
-            r1 = 2131628523(0x7f0e11eb, float:1.8884341E38)
+            r1 = 2131628526(0x7f0e11ee, float:1.8884347E38)
             java.lang.String r4 = "SyncContactsAdded"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r4, r1)
             android.widget.Toast r0 = android.widget.Toast.makeText(r0, r1, r2)

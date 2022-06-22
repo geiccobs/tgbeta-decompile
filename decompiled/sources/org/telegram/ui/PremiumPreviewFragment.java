@@ -323,7 +323,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         mutate.setColorFilter(new PorterDuffColorFilter(getThemedColor("dialogBackground"), PorterDuff.Mode.MULTIPLY));
         this.shadowDrawable.getPadding(rect);
         if (Build.VERSION.SDK_INT >= 21) {
-            this.statusBarHeight = AndroidUtilities.statusBarHeight;
+            this.statusBarHeight = AndroidUtilities.isTablet() ? 0 : AndroidUtilities.statusBarHeight;
         }
         FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.PremiumPreviewFragment.1
             boolean iconInterceptedTouch;
@@ -357,7 +357,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     PremiumPreviewFragment.this.isLandscapeMode = false;
                 }
                 if (Build.VERSION.SDK_INT >= 21) {
-                    PremiumPreviewFragment.this.statusBarHeight = AndroidUtilities.statusBarHeight;
+                    PremiumPreviewFragment.this.statusBarHeight = AndroidUtilities.isTablet() ? 0 : AndroidUtilities.statusBarHeight;
                 }
                 PremiumPreviewFragment.this.backgroundView.measure(i, View.MeasureSpec.makeMeasureSpec(0, 0));
                 PremiumPreviewFragment.this.particlesView.getLayoutParams().height = PremiumPreviewFragment.this.backgroundView.getMeasuredHeight();
@@ -784,7 +784,10 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             if (premiumPromo != null && (currency = Currency.getInstance(premiumPromo.currency)) != null) {
                 NumberFormat currencyInstance = NumberFormat.getCurrencyInstance();
                 currencyInstance.setCurrency(currency);
-                return LocaleController.formatString(R.string.SubscribeToPremium, currencyInstance.format(((float) premiumPromo.monthly_amount) / 100.0f));
+                double d = premiumPromo.monthly_amount;
+                double pow = Math.pow(10.0d, BillingController.getInstance().getCurrencyExp(premiumPromo.currency));
+                Double.isNaN(d);
+                return LocaleController.formatString(R.string.SubscribeToPremium, currencyInstance.format(d / pow));
             }
             return LocaleController.getString((int) R.string.SubscribeToPremiumNoPrice);
         }

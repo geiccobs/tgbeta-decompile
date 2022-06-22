@@ -33,7 +33,7 @@ class C0154s extends AbstractC0064c3 {
 
     @Override // j$.util.stream.AbstractC0060c
     j$.util.u F0(AbstractC0187y2 abstractC0187y2, j$.util.u uVar) {
-        return EnumC0071d4.DISTINCT.d(abstractC0187y2.s0()) ? abstractC0187y2.w0(uVar) : EnumC0071d4.ORDERED.d(abstractC0187y2.s0()) ? ((E1) L0(abstractC0187y2, uVar)).mo68spliterator() : new C0125m4(abstractC0187y2.w0(uVar));
+        return EnumC0071d4.DISTINCT.d(abstractC0187y2.s0()) ? abstractC0187y2.w0(uVar) : EnumC0071d4.ORDERED.d(abstractC0187y2.s0()) ? ((E1) L0(abstractC0187y2, uVar)).mo69spliterator() : new C0125m4(abstractC0187y2.w0(uVar));
     }
 
     @Override // j$.util.stream.AbstractC0060c
