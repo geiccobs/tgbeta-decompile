@@ -1,0 +1,55 @@
+package com.google.android.gms.common;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import androidx.annotation.RecentlyNonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+import com.google.android.gms.common.internal.Preconditions;
+/* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
+/* loaded from: classes.dex */
+public class SupportErrorDialogFragment extends DialogFragment {
+    private Dialog zaa;
+    private DialogInterface.OnCancelListener zab;
+    private Dialog zac;
+
+    @Override // androidx.fragment.app.DialogFragment
+    public Dialog onCreateDialog(Bundle bundle) {
+        Dialog dialog = this.zaa;
+        if (dialog == null) {
+            setShowsDialog(false);
+            if (this.zac == null) {
+                this.zac = new AlertDialog.Builder(getActivity()).create();
+            }
+            return this.zac;
+        }
+        return dialog;
+    }
+
+    @Override // android.content.DialogInterface.OnCancelListener
+    public void onCancel(@RecentlyNonNull DialogInterface dialogInterface) {
+        DialogInterface.OnCancelListener onCancelListener = this.zab;
+        if (onCancelListener != null) {
+            onCancelListener.onCancel(dialogInterface);
+        }
+    }
+
+    public static SupportErrorDialogFragment newInstance(@RecentlyNonNull Dialog dialog, DialogInterface.OnCancelListener onCancelListener) {
+        SupportErrorDialogFragment supportErrorDialogFragment = new SupportErrorDialogFragment();
+        Dialog dialog2 = (Dialog) Preconditions.checkNotNull(dialog, "Cannot display null dialog");
+        dialog2.setOnCancelListener(null);
+        dialog2.setOnDismissListener(null);
+        supportErrorDialogFragment.zaa = dialog2;
+        if (onCancelListener != null) {
+            supportErrorDialogFragment.zab = onCancelListener;
+        }
+        return supportErrorDialogFragment;
+    }
+
+    @Override // androidx.fragment.app.DialogFragment
+    public void show(@RecentlyNonNull FragmentManager fragmentManager, String str) {
+        super.show(fragmentManager, str);
+    }
+}
