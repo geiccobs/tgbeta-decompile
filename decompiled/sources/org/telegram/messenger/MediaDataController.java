@@ -215,6 +215,7 @@ public class MediaDataController extends BaseController {
     public static final int TYPE_IMAGE = 0;
     public static final int TYPE_MASK = 1;
     private static RectF bitmapRect;
+    private static Comparator<TLRPC$MessageEntity> entityComparator;
     private static Paint erasePaint;
     private static Paint roundPaint;
     private static Path roundPath;
@@ -261,7 +262,7 @@ public class MediaDataController extends BaseController {
     private static Pattern STRIKE_PATTERN = Pattern.compile("~~(.+?)~~");
     public static String SHORTCUT_CATEGORY = "org.telegram.messenger.SHORTCUT_SHARE";
     private static volatile MediaDataController[] Instance = new MediaDataController[4];
-    private static Comparator<TLRPC$MessageEntity> entityComparator = MediaDataController$$ExternalSyntheticLambda126.INSTANCE;
+    private static final Object[] lockObjects = new Object[4];
     private TLRPC$TL_attachMenuBots attachMenuBots = new TLRPC$TL_attachMenuBots();
     private List<TLRPC$TL_availableReaction> reactionsList = new ArrayList();
     private List<TLRPC$TL_availableReaction> enabledReactionsList = new ArrayList();
@@ -342,10 +343,17 @@ public class MediaDataController extends BaseController {
     public static /* synthetic */ void lambda$saveDraft$146(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
     }
 
+    static {
+        for (int i = 0; i < 4; i++) {
+            lockObjects[i] = new Object();
+        }
+        entityComparator = MediaDataController$$ExternalSyntheticLambda126.INSTANCE;
+    }
+
     public static MediaDataController getInstance(int i) {
         MediaDataController mediaDataController = Instance[i];
         if (mediaDataController == null) {
-            synchronized (MediaDataController.class) {
+            synchronized (lockObjects) {
                 mediaDataController = Instance[i];
                 if (mediaDataController == null) {
                     MediaDataController[] mediaDataControllerArr = Instance;
@@ -2191,7 +2199,7 @@ public class MediaDataController extends BaseController {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r0v5, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r0v5, types: [boolean, int] */
     public void addNewStickerSet(TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet) {
         if (this.stickerSetsById.indexOfKey(tLRPC$TL_messages_stickerSet.set.id) >= 0 || this.stickerSetsByName.containsKey(tLRPC$TL_messages_stickerSet.set.short_name)) {
             return;
@@ -3511,7 +3519,7 @@ public class MediaDataController extends BaseController {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r14v0, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r14v0, types: [boolean, int] */
     public void toggleStickerSet(final Context context, final TLObject tLObject, final int i, final BaseFragment baseFragment, final boolean z, boolean z2) {
         TLRPC$StickerSet tLRPC$StickerSet;
         TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet;

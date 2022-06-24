@@ -24,6 +24,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -95,11 +96,13 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView {
         int size = i3 + this.premiumFeatures.size();
         this.rowCount = size;
         this.featuresEndRow = size;
-        int i4 = size + 1;
-        this.rowCount = i4;
+        this.rowCount = size + 1;
         this.sectionRow = size;
-        this.rowCount = i4 + 1;
-        this.buttonRow = i4;
+        if (!UserConfig.getInstance(i).isPremium()) {
+            int i4 = this.rowCount;
+            this.rowCount = i4 + 1;
+            this.buttonRow = i4;
+        }
         this.recyclerListView.setPadding(AndroidUtilities.dp(6.0f), 0, AndroidUtilities.dp(6.0f), 0);
         this.recyclerListView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Components.Premium.PremiumPreviewBottomSheet.1
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
@@ -153,9 +156,11 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView {
         frameLayout2.addView(view, LayoutHelper.createFrame(-1, 1.0f));
         view.getLayoutParams().height = 1;
         AndroidUtilities.updateViewVisibilityAnimated(view, true, 1.0f, false);
-        frameLayout2.addView(premiumButtonView, LayoutHelper.createFrame(-1, 48.0f, 16, 16.0f, 0.0f, 16.0f, 0.0f));
-        frameLayout2.setBackgroundColor(getThemedColor("dialogBackground"));
-        frameLayout.addView(frameLayout2, LayoutHelper.createFrame(-1, 68, 80));
+        if (!UserConfig.getInstance(this.currentAccount).isPremium()) {
+            frameLayout2.addView(premiumButtonView, LayoutHelper.createFrame(-1, 48.0f, 16, 16.0f, 0.0f, 16.0f, 0.0f));
+            frameLayout2.setBackgroundColor(getThemedColor("dialogBackground"));
+            frameLayout.addView(frameLayout2, LayoutHelper.createFrame(-1, 68, 80));
+        }
     }
 
     @Override // org.telegram.ui.Components.BottomSheetWithRecyclerListView

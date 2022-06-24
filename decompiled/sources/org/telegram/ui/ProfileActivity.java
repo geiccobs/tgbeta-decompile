@@ -858,7 +858,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         @Override // org.telegram.ui.Components.ProfileGalleryView.Callback
         public void onPhotosLoaded() {
-            ProfileActivity.this.updateProfileData();
+            ProfileActivity.this.updateProfileData(false);
         }
 
         @Override // org.telegram.ui.Components.ProfileGalleryView.Callback
@@ -2241,7 +2241,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         this.mediaCounterTextView = clippingTextViewSwitcher;
         clippingTextViewSwitcher.setAlpha(0.0f);
         this.avatarContainer2.addView(this.mediaCounterTextView, LayoutHelper.createFrame(-2, -2.0f, 51, 118.0f, 0.0f, 8.0f, 0.0f));
-        updateProfileData();
+        updateProfileData(true);
         this.writeButton = new RLottieImageView(context);
         Drawable mutate = context.getResources().getDrawable(R.drawable.floating_shadow_profile).mutate();
         mutate.setColorFilter(new PorterDuffColorFilter(-16777216, PorterDuff.Mode.MULTIPLY));
@@ -2742,7 +2742,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     userConfig.setCurrentUser(user7);
                     userConfig.saveConfig(true);
                     NotificationCenter.getInstance(((BaseFragment) ProfileActivity.this).currentAccount).postNotificationName(NotificationCenter.mainUserInfoChanged, new Object[0]);
-                    ProfileActivity.this.updateProfileData();
+                    ProfileActivity.this.updateProfileData(true);
                 }
                 ProfileActivity.this.avatarsViewPager.commitMoveToBegin();
             } else if (i == 34) {
@@ -5599,7 +5599,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             boolean z = ((MessagesController.UPDATE_MASK_AVATAR & intValue) == 0 && (MessagesController.UPDATE_MASK_NAME & intValue) == 0 && (MessagesController.UPDATE_MASK_STATUS & intValue) == 0) ? false : true;
             if (this.userId != 0) {
                 if (z) {
-                    updateProfileData();
+                    updateProfileData(true);
                 }
                 if ((intValue & MessagesController.UPDATE_MASK_PHONE) == 0 || (recyclerListView2 = this.listView) == null || (holder = (RecyclerListView.Holder) recyclerListView2.findViewHolderForPosition(this.phoneRow)) == null) {
                     return;
@@ -5613,7 +5613,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else {
                         updateOnlineCount(true);
                     }
-                    updateProfileData();
+                    updateProfileData(true);
                 }
                 if (!z || (recyclerListView = this.listView) == null) {
                     return;
@@ -5634,7 +5634,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             this.chatInfo.online_count = ((Integer) objArr[1]).intValue();
             updateOnlineCount(true);
-            updateProfileData();
+            updateProfileData(false);
         } else if (i == NotificationCenter.contactsDidLoad) {
             createActionBarMenu(true);
         } else if (i == NotificationCenter.encryptedChatCreated) {
@@ -5916,7 +5916,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             imageUpdater.onResume();
             setParentActivityTitle(LocaleController.getString("Settings", R.string.Settings));
         }
-        updateProfileData();
+        updateProfileData(true);
         fixLayout();
         SimpleTextView[] simpleTextViewArr = this.nameTextView;
         if (simpleTextViewArr[1] != null) {
@@ -6118,7 +6118,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         this.topView.invalidate();
         needLayout(true);
-        this.fragmentView.invalidate();
+        View view = this.fragmentView;
+        if (view != null) {
+            view.invalidate();
+        }
         AboutLinkCell aboutLinkCell = this.aboutLinkCell;
         if (aboutLinkCell != null) {
             aboutLinkCell.invalidate();
@@ -6427,39 +6430,38 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         return this.premuimCrossfadeDrawable;
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:44:0x00e7, code lost:
-        if (r11.photoId != r3.photoId) goto L46;
-     */
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:107:0x0250  */
-    /* JADX WARN: Removed duplicated region for block: B:108:0x0256  */
-    /* JADX WARN: Removed duplicated region for block: B:110:0x0259  */
-    /* JADX WARN: Removed duplicated region for block: B:129:0x02df  */
-    /* JADX WARN: Removed duplicated region for block: B:145:0x031f  */
-    /* JADX WARN: Removed duplicated region for block: B:217:0x052d  */
-    /* JADX WARN: Removed duplicated region for block: B:260:0x0634 A[ADDED_TO_REGION] */
-    /* JADX WARN: Removed duplicated region for block: B:264:0x0648  */
-    /* JADX WARN: Removed duplicated region for block: B:274:0x0661  */
-    /* JADX WARN: Removed duplicated region for block: B:286:0x0686  */
-    /* JADX WARN: Removed duplicated region for block: B:297:0x070e  */
-    /* JADX WARN: Removed duplicated region for block: B:300:0x074a  */
-    /* JADX WARN: Removed duplicated region for block: B:301:0x074d  */
-    /* JADX WARN: Removed duplicated region for block: B:306:0x0768  */
-    /* JADX WARN: Removed duplicated region for block: B:309:0x076f  */
-    /* JADX WARN: Removed duplicated region for block: B:310:0x0772  */
-    /* JADX WARN: Removed duplicated region for block: B:326:0x07c2  */
-    /* JADX WARN: Removed duplicated region for block: B:337:0x080c  */
-    /* JADX WARN: Removed duplicated region for block: B:360:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:105:0x0248  */
+    /* JADX WARN: Removed duplicated region for block: B:106:0x024e  */
+    /* JADX WARN: Removed duplicated region for block: B:108:0x0251  */
+    /* JADX WARN: Removed duplicated region for block: B:127:0x02cf  */
+    /* JADX WARN: Removed duplicated region for block: B:143:0x030f  */
+    /* JADX WARN: Removed duplicated region for block: B:146:0x031a  */
+    /* JADX WARN: Removed duplicated region for block: B:217:0x0515  */
+    /* JADX WARN: Removed duplicated region for block: B:259:0x0609 A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:264:0x0624  */
+    /* JADX WARN: Removed duplicated region for block: B:275:0x063f  */
+    /* JADX WARN: Removed duplicated region for block: B:287:0x0664  */
+    /* JADX WARN: Removed duplicated region for block: B:297:0x06e3  */
+    /* JADX WARN: Removed duplicated region for block: B:300:0x071f  */
+    /* JADX WARN: Removed duplicated region for block: B:301:0x0722  */
+    /* JADX WARN: Removed duplicated region for block: B:307:0x0738  */
+    /* JADX WARN: Removed duplicated region for block: B:310:0x073f  */
+    /* JADX WARN: Removed duplicated region for block: B:311:0x0742  */
+    /* JADX WARN: Removed duplicated region for block: B:327:0x0794  */
+    /* JADX WARN: Removed duplicated region for block: B:338:0x07de  */
+    /* JADX WARN: Removed duplicated region for block: B:352:0x0332 A[ADDED_TO_REGION, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:358:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void updateProfileData() {
+    public void updateProfileData(boolean r33) {
         /*
-            Method dump skipped, instructions count: 2064
+            Method dump skipped, instructions count: 2018
             To view this dump add '--comments-level debug' option
         */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ProfileActivity.updateProfileData():void");
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ProfileActivity.updateProfileData(boolean):void");
     }
 
     public /* synthetic */ void lambda$updateProfileData$32(TLRPC$User tLRPC$User, SimpleTextView simpleTextView, View view) {
@@ -6920,7 +6922,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         this.avatar = null;
         this.avatarBig = null;
         this.avatarsViewPager.setCreateThumbFromParent(false);
-        updateProfileData();
+        updateProfileData(true);
         showAvatarProgress(false, true);
         getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, Integer.valueOf(MessagesController.UPDATE_MASK_ALL));
         getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged, new Object[0]);

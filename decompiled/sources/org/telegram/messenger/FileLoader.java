@@ -750,25 +750,22 @@ public class FileLoader extends BaseController {
         }
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:125:0x0216  */
-    /* JADX WARN: Removed duplicated region for block: B:155:0x0292  */
-    /* JADX WARN: Removed duplicated region for block: B:158:0x02bd  */
-    /* JADX WARN: Removed duplicated region for block: B:169:0x02e3  */
-    /* JADX WARN: Removed duplicated region for block: B:209:0x0360  */
-    /* JADX WARN: Type inference failed for: r14v1, types: [int, boolean] */
-    /* JADX WARN: Type inference failed for: r14v2 */
-    /* JADX WARN: Type inference failed for: r14v4 */
-    /* JADX WARN: Type inference failed for: r14v5 */
-    /* JADX WARN: Type inference failed for: r14v6 */
-    /* JADX WARN: Type inference failed for: r14v7 */
-    /* JADX WARN: Type inference failed for: r14v8 */
+    /* JADX WARN: Code restructure failed: missing block: B:107:0x01e7, code lost:
+        if (r38.imageType == 2) goto L109;
+     */
+    /* JADX WARN: Removed duplicated region for block: B:132:0x0240  */
+    /* JADX WARN: Removed duplicated region for block: B:161:0x02b8  */
+    /* JADX WARN: Removed duplicated region for block: B:164:0x02e6  */
+    /* JADX WARN: Removed duplicated region for block: B:175:0x030b  */
+    /* JADX WARN: Removed duplicated region for block: B:220:0x0392  */
+    /* JADX WARN: Removed duplicated region for block: B:222:0x03ca  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private org.telegram.messenger.FileLoadOperation loadFileInternal(final org.telegram.tgnet.TLRPC$Document r34, org.telegram.messenger.SecureDocument r35, org.telegram.messenger.WebFile r36, org.telegram.tgnet.TLRPC$TL_fileLocationToBeDeprecated r37, org.telegram.messenger.ImageLocation r38, final java.lang.Object r39, java.lang.String r40, long r41, int r43, org.telegram.messenger.FileLoadOperationStream r44, int r45, boolean r46, int r47) {
         /*
-            Method dump skipped, instructions count: 873
+            Method dump skipped, instructions count: 979
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.FileLoader.loadFileInternal(org.telegram.tgnet.TLRPC$Document, org.telegram.messenger.SecureDocument, org.telegram.messenger.WebFile, org.telegram.tgnet.TLRPC$TL_fileLocationToBeDeprecated, org.telegram.messenger.ImageLocation, java.lang.Object, java.lang.String, long, int, org.telegram.messenger.FileLoadOperationStream, int, boolean, int):org.telegram.messenger.FileLoadOperation");
@@ -783,15 +780,17 @@ public class FileLoader extends BaseController {
         if (SharedConfig.saveToGalleryFlags != 0 && !BuildVars.NO_SCOPED_STORAGE && (obj instanceof MessageObject)) {
             MessageObject messageObject = (MessageObject) obj;
             long dialogId = messageObject.getDialogId();
-            long j = -dialogId;
-            if (!getMessagesController().isChatNoForwards(getMessagesController().getChat(Long.valueOf(j))) && !messageObject.messageOwner.noforwards) {
-                if (dialogId >= 0) {
-                    i = 1;
-                } else {
-                    i = ChatObject.isChannelAndNotMegaGroup(getMessagesController().getChat(Long.valueOf(j))) ? 4 : 2;
-                }
-                if ((i & SharedConfig.saveToGalleryFlags) != 0) {
-                    return true;
+            if (!messageObject.isAnyKindOfSticker()) {
+                long j = -dialogId;
+                if (!getMessagesController().isChatNoForwards(getMessagesController().getChat(Long.valueOf(j))) && !messageObject.messageOwner.noforwards) {
+                    if (dialogId >= 0) {
+                        i = 1;
+                    } else {
+                        i = ChatObject.isChannelAndNotMegaGroup(getMessagesController().getChat(Long.valueOf(j))) ? 4 : 2;
+                    }
+                    if ((i & SharedConfig.saveToGalleryFlags) != 0) {
+                        return true;
+                    }
                 }
             }
         }

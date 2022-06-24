@@ -86,6 +86,7 @@ public class NotificationsController extends BaseController {
     public static final int TYPE_GROUP = 0;
     public static final int TYPE_PRIVATE = 1;
     protected static AudioManager audioManager;
+    private static final Object[] lockObjects;
     private static NotificationManagerCompat notificationManager;
     private static NotificationManager systemNotificationManager;
     private AlarmManager alarmManager;
@@ -153,12 +154,16 @@ public class NotificationsController extends BaseController {
         }
         audioManager = (AudioManager) ApplicationLoader.applicationContext.getSystemService(MediaStreamTrack.AUDIO_TRACK_KIND);
         Instance = new NotificationsController[4];
+        lockObjects = new Object[4];
+        for (int i = 0; i < 4; i++) {
+            lockObjects[i] = new Object();
+        }
     }
 
     public static NotificationsController getInstance(int i) {
         NotificationsController notificationsController = Instance[i];
         if (notificationsController == null) {
-            synchronized (NotificationsController.class) {
+            synchronized (lockObjects[i]) {
                 notificationsController = Instance[i];
                 if (notificationsController == null) {
                     NotificationsController[] notificationsControllerArr = Instance;

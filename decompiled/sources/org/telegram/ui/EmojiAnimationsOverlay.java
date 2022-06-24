@@ -535,7 +535,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
 
     /* renamed from: showStickerSetBulletin */
     public void lambda$showAnimationForCell$0(TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet, final MessageObject messageObject) {
-        if (MessagesController.getInstance(this.currentAccount).premiumLocked) {
+        if (MessagesController.getInstance(this.currentAccount).premiumLocked || this.chatActivity.getParentActivity() == null) {
             return;
         }
         StickerSetBulletinLayout stickerSetBulletinLayout = new StickerSetBulletinLayout(this.contentLayout.getContext(), null, -1, messageObject.getDocument(), this.chatActivity.getResourceProvider());

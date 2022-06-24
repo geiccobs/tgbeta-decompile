@@ -808,6 +808,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private int[] currentPinnedMessageIndex = new int[1];
     private int lastStableId = 10;
     private boolean allowContextBotPanelSecond = true;
+    private int runningAnimationIndex = -1;
     private boolean paused = true;
     boolean firstOpen = true;
     private int lastLoadIndex = 1;
@@ -7950,9 +7951,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             animatorArr[0] = ObjectAnimator.ofFloat(frameLayout, property, fArr);
             animatorSet2.playTogether(animatorArr);
             this.runningAnimation.setDuration(150L);
+            this.runningAnimationIndex = getNotificationCenter().setAnimationInProgress(this.runningAnimationIndex, null);
             this.runningAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.ChatActivity.67
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
                 public void onAnimationEnd(Animator animator) {
+                    ChatActivity.this.getNotificationCenter().onAnimationFinish(ChatActivity.this.runningAnimationIndex);
                     if (ChatActivity.this.runningAnimation == null || !ChatActivity.this.runningAnimation.equals(animator)) {
                         return;
                     }
@@ -13201,7 +13204,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             return this.trackWidth;
         }
 
-        /* JADX INFO: Access modifiers changed from: protected */
         @Override // org.telegram.ui.ActionBar.SimpleTextView
         public boolean createLayout(int i) {
             boolean createLayout = super.createLayout(i);
@@ -14304,7 +14306,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     /* JADX WARN: Type inference failed for: r11v9 */
     /* JADX WARN: Type inference failed for: r7v15 */
     /* JADX WARN: Type inference failed for: r7v68 */
-    /* JADX WARN: Type inference failed for: r7v7, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r7v7, types: [boolean, int] */
     @android.annotation.SuppressLint({"ClickableViewAccessibility"})
     /*
         Code decompiled incorrectly, please refer to instructions dump.

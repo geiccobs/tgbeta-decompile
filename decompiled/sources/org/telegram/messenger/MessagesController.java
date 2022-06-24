@@ -558,7 +558,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public static int UPDATE_MASK_ALL = ((((((((2 | 4) | 1) | 8) | 16) | 32) | 64) | ConnectionsManager.RequestFlagNeedQuickAck) | 256) | 1024;
     public static int DIALOG_FILTER_FLAG_ALL_CHATS = (((1 | 2) | 4) | 8) | 16;
     private static volatile MessagesController[] Instance = new MessagesController[4];
-    private static volatile Object[] lockObjects = new Object[4];
+    private static final Object[] lockObjects = new Object[4];
     private ConcurrentHashMap<Long, TLRPC$Chat> chats = new ConcurrentHashMap<>(100, 1.0f, 2);
     private ConcurrentHashMap<Integer, TLRPC$EncryptedChat> encryptedChats = new ConcurrentHashMap<>(10, 1.0f, 2);
     private ConcurrentHashMap<Long, TLRPC$User> users = new ConcurrentHashMap<>(100, 1.0f, 2);

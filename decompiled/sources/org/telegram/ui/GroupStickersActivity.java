@@ -415,9 +415,10 @@ public class GroupStickersActivity extends BaseFragment implements NotificationC
             MessagesStorage.getInstance(this.currentAccount).updateChatInfo(this.info, false);
             NotificationCenter.getInstance(this.currentAccount).postNotificationName(NotificationCenter.chatInfoDidLoad, this.info, 0, Boolean.TRUE, Boolean.FALSE);
             finishFragment();
-            return;
+        } else if (getParentActivity() == null) {
+        } else {
+            Toast.makeText(getParentActivity(), LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + tLRPC$TL_error.text, 0).show();
         }
-        Toast.makeText(getParentActivity(), LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + tLRPC$TL_error.text, 0).show();
     }
 
     /* JADX WARN: Removed duplicated region for block: B:15:0x002d A[LOOP:0: B:15:0x002d->B:20:0x0044, LOOP_START, PHI: r1 

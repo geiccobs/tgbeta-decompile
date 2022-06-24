@@ -1,6 +1,7 @@
 package org.telegram.ui.Components;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -17,14 +18,12 @@ public class ScamDrawable extends Drawable {
     private int textWidth;
     private RectF rect = new RectF();
     private Paint paint = new Paint(1);
+    int colorAlpha = 255;
+    int alpha = 255;
 
     @Override // android.graphics.drawable.Drawable
     public int getOpacity() {
         return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
     }
 
     @Override // android.graphics.drawable.Drawable
@@ -63,6 +62,16 @@ public class ScamDrawable extends Drawable {
     public void setColor(int i) {
         this.textPaint.setColor(i);
         this.paint.setColor(i);
+        this.colorAlpha = Color.alpha(i);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int i) {
+        if (this.alpha != i) {
+            int i2 = (int) (this.colorAlpha * (i / 255.0f));
+            this.paint.setAlpha(i2);
+            this.textPaint.setAlpha(i2);
+        }
     }
 
     @Override // android.graphics.drawable.Drawable

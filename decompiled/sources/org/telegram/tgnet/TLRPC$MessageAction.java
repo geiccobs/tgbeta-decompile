@@ -347,7 +347,6 @@ public abstract class TLRPC$MessageAction extends TLObject {
 
                     @Override // org.telegram.tgnet.TLRPC$TL_messageActionPaymentSent, org.telegram.tgnet.TLObject
                     public void readParams(AbstractSerializedData abstractSerializedData2, boolean z2) {
-                        this.flags = abstractSerializedData2.readInt32(z2);
                         this.currency = abstractSerializedData2.readString(z2);
                         this.total_amount = abstractSerializedData2.readInt64(z2);
                     }

@@ -3053,7 +3053,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     /* JADX WARN: Type inference failed for: r14v13 */
     /* JADX WARN: Type inference failed for: r14v173 */
     /* JADX WARN: Type inference failed for: r14v174 */
-    /* JADX WARN: Type inference failed for: r14v2, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r14v2, types: [boolean, int] */
     /* JADX WARN: Type inference failed for: r3v275, types: [org.telegram.tgnet.TLRPC$InputStickerSet] */
     /* JADX WARN: Type inference failed for: r6v201 */
     /* JADX WARN: Type inference failed for: r6v204 */
@@ -4435,7 +4435,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatMessageCell.updateReactionLayoutPosition():void");
     }
 
-    /* JADX WARN: Type inference failed for: r11v1, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r11v1, types: [boolean, int] */
     /* JADX WARN: Type inference failed for: r11v45 */
     /* JADX WARN: Type inference failed for: r11v54 */
     public void drawLinkPreview(Canvas canvas, float f) {

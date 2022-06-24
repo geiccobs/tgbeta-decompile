@@ -179,7 +179,7 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         return false;
     }
 
-    static /* synthetic */ int access$1110(SecretMediaViewer secretMediaViewer) {
+    static /* synthetic */ int access$1210(SecretMediaViewer secretMediaViewer) {
         int i = secretMediaViewer.playerRetryPlayCount;
         secretMediaViewer.playerRetryPlayCount = i - 1;
         return i;
@@ -208,6 +208,18 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         @Override // android.view.ViewGroup
         protected boolean drawChild(Canvas canvas, View view, long j) {
             return view != SecretMediaViewer.this.aspectRatioFrameLayout && super.drawChild(canvas, view, j);
+        }
+
+        @Override // android.view.ViewGroup, android.view.View
+        protected void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            SecretMediaViewer.this.centerImage.onAttachedToWindow();
+        }
+
+        @Override // android.view.ViewGroup, android.view.View
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            SecretMediaViewer.this.centerImage.onDetachedFromWindow();
         }
     }
 
@@ -489,7 +501,7 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         @Override // org.telegram.ui.Components.VideoPlayer.VideoPlayerDelegate
         public void onError(VideoPlayer videoPlayer, Exception exc) {
             if (SecretMediaViewer.this.playerRetryPlayCount > 0) {
-                SecretMediaViewer.access$1110(SecretMediaViewer.this);
+                SecretMediaViewer.access$1210(SecretMediaViewer.this);
                 final File file = this.val$file;
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.SecretMediaViewer$1$$ExternalSyntheticLambda0
                     @Override // java.lang.Runnable

@@ -122,6 +122,10 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable {
         return i;
     }
 
+    static {
+        new ScheduledThreadPoolExecutor(4, new ThreadPoolExecutor.DiscardPolicy());
+    }
+
     public void invalidateInternal() {
         for (int i = 0; i < this.parents.size(); i++) {
             if (this.parents.get(i).getParentView() != null) {

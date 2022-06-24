@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC$BotInlineResult;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$DocumentAttribute;
@@ -29,10 +31,12 @@ import org.telegram.tgnet.TLRPC$TL_inlineBotSwitchPM;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.MentionsAdapter;
 import org.telegram.ui.Adapters.PaddedListAdapter;
+import org.telegram.ui.ChatActivity;
 import org.telegram.ui.ContentPreviewViewer;
 /* loaded from: classes3.dex */
 public class MentionsContainerView extends BlurredFrameLayout {
     private MentionsAdapter adapter;
+    ChatActivity chatActivity;
     private Integer color;
     private float containerBottom;
     private float containerPadding;
@@ -51,12 +55,13 @@ public class MentionsContainerView extends BlurredFrameLayout {
     private boolean ignoreLayout = false;
     private boolean scrollToFirst = false;
     private boolean shown = false;
-    private Runnable updateVisibilityRunnable = new Runnable() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda2
+    private Runnable updateVisibilityRunnable = new Runnable() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda3
         @Override // java.lang.Runnable
         public final void run() {
-            MentionsContainerView.this.lambda$new$0();
+            MentionsContainerView.this.lambda$new$1();
         }
     };
+    private int animationIndex = -1;
     private boolean listViewHiding = false;
     private float hideT = 0.0f;
     private boolean switchLayoutManagerOnEnd = false;
@@ -81,9 +86,10 @@ public class MentionsContainerView extends BlurredFrameLayout {
     public void onPanTransitionEnd() {
     }
 
-    public MentionsContainerView(Context context, long j, int i, SizeNotifierFrameLayout sizeNotifierFrameLayout, Theme.ResourcesProvider resourcesProvider) {
-        super(context, sizeNotifierFrameLayout);
-        this.sizeNotifierFrameLayout = sizeNotifierFrameLayout;
+    public MentionsContainerView(Context context, long j, int i, final ChatActivity chatActivity, Theme.ResourcesProvider resourcesProvider) {
+        super(context, chatActivity.contentView);
+        this.chatActivity = chatActivity;
+        this.sizeNotifierFrameLayout = chatActivity.contentView;
         this.resourcesProvider = resourcesProvider;
         this.drawBlur = false;
         this.isTopView = false;
@@ -228,7 +234,7 @@ public class MentionsContainerView extends BlurredFrameLayout {
                     return;
                 }
                 AndroidUtilities.cancelRunOnUIThread(MentionsContainerView.this.updateVisibilityRunnable);
-                AndroidUtilities.runOnUIThread(MentionsContainerView.this.updateVisibilityRunnable);
+                AndroidUtilities.runOnUIThread(MentionsContainerView.this.updateVisibilityRunnable, chatActivity.fragmentOpened ? 0L : 50L);
             }
 
             @Override // org.telegram.ui.Adapters.MentionsAdapter.MentionsAdapterDelegate
@@ -413,6 +419,15 @@ public class MentionsContainerView extends BlurredFrameLayout {
         super.requestLayout();
     }
 
+    public /* synthetic */ void lambda$new$1() {
+        NotificationCenter.getInstance(UserConfig.selectedAccount).doOnIdle(new Runnable() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda4
+            @Override // java.lang.Runnable
+            public final void run() {
+                MentionsContainerView.this.lambda$new$0();
+            }
+        });
+    }
+
     public /* synthetic */ void lambda$new$0() {
         updateListViewTranslation(!this.shown, true);
     }
@@ -443,7 +458,7 @@ public class MentionsContainerView extends BlurredFrameLayout {
         if (springAnimation != null) {
             springAnimation.cancel();
         }
-        AndroidUtilities.runOnUIThread(this.updateVisibilityRunnable);
+        AndroidUtilities.runOnUIThread(this.updateVisibilityRunnable, this.chatActivity.fragmentOpened ? 0L : 50L);
         if (z) {
             onOpen();
         } else {
@@ -503,22 +518,30 @@ public class MentionsContainerView extends BlurredFrameLayout {
                 updateVisibility(true);
                 return;
             }
+            final int i2 = UserConfig.selectedAccount;
+            this.animationIndex = NotificationCenter.getInstance(i2).setAnimationInProgress(this.animationIndex, null);
             SpringAnimation spring = new SpringAnimation(new FloatValueHolder(translationY)).setSpring(new SpringForce(f4).setDampingRatio(1.0f).setStiffness(550.0f));
             this.listViewTranslationAnimator = spring;
-            spring.addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda1
+            spring.addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda2
                 @Override // androidx.dynamicanimation.animation.DynamicAnimation.OnAnimationUpdateListener
                 public final void onAnimationUpdate(DynamicAnimation dynamicAnimation, float f7, float f8) {
-                    MentionsContainerView.this.lambda$updateListViewTranslation$1(f5, f6, translationY, f4, dynamicAnimation, f7, f8);
+                    MentionsContainerView.this.lambda$updateListViewTranslation$2(f5, f6, translationY, f4, dynamicAnimation, f7, f8);
                 }
             });
             if (z) {
-                this.listViewTranslationAnimator.addEndListener(new DynamicAnimation.OnAnimationEndListener() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda0
+                this.listViewTranslationAnimator.addEndListener(new DynamicAnimation.OnAnimationEndListener() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda1
                     @Override // androidx.dynamicanimation.animation.DynamicAnimation.OnAnimationEndListener
                     public final void onAnimationEnd(DynamicAnimation dynamicAnimation, boolean z3, float f7, float f8) {
-                        MentionsContainerView.this.lambda$updateListViewTranslation$2(z, dynamicAnimation, z3, f7, f8);
+                        MentionsContainerView.this.lambda$updateListViewTranslation$3(z, dynamicAnimation, z3, f7, f8);
                     }
                 });
             }
+            this.listViewTranslationAnimator.addEndListener(new DynamicAnimation.OnAnimationEndListener() { // from class: org.telegram.ui.Components.MentionsContainerView$$ExternalSyntheticLambda0
+                @Override // androidx.dynamicanimation.animation.DynamicAnimation.OnAnimationEndListener
+                public final void onAnimationEnd(DynamicAnimation dynamicAnimation, boolean z3, float f7, float f8) {
+                    MentionsContainerView.this.lambda$updateListViewTranslation$4(i2, dynamicAnimation, z3, f7, f8);
+                }
+            });
             this.listViewTranslationAnimator.start();
             return;
         }
@@ -533,12 +556,12 @@ public class MentionsContainerView extends BlurredFrameLayout {
         setVisibility(8);
     }
 
-    public /* synthetic */ void lambda$updateListViewTranslation$1(float f, float f2, float f3, float f4, DynamicAnimation dynamicAnimation, float f5, float f6) {
+    public /* synthetic */ void lambda$updateListViewTranslation$2(float f, float f2, float f3, float f4, DynamicAnimation dynamicAnimation, float f5, float f6) {
         this.listView.setTranslationY(f5);
         this.hideT = AndroidUtilities.lerp(f, f2, (f5 - f3) / (f4 - f3));
     }
 
-    public /* synthetic */ void lambda$updateListViewTranslation$2(boolean z, DynamicAnimation dynamicAnimation, boolean z2, float f, float f2) {
+    public /* synthetic */ void lambda$updateListViewTranslation$3(boolean z, DynamicAnimation dynamicAnimation, boolean z2, float f, float f2) {
         if (!z2) {
             this.listViewTranslationAnimator = null;
             setVisibility(z ? 8 : 0);
@@ -550,6 +573,10 @@ public class MentionsContainerView extends BlurredFrameLayout {
             this.shown = true;
             updateVisibility(true);
         }
+    }
+
+    public /* synthetic */ void lambda$updateListViewTranslation$4(int i, DynamicAnimation dynamicAnimation, boolean z, float f, float f2) {
+        NotificationCenter.getInstance(i).onAnimationFinish(this.animationIndex);
     }
 
     /* loaded from: classes3.dex */

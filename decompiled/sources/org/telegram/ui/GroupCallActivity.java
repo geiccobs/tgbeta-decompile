@@ -762,7 +762,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         private RectF rect = new RectF();
         private float[] volumeAlphas = new float[3];
         private float colorChangeProgress = 1.0f;
-        private RLottieDrawable speakerDrawable = new RLottieDrawable(R.raw.speaker, "2131558534", AndroidUtilities.dp(24.0f), AndroidUtilities.dp(24.0f), true, null);
+        private RLottieDrawable speakerDrawable = new RLottieDrawable(R.raw.speaker, "2131558536", AndroidUtilities.dp(24.0f), AndroidUtilities.dp(24.0f), true, null);
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public VolumeSlider(Context context, TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant) {
@@ -1858,7 +1858,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.didEndCall);
         this.shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
-        this.bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "2131558585", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
+        this.bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "2131558587", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
         this.handDrawables = new RLottieDrawable(R.raw.hand_2, "2131558459", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
         FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.GroupCallActivity.7
             private int lastSize;
@@ -7590,7 +7590,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                     forUser2 = ImageLocation.getForLocal(this.avatar);
                 }
                 GroupCallActivity.this.avatarsViewPager.setCreateThumbFromParent(false);
-                GroupCallActivity.this.avatarsViewPager.initIfEmpty(forUser, forUser2);
+                GroupCallActivity.this.avatarsViewPager.initIfEmpty(forUser, forUser2, true);
                 this.avatar = null;
                 this.avatarBig = null;
                 AndroidUtilities.updateVisibleRows(GroupCallActivity.this.listView);
@@ -7613,7 +7613,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                 forChat2 = ImageLocation.getForLocal(this.avatar);
             }
             GroupCallActivity.this.avatarsViewPager.setCreateThumbFromParent(false);
-            GroupCallActivity.this.avatarsViewPager.initIfEmpty(forChat, forChat2);
+            GroupCallActivity.this.avatarsViewPager.initIfEmpty(forChat, forChat2, true);
             this.avatar = null;
             this.avatarBig = null;
             AndroidUtilities.updateVisibleRows(GroupCallActivity.this.listView);

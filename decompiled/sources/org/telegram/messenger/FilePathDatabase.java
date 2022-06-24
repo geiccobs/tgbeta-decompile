@@ -57,7 +57,7 @@ public class FilePathDatabase {
             } else {
                 int intValue = this.database.executeInt("PRAGMA user_version", new Object[0]).intValue();
                 if (BuildVars.LOGS_ENABLED) {
-                    FileLog.d("current db version = " + intValue);
+                    FileLog.d("current files db version = " + intValue);
                 }
                 if (intValue == 0) {
                     throw new Exception("malformed");
@@ -127,7 +127,7 @@ public class FilePathDatabase {
             final CountDownLatch countDownLatch = new CountDownLatch(1);
             final String[] strArr = new String[1];
             System.currentTimeMillis();
-            this.dispatchQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FilePathDatabase$$ExternalSyntheticLambda2
+            this.dispatchQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FilePathDatabase$$ExternalSyntheticLambda3
                 @Override // java.lang.Runnable
                 public final void run() {
                     FilePathDatabase.this.lambda$getPath$1(j, i, i2, strArr, countDownLatch);
@@ -145,6 +145,9 @@ public class FilePathDatabase {
             SQLiteCursor queryFinalized = sQLiteDatabase.queryFinalized("SELECT path FROM paths WHERE document_id = " + j + " AND dc_id = " + i + " AND type = " + i2, new Object[0]);
             if (queryFinalized.next()) {
                 str = queryFinalized.stringValue(0);
+                if (BuildVars.DEBUG_VERSION) {
+                    FileLog.d("get file path id=" + j + " dc=" + i + " type=" + i2 + " path=" + str);
+                }
             }
             queryFinalized.dispose();
         } catch (SQLiteException e) {
@@ -159,6 +162,9 @@ public class FilePathDatabase {
             SQLiteCursor queryFinalized = sQLiteDatabase.queryFinalized("SELECT path FROM paths WHERE document_id = " + j + " AND dc_id = " + i + " AND type = " + i2, new Object[0]);
             if (queryFinalized.next()) {
                 strArr[0] = queryFinalized.stringValue(0);
+                if (BuildVars.DEBUG_VERSION) {
+                    FileLog.d("get file path id=" + j + " dc=" + i + " type=" + i2 + " path=" + strArr[0]);
+                }
             }
             queryFinalized.dispose();
         } catch (SQLiteException e) {
@@ -168,15 +174,18 @@ public class FilePathDatabase {
     }
 
     public void putPath(final long j, final int i, final int i2, final String str) {
-        this.dispatchQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FilePathDatabase$$ExternalSyntheticLambda3
+        this.dispatchQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FilePathDatabase$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                FilePathDatabase.this.lambda$putPath$2(str, j, i, i2);
+                FilePathDatabase.this.lambda$putPath$2(j, i, i2, str);
             }
         });
     }
 
-    public /* synthetic */ void lambda$putPath$2(String str, long j, int i, int i2) {
+    public /* synthetic */ void lambda$putPath$2(long j, int i, int i2, String str) {
+        if (BuildVars.DEBUG_VERSION) {
+            FileLog.d("put file path id=" + j + " dc=" + i + " type=" + i2 + " path=" + str);
+        }
         try {
             if (str != null) {
                 SQLitePreparedStatement executeFast = this.database.executeFast("REPLACE INTO paths VALUES(?, ?, ?, ?)");

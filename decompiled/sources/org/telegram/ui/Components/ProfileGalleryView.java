@@ -447,7 +447,7 @@ public class ProfileGalleryView extends CircularViewPager implements Notificatio
         this.adapter.notifyDataSetChanged();
     }
 
-    public boolean initIfEmpty(ImageLocation imageLocation, ImageLocation imageLocation2) {
+    public boolean initIfEmpty(ImageLocation imageLocation, ImageLocation imageLocation2, boolean z) {
         if (imageLocation == null || imageLocation2 == null || this.settingMainPhoto != 0) {
             return false;
         }
@@ -455,10 +455,13 @@ public class ProfileGalleryView extends CircularViewPager implements Notificatio
         if (imageLocation3 == null || imageLocation3.location.local_id != imageLocation.location.local_id) {
             if (!this.imagesLocations.isEmpty()) {
                 this.prevImageLocation = imageLocation;
-                MessagesController.getInstance(this.currentAccount).loadDialogPhotos(this.dialogId, 80, 0, true, this.parentClassGuid);
+                if (z) {
+                    MessagesController.getInstance(this.currentAccount).loadDialogPhotos(this.dialogId, 80, 0, true, this.parentClassGuid);
+                }
                 return true;
+            } else if (z) {
+                MessagesController.getInstance(this.currentAccount).loadDialogPhotos(this.dialogId, 80, 0, true, this.parentClassGuid);
             }
-            MessagesController.getInstance(this.currentAccount).loadDialogPhotos(this.dialogId, 80, 0, true, this.parentClassGuid);
         }
         if (!this.imagesLocations.isEmpty()) {
             return false;

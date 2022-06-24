@@ -9,9 +9,10 @@ import com.google.android.gms.dynamic.IObjectWrapper;
 import com.google.android.gms.dynamic.ObjectWrapper;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+/* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
-abstract class zzd extends zzo {
+public abstract class zzd extends zzo {
     private int zza;
 
     public zzd(byte[] bArr) {

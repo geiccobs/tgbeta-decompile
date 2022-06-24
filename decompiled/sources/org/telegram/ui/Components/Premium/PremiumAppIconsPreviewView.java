@@ -14,14 +14,15 @@ import org.telegram.messenger.Utilities;
 import org.telegram.ui.Cells.AppIconsSelectorCell;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.LauncherIconController;
 /* loaded from: classes3.dex */
 public class PremiumAppIconsPreviewView extends FrameLayout implements PagerHeaderView {
-    private AppIconsSelectorCell.AdaptiveIconImageView bottomLeftIcon;
-    private AppIconsSelectorCell.AdaptiveIconImageView bottomRightIcon;
+    private AdaptiveIconImageView bottomLeftIcon;
+    private AdaptiveIconImageView bottomRightIcon;
     private List<LauncherIconController.LauncherIcon> icons = new ArrayList();
     boolean isEmpty;
-    private AppIconsSelectorCell.AdaptiveIconImageView topIcon;
+    private AdaptiveIconImageView topIcon;
 
     public PremiumAppIconsPreviewView(Context context) {
         super(context);
@@ -39,29 +40,15 @@ public class PremiumAppIconsPreviewView extends FrameLayout implements PagerHead
             this.isEmpty = true;
             return;
         }
-        this.topIcon = newIconView(context, this.icons.get(0));
-        this.bottomLeftIcon = newIconView(context, this.icons.get(1));
-        this.bottomRightIcon = newIconView(context, this.icons.get(2));
+        this.topIcon = newIconView(context, 0);
+        this.bottomLeftIcon = newIconView(context, 1);
+        this.bottomRightIcon = newIconView(context, 2);
+        setClipChildren(false);
     }
 
-    private AppIconsSelectorCell.AdaptiveIconImageView newIconView(Context context, LauncherIconController.LauncherIcon launcherIcon) {
-        AppIconsSelectorCell.AdaptiveIconImageView adaptiveIconImageView = new AppIconsSelectorCell.AdaptiveIconImageView(this, context) { // from class: org.telegram.ui.Components.Premium.PremiumAppIconsPreviewView.1
-            private Paint paint;
-
-            {
-                Paint paint = new Paint(1);
-                this.paint = paint;
-                paint.setColor(-1);
-            }
-
-            @Override // org.telegram.ui.Cells.AppIconsSelectorCell.AdaptiveIconImageView, android.view.View
-            public void draw(Canvas canvas) {
-                RectF rectF = AndroidUtilities.rectTmp;
-                rectF.set(0.0f, 0.0f, getWidth(), getHeight());
-                canvas.drawRoundRect(rectF, AndroidUtilities.dp(18.0f), AndroidUtilities.dp(18.0f), this.paint);
-                super.draw(canvas);
-            }
-        };
+    private AdaptiveIconImageView newIconView(Context context, int i) {
+        LauncherIconController.LauncherIcon launcherIcon = this.icons.get(i);
+        AdaptiveIconImageView adaptiveIconImageView = new AdaptiveIconImageView(this, context, i);
         adaptiveIconImageView.setLayoutParams(LayoutHelper.createFrame(-2, -2.0f, 17, 0.0f, 52.0f, 0.0f, 0.0f));
         adaptiveIconImageView.setForeground(launcherIcon.foreground);
         adaptiveIconImageView.setBackgroundResource(launcherIcon.background);
@@ -104,6 +91,7 @@ public class PremiumAppIconsPreviewView extends FrameLayout implements PagerHead
         float interpolation = CubicBezierInterpolator.EASE_IN.getInterpolation(measuredWidth);
         this.bottomRightIcon.setTranslationX(((getRight() - this.bottomRightIcon.getRight()) + (this.bottomRightIcon.getWidth() * 1.5f) + AndroidUtilities.dp(32.0f)) * interpolation);
         this.bottomRightIcon.setTranslationY(AndroidUtilities.dp(16.0f) * interpolation);
+        float f2 = 1.0f;
         float clamp = Utilities.clamp(AndroidUtilities.lerp(1.0f, 1.5f, interpolation), 1.0f, 0.0f);
         this.bottomRightIcon.setScaleX(clamp);
         this.bottomRightIcon.setScaleY(clamp);
@@ -118,5 +106,52 @@ public class PremiumAppIconsPreviewView extends FrameLayout implements PagerHead
         float clamp3 = Utilities.clamp(AndroidUtilities.lerp(1.0f, 2.5f, measuredWidth), 1.0f, 0.0f);
         this.bottomLeftIcon.setScaleX(clamp3);
         this.bottomLeftIcon.setScaleY(clamp3);
+        if (measuredWidth < 0.4f) {
+            f2 = measuredWidth / 0.4f;
+        }
+        this.bottomRightIcon.particlesScale = f2;
+        this.topIcon.particlesScale = f2;
+        this.bottomLeftIcon.particlesScale = f2;
+    }
+
+    /* loaded from: classes3.dex */
+    public class AdaptiveIconImageView extends AppIconsSelectorCell.AdaptiveIconImageView {
+        StarParticlesView.Drawable drawable = new StarParticlesView.Drawable(20);
+        Paint paint = new Paint(1);
+        float particlesScale;
+
+        public AdaptiveIconImageView(PremiumAppIconsPreviewView premiumAppIconsPreviewView, Context context, int i) {
+            super(context);
+            StarParticlesView.Drawable drawable = this.drawable;
+            drawable.size1 = 12;
+            drawable.size2 = 8;
+            drawable.size3 = 6;
+            if (i == 1) {
+                drawable.type = 1001;
+            }
+            if (i == 0) {
+                drawable.type = 1002;
+            }
+            drawable.init();
+            this.paint.setColor(-1);
+        }
+
+        @Override // org.telegram.ui.Cells.AppIconsSelectorCell.AdaptiveIconImageView, android.view.View
+        public void draw(Canvas canvas) {
+            int dp = AndroidUtilities.dp(10.0f);
+            this.drawable.excludeRect.set(AndroidUtilities.dp(5.0f), AndroidUtilities.dp(5.0f), getMeasuredWidth() - AndroidUtilities.dp(5.0f), getMeasuredHeight() - AndroidUtilities.dp(5.0f));
+            float f = -dp;
+            this.drawable.rect.set(f, f, getWidth() + dp, getHeight() + dp);
+            canvas.save();
+            float f2 = this.particlesScale;
+            canvas.scale(1.0f - f2, 1.0f - f2, getMeasuredWidth() / 2.0f, getMeasuredHeight() / 2.0f);
+            this.drawable.onDraw(canvas);
+            canvas.restore();
+            invalidate();
+            RectF rectF = AndroidUtilities.rectTmp;
+            rectF.set(0.0f, 0.0f, getWidth(), getHeight());
+            canvas.drawRoundRect(rectF, AndroidUtilities.dp(18.0f), AndroidUtilities.dp(18.0f), this.paint);
+            super.draw(canvas);
+        }
     }
 }

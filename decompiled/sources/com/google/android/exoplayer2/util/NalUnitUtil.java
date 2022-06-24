@@ -145,7 +145,7 @@ public final class NalUnitUtil {
     /* JADX WARN: Removed duplicated region for block: B:58:0x00e8  */
     /* JADX WARN: Removed duplicated region for block: B:75:0x0136  */
     /* JADX WARN: Removed duplicated region for block: B:80:0x0149  */
-    /* JADX WARN: Type inference failed for: r16v0, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r16v0, types: [boolean, int] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
