@@ -687,6 +687,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                     notificationCenter.addObserver(this, NotificationCenter.messagesDeleted);
                     notificationCenter.addObserver(this, NotificationCenter.replaceMessagesObjects);
                     notificationCenter.addObserver(this, NotificationCenter.chatInfoDidLoad);
+                    notificationCenter.addObserver(this, NotificationCenter.fileLoaded);
                     return;
                 }
             }
@@ -714,6 +715,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             notificationCenter.removeObserver(this, NotificationCenter.messagesDeleted);
             notificationCenter.removeObserver(this, NotificationCenter.replaceMessagesObjects);
             notificationCenter.removeObserver(this, NotificationCenter.chatInfoDidLoad);
+            notificationCenter.removeObserver(this, NotificationCenter.fileLoaded);
         }
 
         public int[] getLastMediaCount() {
@@ -732,9 +734,9 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public void didReceivedNotification(int r24, int r25, java.lang.Object... r26) {
+        public void didReceivedNotification(int r24, final int r25, java.lang.Object... r26) {
             /*
-                Method dump skipped, instructions count: 1140
+                Method dump skipped, instructions count: 1177
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.SharedMediaLayout.SharedMediaPreloader.didReceivedNotification(int, int, java.lang.Object[]):void");

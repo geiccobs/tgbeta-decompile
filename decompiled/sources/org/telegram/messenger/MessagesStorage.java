@@ -8903,7 +8903,7 @@ public class MessagesStorage extends BaseController {
     /* JADX WARN: Type inference failed for: r15v10 */
     /* JADX WARN: Type inference failed for: r15v5 */
     /* JADX WARN: Type inference failed for: r6v0 */
-    /* JADX WARN: Type inference failed for: r6v1, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r6v1, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r6v21 */
     /* JADX WARN: Type inference failed for: r6v22 */
     /* renamed from: markMessagesAsDeletedInternal */

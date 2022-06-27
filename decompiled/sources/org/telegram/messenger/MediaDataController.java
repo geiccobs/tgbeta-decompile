@@ -2199,7 +2199,7 @@ public class MediaDataController extends BaseController {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r0v5, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r0v5, types: [int, boolean] */
     public void addNewStickerSet(TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet) {
         if (this.stickerSetsById.indexOfKey(tLRPC$TL_messages_stickerSet.set.id) >= 0 || this.stickerSetsByName.containsKey(tLRPC$TL_messages_stickerSet.set.short_name)) {
             return;
@@ -3519,7 +3519,7 @@ public class MediaDataController extends BaseController {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r14v0, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r14v0, types: [int, boolean] */
     public void toggleStickerSet(final Context context, final TLObject tLObject, final int i, final BaseFragment baseFragment, final boolean z, boolean z2) {
         TLRPC$StickerSet tLRPC$StickerSet;
         TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet;

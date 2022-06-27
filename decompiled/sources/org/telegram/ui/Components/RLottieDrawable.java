@@ -58,6 +58,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
     protected volatile boolean isRecycled;
     protected volatile boolean isRunning;
     private long lastFrameTime;
+    private DispatchQueuePool loadFrameQueue;
     protected Runnable loadFrameRunnable;
     protected Runnable loadFrameTask;
     protected boolean loadingInBackground;
@@ -96,7 +97,8 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
     protected static final Handler uiHandler = new Handler(Looper.getMainLooper());
     private static ThreadLocal<byte[]> readBufferLocal = new ThreadLocal<>();
     private static ThreadLocal<byte[]> bufferLocal = new ThreadLocal<>();
-    private static DispatchQueuePool loadFrameRunnableQueue = new DispatchQueuePool(4);
+    private static final DispatchQueuePool loadFrameRunnableQueue = new DispatchQueuePool(2);
+    private static final DispatchQueuePool largeSizeLoadFrameRunnableQueue = new DispatchQueuePool(4);
     private static HashSet<String> generatingCacheFiles = new HashSet<>();
 
     public static native long create(String str, String str2, int i, int i2, int[] iArr, boolean z, int[] iArr2, boolean z2, int i3);
@@ -226,6 +228,8 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
         this.scaleY = 1.0f;
         this.dstRect = new android.graphics.Rect();
         this.parentViews = new ArrayList<>();
+        DispatchQueuePool dispatchQueuePool = loadFrameRunnableQueue;
+        this.loadFrameQueue = dispatchQueuePool;
         this.uiRunnableNoFrame = new Runnable() { // from class: org.telegram.ui.Components.RLottieDrawable.1
             @Override // java.lang.Runnable
             public void run() {
@@ -437,6 +441,11 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
         if (z && lottieCacheGenerateQueue == null) {
             lottieCacheGenerateQueue = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue());
         }
+        if (i > AndroidUtilities.dp(120.0f) || i2 > AndroidUtilities.dp(120.0f)) {
+            this.loadFrameQueue = largeSizeLoadFrameRunnableQueue;
+        } else {
+            this.loadFrameQueue = dispatchQueuePool;
+        }
         if (this.nativePtr == 0) {
             file.delete();
         }
@@ -462,6 +471,8 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
         this.scaleY = 1.0f;
         this.dstRect = new android.graphics.Rect();
         this.parentViews = new ArrayList<>();
+        DispatchQueuePool dispatchQueuePool = loadFrameRunnableQueue;
+        this.loadFrameQueue = dispatchQueuePool;
         this.uiRunnableNoFrame = new Runnable() { // from class: org.telegram.ui.Components.RLottieDrawable.1
             @Override // java.lang.Runnable
             public void run() {
@@ -680,6 +691,11 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
             this.shouldLimitFps = false;
         }
         this.timeBetweenFrames = Math.max(this.shouldLimitFps ? 33 : 16, (int) (1000.0f / iArr2[1]));
+        if (i > AndroidUtilities.dp(100.0f) || i > AndroidUtilities.dp(100.0f)) {
+            this.loadFrameQueue = largeSizeLoadFrameRunnableQueue;
+        } else {
+            this.loadFrameQueue = dispatchQueuePool;
+        }
     }
 
     public RLottieDrawable(int i, String str, int i2, int i3) {
@@ -699,6 +715,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
         this.scaleY = 1.0f;
         this.dstRect = new android.graphics.Rect();
         this.parentViews = new ArrayList<>();
+        this.loadFrameQueue = loadFrameRunnableQueue;
         this.uiRunnableNoFrame = new Runnable() { // from class: org.telegram.ui.Components.RLottieDrawable.1
             @Override // java.lang.Runnable
             public void run() {
@@ -1047,6 +1064,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
         this.scaleY = 1.0f;
         this.dstRect = new android.graphics.Rect();
         this.parentViews = new ArrayList<>();
+        this.loadFrameQueue = loadFrameRunnableQueue;
         this.uiRunnableNoFrame = new Runnable() { // from class: org.telegram.ui.Components.RLottieDrawable.1
             @Override // java.lang.Runnable
             public void run() {
@@ -1564,7 +1582,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
             this.pendingReplaceColors = iArr;
             this.newReplaceColors = null;
         }
-        DispatchQueuePool dispatchQueuePool = loadFrameRunnableQueue;
+        DispatchQueuePool dispatchQueuePool = this.loadFrameQueue;
         Runnable runnable = this.loadFrameRunnable;
         this.loadFrameTask = runnable;
         dispatchQueuePool.execute(runnable);

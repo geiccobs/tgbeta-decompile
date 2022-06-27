@@ -375,7 +375,6 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         BitmapDrawable bitmapDrawable;
         TLRPC$ChatPhoto tLRPC$ChatPhoto;
         ImageLocation imageLocation;
-        TLRPC$Photo tLRPC$Photo;
         ArrayList<TLRPC$VideoSize> arrayList;
         Object obj2 = obj == null ? tLObject : obj;
         setUseRoundForThumbDrawable(true);
@@ -387,24 +386,26 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             if (tLRPC$UserProfilePhoto != null) {
                 ?? r6 = tLRPC$UserProfilePhoto.strippedBitmap;
                 int i2 = tLRPC$UserProfilePhoto.stripped_thumb != null ? 1 : 0;
-                if (MessagesController.getInstance(this.currentAccount).isPremiumUser(tLRPC$User) && tLRPC$User.photo.has_video && z) {
+                if (z && MessagesController.getInstance(this.currentAccount).isPremiumUser(tLRPC$User) && tLRPC$User.photo.has_video) {
                     TLRPC$UserFull userFull = MessagesController.getInstance(this.currentAccount).getUserFull(tLRPC$User.id);
                     if (userFull == null) {
                         MessagesController.getInstance(this.currentAccount).loadFullUser(tLRPC$User, this.currentGuid, false);
-                    }
-                    if (userFull != null && (tLRPC$Photo = userFull.profile_photo) != null && (arrayList = tLRPC$Photo.video_sizes) != null && !arrayList.isEmpty()) {
-                        TLRPC$VideoSize tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(0);
-                        while (true) {
-                            if (i >= userFull.profile_photo.video_sizes.size()) {
-                                break;
-                            } else if ("p".equals(userFull.profile_photo.video_sizes.get(i).type)) {
-                                tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(i);
-                                break;
-                            } else {
-                                i++;
+                    } else {
+                        TLRPC$Photo tLRPC$Photo = userFull.profile_photo;
+                        if (tLRPC$Photo != null && (arrayList = tLRPC$Photo.video_sizes) != null && !arrayList.isEmpty()) {
+                            TLRPC$VideoSize tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(0);
+                            while (true) {
+                                if (i >= userFull.profile_photo.video_sizes.size()) {
+                                    break;
+                                } else if ("p".equals(userFull.profile_photo.video_sizes.get(i).type)) {
+                                    tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(i);
+                                    break;
+                                } else {
+                                    i++;
+                                }
                             }
+                            imageLocation2 = ImageLocation.getForPhoto(tLRPC$VideoSize, userFull.profile_photo);
                         }
-                        imageLocation2 = ImageLocation.getForPhoto(tLRPC$VideoSize, userFull.profile_photo);
                     }
                 }
                 imageLocation = imageLocation2;

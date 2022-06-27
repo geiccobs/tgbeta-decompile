@@ -145,9 +145,9 @@ public class FilePathDatabase {
             SQLiteCursor queryFinalized = sQLiteDatabase.queryFinalized("SELECT path FROM paths WHERE document_id = " + j + " AND dc_id = " + i + " AND type = " + i2, new Object[0]);
             if (queryFinalized.next()) {
                 str = queryFinalized.stringValue(0);
-                if (BuildVars.DEBUG_VERSION) {
-                    FileLog.d("get file path id=" + j + " dc=" + i + " type=" + i2 + " path=" + str);
-                }
+            }
+            if (BuildVars.DEBUG_VERSION) {
+                FileLog.d("get file path id=" + j + " dc=" + i + " type=" + i2 + " path=" + str);
             }
             queryFinalized.dispose();
         } catch (SQLiteException e) {

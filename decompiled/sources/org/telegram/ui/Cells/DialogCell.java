@@ -863,18 +863,18 @@ public class DialogCell extends BaseCell {
         update(i, true);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:102:0x01ac  */
-    /* JADX WARN: Removed duplicated region for block: B:137:0x0202  */
-    /* JADX WARN: Removed duplicated region for block: B:161:0x0261  */
-    /* JADX WARN: Removed duplicated region for block: B:163:0x0266  */
-    /* JADX WARN: Removed duplicated region for block: B:287:0x057d  */
+    /* JADX WARN: Removed duplicated region for block: B:101:0x01aa  */
+    /* JADX WARN: Removed duplicated region for block: B:136:0x0200  */
+    /* JADX WARN: Removed duplicated region for block: B:160:0x025f  */
+    /* JADX WARN: Removed duplicated region for block: B:162:0x0264  */
+    /* JADX WARN: Removed duplicated region for block: B:286:0x057b  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void update(int r24, boolean r25) {
         /*
-            Method dump skipped, instructions count: 1442
+            Method dump skipped, instructions count: 1440
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.DialogCell.update(int, boolean):void");

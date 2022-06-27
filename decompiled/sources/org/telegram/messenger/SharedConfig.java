@@ -262,19 +262,17 @@ public class SharedConfig {
         return i;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:36:0x0161 A[Catch: Exception -> 0x017f, all -> 0x03b1, TryCatch #0 {Exception -> 0x017f, blocks: (B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177), top: B:77:0x0112, outer: #1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:38:0x0165 A[Catch: Exception -> 0x017f, all -> 0x03b1, TryCatch #0 {Exception -> 0x017f, blocks: (B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177), top: B:77:0x0112, outer: #1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:50:0x0193 A[Catch: all -> 0x03b1, TryCatch #1 {, blocks: (B:4:0x0003, B:6:0x0007, B:9:0x000d, B:11:0x00ce, B:12:0x00d4, B:14:0x00dc, B:16:0x00e0, B:17:0x00ed, B:19:0x00fb, B:20:0x0102, B:21:0x0106, B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:29:0x0142, B:30:0x0154, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177, B:47:0x0180, B:48:0x0183, B:50:0x0193, B:51:0x01ac, B:52:0x01b4, B:54:0x01ef, B:58:0x01fa, B:62:0x0223, B:63:0x039b, B:65:0x03a1, B:67:0x03a5, B:69:0x03aa, B:70:0x03ad, B:72:0x03af), top: B:79:0x0003, inners: #0, #2 }] */
-    /* JADX WARN: Removed duplicated region for block: B:51:0x01ac A[Catch: all -> 0x03b1, TryCatch #1 {, blocks: (B:4:0x0003, B:6:0x0007, B:9:0x000d, B:11:0x00ce, B:12:0x00d4, B:14:0x00dc, B:16:0x00e0, B:17:0x00ed, B:19:0x00fb, B:20:0x0102, B:21:0x0106, B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:29:0x0142, B:30:0x0154, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177, B:47:0x0180, B:48:0x0183, B:50:0x0193, B:51:0x01ac, B:52:0x01b4, B:54:0x01ef, B:58:0x01fa, B:62:0x0223, B:63:0x039b, B:65:0x03a1, B:67:0x03a5, B:69:0x03aa, B:70:0x03ad, B:72:0x03af), top: B:79:0x0003, inners: #0, #2 }] */
-    /* JADX WARN: Removed duplicated region for block: B:60:0x021e  */
-    /* JADX WARN: Removed duplicated region for block: B:61:0x0221  */
+    /* JADX WARN: Removed duplicated region for block: B:36:0x0161 A[Catch: Exception -> 0x017f, all -> 0x03b5, TryCatch #0 {Exception -> 0x017f, blocks: (B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177), top: B:79:0x0112, outer: #2 }] */
+    /* JADX WARN: Removed duplicated region for block: B:38:0x0165 A[Catch: Exception -> 0x017f, all -> 0x03b5, TryCatch #0 {Exception -> 0x017f, blocks: (B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177), top: B:79:0x0112, outer: #2 }] */
+    /* JADX WARN: Removed duplicated region for block: B:62:0x0222  */
+    /* JADX WARN: Removed duplicated region for block: B:63:0x0225  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public static void loadConfig() {
         /*
-            Method dump skipped, instructions count: 948
+            Method dump skipped, instructions count: 952
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.SharedConfig.loadConfig():void");

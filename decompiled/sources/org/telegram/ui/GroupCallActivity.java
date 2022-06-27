@@ -1858,7 +1858,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.didEndCall);
         this.shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
-        this.bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "2131558587", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
+        this.bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "2131558588", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
         this.handDrawables = new RLottieDrawable(R.raw.hand_2, "2131558459", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
         FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.GroupCallActivity.7
             private int lastSize;
@@ -7312,13 +7312,11 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                 };
             } else if (i == 1) {
                 view = new GroupCallUserCell(this.mContext) { // from class: org.telegram.ui.GroupCallActivity.ListAdapter.2
-                    /* JADX INFO: Access modifiers changed from: protected */
                     @Override // org.telegram.ui.Cells.GroupCallUserCell
                     public void onMuteClick(GroupCallUserCell groupCallUserCell) {
                         GroupCallActivity.this.showMenuForCell(groupCallUserCell);
                     }
 
-                    /* JADX INFO: Access modifiers changed from: protected */
                     @Override // org.telegram.ui.Cells.GroupCallUserCell, android.widget.FrameLayout, android.view.View
                     public void onMeasure(int i2, int i3) {
                         if (AndroidUtilities.isTablet()) {

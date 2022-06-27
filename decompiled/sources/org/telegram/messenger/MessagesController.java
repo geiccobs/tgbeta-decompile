@@ -10680,25 +10680,25 @@ public class MessagesController extends BaseController implements NotificationCe
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesController.lambda$processDialogsUpdate$188(org.telegram.tgnet.TLRPC$messages_Dialogs, boolean):void");
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:102:0x0294  */
-    /* JADX WARN: Removed duplicated region for block: B:116:0x0297 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:118:0x0297 A[ADDED_TO_REGION, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:120:0x0297 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:40:0x0109  */
-    /* JADX WARN: Removed duplicated region for block: B:41:0x012c  */
-    /* JADX WARN: Removed duplicated region for block: B:44:0x013b  */
-    /* JADX WARN: Removed duplicated region for block: B:74:0x0202  */
-    /* JADX WARN: Removed duplicated region for block: B:82:0x0221  */
-    /* JADX WARN: Removed duplicated region for block: B:86:0x023e  */
-    /* JADX WARN: Removed duplicated region for block: B:88:0x0245  */
-    /* JADX WARN: Removed duplicated region for block: B:99:0x028a A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:102:0x02aa  */
+    /* JADX WARN: Removed duplicated region for block: B:116:0x02ad A[SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:118:0x02ad A[ADDED_TO_REGION, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:120:0x02ad A[SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:40:0x010c  */
+    /* JADX WARN: Removed duplicated region for block: B:41:0x0130  */
+    /* JADX WARN: Removed duplicated region for block: B:44:0x013f  */
+    /* JADX WARN: Removed duplicated region for block: B:74:0x0218  */
+    /* JADX WARN: Removed duplicated region for block: B:82:0x0237  */
+    /* JADX WARN: Removed duplicated region for block: B:86:0x0254  */
+    /* JADX WARN: Removed duplicated region for block: B:88:0x025b  */
+    /* JADX WARN: Removed duplicated region for block: B:99:0x02a0 A[ADDED_TO_REGION] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public /* synthetic */ void lambda$processDialogsUpdate$187(org.telegram.tgnet.TLRPC$messages_Dialogs r19, androidx.collection.LongSparseArray r20, androidx.collection.LongSparseArray r21, boolean r22, org.telegram.messenger.support.LongSparseIntArray r23) {
+    public /* synthetic */ void lambda$processDialogsUpdate$187(org.telegram.tgnet.TLRPC$messages_Dialogs r21, androidx.collection.LongSparseArray r22, androidx.collection.LongSparseArray r23, boolean r24, org.telegram.messenger.support.LongSparseIntArray r25) {
         /*
-            Method dump skipped, instructions count: 734
+            Method dump skipped, instructions count: 760
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesController.lambda$processDialogsUpdate$187(org.telegram.tgnet.TLRPC$messages_Dialogs, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray, boolean, org.telegram.messenger.support.LongSparseIntArray):void");

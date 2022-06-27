@@ -52,6 +52,7 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.util.Property;
 import android.util.SparseArray;
 import android.view.ActionMode;
@@ -11376,21 +11377,44 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     public /* synthetic */ void lambda$checkProgress$70(boolean z, final File file, File file2, FileLoader.FileResolver fileResolver, final int i, MessageObject messageObject, final boolean z2, final boolean z3, final boolean z4, final boolean z5) {
+        final boolean z6;
+        File file3;
         ChatActivity chatActivity;
         TLRPC$Document document;
-        boolean exists = (z || file == null) ? z : file.exists();
-        final File file3 = (file2 != null || fileResolver == null) ? file2 : fileResolver.getFile();
-        if (!exists && file3 != null) {
-            exists = file3.exists();
+        Log.d("kek", "finalFileExist ");
+        if (z || file == null) {
+            z6 = z;
+        } else {
+            z6 = file.exists();
+            Log.d("kek", "exist=" + z6 + " " + file);
         }
-        final boolean z6 = exists;
+        File file4 = null;
+        if (file2 != null || fileResolver == null) {
+            if (fileResolver != null) {
+                file4 = fileResolver.getFile();
+            }
+            file3 = file2;
+        } else {
+            file3 = fileResolver.getFile();
+        }
+        Log.d("kek", "f2Local=" + file3);
+        Log.d("kek", "f3Local=" + file4);
+        if (!z6 && file3 != null) {
+            Log.d("kek", "exist=" + z6 + " " + file3);
+            z6 = file3.exists();
+        }
+        if (!z6 && file4 != null) {
+            Log.d("kek", "exist=" + z6 + " " + file4);
+            z6 = file4.exists();
+        }
         if (!z6 && i != 0 && messageObject != null && z2 && DownloadController.getInstance(this.currentAccount).canDownloadMedia(messageObject.messageOwner) != 0 && (((chatActivity = this.parentChatActivity) == null || chatActivity.getCurrentEncryptedChat() == null) && !messageObject.shouldEncryptPhotoOrVideo() && (document = messageObject.getDocument()) != null)) {
             FileLoader.getInstance(this.currentAccount).loadFile(document, messageObject, 0, 10);
         }
+        final File file5 = file3;
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.PhotoViewer$$ExternalSyntheticLambda58
             @Override // java.lang.Runnable
             public final void run() {
-                PhotoViewer.this.lambda$checkProgress$69(i, file, file3, z6, z2, z3, z4, z5);
+                PhotoViewer.this.lambda$checkProgress$69(i, file, file5, z6, z2, z3, z4, z5);
             }
         });
     }
@@ -13538,7 +13562,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     /* JADX WARN: Removed duplicated region for block: B:625:0x0dd0  */
     /* JADX WARN: Removed duplicated region for block: B:635:0x0bdf A[EDGE_INSN: B:635:0x0bdf->B:552:0x0bdf ?: BREAK  , SYNTHETIC] */
     /* JADX WARN: Removed duplicated region for block: B:640:? A[ADDED_TO_REGION, RETURN, SYNTHETIC] */
-    /* JADX WARN: Type inference failed for: r15v2, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r15v2, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r15v21 */
     /* JADX WARN: Type inference failed for: r15v30 */
     /* JADX WARN: Type inference failed for: r15v42 */

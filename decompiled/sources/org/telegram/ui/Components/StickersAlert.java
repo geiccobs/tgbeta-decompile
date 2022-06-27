@@ -1319,7 +1319,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r0v2, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r0v2, types: [int, boolean] */
     public /* synthetic */ void lambda$updateFields$14(TLRPC$TL_error tLRPC$TL_error, TLObject tLObject) {
         ?? r0 = this.stickerSet.set.masks;
         try {

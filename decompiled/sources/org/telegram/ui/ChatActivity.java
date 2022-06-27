@@ -13204,6 +13204,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             return this.trackWidth;
         }
 
+        /* JADX INFO: Access modifiers changed from: protected */
         @Override // org.telegram.ui.ActionBar.SimpleTextView
         public boolean createLayout(int i) {
             boolean createLayout = super.createLayout(i);
@@ -14306,7 +14307,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     /* JADX WARN: Type inference failed for: r11v9 */
     /* JADX WARN: Type inference failed for: r7v15 */
     /* JADX WARN: Type inference failed for: r7v68 */
-    /* JADX WARN: Type inference failed for: r7v7, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r7v7, types: [int, boolean] */
     @android.annotation.SuppressLint({"ClickableViewAccessibility"})
     /*
         Code decompiled incorrectly, please refer to instructions dump.

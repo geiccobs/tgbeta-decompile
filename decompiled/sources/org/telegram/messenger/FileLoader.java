@@ -1105,15 +1105,15 @@ public class FileLoader extends BaseController {
         return getPathToAttach(tLObject, null, str, z, z2);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:101:0x015d  */
-    /* JADX WARN: Removed duplicated region for block: B:99:0x0155  */
+    /* JADX WARN: Removed duplicated region for block: B:103:0x0166  */
+    /* JADX WARN: Removed duplicated region for block: B:105:0x016e  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public java.io.File getPathToAttach(org.telegram.tgnet.TLObject r11, java.lang.String r12, java.lang.String r13, boolean r14, boolean r15) {
         /*
-            Method dump skipped, instructions count: 386
+            Method dump skipped, instructions count: 403
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.FileLoader.getPathToAttach(org.telegram.tgnet.TLObject, java.lang.String, java.lang.String, boolean, boolean):java.io.File");

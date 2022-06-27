@@ -82,6 +82,7 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$ChatInvite;
+import org.telegram.tgnet.TLRPC$ChatPhoto;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$DocumentAttribute;
 import org.telegram.tgnet.TLRPC$FileLocation;
@@ -91,6 +92,7 @@ import org.telegram.tgnet.TLRPC$MessageEntity;
 import org.telegram.tgnet.TLRPC$MessageFwdHeader;
 import org.telegram.tgnet.TLRPC$MessageReplies;
 import org.telegram.tgnet.TLRPC$Peer;
+import org.telegram.tgnet.TLRPC$Photo;
 import org.telegram.tgnet.TLRPC$PhotoSize;
 import org.telegram.tgnet.TLRPC$Poll;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeAudio;
@@ -116,6 +118,7 @@ import org.telegram.tgnet.TLRPC$TL_reactionCount;
 import org.telegram.tgnet.TLRPC$TL_user;
 import org.telegram.tgnet.TLRPC$TL_webPage;
 import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC$UserProfilePhoto;
 import org.telegram.tgnet.TLRPC$WebPage;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextSelectionHelper;
@@ -859,12 +862,73 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
     public void didReceivedNotification(int i, int i2, Object... objArr) {
+        TLRPC$User tLRPC$User;
         if (i == NotificationCenter.startSpoilers) {
             setSpoilersSuppressed(false);
-        } else if (i != NotificationCenter.stopSpoilers) {
-        } else {
+        } else if (i == NotificationCenter.stopSpoilers) {
             setSpoilersSuppressed(true);
+        } else if (i != NotificationCenter.userInfoDidLoad || (tLRPC$User = this.currentUser) == null || tLRPC$User.id != ((Long) objArr[0]).longValue()) {
+        } else {
+            setAvatar(this.currentMessageObject);
         }
+    }
+
+    private void setAvatar(MessageObject messageObject) {
+        TLRPC$Chat tLRPC$Chat;
+        if (messageObject == null) {
+            return;
+        }
+        if (this.isAvatarVisible) {
+            Drawable drawable = messageObject.customAvatarDrawable;
+            if (drawable != null) {
+                this.avatarImage.setImageBitmap(drawable);
+                return;
+            }
+            TLRPC$User tLRPC$User = this.currentUser;
+            if (tLRPC$User != null) {
+                TLRPC$UserProfilePhoto tLRPC$UserProfilePhoto = tLRPC$User.photo;
+                if (tLRPC$UserProfilePhoto != null) {
+                    this.currentPhoto = tLRPC$UserProfilePhoto.photo_small;
+                } else {
+                    this.currentPhoto = null;
+                }
+                this.avatarDrawable.setInfo(tLRPC$User);
+                this.avatarImage.setForUserOrChat(this.currentUser, this.avatarDrawable, null, true);
+                return;
+            }
+            TLRPC$Chat tLRPC$Chat2 = this.currentChat;
+            if (tLRPC$Chat2 != null) {
+                TLRPC$ChatPhoto tLRPC$ChatPhoto = tLRPC$Chat2.photo;
+                if (tLRPC$ChatPhoto != null) {
+                    this.currentPhoto = tLRPC$ChatPhoto.photo_small;
+                } else {
+                    this.currentPhoto = null;
+                }
+                this.avatarDrawable.setInfo(tLRPC$Chat2);
+                this.avatarImage.setForUserOrChat(this.currentChat, this.avatarDrawable);
+                return;
+            } else if (messageObject.isSponsored()) {
+                TLRPC$ChatInvite tLRPC$ChatInvite = messageObject.sponsoredChatInvite;
+                if (tLRPC$ChatInvite != null && (tLRPC$Chat = tLRPC$ChatInvite.chat) != null) {
+                    this.avatarDrawable.setInfo(tLRPC$Chat);
+                    this.avatarImage.setForUserOrChat(messageObject.sponsoredChatInvite.chat, this.avatarDrawable);
+                    return;
+                }
+                this.avatarDrawable.setInfo(tLRPC$ChatInvite);
+                TLRPC$Photo tLRPC$Photo = messageObject.sponsoredChatInvite.photo;
+                if (tLRPC$Photo == null) {
+                    return;
+                }
+                this.avatarImage.setImage(ImageLocation.getForPhoto(tLRPC$Photo.sizes.get(0), tLRPC$Photo), "50_50", this.avatarDrawable, null, null, 0);
+                return;
+            } else {
+                this.currentPhoto = null;
+                this.avatarDrawable.setInfo(messageObject.getFromChatId(), null, null);
+                this.avatarImage.setImage(null, null, this.avatarDrawable, null, null, 0);
+                return;
+            }
+        }
+        this.currentPhoto = null;
     }
 
     public void setSpoilersSuppressed(boolean z) {
@@ -2667,6 +2731,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         super.onDetachedFromWindow();
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.startSpoilers);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.stopSpoilers);
+        NotificationCenter.getInstance(this.currentAccount).removeObserver(this, NotificationCenter.userInfoDidLoad);
         cancelShakeAnimation();
         if (this.animationRunning) {
             return;
@@ -2751,6 +2816,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         super.onAttachedToWindow();
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.startSpoilers);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.stopSpoilers);
+        NotificationCenter.getInstance(this.currentAccount).addObserver(this, NotificationCenter.userInfoDidLoad);
         MessageObject messageObject = this.currentMessageObject;
         if (messageObject != null) {
             messageObject.animateComments = false;
@@ -2791,6 +2857,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         this.videoRadialProgress.onAttachedToWindow();
         this.avatarImage.setParentView((View) getParent());
         this.avatarImage.onAttachedToWindow();
+        MessageObject messageObject3 = this.currentMessageObject;
+        if (messageObject3 != null) {
+            setAvatar(messageObject3);
+        }
         if (this.pollAvatarImages != null) {
             int i2 = 0;
             while (true) {
@@ -2822,8 +2892,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else {
             updateButtonState(false, false, false);
         }
-        MessageObject messageObject3 = this.currentMessageObject;
-        if (messageObject3 != null && (this.isRoundVideo || messageObject3.isVideo())) {
+        MessageObject messageObject4 = this.currentMessageObject;
+        if (messageObject4 != null && (this.isRoundVideo || messageObject4.isVideo())) {
             checkVideoPlayback(true, null);
         }
         int i4 = this.documentAttachType;
@@ -3053,7 +3123,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     /* JADX WARN: Type inference failed for: r14v13 */
     /* JADX WARN: Type inference failed for: r14v173 */
     /* JADX WARN: Type inference failed for: r14v174 */
-    /* JADX WARN: Type inference failed for: r14v2, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r14v2, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r3v275, types: [org.telegram.tgnet.TLRPC$InputStickerSet] */
     /* JADX WARN: Type inference failed for: r6v201 */
     /* JADX WARN: Type inference failed for: r6v204 */
@@ -4435,7 +4505,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatMessageCell.updateReactionLayoutPosition():void");
     }
 
-    /* JADX WARN: Type inference failed for: r11v1, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r11v1, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r11v45 */
     /* JADX WARN: Type inference failed for: r11v54 */
     public void drawLinkPreview(Canvas canvas, float f) {
@@ -5730,61 +5800,46 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
     }
 
-    /* JADX WARN: Can't wrap try/catch for region: R(16:258|(2:262|(1:264))|265|(1:267)(2:268|(1:270))|271|(6:(10:277|(3:279|(3:281|(1:283)(1:284)|285)(1:286)|287)(1:288)|(1:290)|(1:307)(3:302|(1:304)(1:305)|306)|308|(2:310|(2:312|(2:314|(1:316)(1:317))(1:318))(1:319))(2:320|(2:324|(2:326|(1:328))(2:329|(2:331|(1:333))(2:334|(1:336)))))|(1:338)|339|(1:341)(2:342|(1:344)(3:345|(4:347|(1:349)|350|(1:352))(2:354|(1:364)(4:358|(1:360)|361|(1:363)))|353))|365)(6:366|(1:368)(2:369|(1:371)(2:372|(1:374)))|375|(1:377)|378|(7:385|(1:(1:388)(1:389))(1:(1:391)(1:392))|393|(1:395)(1:396)|397|(1:403)|404)(15:384|(1:407)|458|408|409|450|410|(1:412)(1:413)|414|(2:416|(1:418))|456|421|(1:423)(1:424)|425|(8:427|(3:429|(2:431|466)(1:467)|432)|465|(1:434)|435|(1:437)|438|(1:442))))|456|421|(0)(0)|425|(0))|405|(0)|458|408|409|450|410|(0)(0)|414|(0)) */
-    /* JADX WARN: Can't wrap try/catch for region: R(21:258|(2:262|(1:264))|265|(1:267)(2:268|(1:270))|271|(10:277|(3:279|(3:281|(1:283)(1:284)|285)(1:286)|287)(1:288)|(1:290)|(1:307)(3:302|(1:304)(1:305)|306)|308|(2:310|(2:312|(2:314|(1:316)(1:317))(1:318))(1:319))(2:320|(2:324|(2:326|(1:328))(2:329|(2:331|(1:333))(2:334|(1:336)))))|(1:338)|339|(1:341)(2:342|(1:344)(3:345|(4:347|(1:349)|350|(1:352))(2:354|(1:364)(4:358|(1:360)|361|(1:363)))|353))|365)(6:366|(1:368)(2:369|(1:371)(2:372|(1:374)))|375|(1:377)|378|(7:385|(1:(1:388)(1:389))(1:(1:391)(1:392))|393|(1:395)(1:396)|397|(1:403)|404)(15:384|(1:407)|458|408|409|450|410|(1:412)(1:413)|414|(2:416|(1:418))|456|421|(1:423)(1:424)|425|(8:427|(3:429|(2:431|466)(1:467)|432)|465|(1:434)|435|(1:437)|438|(1:442))))|405|(0)|458|408|409|450|410|(0)(0)|414|(0)|456|421|(0)(0)|425|(0)) */
-    /* JADX WARN: Can't wrap try/catch for region: R(22:66|(1:68)|69|(1:78)(2:75|(17:77|86|104|(1:106)(1:(1:108)(1:109))|110|(1:112)(1:113)|114|(8:116|(1:118)|119|(1:121)(3:123|(1:125)(1:126)|127)|122|128|(1:130)(1:131)|132)(1:133)|452|134|135|464|136|(3:138|(1:140)|141)(1:142)|(1:144)(1:145)|148|(1:150)))|79|(2:87|(16:103|104|(0)(0)|110|(0)(0)|114|(0)(0)|452|134|135|464|136|(0)(0)|(0)(0)|148|(0))(3:99|(1:101)|102))(1:85)|86|104|(0)(0)|110|(0)(0)|114|(0)(0)|452|134|135|464|136|(0)(0)|(0)(0)|148|(0)) */
-    /* JADX WARN: Code restructure failed: missing block: B:146:0x0433, code lost:
+    /* JADX WARN: Can't wrap try/catch for region: R(22:35|(1:37)|38|(1:47)(2:44|(17:46|55|73|(1:75)(1:(1:77)(1:78))|79|(1:81)(1:82)|83|(8:85|(1:87)|88|(1:90)(3:92|(1:94)(1:95)|96)|91|97|(1:99)(1:100)|101)(1:102)|424|103|104|423|105|(3:107|(1:109)|110)(1:111)|(1:113)(1:114)|117|(1:119)))|48|(2:56|(16:72|73|(0)(0)|79|(0)(0)|83|(0)(0)|424|103|104|423|105|(0)(0)|(0)(0)|117|(0))(3:68|(1:70)|71))(1:54)|55|73|(0)(0)|79|(0)(0)|83|(0)(0)|424|103|104|423|105|(0)(0)|(0)(0)|117|(0)) */
+    /* JADX WARN: Code restructure failed: missing block: B:115:0x038e, code lost:
         r0 = move-exception;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:147:0x0434, code lost:
-        org.telegram.messenger.FileLog.e(r0);
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:419:0x0c5f, code lost:
-        r0 = move-exception;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:420:0x0c60, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:116:0x038f, code lost:
         org.telegram.messenger.FileLog.e(r0);
      */
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:106:0x0283  */
-    /* JADX WARN: Removed duplicated region for block: B:107:0x0286  */
-    /* JADX WARN: Removed duplicated region for block: B:112:0x02a3  */
-    /* JADX WARN: Removed duplicated region for block: B:113:0x02a6  */
-    /* JADX WARN: Removed duplicated region for block: B:116:0x02b1  */
-    /* JADX WARN: Removed duplicated region for block: B:133:0x039f  */
-    /* JADX WARN: Removed duplicated region for block: B:138:0x03d4 A[Catch: Exception -> 0x0433, TryCatch #7 {Exception -> 0x0433, blocks: (B:136:0x03b1, B:138:0x03d4, B:140:0x03e8, B:141:0x03f3, B:142:0x03fc, B:144:0x0400, B:145:0x042f), top: B:464:0x03b1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:142:0x03fc A[Catch: Exception -> 0x0433, TryCatch #7 {Exception -> 0x0433, blocks: (B:136:0x03b1, B:138:0x03d4, B:140:0x03e8, B:141:0x03f3, B:142:0x03fc, B:144:0x0400, B:145:0x042f), top: B:464:0x03b1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:144:0x0400 A[Catch: Exception -> 0x0433, TryCatch #7 {Exception -> 0x0433, blocks: (B:136:0x03b1, B:138:0x03d4, B:140:0x03e8, B:141:0x03f3, B:142:0x03fc, B:144:0x0400, B:145:0x042f), top: B:464:0x03b1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:145:0x042f A[Catch: Exception -> 0x0433, TRY_LEAVE, TryCatch #7 {Exception -> 0x0433, blocks: (B:136:0x03b1, B:138:0x03d4, B:140:0x03e8, B:141:0x03f3, B:142:0x03fc, B:144:0x0400, B:145:0x042f), top: B:464:0x03b1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:150:0x0440  */
-    /* JADX WARN: Removed duplicated region for block: B:407:0x0be8  */
-    /* JADX WARN: Removed duplicated region for block: B:412:0x0c0e  */
-    /* JADX WARN: Removed duplicated region for block: B:413:0x0c11  */
-    /* JADX WARN: Removed duplicated region for block: B:416:0x0c1c A[Catch: Exception -> 0x0c5f, TryCatch #0 {Exception -> 0x0c5f, blocks: (B:410:0x0c0a, B:414:0x0c12, B:416:0x0c1c, B:418:0x0c3d), top: B:450:0x0c0a }] */
-    /* JADX WARN: Removed duplicated region for block: B:423:0x0c67  */
-    /* JADX WARN: Removed duplicated region for block: B:424:0x0c6a  */
-    /* JADX WARN: Removed duplicated region for block: B:427:0x0c75 A[Catch: Exception -> 0x0d09, TryCatch #3 {Exception -> 0x0d09, blocks: (B:421:0x0c63, B:425:0x0c6b, B:427:0x0c75, B:429:0x0c8c, B:431:0x0c97, B:432:0x0c9c, B:434:0x0ca1, B:435:0x0caa, B:437:0x0cc7, B:438:0x0ce8, B:440:0x0cf5, B:442:0x0cff), top: B:456:0x0c63 }] */
-    /* JADX WARN: Type inference failed for: r0v18, types: [android.text.SpannableStringBuilder, java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r0v19 */
-    /* JADX WARN: Type inference failed for: r0v34, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r0v4, types: [android.text.StaticLayout[]] */
-    /* JADX WARN: Type inference failed for: r11v1, types: [java.lang.CharSequence, java.lang.String] */
-    /* JADX WARN: Type inference failed for: r11v2, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r11v4 */
-    /* JADX WARN: Type inference failed for: r11v6, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r11v7, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r3v116 */
-    /* JADX WARN: Type inference failed for: r3v4, types: [org.telegram.tgnet.TLRPC$Chat, org.telegram.tgnet.TLRPC$User, java.lang.String] */
-    /* JADX WARN: Type inference failed for: r3v94 */
-    /* JADX WARN: Type inference failed for: r3v95 */
-    /* JADX WARN: Type inference failed for: r4v100, types: [java.lang.String] */
+    /* JADX WARN: Removed duplicated region for block: B:102:0x02fa  */
+    /* JADX WARN: Removed duplicated region for block: B:107:0x032f A[Catch: Exception -> 0x038e, TryCatch #3 {Exception -> 0x038e, blocks: (B:105:0x030c, B:107:0x032f, B:109:0x0343, B:110:0x034e, B:111:0x0357, B:113:0x035b, B:114:0x038a), top: B:423:0x030c }] */
+    /* JADX WARN: Removed duplicated region for block: B:111:0x0357 A[Catch: Exception -> 0x038e, TryCatch #3 {Exception -> 0x038e, blocks: (B:105:0x030c, B:107:0x032f, B:109:0x0343, B:110:0x034e, B:111:0x0357, B:113:0x035b, B:114:0x038a), top: B:423:0x030c }] */
+    /* JADX WARN: Removed duplicated region for block: B:113:0x035b A[Catch: Exception -> 0x038e, TryCatch #3 {Exception -> 0x038e, blocks: (B:105:0x030c, B:107:0x032f, B:109:0x0343, B:110:0x034e, B:111:0x0357, B:113:0x035b, B:114:0x038a), top: B:423:0x030c }] */
+    /* JADX WARN: Removed duplicated region for block: B:114:0x038a A[Catch: Exception -> 0x038e, TRY_LEAVE, TryCatch #3 {Exception -> 0x038e, blocks: (B:105:0x030c, B:107:0x032f, B:109:0x0343, B:110:0x034e, B:111:0x0357, B:113:0x035b, B:114:0x038a), top: B:423:0x030c }] */
+    /* JADX WARN: Removed duplicated region for block: B:119:0x039b  */
+    /* JADX WARN: Removed duplicated region for block: B:75:0x01e0  */
+    /* JADX WARN: Removed duplicated region for block: B:76:0x01e3  */
+    /* JADX WARN: Removed duplicated region for block: B:81:0x0200  */
+    /* JADX WARN: Removed duplicated region for block: B:82:0x0203  */
+    /* JADX WARN: Removed duplicated region for block: B:85:0x020e  */
+    /* JADX WARN: Type inference failed for: r0v17, types: [android.text.SpannableStringBuilder, java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r0v18 */
+    /* JADX WARN: Type inference failed for: r0v3, types: [android.text.StaticLayout[]] */
+    /* JADX WARN: Type inference failed for: r0v33, types: [java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r10v1, types: [java.lang.CharSequence, java.lang.String] */
+    /* JADX WARN: Type inference failed for: r10v2, types: [java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r10v4 */
+    /* JADX WARN: Type inference failed for: r10v7, types: [java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r10v8, types: [java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r4v1, types: [org.telegram.tgnet.TLRPC$Chat, org.telegram.tgnet.TLRPC$User, java.lang.String] */
+    /* JADX WARN: Type inference failed for: r4v103 */
+    /* JADX WARN: Type inference failed for: r4v156, types: [java.lang.String] */
+    /* JADX WARN: Type inference failed for: r4v158 */
+    /* JADX WARN: Type inference failed for: r4v99 */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    private void setMessageObjectInternal(org.telegram.messenger.MessageObject r41) {
+    private void setMessageObjectInternal(org.telegram.messenger.MessageObject r43) {
         /*
-            Method dump skipped, instructions count: 3345
+            Method dump skipped, instructions count: 3176
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatMessageCell.setMessageObjectInternal(org.telegram.messenger.MessageObject):void");

@@ -1512,7 +1512,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
     /* JADX WARN: Type inference failed for: r5v11 */
     /* JADX WARN: Type inference failed for: r5v14 */
     /* JADX WARN: Type inference failed for: r5v15 */
-    /* JADX WARN: Type inference failed for: r5v2, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r5v2, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r5v9 */
     /* JADX WARN: Type inference failed for: r76v0, types: [android.content.Intent] */
     @android.annotation.SuppressLint({"Range"})
