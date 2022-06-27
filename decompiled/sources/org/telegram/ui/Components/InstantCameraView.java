@@ -1023,11 +1023,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private org.telegram.messenger.camera.Size chooseOptimalSize(ArrayList<org.telegram.messenger.camera.Size> arrayList) {
         ArrayList arrayList2 = new ArrayList();
         for (int i = 0; i < arrayList.size(); i++) {
-            if (Math.max(arrayList.get(i).mHeight, arrayList.get(i).mHeight) <= 1200 && Math.min(arrayList.get(i).mHeight, arrayList.get(i).mHeight) >= 320) {
+            if (Math.max(arrayList.get(i).mHeight, arrayList.get(i).mWidth) <= 1200 && Math.min(arrayList.get(i).mHeight, arrayList.get(i).mWidth) >= 320) {
                 arrayList2.add(arrayList.get(i));
             }
         }
-        if (arrayList2.isEmpty() || SharedConfig.getDevicePerformanceClass() == 0) {
+        if (arrayList2.isEmpty() || SharedConfig.getDevicePerformanceClass() == 0 || SharedConfig.getDevicePerformanceClass() == 1) {
             return CameraController.chooseOptimalSize(arrayList, 480, 270, this.aspectRatio);
         }
         Collections.sort(arrayList2, InstantCameraView$$ExternalSyntheticLambda6.INSTANCE);
@@ -1035,12 +1035,12 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     }
 
     public static /* synthetic */ int lambda$chooseOptimalSize$2(org.telegram.messenger.camera.Size size, org.telegram.messenger.camera.Size size2) {
-        float min = Math.min(size.mHeight, size.mWidth) / Math.max(size.mHeight, size.mWidth);
-        float min2 = Math.min(size2.mHeight, size2.mWidth) / Math.max(size2.mHeight, size2.mWidth);
-        if (min < min2) {
-            return 1;
+        float abs = Math.abs(1.0f - (Math.min(size.mHeight, size.mWidth) / Math.max(size.mHeight, size.mWidth)));
+        float abs2 = Math.abs(1.0f - (Math.min(size2.mHeight, size2.mWidth) / Math.max(size2.mHeight, size2.mWidth)));
+        if (abs < abs2) {
+            return -1;
         }
-        return min > min2 ? -1 : 0;
+        return abs > abs2 ? 1 : 0;
     }
 
     public void createCamera(final SurfaceTexture surfaceTexture) {
@@ -1230,13 +1230,16 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             float min = f / Math.min(width, height);
             int i3 = (int) (width * min);
             int height2 = (int) (r3.previewSize.getHeight() * min);
-            if (i3 > height2) {
+            if (i3 == height2) {
+                r3.scaleX = 1.0f;
+                r3.scaleY = 1.0f;
+            } else if (i3 > height2) {
                 r3.scaleX = 1.0f;
                 r3.scaleY = i3 / i2;
-                return;
+            } else {
+                r3.scaleX = height2 / f;
+                r3.scaleY = 1.0f;
             }
-            r3.scaleX = height2 / f;
-            r3.scaleY = 1.0f;
         }
 
         private boolean initGL() {
@@ -1852,13 +1855,17 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             public void run() {
                 TextureView textureView = InstantCameraView.this.textureView;
                 if (textureView != null) {
-                    final Bitmap bitmap = textureView.getBitmap(AndroidUtilities.dp(56.0f), AndroidUtilities.dp(56.0f));
-                    AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InstantCameraView$VideoRecorder$GenerateKeyframeThumbTask$$ExternalSyntheticLambda0
-                        @Override // java.lang.Runnable
-                        public final void run() {
-                            InstantCameraView.VideoRecorder.GenerateKeyframeThumbTask.this.lambda$run$0(bitmap);
-                        }
-                    });
+                    try {
+                        final Bitmap bitmap = textureView.getBitmap(AndroidUtilities.dp(56.0f), AndroidUtilities.dp(56.0f));
+                        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InstantCameraView$VideoRecorder$GenerateKeyframeThumbTask$$ExternalSyntheticLambda0
+                            @Override // java.lang.Runnable
+                            public final void run() {
+                                InstantCameraView.VideoRecorder.GenerateKeyframeThumbTask.this.lambda$run$0(bitmap);
+                            }
+                        });
+                    } catch (Exception e) {
+                        FileLog.e(e);
+                    }
                 }
             }
 
@@ -2406,7 +2413,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     }
 
     public String createFragmentShader(org.telegram.messenger.camera.Size size) {
-        if (SharedConfig.getDevicePerformanceClass() == 0 || Math.max(size.getHeight(), size.getWidth()) * 0.7f < MessagesController.getInstance(this.currentAccount).roundVideoSize) {
+        if (SharedConfig.getDevicePerformanceClass() == 0 || SharedConfig.getDevicePerformanceClass() == 1 || Math.max(size.getHeight(), size.getWidth()) * 0.7f < MessagesController.getInstance(this.currentAccount).roundVideoSize) {
             return "#extension GL_OES_EGL_image_external : require\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform float scaleX;\nuniform float scaleY;\nuniform float alpha;\nuniform samplerExternalOES sTexture;\nvoid main() {\n   vec2 coord = vec2((vTextureCoord.x - 0.5) * scaleX, (vTextureCoord.y - 0.5) * scaleY);\n   float coef = ceil(clamp(0.2601 - dot(coord, coord), 0.0, 1.0));\n   vec3 color = texture2D(sTexture, vTextureCoord).rgb * coef + (1.0 - step(0.001, coef));\n   gl_FragColor = vec4(color * alpha, alpha);\n}\n";
         }
         return "#extension GL_OES_EGL_image_external : require\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform float scaleX;\nuniform float scaleY;\nuniform float alpha;\nconst float kernel = 1.0;\nconst float pixelSizeX = 1.0 / " + size.getWidth() + ".0;\nconst float pixelSizeY = 1.0 / " + size.getHeight() + ".0;\nuniform samplerExternalOES sTexture;\nvoid main() {\n   vec3 accumulation = vec3(0);\n   vec3 weightsum = vec3(0);\n   for (float x = -kernel; x <= kernel; x++){\n       for (float y = -kernel; y <= kernel; y++){\n           accumulation += texture2D(sTexture, vTextureCoord + vec2(x * pixelSizeX, y * pixelSizeY)).xyz;\n           weightsum += 1.0;\n       }\n   }\n   vec4 textColor = vec4(accumulation / weightsum, 1.0);\n   vec2 coord = vec2((vTextureCoord.x - 0.5) * scaleX, (vTextureCoord.y - 0.5) * scaleY);\n   float coef = ceil(clamp(0.2601 - dot(coord, coord), 0.0, 1.0));\n   vec3 color = textColor.rgb * coef + (1.0 - step(0.001, coef));\n   gl_FragColor = vec4(color * alpha, alpha);\n}\n";

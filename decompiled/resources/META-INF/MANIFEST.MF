@@ -10551,13 +10551,13 @@ Name: builddef.lst
 SHA1-Digest: 2OFxLdkhRBE8GU89a6MioeZUiU4=
 
 Name: classes.dex
-SHA1-Digest: zrh+X3WRFG695EdBuzxRwtXFJ5I=
+SHA1-Digest: 5/E+stW3yoUz3wwohMek6oENQmA=
 
 Name: classes2.dex
 SHA1-Digest: mB0Vg0+wQc0oX8FpWGz3P4+BpdA=
 
 Name: classes3.dex
-SHA1-Digest: AFaS6IMWOSXFrX9v3Xu53oaHNZo=
+SHA1-Digest: 1yHoPyco3pmqjfWoUM+/heLLntU=
 
 Name: com/google/android/search/verification/client/R.java
 SHA1-Digest: 3OspJ3jk+6chzCfOCJPZHwrwxpA=

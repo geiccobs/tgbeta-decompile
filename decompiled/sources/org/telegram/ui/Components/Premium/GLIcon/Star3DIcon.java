@@ -57,8 +57,8 @@ public class Star3DIcon {
     float xOffset;
     private int xOffsetHandle;
     float enterAlpha = 0.0f;
-    public float spec1 = 2.0f;
-    public float spec2 = 0.13f;
+    public float spec1 = 0.0f;
+    public float spec2 = 0.0f;
     public float diffuse = 1.0f;
     public float normalSpec = 0.2f;
     public int normalSpecColor = -1;
