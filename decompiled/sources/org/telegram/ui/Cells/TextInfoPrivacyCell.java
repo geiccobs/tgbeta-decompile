@@ -13,13 +13,14 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkSpanDrawable;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class TextInfoPrivacyCell extends FrameLayout {
     private int bottomPadding;
     private int fixedSize;
@@ -30,12 +31,6 @@ public class TextInfoPrivacyCell extends FrameLayout {
     private TextView textView;
     private int topPadding;
 
-    protected void afterTextDraw() {
-    }
-
-    protected void onTextDraw() {
-    }
-
     public TextInfoPrivacyCell(Context context) {
         this(context, 21, null);
     }
@@ -44,9 +39,13 @@ public class TextInfoPrivacyCell extends FrameLayout {
         this(context, 21, resourcesProvider);
     }
 
-    public TextInfoPrivacyCell(Context context, int i, Theme.ResourcesProvider resourcesProvider) {
+    public TextInfoPrivacyCell(Context context, int padding) {
+        this(context, padding, null);
+    }
+
+    public TextInfoPrivacyCell(Context context, int padding, Theme.ResourcesProvider resourcesProvider) {
         super(context);
-        this.linkTextColorKey = "windowBackgroundWhiteLinkText";
+        this.linkTextColorKey = Theme.key_windowBackgroundWhiteLinkText;
         this.topPadding = 10;
         this.bottomPadding = 17;
         this.resourcesProvider = resourcesProvider;
@@ -63,15 +62,14 @@ public class TextInfoPrivacyCell extends FrameLayout {
         };
         this.textView = linksTextView;
         linksTextView.setTextSize(1, 14.0f);
-        int i2 = 5;
+        int i = 5;
         this.textView.setGravity(LocaleController.isRTL ? 5 : 3);
         this.textView.setPadding(0, AndroidUtilities.dp(10.0f), 0, AndroidUtilities.dp(17.0f));
         this.textView.setMovementMethod(LinkMovementMethod.getInstance());
-        this.textView.setTextColor(getThemedColor("windowBackgroundWhiteGrayText4"));
+        this.textView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText4));
         this.textView.setLinkTextColor(getThemedColor(this.linkTextColorKey));
         this.textView.setImportantForAccessibility(2);
-        float f = i;
-        addView(this.textView, LayoutHelper.createFrame(-1, -2.0f, (!LocaleController.isRTL ? 3 : i2) | 48, f, 0.0f, f, 0.0f));
+        addView(this.textView, LayoutHelper.createFrame(-1, -2.0f, (!LocaleController.isRTL ? 3 : i) | 48, padding, 0.0f, padding, 0.0f));
     }
 
     @Override // android.view.View
@@ -87,69 +85,68 @@ public class TextInfoPrivacyCell extends FrameLayout {
         super.onDraw(canvas);
     }
 
-    public void setLinkTextColorKey(String str) {
-        this.linkTextColorKey = str;
+    protected void onTextDraw() {
+    }
+
+    protected void afterTextDraw() {
+    }
+
+    public void setLinkTextColorKey(String key) {
+        this.linkTextColorKey = key;
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (this.fixedSize != 0) {
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.fixedSize), 1073741824));
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.fixedSize), C.BUFFER_FLAG_ENCRYPTED));
         } else {
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(0, 0));
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(0, 0));
         }
     }
 
-    public void setTopPadding(int i) {
-        this.topPadding = i;
+    public void setTopPadding(int topPadding) {
+        this.topPadding = topPadding;
     }
 
-    public void setBottomPadding(int i) {
-        this.bottomPadding = i;
+    public void setBottomPadding(int value) {
+        this.bottomPadding = value;
     }
 
-    public void setFixedSize(int i) {
-        this.fixedSize = i;
+    public void setFixedSize(int size) {
+        this.fixedSize = size;
     }
 
-    public void setText(CharSequence charSequence) {
-        if (!TextUtils.equals(charSequence, this.text)) {
-            this.text = charSequence;
-            if (charSequence == null) {
+    public void setText(CharSequence text) {
+        if (!TextUtils.equals(text, this.text)) {
+            this.text = text;
+            if (text == null) {
                 this.textView.setPadding(0, AndroidUtilities.dp(2.0f), 0, 0);
             } else {
                 this.textView.setPadding(0, AndroidUtilities.dp(this.topPadding), 0, AndroidUtilities.dp(this.bottomPadding));
             }
             SpannableString spannableString = null;
-            if (charSequence != null) {
-                int length = charSequence.length();
-                for (int i = 0; i < length - 1; i++) {
-                    if (charSequence.charAt(i) == '\n') {
-                        int i2 = i + 1;
-                        if (charSequence.charAt(i2) == '\n') {
-                            if (spannableString == null) {
-                                spannableString = new SpannableString(charSequence);
-                            }
-                            spannableString.setSpan(new AbsoluteSizeSpan(10, true), i2, i + 2, 33);
+            if (text != null) {
+                int len = text.length();
+                for (int i = 0; i < len - 1; i++) {
+                    if (text.charAt(i) == '\n' && text.charAt(i + 1) == '\n') {
+                        if (spannableString == null) {
+                            spannableString = new SpannableString(text);
                         }
+                        spannableString.setSpan(new AbsoluteSizeSpan(10, true), i + 1, i + 2, 33);
                     }
                 }
             }
-            TextView textView = this.textView;
-            if (spannableString != null) {
-                charSequence = spannableString;
-            }
-            textView.setText(charSequence);
+            this.textView.setText(spannableString != null ? spannableString : text);
         }
     }
 
-    public void setTextColor(int i) {
-        this.textView.setTextColor(i);
+    public void setTextColor(int color) {
+        this.textView.setTextColor(color);
     }
 
-    public void setTextColor(String str) {
-        this.textView.setTextColor(getThemedColor(str));
-        this.textView.setTag(str);
+    public void setTextColor(String key) {
+        this.textView.setTextColor(getThemedColor(key));
+        this.textView.setTag(key);
     }
 
     public TextView getTextView() {
@@ -160,36 +157,36 @@ public class TextInfoPrivacyCell extends FrameLayout {
         return this.textView.length();
     }
 
-    public void setEnabled(boolean z, ArrayList<Animator> arrayList) {
+    public void setEnabled(boolean value, ArrayList<Animator> animators) {
         float f = 1.0f;
-        if (arrayList != null) {
+        if (animators != null) {
             TextView textView = this.textView;
             Property property = View.ALPHA;
             float[] fArr = new float[1];
-            if (!z) {
+            if (!value) {
                 f = 0.5f;
             }
             fArr[0] = f;
-            arrayList.add(ObjectAnimator.ofFloat(textView, property, fArr));
+            animators.add(ObjectAnimator.ofFloat(textView, property, fArr));
             return;
         }
         TextView textView2 = this.textView;
-        if (!z) {
+        if (!value) {
             f = 0.5f;
         }
         textView2.setAlpha(f);
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
-        accessibilityNodeInfo.setClassName(TextView.class.getName());
-        accessibilityNodeInfo.setText(this.text);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(TextView.class.getName());
+        info.setText(this.text);
     }
 
-    private int getThemedColor(String str) {
+    private int getThemedColor(String key) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
-        return color != null ? color.intValue() : Theme.getColor(str);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
+        return color != null ? color.intValue() : Theme.getColor(key);
     }
 }

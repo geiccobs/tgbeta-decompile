@@ -3,7 +3,7 @@ package org.telegram.messenger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class NotificationCallbackReceiver extends BroadcastReceiver {
     @Override // android.content.BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
@@ -11,12 +11,13 @@ public class NotificationCallbackReceiver extends BroadcastReceiver {
             return;
         }
         ApplicationLoader.postInitApplication();
-        int intExtra = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
-        if (!UserConfig.isValidAccount(intExtra)) {
+        int currentAccount = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
+        if (!UserConfig.isValidAccount(currentAccount)) {
             return;
         }
-        long longExtra = intent.getLongExtra("did", 777000L);
-        byte[] byteArrayExtra = intent.getByteArrayExtra("data");
-        SendMessagesHelper.getInstance(intExtra).sendNotificationCallback(longExtra, intent.getIntExtra("mid", 0), byteArrayExtra);
+        long did = intent.getLongExtra("did", 777000L);
+        byte[] data = intent.getByteArrayExtra("data");
+        int mid = intent.getIntExtra("mid", 0);
+        SendMessagesHelper.getInstance(currentAccount).sendNotificationCallback(did, mid, data);
     }
 }

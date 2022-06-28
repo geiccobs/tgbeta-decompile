@@ -5,37 +5,33 @@ import com.google.firebase.encoders.ObjectEncoder;
 import com.google.firebase.encoders.ObjectEncoderContext;
 import com.google.firebase.encoders.config.Configurator;
 import com.google.firebase.encoders.config.EncoderConfig;
+import com.google.firebase.remoteconfig.RemoteConfigConstants;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AutoBatchedLogRequestEncoder implements Configurator {
+    public static final int CODEGEN_VERSION = 2;
     public static final Configurator CONFIG = new AutoBatchedLogRequestEncoder();
 
     private AutoBatchedLogRequestEncoder() {
     }
 
     @Override // com.google.firebase.encoders.config.Configurator
-    public void configure(EncoderConfig<?> encoderConfig) {
-        BatchedLogRequestEncoder batchedLogRequestEncoder = BatchedLogRequestEncoder.INSTANCE;
-        encoderConfig.registerEncoder(BatchedLogRequest.class, batchedLogRequestEncoder);
-        encoderConfig.registerEncoder(AutoValue_BatchedLogRequest.class, batchedLogRequestEncoder);
-        LogRequestEncoder logRequestEncoder = LogRequestEncoder.INSTANCE;
-        encoderConfig.registerEncoder(LogRequest.class, logRequestEncoder);
-        encoderConfig.registerEncoder(AutoValue_LogRequest.class, logRequestEncoder);
-        ClientInfoEncoder clientInfoEncoder = ClientInfoEncoder.INSTANCE;
-        encoderConfig.registerEncoder(ClientInfo.class, clientInfoEncoder);
-        encoderConfig.registerEncoder(AutoValue_ClientInfo.class, clientInfoEncoder);
-        AndroidClientInfoEncoder androidClientInfoEncoder = AndroidClientInfoEncoder.INSTANCE;
-        encoderConfig.registerEncoder(AndroidClientInfo.class, androidClientInfoEncoder);
-        encoderConfig.registerEncoder(AutoValue_AndroidClientInfo.class, androidClientInfoEncoder);
-        LogEventEncoder logEventEncoder = LogEventEncoder.INSTANCE;
-        encoderConfig.registerEncoder(LogEvent.class, logEventEncoder);
-        encoderConfig.registerEncoder(AutoValue_LogEvent.class, logEventEncoder);
-        NetworkConnectionInfoEncoder networkConnectionInfoEncoder = NetworkConnectionInfoEncoder.INSTANCE;
-        encoderConfig.registerEncoder(NetworkConnectionInfo.class, networkConnectionInfoEncoder);
-        encoderConfig.registerEncoder(AutoValue_NetworkConnectionInfo.class, networkConnectionInfoEncoder);
+    public void configure(EncoderConfig<?> cfg) {
+        cfg.registerEncoder(BatchedLogRequest.class, BatchedLogRequestEncoder.INSTANCE);
+        cfg.registerEncoder(AutoValue_BatchedLogRequest.class, BatchedLogRequestEncoder.INSTANCE);
+        cfg.registerEncoder(LogRequest.class, LogRequestEncoder.INSTANCE);
+        cfg.registerEncoder(AutoValue_LogRequest.class, LogRequestEncoder.INSTANCE);
+        cfg.registerEncoder(ClientInfo.class, ClientInfoEncoder.INSTANCE);
+        cfg.registerEncoder(AutoValue_ClientInfo.class, ClientInfoEncoder.INSTANCE);
+        cfg.registerEncoder(AndroidClientInfo.class, AndroidClientInfoEncoder.INSTANCE);
+        cfg.registerEncoder(AutoValue_AndroidClientInfo.class, AndroidClientInfoEncoder.INSTANCE);
+        cfg.registerEncoder(LogEvent.class, LogEventEncoder.INSTANCE);
+        cfg.registerEncoder(AutoValue_LogEvent.class, LogEventEncoder.INSTANCE);
+        cfg.registerEncoder(NetworkConnectionInfo.class, NetworkConnectionInfoEncoder.INSTANCE);
+        cfg.registerEncoder(AutoValue_NetworkConnectionInfo.class, NetworkConnectionInfoEncoder.INSTANCE);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class BatchedLogRequestEncoder implements ObjectEncoder<BatchedLogRequest> {
         static final BatchedLogRequestEncoder INSTANCE = new BatchedLogRequestEncoder();
         private static final FieldDescriptor LOGREQUEST_DESCRIPTOR = FieldDescriptor.of("logRequest");
@@ -43,12 +39,12 @@ public final class AutoBatchedLogRequestEncoder implements Configurator {
         private BatchedLogRequestEncoder() {
         }
 
-        public void encode(BatchedLogRequest batchedLogRequest, ObjectEncoderContext objectEncoderContext) throws IOException {
-            objectEncoderContext.add(LOGREQUEST_DESCRIPTOR, batchedLogRequest.getLogRequests());
+        public void encode(BatchedLogRequest value, ObjectEncoderContext ctx) throws IOException {
+            ctx.add(LOGREQUEST_DESCRIPTOR, value.getLogRequests());
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class LogRequestEncoder implements ObjectEncoder<LogRequest> {
         static final LogRequestEncoder INSTANCE = new LogRequestEncoder();
         private static final FieldDescriptor REQUESTTIMEMS_DESCRIPTOR = FieldDescriptor.of("requestTimeMs");
@@ -62,18 +58,18 @@ public final class AutoBatchedLogRequestEncoder implements Configurator {
         private LogRequestEncoder() {
         }
 
-        public void encode(LogRequest logRequest, ObjectEncoderContext objectEncoderContext) throws IOException {
-            objectEncoderContext.add(REQUESTTIMEMS_DESCRIPTOR, logRequest.getRequestTimeMs());
-            objectEncoderContext.add(REQUESTUPTIMEMS_DESCRIPTOR, logRequest.getRequestUptimeMs());
-            objectEncoderContext.add(CLIENTINFO_DESCRIPTOR, logRequest.getClientInfo());
-            objectEncoderContext.add(LOGSOURCE_DESCRIPTOR, logRequest.getLogSource());
-            objectEncoderContext.add(LOGSOURCENAME_DESCRIPTOR, logRequest.getLogSourceName());
-            objectEncoderContext.add(LOGEVENT_DESCRIPTOR, logRequest.getLogEvents());
-            objectEncoderContext.add(QOSTIER_DESCRIPTOR, logRequest.getQosTier());
+        public void encode(LogRequest value, ObjectEncoderContext ctx) throws IOException {
+            ctx.add(REQUESTTIMEMS_DESCRIPTOR, value.getRequestTimeMs());
+            ctx.add(REQUESTUPTIMEMS_DESCRIPTOR, value.getRequestUptimeMs());
+            ctx.add(CLIENTINFO_DESCRIPTOR, value.getClientInfo());
+            ctx.add(LOGSOURCE_DESCRIPTOR, value.getLogSource());
+            ctx.add(LOGSOURCENAME_DESCRIPTOR, value.getLogSourceName());
+            ctx.add(LOGEVENT_DESCRIPTOR, value.getLogEvents());
+            ctx.add(QOSTIER_DESCRIPTOR, value.getQosTier());
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class ClientInfoEncoder implements ObjectEncoder<ClientInfo> {
         static final ClientInfoEncoder INSTANCE = new ClientInfoEncoder();
         private static final FieldDescriptor CLIENTTYPE_DESCRIPTOR = FieldDescriptor.of("clientType");
@@ -82,16 +78,16 @@ public final class AutoBatchedLogRequestEncoder implements Configurator {
         private ClientInfoEncoder() {
         }
 
-        public void encode(ClientInfo clientInfo, ObjectEncoderContext objectEncoderContext) throws IOException {
-            objectEncoderContext.add(CLIENTTYPE_DESCRIPTOR, clientInfo.getClientType());
-            objectEncoderContext.add(ANDROIDCLIENTINFO_DESCRIPTOR, clientInfo.getAndroidClientInfo());
+        public void encode(ClientInfo value, ObjectEncoderContext ctx) throws IOException {
+            ctx.add(CLIENTTYPE_DESCRIPTOR, value.getClientType());
+            ctx.add(ANDROIDCLIENTINFO_DESCRIPTOR, value.getAndroidClientInfo());
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class AndroidClientInfoEncoder implements ObjectEncoder<AndroidClientInfo> {
         static final AndroidClientInfoEncoder INSTANCE = new AndroidClientInfoEncoder();
-        private static final FieldDescriptor SDKVERSION_DESCRIPTOR = FieldDescriptor.of("sdkVersion");
+        private static final FieldDescriptor SDKVERSION_DESCRIPTOR = FieldDescriptor.of(RemoteConfigConstants.RequestFieldKey.SDK_VERSION);
         private static final FieldDescriptor MODEL_DESCRIPTOR = FieldDescriptor.of("model");
         private static final FieldDescriptor HARDWARE_DESCRIPTOR = FieldDescriptor.of("hardware");
         private static final FieldDescriptor DEVICE_DESCRIPTOR = FieldDescriptor.of("device");
@@ -107,23 +103,23 @@ public final class AutoBatchedLogRequestEncoder implements Configurator {
         private AndroidClientInfoEncoder() {
         }
 
-        public void encode(AndroidClientInfo androidClientInfo, ObjectEncoderContext objectEncoderContext) throws IOException {
-            objectEncoderContext.add(SDKVERSION_DESCRIPTOR, androidClientInfo.getSdkVersion());
-            objectEncoderContext.add(MODEL_DESCRIPTOR, androidClientInfo.getModel());
-            objectEncoderContext.add(HARDWARE_DESCRIPTOR, androidClientInfo.getHardware());
-            objectEncoderContext.add(DEVICE_DESCRIPTOR, androidClientInfo.getDevice());
-            objectEncoderContext.add(PRODUCT_DESCRIPTOR, androidClientInfo.getProduct());
-            objectEncoderContext.add(OSBUILD_DESCRIPTOR, androidClientInfo.getOsBuild());
-            objectEncoderContext.add(MANUFACTURER_DESCRIPTOR, androidClientInfo.getManufacturer());
-            objectEncoderContext.add(FINGERPRINT_DESCRIPTOR, androidClientInfo.getFingerprint());
-            objectEncoderContext.add(LOCALE_DESCRIPTOR, androidClientInfo.getLocale());
-            objectEncoderContext.add(COUNTRY_DESCRIPTOR, androidClientInfo.getCountry());
-            objectEncoderContext.add(MCCMNC_DESCRIPTOR, androidClientInfo.getMccMnc());
-            objectEncoderContext.add(APPLICATIONBUILD_DESCRIPTOR, androidClientInfo.getApplicationBuild());
+        public void encode(AndroidClientInfo value, ObjectEncoderContext ctx) throws IOException {
+            ctx.add(SDKVERSION_DESCRIPTOR, value.getSdkVersion());
+            ctx.add(MODEL_DESCRIPTOR, value.getModel());
+            ctx.add(HARDWARE_DESCRIPTOR, value.getHardware());
+            ctx.add(DEVICE_DESCRIPTOR, value.getDevice());
+            ctx.add(PRODUCT_DESCRIPTOR, value.getProduct());
+            ctx.add(OSBUILD_DESCRIPTOR, value.getOsBuild());
+            ctx.add(MANUFACTURER_DESCRIPTOR, value.getManufacturer());
+            ctx.add(FINGERPRINT_DESCRIPTOR, value.getFingerprint());
+            ctx.add(LOCALE_DESCRIPTOR, value.getLocale());
+            ctx.add(COUNTRY_DESCRIPTOR, value.getCountry());
+            ctx.add(MCCMNC_DESCRIPTOR, value.getMccMnc());
+            ctx.add(APPLICATIONBUILD_DESCRIPTOR, value.getApplicationBuild());
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class LogEventEncoder implements ObjectEncoder<LogEvent> {
         static final LogEventEncoder INSTANCE = new LogEventEncoder();
         private static final FieldDescriptor EVENTTIMEMS_DESCRIPTOR = FieldDescriptor.of("eventTimeMs");
@@ -137,18 +133,18 @@ public final class AutoBatchedLogRequestEncoder implements Configurator {
         private LogEventEncoder() {
         }
 
-        public void encode(LogEvent logEvent, ObjectEncoderContext objectEncoderContext) throws IOException {
-            objectEncoderContext.add(EVENTTIMEMS_DESCRIPTOR, logEvent.getEventTimeMs());
-            objectEncoderContext.add(EVENTCODE_DESCRIPTOR, logEvent.getEventCode());
-            objectEncoderContext.add(EVENTUPTIMEMS_DESCRIPTOR, logEvent.getEventUptimeMs());
-            objectEncoderContext.add(SOURCEEXTENSION_DESCRIPTOR, logEvent.getSourceExtension());
-            objectEncoderContext.add(SOURCEEXTENSIONJSONPROTO3_DESCRIPTOR, logEvent.getSourceExtensionJsonProto3());
-            objectEncoderContext.add(TIMEZONEOFFSETSECONDS_DESCRIPTOR, logEvent.getTimezoneOffsetSeconds());
-            objectEncoderContext.add(NETWORKCONNECTIONINFO_DESCRIPTOR, logEvent.getNetworkConnectionInfo());
+        public void encode(LogEvent value, ObjectEncoderContext ctx) throws IOException {
+            ctx.add(EVENTTIMEMS_DESCRIPTOR, value.getEventTimeMs());
+            ctx.add(EVENTCODE_DESCRIPTOR, value.getEventCode());
+            ctx.add(EVENTUPTIMEMS_DESCRIPTOR, value.getEventUptimeMs());
+            ctx.add(SOURCEEXTENSION_DESCRIPTOR, value.getSourceExtension());
+            ctx.add(SOURCEEXTENSIONJSONPROTO3_DESCRIPTOR, value.getSourceExtensionJsonProto3());
+            ctx.add(TIMEZONEOFFSETSECONDS_DESCRIPTOR, value.getTimezoneOffsetSeconds());
+            ctx.add(NETWORKCONNECTIONINFO_DESCRIPTOR, value.getNetworkConnectionInfo());
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class NetworkConnectionInfoEncoder implements ObjectEncoder<NetworkConnectionInfo> {
         static final NetworkConnectionInfoEncoder INSTANCE = new NetworkConnectionInfoEncoder();
         private static final FieldDescriptor NETWORKTYPE_DESCRIPTOR = FieldDescriptor.of("networkType");
@@ -157,9 +153,9 @@ public final class AutoBatchedLogRequestEncoder implements Configurator {
         private NetworkConnectionInfoEncoder() {
         }
 
-        public void encode(NetworkConnectionInfo networkConnectionInfo, ObjectEncoderContext objectEncoderContext) throws IOException {
-            objectEncoderContext.add(NETWORKTYPE_DESCRIPTOR, networkConnectionInfo.getNetworkType());
-            objectEncoderContext.add(MOBILESUBTYPE_DESCRIPTOR, networkConnectionInfo.getMobileSubtype());
+        public void encode(NetworkConnectionInfo value, ObjectEncoderContext ctx) throws IOException {
+            ctx.add(NETWORKTYPE_DESCRIPTOR, value.getNetworkType());
+            ctx.add(MOBILESUBTYPE_DESCRIPTOR, value.getMobileSubtype());
         }
     }
 }

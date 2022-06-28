@@ -6,8 +6,11 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ProtocolExtension implements Model {
+    private static final String DEV_MAKE = "devMake";
+    private static final String DEV_MODEL = "devModel";
+    private static final String TICKET_KEYS = "ticketKeys";
     private String devMake;
     private String devModel;
     private List<String> ticketKeys;
@@ -16,71 +19,72 @@ public class ProtocolExtension implements Model {
         return this.ticketKeys;
     }
 
-    public void setTicketKeys(List<String> list) {
-        this.ticketKeys = list;
+    public void setTicketKeys(List<String> ticketKeys) {
+        this.ticketKeys = ticketKeys;
     }
 
     public String getDevMake() {
         return this.devMake;
     }
 
-    public void setDevMake(String str) {
-        this.devMake = str;
+    public void setDevMake(String devMake) {
+        this.devMake = devMake;
     }
 
     public String getDevModel() {
         return this.devModel;
     }
 
-    public void setDevModel(String str) {
-        this.devModel = str;
+    public void setDevModel(String devModel) {
+        this.devModel = devModel;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject jSONObject) throws JSONException {
-        setTicketKeys(JSONUtils.readStringArray(jSONObject, "ticketKeys"));
-        setDevMake(jSONObject.optString("devMake", null));
-        setDevModel(jSONObject.optString("devModel", null));
+    public void read(JSONObject object) throws JSONException {
+        setTicketKeys(JSONUtils.readStringArray(object, TICKET_KEYS));
+        setDevMake(object.optString(DEV_MAKE, null));
+        setDevModel(object.optString(DEV_MODEL, null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer jSONStringer) throws JSONException {
-        JSONUtils.writeStringArray(jSONStringer, "ticketKeys", getTicketKeys());
-        JSONUtils.write(jSONStringer, "devMake", getDevMake());
-        JSONUtils.write(jSONStringer, "devModel", getDevModel());
+    public void write(JSONStringer writer) throws JSONException {
+        JSONUtils.writeStringArray(writer, TICKET_KEYS, getTicketKeys());
+        JSONUtils.write(writer, DEV_MAKE, getDevMake());
+        JSONUtils.write(writer, DEV_MODEL, getDevModel());
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || ProtocolExtension.class != obj.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ProtocolExtension protocolExtension = (ProtocolExtension) obj;
+        ProtocolExtension that = (ProtocolExtension) o;
         List<String> list = this.ticketKeys;
-        if (list == null ? protocolExtension.ticketKeys != null : !list.equals(protocolExtension.ticketKeys)) {
+        if (list == null ? that.ticketKeys != null : !list.equals(that.ticketKeys)) {
             return false;
         }
         String str = this.devMake;
-        if (str == null ? protocolExtension.devMake != null : !str.equals(protocolExtension.devMake)) {
+        if (str == null ? that.devMake != null : !str.equals(that.devMake)) {
             return false;
         }
         String str2 = this.devModel;
-        String str3 = protocolExtension.devModel;
-        return str2 != null ? str2.equals(str3) : str3 == null;
+        return str2 != null ? str2.equals(that.devModel) : that.devModel == null;
     }
 
     public int hashCode() {
         List<String> list = this.ticketKeys;
         int i = 0;
-        int hashCode = (list != null ? list.hashCode() : 0) * 31;
+        int result = list != null ? list.hashCode() : 0;
+        int i2 = result * 31;
         String str = this.devMake;
-        int hashCode2 = (hashCode + (str != null ? str.hashCode() : 0)) * 31;
+        int result2 = i2 + (str != null ? str.hashCode() : 0);
+        int result3 = result2 * 31;
         String str2 = this.devModel;
         if (str2 != null) {
             i = str2.hashCode();
         }
-        return hashCode2 + i;
+        return result3 + i;
     }
 }

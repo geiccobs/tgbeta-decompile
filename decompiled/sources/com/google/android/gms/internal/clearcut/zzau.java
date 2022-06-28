@@ -1,9 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.internal.clearcut.zzdo;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzau<MessageType extends zzdo> {
-    static {
-        zzbt.zzan();
-    }
+    private static final zzbt zzez = zzbt.zzan();
 }

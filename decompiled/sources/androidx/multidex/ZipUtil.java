@@ -7,6 +7,9 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipException;
 /* loaded from: classes.dex */
 final class ZipUtil {
+    private static final int BUFFER_SIZE = 16384;
+    private static final int ENDHDR = 22;
+    private static final int ENDSIG = 101010256;
 
     /* loaded from: classes.dex */
     public static class CentralDirectory {
@@ -17,57 +20,63 @@ final class ZipUtil {
         }
     }
 
-    public static long getZipCrc(File file) throws IOException {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+    ZipUtil() {
+    }
+
+    public static long getZipCrc(File apk) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(apk, "r");
         try {
-            return computeCrcOfCentralDir(randomAccessFile, findCentralDirectory(randomAccessFile));
+            CentralDirectory dir = findCentralDirectory(raf);
+            return computeCrcOfCentralDir(raf, dir);
         } finally {
-            randomAccessFile.close();
+            raf.close();
         }
     }
 
-    static CentralDirectory findCentralDirectory(RandomAccessFile randomAccessFile) throws IOException, ZipException {
-        long length = randomAccessFile.length() - 22;
-        long j = 0;
-        if (length < 0) {
-            throw new ZipException("File too short to be a zip file: " + randomAccessFile.length());
+    static CentralDirectory findCentralDirectory(RandomAccessFile raf) throws IOException, ZipException {
+        long scanOffset = raf.length() - 22;
+        if (scanOffset < 0) {
+            throw new ZipException("File too short to be a zip file: " + raf.length());
         }
-        long j2 = length - 65536;
-        if (j2 >= 0) {
-            j = j2;
+        long stopOffset = scanOffset - 65536;
+        if (stopOffset < 0) {
+            stopOffset = 0;
         }
-        int reverseBytes = Integer.reverseBytes(101010256);
+        int endSig = Integer.reverseBytes(ENDSIG);
         do {
-            randomAccessFile.seek(length);
-            if (randomAccessFile.readInt() == reverseBytes) {
-                randomAccessFile.skipBytes(2);
-                randomAccessFile.skipBytes(2);
-                randomAccessFile.skipBytes(2);
-                randomAccessFile.skipBytes(2);
-                CentralDirectory centralDirectory = new CentralDirectory();
-                centralDirectory.size = Integer.reverseBytes(randomAccessFile.readInt()) & 4294967295L;
-                centralDirectory.offset = Integer.reverseBytes(randomAccessFile.readInt()) & 4294967295L;
-                return centralDirectory;
+            raf.seek(scanOffset);
+            if (raf.readInt() != endSig) {
+                scanOffset--;
+            } else {
+                raf.skipBytes(2);
+                raf.skipBytes(2);
+                raf.skipBytes(2);
+                raf.skipBytes(2);
+                CentralDirectory dir = new CentralDirectory();
+                dir.size = Integer.reverseBytes(raf.readInt()) & 4294967295L;
+                dir.offset = Integer.reverseBytes(raf.readInt()) & 4294967295L;
+                return dir;
             }
-            length--;
-        } while (length >= j);
+        } while (scanOffset >= stopOffset);
         throw new ZipException("End Of Central Directory signature not found");
     }
 
-    static long computeCrcOfCentralDir(RandomAccessFile randomAccessFile, CentralDirectory centralDirectory) throws IOException {
-        CRC32 crc32 = new CRC32();
-        long j = centralDirectory.size;
-        randomAccessFile.seek(centralDirectory.offset);
-        byte[] bArr = new byte[16384];
-        int read = randomAccessFile.read(bArr, 0, (int) Math.min(16384L, j));
-        while (read != -1) {
-            crc32.update(bArr, 0, read);
-            j -= read;
-            if (j == 0) {
+    static long computeCrcOfCentralDir(RandomAccessFile raf, CentralDirectory dir) throws IOException {
+        CRC32 crc = new CRC32();
+        long stillToRead = dir.size;
+        raf.seek(dir.offset);
+        int length = (int) Math.min(16384L, stillToRead);
+        byte[] buffer = new byte[16384];
+        int length2 = raf.read(buffer, 0, length);
+        while (length2 != -1) {
+            crc.update(buffer, 0, length2);
+            stillToRead -= length2;
+            if (stillToRead == 0) {
                 break;
             }
-            read = randomAccessFile.read(bArr, 0, (int) Math.min(16384L, j));
+            int length3 = (int) Math.min(16384L, stillToRead);
+            length2 = raf.read(buffer, 0, length3);
         }
-        return crc32.getValue();
+        return crc.getValue();
     }
 }

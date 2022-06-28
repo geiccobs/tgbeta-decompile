@@ -1,14 +1,14 @@
 package org.webrtc;
 
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class RTCStatsReport {
     private final Map<String, RTCStats> stats;
     private final long timestampUs;
 
-    public RTCStatsReport(long j, Map<String, RTCStats> map) {
-        this.timestampUs = j;
-        this.stats = map;
+    public RTCStatsReport(long timestampUs, Map<String, RTCStats> stats) {
+        this.timestampUs = timestampUs;
+        this.stats = stats;
     }
 
     public double getTimestampUs() {
@@ -20,24 +20,23 @@ public class RTCStatsReport {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{ timestampUs: ");
-        sb.append(this.timestampUs);
-        sb.append(", stats: [\n");
-        boolean z = true;
-        for (RTCStats rTCStats : this.stats.values()) {
-            if (!z) {
-                sb.append(",\n");
+        StringBuilder builder = new StringBuilder();
+        builder.append("{ timestampUs: ");
+        builder.append(this.timestampUs);
+        builder.append(", stats: [\n");
+        boolean first = true;
+        for (RTCStats stat : this.stats.values()) {
+            if (!first) {
+                builder.append(",\n");
             }
-            sb.append(rTCStats);
-            z = false;
+            builder.append(stat);
+            first = false;
         }
-        sb.append(" ] }");
-        return sb.toString();
+        builder.append(" ] }");
+        return builder.toString();
     }
 
-    @CalledByNative
-    private static RTCStatsReport create(long j, Map map) {
-        return new RTCStatsReport(j, map);
+    private static RTCStatsReport create(long timestampUs, Map stats) {
+        return new RTCStatsReport(timestampUs, stats);
     }
 }

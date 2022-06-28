@@ -23,6 +23,8 @@ import android.widget.TextView;
 import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.upstream.cache.ContentMetadata;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.telegram.messenger.AndroidUtilities;
@@ -34,15 +36,12 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$Dialog;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$TL_peerNotifySettings;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -68,8 +67,9 @@ import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.NotificationsCustomSettingsActivity;
 import org.telegram.ui.NotificationsSettingsActivity;
 import org.telegram.ui.ProfileNotificationsActivity;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class NotificationsCustomSettingsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+    private static final int search_button = 0;
     private ListAdapter adapter;
     private int alertRow;
     private int alertSection2Row;
@@ -98,21 +98,21 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
     private boolean searchWas;
     private boolean searching;
 
-    public NotificationsCustomSettingsActivity(int i, ArrayList<NotificationsSettingsActivity.NotificationException> arrayList) {
-        this(i, arrayList, false);
+    public NotificationsCustomSettingsActivity(int type, ArrayList<NotificationsSettingsActivity.NotificationException> notificationExceptions) {
+        this(type, notificationExceptions, false);
     }
 
-    public NotificationsCustomSettingsActivity(int i, ArrayList<NotificationsSettingsActivity.NotificationException> arrayList, boolean z) {
+    public NotificationsCustomSettingsActivity(int type, ArrayList<NotificationsSettingsActivity.NotificationException> notificationExceptions, boolean load) {
         this.rowCount = 0;
         this.exceptionsDict = new HashMap<>();
-        this.currentType = i;
-        this.exceptions = arrayList;
-        int size = arrayList.size();
-        for (int i2 = 0; i2 < size; i2++) {
-            NotificationsSettingsActivity.NotificationException notificationException = this.exceptions.get(i2);
-            this.exceptionsDict.put(Long.valueOf(notificationException.did), notificationException);
+        this.currentType = type;
+        this.exceptions = notificationExceptions;
+        int N = notificationExceptions.size();
+        for (int a = 0; a < N; a++) {
+            NotificationsSettingsActivity.NotificationException exception = this.exceptions.get(a);
+            this.exceptionsDict.put(Long.valueOf(exception.did), exception);
         }
-        if (z) {
+        if (load) {
             loadExceptions();
         }
     }
@@ -126,6 +126,7 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public View createView(final Context context) {
         this.searching = false;
+        this.searchWas = false;
         this.actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         this.actionBar.setAllowOverlayTitle(true);
         if (this.currentType == -1) {
@@ -135,15 +136,16 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         }
         this.actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.1
             @Override // org.telegram.ui.ActionBar.ActionBar.ActionBarMenuOnItemClick
-            public void onItemClick(int i) {
-                if (i == -1) {
+            public void onItemClick(int id) {
+                if (id == -1) {
                     NotificationsCustomSettingsActivity.this.finishFragment();
                 }
             }
         });
         ArrayList<NotificationsSettingsActivity.NotificationException> arrayList = this.exceptions;
         if (arrayList != null && !arrayList.isEmpty()) {
-            this.actionBar.createMenu().addItem(0, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.2
+            ActionBarMenu menu = this.actionBar.createMenu();
+            ActionBarMenuItem searchItem = menu.addItem(0, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.2
                 @Override // org.telegram.ui.ActionBar.ActionBarMenuItem.ActionBarMenuItemSearchListener
                 public void onSearchExpand() {
                     NotificationsCustomSettingsActivity.this.searching = true;
@@ -168,8 +170,8 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
                     if (NotificationsCustomSettingsActivity.this.searchAdapter == null) {
                         return;
                     }
-                    String obj = editText.getText().toString();
-                    if (obj.length() != 0) {
+                    String text = editText.getText().toString();
+                    if (text.length() != 0) {
                         NotificationsCustomSettingsActivity.this.searchWas = true;
                         if (NotificationsCustomSettingsActivity.this.listView != null) {
                             NotificationsCustomSettingsActivity.this.emptyView.setText(LocaleController.getString("NoResult", R.string.NoResult));
@@ -180,32 +182,32 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
                             NotificationsCustomSettingsActivity.this.listView.setVerticalScrollBarEnabled(true);
                         }
                     }
-                    NotificationsCustomSettingsActivity.this.searchAdapter.searchDialogs(obj);
+                    NotificationsCustomSettingsActivity.this.searchAdapter.searchDialogs(text);
                 }
-            }).setSearchFieldHint(LocaleController.getString("Search", R.string.Search));
+            });
+            searchItem.setSearchFieldHint(LocaleController.getString("Search", R.string.Search));
         }
         this.searchAdapter = new SearchAdapter(context);
-        FrameLayout frameLayout = new FrameLayout(context);
-        this.fragmentView = frameLayout;
-        FrameLayout frameLayout2 = frameLayout;
-        frameLayout2.setBackgroundColor(Theme.getColor("windowBackgroundGray"));
+        this.fragmentView = new FrameLayout(context);
+        FrameLayout frameLayout = (FrameLayout) this.fragmentView;
+        frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
         EmptyTextProgressView emptyTextProgressView = new EmptyTextProgressView(context);
         this.emptyView = emptyTextProgressView;
         emptyTextProgressView.setTextSize(18);
         this.emptyView.setText(LocaleController.getString("NoExceptions", R.string.NoExceptions));
         this.emptyView.showTextView();
-        frameLayout2.addView(this.emptyView, LayoutHelper.createFrame(-1, -1.0f));
+        frameLayout.addView(this.emptyView, LayoutHelper.createFrame(-1, -1.0f));
         RecyclerListView recyclerListView = new RecyclerListView(context);
         this.listView = recyclerListView;
         recyclerListView.setEmptyView(this.emptyView);
         this.listView.setLayoutManager(new LinearLayoutManager(context, 1, false));
         this.listView.setVerticalScrollBarEnabled(false);
-        frameLayout2.addView(this.listView, LayoutHelper.createFrame(-1, -1.0f));
+        frameLayout.addView(this.listView, LayoutHelper.createFrame(-1, -1.0f));
         RecyclerListView recyclerListView2 = this.listView;
         ListAdapter listAdapter = new ListAdapter(context);
         this.adapter = listAdapter;
         recyclerListView2.setAdapter(listAdapter);
-        this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListenerExtended() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda9
+        this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListenerExtended() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda11
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListenerExtended
             public /* synthetic */ boolean hasDoubleTap(View view, int i) {
                 return RecyclerListView.OnItemClickListenerExtended.CC.$default$hasDoubleTap(this, view, i);
@@ -218,355 +220,388 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
 
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListenerExtended
             public final void onItemClick(View view, int i, float f, float f2) {
-                NotificationsCustomSettingsActivity.this.lambda$createView$8(context, view, i, f, f2);
+                NotificationsCustomSettingsActivity.this.m3943x91af2ba3(context, view, i, f, f2);
             }
         });
         this.listView.setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.4
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrollStateChanged(RecyclerView recyclerView, int i) {
-                if (i == 1) {
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == 1) {
                     AndroidUtilities.hideKeyboard(NotificationsCustomSettingsActivity.this.getParentActivity().getCurrentFocus());
                 }
             }
 
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrolled(RecyclerView recyclerView, int i, int i2) {
-                super.onScrolled(recyclerView, i, i2);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
             }
         });
         return this.fragmentView;
     }
 
-    public /* synthetic */ void lambda$createView$8(Context context, View view, final int i, float f, float f2) {
-        final ArrayList<NotificationsSettingsActivity.NotificationException> arrayList;
-        final boolean z;
-        final NotificationsSettingsActivity.NotificationException notificationException;
+    /* renamed from: lambda$createView$8$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3943x91af2ba3(Context context, View view, final int position, float x, float y) {
+        boolean newException;
+        NotificationsSettingsActivity.NotificationException exception;
+        ArrayList<NotificationsSettingsActivity.NotificationException> arrayList;
+        boolean newException2;
+        NotificationsSettingsActivity.NotificationException exception2;
         ArrayList<NotificationsSettingsActivity.NotificationException> arrayList2;
-        NotificationsSettingsActivity.NotificationException notificationException2;
-        long j;
-        boolean z2;
-        if (getParentActivity() == null) {
-            return;
-        }
-        boolean z3 = false;
-        if (this.listView.getAdapter() == this.searchAdapter || (i >= this.exceptionsStartRow && i < this.exceptionsEndRow)) {
-            RecyclerView.Adapter adapter = this.listView.getAdapter();
-            SearchAdapter searchAdapter = this.searchAdapter;
-            if (adapter == searchAdapter) {
-                Object object = searchAdapter.getObject(i);
-                if (!(object instanceof NotificationsSettingsActivity.NotificationException)) {
-                    boolean z4 = object instanceof TLRPC$User;
-                    if (z4) {
-                        j = ((TLRPC$User) object).id;
+        long did;
+        boolean newException3;
+        NotificationsSettingsActivity.NotificationException exception3;
+        String key;
+        boolean enabled = false;
+        if (getParentActivity() != null) {
+            if (this.listView.getAdapter() == this.searchAdapter || (position >= this.exceptionsStartRow && position < this.exceptionsEndRow)) {
+                RecyclerView.Adapter adapter = this.listView.getAdapter();
+                SearchAdapter searchAdapter = this.searchAdapter;
+                if (adapter == searchAdapter) {
+                    Object object = searchAdapter.getObject(position);
+                    if (object instanceof NotificationsSettingsActivity.NotificationException) {
+                        exception2 = (NotificationsSettingsActivity.NotificationException) object;
+                        newException2 = false;
+                        arrayList2 = this.searchAdapter.searchResult;
                     } else {
-                        j = -((TLRPC$Chat) object).id;
-                    }
-                    if (this.exceptionsDict.containsKey(Long.valueOf(j))) {
-                        notificationException2 = this.exceptionsDict.get(Long.valueOf(j));
-                    } else {
-                        NotificationsSettingsActivity.NotificationException notificationException3 = new NotificationsSettingsActivity.NotificationException();
-                        notificationException3.did = j;
-                        if (z4) {
-                            notificationException3.did = ((TLRPC$User) object).id;
+                        if (object instanceof TLRPC.User) {
+                            TLRPC.User user = (TLRPC.User) object;
+                            did = user.id;
                         } else {
-                            notificationException3.did = -((TLRPC$Chat) object).id;
+                            TLRPC.Chat chat = (TLRPC.Chat) object;
+                            did = -chat.id;
                         }
-                        notificationException2 = notificationException3;
-                        z3 = true;
+                        if (this.exceptionsDict.containsKey(Long.valueOf(did))) {
+                            exception3 = this.exceptionsDict.get(Long.valueOf(did));
+                            newException3 = false;
+                        } else {
+                            NotificationsSettingsActivity.NotificationException exception4 = new NotificationsSettingsActivity.NotificationException();
+                            exception4.did = did;
+                            if (object instanceof TLRPC.User) {
+                                TLRPC.User user2 = (TLRPC.User) object;
+                                exception4.did = user2.id;
+                            } else {
+                                TLRPC.Chat chat2 = (TLRPC.Chat) object;
+                                exception4.did = -chat2.id;
+                            }
+                            newException3 = true;
+                            exception3 = exception4;
+                        }
+                        exception2 = exception3;
+                        newException2 = newException3;
+                        arrayList2 = this.exceptions;
                     }
-                    arrayList2 = this.exceptions;
+                    arrayList = arrayList2;
+                    exception = exception2;
+                    newException = newException2;
                 } else {
-                    arrayList2 = this.searchAdapter.searchResult;
-                    notificationException2 = (NotificationsSettingsActivity.NotificationException) object;
-                }
-                notificationException = notificationException2;
-                arrayList = arrayList2;
-                z = z3;
-            } else {
-                ArrayList<NotificationsSettingsActivity.NotificationException> arrayList3 = this.exceptions;
-                int i2 = i - this.exceptionsStartRow;
-                if (i2 < 0 || i2 >= arrayList3.size()) {
+                    ArrayList<NotificationsSettingsActivity.NotificationException> arrayList3 = this.exceptions;
+                    int index = position - this.exceptionsStartRow;
+                    if (index >= 0 && index < arrayList3.size()) {
+                        arrayList = arrayList3;
+                        exception = arrayList3.get(index);
+                        newException = false;
+                    }
                     return;
                 }
-                arrayList = arrayList3;
-                notificationException = arrayList3.get(i2);
-                z = false;
-            }
-            if (notificationException == null) {
-                return;
-            }
-            final long j2 = notificationException.did;
-            final boolean isGlobalNotificationsEnabled = NotificationsController.getInstance(this.currentAccount).isGlobalNotificationsEnabled(j2);
-            ChatNotificationsPopupWrapper chatNotificationsPopupWrapper = new ChatNotificationsPopupWrapper(context, this.currentAccount, null, true, true, new ChatNotificationsPopupWrapper.Callback() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.3
-                @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
-                public /* synthetic */ void dismiss() {
-                    ChatNotificationsPopupWrapper.Callback.CC.$default$dismiss(this);
+                if (exception == null) {
+                    return;
                 }
-
-                @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
-                public void toggleSound() {
-                    SharedPreferences notificationsSettings = MessagesController.getNotificationsSettings(((BaseFragment) NotificationsCustomSettingsActivity.this).currentAccount);
-                    boolean z5 = !notificationsSettings.getBoolean("sound_enabled_" + j2, true);
-                    notificationsSettings.edit().putBoolean("sound_enabled_" + j2, z5).apply();
-                    if (BulletinFactory.canShowBulletin(NotificationsCustomSettingsActivity.this)) {
-                        NotificationsCustomSettingsActivity notificationsCustomSettingsActivity = NotificationsCustomSettingsActivity.this;
-                        BulletinFactory.createSoundEnabledBulletin(notificationsCustomSettingsActivity, !z5, notificationsCustomSettingsActivity.getResourceProvider()).show();
+                final long did2 = exception.did;
+                final boolean defaultEnabled = NotificationsController.getInstance(this.currentAccount).isGlobalNotificationsEnabled(did2);
+                final NotificationsSettingsActivity.NotificationException notificationException = exception;
+                final boolean z = newException;
+                final ArrayList<NotificationsSettingsActivity.NotificationException> arrayList4 = arrayList;
+                ChatNotificationsPopupWrapper chatNotificationsPopupWrapper = new ChatNotificationsPopupWrapper(context, this.currentAccount, null, true, true, new ChatNotificationsPopupWrapper.Callback() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.3
+                    @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
+                    public /* synthetic */ void dismiss() {
+                        ChatNotificationsPopupWrapper.Callback.CC.$default$dismiss(this);
                     }
-                }
 
-                @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
-                public void muteFor(int i3) {
-                    if (i3 != 0) {
-                        NotificationsCustomSettingsActivity.this.getNotificationsController().muteUntil(j2, i3);
+                    @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
+                    public void toggleSound() {
+                        SharedPreferences preferences = MessagesController.getNotificationsSettings(NotificationsCustomSettingsActivity.this.currentAccount);
+                        int i = 1;
+                        boolean enabled2 = !preferences.getBoolean("sound_enabled_" + did2, true);
+                        preferences.edit().putBoolean("sound_enabled_" + did2, enabled2).apply();
                         if (BulletinFactory.canShowBulletin(NotificationsCustomSettingsActivity.this)) {
                             NotificationsCustomSettingsActivity notificationsCustomSettingsActivity = NotificationsCustomSettingsActivity.this;
-                            BulletinFactory.createMuteBulletin(notificationsCustomSettingsActivity, 5, i3, notificationsCustomSettingsActivity.getResourceProvider()).show();
-                        }
-                    } else {
-                        if (NotificationsCustomSettingsActivity.this.getMessagesController().isDialogMuted(j2)) {
-                            toggleMute();
-                        }
-                        if (BulletinFactory.canShowBulletin(NotificationsCustomSettingsActivity.this)) {
-                            NotificationsCustomSettingsActivity notificationsCustomSettingsActivity2 = NotificationsCustomSettingsActivity.this;
-                            BulletinFactory.createMuteBulletin(notificationsCustomSettingsActivity2, 4, i3, notificationsCustomSettingsActivity2.getResourceProvider()).show();
-                        }
-                    }
-                    update();
-                }
-
-                @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
-                public void showCustomize() {
-                    if (j2 != 0) {
-                        Bundle bundle = new Bundle();
-                        bundle.putLong("dialog_id", j2);
-                        ProfileNotificationsActivity profileNotificationsActivity = new ProfileNotificationsActivity(bundle);
-                        profileNotificationsActivity.setDelegate(new ProfileNotificationsActivity.ProfileNotificationsActivityDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.3.1
-                            @Override // org.telegram.ui.ProfileNotificationsActivity.ProfileNotificationsActivityDelegate
-                            public void didCreateNewException(NotificationsSettingsActivity.NotificationException notificationException4) {
+                            if (enabled2) {
+                                i = 0;
                             }
-
-                            @Override // org.telegram.ui.ProfileNotificationsActivity.ProfileNotificationsActivityDelegate
-                            public void didRemoveException(long j3) {
-                                setDefault();
-                            }
-                        });
-                        NotificationsCustomSettingsActivity.this.presentFragment(profileNotificationsActivity);
-                    }
-                }
-
-                @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
-                public void toggleMute() {
-                    NotificationsCustomSettingsActivity.this.getNotificationsController().muteDialog(j2, !NotificationsCustomSettingsActivity.this.getMessagesController().isDialogMuted(j2));
-                    NotificationsCustomSettingsActivity notificationsCustomSettingsActivity = NotificationsCustomSettingsActivity.this;
-                    BulletinFactory.createMuteBulletin(notificationsCustomSettingsActivity, notificationsCustomSettingsActivity.getMessagesController().isDialogMuted(j2), null).show();
-                    update();
-                }
-
-                private void update() {
-                    if (NotificationsCustomSettingsActivity.this.getMessagesController().isDialogMuted(j2) != isGlobalNotificationsEnabled) {
-                        setDefault();
-                    } else {
-                        setNotDefault();
-                    }
-                }
-
-                private void setNotDefault() {
-                    SharedPreferences notificationsSettings = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
-                    NotificationsSettingsActivity.NotificationException notificationException4 = notificationException;
-                    notificationException4.hasCustom = notificationsSettings.getBoolean("custom_" + notificationException.did, false);
-                    NotificationsSettingsActivity.NotificationException notificationException5 = notificationException;
-                    notificationException5.notify = notificationsSettings.getInt("notify2_" + notificationException.did, 0);
-                    if (notificationException.notify != 0) {
-                        int i3 = notificationsSettings.getInt("notifyuntil_" + notificationException.did, -1);
-                        if (i3 != -1) {
-                            notificationException.muteUntil = i3;
+                            BulletinFactory.createSoundEnabledBulletin(notificationsCustomSettingsActivity, i, notificationsCustomSettingsActivity.getResourceProvider()).show();
                         }
                     }
-                    if (z) {
-                        NotificationsCustomSettingsActivity.this.exceptions.add(notificationException);
-                        NotificationsCustomSettingsActivity.this.exceptionsDict.put(Long.valueOf(notificationException.did), notificationException);
-                        NotificationsCustomSettingsActivity.this.updateRows(true);
-                    } else {
-                        NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemChanged(i);
-                    }
-                    ((BaseFragment) NotificationsCustomSettingsActivity.this).actionBar.closeSearchField();
-                }
 
-                public void setDefault() {
-                    int indexOf;
-                    if (z) {
+                    @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
+                    public void muteFor(int timeInSeconds) {
+                        if (timeInSeconds != 0) {
+                            NotificationsCustomSettingsActivity.this.getNotificationsController().muteUntil(did2, timeInSeconds);
+                            if (BulletinFactory.canShowBulletin(NotificationsCustomSettingsActivity.this)) {
+                                NotificationsCustomSettingsActivity notificationsCustomSettingsActivity = NotificationsCustomSettingsActivity.this;
+                                BulletinFactory.createMuteBulletin(notificationsCustomSettingsActivity, 5, timeInSeconds, notificationsCustomSettingsActivity.getResourceProvider()).show();
+                            }
+                        } else {
+                            if (NotificationsCustomSettingsActivity.this.getMessagesController().isDialogMuted(did2)) {
+                                toggleMute();
+                            }
+                            if (BulletinFactory.canShowBulletin(NotificationsCustomSettingsActivity.this)) {
+                                NotificationsCustomSettingsActivity notificationsCustomSettingsActivity2 = NotificationsCustomSettingsActivity.this;
+                                BulletinFactory.createMuteBulletin(notificationsCustomSettingsActivity2, 4, timeInSeconds, notificationsCustomSettingsActivity2.getResourceProvider()).show();
+                            }
+                        }
+                        update();
+                    }
+
+                    @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
+                    public void showCustomize() {
+                        if (did2 != 0) {
+                            Bundle args = new Bundle();
+                            args.putLong("dialog_id", did2);
+                            ProfileNotificationsActivity fragment = new ProfileNotificationsActivity(args);
+                            fragment.setDelegate(new ProfileNotificationsActivity.ProfileNotificationsActivityDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.3.1
+                                @Override // org.telegram.ui.ProfileNotificationsActivity.ProfileNotificationsActivityDelegate
+                                public void didCreateNewException(NotificationsSettingsActivity.NotificationException exception5) {
+                                }
+
+                                @Override // org.telegram.ui.ProfileNotificationsActivity.ProfileNotificationsActivityDelegate
+                                public void didRemoveException(long dialog_id) {
+                                    setDefault();
+                                }
+                            });
+                            NotificationsCustomSettingsActivity.this.presentFragment(fragment);
+                        }
+                    }
+
+                    @Override // org.telegram.ui.Components.ChatNotificationsPopupWrapper.Callback
+                    public void toggleMute() {
+                        boolean muted = NotificationsCustomSettingsActivity.this.getMessagesController().isDialogMuted(did2);
+                        NotificationsCustomSettingsActivity.this.getNotificationsController().muteDialog(did2, !muted);
+                        NotificationsCustomSettingsActivity notificationsCustomSettingsActivity = NotificationsCustomSettingsActivity.this;
+                        BulletinFactory.createMuteBulletin(notificationsCustomSettingsActivity, notificationsCustomSettingsActivity.getMessagesController().isDialogMuted(did2), null).show();
+                        update();
+                    }
+
+                    private void update() {
+                        if (NotificationsCustomSettingsActivity.this.getMessagesController().isDialogMuted(did2) != defaultEnabled) {
+                            setDefault();
+                        } else {
+                            setNotDefault();
+                        }
+                    }
+
+                    private void setNotDefault() {
+                        SharedPreferences preferences = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
+                        NotificationsSettingsActivity.NotificationException notificationException2 = notificationException;
+                        notificationException2.hasCustom = preferences.getBoolean(ContentMetadata.KEY_CUSTOM_PREFIX + notificationException.did, false);
+                        NotificationsSettingsActivity.NotificationException notificationException3 = notificationException;
+                        notificationException3.notify = preferences.getInt("notify2_" + notificationException.did, 0);
+                        if (notificationException.notify != 0) {
+                            int time = preferences.getInt("notifyuntil_" + notificationException.did, -1);
+                            if (time != -1) {
+                                notificationException.muteUntil = time;
+                            }
+                        }
+                        if (z) {
+                            NotificationsCustomSettingsActivity.this.exceptions.add(notificationException);
+                            NotificationsCustomSettingsActivity.this.exceptionsDict.put(Long.valueOf(notificationException.did), notificationException);
+                            NotificationsCustomSettingsActivity.this.updateRows(true);
+                        } else {
+                            NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemChanged(position);
+                        }
+                        NotificationsCustomSettingsActivity.this.actionBar.closeSearchField();
+                    }
+
+                    public void setDefault() {
+                        int idx;
+                        if (!z) {
+                            if (arrayList4 != NotificationsCustomSettingsActivity.this.exceptions && (idx = NotificationsCustomSettingsActivity.this.exceptions.indexOf(notificationException)) >= 0) {
+                                NotificationsCustomSettingsActivity.this.exceptions.remove(idx);
+                                NotificationsCustomSettingsActivity.this.exceptionsDict.remove(Long.valueOf(notificationException.did));
+                            }
+                            arrayList4.remove(notificationException);
+                            if (arrayList4 == NotificationsCustomSettingsActivity.this.exceptions) {
+                                if (NotificationsCustomSettingsActivity.this.exceptionsAddRow != -1 && arrayList4.isEmpty()) {
+                                    NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemChanged(NotificationsCustomSettingsActivity.this.exceptionsAddRow);
+                                    NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemRemoved(NotificationsCustomSettingsActivity.this.deleteAllRow);
+                                    NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemRemoved(NotificationsCustomSettingsActivity.this.deleteAllSectionRow);
+                                }
+                                NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemRemoved(position);
+                                NotificationsCustomSettingsActivity.this.updateRows(false);
+                                NotificationsCustomSettingsActivity.this.checkRowsEnabled();
+                            } else {
+                                NotificationsCustomSettingsActivity.this.updateRows(true);
+                                NotificationsCustomSettingsActivity.this.searchAdapter.notifyItemChanged(position);
+                            }
+                            NotificationsCustomSettingsActivity.this.actionBar.closeSearchField();
+                        }
+                    }
+                }, getResourceProvider());
+                chatNotificationsPopupWrapper.m2522x80790d7d(did2);
+                chatNotificationsPopupWrapper.showAsOptions(this, view, x, y);
+                return;
+            }
+            if (position != this.exceptionsAddRow) {
+                if (position != this.deleteAllRow) {
+                    if (position == this.alertRow) {
+                        enabled = getNotificationsController().isGlobalNotificationsEnabled(this.currentType);
+                        final NotificationsCheckCell checkCell = (NotificationsCheckCell) view;
+                        final RecyclerView.ViewHolder holder = this.listView.findViewHolderForAdapterPosition(position);
+                        if (!enabled) {
+                            getNotificationsController().setGlobalNotificationsEnabled(this.currentType, 0);
+                            checkCell.setChecked(true);
+                            if (holder != null) {
+                                this.adapter.onBindViewHolder(holder, position);
+                            }
+                            checkRowsEnabled();
+                        } else {
+                            AlertsCreator.showCustomNotificationsDialog(this, 0L, this.currentType, this.exceptions, this.currentAccount, new MessagesStorage.IntCallback() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda9
+                                @Override // org.telegram.messenger.MessagesStorage.IntCallback
+                                public final void run(int i) {
+                                    NotificationsCustomSettingsActivity.this.m3938xcf89b41e(checkCell, holder, position, i);
+                                }
+                            });
+                        }
+                    } else if (position != this.previewRow) {
+                        if (position == this.messageSoundRow) {
+                            if (!view.isEnabled()) {
+                                return;
+                            }
+                            try {
+                                Bundle bundle = new Bundle();
+                                bundle.putInt(CommonProperties.TYPE, this.currentType);
+                                presentFragment(new NotificationsSoundActivity(bundle, getResourceProvider()));
+                            } catch (Exception e) {
+                                FileLog.e(e);
+                            }
+                        } else if (position == this.messageLedRow) {
+                            if (view.isEnabled()) {
+                                showDialog(AlertsCreator.createColorSelectDialog(getParentActivity(), 0L, this.currentType, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda4
+                                    @Override // java.lang.Runnable
+                                    public final void run() {
+                                        NotificationsCustomSettingsActivity.this.m3939x5cc4659f(position);
+                                    }
+                                }));
+                            } else {
+                                return;
+                            }
+                        } else if (position == this.messagePopupNotificationRow) {
+                            if (view.isEnabled()) {
+                                showDialog(AlertsCreator.createPopupSelectDialog(getParentActivity(), this.currentType, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda5
+                                    @Override // java.lang.Runnable
+                                    public final void run() {
+                                        NotificationsCustomSettingsActivity.this.m3940xe9ff1720(position);
+                                    }
+                                }));
+                            } else {
+                                return;
+                            }
+                        } else if (position == this.messageVibrateRow) {
+                            if (!view.isEnabled()) {
+                                return;
+                            }
+                            int i = this.currentType;
+                            if (i == 1) {
+                                key = "vibrate_messages";
+                            } else if (i == 0) {
+                                key = "vibrate_group";
+                            } else {
+                                key = "vibrate_channel";
+                            }
+                            showDialog(AlertsCreator.createVibrationSelectDialog(getParentActivity(), 0L, key, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda6
+                                @Override // java.lang.Runnable
+                                public final void run() {
+                                    NotificationsCustomSettingsActivity.this.m3941x7739c8a1(position);
+                                }
+                            }));
+                        } else if (position == this.messagePriorityRow) {
+                            if (view.isEnabled()) {
+                                showDialog(AlertsCreator.createPrioritySelectDialog(getParentActivity(), 0L, this.currentType, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda7
+                                    @Override // java.lang.Runnable
+                                    public final void run() {
+                                        NotificationsCustomSettingsActivity.this.m3942x4747a22(position);
+                                    }
+                                }));
+                            } else {
+                                return;
+                            }
+                        }
+                    } else if (!view.isEnabled()) {
                         return;
-                    }
-                    if (arrayList != NotificationsCustomSettingsActivity.this.exceptions && (indexOf = NotificationsCustomSettingsActivity.this.exceptions.indexOf(notificationException)) >= 0) {
-                        NotificationsCustomSettingsActivity.this.exceptions.remove(indexOf);
-                        NotificationsCustomSettingsActivity.this.exceptionsDict.remove(Long.valueOf(notificationException.did));
-                    }
-                    arrayList.remove(notificationException);
-                    if (arrayList == NotificationsCustomSettingsActivity.this.exceptions) {
-                        if (NotificationsCustomSettingsActivity.this.exceptionsAddRow != -1 && arrayList.isEmpty()) {
-                            NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemChanged(NotificationsCustomSettingsActivity.this.exceptionsAddRow);
-                            NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemRemoved(NotificationsCustomSettingsActivity.this.deleteAllRow);
-                            NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemRemoved(NotificationsCustomSettingsActivity.this.deleteAllSectionRow);
-                        }
-                        NotificationsCustomSettingsActivity.this.listView.getAdapter().notifyItemRemoved(i);
-                        NotificationsCustomSettingsActivity.this.updateRows(false);
-                        NotificationsCustomSettingsActivity.this.checkRowsEnabled();
                     } else {
-                        NotificationsCustomSettingsActivity.this.updateRows(true);
-                        NotificationsCustomSettingsActivity.this.searchAdapter.notifyItemChanged(i);
+                        SharedPreferences preferences = getNotificationsSettings();
+                        SharedPreferences.Editor editor = preferences.edit();
+                        int i2 = this.currentType;
+                        if (i2 == 1) {
+                            boolean enabled2 = preferences.getBoolean("EnablePreviewAll", true);
+                            editor.putBoolean("EnablePreviewAll", !enabled2);
+                            enabled = enabled2;
+                        } else if (i2 == 0) {
+                            boolean enabled3 = preferences.getBoolean("EnablePreviewGroup", true);
+                            editor.putBoolean("EnablePreviewGroup", !enabled3);
+                            enabled = enabled3;
+                        } else {
+                            boolean enabled4 = preferences.getBoolean("EnablePreviewChannel", true);
+                            editor.putBoolean("EnablePreviewChannel", !enabled4);
+                            enabled = enabled4;
+                        }
+                        editor.commit();
+                        getNotificationsController().updateServerNotificationsSettings(this.currentType);
                     }
-                    ((BaseFragment) NotificationsCustomSettingsActivity.this).actionBar.closeSearchField();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                    builder.setTitle(LocaleController.getString("NotificationsDeleteAllExceptionTitle", R.string.NotificationsDeleteAllExceptionTitle));
+                    builder.setMessage(LocaleController.getString("NotificationsDeleteAllExceptionAlert", R.string.NotificationsDeleteAllExceptionAlert));
+                    builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda0
+                        @Override // android.content.DialogInterface.OnClickListener
+                        public final void onClick(DialogInterface dialogInterface, int i3) {
+                            NotificationsCustomSettingsActivity.this.m3937x424f029d(dialogInterface, i3);
+                        }
+                    });
+                    builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                    AlertDialog alertDialog = builder.create();
+                    showDialog(alertDialog);
+                    TextView button = (TextView) alertDialog.getButton(-1);
+                    if (button != null) {
+                        button.setTextColor(Theme.getColor(Theme.key_dialogTextRed2));
+                    }
                 }
-            }, getResourceProvider());
-            chatNotificationsPopupWrapper.lambda$update$10(j2);
-            chatNotificationsPopupWrapper.showAsOptions(this, view, f, f2);
-            return;
-        }
-        if (i == this.exceptionsAddRow) {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("onlySelect", true);
-            bundle.putBoolean("checkCanWrite", false);
-            int i3 = this.currentType;
-            if (i3 == 0) {
-                bundle.putInt("dialogsType", 6);
-            } else if (i3 == 2) {
-                bundle.putInt("dialogsType", 5);
             } else {
-                bundle.putInt("dialogsType", 4);
-            }
-            DialogsActivity dialogsActivity = new DialogsActivity(bundle);
-            dialogsActivity.setDelegate(new DialogsActivity.DialogsActivityDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda10
-                @Override // org.telegram.ui.DialogsActivity.DialogsActivityDelegate
-                public final void didSelectDialogs(DialogsActivity dialogsActivity2, ArrayList arrayList4, CharSequence charSequence, boolean z5) {
-                    NotificationsCustomSettingsActivity.this.lambda$createView$1(dialogsActivity2, arrayList4, charSequence, z5);
+                Bundle args = new Bundle();
+                args.putBoolean("onlySelect", true);
+                args.putBoolean("checkCanWrite", false);
+                int i3 = this.currentType;
+                if (i3 == 0) {
+                    args.putInt("dialogsType", 6);
+                } else if (i3 == 2) {
+                    args.putInt("dialogsType", 5);
+                } else {
+                    args.putInt("dialogsType", 4);
                 }
-            });
-            presentFragment(dialogsActivity);
-        } else if (i == this.deleteAllRow) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-            builder.setTitle(LocaleController.getString("NotificationsDeleteAllExceptionTitle", R.string.NotificationsDeleteAllExceptionTitle));
-            builder.setMessage(LocaleController.getString("NotificationsDeleteAllExceptionAlert", R.string.NotificationsDeleteAllExceptionAlert));
-            builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda0
-                @Override // android.content.DialogInterface.OnClickListener
-                public final void onClick(DialogInterface dialogInterface, int i4) {
-                    NotificationsCustomSettingsActivity.this.lambda$createView$2(dialogInterface, i4);
-                }
-            });
-            builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
-            AlertDialog create = builder.create();
-            showDialog(create);
-            TextView textView = (TextView) create.getButton(-1);
-            if (textView != null) {
-                textView.setTextColor(Theme.getColor("dialogTextRed2"));
-            }
-        } else if (i == this.alertRow) {
-            boolean isGlobalNotificationsEnabled2 = getNotificationsController().isGlobalNotificationsEnabled(this.currentType);
-            final NotificationsCheckCell notificationsCheckCell = (NotificationsCheckCell) view;
-            final RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.listView.findViewHolderForAdapterPosition(i);
-            if (!isGlobalNotificationsEnabled2) {
-                getNotificationsController().setGlobalNotificationsEnabled(this.currentType, 0);
-                notificationsCheckCell.setChecked(true);
-                if (findViewHolderForAdapterPosition != null) {
-                    this.adapter.onBindViewHolder(findViewHolderForAdapterPosition, i);
-                }
-                checkRowsEnabled();
-            } else {
-                AlertsCreator.showCustomNotificationsDialog(this, 0L, this.currentType, this.exceptions, this.currentAccount, new MessagesStorage.IntCallback() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda7
-                    @Override // org.telegram.messenger.MessagesStorage.IntCallback
-                    public final void run(int i4) {
-                        NotificationsCustomSettingsActivity.this.lambda$createView$3(notificationsCheckCell, findViewHolderForAdapterPosition, i, i4);
+                DialogsActivity activity = new DialogsActivity(args);
+                activity.setDelegate(new DialogsActivity.DialogsActivityDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda1
+                    @Override // org.telegram.ui.DialogsActivity.DialogsActivityDelegate
+                    public final void didSelectDialogs(DialogsActivity dialogsActivity, ArrayList arrayList5, CharSequence charSequence, boolean z2) {
+                        NotificationsCustomSettingsActivity.this.m3936xb514511c(dialogsActivity, arrayList5, charSequence, z2);
                     }
                 });
+                presentFragment(activity);
             }
-            z3 = isGlobalNotificationsEnabled2;
-        } else if (i == this.previewRow) {
-            if (!view.isEnabled()) {
-                return;
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(!enabled);
             }
-            SharedPreferences notificationsSettings = getNotificationsSettings();
-            SharedPreferences.Editor edit = notificationsSettings.edit();
-            int i4 = this.currentType;
-            if (i4 == 1) {
-                z2 = notificationsSettings.getBoolean("EnablePreviewAll", true);
-                edit.putBoolean("EnablePreviewAll", !z2);
-            } else if (i4 == 0) {
-                z2 = notificationsSettings.getBoolean("EnablePreviewGroup", true);
-                edit.putBoolean("EnablePreviewGroup", !z2);
-            } else {
-                z2 = notificationsSettings.getBoolean("EnablePreviewChannel", true);
-                edit.putBoolean("EnablePreviewChannel", !z2);
-            }
-            z3 = z2;
-            edit.commit();
-            getNotificationsController().updateServerNotificationsSettings(this.currentType);
-        } else if (i == this.messageSoundRow) {
-            if (!view.isEnabled()) {
-                return;
-            }
-            try {
-                Bundle bundle2 = new Bundle();
-                bundle2.putInt("type", this.currentType);
-                presentFragment(new NotificationsSoundActivity(bundle2, getResourceProvider()));
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
-        } else if (i == this.messageLedRow) {
-            if (!view.isEnabled()) {
-                return;
-            }
-            showDialog(AlertsCreator.createColorSelectDialog(getParentActivity(), 0L, this.currentType, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda4
-                @Override // java.lang.Runnable
-                public final void run() {
-                    NotificationsCustomSettingsActivity.this.lambda$createView$4(i);
-                }
-            }));
-        } else if (i == this.messagePopupNotificationRow) {
-            if (!view.isEnabled()) {
-                return;
-            }
-            showDialog(AlertsCreator.createPopupSelectDialog(getParentActivity(), this.currentType, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda2
-                @Override // java.lang.Runnable
-                public final void run() {
-                    NotificationsCustomSettingsActivity.this.lambda$createView$5(i);
-                }
-            }));
-        } else if (i == this.messageVibrateRow) {
-            if (!view.isEnabled()) {
-                return;
-            }
-            int i5 = this.currentType;
-            showDialog(AlertsCreator.createVibrationSelectDialog(getParentActivity(), 0L, i5 == 1 ? "vibrate_messages" : i5 == 0 ? "vibrate_group" : "vibrate_channel", new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda3
-                @Override // java.lang.Runnable
-                public final void run() {
-                    NotificationsCustomSettingsActivity.this.lambda$createView$6(i);
-                }
-            }));
-        } else if (i == this.messagePriorityRow) {
-            if (!view.isEnabled()) {
-                return;
-            }
-            showDialog(AlertsCreator.createPrioritySelectDialog(getParentActivity(), 0L, this.currentType, new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda5
-                @Override // java.lang.Runnable
-                public final void run() {
-                    NotificationsCustomSettingsActivity.this.lambda$createView$7(i);
-                }
-            }));
         }
-        if (!(view instanceof TextCheckCell)) {
-            return;
-        }
-        ((TextCheckCell) view).setChecked(!z3);
     }
 
-    public /* synthetic */ void lambda$createView$1(DialogsActivity dialogsActivity, ArrayList arrayList, CharSequence charSequence, boolean z) {
-        Bundle bundle = new Bundle();
-        bundle.putLong("dialog_id", ((Long) arrayList.get(0)).longValue());
-        bundle.putBoolean("exception", true);
-        ProfileNotificationsActivity profileNotificationsActivity = new ProfileNotificationsActivity(bundle, getResourceProvider());
-        profileNotificationsActivity.setDelegate(new ProfileNotificationsActivity.ProfileNotificationsActivityDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda11
+    /* renamed from: lambda$createView$1$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3936xb514511c(DialogsActivity fragment, ArrayList dids, CharSequence message, boolean param) {
+        Bundle args2 = new Bundle();
+        args2.putLong("dialog_id", ((Long) dids.get(0)).longValue());
+        args2.putBoolean("exception", true);
+        ProfileNotificationsActivity profileNotificationsActivity = new ProfileNotificationsActivity(args2, getResourceProvider());
+        profileNotificationsActivity.setDelegate(new ProfileNotificationsActivity.ProfileNotificationsActivityDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda2
             @Override // org.telegram.ui.ProfileNotificationsActivity.ProfileNotificationsActivityDelegate
             public final void didCreateNewException(NotificationsSettingsActivity.NotificationException notificationException) {
-                NotificationsCustomSettingsActivity.this.lambda$createView$0(notificationException);
+                NotificationsCustomSettingsActivity.this.m3935x27d99f9b(notificationException);
             }
 
             @Override // org.telegram.ui.ProfileNotificationsActivity.ProfileNotificationsActivityDelegate
@@ -577,28 +612,31 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         presentFragment(profileNotificationsActivity, true);
     }
 
-    public /* synthetic */ void lambda$createView$0(NotificationsSettingsActivity.NotificationException notificationException) {
-        this.exceptions.add(0, notificationException);
+    /* renamed from: lambda$createView$0$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3935x27d99f9b(NotificationsSettingsActivity.NotificationException exception) {
+        this.exceptions.add(0, exception);
         updateRows(true);
     }
 
-    public /* synthetic */ void lambda$createView$2(DialogInterface dialogInterface, int i) {
-        SharedPreferences.Editor edit = getNotificationsSettings().edit();
-        int size = this.exceptions.size();
-        for (int i2 = 0; i2 < size; i2++) {
-            NotificationsSettingsActivity.NotificationException notificationException = this.exceptions.get(i2);
-            SharedPreferences.Editor remove = edit.remove("notify2_" + notificationException.did);
-            remove.remove("custom_" + notificationException.did);
-            getMessagesStorage().setDialogFlags(notificationException.did, 0L);
-            TLRPC$Dialog tLRPC$Dialog = getMessagesController().dialogs_dict.get(notificationException.did);
-            if (tLRPC$Dialog != null) {
-                tLRPC$Dialog.notify_settings = new TLRPC$TL_peerNotifySettings();
+    /* renamed from: lambda$createView$2$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3937x424f029d(DialogInterface dialogInterface, int i) {
+        SharedPreferences preferences = getNotificationsSettings();
+        SharedPreferences.Editor editor = preferences.edit();
+        int N = this.exceptions.size();
+        for (int a = 0; a < N; a++) {
+            NotificationsSettingsActivity.NotificationException exception = this.exceptions.get(a);
+            SharedPreferences.Editor remove = editor.remove("notify2_" + exception.did);
+            remove.remove(ContentMetadata.KEY_CUSTOM_PREFIX + exception.did);
+            getMessagesStorage().setDialogFlags(exception.did, 0L);
+            TLRPC.Dialog dialog = getMessagesController().dialogs_dict.get(exception.did);
+            if (dialog != null) {
+                dialog.notify_settings = new TLRPC.TL_peerNotifySettings();
             }
         }
-        edit.commit();
-        int size2 = this.exceptions.size();
-        for (int i3 = 0; i3 < size2; i3++) {
-            getNotificationsController().updateServerNotificationsSettings(this.exceptions.get(i3).did, false);
+        editor.commit();
+        int N2 = this.exceptions.size();
+        for (int a2 = 0; a2 < N2; a2++) {
+            getNotificationsController().updateServerNotificationsSettings(this.exceptions.get(a2).did, false);
         }
         this.exceptions.clear();
         this.exceptionsDict.clear();
@@ -606,54 +644,63 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         getNotificationCenter().postNotificationName(NotificationCenter.notificationsSettingsUpdated, new Object[0]);
     }
 
-    public /* synthetic */ void lambda$createView$3(NotificationsCheckCell notificationsCheckCell, RecyclerView.ViewHolder viewHolder, int i, int i2) {
-        int i3;
-        SharedPreferences notificationsSettings = getNotificationsSettings();
-        int i4 = this.currentType;
-        int i5 = 0;
-        if (i4 == 1) {
-            i3 = notificationsSettings.getInt("EnableAll2", 0);
-        } else if (i4 == 0) {
-            i3 = notificationsSettings.getInt("EnableGroup2", 0);
+    /* renamed from: lambda$createView$3$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3938xcf89b41e(NotificationsCheckCell checkCell, RecyclerView.ViewHolder holder, int position, int param) {
+        int offUntil;
+        int iconType;
+        SharedPreferences preferences = getNotificationsSettings();
+        int offUntil2 = this.currentType;
+        if (offUntil2 == 1) {
+            offUntil = preferences.getInt("EnableAll2", 0);
+        } else if (offUntil2 == 0) {
+            offUntil = preferences.getInt("EnableGroup2", 0);
         } else {
-            i3 = notificationsSettings.getInt("EnableChannel2", 0);
+            offUntil = preferences.getInt("EnableChannel2", 0);
         }
         int currentTime = getConnectionsManager().getCurrentTime();
-        if (i3 >= currentTime && i3 - 31536000 < currentTime) {
-            i5 = 2;
+        if (offUntil < currentTime) {
+            iconType = 0;
+        } else if (offUntil - 31536000 >= currentTime) {
+            iconType = 0;
+        } else {
+            iconType = 2;
         }
-        notificationsCheckCell.setChecked(getNotificationsController().isGlobalNotificationsEnabled(this.currentType), i5);
-        if (viewHolder != null) {
-            this.adapter.onBindViewHolder(viewHolder, i);
+        checkCell.setChecked(getNotificationsController().isGlobalNotificationsEnabled(this.currentType), iconType);
+        if (holder != null) {
+            this.adapter.onBindViewHolder(holder, position);
         }
         checkRowsEnabled();
     }
 
-    public /* synthetic */ void lambda$createView$4(int i) {
-        RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.listView.findViewHolderForAdapterPosition(i);
-        if (findViewHolderForAdapterPosition != null) {
-            this.adapter.onBindViewHolder(findViewHolderForAdapterPosition, i);
+    /* renamed from: lambda$createView$4$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3939x5cc4659f(int position) {
+        RecyclerView.ViewHolder holder = this.listView.findViewHolderForAdapterPosition(position);
+        if (holder != null) {
+            this.adapter.onBindViewHolder(holder, position);
         }
     }
 
-    public /* synthetic */ void lambda$createView$5(int i) {
-        RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.listView.findViewHolderForAdapterPosition(i);
-        if (findViewHolderForAdapterPosition != null) {
-            this.adapter.onBindViewHolder(findViewHolderForAdapterPosition, i);
+    /* renamed from: lambda$createView$5$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3940xe9ff1720(int position) {
+        RecyclerView.ViewHolder holder = this.listView.findViewHolderForAdapterPosition(position);
+        if (holder != null) {
+            this.adapter.onBindViewHolder(holder, position);
         }
     }
 
-    public /* synthetic */ void lambda$createView$6(int i) {
-        RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.listView.findViewHolderForAdapterPosition(i);
-        if (findViewHolderForAdapterPosition != null) {
-            this.adapter.onBindViewHolder(findViewHolderForAdapterPosition, i);
+    /* renamed from: lambda$createView$6$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3941x7739c8a1(int position) {
+        RecyclerView.ViewHolder holder = this.listView.findViewHolderForAdapterPosition(position);
+        if (holder != null) {
+            this.adapter.onBindViewHolder(holder, position);
         }
     }
 
-    public /* synthetic */ void lambda$createView$7(int i) {
-        RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.listView.findViewHolderForAdapterPosition(i);
-        if (findViewHolderForAdapterPosition != null) {
-            this.adapter.onBindViewHolder(findViewHolderForAdapterPosition, i);
+    /* renamed from: lambda$createView$7$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3942x4747a22(int position) {
+        RecyclerView.ViewHolder holder = this.listView.findViewHolderForAdapterPosition(position);
+        if (holder != null) {
+            this.adapter.onBindViewHolder(holder, position);
         }
     }
 
@@ -661,94 +708,99 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         if (!this.exceptions.isEmpty()) {
             return;
         }
-        int childCount = this.listView.getChildCount();
-        ArrayList<Animator> arrayList = new ArrayList<>();
-        boolean isGlobalNotificationsEnabled = getNotificationsController().isGlobalNotificationsEnabled(this.currentType);
-        for (int i = 0; i < childCount; i++) {
-            RecyclerListView.Holder holder = (RecyclerListView.Holder) this.listView.getChildViewHolder(this.listView.getChildAt(i));
-            int itemViewType = holder.getItemViewType();
-            if (itemViewType == 0) {
-                HeaderCell headerCell = (HeaderCell) holder.itemView;
-                if (holder.getAdapterPosition() == this.messageSectionRow) {
-                    headerCell.setEnabled(isGlobalNotificationsEnabled, arrayList);
-                }
-            } else if (itemViewType == 1) {
-                ((TextCheckCell) holder.itemView).setEnabled(isGlobalNotificationsEnabled, arrayList);
-            } else if (itemViewType == 3) {
-                ((TextColorCell) holder.itemView).setEnabled(isGlobalNotificationsEnabled, arrayList);
-            } else if (itemViewType == 5) {
-                ((TextSettingsCell) holder.itemView).setEnabled(isGlobalNotificationsEnabled, arrayList);
+        int count = this.listView.getChildCount();
+        ArrayList<Animator> animators = new ArrayList<>();
+        boolean enabled = getNotificationsController().isGlobalNotificationsEnabled(this.currentType);
+        for (int a = 0; a < count; a++) {
+            View child = this.listView.getChildAt(a);
+            RecyclerListView.Holder holder = (RecyclerListView.Holder) this.listView.getChildViewHolder(child);
+            switch (holder.getItemViewType()) {
+                case 0:
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    if (holder.getAdapterPosition() == this.messageSectionRow) {
+                        headerCell.setEnabled(enabled, animators);
+                        break;
+                    } else {
+                        break;
+                    }
+                case 1:
+                    TextCheckCell textCell = (TextCheckCell) holder.itemView;
+                    textCell.setEnabled(enabled, animators);
+                    break;
+                case 3:
+                    TextColorCell textCell2 = (TextColorCell) holder.itemView;
+                    textCell2.setEnabled(enabled, animators);
+                    break;
+                case 5:
+                    TextSettingsCell textCell3 = (TextSettingsCell) holder.itemView;
+                    textCell3.setEnabled(enabled, animators);
+                    break;
             }
         }
-        if (arrayList.isEmpty()) {
-            return;
-        }
-        AnimatorSet animatorSet = this.animatorSet;
-        if (animatorSet != null) {
-            animatorSet.cancel();
-        }
-        AnimatorSet animatorSet2 = new AnimatorSet();
-        this.animatorSet = animatorSet2;
-        animatorSet2.playTogether(arrayList);
-        this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.5
-            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                if (animator.equals(NotificationsCustomSettingsActivity.this.animatorSet)) {
-                    NotificationsCustomSettingsActivity.this.animatorSet = null;
-                }
+        if (!animators.isEmpty()) {
+            AnimatorSet animatorSet = this.animatorSet;
+            if (animatorSet != null) {
+                animatorSet.cancel();
             }
-        });
-        this.animatorSet.setDuration(150L);
-        this.animatorSet.start();
+            AnimatorSet animatorSet2 = new AnimatorSet();
+            this.animatorSet = animatorSet2;
+            animatorSet2.playTogether(animators);
+            this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity.5
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationEnd(Animator animator) {
+                    if (animator.equals(NotificationsCustomSettingsActivity.this.animatorSet)) {
+                        NotificationsCustomSettingsActivity.this.animatorSet = null;
+                    }
+                }
+            });
+            this.animatorSet.setDuration(150L);
+            this.animatorSet.start();
+        }
     }
 
     private void loadExceptions() {
-        getMessagesStorage().getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda1
+        getMessagesStorage().getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                NotificationsCustomSettingsActivity.this.lambda$loadExceptions$10();
+                NotificationsCustomSettingsActivity.this.m3945x1eb530ad();
             }
         });
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:25:0x0117, code lost:
-        if (r4.deleted != false) goto L50;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:33:0x0141, code lost:
-        if (r4.deleted != false) goto L50;
-     */
-    /* JADX WARN: Removed duplicated region for block: B:101:0x0246  */
-    /* JADX WARN: Removed duplicated region for block: B:107:0x0260 A[LOOP:3: B:106:0x025e->B:107:0x0260, LOOP_END] */
-    /* JADX WARN: Removed duplicated region for block: B:110:0x0279  */
-    /* JADX WARN: Removed duplicated region for block: B:84:0x0207  */
+    /* JADX WARN: Removed duplicated region for block: B:115:0x02f1  */
+    /* JADX WARN: Removed duplicated region for block: B:121:0x030b A[LOOP:3: B:120:0x0309->B:121:0x030b, LOOP_END] */
+    /* JADX WARN: Removed duplicated region for block: B:124:0x0325  */
+    /* JADX WARN: Removed duplicated region for block: B:96:0x029d  */
+    /* renamed from: lambda$loadExceptions$10$org-telegram-ui-NotificationsCustomSettingsActivity */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public /* synthetic */ void lambda$loadExceptions$10() {
+    public /* synthetic */ void m3945x1eb530ad() {
         /*
-            Method dump skipped, instructions count: 688
+            Method dump skipped, instructions count: 879
             To view this dump add '--comments-level debug' option
         */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.NotificationsCustomSettingsActivity.lambda$loadExceptions$10():void");
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.NotificationsCustomSettingsActivity.m3945x1eb530ad():void");
     }
 
-    public /* synthetic */ void lambda$loadExceptions$9(ArrayList arrayList, ArrayList arrayList2, ArrayList arrayList3, ArrayList arrayList4, ArrayList arrayList5, ArrayList arrayList6) {
-        getMessagesController().putUsers(arrayList, true);
-        getMessagesController().putChats(arrayList2, true);
-        getMessagesController().putEncryptedChats(arrayList3, true);
+    /* renamed from: lambda$loadExceptions$9$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3946xec5027ad(ArrayList users, ArrayList chats, ArrayList encryptedChats, ArrayList usersResult, ArrayList chatsResult, ArrayList channelsResult) {
+        getMessagesController().putUsers(users, true);
+        getMessagesController().putChats(chats, true);
+        getMessagesController().putEncryptedChats(encryptedChats, true);
         int i = this.currentType;
         if (i == 1) {
-            this.exceptions = arrayList4;
+            this.exceptions = usersResult;
         } else if (i == 0) {
-            this.exceptions = arrayList5;
+            this.exceptions = chatsResult;
         } else {
-            this.exceptions = arrayList6;
+            this.exceptions = channelsResult;
         }
         updateRows(true);
     }
 
-    public void updateRows(boolean z) {
+    public void updateRows(boolean notify) {
         ListAdapter listAdapter;
         ArrayList<NotificationsSettingsActivity.NotificationException> arrayList;
         this.rowCount = 0;
@@ -779,10 +831,10 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
                 this.messagePopupNotificationRow = i7;
             }
             int i8 = this.rowCount;
-            int i9 = i8 + 1;
-            this.rowCount = i9;
+            this.rowCount = i8 + 1;
             this.messageSoundRow = i8;
             if (Build.VERSION.SDK_INT >= 21) {
+                int i9 = this.rowCount;
                 this.rowCount = i9 + 1;
                 this.messagePriorityRow = i9;
             } else {
@@ -837,61 +889,60 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
             this.deleteAllRow = -1;
             this.deleteAllSectionRow = -1;
         }
-        if (!z || (listAdapter = this.adapter) == null) {
-            return;
+        if (notify && (listAdapter = this.adapter) != null) {
+            listAdapter.notifyDataSetChanged();
         }
-        listAdapter.notifyDataSetChanged();
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
-    public void onActivityResultFragment(int i, int i2, Intent intent) {
-        Ringtone ringtone;
-        if (i2 == -1) {
-            Uri uri = (Uri) intent.getParcelableExtra("android.intent.extra.ringtone.PICKED_URI");
-            String str = null;
-            if (uri != null && (ringtone = RingtoneManager.getRingtone(getParentActivity(), uri)) != null) {
-                if (uri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
-                    str = LocaleController.getString("SoundDefault", R.string.SoundDefault);
+    public void onActivityResultFragment(int requestCode, int resultCode, Intent data) {
+        Ringtone rng;
+        if (resultCode == -1) {
+            Uri ringtone = (Uri) data.getParcelableExtra("android.intent.extra.ringtone.PICKED_URI");
+            String name = null;
+            if (ringtone != null && (rng = RingtoneManager.getRingtone(getParentActivity(), ringtone)) != null) {
+                if (ringtone.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
+                    name = LocaleController.getString("SoundDefault", R.string.SoundDefault);
                 } else {
-                    str = ringtone.getTitle(getParentActivity());
+                    name = rng.getTitle(getParentActivity());
                 }
-                ringtone.stop();
+                rng.stop();
             }
-            SharedPreferences.Editor edit = getNotificationsSettings().edit();
-            int i3 = this.currentType;
-            if (i3 == 1) {
-                if (str != null && uri != null) {
-                    edit.putString("GlobalSound", str);
-                    edit.putString("GlobalSoundPath", uri.toString());
+            SharedPreferences preferences = getNotificationsSettings();
+            SharedPreferences.Editor editor = preferences.edit();
+            int i = this.currentType;
+            if (i == 1) {
+                if (name != null && ringtone != null) {
+                    editor.putString("GlobalSound", name);
+                    editor.putString("GlobalSoundPath", ringtone.toString());
                 } else {
-                    edit.putString("GlobalSound", "NoSound");
-                    edit.putString("GlobalSoundPath", "NoSound");
+                    editor.putString("GlobalSound", "NoSound");
+                    editor.putString("GlobalSoundPath", "NoSound");
                 }
-            } else if (i3 == 0) {
-                if (str != null && uri != null) {
-                    edit.putString("GroupSound", str);
-                    edit.putString("GroupSoundPath", uri.toString());
+            } else if (i == 0) {
+                if (name != null && ringtone != null) {
+                    editor.putString("GroupSound", name);
+                    editor.putString("GroupSoundPath", ringtone.toString());
                 } else {
-                    edit.putString("GroupSound", "NoSound");
-                    edit.putString("GroupSoundPath", "NoSound");
+                    editor.putString("GroupSound", "NoSound");
+                    editor.putString("GroupSoundPath", "NoSound");
                 }
-            } else if (i3 == 2) {
-                if (str != null && uri != null) {
-                    edit.putString("ChannelSound", str);
-                    edit.putString("ChannelSoundPath", uri.toString());
+            } else if (i == 2) {
+                if (name != null && ringtone != null) {
+                    editor.putString("ChannelSound", name);
+                    editor.putString("ChannelSoundPath", ringtone.toString());
                 } else {
-                    edit.putString("ChannelSound", "NoSound");
-                    edit.putString("ChannelSoundPath", "NoSound");
+                    editor.putString("ChannelSound", "NoSound");
+                    editor.putString("ChannelSoundPath", "NoSound");
                 }
             }
             getNotificationsController().deleteNotificationChannelGlobal(this.currentType);
-            edit.commit();
+            editor.commit();
             getNotificationsController().updateServerNotificationsSettings(this.currentType);
-            RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.listView.findViewHolderForAdapterPosition(i);
-            if (findViewHolderForAdapterPosition == null) {
-                return;
+            RecyclerView.ViewHolder holder = this.listView.findViewHolderForAdapterPosition(requestCode);
+            if (holder != null) {
+                this.adapter.onBindViewHolder(holder, requestCode);
             }
-            this.adapter.onBindViewHolder(findViewHolderForAdapterPosition, i);
         }
     }
 
@@ -912,15 +963,14 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int i, int i2, Object... objArr) {
+    public void didReceivedNotification(int id, int account, Object... args) {
         ListAdapter listAdapter;
-        if (i != NotificationCenter.notificationsSettingsUpdated || (listAdapter = this.adapter) == null) {
-            return;
+        if (id == NotificationCenter.notificationsSettingsUpdated && (listAdapter = this.adapter) != null) {
+            listAdapter.notifyDataSetChanged();
         }
-        listAdapter.notifyDataSetChanged();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class SearchAdapter extends RecyclerListView.SelectionAdapter {
         private Context mContext;
         private SearchAdapterHelper searchAdapterHelper;
@@ -928,13 +978,8 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         private ArrayList<CharSequence> searchResultNames = new ArrayList<>();
         private Runnable searchRunnable;
 
-        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            return true;
-        }
-
         public SearchAdapter(Context context) {
-            NotificationsCustomSettingsActivity.this = r1;
+            NotificationsCustomSettingsActivity.this = r2;
             this.mContext = context;
             SearchAdapterHelper searchAdapterHelper = new SearchAdapterHelper(true);
             this.searchAdapterHelper = searchAdapterHelper;
@@ -956,7 +1001,7 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
 
                 @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
                 public final void onDataSetChanged(int i) {
-                    NotificationsCustomSettingsActivity.SearchAdapter.this.lambda$new$0(i);
+                    NotificationsCustomSettingsActivity.SearchAdapter.this.m3947x1bdfa523(i);
                 }
 
                 @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
@@ -966,19 +1011,20 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
             });
         }
 
-        public /* synthetic */ void lambda$new$0(int i) {
+        /* renamed from: lambda$new$0$org-telegram-ui-NotificationsCustomSettingsActivity$SearchAdapter */
+        public /* synthetic */ void m3947x1bdfa523(int searchId) {
             if (this.searchRunnable == null && !this.searchAdapterHelper.isSearchInProgress()) {
                 NotificationsCustomSettingsActivity.this.emptyView.showTextView();
             }
             notifyDataSetChanged();
         }
 
-        public void searchDialogs(final String str) {
+        public void searchDialogs(final String query) {
             if (this.searchRunnable != null) {
                 Utilities.searchQueue.cancelRunnable(this.searchRunnable);
                 this.searchRunnable = null;
             }
-            if (str == null) {
+            if (query == null) {
                 this.searchResult.clear();
                 this.searchResultNames.clear();
                 this.searchAdapterHelper.mergeResults(null);
@@ -990,7 +1036,7 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
             Runnable runnable = new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$SearchAdapter$$ExternalSyntheticLambda1
                 @Override // java.lang.Runnable
                 public final void run() {
-                    NotificationsCustomSettingsActivity.SearchAdapter.this.lambda$searchDialogs$1(str);
+                    NotificationsCustomSettingsActivity.SearchAdapter.this.m3950xa1b56767(query);
                 }
             };
             this.searchRunnable = runnable;
@@ -998,137 +1044,159 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         }
 
         /* renamed from: processSearch */
-        public void lambda$searchDialogs$1(final String str) {
+        public void m3950xa1b56767(final String query) {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$SearchAdapter$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    NotificationsCustomSettingsActivity.SearchAdapter.this.lambda$processSearch$3(str);
+                    NotificationsCustomSettingsActivity.SearchAdapter.this.m3949xe4abc47d(query);
                 }
             });
         }
 
-        public /* synthetic */ void lambda$processSearch$3(final String str) {
-            this.searchAdapterHelper.queryServerSearch(str, true, NotificationsCustomSettingsActivity.this.currentType != 1, true, false, false, 0L, false, 0, 0);
-            final ArrayList arrayList = new ArrayList(NotificationsCustomSettingsActivity.this.exceptions);
+        /* renamed from: lambda$processSearch$3$org-telegram-ui-NotificationsCustomSettingsActivity$SearchAdapter */
+        public /* synthetic */ void m3949xe4abc47d(final String query) {
+            this.searchAdapterHelper.queryServerSearch(query, true, NotificationsCustomSettingsActivity.this.currentType != 1, true, false, false, 0L, false, 0, 0);
+            final ArrayList<NotificationsSettingsActivity.NotificationException> contactsCopy = new ArrayList<>(NotificationsCustomSettingsActivity.this.exceptions);
             Utilities.searchQueue.postRunnable(new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$SearchAdapter$$ExternalSyntheticLambda2
                 @Override // java.lang.Runnable
                 public final void run() {
-                    NotificationsCustomSettingsActivity.SearchAdapter.this.lambda$processSearch$2(str, arrayList);
+                    NotificationsCustomSettingsActivity.SearchAdapter.this.m3948x8ea48bc(query, contactsCopy);
                 }
             });
         }
 
-        /* JADX WARN: Code restructure failed: missing block: B:60:0x0169, code lost:
-            if (r10[r5].contains(" " + r15) == false) goto L62;
+        /* JADX WARN: Code restructure failed: missing block: B:62:0x017f, code lost:
+            if (r9[0].contains(" " + r15) == false) goto L64;
          */
-        /* JADX WARN: Code restructure failed: missing block: B:66:0x0189, code lost:
-            if (r6.contains(" " + r15) != false) goto L67;
+        /* JADX WARN: Code restructure failed: missing block: B:68:0x019f, code lost:
+            if (r3.contains(" " + r15) != false) goto L69;
          */
-        /* JADX WARN: Removed duplicated region for block: B:50:0x0130  */
-        /* JADX WARN: Removed duplicated region for block: B:55:0x0140  */
-        /* JADX WARN: Removed duplicated region for block: B:81:0x01e0 A[LOOP:1: B:54:0x013e->B:81:0x01e0, LOOP_END] */
-        /* JADX WARN: Removed duplicated region for block: B:91:0x01a1 A[SYNTHETIC] */
+        /* JADX WARN: Multi-variable type inference failed */
+        /* JADX WARN: Removed duplicated region for block: B:85:0x0201 A[LOOP:1: B:55:0x0151->B:85:0x0201, LOOP_END] */
+        /* JADX WARN: Removed duplicated region for block: B:99:0x01ba A[SYNTHETIC] */
+        /* JADX WARN: Type inference failed for: r5v10 */
+        /* JADX WARN: Type inference failed for: r5v13 */
+        /* JADX WARN: Type inference failed for: r5v6 */
+        /* JADX WARN: Type inference failed for: r5v8 */
+        /* renamed from: lambda$processSearch$2$org-telegram-ui-NotificationsCustomSettingsActivity$SearchAdapter */
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public /* synthetic */ void lambda$processSearch$2(java.lang.String r20, java.util.ArrayList r21) {
+        public /* synthetic */ void m3948x8ea48bc(java.lang.String r23, java.util.ArrayList r24) {
             /*
-                Method dump skipped, instructions count: 513
+                Method dump skipped, instructions count: 553
                 To view this dump add '--comments-level debug' option
             */
-            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.NotificationsCustomSettingsActivity.SearchAdapter.lambda$processSearch$2(java.lang.String, java.util.ArrayList):void");
+            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.NotificationsCustomSettingsActivity.SearchAdapter.m3948x8ea48bc(java.lang.String, java.util.ArrayList):void");
         }
 
-        private void updateSearchResults(final ArrayList<Object> arrayList, final ArrayList<NotificationsSettingsActivity.NotificationException> arrayList2, final ArrayList<CharSequence> arrayList3) {
+        private void updateSearchResults(final ArrayList<Object> result, final ArrayList<NotificationsSettingsActivity.NotificationException> exceptions, final ArrayList<CharSequence> names) {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$SearchAdapter$$ExternalSyntheticLambda3
                 @Override // java.lang.Runnable
                 public final void run() {
-                    NotificationsCustomSettingsActivity.SearchAdapter.this.lambda$updateSearchResults$4(arrayList2, arrayList3, arrayList);
+                    NotificationsCustomSettingsActivity.SearchAdapter.this.m3951x5892f8ec(exceptions, names, result);
                 }
             });
         }
 
-        public /* synthetic */ void lambda$updateSearchResults$4(ArrayList arrayList, ArrayList arrayList2, ArrayList arrayList3) {
+        /* renamed from: lambda$updateSearchResults$4$org-telegram-ui-NotificationsCustomSettingsActivity$SearchAdapter */
+        public /* synthetic */ void m3951x5892f8ec(ArrayList exceptions, ArrayList names, ArrayList result) {
             if (!NotificationsCustomSettingsActivity.this.searching) {
                 return;
             }
             this.searchRunnable = null;
-            this.searchResult = arrayList;
-            this.searchResultNames = arrayList2;
-            this.searchAdapterHelper.mergeResults(arrayList3);
+            this.searchResult = exceptions;
+            this.searchResultNames = names;
+            this.searchAdapterHelper.mergeResults(result);
             if (NotificationsCustomSettingsActivity.this.searching && !this.searchAdapterHelper.isSearchInProgress()) {
                 NotificationsCustomSettingsActivity.this.emptyView.showTextView();
             }
             notifyDataSetChanged();
         }
 
-        public Object getObject(int i) {
-            if (i >= 0 && i < this.searchResult.size()) {
-                return this.searchResult.get(i);
+        public Object getObject(int position) {
+            if (position >= 0 && position < this.searchResult.size()) {
+                return this.searchResult.get(position);
             }
-            int size = i - (this.searchResult.size() + 1);
+            int position2 = position - (this.searchResult.size() + 1);
             ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
-            if (size >= 0 && size < globalSearch.size()) {
-                return this.searchAdapterHelper.getGlobalSearch().get(size);
+            if (position2 >= 0 && position2 < globalSearch.size()) {
+                return this.searchAdapterHelper.getGlobalSearch().get(position2);
             }
             return null;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemCount() {
-            int size = this.searchResult.size();
-            ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
-            return !globalSearch.isEmpty() ? size + globalSearch.size() + 1 : size;
+        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            return true;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public int getItemCount() {
+            int count = this.searchResult.size();
+            ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
+            if (!globalSearch.isEmpty()) {
+                return count + globalSearch.size() + 1;
+            }
+            return count;
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view;
-            if (i == 0) {
-                view = new UserCell(this.mContext, 4, 0, false, true);
-                view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
-            } else {
-                view = new GraySectionCell(this.mContext);
+            switch (viewType) {
+                case 0:
+                    view = new UserCell(this.mContext, 4, 0, false, true);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                default:
+                    view = new GraySectionCell(this.mContext);
+                    break;
             }
             return new RecyclerListView.Holder(view);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            int itemViewType = viewHolder.getItemViewType();
-            boolean z = true;
-            if (itemViewType != 0) {
-                if (itemViewType != 1) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            switch (holder.getItemViewType()) {
+                case 0:
+                    UserCell cell = (UserCell) holder.itemView;
+                    boolean z = true;
+                    if (position < this.searchResult.size()) {
+                        NotificationsSettingsActivity.NotificationException notificationException = this.searchResult.get(position);
+                        CharSequence charSequence = this.searchResultNames.get(position);
+                        if (position == this.searchResult.size() - 1) {
+                            z = false;
+                        }
+                        cell.setException(notificationException, charSequence, z);
+                        cell.setAddButtonVisible(false);
+                        return;
+                    }
+                    int position2 = position - (this.searchResult.size() + 1);
+                    ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
+                    TLObject object = globalSearch.get(position2);
+                    cell.setData(object, null, LocaleController.getString("NotificationsOn", R.string.NotificationsOn), 0, position2 != globalSearch.size() - 1);
+                    cell.setAddButtonVisible(true);
                     return;
-                }
-                ((GraySectionCell) viewHolder.itemView).setText(LocaleController.getString("AddToExceptions", R.string.AddToExceptions));
-                return;
+                case 1:
+                    ((GraySectionCell) holder.itemView).setText(LocaleController.getString("AddToExceptions", R.string.AddToExceptions));
+                    return;
+                default:
+                    return;
             }
-            UserCell userCell = (UserCell) viewHolder.itemView;
-            if (i < this.searchResult.size()) {
-                NotificationsSettingsActivity.NotificationException notificationException = this.searchResult.get(i);
-                CharSequence charSequence = this.searchResultNames.get(i);
-                if (i == this.searchResult.size() - 1) {
-                    z = false;
-                }
-                userCell.setException(notificationException, charSequence, z);
-                userCell.setAddButtonVisible(false);
-                return;
-            }
-            int size = i - (this.searchResult.size() + 1);
-            ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
-            userCell.setData(globalSearch.get(size), null, LocaleController.getString("NotificationsOn", R.string.NotificationsOn), 0, size != globalSearch.size() - 1);
-            userCell.setAddButtonVisible(true);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int i) {
-            return i == this.searchResult.size() ? 1 : 0;
+        public int getItemViewType(int position) {
+            if (position == this.searchResult.size()) {
+                return 1;
+            }
+            return 0;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class ListAdapter extends RecyclerListView.SelectionAdapter {
         private Context mContext;
 
@@ -1138,9 +1206,9 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            int itemViewType = viewHolder.getItemViewType();
-            return (itemViewType == 0 || itemViewType == 4) ? false : true;
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            int type = holder.getItemViewType();
+            return (type == 0 || type == 4) ? false : true;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -1149,280 +1217,282 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view;
-            switch (i) {
+            switch (viewType) {
                 case 0:
                     view = new HeaderCell(this.mContext);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 1:
                     view = new TextCheckCell(this.mContext);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 2:
                     view = new UserCell(this.mContext, 6, 0, false);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 3:
                     view = new TextColorCell(this.mContext);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 4:
                     view = new ShadowSectionCell(this.mContext);
                     break;
                 case 5:
                     view = new TextSettingsCell(this.mContext);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 6:
                     view = new NotificationsCheckCell(this.mContext);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 default:
                     view = new TextCell(this.mContext);
-                    view.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
             }
             return new RecyclerListView.Holder(view);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            boolean z;
-            int i2;
-            int i3;
-            CharSequence charSequence;
-            int i4;
-            int i5;
-            String str;
-            long j;
-            String string;
-            int i6;
-            int i7;
-            boolean z2 = false;
-            boolean z3 = false;
-            int i8 = 0;
-            switch (viewHolder.getItemViewType()) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            boolean enabled;
+            int color;
+            int option;
+            String value;
+            int value2;
+            int value3;
+            long documentId;
+            String value4;
+            int offUntil;
+            String text;
+            int iconType;
+            boolean z = false;
+            switch (holder.getItemViewType()) {
                 case 0:
-                    HeaderCell headerCell = (HeaderCell) viewHolder.itemView;
-                    if (i != NotificationsCustomSettingsActivity.this.messageSectionRow) {
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    if (position == NotificationsCustomSettingsActivity.this.messageSectionRow) {
+                        headerCell.setText(LocaleController.getString("SETTINGS", R.string.SETTINGS));
                         return;
                     }
-                    headerCell.setText(LocaleController.getString("SETTINGS", R.string.SETTINGS));
                     return;
                 case 1:
-                    TextCheckCell textCheckCell = (TextCheckCell) viewHolder.itemView;
-                    SharedPreferences notificationsSettings = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
-                    if (i != NotificationsCustomSettingsActivity.this.previewRow) {
+                    TextCheckCell checkCell = (TextCheckCell) holder.itemView;
+                    SharedPreferences preferences = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
+                    if (position == NotificationsCustomSettingsActivity.this.previewRow) {
+                        if (NotificationsCustomSettingsActivity.this.currentType != 1) {
+                            if (NotificationsCustomSettingsActivity.this.currentType == 0) {
+                                enabled = preferences.getBoolean("EnablePreviewGroup", true);
+                            } else {
+                                enabled = preferences.getBoolean("EnablePreviewChannel", true);
+                            }
+                        } else {
+                            enabled = preferences.getBoolean("EnablePreviewAll", true);
+                        }
+                        checkCell.setTextAndCheck(LocaleController.getString("MessagePreview", R.string.MessagePreview), enabled, true);
                         return;
                     }
-                    if (NotificationsCustomSettingsActivity.this.currentType != 1) {
-                        if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                            z = notificationsSettings.getBoolean("EnablePreviewGroup", true);
-                        } else {
-                            z = notificationsSettings.getBoolean("EnablePreviewChannel", true);
-                        }
-                    } else {
-                        z = notificationsSettings.getBoolean("EnablePreviewAll", true);
-                    }
-                    textCheckCell.setTextAndCheck(LocaleController.getString("MessagePreview", R.string.MessagePreview), z, true);
                     return;
                 case 2:
-                    UserCell userCell = (UserCell) viewHolder.itemView;
-                    NotificationsSettingsActivity.NotificationException notificationException = (NotificationsSettingsActivity.NotificationException) NotificationsCustomSettingsActivity.this.exceptions.get(i - NotificationsCustomSettingsActivity.this.exceptionsStartRow);
-                    if (i != NotificationsCustomSettingsActivity.this.exceptionsEndRow - 1) {
-                        z2 = true;
+                    UserCell cell = (UserCell) holder.itemView;
+                    NotificationsSettingsActivity.NotificationException exception = (NotificationsSettingsActivity.NotificationException) NotificationsCustomSettingsActivity.this.exceptions.get(position - NotificationsCustomSettingsActivity.this.exceptionsStartRow);
+                    if (position != NotificationsCustomSettingsActivity.this.exceptionsEndRow - 1) {
+                        z = true;
                     }
-                    userCell.setException(notificationException, null, z2);
+                    cell.setException(exception, null, z);
                     return;
                 case 3:
-                    TextColorCell textColorCell = (TextColorCell) viewHolder.itemView;
-                    SharedPreferences notificationsSettings2 = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
+                    TextColorCell textColorCell = (TextColorCell) holder.itemView;
+                    SharedPreferences preferences2 = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
                     if (NotificationsCustomSettingsActivity.this.currentType != 1) {
                         if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                            i2 = notificationsSettings2.getInt("GroupLed", -16776961);
+                            color = preferences2.getInt("GroupLed", -16776961);
                         } else {
-                            i2 = notificationsSettings2.getInt("ChannelLed", -16776961);
+                            color = preferences2.getInt("ChannelLed", -16776961);
                         }
                     } else {
-                        i2 = notificationsSettings2.getInt("MessagesLed", -16776961);
+                        color = preferences2.getInt("MessagesLed", -16776961);
                     }
+                    int a = 0;
                     while (true) {
-                        if (i8 < 9) {
-                            if (TextColorCell.colorsToSave[i8] == i2) {
-                                i2 = TextColorCell.colors[i8];
+                        if (a < 9) {
+                            if (TextColorCell.colorsToSave[a] != color) {
+                                a++;
                             } else {
-                                i8++;
+                                color = TextColorCell.colors[a];
                             }
                         }
                     }
-                    textColorCell.setTextAndColor(LocaleController.getString("LedColor", R.string.LedColor), i2, true);
+                    textColorCell.setTextAndColor(LocaleController.getString("LedColor", R.string.LedColor), color, true);
                     return;
                 case 4:
-                    if (i == NotificationsCustomSettingsActivity.this.deleteAllSectionRow || ((i == NotificationsCustomSettingsActivity.this.groupSection2Row && NotificationsCustomSettingsActivity.this.exceptionsSection2Row == -1) || (i == NotificationsCustomSettingsActivity.this.exceptionsSection2Row && NotificationsCustomSettingsActivity.this.deleteAllRow == -1))) {
-                        viewHolder.itemView.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider_bottom, "windowBackgroundGrayShadow"));
+                    if (position == NotificationsCustomSettingsActivity.this.deleteAllSectionRow || ((position == NotificationsCustomSettingsActivity.this.groupSection2Row && NotificationsCustomSettingsActivity.this.exceptionsSection2Row == -1) || (position == NotificationsCustomSettingsActivity.this.exceptionsSection2Row && NotificationsCustomSettingsActivity.this.deleteAllRow == -1))) {
+                        holder.itemView.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                         return;
                     } else {
-                        viewHolder.itemView.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, "windowBackgroundGrayShadow"));
+                        holder.itemView.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                         return;
                     }
                 case 5:
-                    TextSettingsCell textSettingsCell = (TextSettingsCell) viewHolder.itemView;
-                    SharedPreferences notificationsSettings3 = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
-                    if (i == NotificationsCustomSettingsActivity.this.messageSoundRow) {
+                    TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
+                    SharedPreferences preferences3 = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
+                    if (position == NotificationsCustomSettingsActivity.this.messageSoundRow) {
                         if (NotificationsCustomSettingsActivity.this.currentType != 1) {
                             if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                                str = notificationsSettings3.getString("GroupSound", LocaleController.getString("SoundDefault", R.string.SoundDefault));
-                                j = notificationsSettings3.getLong("GroupSoundDocId", 0L);
+                                value4 = preferences3.getString("GroupSound", LocaleController.getString("SoundDefault", R.string.SoundDefault));
+                                documentId = preferences3.getLong("GroupSoundDocId", 0L);
                             } else {
-                                str = notificationsSettings3.getString("ChannelSound", LocaleController.getString("SoundDefault", R.string.SoundDefault));
-                                j = notificationsSettings3.getLong("ChannelDocId", 0L);
+                                String value5 = LocaleController.getString("SoundDefault", R.string.SoundDefault);
+                                value4 = preferences3.getString("ChannelSound", value5);
+                                documentId = preferences3.getLong("ChannelDocId", 0L);
                             }
                         } else {
-                            str = notificationsSettings3.getString("GlobalSound", LocaleController.getString("SoundDefault", R.string.SoundDefault));
-                            j = notificationsSettings3.getLong("GlobalSoundDocId", 0L);
+                            value4 = preferences3.getString("GlobalSound", LocaleController.getString("SoundDefault", R.string.SoundDefault));
+                            documentId = preferences3.getLong("GlobalSoundDocId", 0L);
                         }
-                        if (j != 0) {
-                            TLRPC$Document document = NotificationsCustomSettingsActivity.this.getMediaDataController().ringtoneDataStore.getDocument(j);
+                        if (documentId != 0) {
+                            TLRPC.Document document = NotificationsCustomSettingsActivity.this.getMediaDataController().ringtoneDataStore.getDocument(documentId);
                             if (document == null) {
-                                str = LocaleController.getString("CustomSound", R.string.CustomSound);
+                                value4 = LocaleController.getString("CustomSound", R.string.CustomSound);
                             } else {
-                                str = NotificationsSoundActivity.trimTitle(document, FileLoader.getDocumentFileName(document));
+                                value4 = NotificationsSoundActivity.trimTitle(document, FileLoader.getDocumentFileName(document));
                             }
-                        } else if (str.equals("NoSound")) {
-                            str = LocaleController.getString("NoSound", R.string.NoSound);
-                        } else if (str.equals("Default")) {
-                            str = LocaleController.getString("SoundDefault", R.string.SoundDefault);
+                        } else if (value4.equals("NoSound")) {
+                            value4 = LocaleController.getString("NoSound", R.string.NoSound);
+                        } else if (value4.equals("Default")) {
+                            value4 = LocaleController.getString("SoundDefault", R.string.SoundDefault);
                         }
-                        textSettingsCell.setTextAndValue(LocaleController.getString("Sound", R.string.Sound), str, true);
+                        textCell.setTextAndValue(LocaleController.getString("Sound", R.string.Sound), value4, true);
                         return;
-                    } else if (i == NotificationsCustomSettingsActivity.this.messageVibrateRow) {
+                    } else if (position == NotificationsCustomSettingsActivity.this.messageVibrateRow) {
                         if (NotificationsCustomSettingsActivity.this.currentType != 1) {
                             if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                                i5 = notificationsSettings3.getInt("vibrate_group", 0);
+                                value3 = preferences3.getInt("vibrate_group", 0);
                             } else {
-                                i5 = notificationsSettings3.getInt("vibrate_channel", 0);
+                                value3 = preferences3.getInt("vibrate_channel", 0);
                             }
                         } else {
-                            i5 = notificationsSettings3.getInt("vibrate_messages", 0);
+                            value3 = preferences3.getInt("vibrate_messages", 0);
                         }
-                        if (i5 == 0) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("VibrationDefault", R.string.VibrationDefault), true);
+                        if (value3 == 0) {
+                            textCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("VibrationDefault", R.string.VibrationDefault), true);
                             return;
-                        } else if (i5 == 1) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("Short", R.string.Short), true);
+                        } else if (value3 == 1) {
+                            textCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("Short", R.string.Short), true);
                             return;
-                        } else if (i5 == 2) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("VibrationDisabled", R.string.VibrationDisabled), true);
+                        } else if (value3 == 2) {
+                            textCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("VibrationDisabled", R.string.VibrationDisabled), true);
                             return;
-                        } else if (i5 == 3) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("Long", R.string.Long), true);
+                        } else if (value3 == 3) {
+                            textCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("Long", R.string.Long), true);
                             return;
-                        } else if (i5 != 4) {
+                        } else if (value3 == 4) {
+                            textCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("OnlyIfSilent", R.string.OnlyIfSilent), true);
                             return;
                         } else {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("Vibrate", R.string.Vibrate), LocaleController.getString("OnlyIfSilent", R.string.OnlyIfSilent), true);
                             return;
                         }
-                    } else if (i == NotificationsCustomSettingsActivity.this.messagePriorityRow) {
+                    } else if (position == NotificationsCustomSettingsActivity.this.messagePriorityRow) {
                         if (NotificationsCustomSettingsActivity.this.currentType != 1) {
                             if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                                i4 = notificationsSettings3.getInt("priority_group", 1);
+                                value2 = preferences3.getInt("priority_group", 1);
                             } else {
-                                i4 = notificationsSettings3.getInt("priority_channel", 1);
+                                value2 = preferences3.getInt("priority_channel", 1);
                             }
                         } else {
-                            i4 = notificationsSettings3.getInt("priority_messages", 1);
+                            value2 = preferences3.getInt("priority_messages", 1);
                         }
-                        if (i4 == 0) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityHigh", R.string.NotificationsPriorityHigh), false);
+                        if (value2 == 0) {
+                            textCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityHigh", R.string.NotificationsPriorityHigh), false);
                             return;
-                        } else if (i4 == 1 || i4 == 2) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityUrgent", R.string.NotificationsPriorityUrgent), false);
+                        } else if (value2 == 1 || value2 == 2) {
+                            textCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityUrgent", R.string.NotificationsPriorityUrgent), false);
                             return;
-                        } else if (i4 == 4) {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityLow", R.string.NotificationsPriorityLow), false);
+                        } else if (value2 == 4) {
+                            textCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityLow", R.string.NotificationsPriorityLow), false);
                             return;
-                        } else if (i4 != 5) {
+                        } else if (value2 == 5) {
+                            textCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityMedium", R.string.NotificationsPriorityMedium), false);
                             return;
                         } else {
-                            textSettingsCell.setTextAndValue(LocaleController.getString("NotificationsImportance", R.string.NotificationsImportance), LocaleController.getString("NotificationsPriorityMedium", R.string.NotificationsPriorityMedium), false);
                             return;
                         }
-                    } else if (i != NotificationsCustomSettingsActivity.this.messagePopupNotificationRow) {
+                    } else if (position == NotificationsCustomSettingsActivity.this.messagePopupNotificationRow) {
+                        if (NotificationsCustomSettingsActivity.this.currentType != 1) {
+                            if (NotificationsCustomSettingsActivity.this.currentType == 0) {
+                                option = preferences3.getInt("popupGroup", 0);
+                            } else {
+                                option = preferences3.getInt("popupChannel", 0);
+                            }
+                        } else {
+                            option = preferences3.getInt("popupAll", 0);
+                        }
+                        if (option == 0) {
+                            value = LocaleController.getString("NoPopup", R.string.NoPopup);
+                        } else if (option == 1) {
+                            value = LocaleController.getString("OnlyWhenScreenOn", R.string.OnlyWhenScreenOn);
+                        } else if (option == 2) {
+                            value = LocaleController.getString("OnlyWhenScreenOff", R.string.OnlyWhenScreenOff);
+                        } else {
+                            value = LocaleController.getString("AlwaysShowPopup", R.string.AlwaysShowPopup);
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("PopupNotification", R.string.PopupNotification), value, true);
                         return;
                     } else {
-                        if (NotificationsCustomSettingsActivity.this.currentType != 1) {
-                            if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                                i3 = notificationsSettings3.getInt("popupGroup", 0);
-                            } else {
-                                i3 = notificationsSettings3.getInt("popupChannel", 0);
-                            }
-                        } else {
-                            i3 = notificationsSettings3.getInt("popupAll", 0);
-                        }
-                        if (i3 == 0) {
-                            charSequence = LocaleController.getString("NoPopup", R.string.NoPopup);
-                        } else if (i3 == 1) {
-                            charSequence = LocaleController.getString("OnlyWhenScreenOn", R.string.OnlyWhenScreenOn);
-                        } else if (i3 == 2) {
-                            charSequence = LocaleController.getString("OnlyWhenScreenOff", R.string.OnlyWhenScreenOff);
-                        } else {
-                            charSequence = LocaleController.getString("AlwaysShowPopup", R.string.AlwaysShowPopup);
-                        }
-                        textSettingsCell.setTextAndValue(LocaleController.getString("PopupNotification", R.string.PopupNotification), charSequence, true);
                         return;
                     }
                 case 6:
-                    NotificationsCheckCell notificationsCheckCell = (NotificationsCheckCell) viewHolder.itemView;
-                    notificationsCheckCell.setDrawLine(false);
-                    StringBuilder sb = new StringBuilder();
-                    SharedPreferences notificationsSettings4 = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
+                    NotificationsCheckCell checkCell2 = (NotificationsCheckCell) holder.itemView;
+                    checkCell2.setDrawLine(false);
+                    StringBuilder builder = new StringBuilder();
+                    SharedPreferences preferences4 = NotificationsCustomSettingsActivity.this.getNotificationsSettings();
                     if (NotificationsCustomSettingsActivity.this.currentType != 1) {
                         if (NotificationsCustomSettingsActivity.this.currentType == 0) {
-                            string = LocaleController.getString("NotificationsForGroups", R.string.NotificationsForGroups);
-                            i6 = notificationsSettings4.getInt("EnableGroup2", 0);
+                            String text2 = LocaleController.getString("NotificationsForGroups", R.string.NotificationsForGroups);
+                            text = text2;
+                            offUntil = preferences4.getInt("EnableGroup2", 0);
                         } else {
-                            string = LocaleController.getString("NotificationsForChannels", R.string.NotificationsForChannels);
-                            i6 = notificationsSettings4.getInt("EnableChannel2", 0);
+                            String text3 = LocaleController.getString("NotificationsForChannels", R.string.NotificationsForChannels);
+                            text = text3;
+                            offUntil = preferences4.getInt("EnableChannel2", 0);
                         }
                     } else {
-                        string = LocaleController.getString("NotificationsForPrivateChats", R.string.NotificationsForPrivateChats);
-                        i6 = notificationsSettings4.getInt("EnableAll2", 0);
+                        String text4 = LocaleController.getString("NotificationsForPrivateChats", R.string.NotificationsForPrivateChats);
+                        text = text4;
+                        offUntil = preferences4.getInt("EnableAll2", 0);
                     }
-                    String str2 = string;
                     int currentTime = NotificationsCustomSettingsActivity.this.getConnectionsManager().getCurrentTime();
-                    boolean z4 = i6 < currentTime;
-                    if (z4) {
-                        sb.append(LocaleController.getString("NotificationsOn", R.string.NotificationsOn));
-                    } else if (i6 - 31536000 >= currentTime) {
-                        sb.append(LocaleController.getString("NotificationsOff", R.string.NotificationsOff));
+                    boolean z2 = offUntil < currentTime;
+                    boolean enabled2 = z2;
+                    if (z2) {
+                        builder.append(LocaleController.getString("NotificationsOn", R.string.NotificationsOn));
+                        iconType = 0;
+                    } else if (offUntil - 31536000 >= currentTime) {
+                        builder.append(LocaleController.getString("NotificationsOff", R.string.NotificationsOff));
+                        iconType = 0;
                     } else {
-                        sb.append(LocaleController.formatString("NotificationsOffUntil", R.string.NotificationsOffUntil, LocaleController.stringForMessageListDate(i6)));
-                        i7 = 2;
-                        notificationsCheckCell.setTextAndValueAndCheck(str2, sb, z4, i7, false);
-                        return;
+                        builder.append(LocaleController.formatString("NotificationsOffUntil", R.string.NotificationsOffUntil, LocaleController.stringForMessageListDate(offUntil)));
+                        iconType = 2;
                     }
-                    i7 = 0;
-                    notificationsCheckCell.setTextAndValueAndCheck(str2, sb, z4, i7, false);
+                    checkCell2.setTextAndValueAndCheck(text, builder, enabled2, iconType, false);
                     return;
                 case 7:
-                    TextCell textCell = (TextCell) viewHolder.itemView;
-                    if (i != NotificationsCustomSettingsActivity.this.exceptionsAddRow) {
-                        if (i != NotificationsCustomSettingsActivity.this.deleteAllRow) {
+                    TextCell textCell2 = (TextCell) holder.itemView;
+                    if (position != NotificationsCustomSettingsActivity.this.exceptionsAddRow) {
+                        if (position == NotificationsCustomSettingsActivity.this.deleteAllRow) {
+                            textCell2.setText(LocaleController.getString("NotificationsDeleteAllException", R.string.NotificationsDeleteAllException), false);
+                            textCell2.setColors(null, Theme.key_windowBackgroundWhiteRedText5);
                             return;
                         }
-                        textCell.setText(LocaleController.getString("NotificationsDeleteAllException", R.string.NotificationsDeleteAllException), false);
-                        textCell.setColors(null, "windowBackgroundWhiteRedText5");
                         return;
                     }
-                    String string2 = LocaleController.getString("NotificationsAddAnException", R.string.NotificationsAddAnException);
+                    String string = LocaleController.getString("NotificationsAddAnException", R.string.NotificationsAddAnException);
                     if (NotificationsCustomSettingsActivity.this.exceptionsStartRow != -1) {
-                        z3 = true;
+                        z = true;
                     }
-                    textCell.setTextAndIcon(string2, R.drawable.msg_contact_add, z3);
-                    textCell.setColors("windowBackgroundWhiteBlueIcon", "windowBackgroundWhiteBlueButton");
+                    textCell2.setTextAndIcon(string, R.drawable.msg_contact_add, z);
+                    textCell2.setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
                     return;
                 default:
                     return;
@@ -1430,60 +1500,73 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onViewAttachedToWindow(RecyclerView.ViewHolder viewHolder) {
-            if (NotificationsCustomSettingsActivity.this.exceptions == null || !NotificationsCustomSettingsActivity.this.exceptions.isEmpty()) {
-                return;
-            }
-            boolean isGlobalNotificationsEnabled = NotificationsCustomSettingsActivity.this.getNotificationsController().isGlobalNotificationsEnabled(NotificationsCustomSettingsActivity.this.currentType);
-            int itemViewType = viewHolder.getItemViewType();
-            if (itemViewType == 0) {
-                HeaderCell headerCell = (HeaderCell) viewHolder.itemView;
-                if (viewHolder.getAdapterPosition() == NotificationsCustomSettingsActivity.this.messageSectionRow) {
-                    headerCell.setEnabled(isGlobalNotificationsEnabled, null);
-                } else {
-                    headerCell.setEnabled(true, null);
+        public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+            if (NotificationsCustomSettingsActivity.this.exceptions != null && NotificationsCustomSettingsActivity.this.exceptions.isEmpty()) {
+                boolean enabled = NotificationsCustomSettingsActivity.this.getNotificationsController().isGlobalNotificationsEnabled(NotificationsCustomSettingsActivity.this.currentType);
+                switch (holder.getItemViewType()) {
+                    case 0:
+                        HeaderCell headerCell = (HeaderCell) holder.itemView;
+                        if (holder.getAdapterPosition() == NotificationsCustomSettingsActivity.this.messageSectionRow) {
+                            headerCell.setEnabled(enabled, null);
+                            return;
+                        } else {
+                            headerCell.setEnabled(true, null);
+                            return;
+                        }
+                    case 1:
+                        TextCheckCell textCell = (TextCheckCell) holder.itemView;
+                        textCell.setEnabled(enabled, null);
+                        return;
+                    case 2:
+                    case 4:
+                    default:
+                        return;
+                    case 3:
+                        TextColorCell textCell2 = (TextColorCell) holder.itemView;
+                        textCell2.setEnabled(enabled, null);
+                        return;
+                    case 5:
+                        TextSettingsCell textCell3 = (TextSettingsCell) holder.itemView;
+                        textCell3.setEnabled(enabled, null);
+                        return;
                 }
-            } else if (itemViewType == 1) {
-                ((TextCheckCell) viewHolder.itemView).setEnabled(isGlobalNotificationsEnabled, null);
-            } else if (itemViewType == 3) {
-                ((TextColorCell) viewHolder.itemView).setEnabled(isGlobalNotificationsEnabled, null);
-            } else if (itemViewType != 5) {
-            } else {
-                ((TextSettingsCell) viewHolder.itemView).setEnabled(isGlobalNotificationsEnabled, null);
             }
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int i) {
-            if (i == NotificationsCustomSettingsActivity.this.messageSectionRow) {
-                return 0;
-            }
-            if (i == NotificationsCustomSettingsActivity.this.previewRow) {
+        public int getItemViewType(int position) {
+            if (position != NotificationsCustomSettingsActivity.this.messageSectionRow) {
+                if (position != NotificationsCustomSettingsActivity.this.previewRow) {
+                    if (position < NotificationsCustomSettingsActivity.this.exceptionsStartRow || position >= NotificationsCustomSettingsActivity.this.exceptionsEndRow) {
+                        if (position != NotificationsCustomSettingsActivity.this.messageLedRow) {
+                            if (position != NotificationsCustomSettingsActivity.this.groupSection2Row && position != NotificationsCustomSettingsActivity.this.alertSection2Row && position != NotificationsCustomSettingsActivity.this.exceptionsSection2Row && position != NotificationsCustomSettingsActivity.this.deleteAllSectionRow) {
+                                if (position != NotificationsCustomSettingsActivity.this.alertRow) {
+                                    if (position == NotificationsCustomSettingsActivity.this.exceptionsAddRow || position == NotificationsCustomSettingsActivity.this.deleteAllRow) {
+                                        return 7;
+                                    }
+                                    return 5;
+                                }
+                                return 6;
+                            }
+                            return 4;
+                        }
+                        return 3;
+                    }
+                    return 2;
+                }
                 return 1;
             }
-            if (i >= NotificationsCustomSettingsActivity.this.exceptionsStartRow && i < NotificationsCustomSettingsActivity.this.exceptionsEndRow) {
-                return 2;
-            }
-            if (i == NotificationsCustomSettingsActivity.this.messageLedRow) {
-                return 3;
-            }
-            if (i == NotificationsCustomSettingsActivity.this.groupSection2Row || i == NotificationsCustomSettingsActivity.this.alertSection2Row || i == NotificationsCustomSettingsActivity.this.exceptionsSection2Row || i == NotificationsCustomSettingsActivity.this.deleteAllSectionRow) {
-                return 4;
-            }
-            if (i == NotificationsCustomSettingsActivity.this.alertRow) {
-                return 6;
-            }
-            return (i == NotificationsCustomSettingsActivity.this.exceptionsAddRow || i == NotificationsCustomSettingsActivity.this.deleteAllRow) ? 7 : 5;
+            return 0;
         }
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public ArrayList<ThemeDescription> getThemeDescriptions() {
-        ArrayList<ThemeDescription> arrayList = new ArrayList<>();
-        ThemeDescription.ThemeDescriptionDelegate themeDescriptionDelegate = new ThemeDescription.ThemeDescriptionDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda8
+        ArrayList<ThemeDescription> themeDescriptions = new ArrayList<>();
+        ThemeDescription.ThemeDescriptionDelegate cellDelegate = new ThemeDescription.ThemeDescriptionDelegate() { // from class: org.telegram.ui.NotificationsCustomSettingsActivity$$ExternalSyntheticLambda10
             @Override // org.telegram.ui.ActionBar.ThemeDescription.ThemeDescriptionDelegate
             public final void didSetColor() {
-                NotificationsCustomSettingsActivity.this.lambda$getThemeDescriptions$11();
+                NotificationsCustomSettingsActivity.this.m3944x9649d3ce();
             }
 
             @Override // org.telegram.ui.ActionBar.ThemeDescription.ThemeDescriptionDelegate
@@ -1491,56 +1574,57 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
                 ThemeDescription.ThemeDescriptionDelegate.CC.$default$onAnimationProgress(this, f);
             }
         };
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{HeaderCell.class, TextCheckCell.class, TextColorCell.class, TextSettingsCell.class, UserCell.class, NotificationsCheckCell.class}, null, null, null, "windowBackgroundWhite"));
-        arrayList.add(new ThemeDescription(this.fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "windowBackgroundGray"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "actionBarDefault"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, "actionBarDefault"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, "actionBarDefaultIcon"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, "actionBarDefaultTitle"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, "actionBarDefaultSelector"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, "listSelectorSDK21"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, "divider"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{HeaderCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlueHeader"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteGrayText2"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "switchTrack"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "switchTrackChecked"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"imageView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteGrayIcon"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"nameTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"statusColor"}, (Paint[]) null, (Drawable[]) null, themeDescriptionDelegate, "windowBackgroundWhiteGrayText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"statusOnlineColor"}, (Paint[]) null, (Drawable[]) null, themeDescriptionDelegate, "windowBackgroundWhiteBlueText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, null, Theme.avatarDrawables, null, "avatar_text"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundRed"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundOrange"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundViolet"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundGreen"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundCyan"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundBlue"));
-        arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "avatar_backgroundPink"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{GraySectionCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "key_graySectionText"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{GraySectionCell.class}, null, null, null, "graySection"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteGrayText2"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "switchTrack"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "switchTrackChecked"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextColorCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteValueText"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{ShadowSectionCell.class}, null, null, null, "windowBackgroundGrayShadow"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKTAG, new Class[]{TextCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlueButton"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKTAG, new Class[]{TextCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteRedText5"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKTAG, new Class[]{TextCell.class}, new String[]{"imageView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlueIcon"));
-        return arrayList;
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{HeaderCell.class, TextCheckCell.class, TextColorCell.class, TextSettingsCell.class, UserCell.class, NotificationsCheckCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
+        themeDescriptions.add(new ThemeDescription(this.fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundGray));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, Theme.key_actionBarDefaultSelector));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, Theme.key_listSelector));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, Theme.key_divider));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{HeaderCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlueHeader));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteGrayText2));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_switchTrack));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_switchTrackChecked));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"imageView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteGrayIcon));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"nameTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"statusColor"}, (Paint[]) null, (Drawable[]) null, cellDelegate, Theme.key_windowBackgroundWhiteGrayText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, new String[]{"statusOnlineColor"}, (Paint[]) null, (Drawable[]) null, cellDelegate, Theme.key_windowBackgroundWhiteBlueText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{UserCell.class}, null, Theme.avatarDrawables, null, Theme.key_avatar_text));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundRed));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundOrange));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundViolet));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundGreen));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundCyan));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundBlue));
+        themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundPink));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{GraySectionCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_graySectionText));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{GraySectionCell.class}, null, null, null, Theme.key_graySection));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteGrayText2));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_switchTrack));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{NotificationsCheckCell.class}, new String[]{"checkBox"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_switchTrackChecked));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextColorCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteValueText));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{ShadowSectionCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKTAG, new Class[]{TextCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlueButton));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKTAG, new Class[]{TextCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteRedText5));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKTAG, new Class[]{TextCell.class}, new String[]{"imageView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlueIcon));
+        return themeDescriptions;
     }
 
-    public /* synthetic */ void lambda$getThemeDescriptions$11() {
+    /* renamed from: lambda$getThemeDescriptions$11$org-telegram-ui-NotificationsCustomSettingsActivity */
+    public /* synthetic */ void m3944x9649d3ce() {
         RecyclerListView recyclerListView = this.listView;
         if (recyclerListView != null) {
-            int childCount = recyclerListView.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View childAt = this.listView.getChildAt(i);
-                if (childAt instanceof UserCell) {
-                    ((UserCell) childAt).update(0);
+            int count = recyclerListView.getChildCount();
+            for (int a = 0; a < count; a++) {
+                View child = this.listView.getChildAt(a);
+                if (child instanceof UserCell) {
+                    ((UserCell) child).update(0);
                 }
             }
         }

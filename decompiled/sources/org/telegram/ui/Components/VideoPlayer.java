@@ -1,6 +1,5 @@
 package org.telegram.ui.Components;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
@@ -35,6 +34,7 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
@@ -45,15 +45,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.CharacterCompat;
 import org.telegram.messenger.FourierTransform;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.secretmedia.ExtendedDefaultDataSourceFactory;
 import org.telegram.ui.Components.VideoPlayer;
-@SuppressLint({"NewApi"})
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoListener, AnalyticsListener, NotificationCenter.NotificationCenterDelegate {
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
+    private static final int RENDERER_BUILDING_STATE_BUILDING = 2;
+    private static final int RENDERER_BUILDING_STATE_BUILT = 3;
+    private static final int RENDERER_BUILDING_STATE_IDLE = 1;
     private SimpleExoPlayer audioPlayer;
     private boolean audioPlayerReady;
     private String audioType;
@@ -83,46 +84,11 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
     private String videoType;
     private Uri videoUri;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface AudioVisualizerDelegate {
         boolean needUpdate();
 
         void onVisualizerUpdate(boolean z, boolean z2, float[] fArr);
-    }
-
-    /* loaded from: classes3.dex */
-    public interface VideoPlayerDelegate {
-
-        /* renamed from: org.telegram.ui.Components.VideoPlayer$VideoPlayerDelegate$-CC */
-        /* loaded from: classes3.dex */
-        public final /* synthetic */ class CC {
-            public static void $default$onRenderedFirstFrame(VideoPlayerDelegate videoPlayerDelegate, AnalyticsListener.EventTime eventTime) {
-            }
-
-            public static void $default$onSeekFinished(VideoPlayerDelegate videoPlayerDelegate, AnalyticsListener.EventTime eventTime) {
-            }
-
-            public static void $default$onSeekStarted(VideoPlayerDelegate videoPlayerDelegate, AnalyticsListener.EventTime eventTime) {
-            }
-        }
-
-        void onError(VideoPlayer videoPlayer, Exception exc);
-
-        void onRenderedFirstFrame();
-
-        void onRenderedFirstFrame(AnalyticsListener.EventTime eventTime);
-
-        void onSeekFinished(AnalyticsListener.EventTime eventTime);
-
-        void onSeekStarted(AnalyticsListener.EventTime eventTime);
-
-        void onStateChanged(boolean z, int i);
-
-        boolean onSurfaceDestroyed(SurfaceTexture surfaceTexture);
-
-        void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture);
-
-        void onVideoSizeChanged(int i, int i2, int i3, float f);
     }
 
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -173,6 +139,11 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
     public /* synthetic */ void onDrmKeysLoaded(AnalyticsListener.EventTime eventTime) {
         AnalyticsListener.CC.$default$onDrmKeysLoaded(this, eventTime);
+    }
+
+    @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
+    public /* synthetic */ void onDrmKeysRemoved(AnalyticsListener.EventTime eventTime) {
+        AnalyticsListener.CC.$default$onDrmKeysRemoved(this, eventTime);
     }
 
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -235,10 +206,6 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         AnalyticsListener.CC.$default$onLoadingChanged(this, eventTime, z);
     }
 
-    @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onLoadingChanged(boolean z) {
-    }
-
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
     public /* synthetic */ void onMediaPeriodCreated(AnalyticsListener.EventTime eventTime) {
         AnalyticsListener.CC.$default$onMediaPeriodCreated(this, eventTime);
@@ -252,10 +219,6 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
     public /* synthetic */ void onMetadata(AnalyticsListener.EventTime eventTime, Metadata metadata) {
         AnalyticsListener.CC.$default$onMetadata(this, eventTime, metadata);
-    }
-
-    @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
     }
 
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -293,21 +256,14 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         AnalyticsListener.CC.$default$onReadingStarted(this, eventTime);
     }
 
-    @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onRepeatModeChanged(int i) {
-    }
-
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
     public /* synthetic */ void onRepeatModeChanged(AnalyticsListener.EventTime eventTime, int i) {
         AnalyticsListener.CC.$default$onRepeatModeChanged(this, eventTime, i);
     }
 
-    @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onSeekProcessed() {
-    }
-
-    @Override // com.google.android.exoplayer2.video.VideoListener
-    public void onSurfaceSizeChanged(int i, int i2) {
+    @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
+    public /* synthetic */ void onShuffleModeChanged(AnalyticsListener.EventTime eventTime, boolean z) {
+        AnalyticsListener.CC.$default$onShuffleModeChanged(this, eventTime, z);
     }
 
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -317,11 +273,7 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
 
     @Override // com.google.android.exoplayer2.Player.EventListener
     public /* synthetic */ void onTimelineChanged(Timeline timeline, int i) {
-        onTimelineChanged(timeline, r3.getWindowCount() == 1 ? timeline.getWindow(0, new Timeline.Window()).manifest : null, i);
-    }
-
-    @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onTimelineChanged(Timeline timeline, Object obj, int i) {
+        Player.EventListener.CC.$default$onTimelineChanged(this, timeline, i);
     }
 
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -332,10 +284,6 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
     public /* synthetic */ void onTracksChanged(AnalyticsListener.EventTime eventTime, TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
         AnalyticsListener.CC.$default$onTracksChanged(this, eventTime, trackGroupArray, trackSelectionArray);
-    }
-
-    @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onTracksChanged(TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
     }
 
     @Override // com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -353,43 +301,80 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         AnalyticsListener.CC.$default$onVolumeChanged(this, eventTime, f);
     }
 
+    /* loaded from: classes5.dex */
+    public interface VideoPlayerDelegate {
+        void onError(VideoPlayer videoPlayer, Exception exc);
+
+        void onRenderedFirstFrame();
+
+        void onRenderedFirstFrame(AnalyticsListener.EventTime eventTime);
+
+        void onSeekFinished(AnalyticsListener.EventTime eventTime);
+
+        void onSeekStarted(AnalyticsListener.EventTime eventTime);
+
+        void onStateChanged(boolean z, int i);
+
+        boolean onSurfaceDestroyed(SurfaceTexture surfaceTexture);
+
+        void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture);
+
+        void onVideoSizeChanged(int i, int i2, int i3, float f);
+
+        /* renamed from: org.telegram.ui.Components.VideoPlayer$VideoPlayerDelegate$-CC */
+        /* loaded from: classes5.dex */
+        public final /* synthetic */ class CC {
+            public static void $default$onRenderedFirstFrame(VideoPlayerDelegate _this, AnalyticsListener.EventTime eventTime) {
+            }
+
+            public static void $default$onSeekStarted(VideoPlayerDelegate _this, AnalyticsListener.EventTime eventTime) {
+            }
+
+            public static void $default$onSeekFinished(VideoPlayerDelegate _this, AnalyticsListener.EventTime eventTime) {
+            }
+        }
+    }
+
     public VideoPlayer() {
         this(true);
     }
 
-    public VideoPlayer(boolean z) {
+    public VideoPlayer(boolean pauseOther) {
         this.audioUpdateHandler = new Handler(Looper.getMainLooper());
         Context context = ApplicationLoader.applicationContext;
         DefaultBandwidthMeter defaultBandwidthMeter = BANDWIDTH_METER;
         this.mediaDataSourceFactory = new ExtendedDefaultDataSourceFactory(context, defaultBandwidthMeter, new DefaultHttpDataSourceFactory("Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)", defaultBandwidthMeter));
         this.mainHandler = new Handler();
-        this.trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(defaultBandwidthMeter));
+        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(defaultBandwidthMeter);
+        this.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
         this.lastReportedPlaybackState = 1;
-        this.shouldPauseOther = z;
-        if (z) {
+        this.shouldPauseOther = pauseOther;
+        if (pauseOther) {
             NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.playerDidStartPlaying);
         }
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int i, int i2, Object... objArr) {
-        if (i != NotificationCenter.playerDidStartPlaying || ((VideoPlayer) objArr[0]) == this || !isPlaying()) {
-            return;
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.playerDidStartPlaying) {
+            VideoPlayer p = (VideoPlayer) args[0];
+            if (p != this && isPlaying()) {
+                pause();
+            }
         }
-        pause();
     }
 
     private void ensurePlayerCreated() {
-        DefaultRenderersFactory defaultRenderersFactory;
-        DefaultLoadControl defaultLoadControl = new DefaultLoadControl(new DefaultAllocator(true, CharacterCompat.MIN_SUPPLEMENTARY_CODE_POINT), 15000, 50000, 100, 5000, -1, true);
+        DefaultRenderersFactory factory;
+        DefaultLoadControl loadControl = new DefaultLoadControl(new DefaultAllocator(true, 65536), 15000, 50000, 100, 5000, -1, true);
         if (this.player == null) {
             if (this.audioVisualizerDelegate != null) {
-                defaultRenderersFactory = new AudioVisualizerRenderersFactory(ApplicationLoader.applicationContext);
+                factory = new AudioVisualizerRenderersFactory(ApplicationLoader.applicationContext);
             } else {
-                defaultRenderersFactory = new DefaultRenderersFactory(ApplicationLoader.applicationContext);
+                factory = new DefaultRenderersFactory(ApplicationLoader.applicationContext);
             }
-            defaultRenderersFactory.setExtensionRendererMode(2);
-            SimpleExoPlayer newSimpleInstance = ExoPlayerFactory.newSimpleInstance(ApplicationLoader.applicationContext, defaultRenderersFactory, this.trackSelector, defaultLoadControl, (DrmSessionManager<FrameworkMediaCrypto>) null);
+            factory.setExtensionRendererMode(2);
+            SimpleExoPlayer newSimpleInstance = ExoPlayerFactory.newSimpleInstance(ApplicationLoader.applicationContext, factory, this.trackSelector, loadControl, (DrmSessionManager<FrameworkMediaCrypto>) null);
             this.player = newSimpleInstance;
             newSimpleInstance.addAnalyticsListener(this);
             this.player.addListener(this);
@@ -406,329 +391,206 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
             this.player.setPlayWhenReady(this.autoplay);
             this.player.setRepeatMode(this.looping ? 2 : 0);
         }
-        if (!this.mixedAudio || this.audioPlayer != null) {
-            return;
-        }
-        SimpleExoPlayer newSimpleInstance2 = ExoPlayerFactory.newSimpleInstance(ApplicationLoader.applicationContext, this.trackSelector, defaultLoadControl, (DrmSessionManager<FrameworkMediaCrypto>) null, 2);
-        this.audioPlayer = newSimpleInstance2;
-        newSimpleInstance2.addListener(new Player.EventListener() { // from class: org.telegram.ui.Components.VideoPlayer.1
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public /* synthetic */ void onIsPlayingChanged(boolean z) {
-                Player.EventListener.CC.$default$onIsPlayingChanged(this, z);
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onLoadingChanged(boolean z) {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public /* synthetic */ void onPlaybackSuppressionReasonChanged(int i) {
-                Player.EventListener.CC.$default$onPlaybackSuppressionReasonChanged(this, i);
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onPlayerError(ExoPlaybackException exoPlaybackException) {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onPositionDiscontinuity(int i) {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onRepeatModeChanged(int i) {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onSeekProcessed() {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public /* synthetic */ void onTimelineChanged(Timeline timeline, int i) {
-                onTimelineChanged(timeline, r3.getWindowCount() == 1 ? timeline.getWindow(0, new Timeline.Window()).manifest : null, i);
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onTimelineChanged(Timeline timeline, Object obj, int i) {
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onTracksChanged(TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
-            }
-
-            {
-                VideoPlayer.this = this;
-            }
-
-            @Override // com.google.android.exoplayer2.Player.EventListener
-            public void onPlayerStateChanged(boolean z, int i) {
-                if (VideoPlayer.this.audioPlayerReady || i != 3) {
-                    return;
+        if (this.mixedAudio && this.audioPlayer == null) {
+            SimpleExoPlayer newSimpleInstance2 = ExoPlayerFactory.newSimpleInstance(ApplicationLoader.applicationContext, this.trackSelector, loadControl, (DrmSessionManager<FrameworkMediaCrypto>) null, 2);
+            this.audioPlayer = newSimpleInstance2;
+            newSimpleInstance2.addListener(new Player.EventListener() { // from class: org.telegram.ui.Components.VideoPlayer.1
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public /* synthetic */ void onIsPlayingChanged(boolean z) {
+                    Player.EventListener.CC.$default$onIsPlayingChanged(this, z);
                 }
-                VideoPlayer.this.audioPlayerReady = true;
-                VideoPlayer.this.checkPlayersReady();
-            }
-        });
-        this.audioPlayer.setPlayWhenReady(this.autoplay);
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public /* synthetic */ void onPlaybackSuppressionReasonChanged(int i) {
+                    Player.EventListener.CC.$default$onPlaybackSuppressionReasonChanged(this, i);
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public /* synthetic */ void onTimelineChanged(Timeline timeline, int i) {
+                    Player.EventListener.CC.$default$onTimelineChanged(this, timeline, i);
+                }
+
+                {
+                    VideoPlayer.this = this;
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onLoadingChanged(boolean isLoading) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onPositionDiscontinuity(int reason) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onSeekProcessed() {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                    if (!VideoPlayer.this.audioPlayerReady && playbackState == 3) {
+                        VideoPlayer.this.audioPlayerReady = true;
+                        VideoPlayer.this.checkPlayersReady();
+                    }
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onRepeatModeChanged(int repeatMode) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onPlayerError(ExoPlaybackException error) {
+                }
+
+                @Override // com.google.android.exoplayer2.Player.EventListener
+                public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+                }
+            });
+            this.audioPlayer.setPlayWhenReady(this.autoplay);
+        }
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    /* JADX WARN: Code restructure failed: missing block: B:12:0x003f, code lost:
-        if (r11.equals("dash") == false) goto L10;
+    /* JADX WARN: Code restructure failed: missing block: B:17:0x0055, code lost:
+        if (r11.equals(com.google.android.exoplayer2.offline.DownloadRequest.TYPE_SS) != false) goto L19;
      */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void preparePlayerLoop(android.net.Uri r19, java.lang.String r20, android.net.Uri r21, java.lang.String r22) {
+    public void preparePlayerLoop(android.net.Uri r20, java.lang.String r21, android.net.Uri r22, java.lang.String r23) {
         /*
-            r18 = this;
-            r0 = r18
-            r1 = r19
-            r0.videoUri = r1
-            r2 = r21
-            r0.audioUri = r2
-            r3 = r20
-            r0.videoType = r3
-            r4 = r22
-            r0.audioType = r4
-            r5 = 1
-            r0.loopingMediaSource = r5
-            r0.mixedAudio = r5
-            r6 = 0
-            r0.audioPlayerReady = r6
-            r0.videoPlayerReady = r6
-            r18.ensurePlayerCreated()
-            r7 = 0
-            r8 = r7
-            r9 = 0
-        L22:
-            r10 = 2
-            if (r9 >= r10) goto Laf
-            if (r9 != 0) goto L2a
-            r13 = r1
-            r11 = r3
-            goto L2c
-        L2a:
-            r13 = r2
-            r11 = r4
-        L2c:
-            r11.hashCode()
-            r12 = -1
-            int r14 = r11.hashCode()
-            switch(r14) {
-                case 3680: goto L4d;
-                case 103407: goto L42;
-                case 3075986: goto L39;
-                default: goto L37;
-            }
-        L37:
-            r10 = -1
-            goto L57
-        L39:
-            java.lang.String r14 = "dash"
-            boolean r11 = r11.equals(r14)
-            if (r11 != 0) goto L57
-            goto L37
-        L42:
-            java.lang.String r10 = "hls"
-            boolean r10 = r11.equals(r10)
-            if (r10 != 0) goto L4b
-            goto L37
-        L4b:
-            r10 = 1
-            goto L57
-        L4d:
-            java.lang.String r10 = "ss"
-            boolean r10 = r11.equals(r10)
-            if (r10 != 0) goto L56
-            goto L37
-        L56:
-            r10 = 0
-        L57:
-            switch(r10) {
-                case 0: goto L8e;
-                case 1: goto L82;
-                case 2: goto L6e;
-                default: goto L5a;
-            }
-        L5a:
-            com.google.android.exoplayer2.source.ExtractorMediaSource r10 = new com.google.android.exoplayer2.source.ExtractorMediaSource
-            com.google.android.exoplayer2.upstream.DataSource$Factory r14 = r0.mediaDataSourceFactory
-            com.google.android.exoplayer2.extractor.DefaultExtractorsFactory r15 = new com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-            r15.<init>()
-            android.os.Handler r11 = r0.mainHandler
-            r17 = 0
-            r12 = r10
-            r16 = r11
-            r12.<init>(r13, r14, r15, r16, r17)
-            goto La1
-        L6e:
-            com.google.android.exoplayer2.source.dash.DashMediaSource r10 = new com.google.android.exoplayer2.source.dash.DashMediaSource
-            com.google.android.exoplayer2.upstream.DataSource$Factory r14 = r0.mediaDataSourceFactory
-            com.google.android.exoplayer2.source.dash.DefaultDashChunkSource$Factory r15 = new com.google.android.exoplayer2.source.dash.DefaultDashChunkSource$Factory
-            r15.<init>(r14)
-            android.os.Handler r11 = r0.mainHandler
-            r17 = 0
-            r12 = r10
-            r16 = r11
-            r12.<init>(r13, r14, r15, r16, r17)
-            goto La1
-        L82:
-            com.google.android.exoplayer2.source.hls.HlsMediaSource$Factory r10 = new com.google.android.exoplayer2.source.hls.HlsMediaSource$Factory
-            com.google.android.exoplayer2.upstream.DataSource$Factory r11 = r0.mediaDataSourceFactory
-            r10.<init>(r11)
-            com.google.android.exoplayer2.source.hls.HlsMediaSource r10 = r10.createMediaSource(r13)
-            goto La1
-        L8e:
-            com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource r10 = new com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-            com.google.android.exoplayer2.upstream.DataSource$Factory r14 = r0.mediaDataSourceFactory
-            com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource$Factory r15 = new com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource$Factory
-            r15.<init>(r14)
-            android.os.Handler r11 = r0.mainHandler
-            r17 = 0
-            r12 = r10
-            r16 = r11
-            r12.<init>(r13, r14, r15, r16, r17)
-        La1:
-            com.google.android.exoplayer2.source.LoopingMediaSource r11 = new com.google.android.exoplayer2.source.LoopingMediaSource
-            r11.<init>(r10)
-            if (r9 != 0) goto Laa
-            r7 = r11
-            goto Lab
-        Laa:
-            r8 = r11
-        Lab:
-            int r9 = r9 + 1
-            goto L22
-        Laf:
-            com.google.android.exoplayer2.SimpleExoPlayer r1 = r0.player
-            r1.prepare(r7, r5, r5)
-            com.google.android.exoplayer2.SimpleExoPlayer r1 = r0.audioPlayer
-            r1.prepare(r8, r5, r5)
-            return
+            Method dump skipped, instructions count: 230
+            To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.VideoPlayer.preparePlayerLoop(android.net.Uri, java.lang.String, android.net.Uri, java.lang.String):void");
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    /* JADX WARN: Code restructure failed: missing block: B:18:0x0052, code lost:
-        if (r10.equals("ss") == false) goto L10;
+    /* JADX WARN: Code restructure failed: missing block: B:11:0x0038, code lost:
+        if (r11.equals(com.google.android.exoplayer2.offline.DownloadRequest.TYPE_DASH) != false) goto L19;
      */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void preparePlayer(android.net.Uri r9, java.lang.String r10) {
+    public void preparePlayer(android.net.Uri r10, java.lang.String r11) {
         /*
-            r8 = this;
-            r8.videoUri = r9
-            r8.videoType = r10
-            r2 = 0
-            r8.audioUri = r2
-            r8.audioType = r2
-            r2 = 0
-            r8.loopingMediaSource = r2
-            r8.videoPlayerReady = r2
-            r8.mixedAudio = r2
-            r8.currentUri = r9
-            java.lang.String r3 = r9.getScheme()
-            r6 = 1
-            if (r3 == 0) goto L23
-            java.lang.String r4 = "file"
-            boolean r3 = r3.startsWith(r4)
+            r9 = this;
+            r9.videoUri = r10
+            r9.videoType = r11
+            r0 = 0
+            r9.audioUri = r0
+            r9.audioType = r0
+            r0 = 0
+            r9.loopingMediaSource = r0
+            r9.videoPlayerReady = r0
+            r9.mixedAudio = r0
+            r9.currentUri = r10
+            java.lang.String r1 = r10.getScheme()
+            r2 = 1
+            if (r1 == 0) goto L23
+            java.lang.String r3 = "file"
+            boolean r3 = r1.startsWith(r3)
             if (r3 != 0) goto L23
             r3 = 1
             goto L24
         L23:
             r3 = 0
         L24:
-            r8.isStreaming = r3
-            r8.ensurePlayerCreated()
-            r10.hashCode()
+            r9.isStreaming = r3
+            r9.ensurePlayerCreated()
             r3 = -1
-            int r4 = r10.hashCode()
+            int r4 = r11.hashCode()
             switch(r4) {
-                case 3680: goto L4c;
-                case 103407: goto L41;
-                case 3075986: goto L36;
-                default: goto L34;
+                case 3680: goto L45;
+                case 103407: goto L3b;
+                case 3075986: goto L32;
+                default: goto L31;
             }
-        L34:
-            r2 = -1
-            goto L55
-        L36:
-            java.lang.String r2 = "dash"
-            boolean r0 = r10.equals(r2)
-            if (r0 != 0) goto L3f
-            goto L34
-        L3f:
-            r2 = 2
-            goto L55
-        L41:
-            java.lang.String r2 = "hls"
-            boolean r0 = r10.equals(r2)
-            if (r0 != 0) goto L4a
-            goto L34
-        L4a:
-            r2 = 1
-            goto L55
-        L4c:
-            java.lang.String r4 = "ss"
-            boolean r0 = r10.equals(r4)
-            if (r0 != 0) goto L55
-            goto L34
-        L55:
-            switch(r2) {
-                case 0: goto L88;
-                case 1: goto L7c;
-                case 2: goto L6a;
-                default: goto L58;
+        L31:
+            goto L4f
+        L32:
+            java.lang.String r4 = "dash"
+            boolean r4 = r11.equals(r4)
+            if (r4 == 0) goto L31
+            goto L50
+        L3b:
+            java.lang.String r0 = "hls"
+            boolean r0 = r11.equals(r0)
+            if (r0 == 0) goto L31
+            r0 = 1
+            goto L50
+        L45:
+            java.lang.String r0 = "ss"
+            boolean r0 = r11.equals(r0)
+            if (r0 == 0) goto L31
+            r0 = 2
+            goto L50
+        L4f:
+            r0 = -1
+        L50:
+            switch(r0) {
+                case 0: goto L85;
+                case 1: goto L79;
+                case 2: goto L65;
+                default: goto L53;
             }
-        L58:
-            com.google.android.exoplayer2.source.ExtractorMediaSource r7 = new com.google.android.exoplayer2.source.ExtractorMediaSource
-            com.google.android.exoplayer2.upstream.DataSource$Factory r2 = r8.mediaDataSourceFactory
-            com.google.android.exoplayer2.extractor.DefaultExtractorsFactory r3 = new com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-            r3.<init>()
-            android.os.Handler r4 = r8.mainHandler
-            r5 = 0
-            r0 = r7
-            r1 = r9
-            r0.<init>(r1, r2, r3, r4, r5)
+        L53:
+            com.google.android.exoplayer2.source.ExtractorMediaSource r0 = new com.google.android.exoplayer2.source.ExtractorMediaSource
+            com.google.android.exoplayer2.upstream.DataSource$Factory r5 = r9.mediaDataSourceFactory
+            com.google.android.exoplayer2.extractor.DefaultExtractorsFactory r6 = new com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+            r6.<init>()
+            android.os.Handler r7 = r9.mainHandler
+            r8 = 0
+            r3 = r0
+            r4 = r10
+            r3.<init>(r4, r5, r6, r7, r8)
             goto L99
-        L6a:
-            com.google.android.exoplayer2.source.dash.DashMediaSource r7 = new com.google.android.exoplayer2.source.dash.DashMediaSource
-            com.google.android.exoplayer2.upstream.DataSource$Factory r2 = r8.mediaDataSourceFactory
-            com.google.android.exoplayer2.source.dash.DefaultDashChunkSource$Factory r3 = new com.google.android.exoplayer2.source.dash.DefaultDashChunkSource$Factory
-            r3.<init>(r2)
-            android.os.Handler r4 = r8.mainHandler
-            r5 = 0
-            r0 = r7
-            r1 = r9
-            r0.<init>(r1, r2, r3, r4, r5)
+        L65:
+            com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource r0 = new com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
+            com.google.android.exoplayer2.upstream.DataSource$Factory r5 = r9.mediaDataSourceFactory
+            com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource$Factory r6 = new com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource$Factory
+            com.google.android.exoplayer2.upstream.DataSource$Factory r3 = r9.mediaDataSourceFactory
+            r6.<init>(r3)
+            android.os.Handler r7 = r9.mainHandler
+            r8 = 0
+            r3 = r0
+            r4 = r10
+            r3.<init>(r4, r5, r6, r7, r8)
             goto L99
-        L7c:
+        L79:
             com.google.android.exoplayer2.source.hls.HlsMediaSource$Factory r0 = new com.google.android.exoplayer2.source.hls.HlsMediaSource$Factory
-            com.google.android.exoplayer2.upstream.DataSource$Factory r2 = r8.mediaDataSourceFactory
-            r0.<init>(r2)
-            com.google.android.exoplayer2.source.hls.HlsMediaSource r7 = r0.createMediaSource(r9)
+            com.google.android.exoplayer2.upstream.DataSource$Factory r3 = r9.mediaDataSourceFactory
+            r0.<init>(r3)
+            com.google.android.exoplayer2.source.hls.HlsMediaSource r0 = r0.createMediaSource(r10)
             goto L99
-        L88:
-            com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource r7 = new com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-            com.google.android.exoplayer2.upstream.DataSource$Factory r2 = r8.mediaDataSourceFactory
-            com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource$Factory r3 = new com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource$Factory
-            r3.<init>(r2)
-            android.os.Handler r4 = r8.mainHandler
-            r5 = 0
-            r0 = r7
-            r1 = r9
-            r0.<init>(r1, r2, r3, r4, r5)
+        L85:
+            com.google.android.exoplayer2.source.dash.DashMediaSource r0 = new com.google.android.exoplayer2.source.dash.DashMediaSource
+            com.google.android.exoplayer2.upstream.DataSource$Factory r5 = r9.mediaDataSourceFactory
+            com.google.android.exoplayer2.source.dash.DefaultDashChunkSource$Factory r6 = new com.google.android.exoplayer2.source.dash.DefaultDashChunkSource$Factory
+            com.google.android.exoplayer2.upstream.DataSource$Factory r3 = r9.mediaDataSourceFactory
+            r6.<init>(r3)
+            android.os.Handler r7 = r9.mainHandler
+            r8 = 0
+            r3 = r0
+            r4 = r10
+            r3.<init>(r4, r5, r6, r7, r8)
         L99:
-            com.google.android.exoplayer2.SimpleExoPlayer r0 = r8.player
-            r0.prepare(r7, r6, r6)
+            com.google.android.exoplayer2.SimpleExoPlayer r3 = r9.player
+            r3.prepare(r0, r2, r2)
             return
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.VideoPlayer.preparePlayer(android.net.Uri, java.lang.String):void");
@@ -738,15 +600,15 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         return this.player != null;
     }
 
-    public void releasePlayer(boolean z) {
+    public void releasePlayer(boolean async) {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer != null) {
-            simpleExoPlayer.release(z);
+            simpleExoPlayer.release(async);
             this.player = null;
         }
         SimpleExoPlayer simpleExoPlayer2 = this.audioPlayer;
         if (simpleExoPlayer2 != null) {
-            simpleExoPlayer2.release(z);
+            simpleExoPlayer2.release(async);
             this.audioPlayer = null;
         }
         if (this.shouldPauseOther) {
@@ -778,28 +640,28 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         }
     }
 
-    public void setTextureView(TextureView textureView) {
-        if (this.textureView == textureView) {
+    public void setTextureView(TextureView texture) {
+        if (this.textureView == texture) {
             return;
         }
-        this.textureView = textureView;
+        this.textureView = texture;
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer == null) {
             return;
         }
-        simpleExoPlayer.setVideoTextureView(textureView);
+        simpleExoPlayer.setVideoTextureView(texture);
     }
 
-    public void setSurface(Surface surface) {
-        if (this.surface == surface) {
+    public void setSurface(Surface s) {
+        if (this.surface == s) {
             return;
         }
-        this.surface = surface;
+        this.surface = s;
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer == null) {
             return;
         }
-        simpleExoPlayer.setVideoSurface(surface);
+        simpleExoPlayer.setVideoSurface(s);
     }
 
     public boolean getPlayWhenReady() {
@@ -822,10 +684,10 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
                 simpleExoPlayer.setPlayWhenReady(false);
             }
             SimpleExoPlayer simpleExoPlayer2 = this.audioPlayer;
-            if (simpleExoPlayer2 == null) {
+            if (simpleExoPlayer2 != null) {
+                simpleExoPlayer2.setPlayWhenReady(false);
                 return;
             }
-            simpleExoPlayer2.setPlayWhenReady(false);
             return;
         }
         SimpleExoPlayer simpleExoPlayer3 = this.player;
@@ -833,10 +695,9 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
             simpleExoPlayer3.setPlayWhenReady(true);
         }
         SimpleExoPlayer simpleExoPlayer4 = this.audioPlayer;
-        if (simpleExoPlayer4 == null) {
-            return;
+        if (simpleExoPlayer4 != null) {
+            simpleExoPlayer4.setPlayWhenReady(true);
         }
-        simpleExoPlayer4.setPlayWhenReady(true);
     }
 
     public void pause() {
@@ -855,41 +716,40 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         }
     }
 
-    public void setPlaybackSpeed(float f) {
+    public void setPlaybackSpeed(float speed) {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer != null) {
-            float f2 = 1.0f;
-            if (f > 1.0f) {
-                f2 = 0.98f;
+            float f = 1.0f;
+            if (speed > 1.0f) {
+                f = 0.98f;
             }
-            simpleExoPlayer.setPlaybackParameters(new PlaybackParameters(f, f2));
+            simpleExoPlayer.setPlaybackParameters(new PlaybackParameters(speed, f));
         }
     }
 
-    public void setPlayWhenReady(boolean z) {
-        this.mixedPlayWhenReady = z;
-        if (z && this.mixedAudio && (!this.audioPlayerReady || !this.videoPlayerReady)) {
+    public void setPlayWhenReady(boolean playWhenReady) {
+        this.mixedPlayWhenReady = playWhenReady;
+        if (playWhenReady && this.mixedAudio && (!this.audioPlayerReady || !this.videoPlayerReady)) {
             SimpleExoPlayer simpleExoPlayer = this.player;
             if (simpleExoPlayer != null) {
                 simpleExoPlayer.setPlayWhenReady(false);
             }
             SimpleExoPlayer simpleExoPlayer2 = this.audioPlayer;
-            if (simpleExoPlayer2 == null) {
+            if (simpleExoPlayer2 != null) {
+                simpleExoPlayer2.setPlayWhenReady(false);
                 return;
             }
-            simpleExoPlayer2.setPlayWhenReady(false);
             return;
         }
-        this.autoplay = z;
+        this.autoplay = playWhenReady;
         SimpleExoPlayer simpleExoPlayer3 = this.player;
         if (simpleExoPlayer3 != null) {
-            simpleExoPlayer3.setPlayWhenReady(z);
+            simpleExoPlayer3.setPlayWhenReady(playWhenReady);
         }
         SimpleExoPlayer simpleExoPlayer4 = this.audioPlayer;
-        if (simpleExoPlayer4 == null) {
-            return;
+        if (simpleExoPlayer4 != null) {
+            simpleExoPlayer4.setPlayWhenReady(playWhenReady);
         }
-        simpleExoPlayer4.setPlayWhenReady(z);
     }
 
     public long getDuration() {
@@ -913,36 +773,44 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         return simpleExoPlayer != null && simpleExoPlayer.getVolume() == 0.0f;
     }
 
-    public void setMute(boolean z) {
+    public void setMute(boolean value) {
         SimpleExoPlayer simpleExoPlayer = this.player;
         float f = 0.0f;
         if (simpleExoPlayer != null) {
-            simpleExoPlayer.setVolume(z ? 0.0f : 1.0f);
+            simpleExoPlayer.setVolume(value ? 0.0f : 1.0f);
         }
         SimpleExoPlayer simpleExoPlayer2 = this.audioPlayer;
         if (simpleExoPlayer2 != null) {
-            if (!z) {
+            if (!value) {
                 f = 1.0f;
             }
             simpleExoPlayer2.setVolume(f);
         }
     }
 
-    public void setVolume(float f) {
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onRepeatModeChanged(int repeatMode) {
+    }
+
+    @Override // com.google.android.exoplayer2.video.VideoListener
+    public void onSurfaceSizeChanged(int width, int height) {
+    }
+
+    public void setVolume(float volume) {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer != null) {
-            simpleExoPlayer.setVolume(f);
+            simpleExoPlayer.setVolume(volume);
         }
         SimpleExoPlayer simpleExoPlayer2 = this.audioPlayer;
         if (simpleExoPlayer2 != null) {
-            simpleExoPlayer2.setVolume(f);
+            simpleExoPlayer2.setVolume(volume);
         }
     }
 
-    public void seekTo(long j) {
+    public void seekTo(long positionMs) {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer != null) {
-            simpleExoPlayer.seekTo(j);
+            simpleExoPlayer.seekTo(positionMs);
         }
     }
 
@@ -954,12 +822,27 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         this.audioVisualizerDelegate = audioVisualizerDelegate;
     }
 
+    public int getBufferedPercentage() {
+        if (this.isStreaming) {
+            SimpleExoPlayer simpleExoPlayer = this.player;
+            if (simpleExoPlayer == null) {
+                return 0;
+            }
+            return simpleExoPlayer.getBufferedPercentage();
+        }
+        return 100;
+    }
+
     public long getBufferedPosition() {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer != null) {
             return this.isStreaming ? simpleExoPlayer.getBufferedPosition() : simpleExoPlayer.getDuration();
         }
         return 0L;
+    }
+
+    public boolean isStreaming() {
+        return this.isStreaming;
     }
 
     public boolean isPlaying() {
@@ -971,25 +854,24 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         return this.player != null && this.lastReportedPlaybackState == 2;
     }
 
-    public void setStreamType(int i) {
+    public void setStreamType(int type) {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer != null) {
-            simpleExoPlayer.setAudioStreamType(i);
+            simpleExoPlayer.setAudioStreamType(type);
         }
         SimpleExoPlayer simpleExoPlayer2 = this.audioPlayer;
         if (simpleExoPlayer2 != null) {
-            simpleExoPlayer2.setAudioStreamType(i);
+            simpleExoPlayer2.setAudioStreamType(type);
         }
     }
 
-    public void setLooping(boolean z) {
-        if (this.looping != z) {
-            this.looping = z;
+    public void setLooping(boolean looping) {
+        if (this.looping != looping) {
+            this.looping = looping;
             SimpleExoPlayer simpleExoPlayer = this.player;
-            if (simpleExoPlayer == null) {
-                return;
+            if (simpleExoPlayer != null) {
+                simpleExoPlayer.setRepeatMode(looping ? 2 : 0);
             }
-            simpleExoPlayer.setRepeatMode(z ? 2 : 0);
         }
     }
 
@@ -998,70 +880,88 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
     }
 
     public void checkPlayersReady() {
-        if (!this.audioPlayerReady || !this.videoPlayerReady || !this.mixedPlayWhenReady) {
-            return;
+        if (this.audioPlayerReady && this.videoPlayerReady && this.mixedPlayWhenReady) {
+            play();
         }
-        play();
     }
 
     @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onPlayerStateChanged(boolean z, int i) {
+    public void onLoadingChanged(boolean isLoading) {
+    }
+
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         maybeReportPlayerState();
-        if (z && i == 3 && !isMuted() && this.shouldPauseOther) {
+        if (playWhenReady && playbackState == 3 && !isMuted() && this.shouldPauseOther) {
             NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.playerDidStartPlaying, this);
         }
-        if (!this.videoPlayerReady && i == 3) {
+        if (!this.videoPlayerReady && playbackState == 3) {
             this.videoPlayerReady = true;
             checkPlayersReady();
         }
-        if (i != 3) {
+        if (playbackState != 3) {
             this.audioUpdateHandler.removeCallbacksAndMessages(null);
             AudioVisualizerDelegate audioVisualizerDelegate = this.audioVisualizerDelegate;
-            if (audioVisualizerDelegate == null) {
-                return;
+            if (audioVisualizerDelegate != null) {
+                audioVisualizerDelegate.onVisualizerUpdate(false, true, null);
             }
-            audioVisualizerDelegate.onVisualizerUpdate(false, true, null);
         }
     }
 
     @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onPositionDiscontinuity(int i) {
-        if (i == 0) {
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+    }
+
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+    }
+
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onPositionDiscontinuity(int reason) {
+        if (reason == 0) {
             this.repeatCount++;
         }
     }
 
     @Override // com.google.android.exoplayer2.Player.EventListener
-    public void onPlayerError(ExoPlaybackException exoPlaybackException) {
-        Throwable cause = exoPlaybackException.getCause();
+    public void onSeekProcessed() {
+    }
+
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onPlayerError(ExoPlaybackException error) {
+        Throwable cause = error.getCause();
         TextureView textureView = this.textureView;
         if (textureView != null && ((!this.triedReinit && (cause instanceof MediaCodecRenderer.DecoderInitializationException)) || (cause instanceof SurfaceNotValidException))) {
             this.triedReinit = true;
-            if (this.player == null) {
+            if (this.player != null) {
+                ViewGroup parent = (ViewGroup) textureView.getParent();
+                if (parent != null) {
+                    int i = parent.indexOfChild(this.textureView);
+                    parent.removeView(this.textureView);
+                    parent.addView(this.textureView, i);
+                }
+                this.player.clearVideoTextureView(this.textureView);
+                this.player.setVideoTextureView(this.textureView);
+                if (this.loopingMediaSource) {
+                    preparePlayerLoop(this.videoUri, this.videoType, this.audioUri, this.audioType);
+                } else {
+                    preparePlayer(this.videoUri, this.videoType);
+                }
+                play();
                 return;
             }
-            ViewGroup viewGroup = (ViewGroup) textureView.getParent();
-            if (viewGroup != null) {
-                int indexOfChild = viewGroup.indexOfChild(this.textureView);
-                viewGroup.removeView(this.textureView);
-                viewGroup.addView(this.textureView, indexOfChild);
-            }
-            this.player.clearVideoTextureView(this.textureView);
-            this.player.setVideoTextureView(this.textureView);
-            if (this.loopingMediaSource) {
-                preparePlayerLoop(this.videoUri, this.videoType, this.audioUri, this.audioType);
-            } else {
-                preparePlayer(this.videoUri, this.videoType);
-            }
-            play();
             return;
         }
-        this.delegate.onError(this, exoPlaybackException);
+        this.delegate.onError(this, error);
+    }
+
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
     }
 
     @Override // com.google.android.exoplayer2.video.VideoListener
-    public void onVideoSizeChanged(int i, int i2, int i3, float f) {
-        this.delegate.onVideoSizeChanged(i, i2, i3, f);
+    public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+        this.delegate.onVideoSizeChanged(width, height, unappliedRotationDegrees, pixelWidthHeightRatio);
     }
 
     @Override // com.google.android.exoplayer2.video.VideoListener
@@ -1079,6 +979,10 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         this.delegate.onSurfaceTextureUpdated(surfaceTexture);
     }
 
+    @Override // com.google.android.exoplayer2.Player.EventListener
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+    }
+
     private void maybeReportPlayerState() {
         SimpleExoPlayer simpleExoPlayer = this.player;
         if (simpleExoPlayer == null) {
@@ -1086,15 +990,18 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         }
         boolean playWhenReady = simpleExoPlayer.getPlayWhenReady();
         int playbackState = this.player.getPlaybackState();
-        if (this.lastReportedPlayWhenReady == playWhenReady && this.lastReportedPlaybackState == playbackState) {
-            return;
+        if (this.lastReportedPlayWhenReady != playWhenReady || this.lastReportedPlaybackState != playbackState) {
+            this.delegate.onStateChanged(playWhenReady, playbackState);
+            this.lastReportedPlayWhenReady = playWhenReady;
+            this.lastReportedPlaybackState = playbackState;
         }
-        this.delegate.onStateChanged(playWhenReady, playbackState);
-        this.lastReportedPlayWhenReady = playWhenReady;
-        this.lastReportedPlaybackState = playbackState;
     }
 
-    /* loaded from: classes3.dex */
+    public int getRepeatCount() {
+        return this.repeatCount;
+    }
+
+    /* loaded from: classes5.dex */
     public class AudioVisualizerRenderersFactory extends DefaultRenderersFactory {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public AudioVisualizerRenderersFactory(Context context) {
@@ -1103,124 +1010,123 @@ public class VideoPlayer implements Player.EventListener, SimpleExoPlayer.VideoL
         }
 
         @Override // com.google.android.exoplayer2.DefaultRenderersFactory
-        public void buildAudioRenderers(Context context, int i, MediaCodecSelector mediaCodecSelector, DrmSessionManager<FrameworkMediaCrypto> drmSessionManager, boolean z, boolean z2, AudioProcessor[] audioProcessorArr, Handler handler, AudioRendererEventListener audioRendererEventListener, ArrayList<Renderer> arrayList) {
-            super.buildAudioRenderers(context, i, mediaCodecSelector, drmSessionManager, z, z2, new AudioProcessor[]{new TeeAudioProcessor(new VisualizerBufferSink())}, handler, audioRendererEventListener, arrayList);
+        public void buildAudioRenderers(Context context, int extensionRendererMode, MediaCodecSelector mediaCodecSelector, DrmSessionManager<FrameworkMediaCrypto> drmSessionManager, boolean playClearSamplesWithoutKeys, boolean enableDecoderFallback, AudioProcessor[] audioProcessors, Handler eventHandler, AudioRendererEventListener eventListener, ArrayList<Renderer> out) {
+            AudioProcessor audioProcessor = new TeeAudioProcessor(new VisualizerBufferSink());
+            super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector, drmSessionManager, playClearSamplesWithoutKeys, enableDecoderFallback, new AudioProcessor[]{audioProcessor}, eventHandler, eventListener, out);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class VisualizerBufferSink implements TeeAudioProcessor.AudioBufferSink {
         ByteBuffer byteBuffer;
         long lastUpdateTime;
+        private final int BUFFER_SIZE = 1024;
+        private final int MAX_BUFFER_SIZE = 8192;
         FourierTransform.FFT fft = new FourierTransform.FFT(1024, 48000.0f);
         float[] real = new float[1024];
         int position = 0;
 
-        @Override // com.google.android.exoplayer2.audio.TeeAudioProcessor.AudioBufferSink
-        public void flush(int i, int i2, int i3) {
-        }
-
         public VisualizerBufferSink() {
-            VideoPlayer.this = r3;
+            VideoPlayer.this = r4;
             ByteBuffer allocateDirect = ByteBuffer.allocateDirect(8192);
             this.byteBuffer = allocateDirect;
             allocateDirect.position(0);
         }
 
         @Override // com.google.android.exoplayer2.audio.TeeAudioProcessor.AudioBufferSink
-        public void handleBuffer(ByteBuffer byteBuffer) {
+        public void flush(int sampleRateHz, int channelCount, int encoding) {
+        }
+
+        @Override // com.google.android.exoplayer2.audio.TeeAudioProcessor.AudioBufferSink
+        public void handleBuffer(ByteBuffer buffer) {
             if (VideoPlayer.this.audioVisualizerDelegate == null) {
                 return;
             }
-            if (byteBuffer != AudioProcessor.EMPTY_BUFFER && VideoPlayer.this.mixedPlayWhenReady) {
+            if (buffer != AudioProcessor.EMPTY_BUFFER && VideoPlayer.this.mixedPlayWhenReady) {
                 if (!VideoPlayer.this.audioVisualizerDelegate.needUpdate()) {
                     return;
                 }
-                int limit = byteBuffer.limit();
-                int i = 0;
-                if (limit > 8192) {
+                int len = buffer.limit();
+                if (len > 8192) {
                     VideoPlayer.this.audioUpdateHandler.removeCallbacksAndMessages(null);
                     VideoPlayer.this.audioVisualizerDelegate.onVisualizerUpdate(false, true, null);
                     return;
                 }
-                this.byteBuffer.put(byteBuffer);
-                int i2 = this.position + limit;
-                this.position = i2;
-                if (i2 < 1024) {
-                    return;
-                }
-                this.byteBuffer.position(0);
-                for (int i3 = 0; i3 < 1024; i3++) {
-                    this.real[i3] = this.byteBuffer.getShort() / 32768.0f;
-                }
-                this.byteBuffer.rewind();
-                this.position = 0;
-                this.fft.forward(this.real);
-                int i4 = 0;
-                float f = 0.0f;
-                while (true) {
-                    float f2 = 1.0f;
-                    if (i4 >= 1024) {
-                        break;
+                this.byteBuffer.put(buffer);
+                int i = this.position + len;
+                this.position = i;
+                if (i >= 1024) {
+                    this.byteBuffer.position(0);
+                    for (int i2 = 0; i2 < 1024; i2++) {
+                        this.real[i2] = this.byteBuffer.getShort() / 32768.0f;
                     }
-                    float f3 = this.fft.getSpectrumReal()[i4];
-                    float f4 = this.fft.getSpectrumImaginary()[i4];
-                    float sqrt = ((float) Math.sqrt((f3 * f3) + (f4 * f4))) / 30.0f;
-                    if (sqrt <= 1.0f) {
-                        f2 = sqrt < 0.0f ? 0.0f : sqrt;
-                    }
-                    f += f2 * f2;
-                    i4++;
-                }
-                float sqrt2 = (float) Math.sqrt(f / 1024);
-                final float[] fArr = new float[7];
-                fArr[6] = sqrt2;
-                if (sqrt2 < 0.4f) {
-                    while (i < 7) {
-                        fArr[i] = 0.0f;
-                        i++;
-                    }
-                } else {
-                    while (i < 6) {
-                        int i5 = 170 * i;
-                        float f5 = this.fft.getSpectrumReal()[i5];
-                        float f6 = this.fft.getSpectrumImaginary()[i5];
-                        fArr[i] = (float) (Math.sqrt((f5 * f5) + (f6 * f6)) / 30.0d);
-                        if (fArr[i] > 1.0f) {
-                            fArr[i] = 1.0f;
-                        } else if (fArr[i] < 0.0f) {
-                            fArr[i] = 0.0f;
+                    this.byteBuffer.rewind();
+                    this.position = 0;
+                    this.fft.forward(this.real);
+                    float sum = 0.0f;
+                    for (int i3 = 0; i3 < 1024; i3++) {
+                        float r = this.fft.getSpectrumReal()[i3];
+                        float img = this.fft.getSpectrumImaginary()[i3];
+                        float peak = ((float) Math.sqrt((r * r) + (img * img))) / 30.0f;
+                        if (peak > 1.0f) {
+                            peak = 1.0f;
+                        } else if (peak < 0.0f) {
+                            peak = 0.0f;
                         }
-                        i++;
+                        sum += peak * peak;
                     }
-                }
-                if (System.currentTimeMillis() - this.lastUpdateTime < 64) {
+                    float amplitude = (float) Math.sqrt(sum / 1024);
+                    final float[] partsAmplitude = new float[7];
+                    partsAmplitude[6] = amplitude;
+                    if (amplitude < 0.4f) {
+                        for (int k = 0; k < 7; k++) {
+                            partsAmplitude[k] = 0.0f;
+                        }
+                    } else {
+                        int part = 1024 / 6;
+                        for (int k2 = 0; k2 < 6; k2++) {
+                            int start = part * k2;
+                            float r2 = this.fft.getSpectrumReal()[start];
+                            float img2 = this.fft.getSpectrumImaginary()[start];
+                            partsAmplitude[k2] = (float) (Math.sqrt((r2 * r2) + (img2 * img2)) / 30.0d);
+                            if (partsAmplitude[k2] > 1.0f) {
+                                partsAmplitude[k2] = 1.0f;
+                            } else if (partsAmplitude[k2] < 0.0f) {
+                                partsAmplitude[k2] = 0.0f;
+                            }
+                        }
+                    }
+                    if (System.currentTimeMillis() - this.lastUpdateTime >= 64) {
+                        this.lastUpdateTime = System.currentTimeMillis();
+                        VideoPlayer.this.audioUpdateHandler.postDelayed(new Runnable() { // from class: org.telegram.ui.Components.VideoPlayer$VisualizerBufferSink$$ExternalSyntheticLambda1
+                            @Override // java.lang.Runnable
+                            public final void run() {
+                                VideoPlayer.VisualizerBufferSink.this.m3200xb50afb68(partsAmplitude);
+                            }
+                        }, 130L);
+                        return;
+                    }
                     return;
                 }
-                this.lastUpdateTime = System.currentTimeMillis();
-                VideoPlayer.this.audioUpdateHandler.postDelayed(new Runnable() { // from class: org.telegram.ui.Components.VideoPlayer$VisualizerBufferSink$$ExternalSyntheticLambda1
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        VideoPlayer.VisualizerBufferSink.this.lambda$handleBuffer$1(fArr);
-                    }
-                }, 130L);
                 return;
             }
             VideoPlayer.this.audioUpdateHandler.postDelayed(new Runnable() { // from class: org.telegram.ui.Components.VideoPlayer$VisualizerBufferSink$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    VideoPlayer.VisualizerBufferSink.this.lambda$handleBuffer$0();
+                    VideoPlayer.VisualizerBufferSink.this.m3199xfa955ae7();
                 }
             }, 80L);
         }
 
-        public /* synthetic */ void lambda$handleBuffer$0() {
+        /* renamed from: lambda$handleBuffer$0$org-telegram-ui-Components-VideoPlayer$VisualizerBufferSink */
+        public /* synthetic */ void m3199xfa955ae7() {
             VideoPlayer.this.audioUpdateHandler.removeCallbacksAndMessages(null);
             VideoPlayer.this.audioVisualizerDelegate.onVisualizerUpdate(false, true, null);
         }
 
-        public /* synthetic */ void lambda$handleBuffer$1(float[] fArr) {
-            VideoPlayer.this.audioVisualizerDelegate.onVisualizerUpdate(true, true, fArr);
+        /* renamed from: lambda$handleBuffer$1$org-telegram-ui-Components-VideoPlayer$VisualizerBufferSink */
+        public /* synthetic */ void m3200xb50afb68(float[] partsAmplitude) {
+            VideoPlayer.this.audioVisualizerDelegate.onVisualizerUpdate(true, true, partsAmplitude);
         }
     }
 }

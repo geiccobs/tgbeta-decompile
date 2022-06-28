@@ -5,8 +5,12 @@ import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class StackFrame implements Model {
+    private static final String CLASS_NAME = "className";
+    private static final String FILE_NAME = "fileName";
+    private static final String LINE_NUMBER = "lineNumber";
+    private static final String METHOD_NAME = "methodName";
     private String className;
     private String fileName;
     private Integer lineNumber;
@@ -16,87 +20,88 @@ public class StackFrame implements Model {
         return this.className;
     }
 
-    public void setClassName(String str) {
-        this.className = str;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     public String getMethodName() {
         return this.methodName;
     }
 
-    public void setMethodName(String str) {
-        this.methodName = str;
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 
     public Integer getLineNumber() {
         return this.lineNumber;
     }
 
-    public void setLineNumber(Integer num) {
-        this.lineNumber = num;
+    public void setLineNumber(Integer lineNumber) {
+        this.lineNumber = lineNumber;
     }
 
     public String getFileName() {
         return this.fileName;
     }
 
-    public void setFileName(String str) {
-        this.fileName = str;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject jSONObject) throws JSONException {
-        setClassName(jSONObject.optString("className", null));
-        setMethodName(jSONObject.optString("methodName", null));
-        setLineNumber(JSONUtils.readInteger(jSONObject, "lineNumber"));
-        setFileName(jSONObject.optString("fileName", null));
+    public void read(JSONObject object) throws JSONException {
+        setClassName(object.optString(CLASS_NAME, null));
+        setMethodName(object.optString(METHOD_NAME, null));
+        setLineNumber(JSONUtils.readInteger(object, LINE_NUMBER));
+        setFileName(object.optString(FILE_NAME, null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer jSONStringer) throws JSONException {
-        JSONUtils.write(jSONStringer, "className", getClassName());
-        JSONUtils.write(jSONStringer, "methodName", getMethodName());
-        JSONUtils.write(jSONStringer, "lineNumber", getLineNumber());
-        JSONUtils.write(jSONStringer, "fileName", getFileName());
+    public void write(JSONStringer writer) throws JSONException {
+        JSONUtils.write(writer, CLASS_NAME, getClassName());
+        JSONUtils.write(writer, METHOD_NAME, getMethodName());
+        JSONUtils.write(writer, LINE_NUMBER, getLineNumber());
+        JSONUtils.write(writer, FILE_NAME, getFileName());
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || StackFrame.class != obj.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        StackFrame stackFrame = (StackFrame) obj;
+        StackFrame that = (StackFrame) o;
         String str = this.className;
-        if (str == null ? stackFrame.className != null : !str.equals(stackFrame.className)) {
+        if (str == null ? that.className != null : !str.equals(that.className)) {
             return false;
         }
         String str2 = this.methodName;
-        if (str2 == null ? stackFrame.methodName != null : !str2.equals(stackFrame.methodName)) {
+        if (str2 == null ? that.methodName != null : !str2.equals(that.methodName)) {
             return false;
         }
         Integer num = this.lineNumber;
-        if (num == null ? stackFrame.lineNumber != null : !num.equals(stackFrame.lineNumber)) {
+        if (num == null ? that.lineNumber != null : !num.equals(that.lineNumber)) {
             return false;
         }
         String str3 = this.fileName;
-        String str4 = stackFrame.fileName;
-        return str3 != null ? str3.equals(str4) : str4 == null;
+        return str3 != null ? str3.equals(that.fileName) : that.fileName == null;
     }
 
     public int hashCode() {
         String str = this.className;
         int i = 0;
-        int hashCode = (str != null ? str.hashCode() : 0) * 31;
+        int result = str != null ? str.hashCode() : 0;
+        int i2 = result * 31;
         String str2 = this.methodName;
-        int hashCode2 = (hashCode + (str2 != null ? str2.hashCode() : 0)) * 31;
+        int result2 = i2 + (str2 != null ? str2.hashCode() : 0);
+        int result3 = result2 * 31;
         Integer num = this.lineNumber;
-        int hashCode3 = (hashCode2 + (num != null ? num.hashCode() : 0)) * 31;
+        int result4 = (result3 + (num != null ? num.hashCode() : 0)) * 31;
         String str3 = this.fileName;
         if (str3 != null) {
             i = str3.hashCode();
         }
-        return hashCode3 + i;
+        return result4 + i;
     }
 }

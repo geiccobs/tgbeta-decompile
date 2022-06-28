@@ -3,7 +3,7 @@ package com.google.android.gms.maps.internal;
 import android.os.Parcel;
 import android.os.RemoteException;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzs extends com.google.android.gms.internal.maps.zzb implements zzt {
     public zzs() {
         super("com.google.android.gms.maps.internal.IOnCameraMoveListener");

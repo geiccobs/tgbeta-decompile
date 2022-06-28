@@ -13,9 +13,9 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
@@ -23,7 +23,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.PasscodeView;
 import org.telegram.ui.Components.ThemeEditorView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class BubbleActivity extends BasePermissionsActivity implements ActionBarLayout.ActionBarLayoutDelegate {
     private ActionBarLayout actionBarLayout;
     private long dialogId;
@@ -38,27 +38,8 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
     private int passcodeSaveIntentState;
     private PasscodeView passcodeView;
 
-    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
-    public boolean needAddFragmentToStack(BaseFragment baseFragment, ActionBarLayout actionBarLayout) {
-        return true;
-    }
-
-    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
-    public boolean needPresentFragment(BaseFragment baseFragment, boolean z, boolean z2, ActionBarLayout actionBarLayout) {
-        return true;
-    }
-
-    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
-    public boolean onPreIme() {
-        return false;
-    }
-
-    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
-    public void onRebuildAllFragments(ActionBarLayout actionBarLayout, boolean z) {
-    }
-
     @Override // android.app.Activity
-    protected void onCreate(Bundle bundle) {
+    protected void onCreate(Bundle savedInstanceState) {
         ApplicationLoader.postInitApplication();
         requestWindowFeature(1);
         setTheme(R.style.Theme_TMessages);
@@ -70,7 +51,7 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
                 FileLog.e(e);
             }
         }
-        super.onCreate(bundle);
+        super.onCreate(savedInstanceState);
         if (SharedConfig.passcodeHash.length() != 0 && SharedConfig.appLocked) {
             SharedConfig.lastPauseTime = (int) (SystemClock.elapsedRealtime() / 1000);
         }
@@ -85,9 +66,9 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         this.drawerLayoutContainer = drawerLayoutContainer;
         drawerLayoutContainer.setAllowOpenDrawer(false, false);
         setContentView(this.drawerLayoutContainer, new ViewGroup.LayoutParams(-1, -1));
-        RelativeLayout relativeLayout = new RelativeLayout(this);
-        this.drawerLayoutContainer.addView(relativeLayout, LayoutHelper.createFrame(-1, -1.0f));
-        relativeLayout.addView(this.actionBarLayout, LayoutHelper.createRelative(-1, -1));
+        RelativeLayout launchLayout = new RelativeLayout(this);
+        this.drawerLayoutContainer.addView(launchLayout, LayoutHelper.createFrame(-1, -1.0f));
+        launchLayout.addView(this.actionBarLayout, LayoutHelper.createRelative(-1, -1));
         this.drawerLayoutContainer.setParentActionBarLayout(this.actionBarLayout);
         this.actionBarLayout.setDrawerLayoutContainer(this.drawerLayoutContainer);
         this.actionBarLayout.init(this.mainFragmentsStack);
@@ -97,7 +78,7 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         this.drawerLayoutContainer.addView(passcodeView, LayoutHelper.createFrame(-1, -1.0f));
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.closeOtherAppActivities, this);
         this.actionBarLayout.removeAllFragments();
-        handleIntent(getIntent(), false, bundle != null, false, UserConfig.selectedAccount, 0);
+        handleIntent(getIntent(), false, savedInstanceState != null, false, UserConfig.selectedAccount, 0);
     }
 
     public void showPasscodeActivity() {
@@ -118,12 +99,13 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         this.passcodeView.setDelegate(new PasscodeView.PasscodeViewDelegate() { // from class: org.telegram.ui.BubbleActivity$$ExternalSyntheticLambda0
             @Override // org.telegram.ui.Components.PasscodeView.PasscodeViewDelegate
             public final void didAcceptedPassword() {
-                BubbleActivity.this.lambda$showPasscodeActivity$0();
+                BubbleActivity.this.m1572lambda$showPasscodeActivity$0$orgtelegramuiBubbleActivity();
             }
         });
     }
 
-    public /* synthetic */ void lambda$showPasscodeActivity$0() {
+    /* renamed from: lambda$showPasscodeActivity$0$org-telegram-ui-BubbleActivity */
+    public /* synthetic */ void m1572lambda$showPasscodeActivity$0$orgtelegramuiBubbleActivity() {
         SharedConfig.isWaitingForPasscodeEnter = false;
         Intent intent = this.passcodeSaveIntent;
         if (intent != null) {
@@ -134,36 +116,35 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         this.actionBarLayout.showLastFragment();
     }
 
-    private boolean handleIntent(Intent intent, boolean z, boolean z2, boolean z3, int i, int i2) {
-        if (!z3 && (AndroidUtilities.needShowPasscode(true) || SharedConfig.isWaitingForPasscodeEnter)) {
+    private boolean handleIntent(Intent intent, boolean isNew, boolean restore, boolean fromPassword, int intentAccount, int state) {
+        if (!fromPassword && (AndroidUtilities.needShowPasscode(true) || SharedConfig.isWaitingForPasscodeEnter)) {
             showPasscodeActivity();
             this.passcodeSaveIntent = intent;
-            this.passcodeSaveIntentIsNew = z;
-            this.passcodeSaveIntentIsRestore = z2;
-            this.passcodeSaveIntentAccount = i;
-            this.passcodeSaveIntentState = i2;
-            UserConfig.getInstance(i).saveConfig(false);
+            this.passcodeSaveIntentIsNew = isNew;
+            this.passcodeSaveIntentIsRestore = restore;
+            this.passcodeSaveIntentAccount = intentAccount;
+            this.passcodeSaveIntentState = state;
+            UserConfig.getInstance(intentAccount).saveConfig(false);
             return false;
         }
-        int intExtra = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
-        this.currentAccount = intExtra;
-        if (!UserConfig.isValidAccount(intExtra)) {
+        this.currentAccount = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
+        if (!UserConfig.isValidAccount(this.currentAccount)) {
             finish();
             return false;
         }
-        ChatActivity chatActivity = null;
+        BaseFragment chatActivity = null;
         if (intent.getAction() != null && intent.getAction().startsWith("com.tmessages.openchat")) {
-            long longExtra = intent.getLongExtra("chatId", 0L);
-            long longExtra2 = intent.getLongExtra("userId", 0L);
-            Bundle bundle = new Bundle();
-            if (longExtra2 != 0) {
-                this.dialogId = longExtra2;
-                bundle.putLong("user_id", longExtra2);
+            long chatId = intent.getLongExtra("chatId", 0L);
+            long userId = intent.getLongExtra("userId", 0L);
+            Bundle args = new Bundle();
+            if (userId == 0) {
+                this.dialogId = -chatId;
+                args.putLong(ChatReactionsEditActivity.KEY_CHAT_ID, chatId);
             } else {
-                this.dialogId = -longExtra;
-                bundle.putLong("chat_id", longExtra);
+                this.dialogId = userId;
+                args.putLong("user_id", userId);
             }
-            chatActivity = new ChatActivity(bundle);
+            chatActivity = new ChatActivity(args);
             chatActivity.setInBubbleMode(true);
             chatActivity.setCurrentAccount(this.currentAccount);
         }
@@ -178,6 +159,11 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         AccountInstance.getInstance(this.currentAccount).getConnectionsManager().setAppPaused(false, false);
         this.actionBarLayout.showLastFragment();
         return true;
+    }
+
+    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
+    public boolean onPreIme() {
+        return false;
     }
 
     @Override // android.app.Activity
@@ -198,6 +184,14 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         this.finished = true;
     }
 
+    public void presentFragment(BaseFragment fragment) {
+        this.actionBarLayout.presentFragment(fragment);
+    }
+
+    public boolean presentFragment(BaseFragment fragment, boolean removeLast, boolean forceWithoutAnimation) {
+        return this.actionBarLayout.presentFragment(fragment, removeLast, forceWithoutAnimation, true, false);
+    }
+
     @Override // android.app.Activity
     protected void onPause() {
         super.onPause();
@@ -213,38 +207,37 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
     @Override // android.app.Activity
     protected void onDestroy() {
         super.onDestroy();
-        int i = this.currentAccount;
-        if (i != -1) {
-            AccountInstance.getInstance(i).getNotificationsController().setOpenedInBubble(this.dialogId, false);
+        if (this.currentAccount != -1) {
+            AccountInstance.getInstance(this.currentAccount).getNotificationsController().setOpenedInBubble(this.dialogId, false);
             AccountInstance.getInstance(this.currentAccount).getConnectionsManager().setAppPaused(false, false);
         }
         onFinish();
     }
 
     @Override // android.app.Activity
-    protected void onActivityResult(int i, int i2, Intent intent) {
-        super.onActivityResult(i, i2, intent);
-        ThemeEditorView themeEditorView = ThemeEditorView.getInstance();
-        if (themeEditorView != null) {
-            themeEditorView.onActivityResult(i, i2, intent);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ThemeEditorView editorView = ThemeEditorView.getInstance();
+        if (editorView != null) {
+            editorView.onActivityResult(requestCode, resultCode, data);
         }
         if (this.actionBarLayout.fragmentsStack.size() != 0) {
-            ArrayList<BaseFragment> arrayList = this.actionBarLayout.fragmentsStack;
-            arrayList.get(arrayList.size() - 1).onActivityResultFragment(i, i2, intent);
+            BaseFragment fragment = this.actionBarLayout.fragmentsStack.get(this.actionBarLayout.fragmentsStack.size() - 1);
+            fragment.onActivityResultFragment(requestCode, resultCode, data);
         }
     }
 
     @Override // android.app.Activity
-    public void onRequestPermissionsResult(int i, String[] strArr, int[] iArr) {
-        super.onRequestPermissionsResult(i, strArr, iArr);
-        if (!checkPermissionsResult(i, strArr, iArr)) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (!checkPermissionsResult(requestCode, permissions, grantResults)) {
             return;
         }
         if (this.actionBarLayout.fragmentsStack.size() != 0) {
-            ArrayList<BaseFragment> arrayList = this.actionBarLayout.fragmentsStack;
-            arrayList.get(arrayList.size() - 1).onRequestPermissionsResultFragment(i, strArr, iArr);
+            BaseFragment fragment = this.actionBarLayout.fragmentsStack.get(this.actionBarLayout.fragmentsStack.size() - 1);
+            fragment.onRequestPermissionsResultFragment(requestCode, permissions, grantResults);
         }
-        VoIPFragment.onRequestPermissionsResult(i, strArr, iArr);
+        VoIPFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override // android.app.Activity
@@ -269,7 +262,7 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
         }
         if (SharedConfig.passcodeHash.length() != 0) {
             SharedConfig.lastPauseTime = (int) (SystemClock.elapsedRealtime() / 1000);
-            Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.BubbleActivity.1
+            this.lockRunnable = new Runnable() { // from class: org.telegram.ui.BubbleActivity.1
                 @Override // java.lang.Runnable
                 public void run() {
                     if (BubbleActivity.this.lockRunnable == this) {
@@ -285,14 +278,10 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
                     }
                 }
             };
-            this.lockRunnable = runnable2;
             if (SharedConfig.appLocked) {
-                AndroidUtilities.runOnUIThread(runnable2, 1000L);
-            } else {
-                int i = SharedConfig.autoLockIn;
-                if (i != 0) {
-                    AndroidUtilities.runOnUIThread(runnable2, (i * 1000) + 1000);
-                }
+                AndroidUtilities.runOnUIThread(this.lockRunnable, 1000L);
+            } else if (SharedConfig.autoLockIn != 0) {
+                AndroidUtilities.runOnUIThread(this.lockRunnable, (SharedConfig.autoLockIn * 1000) + 1000);
             }
         } else {
             SharedConfig.lastPauseTime = 0;
@@ -316,9 +305,9 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
     }
 
     @Override // android.app.Activity, android.content.ComponentCallbacks
-    public void onConfigurationChanged(Configuration configuration) {
-        AndroidUtilities.checkDisplaySize(this, configuration);
-        super.onConfigurationChanged(configuration);
+    public void onConfigurationChanged(Configuration newConfig) {
+        AndroidUtilities.checkDisplaySize(this, newConfig);
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override // android.app.Activity
@@ -343,12 +332,26 @@ public class BubbleActivity extends BasePermissionsActivity implements ActionBar
     }
 
     @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
-    public boolean needCloseLastFragment(ActionBarLayout actionBarLayout) {
-        if (actionBarLayout.fragmentsStack.size() <= 1) {
+    public boolean needPresentFragment(BaseFragment fragment, boolean removeLast, boolean forceWithoutAnimation, ActionBarLayout layout) {
+        return true;
+    }
+
+    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
+    public boolean needAddFragmentToStack(BaseFragment fragment, ActionBarLayout layout) {
+        return true;
+    }
+
+    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
+    public boolean needCloseLastFragment(ActionBarLayout layout) {
+        if (layout.fragmentsStack.size() <= 1) {
             onFinish();
             finish();
             return false;
         }
         return true;
+    }
+
+    @Override // org.telegram.ui.ActionBar.ActionBarLayout.ActionBarLayoutDelegate
+    public void onRebuildAllFragments(ActionBarLayout layout, boolean last) {
     }
 }

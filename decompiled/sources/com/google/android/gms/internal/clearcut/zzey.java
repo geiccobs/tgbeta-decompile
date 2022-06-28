@@ -3,7 +3,7 @@ package com.google.android.gms.internal.clearcut;
 import com.google.android.gms.internal.clearcut.zzcg;
 import java.io.IOException;
 import java.util.Arrays;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzey {
     private static final zzey zzoz = new zzey(0, new int[0], new Object[0], false);
     private int count;
@@ -35,26 +35,33 @@ public final class zzey {
 
     private static void zzb(int i, Object obj, zzfr zzfrVar) throws IOException {
         int i2 = i >>> 3;
-        int i3 = i & 7;
-        if (i3 == 0) {
-            zzfrVar.zzi(i2, ((Long) obj).longValue());
-        } else if (i3 == 1) {
-            zzfrVar.zzc(i2, ((Long) obj).longValue());
-        } else if (i3 == 2) {
-            zzfrVar.zza(i2, (zzbb) obj);
-        } else if (i3 != 3) {
-            if (i3 != 5) {
+        switch (i & 7) {
+            case 0:
+                zzfrVar.zzi(i2, ((Long) obj).longValue());
+                return;
+            case 1:
+                zzfrVar.zzc(i2, ((Long) obj).longValue());
+                return;
+            case 2:
+                zzfrVar.zza(i2, (zzbb) obj);
+                return;
+            case 3:
+                if (zzfrVar.zzaj() == zzcg.zzg.zzko) {
+                    zzfrVar.zzaa(i2);
+                    ((zzey) obj).zzb(zzfrVar);
+                    zzfrVar.zzab(i2);
+                    return;
+                }
+                zzfrVar.zzab(i2);
+                ((zzey) obj).zzb(zzfrVar);
+                zzfrVar.zzaa(i2);
+                return;
+            case 4:
+            default:
                 throw new RuntimeException(zzco.zzbn());
-            }
-            zzfrVar.zzf(i2, ((Integer) obj).intValue());
-        } else if (zzfrVar.zzaj() == zzcg.zzg.zzko) {
-            zzfrVar.zzaa(i2);
-            ((zzey) obj).zzb(zzfrVar);
-            zzfrVar.zzab(i2);
-        } else {
-            zzfrVar.zzab(i2);
-            ((zzey) obj).zzb(zzfrVar);
-            zzfrVar.zzaa(i2);
+            case 5:
+                zzfrVar.zzf(i2, ((Integer) obj).intValue());
+                return;
         }
     }
 
@@ -162,19 +169,25 @@ public final class zzey {
         for (int i4 = 0; i4 < this.count; i4++) {
             int i5 = this.zzpa[i4];
             int i6 = i5 >>> 3;
-            int i7 = i5 & 7;
-            if (i7 == 0) {
-                i = zzbn.zze(i6, ((Long) this.zzmj[i4]).longValue());
-            } else if (i7 == 1) {
-                i = zzbn.zzg(i6, ((Long) this.zzmj[i4]).longValue());
-            } else if (i7 == 2) {
-                i = zzbn.zzc(i6, (zzbb) this.zzmj[i4]);
-            } else if (i7 == 3) {
-                i = (zzbn.zzr(i6) << 1) + ((zzey) this.zzmj[i4]).zzas();
-            } else if (i7 != 5) {
-                throw new IllegalStateException(zzco.zzbn());
-            } else {
-                i = zzbn.zzj(i6, ((Integer) this.zzmj[i4]).intValue());
+            switch (i5 & 7) {
+                case 0:
+                    i = zzbn.zze(i6, ((Long) this.zzmj[i4]).longValue());
+                    break;
+                case 1:
+                    i = zzbn.zzg(i6, ((Long) this.zzmj[i4]).longValue());
+                    break;
+                case 2:
+                    i = zzbn.zzc(i6, (zzbb) this.zzmj[i4]);
+                    break;
+                case 3:
+                    i = (zzbn.zzr(i6) << 1) + ((zzey) this.zzmj[i4]).zzas();
+                    break;
+                case 4:
+                default:
+                    throw new IllegalStateException(zzco.zzbn());
+                case 5:
+                    i = zzbn.zzj(i6, ((Integer) this.zzmj[i4]).intValue());
+                    break;
             }
             i3 += i;
         }

@@ -10,7 +10,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseTrackSelection implements TrackSelection {
     private final long[] blacklistUntilTimes;
     private final Format[] formats;
@@ -20,7 +20,32 @@ public abstract class BaseTrackSelection implements TrackSelection {
     protected final int[] tracks;
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public void disable() {
+    public /* synthetic */ void onDiscontinuity() {
+        TrackSelection.CC.$default$onDiscontinuity(this);
+    }
+
+    public BaseTrackSelection(TrackGroup group, int... tracks) {
+        Assertions.checkState(tracks.length > 0);
+        this.group = (TrackGroup) Assertions.checkNotNull(group);
+        int length = tracks.length;
+        this.length = length;
+        this.formats = new Format[length];
+        for (int i = 0; i < tracks.length; i++) {
+            this.formats[i] = group.getFormat(tracks[i]);
+        }
+        Arrays.sort(this.formats, new DecreasingBandwidthComparator());
+        this.tracks = new int[this.length];
+        int i2 = 0;
+        while (true) {
+            int i3 = this.length;
+            if (i2 < i3) {
+                this.tracks[i2] = group.indexOf(this.formats[i2]);
+                i2++;
+            } else {
+                this.blacklistUntilTimes = new long[i3];
+                return;
+            }
+        }
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
@@ -28,36 +53,7 @@ public abstract class BaseTrackSelection implements TrackSelection {
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public /* synthetic */ void onDiscontinuity() {
-        TrackSelection.CC.$default$onDiscontinuity(this);
-    }
-
-    @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public void onPlaybackSpeed(float f) {
-    }
-
-    public BaseTrackSelection(TrackGroup trackGroup, int... iArr) {
-        int i = 0;
-        Assertions.checkState(iArr.length > 0);
-        this.group = (TrackGroup) Assertions.checkNotNull(trackGroup);
-        int length = iArr.length;
-        this.length = length;
-        this.formats = new Format[length];
-        for (int i2 = 0; i2 < iArr.length; i2++) {
-            this.formats[i2] = trackGroup.getFormat(iArr[i2]);
-        }
-        Arrays.sort(this.formats, new DecreasingBandwidthComparator());
-        this.tracks = new int[this.length];
-        while (true) {
-            int i3 = this.length;
-            if (i < i3) {
-                this.tracks[i] = trackGroup.indexOf(this.formats[i]);
-                i++;
-            } else {
-                this.blacklistUntilTimes = new long[i3];
-                return;
-            }
-        }
+    public void disable() {
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
@@ -71,13 +67,13 @@ public abstract class BaseTrackSelection implements TrackSelection {
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public final Format getFormat(int i) {
-        return this.formats[i];
+    public final Format getFormat(int index) {
+        return this.formats[index];
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public final int getIndexInTrackGroup(int i) {
-        return this.tracks[i];
+    public final int getIndexInTrackGroup(int index) {
+        return this.tracks[index];
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
@@ -91,10 +87,10 @@ public abstract class BaseTrackSelection implements TrackSelection {
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public final int indexOf(int i) {
-        for (int i2 = 0; i2 < this.length; i2++) {
-            if (this.tracks[i2] == i) {
-                return i2;
+    public final int indexOf(int indexInTrackGroup) {
+        for (int i = 0; i < this.length; i++) {
+            if (this.tracks[i] == indexInTrackGroup) {
+                return i;
             }
         }
         return -1;
@@ -111,29 +107,41 @@ public abstract class BaseTrackSelection implements TrackSelection {
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public int evaluateQueueSize(long j, List<? extends MediaChunk> list) {
-        return list.size();
+    public void onPlaybackSpeed(float playbackSpeed) {
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public final boolean blacklist(int i, long j) {
-        long elapsedRealtime = SystemClock.elapsedRealtime();
-        boolean isBlacklisted = isBlacklisted(i, elapsedRealtime);
-        int i2 = 0;
-        while (i2 < this.length && !isBlacklisted) {
-            isBlacklisted = i2 != i && !isBlacklisted(i2, elapsedRealtime);
-            i2++;
+    public int evaluateQueueSize(long playbackPositionUs, List<? extends MediaChunk> queue) {
+        return queue.size();
+    }
+
+    @Override // com.google.android.exoplayer2.trackselection.TrackSelection
+    public final boolean blacklist(int index, long blacklistDurationMs) {
+        long nowMs = SystemClock.elapsedRealtime();
+        boolean canBlacklist = isBlacklisted(index, nowMs);
+        int i = 0;
+        boolean canBlacklist2 = canBlacklist;
+        while (true) {
+            boolean z = false;
+            if (i >= this.length || canBlacklist2) {
+                break;
+            }
+            if (i != index && !isBlacklisted(i, nowMs)) {
+                z = true;
+            }
+            canBlacklist2 = z;
+            i++;
         }
-        if (!isBlacklisted) {
+        if (!canBlacklist2) {
             return false;
         }
         long[] jArr = this.blacklistUntilTimes;
-        jArr[i] = Math.max(jArr[i], Util.addWithOverflowDefault(elapsedRealtime, j, Long.MAX_VALUE));
+        jArr[index] = Math.max(jArr[index], Util.addWithOverflowDefault(nowMs, blacklistDurationMs, Long.MAX_VALUE));
         return true;
     }
 
-    public final boolean isBlacklisted(int i, long j) {
-        return this.blacklistUntilTimes[i] > j;
+    public final boolean isBlacklisted(int index, long nowMs) {
+        return this.blacklistUntilTimes[index] > nowMs;
     }
 
     public int hashCode() {
@@ -150,18 +158,18 @@ public abstract class BaseTrackSelection implements TrackSelection {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        BaseTrackSelection baseTrackSelection = (BaseTrackSelection) obj;
-        return this.group == baseTrackSelection.group && Arrays.equals(this.tracks, baseTrackSelection.tracks);
+        BaseTrackSelection other = (BaseTrackSelection) obj;
+        return this.group == other.group && Arrays.equals(this.tracks, other.tracks);
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class DecreasingBandwidthComparator implements Comparator<Format> {
         private DecreasingBandwidthComparator() {
         }
 
-        public int compare(Format format, Format format2) {
-            return format2.bitrate - format.bitrate;
+        public int compare(Format a, Format b) {
+            return b.bitrate - a.bitrate;
         }
     }
 }

@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class MsgClockDrawable extends Drawable {
     private int color;
     private Drawable.ConstantState constantState;
@@ -15,15 +15,6 @@ public class MsgClockDrawable extends Drawable {
     private int alpha = 255;
     private int colorAlpha = 255;
     private long startTime = System.currentTimeMillis();
-
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
 
     public MsgClockDrawable() {
         Paint paint = new Paint(1);
@@ -36,25 +27,27 @@ public class MsgClockDrawable extends Drawable {
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
         android.graphics.Rect bounds = getBounds();
-        canvas.drawCircle(bounds.centerX(), bounds.centerY(), (Math.min(bounds.width(), bounds.height()) >> 1) - AndroidUtilities.dp(0.5f), this.paint);
-        long currentTimeMillis = System.currentTimeMillis();
+        int r = Math.min(bounds.width(), bounds.height());
+        canvas.drawCircle(bounds.centerX(), bounds.centerY(), (r >> 1) - AndroidUtilities.dp(0.5f), this.paint);
+        long currentTime = System.currentTimeMillis();
+        float rotateHourTime = 1500.0f * 3.0f;
         canvas.save();
-        canvas.rotate(((((float) (currentTimeMillis - this.startTime)) % 1500.0f) * 360.0f) / 1500.0f, bounds.centerX(), bounds.centerY());
+        canvas.rotate(((((float) (currentTime - this.startTime)) % 1500.0f) * 360.0f) / 1500.0f, bounds.centerX(), bounds.centerY());
         canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX(), bounds.centerY() - AndroidUtilities.dp(3.0f), this.paint);
         canvas.restore();
         canvas.save();
-        canvas.rotate(((((float) (currentTimeMillis - this.startTime)) % 4500.0f) * 360.0f) / 4500.0f, bounds.centerX(), bounds.centerY());
+        canvas.rotate(((((float) (currentTime - this.startTime)) % rotateHourTime) * 360.0f) / rotateHourTime, bounds.centerX(), bounds.centerY());
         canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX() + AndroidUtilities.dp(2.3f), bounds.centerY(), this.paint);
         canvas.restore();
     }
 
-    public void setColor(int i) {
-        if (i != this.color) {
-            int alpha = Color.alpha(i);
+    public void setColor(int color) {
+        if (color != this.color) {
+            int alpha = Color.alpha(color);
             this.colorAlpha = alpha;
-            this.paint.setColor(ColorUtils.setAlphaComponent(i, (int) (this.alpha * (alpha / 255.0f))));
+            this.paint.setColor(ColorUtils.setAlphaComponent(color, (int) (this.alpha * (alpha / 255.0f))));
         }
-        this.color = i;
+        this.color = color;
     }
 
     @Override // android.graphics.drawable.Drawable
@@ -76,17 +69,26 @@ public class MsgClockDrawable extends Drawable {
     }
 
     @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    @Override // android.graphics.drawable.Drawable
     public Drawable.ConstantState getConstantState() {
         if (this.constantState == null) {
-            this.constantState = new Drawable.ConstantState(this) { // from class: org.telegram.ui.Components.MsgClockDrawable.1
-                @Override // android.graphics.drawable.Drawable.ConstantState
-                public int getChangingConfigurations() {
-                    return 0;
-                }
-
+            this.constantState = new Drawable.ConstantState() { // from class: org.telegram.ui.Components.MsgClockDrawable.1
                 @Override // android.graphics.drawable.Drawable.ConstantState
                 public Drawable newDrawable() {
                     return new MsgClockDrawable();
+                }
+
+                @Override // android.graphics.drawable.Drawable.ConstantState
+                public int getChangingConfigurations() {
+                    return 0;
                 }
             };
         }

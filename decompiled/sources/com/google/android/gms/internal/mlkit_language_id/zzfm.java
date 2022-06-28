@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzfm implements zzgo {
     private static final zzfw zzb = new zzfp();
     private final zzfw zza;
@@ -41,7 +41,7 @@ public final class zzfm implements zzgo {
     private static zzfw zza() {
         try {
             return (zzfw) Class.forName("com.google.protobuf.DescriptorMessageInfoFactory").getDeclaredMethod("getInstance", new Class[0]).invoke(null, new Object[0]);
-        } catch (Exception unused) {
+        } catch (Exception e) {
             return zzb;
         }
     }

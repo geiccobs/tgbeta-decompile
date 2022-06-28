@@ -1,7 +1,7 @@
 package org.telegram.messenger;
 
 import org.telegram.tgnet.TLObject;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class DownloadObject {
     public boolean forceCache;
     public long id;

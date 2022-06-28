@@ -2,10 +2,10 @@ package com.microsoft.appcenter.channel;
 
 import com.microsoft.appcenter.ingestion.Ingestion;
 import com.microsoft.appcenter.ingestion.models.Log;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface Channel {
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface GroupListener {
         void onBeforeSending(Log log);
 
@@ -14,7 +14,7 @@ public interface Channel {
         void onSuccess(Log log);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Listener {
         void onClear(String str);
 
@@ -24,9 +24,13 @@ public interface Channel {
 
         void onGroupRemoved(String str);
 
+        void onPaused(String str, String str2);
+
         void onPreparedLog(Log log, String str, int i);
 
         void onPreparingLog(Log log, String str);
+
+        void onResumed(String str, String str2);
 
         boolean shouldFilter(Log log);
     }
@@ -39,9 +43,17 @@ public interface Channel {
 
     void enqueue(Log log, String str, int i);
 
+    void invalidateDeviceCache();
+
+    boolean isEnabled();
+
+    void pauseGroup(String str, String str2);
+
     void removeGroup(String str);
 
     void removeListener(Listener listener);
+
+    void resumeGroup(String str, String str2);
 
     void setAppSecret(String str);
 

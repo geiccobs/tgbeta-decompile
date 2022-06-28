@@ -4,7 +4,7 @@ import com.google.firebase.components.ComponentContainer;
 import com.google.firebase.components.ComponentFactory;
 import com.google.mlkit.common.model.RemoteModelManager;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final /* synthetic */ class zzd implements ComponentFactory {
     static final ComponentFactory zza = new zzd();
 

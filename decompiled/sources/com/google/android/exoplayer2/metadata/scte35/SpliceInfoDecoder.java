@@ -8,43 +8,53 @@ import com.google.android.exoplayer2.util.ParsableBitArray;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.TimestampAdjuster;
 import java.nio.ByteBuffer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SpliceInfoDecoder implements MetadataDecoder {
+    private static final int TYPE_PRIVATE_COMMAND = 255;
+    private static final int TYPE_SPLICE_INSERT = 5;
+    private static final int TYPE_SPLICE_NULL = 0;
+    private static final int TYPE_SPLICE_SCHEDULE = 4;
+    private static final int TYPE_TIME_SIGNAL = 6;
     private final ParsableByteArray sectionData = new ParsableByteArray();
     private final ParsableBitArray sectionHeader = new ParsableBitArray();
     private TimestampAdjuster timestampAdjuster;
 
     @Override // com.google.android.exoplayer2.metadata.MetadataDecoder
-    public Metadata decode(MetadataInputBuffer metadataInputBuffer) {
-        ByteBuffer byteBuffer = (ByteBuffer) Assertions.checkNotNull(metadataInputBuffer.data);
-        TimestampAdjuster timestampAdjuster = this.timestampAdjuster;
-        if (timestampAdjuster == null || metadataInputBuffer.subsampleOffsetUs != timestampAdjuster.getTimestampOffsetUs()) {
-            TimestampAdjuster timestampAdjuster2 = new TimestampAdjuster(metadataInputBuffer.timeUs);
-            this.timestampAdjuster = timestampAdjuster2;
-            timestampAdjuster2.adjustSampleTimestamp(metadataInputBuffer.timeUs - metadataInputBuffer.subsampleOffsetUs);
+    public Metadata decode(MetadataInputBuffer inputBuffer) {
+        ByteBuffer buffer = (ByteBuffer) Assertions.checkNotNull(inputBuffer.data);
+        if (this.timestampAdjuster == null || inputBuffer.subsampleOffsetUs != this.timestampAdjuster.getTimestampOffsetUs()) {
+            TimestampAdjuster timestampAdjuster = new TimestampAdjuster(inputBuffer.timeUs);
+            this.timestampAdjuster = timestampAdjuster;
+            timestampAdjuster.adjustSampleTimestamp(inputBuffer.timeUs - inputBuffer.subsampleOffsetUs);
         }
-        byte[] array = byteBuffer.array();
-        int limit = byteBuffer.limit();
-        this.sectionData.reset(array, limit);
-        this.sectionHeader.reset(array, limit);
+        byte[] data = buffer.array();
+        int size = buffer.limit();
+        this.sectionData.reset(data, size);
+        this.sectionHeader.reset(data, size);
         this.sectionHeader.skipBits(39);
-        long readBits = (this.sectionHeader.readBits(1) << 32) | this.sectionHeader.readBits(32);
+        long ptsAdjustment = (this.sectionHeader.readBits(1) << 32) | this.sectionHeader.readBits(32);
         this.sectionHeader.skipBits(20);
-        int readBits2 = this.sectionHeader.readBits(12);
-        int readBits3 = this.sectionHeader.readBits(8);
-        Metadata.Entry entry = null;
+        int spliceCommandLength = this.sectionHeader.readBits(12);
+        int spliceCommandType = this.sectionHeader.readBits(8);
+        SpliceCommand command = null;
         this.sectionData.skipBytes(14);
-        if (readBits3 == 0) {
-            entry = new SpliceNullCommand();
-        } else if (readBits3 == 255) {
-            entry = PrivateCommand.parseFromSection(this.sectionData, readBits2, readBits);
-        } else if (readBits3 == 4) {
-            entry = SpliceScheduleCommand.parseFromSection(this.sectionData);
-        } else if (readBits3 == 5) {
-            entry = SpliceInsertCommand.parseFromSection(this.sectionData, readBits, this.timestampAdjuster);
-        } else if (readBits3 == 6) {
-            entry = TimeSignalCommand.parseFromSection(this.sectionData, readBits, this.timestampAdjuster);
+        switch (spliceCommandType) {
+            case 0:
+                command = new SpliceNullCommand();
+                break;
+            case 4:
+                command = SpliceScheduleCommand.parseFromSection(this.sectionData);
+                break;
+            case 5:
+                command = SpliceInsertCommand.parseFromSection(this.sectionData, ptsAdjustment, this.timestampAdjuster);
+                break;
+            case 6:
+                command = TimeSignalCommand.parseFromSection(this.sectionData, ptsAdjustment, this.timestampAdjuster);
+                break;
+            case 255:
+                command = PrivateCommand.parseFromSection(this.sectionData, spliceCommandLength, ptsAdjustment);
+                break;
         }
-        return entry == null ? new Metadata(new Metadata.Entry[0]) : new Metadata(entry);
+        return command == null ? new Metadata(new Metadata.Entry[0]) : new Metadata(command);
     }
 }

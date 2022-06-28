@@ -8,7 +8,7 @@ import com.google.android.gms.wallet.FullWallet;
 import com.google.android.gms.wallet.MaskedWallet;
 import com.google.android.gms.wallet.PaymentData;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface zzu extends IInterface {
     void zzb(int i, FullWallet fullWallet, Bundle bundle) throws RemoteException;
 

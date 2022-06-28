@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sun.misc.Unsafe;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzhn {
     static final boolean zza;
     private static final Unsafe zzc;
@@ -18,6 +18,20 @@ public final class zzhn {
     private static final boolean zzh;
     private static final boolean zzi;
     private static final long zzj;
+    private static final long zzk;
+    private static final long zzl;
+    private static final long zzm;
+    private static final long zzn;
+    private static final long zzo;
+    private static final long zzp;
+    private static final long zzq;
+    private static final long zzr;
+    private static final long zzs;
+    private static final long zzt;
+    private static final long zzu;
+    private static final long zzv;
+    private static final long zzw;
+    private static final int zzx;
     private static final Logger zzb = Logger.getLogger(zzhn.class.getName());
     private static final Class<?> zzd = zzdl.zzb();
 
@@ -25,7 +39,7 @@ public final class zzhn {
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class zza extends zzc {
         zza(Unsafe unsafe) {
             super(unsafe);
@@ -87,7 +101,7 @@ public final class zzhn {
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class zzb extends zzc {
         zzb(Unsafe unsafe) {
             super(unsafe);
@@ -149,7 +163,7 @@ public final class zzhn {
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static final class zzd extends zzc {
         zzd(Unsafe unsafe) {
             super(unsafe);
@@ -201,7 +215,7 @@ public final class zzhn {
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static abstract class zzc {
         Unsafe zza;
 
@@ -327,7 +341,7 @@ public final class zzhn {
     public static Unsafe zzc() {
         try {
             return (Unsafe) AccessController.doPrivileged(new zzhm());
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
             return null;
         }
     }
@@ -342,30 +356,29 @@ public final class zzhn {
             cls.getMethod("objectFieldOffset", Field.class);
             cls.getMethod("arrayBaseOffset", Class.class);
             cls.getMethod("arrayIndexScale", Class.class);
-            Class<?> cls2 = Long.TYPE;
-            cls.getMethod("getInt", Object.class, cls2);
-            cls.getMethod("putInt", Object.class, cls2, Integer.TYPE);
-            cls.getMethod("getLong", Object.class, cls2);
-            cls.getMethod("putLong", Object.class, cls2, cls2);
-            cls.getMethod("getObject", Object.class, cls2);
-            cls.getMethod("putObject", Object.class, cls2, Object.class);
+            cls.getMethod("getInt", Object.class, Long.TYPE);
+            cls.getMethod("putInt", Object.class, Long.TYPE, Integer.TYPE);
+            cls.getMethod("getLong", Object.class, Long.TYPE);
+            cls.getMethod("putLong", Object.class, Long.TYPE, Long.TYPE);
+            cls.getMethod("getObject", Object.class, Long.TYPE);
+            cls.getMethod("putObject", Object.class, Long.TYPE, Object.class);
             if (zzdl.zza()) {
                 return true;
             }
-            cls.getMethod("getByte", Object.class, cls2);
-            cls.getMethod("putByte", Object.class, cls2, Byte.TYPE);
-            cls.getMethod("getBoolean", Object.class, cls2);
-            cls.getMethod("putBoolean", Object.class, cls2, Boolean.TYPE);
-            cls.getMethod("getFloat", Object.class, cls2);
-            cls.getMethod("putFloat", Object.class, cls2, Float.TYPE);
-            cls.getMethod("getDouble", Object.class, cls2);
-            cls.getMethod("putDouble", Object.class, cls2, Double.TYPE);
+            cls.getMethod("getByte", Object.class, Long.TYPE);
+            cls.getMethod("putByte", Object.class, Long.TYPE, Byte.TYPE);
+            cls.getMethod("getBoolean", Object.class, Long.TYPE);
+            cls.getMethod("putBoolean", Object.class, Long.TYPE, Boolean.TYPE);
+            cls.getMethod("getFloat", Object.class, Long.TYPE);
+            cls.getMethod("putFloat", Object.class, Long.TYPE, Float.TYPE);
+            cls.getMethod("getDouble", Object.class, Long.TYPE);
+            cls.getMethod("putDouble", Object.class, Long.TYPE, Double.TYPE);
             return true;
         } catch (Throwable th) {
             Logger logger = zzb;
             Level level = Level.WARNING;
             String valueOf = String.valueOf(th);
-            StringBuilder sb = new StringBuilder(valueOf.length() + 71);
+            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 71);
             sb.append("platform method missing - proto runtime falling back to safer methods: ");
             sb.append(valueOf);
             logger.logp(level, "com.google.protobuf.UnsafeUtil", "supportsUnsafeArrayOperations", sb.toString());
@@ -381,28 +394,27 @@ public final class zzhn {
         try {
             Class<?> cls = unsafe.getClass();
             cls.getMethod("objectFieldOffset", Field.class);
-            Class<?> cls2 = Long.TYPE;
-            cls.getMethod("getLong", Object.class, cls2);
+            cls.getMethod("getLong", Object.class, Long.TYPE);
             if (zzf() == null) {
                 return false;
             }
             if (zzdl.zza()) {
                 return true;
             }
-            cls.getMethod("getByte", cls2);
-            cls.getMethod("putByte", cls2, Byte.TYPE);
-            cls.getMethod("getInt", cls2);
-            cls.getMethod("putInt", cls2, Integer.TYPE);
-            cls.getMethod("getLong", cls2);
-            cls.getMethod("putLong", cls2, cls2);
-            cls.getMethod("copyMemory", cls2, cls2, cls2);
-            cls.getMethod("copyMemory", Object.class, cls2, Object.class, cls2, cls2);
+            cls.getMethod("getByte", Long.TYPE);
+            cls.getMethod("putByte", Long.TYPE, Byte.TYPE);
+            cls.getMethod("getInt", Long.TYPE);
+            cls.getMethod("putInt", Long.TYPE, Integer.TYPE);
+            cls.getMethod("getLong", Long.TYPE);
+            cls.getMethod("putLong", Long.TYPE, Long.TYPE);
+            cls.getMethod("copyMemory", Long.TYPE, Long.TYPE, Long.TYPE);
+            cls.getMethod("copyMemory", Object.class, Long.TYPE, Object.class, Long.TYPE, Long.TYPE);
             return true;
         } catch (Throwable th) {
             Logger logger = zzb;
             Level level = Level.WARNING;
             String valueOf = String.valueOf(th);
-            StringBuilder sb = new StringBuilder(valueOf.length() + 71);
+            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 71);
             sb.append("platform method missing - proto runtime falling back to safer methods: ");
             sb.append(valueOf);
             logger.logp(level, "com.google.protobuf.UnsafeUtil", "supportsUnsafeByteBufferOperations", sb.toString());
@@ -416,38 +428,36 @@ public final class zzhn {
         }
         try {
             Class<?> cls2 = zzd;
-            Class<?> cls3 = Boolean.TYPE;
-            cls2.getMethod("peekLong", cls, cls3);
-            cls2.getMethod("pokeLong", cls, Long.TYPE, cls3);
-            Class<?> cls4 = Integer.TYPE;
-            cls2.getMethod("pokeInt", cls, cls4, cls3);
-            cls2.getMethod("peekInt", cls, cls3);
+            cls2.getMethod("peekLong", cls, Boolean.TYPE);
+            cls2.getMethod("pokeLong", cls, Long.TYPE, Boolean.TYPE);
+            cls2.getMethod("pokeInt", cls, Integer.TYPE, Boolean.TYPE);
+            cls2.getMethod("peekInt", cls, Boolean.TYPE);
             cls2.getMethod("pokeByte", cls, Byte.TYPE);
             cls2.getMethod("peekByte", cls);
-            cls2.getMethod("pokeByteArray", cls, byte[].class, cls4, cls4);
-            cls2.getMethod("peekByteArray", cls, byte[].class, cls4, cls4);
+            cls2.getMethod("pokeByteArray", cls, byte[].class, Integer.TYPE, Integer.TYPE);
+            cls2.getMethod("peekByteArray", cls, byte[].class, Integer.TYPE, Integer.TYPE);
             return true;
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
             return false;
         }
     }
 
     private static Field zzf() {
         Field zza2;
-        if (!zzdl.zza() || (zza2 = zza(Buffer.class, "effectiveDirectAddress")) == null) {
-            Field zza3 = zza(Buffer.class, "address");
-            if (zza3 != null && zza3.getType() == Long.TYPE) {
-                return zza3;
-            }
-            return null;
+        if (zzdl.zza() && (zza2 = zza(Buffer.class, "effectiveDirectAddress")) != null) {
+            return zza2;
         }
-        return zza2;
+        Field zza3 = zza(Buffer.class, "address");
+        if (zza3 != null && zza3.getType() == Long.TYPE) {
+            return zza3;
+        }
+        return null;
     }
 
     private static Field zza(Class<?> cls, String str) {
         try {
             return cls.getDeclaredField(str);
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
             return null;
         }
     }
@@ -489,6 +499,7 @@ public final class zzhn {
     }
 
     static {
+        long j;
         Unsafe zzc2 = zzc();
         zzc = zzc2;
         boolean zzd2 = zzd(Long.TYPE);
@@ -497,34 +508,41 @@ public final class zzhn {
         zzf = zzd3;
         zzc zzcVar = null;
         if (zzc2 != null) {
-            if (!zzdl.zza()) {
+            if (zzdl.zza()) {
+                if (zzd2) {
+                    zzcVar = new zza(zzc2);
+                } else if (zzd3) {
+                    zzcVar = new zzb(zzc2);
+                }
+            } else {
                 zzcVar = new zzd(zzc2);
-            } else if (zzd2) {
-                zzcVar = new zza(zzc2);
-            } else if (zzd3) {
-                zzcVar = new zzb(zzc2);
             }
         }
         zzg = zzcVar;
         zzh = zze();
         zzi = zzd();
-        zzj = zzb(byte[].class);
-        zzb(boolean[].class);
-        zzc(boolean[].class);
-        zzb(int[].class);
-        zzc(int[].class);
-        zzb(long[].class);
-        zzc(long[].class);
-        zzb(float[].class);
-        zzc(float[].class);
-        zzb(double[].class);
-        zzc(double[].class);
-        zzb(Object[].class);
-        zzc(Object[].class);
+        long zzb2 = zzb(byte[].class);
+        zzj = zzb2;
+        zzk = zzb(boolean[].class);
+        zzl = zzc(boolean[].class);
+        zzm = zzb(int[].class);
+        zzn = zzc(int[].class);
+        zzo = zzb(long[].class);
+        zzp = zzc(long[].class);
+        zzq = zzb(float[].class);
+        zzr = zzc(float[].class);
+        zzs = zzb(double[].class);
+        zzt = zzc(double[].class);
+        zzu = zzb(Object[].class);
+        zzv = zzc(Object[].class);
         Field zzf2 = zzf();
-        if (zzf2 != null && zzcVar != null) {
-            zzcVar.zza.objectFieldOffset(zzf2);
+        if (zzf2 == null || zzcVar == null) {
+            j = -1;
+        } else {
+            j = zzcVar.zza.objectFieldOffset(zzf2);
         }
+        zzw = j;
+        zzx = (int) (7 & zzb2);
         zza = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
     }
 }

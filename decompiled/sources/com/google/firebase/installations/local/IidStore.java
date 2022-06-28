@@ -3,7 +3,10 @@ package com.google.firebase.installations.local;
 import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
+import com.google.android.gms.stats.CodePackage;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.microsoft.appcenter.Constants;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,69 +15,81 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import org.json.JSONException;
 import org.json.JSONObject;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class IidStore {
-    private static final String[] ALLOWABLE_SCOPES = {"*", "FCM", "GCM", ""};
+    private static final String[] ALLOWABLE_SCOPES = {"*", FirebaseMessaging.INSTANCE_ID_SCOPE, CodePackage.GCM, ""};
+    private static final String IID_SHARED_PREFS_NAME = "com.google.android.gms.appid";
+    private static final String JSON_ENCODED_PREFIX = "{";
+    private static final String JSON_TOKEN_KEY = "token";
+    private static final String STORE_KEY_ID = "|S|id";
+    private static final String STORE_KEY_PUB = "|S||P|";
+    private static final String STORE_KEY_SEPARATOR = "|";
+    private static final String STORE_KEY_TOKEN = "|T|";
     private final String defaultSenderId;
     private final SharedPreferences iidPrefs;
 
     public IidStore(FirebaseApp firebaseApp) {
-        this.iidPrefs = firebaseApp.getApplicationContext().getSharedPreferences("com.google.android.gms.appid", 0);
+        this.iidPrefs = firebaseApp.getApplicationContext().getSharedPreferences(IID_SHARED_PREFS_NAME, 0);
         this.defaultSenderId = getDefaultSenderId(firebaseApp);
     }
 
-    private static String getDefaultSenderId(FirebaseApp firebaseApp) {
-        String gcmSenderId = firebaseApp.getOptions().getGcmSenderId();
-        if (gcmSenderId != null) {
-            return gcmSenderId;
+    public IidStore(SharedPreferences iidPrefs, String defaultSenderId) {
+        this.iidPrefs = iidPrefs;
+        this.defaultSenderId = defaultSenderId;
+    }
+
+    private static String getDefaultSenderId(FirebaseApp app) {
+        String senderId = app.getOptions().getGcmSenderId();
+        if (senderId != null) {
+            return senderId;
         }
-        String applicationId = firebaseApp.getOptions().getApplicationId();
-        if (!applicationId.startsWith("1:") && !applicationId.startsWith("2:")) {
-            return applicationId;
+        String appId = app.getOptions().getApplicationId();
+        if (!appId.startsWith("1:") && !appId.startsWith("2:")) {
+            return appId;
         }
-        String[] split = applicationId.split(":");
-        if (split.length != 4) {
+        String[] parts = appId.split(Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
+        if (parts.length != 4) {
             return null;
         }
-        String str = split[1];
-        if (!str.isEmpty()) {
-            return str;
+        String projectNumber = parts[1];
+        if (!projectNumber.isEmpty()) {
+            return projectNumber;
         }
         return null;
     }
 
-    private String createTokenKey(String str, String str2) {
-        return "|T|" + str + "|" + str2;
+    private String createTokenKey(String senderId, String scope) {
+        return STORE_KEY_TOKEN + senderId + STORE_KEY_SEPARATOR + scope;
     }
 
     public String readToken() {
+        String[] strArr;
         synchronized (this.iidPrefs) {
-            for (String str : ALLOWABLE_SCOPES) {
-                String string = this.iidPrefs.getString(createTokenKey(this.defaultSenderId, str), null);
-                if (string != null && !string.isEmpty()) {
-                    if (string.startsWith("{")) {
-                        string = parseIidTokenFromJson(string);
-                    }
-                    return string;
+            for (String scope : ALLOWABLE_SCOPES) {
+                String tokenKey = createTokenKey(this.defaultSenderId, scope);
+                String token = this.iidPrefs.getString(tokenKey, null);
+                if (token != null && !token.isEmpty()) {
+                    return token.startsWith(JSON_ENCODED_PREFIX) ? parseIidTokenFromJson(token) : token;
                 }
             }
             return null;
         }
     }
 
-    private String parseIidTokenFromJson(String str) {
+    private String parseIidTokenFromJson(String token) {
         try {
-            return new JSONObject(str).getString("token");
-        } catch (JSONException unused) {
+            JSONObject json = new JSONObject(token);
+            return json.getString(JSON_TOKEN_KEY);
+        } catch (JSONException e) {
             return null;
         }
     }
 
     public String readIid() {
         synchronized (this.iidPrefs) {
-            String readInstanceIdFromLocalStorage = readInstanceIdFromLocalStorage();
-            if (readInstanceIdFromLocalStorage != null) {
-                return readInstanceIdFromLocalStorage;
+            String id = readInstanceIdFromLocalStorage();
+            if (id != null) {
+                return id;
             }
             return readPublicKeyFromLocalStorageAndCalculateInstanceId();
         }
@@ -83,39 +98,44 @@ public class IidStore {
     private String readInstanceIdFromLocalStorage() {
         String string;
         synchronized (this.iidPrefs) {
-            string = this.iidPrefs.getString("|S|id", null);
+            string = this.iidPrefs.getString(STORE_KEY_ID, null);
         }
         return string;
     }
 
     private String readPublicKeyFromLocalStorageAndCalculateInstanceId() {
         synchronized (this.iidPrefs) {
-            String string = this.iidPrefs.getString("|S||P|", null);
-            if (string == null) {
+            String base64PublicKey = this.iidPrefs.getString(STORE_KEY_PUB, null);
+            if (base64PublicKey == null) {
                 return null;
             }
-            PublicKey parseKey = parseKey(string);
-            if (parseKey == null) {
+            PublicKey publicKey = parseKey(base64PublicKey);
+            if (publicKey == null) {
                 return null;
             }
-            return getIdFromPublicKey(parseKey);
+            return getIdFromPublicKey(publicKey);
         }
     }
 
     private static String getIdFromPublicKey(PublicKey publicKey) {
+        byte[] derPub = publicKey.getEncoded();
         try {
-            byte[] digest = MessageDigest.getInstance("SHA1").digest(publicKey.getEncoded());
-            digest[0] = (byte) (((digest[0] & 15) + 112) & 255);
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            byte[] digest = md.digest(derPub);
+            int b0 = digest[0];
+            digest[0] = (byte) (((b0 & 15) + 112) & 255);
             return Base64.encodeToString(digest, 0, 8, 11);
-        } catch (NoSuchAlgorithmException unused) {
+        } catch (NoSuchAlgorithmException e) {
             Log.w("ContentValues", "Unexpected error, device missing required algorithms");
             return null;
         }
     }
 
-    private PublicKey parseKey(String str) {
+    private PublicKey parseKey(String base64PublicKey) {
         try {
-            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode(str, 8)));
+            byte[] publicKeyBytes = Base64.decode(base64PublicKey, 8);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
         } catch (IllegalArgumentException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             Log.w("ContentValues", "Invalid key stored " + e);
             return null;

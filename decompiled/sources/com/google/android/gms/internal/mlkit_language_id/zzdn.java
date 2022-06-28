@@ -3,18 +3,16 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Locale;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzdn implements Serializable, Iterable<Byte> {
     public static final zzdn zza = new zzdx(zzeq.zzb);
     private static final zzdt zzb;
+    private static final Comparator<zzdn> zzd;
     private int zzc = 0;
-
-    public static int zzb(byte b) {
-        return b & 255;
-    }
 
     public abstract boolean equals(Object obj);
 
@@ -33,6 +31,10 @@ public abstract class zzdn implements Serializable, Iterable<Byte> {
     public abstract byte zzb(int i);
 
     public abstract boolean zzc();
+
+    public static int zzb(byte b) {
+        return b & 255;
+    }
 
     public static zzdn zza(String str) {
         return new zzdx(str.getBytes(zzeq.zza));
@@ -110,6 +112,6 @@ public abstract class zzdn implements Serializable, Iterable<Byte> {
     /* JADX WARN: Type inference failed for: r0v5, types: [com.google.android.gms.internal.mlkit_language_id.zzdw] */
     static {
         zzb = zzdl.zza() ? new zzdw(null) : new zzdr(null);
-        new zzdp();
+        zzd = new zzdp();
     }
 }

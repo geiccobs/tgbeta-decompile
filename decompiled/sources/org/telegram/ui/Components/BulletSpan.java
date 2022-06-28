@@ -2,55 +2,91 @@ package org.telegram.ui.Components;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Parcel;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.LeadingMarginSpan;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class BulletSpan implements LeadingMarginSpan {
+    private static final int STANDARD_BULLET_RADIUS = 4;
+    private static final int STANDARD_COLOR = 0;
+    public static final int STANDARD_GAP_WIDTH = 2;
     private final int mBulletRadius;
     private final int mColor;
     private final int mGapWidth;
     private final boolean mWantColor;
 
-    public BulletSpan(int i, int i2, int i3) {
-        this(i, i2, true, i3);
+    public BulletSpan() {
+        this(2, 0, false, 4);
     }
 
-    private BulletSpan(int i, int i2, boolean z, int i3) {
-        this.mGapWidth = i;
-        this.mBulletRadius = i3;
-        this.mColor = i2;
-        this.mWantColor = z;
+    public BulletSpan(int gapWidth) {
+        this(gapWidth, 0, false, 4);
+    }
+
+    public BulletSpan(int gapWidth, int color) {
+        this(gapWidth, color, true, 4);
+    }
+
+    public BulletSpan(int gapWidth, int color, int bulletRadius) {
+        this(gapWidth, color, true, bulletRadius);
+    }
+
+    private BulletSpan(int gapWidth, int color, boolean wantColor, int bulletRadius) {
+        this.mGapWidth = gapWidth;
+        this.mBulletRadius = bulletRadius;
+        this.mColor = color;
+        this.mWantColor = wantColor;
+    }
+
+    public BulletSpan(Parcel src) {
+        this.mGapWidth = src.readInt();
+        this.mWantColor = src.readInt() != 0;
+        this.mColor = src.readInt();
+        this.mBulletRadius = src.readInt();
     }
 
     @Override // android.text.style.LeadingMarginSpan
-    public int getLeadingMargin(boolean z) {
+    public int getLeadingMargin(boolean first) {
         return (this.mBulletRadius * 2) + this.mGapWidth;
     }
 
+    public int getGapWidth() {
+        return this.mGapWidth;
+    }
+
+    public int getBulletRadius() {
+        return this.mBulletRadius;
+    }
+
+    public int getColor() {
+        return this.mColor;
+    }
+
     @Override // android.text.style.LeadingMarginSpan
-    public void drawLeadingMargin(Canvas canvas, Paint paint, int i, int i2, int i3, int i4, int i5, CharSequence charSequence, int i6, int i7, boolean z, Layout layout) {
-        int i8;
-        if (((Spanned) charSequence).getSpanStart(this) == i6) {
+    public void drawLeadingMargin(Canvas canvas, Paint paint, int x, int dir, int top, int baseline, int bottom, CharSequence text, int start, int end, boolean first, Layout layout) {
+        int bottom2;
+        if (((Spanned) text).getSpanStart(this) == start) {
             Paint.Style style = paint.getStyle();
-            int i9 = 0;
+            int oldcolor = 0;
             if (this.mWantColor) {
-                i8 = paint.getColor();
+                oldcolor = paint.getColor();
                 paint.setColor(this.mColor);
-            } else {
-                i8 = 0;
             }
             paint.setStyle(Paint.Style.FILL);
-            if (layout != null) {
-                if (layout.getLineForOffset(i6) != layout.getLineCount() - 1) {
-                    i9 = (int) layout.getSpacingAdd();
-                }
-                i5 -= i9;
+            if (layout == null) {
+                bottom2 = bottom;
+            } else {
+                int line = layout.getLineForOffset(start);
+                int spacing = line != layout.getLineCount() + (-1) ? (int) layout.getSpacingAdd() : 0;
+                bottom2 = bottom - spacing;
             }
-            int i10 = this.mBulletRadius;
-            canvas.drawCircle(i + (i2 * i10), (i3 + i5) / 2.0f, i10, paint);
+            float yPosition = (top + bottom2) / 2.0f;
+            int i = this.mBulletRadius;
+            float xPosition = (dir * i) + x;
+            canvas.drawCircle(xPosition, yPosition, i, paint);
             if (this.mWantColor) {
-                paint.setColor(i8);
+                paint.setColor(oldcolor);
             }
             paint.setStyle(style);
         }

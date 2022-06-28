@@ -5,7 +5,7 @@ import com.google.android.datatransport.runtime.dagger.internal.DoubleCheck;
 import com.google.android.datatransport.runtime.dagger.internal.Factory;
 import com.google.android.datatransport.runtime.time.Clock;
 import javax.inject.Provider;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SQLiteEventStore_Factory implements Factory<SQLiteEventStore> {
     private final Provider<Clock> clockProvider;
     private final Provider<EventStoreConfig> configProvider;
@@ -13,12 +13,12 @@ public final class SQLiteEventStore_Factory implements Factory<SQLiteEventStore>
     private final Provider<SchemaManager> schemaManagerProvider;
     private final Provider<Clock> wallClockProvider;
 
-    public SQLiteEventStore_Factory(Provider<Clock> provider, Provider<Clock> provider2, Provider<EventStoreConfig> provider3, Provider<SchemaManager> provider4, Provider<String> provider5) {
-        this.wallClockProvider = provider;
-        this.clockProvider = provider2;
-        this.configProvider = provider3;
-        this.schemaManagerProvider = provider4;
-        this.packageNameProvider = provider5;
+    public SQLiteEventStore_Factory(Provider<Clock> wallClockProvider, Provider<Clock> clockProvider, Provider<EventStoreConfig> configProvider, Provider<SchemaManager> schemaManagerProvider, Provider<String> packageNameProvider) {
+        this.wallClockProvider = wallClockProvider;
+        this.clockProvider = clockProvider;
+        this.configProvider = configProvider;
+        this.schemaManagerProvider = schemaManagerProvider;
+        this.packageNameProvider = packageNameProvider;
     }
 
     @Override // javax.inject.Provider
@@ -26,11 +26,11 @@ public final class SQLiteEventStore_Factory implements Factory<SQLiteEventStore>
         return newInstance(this.wallClockProvider.get(), this.clockProvider.get(), this.configProvider.get(), this.schemaManagerProvider.get(), DoubleCheck.lazy(this.packageNameProvider));
     }
 
-    public static SQLiteEventStore_Factory create(Provider<Clock> provider, Provider<Clock> provider2, Provider<EventStoreConfig> provider3, Provider<SchemaManager> provider4, Provider<String> provider5) {
-        return new SQLiteEventStore_Factory(provider, provider2, provider3, provider4, provider5);
+    public static SQLiteEventStore_Factory create(Provider<Clock> wallClockProvider, Provider<Clock> clockProvider, Provider<EventStoreConfig> configProvider, Provider<SchemaManager> schemaManagerProvider, Provider<String> packageNameProvider) {
+        return new SQLiteEventStore_Factory(wallClockProvider, clockProvider, configProvider, schemaManagerProvider, packageNameProvider);
     }
 
-    public static SQLiteEventStore newInstance(Clock clock, Clock clock2, Object obj, Object obj2, Lazy<String> lazy) {
-        return new SQLiteEventStore(clock, clock2, (EventStoreConfig) obj, (SchemaManager) obj2, lazy);
+    public static SQLiteEventStore newInstance(Clock wallClock, Clock clock, Object config, Object schemaManager, Lazy<String> packageName) {
+        return new SQLiteEventStore(wallClock, clock, (EventStoreConfig) config, (SchemaManager) schemaManager, packageName);
     }
 }

@@ -1,5 +1,5 @@
 package org.telegram.messenger;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class SharedConfig$$ExternalSyntheticLambda2 implements Runnable {
     public static final /* synthetic */ SharedConfig$$ExternalSyntheticLambda2 INSTANCE = new SharedConfig$$ExternalSyntheticLambda2();
 

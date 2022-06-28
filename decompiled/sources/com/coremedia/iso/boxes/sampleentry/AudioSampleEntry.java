@@ -1,11 +1,32 @@
 package com.coremedia.iso.boxes.sampleentry;
 
+import com.coremedia.iso.BoxParser;
+import com.coremedia.iso.IsoTypeReader;
 import com.coremedia.iso.IsoTypeWriter;
+import com.coremedia.iso.boxes.Box;
+import com.coremedia.iso.boxes.Container;
+import com.google.android.exoplayer2.metadata.id3.InternalFrame;
+import com.googlecode.mp4parser.DataSource;
+import com.googlecode.mp4parser.util.CastUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AudioSampleEntry extends AbstractSampleEntry {
+    static final /* synthetic */ boolean $assertionsDisabled = false;
+    public static final String TYPE1 = "samr";
+    public static final String TYPE10 = "mlpa";
+    public static final String TYPE11 = "dtsl";
+    public static final String TYPE12 = "dtsh";
+    public static final String TYPE13 = "dtse";
+    public static final String TYPE2 = "sawb";
+    public static final String TYPE3 = "mp4a";
+    public static final String TYPE4 = "drms";
+    public static final String TYPE5 = "alac";
+    public static final String TYPE7 = "owma";
+    public static final String TYPE8 = "ac-3";
+    public static final String TYPE9 = "ec-3";
+    public static final String TYPE_ENCRYPTED = "enca";
     private long bytesPerFrame;
     private long bytesPerPacket;
     private long bytesPerSample;
@@ -20,31 +41,227 @@ public final class AudioSampleEntry extends AbstractSampleEntry {
     private int soundVersion;
     private byte[] soundVersion2Data;
 
-    public AudioSampleEntry(String str) {
-        super(str);
+    public AudioSampleEntry(String type) {
+        super(type);
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public int getChannelCount() {
         return this.channelCount;
     }
 
+    public int getSampleSize() {
+        return this.sampleSize;
+    }
+
     public long getSampleRate() {
         return this.sampleRate;
     }
 
-    public void setChannelCount(int i) {
-        this.channelCount = i;
+    public int getSoundVersion() {
+        return this.soundVersion;
     }
 
-    public void setSampleSize(int i) {
-        this.sampleSize = i;
+    public int getCompressionId() {
+        return this.compressionId;
     }
 
-    public void setSampleRate(long j) {
-        this.sampleRate = j;
+    public int getPacketSize() {
+        return this.packetSize;
     }
 
-    @Override // com.googlecode.mp4parser.AbstractContainerBox, com.coremedia.iso.boxes.Box
+    public long getSamplesPerPacket() {
+        return this.samplesPerPacket;
+    }
+
+    public long getBytesPerPacket() {
+        return this.bytesPerPacket;
+    }
+
+    public long getBytesPerFrame() {
+        return this.bytesPerFrame;
+    }
+
+    public long getBytesPerSample() {
+        return this.bytesPerSample;
+    }
+
+    public byte[] getSoundVersion2Data() {
+        return this.soundVersion2Data;
+    }
+
+    public int getReserved1() {
+        return this.reserved1;
+    }
+
+    public long getReserved2() {
+        return this.reserved2;
+    }
+
+    public void setChannelCount(int channelCount) {
+        this.channelCount = channelCount;
+    }
+
+    public void setSampleSize(int sampleSize) {
+        this.sampleSize = sampleSize;
+    }
+
+    public void setSampleRate(long sampleRate) {
+        this.sampleRate = sampleRate;
+    }
+
+    public void setSoundVersion(int soundVersion) {
+        this.soundVersion = soundVersion;
+    }
+
+    public void setCompressionId(int compressionId) {
+        this.compressionId = compressionId;
+    }
+
+    public void setPacketSize(int packetSize) {
+        this.packetSize = packetSize;
+    }
+
+    public void setSamplesPerPacket(long samplesPerPacket) {
+        this.samplesPerPacket = samplesPerPacket;
+    }
+
+    public void setBytesPerPacket(long bytesPerPacket) {
+        this.bytesPerPacket = bytesPerPacket;
+    }
+
+    public void setBytesPerFrame(long bytesPerFrame) {
+        this.bytesPerFrame = bytesPerFrame;
+    }
+
+    public void setBytesPerSample(long bytesPerSample) {
+        this.bytesPerSample = bytesPerSample;
+    }
+
+    public void setReserved1(int reserved1) {
+        this.reserved1 = reserved1;
+    }
+
+    public void setReserved2(long reserved2) {
+        this.reserved2 = reserved2;
+    }
+
+    public void setSoundVersion2Data(byte[] soundVersion2Data) {
+        this.soundVersion2Data = soundVersion2Data;
+    }
+
+    @Override // com.coremedia.iso.boxes.sampleentry.AbstractSampleEntry, com.googlecode.mp4parser.AbstractContainerBox, com.coremedia.iso.boxes.Box
+    public void parse(DataSource dataSource, ByteBuffer header, long contentSize, BoxParser boxParser) throws IOException {
+        ByteBuffer content = ByteBuffer.allocate(28);
+        dataSource.read(content);
+        content.position(6);
+        this.dataReferenceIndex = IsoTypeReader.readUInt16(content);
+        this.soundVersion = IsoTypeReader.readUInt16(content);
+        this.reserved1 = IsoTypeReader.readUInt16(content);
+        this.reserved2 = IsoTypeReader.readUInt32(content);
+        this.channelCount = IsoTypeReader.readUInt16(content);
+        this.sampleSize = IsoTypeReader.readUInt16(content);
+        this.compressionId = IsoTypeReader.readUInt16(content);
+        this.packetSize = IsoTypeReader.readUInt16(content);
+        this.sampleRate = IsoTypeReader.readUInt32(content);
+        int i = 16;
+        if (!this.type.equals(TYPE10)) {
+            this.sampleRate >>>= 16;
+        }
+        if (this.soundVersion == 1) {
+            ByteBuffer appleStuff = ByteBuffer.allocate(16);
+            dataSource.read(appleStuff);
+            appleStuff.rewind();
+            this.samplesPerPacket = IsoTypeReader.readUInt32(appleStuff);
+            this.bytesPerPacket = IsoTypeReader.readUInt32(appleStuff);
+            this.bytesPerFrame = IsoTypeReader.readUInt32(appleStuff);
+            this.bytesPerSample = IsoTypeReader.readUInt32(appleStuff);
+        }
+        int i2 = 36;
+        if (this.soundVersion == 2) {
+            ByteBuffer appleStuff2 = ByteBuffer.allocate(36);
+            dataSource.read(appleStuff2);
+            appleStuff2.rewind();
+            this.samplesPerPacket = IsoTypeReader.readUInt32(appleStuff2);
+            this.bytesPerPacket = IsoTypeReader.readUInt32(appleStuff2);
+            this.bytesPerFrame = IsoTypeReader.readUInt32(appleStuff2);
+            this.bytesPerSample = IsoTypeReader.readUInt32(appleStuff2);
+            byte[] bArr = new byte[20];
+            this.soundVersion2Data = bArr;
+            appleStuff2.get(bArr);
+        }
+        if (TYPE7.equals(this.type)) {
+            System.err.println(TYPE7);
+            long j = contentSize - 28;
+            int i3 = this.soundVersion;
+            if (i3 != 1) {
+                i = 0;
+            }
+            long j2 = j - i;
+            if (i3 != 2) {
+                i2 = 0;
+            }
+            final long remaining = j2 - i2;
+            final ByteBuffer owmaSpecifics = ByteBuffer.allocate(CastUtils.l2i(remaining));
+            dataSource.read(owmaSpecifics);
+            addBox(new Box() { // from class: com.coremedia.iso.boxes.sampleentry.AudioSampleEntry.1
+                @Override // com.coremedia.iso.boxes.Box
+                public Container getParent() {
+                    return AudioSampleEntry.this;
+                }
+
+                @Override // com.coremedia.iso.boxes.Box
+                public void setParent(Container parent) {
+                    if (AudioSampleEntry.$assertionsDisabled || parent == AudioSampleEntry.this) {
+                        return;
+                    }
+                    throw new AssertionError("you cannot diswown this special box");
+                }
+
+                @Override // com.coremedia.iso.boxes.Box
+                public long getSize() {
+                    return remaining;
+                }
+
+                @Override // com.coremedia.iso.boxes.Box
+                public long getOffset() {
+                    return 0L;
+                }
+
+                @Override // com.coremedia.iso.boxes.Box
+                public String getType() {
+                    return InternalFrame.ID;
+                }
+
+                @Override // com.coremedia.iso.boxes.Box
+                public void getBox(WritableByteChannel writableByteChannel) throws IOException {
+                    owmaSpecifics.rewind();
+                    writableByteChannel.write(owmaSpecifics);
+                }
+
+                @Override // com.coremedia.iso.boxes.Box
+                public void parse(DataSource dataSource2, ByteBuffer header2, long contentSize2, BoxParser boxParser2) throws IOException {
+                    throw new RuntimeException("NotImplemented");
+                }
+            });
+            return;
+        }
+        long j3 = contentSize - 28;
+        int i4 = this.soundVersion;
+        if (i4 != 1) {
+            i = 0;
+        }
+        long j4 = j3 - i;
+        if (i4 != 2) {
+            i2 = 0;
+        }
+        initContainer(dataSource, j4 - i2, boxParser);
+    }
+
+    @Override // com.coremedia.iso.boxes.sampleentry.AbstractSampleEntry, com.googlecode.mp4parser.AbstractContainerBox, com.coremedia.iso.boxes.Box
     public void getBox(WritableByteChannel writableByteChannel) throws IOException {
         writableByteChannel.write(getHeader());
         int i = this.soundVersion;
@@ -53,35 +270,35 @@ public final class AudioSampleEntry extends AbstractSampleEntry {
         if (i == 2) {
             i2 = 36;
         }
-        ByteBuffer allocate = ByteBuffer.allocate(i3 + i2);
-        allocate.position(6);
-        IsoTypeWriter.writeUInt16(allocate, this.dataReferenceIndex);
-        IsoTypeWriter.writeUInt16(allocate, this.soundVersion);
-        IsoTypeWriter.writeUInt16(allocate, this.reserved1);
-        IsoTypeWriter.writeUInt32(allocate, this.reserved2);
-        IsoTypeWriter.writeUInt16(allocate, this.channelCount);
-        IsoTypeWriter.writeUInt16(allocate, this.sampleSize);
-        IsoTypeWriter.writeUInt16(allocate, this.compressionId);
-        IsoTypeWriter.writeUInt16(allocate, this.packetSize);
-        if (this.type.equals("mlpa")) {
-            IsoTypeWriter.writeUInt32(allocate, getSampleRate());
+        ByteBuffer byteBuffer = ByteBuffer.allocate(i3 + i2);
+        byteBuffer.position(6);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.dataReferenceIndex);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.soundVersion);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.reserved1);
+        IsoTypeWriter.writeUInt32(byteBuffer, this.reserved2);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.channelCount);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.sampleSize);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.compressionId);
+        IsoTypeWriter.writeUInt16(byteBuffer, this.packetSize);
+        if (this.type.equals(TYPE10)) {
+            IsoTypeWriter.writeUInt32(byteBuffer, getSampleRate());
         } else {
-            IsoTypeWriter.writeUInt32(allocate, getSampleRate() << 16);
+            IsoTypeWriter.writeUInt32(byteBuffer, getSampleRate() << 16);
         }
         if (this.soundVersion == 1) {
-            IsoTypeWriter.writeUInt32(allocate, this.samplesPerPacket);
-            IsoTypeWriter.writeUInt32(allocate, this.bytesPerPacket);
-            IsoTypeWriter.writeUInt32(allocate, this.bytesPerFrame);
-            IsoTypeWriter.writeUInt32(allocate, this.bytesPerSample);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.samplesPerPacket);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.bytesPerPacket);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.bytesPerFrame);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.bytesPerSample);
         }
         if (this.soundVersion == 2) {
-            IsoTypeWriter.writeUInt32(allocate, this.samplesPerPacket);
-            IsoTypeWriter.writeUInt32(allocate, this.bytesPerPacket);
-            IsoTypeWriter.writeUInt32(allocate, this.bytesPerFrame);
-            IsoTypeWriter.writeUInt32(allocate, this.bytesPerSample);
-            allocate.put(this.soundVersion2Data);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.samplesPerPacket);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.bytesPerPacket);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.bytesPerFrame);
+            IsoTypeWriter.writeUInt32(byteBuffer, this.bytesPerSample);
+            byteBuffer.put(this.soundVersion2Data);
         }
-        writableByteChannel.write((ByteBuffer) allocate.rewind());
+        writableByteChannel.write((ByteBuffer) byteBuffer.rewind());
         writeContainer(writableByteChannel);
     }
 
@@ -94,11 +311,11 @@ public final class AudioSampleEntry extends AbstractSampleEntry {
         if (i == 2) {
             i3 = 36;
         }
-        long containerSize = i4 + i3 + getContainerSize();
-        if (!this.largeBox && 8 + containerSize < 4294967296L) {
+        long s = i4 + i3 + getContainerSize();
+        if (!this.largeBox && 8 + s < 4294967296L) {
             i2 = 8;
         }
-        return containerSize + i2;
+        return s + i2;
     }
 
     @Override // com.googlecode.mp4parser.BasicContainer

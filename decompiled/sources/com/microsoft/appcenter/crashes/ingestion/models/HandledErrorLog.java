@@ -5,22 +5,24 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class HandledErrorLog extends LogWithProperties {
+    private static final String EXCEPTION = "exception";
+    public static final String TYPE = "handledError";
     private Exception exception;
     private UUID id;
 
     @Override // com.microsoft.appcenter.ingestion.models.Log
     public String getType() {
-        return "handledError";
+        return TYPE;
     }
 
     public UUID getId() {
         return this.id;
     }
 
-    public void setId(UUID uuid) {
-        this.id = uuid;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public Exception getException() {
@@ -32,56 +34,57 @@ public class HandledErrorLog extends LogWithProperties {
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.LogWithProperties, com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject jSONObject) throws JSONException {
-        super.read(jSONObject);
-        setId(UUID.fromString(jSONObject.getString("id")));
-        if (jSONObject.has("exception")) {
-            JSONObject jSONObject2 = jSONObject.getJSONObject("exception");
+    public void read(JSONObject object) throws JSONException {
+        super.read(object);
+        setId(UUID.fromString(object.getString("id")));
+        if (object.has(EXCEPTION)) {
+            JSONObject jException = object.getJSONObject(EXCEPTION);
             Exception exception = new Exception();
-            exception.read(jSONObject2);
+            exception.read(jException);
             setException(exception);
         }
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.LogWithProperties, com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer jSONStringer) throws JSONException {
-        super.write(jSONStringer);
-        jSONStringer.key("id").value(getId());
+    public void write(JSONStringer writer) throws JSONException {
+        super.write(writer);
+        writer.key("id").value(getId());
         if (getException() != null) {
-            jSONStringer.key("exception").object();
-            this.exception.write(jSONStringer);
-            jSONStringer.endObject();
+            writer.key(EXCEPTION).object();
+            this.exception.write(writer);
+            writer.endObject();
         }
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.LogWithProperties, com.microsoft.appcenter.ingestion.models.AbstractLog
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || HandledErrorLog.class != obj.getClass() || !super.equals(obj)) {
+        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
             return false;
         }
-        HandledErrorLog handledErrorLog = (HandledErrorLog) obj;
+        HandledErrorLog errorLog = (HandledErrorLog) o;
         UUID uuid = this.id;
-        if (uuid == null ? handledErrorLog.id != null : !uuid.equals(handledErrorLog.id)) {
+        if (uuid == null ? errorLog.id != null : !uuid.equals(errorLog.id)) {
             return false;
         }
         Exception exception = this.exception;
-        Exception exception2 = handledErrorLog.exception;
-        return exception != null ? exception.equals(exception2) : exception2 == null;
+        return exception != null ? exception.equals(errorLog.exception) : errorLog.exception == null;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.LogWithProperties, com.microsoft.appcenter.ingestion.models.AbstractLog
     public int hashCode() {
-        int hashCode = super.hashCode() * 31;
+        int result = super.hashCode();
+        int i = result * 31;
         UUID uuid = this.id;
-        int i = 0;
-        int hashCode2 = (hashCode + (uuid != null ? uuid.hashCode() : 0)) * 31;
+        int i2 = 0;
+        int result2 = i + (uuid != null ? uuid.hashCode() : 0);
+        int result3 = result2 * 31;
         Exception exception = this.exception;
         if (exception != null) {
-            i = exception.hashCode();
+            i2 = exception.hashCode();
         }
-        return hashCode2 + i;
+        return result3 + i2;
     }
 }

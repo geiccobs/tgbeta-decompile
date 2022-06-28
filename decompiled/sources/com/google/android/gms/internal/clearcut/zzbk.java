@@ -1,8 +1,21 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzbk {
+    private static volatile boolean zzft;
+    private int zzfq;
+    private int zzfr;
+    private boolean zzfs;
+
+    static {
+        zzft = false;
+        zzft = true;
+    }
+
     /* JADX INFO: Access modifiers changed from: private */
     public zzbk() {
+        this.zzfq = 100;
+        this.zzfr = Integer.MAX_VALUE;
+        this.zzfs = false;
     }
 
     public static long zza(long j) {

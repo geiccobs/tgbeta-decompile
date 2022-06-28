@@ -1,6 +1,7 @@
 package com.google.android.exoplayer2.source.chunk;
 
 import android.util.SparseArray;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.DummyTrackOutput;
 import com.google.android.exoplayer2.extractor.Extractor;
@@ -11,7 +12,7 @@ import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class ChunkExtractorWrapper implements ExtractorOutput {
     private final SparseArray<BindingTrackOutput> bindingTrackOutputs = new SparseArray<>();
     private long endTimeUs;
@@ -23,15 +24,15 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
     private SeekMap seekMap;
     private TrackOutputProvider trackOutputProvider;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface TrackOutputProvider {
         TrackOutput track(int i, int i2);
     }
 
-    public ChunkExtractorWrapper(Extractor extractor, int i, Format format) {
+    public ChunkExtractorWrapper(Extractor extractor, int primaryTrackType, Format primaryTrackManifestFormat) {
         this.extractor = extractor;
-        this.primaryTrackType = i;
-        this.primaryTrackManifestFormat = format;
+        this.primaryTrackType = primaryTrackType;
+        this.primaryTrackManifestFormat = primaryTrackManifestFormat;
     }
 
     public SeekMap getSeekMap() {
@@ -42,46 +43,43 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
         return this.sampleFormats;
     }
 
-    public void init(TrackOutputProvider trackOutputProvider, long j, long j2) {
+    public void init(TrackOutputProvider trackOutputProvider, long startTimeUs, long endTimeUs) {
         this.trackOutputProvider = trackOutputProvider;
-        this.endTimeUs = j2;
+        this.endTimeUs = endTimeUs;
         if (!this.extractorInitialized) {
             this.extractor.init(this);
-            if (j != -9223372036854775807L) {
-                this.extractor.seek(0L, j);
+            if (startTimeUs != C.TIME_UNSET) {
+                this.extractor.seek(0L, startTimeUs);
             }
             this.extractorInitialized = true;
             return;
         }
-        Extractor extractor = this.extractor;
-        if (j == -9223372036854775807L) {
-            j = 0;
-        }
-        extractor.seek(0L, j);
+        this.extractor.seek(0L, startTimeUs == C.TIME_UNSET ? 0L : startTimeUs);
         for (int i = 0; i < this.bindingTrackOutputs.size(); i++) {
-            this.bindingTrackOutputs.valueAt(i).bind(trackOutputProvider, j2);
+            this.bindingTrackOutputs.valueAt(i).bind(trackOutputProvider, endTimeUs);
         }
     }
 
     @Override // com.google.android.exoplayer2.extractor.ExtractorOutput
-    public TrackOutput track(int i, int i2) {
-        BindingTrackOutput bindingTrackOutput = this.bindingTrackOutputs.get(i);
+    public TrackOutput track(int id, int type) {
+        BindingTrackOutput bindingTrackOutput = this.bindingTrackOutputs.get(id);
         if (bindingTrackOutput == null) {
             Assertions.checkState(this.sampleFormats == null);
-            bindingTrackOutput = new BindingTrackOutput(i, i2, i2 == this.primaryTrackType ? this.primaryTrackManifestFormat : null);
-            bindingTrackOutput.bind(this.trackOutputProvider, this.endTimeUs);
-            this.bindingTrackOutputs.put(i, bindingTrackOutput);
+            BindingTrackOutput bindingTrackOutput2 = new BindingTrackOutput(id, type, type == this.primaryTrackType ? this.primaryTrackManifestFormat : null);
+            bindingTrackOutput2.bind(this.trackOutputProvider, this.endTimeUs);
+            this.bindingTrackOutputs.put(id, bindingTrackOutput2);
+            return bindingTrackOutput2;
         }
         return bindingTrackOutput;
     }
 
     @Override // com.google.android.exoplayer2.extractor.ExtractorOutput
     public void endTracks() {
-        Format[] formatArr = new Format[this.bindingTrackOutputs.size()];
+        Format[] sampleFormats = new Format[this.bindingTrackOutputs.size()];
         for (int i = 0; i < this.bindingTrackOutputs.size(); i++) {
-            formatArr[i] = this.bindingTrackOutputs.valueAt(i).sampleFormat;
+            sampleFormats[i] = this.bindingTrackOutputs.valueAt(i).sampleFormat;
         }
-        this.sampleFormats = formatArr;
+        this.sampleFormats = sampleFormats;
     }
 
     @Override // com.google.android.exoplayer2.extractor.ExtractorOutput
@@ -90,7 +88,7 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class BindingTrackOutput implements TrackOutput {
         private final DummyTrackOutput dummyTrackOutput = new DummyTrackOutput();
         private long endTimeUs;
@@ -100,54 +98,51 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
         private TrackOutput trackOutput;
         private final int type;
 
-        public BindingTrackOutput(int i, int i2, Format format) {
-            this.id = i;
-            this.type = i2;
-            this.manifestFormat = format;
+        public BindingTrackOutput(int id, int type, Format manifestFormat) {
+            this.id = id;
+            this.type = type;
+            this.manifestFormat = manifestFormat;
         }
 
-        public void bind(TrackOutputProvider trackOutputProvider, long j) {
+        public void bind(TrackOutputProvider trackOutputProvider, long endTimeUs) {
             if (trackOutputProvider == null) {
                 this.trackOutput = this.dummyTrackOutput;
                 return;
             }
-            this.endTimeUs = j;
+            this.endTimeUs = endTimeUs;
             TrackOutput track = trackOutputProvider.track(this.id, this.type);
             this.trackOutput = track;
             Format format = this.sampleFormat;
-            if (format == null) {
-                return;
+            if (format != null) {
+                track.format(format);
             }
-            track.format(format);
         }
 
         @Override // com.google.android.exoplayer2.extractor.TrackOutput
         public void format(Format format) {
             Format format2 = this.manifestFormat;
-            if (format2 != null) {
-                format = format.copyWithManifestFormatInfo(format2);
-            }
-            this.sampleFormat = format;
-            this.trackOutput.format(format);
+            Format copyWithManifestFormatInfo = format2 != null ? format.copyWithManifestFormatInfo(format2) : format;
+            this.sampleFormat = copyWithManifestFormatInfo;
+            this.trackOutput.format(copyWithManifestFormatInfo);
         }
 
         @Override // com.google.android.exoplayer2.extractor.TrackOutput
-        public int sampleData(ExtractorInput extractorInput, int i, boolean z) throws IOException, InterruptedException {
-            return this.trackOutput.sampleData(extractorInput, i, z);
+        public int sampleData(ExtractorInput input, int length, boolean allowEndOfInput) throws IOException, InterruptedException {
+            return this.trackOutput.sampleData(input, length, allowEndOfInput);
         }
 
         @Override // com.google.android.exoplayer2.extractor.TrackOutput
-        public void sampleData(ParsableByteArray parsableByteArray, int i) {
-            this.trackOutput.sampleData(parsableByteArray, i);
+        public void sampleData(ParsableByteArray data, int length) {
+            this.trackOutput.sampleData(data, length);
         }
 
         @Override // com.google.android.exoplayer2.extractor.TrackOutput
-        public void sampleMetadata(long j, int i, int i2, int i3, TrackOutput.CryptoData cryptoData) {
-            long j2 = this.endTimeUs;
-            if (j2 != -9223372036854775807L && j >= j2) {
+        public void sampleMetadata(long timeUs, int flags, int size, int offset, TrackOutput.CryptoData cryptoData) {
+            long j = this.endTimeUs;
+            if (j != C.TIME_UNSET && timeUs >= j) {
                 this.trackOutput = this.dummyTrackOutput;
             }
-            this.trackOutput.sampleMetadata(j, i, i2, i3, cryptoData);
+            this.trackOutput.sampleMetadata(timeUs, flags, size, offset, cryptoData);
         }
     }
 }

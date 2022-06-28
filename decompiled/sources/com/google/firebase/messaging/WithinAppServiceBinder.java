@@ -9,13 +9,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.WithinAppServiceConnection;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class WithinAppServiceBinder extends Binder {
     private final IntentHandler intentHandler;
 
     /* JADX INFO: Access modifiers changed from: package-private */
     /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface IntentHandler {
         Task<Void> handle(Intent intent);
     }
@@ -28,8 +28,8 @@ public class WithinAppServiceBinder extends Binder {
         if (Binder.getCallingUid() != Process.myUid()) {
             throw new SecurityException("Binding only allowed within app");
         }
-        if (Log.isLoggable("FirebaseMessaging", 3)) {
-            Log.d("FirebaseMessaging", "service received new intent via bind strategy");
+        if (Log.isLoggable(Constants.TAG, 3)) {
+            Log.d(Constants.TAG, "service received new intent via bind strategy");
         }
         this.intentHandler.handle(bindRequest.intent).addOnCompleteListener(WithinAppServiceBinder$$Lambda$0.$instance, new OnCompleteListener(bindRequest) { // from class: com.google.firebase.messaging.WithinAppServiceBinder$$Lambda$1
             private final WithinAppServiceConnection.BindRequest arg$1;

@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzkb implements zzlf {
     private static final zzkl zzb = new zzka();
     private final zzkl zza;
@@ -41,7 +41,7 @@ public final class zzkb implements zzlf {
     private static zzkl zza() {
         try {
             return (zzkl) Class.forName("com.google.protobuf.DescriptorMessageInfoFactory").getDeclaredMethod("getInstance", new Class[0]).invoke(null, new Object[0]);
-        } catch (Exception unused) {
+        } catch (Exception e) {
             return zzb;
         }
     }

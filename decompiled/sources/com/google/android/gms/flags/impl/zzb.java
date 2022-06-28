@@ -2,7 +2,7 @@ package com.google.android.gms.flags.impl;
 
 import android.content.SharedPreferences;
 import android.util.Log;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzb extends zza<Boolean> {
     public static Boolean zza(SharedPreferences sharedPreferences, String str, Boolean bool) {
         try {

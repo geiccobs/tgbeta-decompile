@@ -6,19 +6,22 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.URLSpanNoUnderline;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class SettingsSuggestionCell extends LinearLayout {
+    public static final int TYPE_PASSWORD = 1;
+    public static final int TYPE_PHONE = 0;
     private int currentAccount = UserConfig.selectedAccount;
     private int currentType;
     private TextView detailTextView;
@@ -26,12 +29,6 @@ public class SettingsSuggestionCell extends LinearLayout {
     private Theme.ResourcesProvider resourcesProvider;
     private TextView textView;
     private TextView yesButton;
-
-    protected void onNoClick(int i) {
-    }
-
-    protected void onYesClick(int i) {
-    }
 
     public SettingsSuggestionCell(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -43,98 +40,103 @@ public class SettingsSuggestionCell extends LinearLayout {
         this.textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         this.textView.setEllipsize(TextUtils.TruncateAt.END);
         this.textView.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
-        this.textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlueHeader", resourcesProvider));
+        this.textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader, resourcesProvider));
         addView(this.textView, LayoutHelper.createLinear(-1, -2, (LocaleController.isRTL ? 5 : 3) | 48, 21, 15, 21, 0));
         TextView textView2 = new TextView(context);
         this.detailTextView = textView2;
-        textView2.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText2", resourcesProvider));
+        textView2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
         this.detailTextView.setTextSize(1, 13.0f);
-        this.detailTextView.setLinkTextColor(Theme.getColor("windowBackgroundWhiteLinkText", resourcesProvider));
-        this.detailTextView.setHighlightColor(Theme.getColor("windowBackgroundWhiteLinkSelection", resourcesProvider));
+        this.detailTextView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText, resourcesProvider));
+        this.detailTextView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection, resourcesProvider));
         this.detailTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         this.detailTextView.setGravity(LocaleController.isRTL ? 5 : 3);
         addView(this.detailTextView, LayoutHelper.createLinear(-2, -2, LocaleController.isRTL ? 5 : 3, 21, 8, 21, 0));
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(0);
         addView(linearLayout, LayoutHelper.createLinear(-1, 40, 21.0f, 17.0f, 21.0f, 20.0f));
-        int i = 0;
-        while (i < 2) {
+        int a = 0;
+        while (a < 2) {
             TextView textView3 = new TextView(context);
-            textView3.setBackground(Theme.AdaptiveRipple.filledRect("featuredStickers_addButton", 4.0f));
+            textView3.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_featuredStickers_addButton, 4.0f));
             textView3.setLines(1);
             textView3.setSingleLine(true);
             textView3.setGravity(1);
             textView3.setEllipsize(TextUtils.TruncateAt.END);
             textView3.setGravity(17);
-            textView3.setTextColor(Theme.getColor("featuredStickers_buttonText", resourcesProvider));
+            textView3.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText, resourcesProvider));
             textView3.setTextSize(1, 14.0f);
             textView3.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-            linearLayout.addView(textView3, LayoutHelper.createLinear(0, 40, 0.5f, i == 0 ? 0 : 4, 0, i == 0 ? 4 : 0, 0));
-            if (i == 0) {
+            linearLayout.addView(textView3, LayoutHelper.createLinear(0, 40, 0.5f, a == 0 ? 0 : 4, 0, a == 0 ? 4 : 0, 0));
+            if (a == 0) {
                 this.yesButton = textView3;
-                textView3.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.SettingsSuggestionCell$$ExternalSyntheticLambda1
+                textView3.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.SettingsSuggestionCell$$ExternalSyntheticLambda0
                     @Override // android.view.View.OnClickListener
                     public final void onClick(View view) {
-                        SettingsSuggestionCell.this.lambda$new$0(view);
+                        SettingsSuggestionCell.this.m1665lambda$new$0$orgtelegramuiCellsSettingsSuggestionCell(view);
                     }
                 });
             } else {
                 this.noButton = textView3;
-                textView3.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.SettingsSuggestionCell$$ExternalSyntheticLambda0
+                textView3.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.SettingsSuggestionCell$$ExternalSyntheticLambda1
                     @Override // android.view.View.OnClickListener
                     public final void onClick(View view) {
-                        SettingsSuggestionCell.this.lambda$new$1(view);
+                        SettingsSuggestionCell.this.m1666lambda$new$1$orgtelegramuiCellsSettingsSuggestionCell(view);
                     }
                 });
             }
-            i++;
+            a++;
         }
     }
 
-    public /* synthetic */ void lambda$new$0(View view) {
+    /* renamed from: lambda$new$0$org-telegram-ui-Cells-SettingsSuggestionCell */
+    public /* synthetic */ void m1665lambda$new$0$orgtelegramuiCellsSettingsSuggestionCell(View v) {
         onYesClick(this.currentType);
     }
 
-    public /* synthetic */ void lambda$new$1(View view) {
+    /* renamed from: lambda$new$1$org-telegram-ui-Cells-SettingsSuggestionCell */
+    public /* synthetic */ void m1666lambda$new$1$orgtelegramuiCellsSettingsSuggestionCell(View v) {
         onNoClick(this.currentType);
     }
 
-    public void setType(int i) {
-        this.currentType = i;
-        if (i != 0) {
-            if (i != 1) {
-                return;
+    public void setType(int type) {
+        this.currentType = type;
+        if (type == 0) {
+            TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(UserConfig.getInstance(this.currentAccount).clientUserId));
+            TextView textView = this.textView;
+            PhoneFormat phoneFormat = PhoneFormat.getInstance();
+            textView.setText(LocaleController.formatString("CheckPhoneNumber", R.string.CheckPhoneNumber, phoneFormat.format("+" + user.phone)));
+            String text = LocaleController.getString("CheckPhoneNumberInfo", R.string.CheckPhoneNumberInfo);
+            SpannableStringBuilder builder = new SpannableStringBuilder(text);
+            int index1 = text.indexOf("**");
+            int index2 = text.lastIndexOf("**");
+            if (index1 >= 0 && index2 >= 0 && index1 != index2) {
+                builder.replace(index2, index2 + 2, (CharSequence) "");
+                builder.replace(index1, index1 + 2, (CharSequence) "");
+                try {
+                    builder.setSpan(new URLSpanNoUnderline(LocaleController.getString("CheckPhoneNumberLearnMoreUrl", R.string.CheckPhoneNumberLearnMoreUrl)), index1, index2 - 2, 33);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
             }
+            this.detailTextView.setText(builder);
+            this.yesButton.setText(LocaleController.getString("CheckPhoneNumberYes", R.string.CheckPhoneNumberYes));
+            this.noButton.setText(LocaleController.getString("CheckPhoneNumberNo", R.string.CheckPhoneNumberNo));
+        } else if (type == 1) {
             this.textView.setText(LocaleController.getString("YourPasswordHeader", R.string.YourPasswordHeader));
             this.detailTextView.setText(LocaleController.getString("YourPasswordRemember", R.string.YourPasswordRemember));
             this.yesButton.setText(LocaleController.getString("YourPasswordRememberYes", R.string.YourPasswordRememberYes));
             this.noButton.setText(LocaleController.getString("YourPasswordRememberNo", R.string.YourPasswordRememberNo));
-            return;
         }
-        TLRPC$User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(UserConfig.getInstance(this.currentAccount).clientUserId));
-        TextView textView = this.textView;
-        PhoneFormat phoneFormat = PhoneFormat.getInstance();
-        textView.setText(LocaleController.formatString("CheckPhoneNumber", R.string.CheckPhoneNumber, phoneFormat.format("+" + user.phone)));
-        String string = LocaleController.getString("CheckPhoneNumberInfo", R.string.CheckPhoneNumberInfo);
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(string);
-        int indexOf = string.indexOf("**");
-        int lastIndexOf = string.lastIndexOf("**");
-        if (indexOf >= 0 && lastIndexOf >= 0 && indexOf != lastIndexOf) {
-            spannableStringBuilder.replace(lastIndexOf, lastIndexOf + 2, (CharSequence) "");
-            spannableStringBuilder.replace(indexOf, indexOf + 2, (CharSequence) "");
-            try {
-                spannableStringBuilder.setSpan(new URLSpanNoUnderline(LocaleController.getString("CheckPhoneNumberLearnMoreUrl", R.string.CheckPhoneNumberLearnMoreUrl)), indexOf, lastIndexOf - 2, 33);
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
-        }
-        this.detailTextView.setText(spannableStringBuilder);
-        this.yesButton.setText(LocaleController.getString("CheckPhoneNumberYes", R.string.CheckPhoneNumberYes));
-        this.noButton.setText(LocaleController.getString("CheckPhoneNumberNo", R.string.CheckPhoneNumberNo));
+    }
+
+    protected void onYesClick(int type) {
+    }
+
+    protected void onNoClick(int type) {
     }
 
     @Override // android.widget.LinearLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), i2);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), heightMeasureSpec);
     }
 }

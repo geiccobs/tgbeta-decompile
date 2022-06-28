@@ -4,103 +4,96 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class LruCache<T> {
     private final LinkedHashMap<String, T> map;
     private final LinkedHashMap<String, ArrayList<String>> mapFilters;
     private int maxSize;
     private int size;
 
-    protected void entryRemoved(boolean z, String str, T t, T t2) {
-    }
-
-    protected int sizeOf(String str, T t) {
-        return 1;
-    }
-
-    public LruCache(int i) {
-        if (i <= 0) {
+    public LruCache(int maxSize) {
+        if (maxSize <= 0) {
             throw new IllegalArgumentException("maxSize <= 0");
         }
-        this.maxSize = i;
+        this.maxSize = maxSize;
         this.map = new LinkedHashMap<>(0, 0.75f, true);
         this.mapFilters = new LinkedHashMap<>();
     }
 
-    public final T get(String str) {
-        if (str == null) {
+    public final T get(String key) {
+        if (key == null) {
             throw new NullPointerException("key == null");
         }
         synchronized (this) {
-            T t = this.map.get(str);
-            if (t == null) {
+            T mapValue = this.map.get(key);
+            if (mapValue == null) {
                 return null;
             }
-            return t;
+            return mapValue;
         }
     }
 
-    public ArrayList<String> getFilterKeys(String str) {
-        ArrayList<String> arrayList = this.mapFilters.get(str);
-        if (arrayList != null) {
-            return new ArrayList<>(arrayList);
+    public ArrayList<String> getFilterKeys(String key) {
+        ArrayList<String> arr = this.mapFilters.get(key);
+        if (arr != null) {
+            return new ArrayList<>(arr);
         }
         return null;
     }
 
-    public void moveToFront(String str) {
-        T remove = this.map.remove(str);
-        if (remove != null) {
-            this.map.put(str, remove);
+    public void moveToFront(String key) {
+        T value = this.map.remove(key);
+        if (value != null) {
+            this.map.put(key, value);
         }
     }
 
-    public T put(String str, T t) {
-        T put;
-        if (str == null || t == null) {
+    public T put(String key, T value) {
+        T previous;
+        if (key == null || value == null) {
             throw new NullPointerException("key == null || value == null");
         }
         synchronized (this) {
-            this.size += safeSizeOf(str, t);
-            put = this.map.put(str, t);
-            if (put != null) {
-                this.size -= safeSizeOf(str, put);
+            this.size += safeSizeOf(key, value);
+            previous = this.map.put(key, value);
+            if (previous != null) {
+                this.size -= safeSizeOf(key, previous);
             }
         }
-        String[] split = str.split("@");
-        if (split.length > 1) {
-            ArrayList<String> arrayList = this.mapFilters.get(split[0]);
-            if (arrayList == null) {
-                arrayList = new ArrayList<>();
-                this.mapFilters.put(split[0], arrayList);
+        String[] args = key.split("@");
+        if (args.length > 1) {
+            ArrayList<String> arr = this.mapFilters.get(args[0]);
+            if (arr == null) {
+                arr = new ArrayList<>();
+                this.mapFilters.put(args[0], arr);
             }
-            if (!arrayList.contains(split[1])) {
-                arrayList.add(split[1]);
+            if (!arr.contains(args[1])) {
+                arr.add(args[1]);
             }
         }
-        if (put != null) {
-            entryRemoved(false, str, put, t);
+        if (previous != null) {
+            entryRemoved(false, key, previous, value);
         }
-        trimToSize(this.maxSize, str);
-        return put;
+        trimToSize(this.maxSize, key);
+        return previous;
     }
 
-    private void trimToSize(int i, String str) {
-        ArrayList<String> arrayList;
+    private void trimToSize(int maxSize, String justAdded) {
+        ArrayList<String> arr;
         synchronized (this) {
-            Iterator<Map.Entry<String, T>> it = this.map.entrySet().iterator();
-            while (it.hasNext() && this.size > i && !this.map.isEmpty()) {
-                Map.Entry<String, T> next = it.next();
-                String key = next.getKey();
-                if (str == null || !str.equals(key)) {
-                    T value = next.getValue();
+            Iterator<Map.Entry<String, T>> iterator = this.map.entrySet().iterator();
+            while (iterator.hasNext() && this.size > maxSize && !this.map.isEmpty()) {
+                Map.Entry<String, T> entry = iterator.next();
+                String key = entry.getKey();
+                if (justAdded == null || !justAdded.equals(key)) {
+                    T value = entry.getValue();
                     this.size -= safeSizeOf(key, value);
-                    it.remove();
-                    String[] split = key.split("@");
-                    if (split.length > 1 && (arrayList = this.mapFilters.get(split[0])) != null) {
-                        arrayList.remove(split[1]);
-                        if (arrayList.isEmpty()) {
-                            this.mapFilters.remove(split[0]);
+                    iterator.remove();
+                    String[] args = key.split("@");
+                    if (args.length > 1 && (arr = this.mapFilters.get(args[0])) != null) {
+                        arr.remove(args[1]);
+                        if (arr.isEmpty()) {
+                            this.mapFilters.remove(args[0]);
                         }
                     }
                     entryRemoved(true, key, value, null);
@@ -109,41 +102,48 @@ public class LruCache<T> {
         }
     }
 
-    public final T remove(String str) {
-        T remove;
-        ArrayList<String> arrayList;
-        if (str == null) {
+    public final T remove(String key) {
+        T previous;
+        ArrayList<String> arr;
+        if (key == null) {
             throw new NullPointerException("key == null");
         }
         synchronized (this) {
-            remove = this.map.remove(str);
-            if (remove != null) {
-                this.size -= safeSizeOf(str, remove);
+            previous = this.map.remove(key);
+            if (previous != null) {
+                this.size -= safeSizeOf(key, previous);
             }
         }
-        if (remove != null) {
-            String[] split = str.split("@");
-            if (split.length > 1 && (arrayList = this.mapFilters.get(split[0])) != null) {
-                arrayList.remove(split[1]);
-                if (arrayList.isEmpty()) {
-                    this.mapFilters.remove(split[0]);
+        if (previous != null) {
+            String[] args = key.split("@");
+            if (args.length > 1 && (arr = this.mapFilters.get(args[0])) != null) {
+                arr.remove(args[1]);
+                if (arr.isEmpty()) {
+                    this.mapFilters.remove(args[0]);
                 }
             }
-            entryRemoved(false, str, remove, null);
+            entryRemoved(false, key, previous, null);
         }
-        return remove;
+        return previous;
     }
 
-    public boolean contains(String str) {
-        return this.map.containsKey(str);
+    public boolean contains(String key) {
+        return this.map.containsKey(key);
     }
 
-    private int safeSizeOf(String str, T t) {
-        int sizeOf = sizeOf(str, t);
-        if (sizeOf >= 0) {
-            return sizeOf;
+    protected void entryRemoved(boolean evicted, String key, T oldValue, T newValue) {
+    }
+
+    private int safeSizeOf(String key, T value) {
+        int result = sizeOf(key, value);
+        if (result < 0) {
+            throw new IllegalStateException("Negative size: " + key + "=" + value);
         }
-        throw new IllegalStateException("Negative size: " + str + "=" + t);
+        return result;
+    }
+
+    protected int sizeOf(String key, T value) {
+        return 1;
     }
 
     public final void evictAll() {

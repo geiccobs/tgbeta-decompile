@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import com.google.firebase.messaging.Constants;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -19,11 +20,11 @@ public class FirebaseMessagingService extends EnhancedIntentService {
         }
         Queue<String> queue = recentlyReceivedMessageIds;
         if (queue.contains(str)) {
-            if (!Log.isLoggable("FirebaseMessaging", 3)) {
+            if (!Log.isLoggable(Constants.TAG, 3)) {
                 return true;
             }
             String valueOf = String.valueOf(str);
-            Log.d("FirebaseMessaging", valueOf.length() != 0 ? "Received duplicate message: ".concat(valueOf) : new String("Received duplicate message: "));
+            Log.d(Constants.TAG, valueOf.length() != 0 ? "Received duplicate message: ".concat(valueOf) : new String("Received duplicate message: "));
             return true;
         }
         if (queue.size() >= 10) {
@@ -58,12 +59,12 @@ public class FirebaseMessagingService extends EnhancedIntentService {
     }
 
     private String getMessageId(Intent intent) {
-        String stringExtra = intent.getStringExtra("google.message_id");
-        return stringExtra == null ? intent.getStringExtra("message_id") : stringExtra;
+        String stringExtra = intent.getStringExtra(Constants.MessagePayloadKeys.MSGID);
+        return stringExtra == null ? intent.getStringExtra(Constants.MessagePayloadKeys.MSGID_SERVER) : stringExtra;
     }
 
     private void handleMessageIntent(Intent intent) {
-        if (!alreadyReceivedMessage(intent.getStringExtra("google.message_id"))) {
+        if (!alreadyReceivedMessage(intent.getStringExtra(Constants.MessagePayloadKeys.MSGID))) {
             passMessageIntentToSdk(intent);
         }
     }
@@ -71,34 +72,34 @@ public class FirebaseMessagingService extends EnhancedIntentService {
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
     private void passMessageIntentToSdk(Intent intent) {
         char c;
-        String stringExtra = intent.getStringExtra("message_type");
+        String stringExtra = intent.getStringExtra(Constants.MessagePayloadKeys.MESSAGE_TYPE);
         if (stringExtra == null) {
-            stringExtra = "gcm";
+            stringExtra = Constants.MessageTypes.MESSAGE;
         }
         switch (stringExtra.hashCode()) {
             case -2062414158:
-                if (stringExtra.equals("deleted_messages")) {
+                if (stringExtra.equals(Constants.MessageTypes.DELETED)) {
                     c = 1;
                     break;
                 }
                 c = 65535;
                 break;
             case 102161:
-                if (stringExtra.equals("gcm")) {
+                if (stringExtra.equals(Constants.MessageTypes.MESSAGE)) {
                     c = 0;
                     break;
                 }
                 c = 65535;
                 break;
             case 814694033:
-                if (stringExtra.equals("send_error")) {
+                if (stringExtra.equals(Constants.MessageTypes.SEND_ERROR)) {
                     c = 3;
                     break;
                 }
                 c = 65535;
                 break;
             case 814800675:
-                if (stringExtra.equals("send_event")) {
+                if (stringExtra.equals(Constants.MessageTypes.SEND_EVENT)) {
                     c = 2;
                     break;
                 }
@@ -108,17 +109,23 @@ public class FirebaseMessagingService extends EnhancedIntentService {
                 c = 65535;
                 break;
         }
-        if (c == 0) {
-            MessagingAnalytics.logNotificationReceived(intent);
-            dispatchMessage(intent);
-        } else if (c == 1) {
-            onDeletedMessages();
-        } else if (c == 2) {
-            onMessageSent(intent.getStringExtra("google.message_id"));
-        } else if (c == 3) {
-            onSendError(getMessageId(intent), new SendException(intent.getStringExtra("error")));
-        } else {
-            Log.w("FirebaseMessaging", stringExtra.length() != 0 ? "Received message with unknown type: ".concat(stringExtra) : new String("Received message with unknown type: "));
+        switch (c) {
+            case 0:
+                MessagingAnalytics.logNotificationReceived(intent);
+                dispatchMessage(intent);
+                return;
+            case 1:
+                onDeletedMessages();
+                return;
+            case 2:
+                onMessageSent(intent.getStringExtra(Constants.MessagePayloadKeys.MSGID));
+                return;
+            case 3:
+                onSendError(getMessageId(intent), new SendException(intent.getStringExtra(Constants.IPC_BUNDLE_KEY_SEND_ERROR)));
+                return;
+            default:
+                Log.w(Constants.TAG, stringExtra.length() != 0 ? "Received message with unknown type: ".concat(stringExtra) : new String("Received message with unknown type: "));
+                return;
         }
     }
 
@@ -136,7 +143,7 @@ public class FirebaseMessagingService extends EnhancedIntentService {
             onNewToken(intent.getStringExtra("token"));
         } else {
             String valueOf = String.valueOf(intent.getAction());
-            Log.d("FirebaseMessaging", valueOf.length() != 0 ? "Unknown intent action: ".concat(valueOf) : new String("Unknown intent action: "));
+            Log.d(Constants.TAG, valueOf.length() != 0 ? "Unknown intent action: ".concat(valueOf) : new String("Unknown intent action: "));
         }
     }
 

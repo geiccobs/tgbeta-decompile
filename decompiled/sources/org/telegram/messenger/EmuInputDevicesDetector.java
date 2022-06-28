@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final class EmuInputDevicesDetector {
     private static final String INPUT_DEVICES_FILE = "/proc/bus/input/devices";
     private static final String NAME_PREFIX = "N: Name=\"";
@@ -18,11 +18,12 @@ public final class EmuInputDevicesDetector {
     }
 
     public static boolean detect() {
-        List<String> inputDevicesNames = getInputDevicesNames();
-        if (inputDevicesNames != null) {
-            for (String str : inputDevicesNames) {
-                for (String str2 : RESTRICTED_DEVICES) {
-                    if (str.toLowerCase().contains(str2)) {
+        String[] strArr;
+        List<String> deviceNames = getInputDevicesNames();
+        if (deviceNames != null) {
+            for (String deviceName : deviceNames) {
+                for (String restrictedDeviceName : RESTRICTED_DEVICES) {
+                    if (deviceName.toLowerCase().contains(restrictedDeviceName)) {
                         return true;
                     }
                 }
@@ -32,23 +33,24 @@ public final class EmuInputDevicesDetector {
     }
 
     private static List<String> getInputDevicesNames() {
-        File file = new File(INPUT_DEVICES_FILE);
-        if (!file.canRead()) {
+        File devicesFile = new File(INPUT_DEVICES_FILE);
+        if (!devicesFile.canRead()) {
             return null;
         }
         try {
-            ArrayList arrayList = new ArrayList();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            List<String> lines = new ArrayList<>();
+            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(devicesFile)));
             while (true) {
-                String readLine = bufferedReader.readLine();
-                if (readLine == null) {
-                    return arrayList;
-                }
-                if (readLine.startsWith(NAME_PREFIX)) {
-                    String substring = readLine.substring(9, readLine.length() - 1);
-                    if (!TextUtils.isEmpty(substring)) {
-                        arrayList.add(substring);
+                String line = r.readLine();
+                if (line != null) {
+                    if (line.startsWith(NAME_PREFIX)) {
+                        String name = line.substring(NAME_PREFIX.length(), line.length() - 1);
+                        if (!TextUtils.isEmpty(name)) {
+                            lines.add(name);
+                        }
                     }
+                } else {
+                    return lines;
                 }
             }
         } catch (IOException e) {

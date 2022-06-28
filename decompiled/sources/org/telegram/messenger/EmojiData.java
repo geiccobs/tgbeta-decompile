@@ -3,7 +3,7 @@ package org.telegram.messenger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class EmojiData {
     public static final String[] aliasNew;
     public static final char[] dataChars;
@@ -26,7 +26,6 @@ public class EmojiData {
         emojiToFE0F = cArr;
         char[] cArr2 = {9774, 10013, 9770, 9784, 10017, 9775, 9766, 9934, 9800, 9801, 9802, 9803, 9804, 9805, 9806, 9807, 9808, 9809, 9810, 9811, 9883, 9762, 9763, 10036, 12953, 12951, 9940, 10060, 11093, 9832, 10071, 10069, 10067, 10068, 8252, 8265, 9884, 12349, 9888, 9851, 10055, 10035, 10062, 9989, 10175, 9410, 9855, 9654, 9208, 9199, 9209, 9210, 9197, 9198, 9193, 9194, 9664, 9195, 9196, 10145, 11013, 11014, 11015, 8599, 8600, 8601, 8598, 8597, 8596, 8618, 8617, 10548, 10549, 8505, 12336, 10160, 10004, 10133, 10134, 10135, 10006, 169, 174, 8482, 9745, 9898, 9899, 9642, 9643, 11035, 11036, 9724, 9723, 9726, 9725, 9824, 9827, 9829, 9830, 9786, 9785, 9994, 9996, 9995, 9757, 9997, 9937, 10084, 10083, 9749, 9917, 9918, 9971, 9975, 9976, 9977, 8986, 9000, 9742, 9201, 9202, 9200, 9203, 8987, 9878, 9874, 9935, 9881, 9939, 9876, 9760, 9904, 9905, 9879, 9969, 9993, 9986, 10002, 9999, 9992, 9973, 9972, 9875, 9981, 9970, 9968, 9978, 9962, 9961, 9752, 11088, 10024, 9732, 9728, 9925, 9729, 9928, 9889, 10052, 9731, 9924, 9730, 9748, 9895, 9167, 9854, 9823};
         dataChars = cArr2;
-        int i = 0;
         String[] strArr = {"🤲", "👐", "🙌", "👏", "👍", "👎", "👊", "✊", "🤛", "🤜", "🤞", "✌", "🤟", "🤘", "👌", "🤌", "🤏", "👈", "👉", "👆", "👇", "☝", "✋", "🤚", "🖐", "🖖", "👋", "🤙", "💪", "🖕", "✍", "🙏", "🦶", "🦵", "👂", "🦻", "👃", "👶", "👧", "🧒", "👦", "👩", "🧑", "👨", "👩\u200d🦱", "🧑\u200d🦱", "👨\u200d🦱", "👩\u200d🦰", "🧑\u200d🦰", "👨\u200d🦰", "👱\u200d♀", "👱", "👱\u200d♂", "👩\u200d🦳", "🧑\u200d🦳", "👨\u200d🦳", "👩\u200d🦲", "🧑\u200d🦲", "👨\u200d🦲", "🧔\u200d♀", "🧔", "🧔\u200d♂", "👵", "🧓", "👴", "👲", "👳\u200d♀", "👳", "👳\u200d♂", "🧕", "👮\u200d♀", "👮", "👮\u200d♂", "👷\u200d♀", "👷", "👷\u200d♂", "💂\u200d♀", "💂", "💂\u200d♂", "🕵\u200d♀", "🕵", "🕵\u200d♂", "👩\u200d⚕", "🧑\u200d⚕", "👨\u200d⚕", "👩\u200d🌾", "🧑\u200d🌾", "👨\u200d🌾", "👩\u200d🍳", "🧑\u200d🍳", "👨\u200d🍳", "👩\u200d🎓", "🧑\u200d🎓", "👨\u200d🎓", "👩\u200d🎤", "🧑\u200d🎤", "👨\u200d🎤", "👩\u200d🏫", "🧑\u200d🏫", "👨\u200d🏫", "👩\u200d🏭", "🧑\u200d🏭", "👨\u200d🏭", "👩\u200d💻", "🧑\u200d💻", "👨\u200d💻", "👩\u200d💼", "🧑\u200d💼", "👨\u200d💼", "👩\u200d🔧", "🧑\u200d🔧", "👨\u200d🔧", "👩\u200d🔬", "🧑\u200d🔬", "👨\u200d🔬", "👩\u200d🎨", "🧑\u200d🎨", "👨\u200d🎨", "👩\u200d🚒", "🧑\u200d🚒", "👨\u200d🚒", "👩\u200d✈", "🧑\u200d✈", "👨\u200d✈", "👩\u200d🚀", "🧑\u200d🚀", "👨\u200d🚀", "👩\u200d⚖", "🧑\u200d⚖", "👨\u200d⚖", "👰\u200d♀", "👰", "👰\u200d♂", "🤵\u200d♀", "🤵", "🤵\u200d♂", "👸", "🤴", "🥷", "🦸\u200d♀", "🦸", "🦸\u200d♂", "🦹\u200d♀", "🦹", "🦹\u200d♂", "🤶", "🧑\u200d🎄", "🎅", "🧙\u200d♀", "🧙", "🧙\u200d♂", "🧝\u200d♀", "🧝", "🧝\u200d♂", "🧛\u200d♀", "🧛", "🧛\u200d♂", "🧜\u200d♀", "🧜", "🧜\u200d♂", "🧚\u200d♀", "🧚", "🧚\u200d♂", "👼", "🤰", "🤱", "👩\u200d🍼", "🧑\u200d🍼", "👨\u200d🍼", "🙇\u200d♀", "🙇", "🙇\u200d♂", "💁\u200d♀", "💁", "💁\u200d♂", "🙅\u200d♀", "🙅", "🙅\u200d♂", "🙆\u200d♀", "🙆", "🙆\u200d♂", "🙋\u200d♀", "🙋", "🙋\u200d♂", "🧏\u200d♀", "🧏", "🧏\u200d♂", "🤦\u200d♀", "🤦", "🤦\u200d♂", "🤷\u200d♀", "🤷", "🤷\u200d♂", "🙎\u200d♀", "🙎", "🙎\u200d♂", "🙍\u200d♀", "🙍", "🙍\u200d♂", "💇\u200d♀", "💇", "💇\u200d♂", "💆\u200d♀", "💆", "💆\u200d♂", "🧖\u200d♀", "🧖", "🧖\u200d♂", "💅", "🤳", "💃", "🕺", "🕴", "👩\u200d🦽", "🧑\u200d🦽", "👨\u200d🦽", "👩\u200d🦼", "🧑\u200d🦼", "👨\u200d🦼", "🚶\u200d♀", "🚶", "🚶\u200d♂", "👩\u200d🦯", "🧑\u200d🦯", "👨\u200d🦯", "🧎\u200d♀", "🧎", "🧎\u200d♂", "🏃\u200d♀", "🏃", "🏃\u200d♂", "🧍\u200d♀", "🧍", "🧍\u200d♂", "🏋\u200d♀", "🏋", "🏋\u200d♂", "🤸\u200d♀", "🤸", "🤸\u200d♂", "⛹\u200d♀", "⛹", "⛹\u200d♂", "🤾\u200d♀", "🤾", "🤾\u200d♂", "🏌\u200d♀", "🏌", "🏌\u200d♂", "🏇", "🧘\u200d♀", "🧘", "🧘\u200d♂", "🏄\u200d♀", "🏄", "🏄\u200d♂", "🏊\u200d♀", "🏊", "🏊\u200d♂", "🤽\u200d♀", "🤽", "🤽\u200d♂", "🚣\u200d♀", "🚣", "🚣\u200d♂", "🧗\u200d♀", "🧗", "🧗\u200d♂", "🚵\u200d♀", "🚵", "🚵\u200d♂", "🚴\u200d♀", "🚴", "🚴\u200d♂", "🤹\u200d♀", "🤹", "🤹\u200d♂", "🛀"};
         emojiColored = strArr;
         String[] strArr2 = {"👫", "👭", "👬", "👩\u200d❤\u200d👨", "👩\u200d❤\u200d👩", "💑", "👨\u200d❤\u200d👨", "👩\u200d❤\u200d💋\u200d👨", "👩\u200d❤\u200d💋\u200d👩", "💏", "👨\u200d❤\u200d💋\u200d👨"};
@@ -38,60 +37,62 @@ public class EmojiData {
         emojiColoredMap = new HashSet<>(strArr.length);
         emojiBigColoredMap = new HashSet<>(strArr2.length);
         emojiAliasMap = new HashMap<>(strArr3.length);
-        int i2 = 0;
+        int a = 0;
         while (true) {
             char[] cArr3 = emojiToFE0F;
-            if (i2 >= cArr3.length) {
+            if (a >= cArr3.length) {
                 break;
             }
-            emojiToFE0FMap.put(Character.valueOf(cArr3[i2]), Boolean.TRUE);
-            i2++;
+            emojiToFE0FMap.put(Character.valueOf(cArr3[a]), true);
+            a++;
         }
-        int i3 = 0;
+        int a2 = 0;
         while (true) {
             char[] cArr4 = dataChars;
-            if (i3 >= cArr4.length) {
+            if (a2 >= cArr4.length) {
                 break;
             }
-            dataCharsMap.put(Character.valueOf(cArr4[i3]), Boolean.TRUE);
-            i3++;
+            dataCharsMap.put(Character.valueOf(cArr4[a2]), true);
+            a2++;
         }
         Collections.addAll(emojiColoredMap, emojiColored);
         Collections.addAll(emojiBigColoredMap, emojiBigColored);
-        int i4 = 0;
+        int a3 = 0;
         while (true) {
             String[] strArr4 = aliasNew;
-            if (i4 < strArr4.length) {
-                emojiAliasMap.put(aliasOld[i4], strArr4[i4]);
-                i4++;
+            if (a3 >= strArr4.length) {
+                break;
             }
+            emojiAliasMap.put(aliasOld[a3], strArr4[a3]);
+            a3++;
         }
+        int a4 = 0;
         while (true) {
             String[][] strArr5 = dataColored;
-            if (i < strArr5.length) {
-                if (strArr5[i] == null) {
-                    strArr5[i] = data[i];
+            if (a4 < strArr5.length) {
+                if (strArr5[a4] == null) {
+                    strArr5[a4] = data[a4];
                 }
-                i++;
+                a4++;
             } else {
                 return;
             }
         }
     }
 
-    public static boolean isHeartEmoji(String str) {
-        return "❤".equals(str) || "🧡".equals(str) || "💛".equals(str) || "💚".equals(str) || "💙".equals(str) || "💜".equals(str) || "🖤".equals(str) || "🤍".equals(str) || "🤎".equals(str);
+    public static boolean isHeartEmoji(String emoji) {
+        return "❤".equals(emoji) || "🧡".equals(emoji) || "💛".equals(emoji) || "💚".equals(emoji) || "💙".equals(emoji) || "💜".equals(emoji) || "🖤".equals(emoji) || "🤍".equals(emoji) || "🤎".equals(emoji);
     }
 
-    public static boolean isPeachEmoji(String str) {
-        return "🍑".equals(str);
+    public static boolean isPeachEmoji(String emoji) {
+        return "🍑".equals(emoji);
     }
 
-    public static boolean isCofinEmoji(String str) {
-        return "⚰".equals(str);
+    public static boolean isCofinEmoji(String emoji) {
+        return "⚰".equals(emoji);
     }
 
-    public static boolean hasEmojiSupportVibration(String str) {
-        return isHeartEmoji(str) || isPeachEmoji(str) || isCofinEmoji(str);
+    public static boolean hasEmojiSupportVibration(String emoji) {
+        return isHeartEmoji(emoji) || isPeachEmoji(emoji) || isCofinEmoji(emoji);
     }
 }

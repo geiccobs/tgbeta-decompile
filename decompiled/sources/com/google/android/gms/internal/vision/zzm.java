@@ -12,7 +12,7 @@ import com.google.android.gms.dynamite.DynamiteModule;
 import com.google.android.gms.vision.barcode.Barcode;
 import java.nio.ByteBuffer;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzm extends zzt<zzl> {
     private final zzk zza;
 

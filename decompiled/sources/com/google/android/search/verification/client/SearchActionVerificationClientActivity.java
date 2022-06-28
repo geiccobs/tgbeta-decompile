@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class SearchActionVerificationClientActivity extends Activity {
     public abstract Class<? extends SearchActionVerificationClientService> getServiceClass();
 

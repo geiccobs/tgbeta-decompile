@@ -2,134 +2,157 @@ package com.google.android.exoplayer2.util;
 
 import android.net.Uri;
 import android.text.TextUtils;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class UriUtil {
-    public static Uri resolveToUri(String str, String str2) {
-        return Uri.parse(resolve(str, str2));
+    private static final int FRAGMENT = 3;
+    private static final int INDEX_COUNT = 4;
+    private static final int PATH = 1;
+    private static final int QUERY = 2;
+    private static final int SCHEME_COLON = 0;
+
+    private UriUtil() {
     }
 
-    public static String resolve(String str, String str2) {
-        StringBuilder sb = new StringBuilder();
-        if (str == null) {
-            str = "";
+    public static Uri resolveToUri(String baseUri, String referenceUri) {
+        return Uri.parse(resolve(baseUri, referenceUri));
+    }
+
+    public static String resolve(String baseUri, String referenceUri) {
+        StringBuilder uri = new StringBuilder();
+        String str = "";
+        String baseUri2 = baseUri == null ? str : baseUri;
+        if (referenceUri != null) {
+            str = referenceUri;
         }
-        if (str2 == null) {
-            str2 = "";
+        String referenceUri2 = str;
+        int[] refIndices = getUriIndices(referenceUri2);
+        if (refIndices[0] != -1) {
+            uri.append(referenceUri2);
+            removeDotSegments(uri, refIndices[1], refIndices[2]);
+            return uri.toString();
         }
-        int[] uriIndices = getUriIndices(str2);
-        if (uriIndices[0] != -1) {
-            sb.append(str2);
-            removeDotSegments(sb, uriIndices[1], uriIndices[2]);
-            return sb.toString();
-        }
-        int[] uriIndices2 = getUriIndices(str);
-        if (uriIndices[3] == 0) {
-            sb.append((CharSequence) str, 0, uriIndices2[3]);
-            sb.append(str2);
-            return sb.toString();
-        } else if (uriIndices[2] == 0) {
-            sb.append((CharSequence) str, 0, uriIndices2[2]);
-            sb.append(str2);
-            return sb.toString();
-        } else if (uriIndices[1] != 0) {
-            int i = uriIndices2[0] + 1;
-            sb.append((CharSequence) str, 0, i);
-            sb.append(str2);
-            return removeDotSegments(sb, uriIndices[1] + i, i + uriIndices[2]);
-        } else if (str2.charAt(uriIndices[1]) == '/') {
-            sb.append((CharSequence) str, 0, uriIndices2[1]);
-            sb.append(str2);
-            return removeDotSegments(sb, uriIndices2[1], uriIndices2[1] + uriIndices[2]);
-        } else if (uriIndices2[0] + 2 < uriIndices2[1] && uriIndices2[1] == uriIndices2[2]) {
-            sb.append((CharSequence) str, 0, uriIndices2[1]);
-            sb.append('/');
-            sb.append(str2);
-            return removeDotSegments(sb, uriIndices2[1], uriIndices2[1] + uriIndices[2] + 1);
+        int[] baseIndices = getUriIndices(baseUri2);
+        if (refIndices[3] == 0) {
+            uri.append((CharSequence) baseUri2, 0, baseIndices[3]);
+            uri.append(referenceUri2);
+            return uri.toString();
+        } else if (refIndices[2] == 0) {
+            uri.append((CharSequence) baseUri2, 0, baseIndices[2]);
+            uri.append(referenceUri2);
+            return uri.toString();
+        } else if (refIndices[1] != 0) {
+            int baseLimit = baseIndices[0] + 1;
+            uri.append((CharSequence) baseUri2, 0, baseLimit);
+            uri.append(referenceUri2);
+            return removeDotSegments(uri, refIndices[1] + baseLimit, refIndices[2] + baseLimit);
+        } else if (referenceUri2.charAt(refIndices[1]) == '/') {
+            uri.append((CharSequence) baseUri2, 0, baseIndices[1]);
+            uri.append(referenceUri2);
+            return removeDotSegments(uri, baseIndices[1], baseIndices[1] + refIndices[2]);
+        } else if (baseIndices[0] + 2 < baseIndices[1] && baseIndices[1] == baseIndices[2]) {
+            uri.append((CharSequence) baseUri2, 0, baseIndices[1]);
+            uri.append('/');
+            uri.append(referenceUri2);
+            return removeDotSegments(uri, baseIndices[1], baseIndices[1] + refIndices[2] + 1);
         } else {
-            int lastIndexOf = str.lastIndexOf(47, uriIndices2[2] - 1);
-            int i2 = lastIndexOf == -1 ? uriIndices2[1] : lastIndexOf + 1;
-            sb.append((CharSequence) str, 0, i2);
-            sb.append(str2);
-            return removeDotSegments(sb, uriIndices2[1], i2 + uriIndices[2]);
+            int lastSlashIndex = baseUri2.lastIndexOf(47, baseIndices[2] - 1);
+            int baseLimit2 = lastSlashIndex == -1 ? baseIndices[1] : lastSlashIndex + 1;
+            uri.append((CharSequence) baseUri2, 0, baseLimit2);
+            uri.append(referenceUri2);
+            return removeDotSegments(uri, baseIndices[1], refIndices[2] + baseLimit2);
         }
     }
 
-    private static String removeDotSegments(StringBuilder sb, int i, int i2) {
-        int i3;
-        int i4;
-        if (i >= i2) {
-            return sb.toString();
-        }
-        if (sb.charAt(i) == '/') {
-            i++;
-        }
-        int i5 = i;
-        int i6 = i5;
-        while (i5 <= i2) {
-            if (i5 == i2) {
-                i3 = i5;
-            } else if (sb.charAt(i5) == '/') {
-                i3 = i5 + 1;
-            } else {
-                i5++;
-            }
-            int i7 = i6 + 1;
-            if (i5 == i7 && sb.charAt(i6) == '.') {
-                sb.delete(i6, i3);
-                i2 -= i3 - i6;
-            } else {
-                if (i5 == i6 + 2 && sb.charAt(i6) == '.' && sb.charAt(i7) == '.') {
-                    i4 = sb.lastIndexOf("/", i6 - 2) + 1;
-                    int i8 = i4 > i ? i4 : i;
-                    sb.delete(i8, i3);
-                    i2 -= i3 - i8;
-                } else {
-                    i4 = i5 + 1;
+    public static Uri removeQueryParameter(Uri uri, String queryParameterName) {
+        Uri.Builder builder = uri.buildUpon();
+        builder.clearQuery();
+        for (String key : uri.getQueryParameterNames()) {
+            if (!key.equals(queryParameterName)) {
+                for (String value : uri.getQueryParameters(key)) {
+                    builder.appendQueryParameter(key, value);
                 }
-                i6 = i4;
             }
-            i5 = i6;
         }
-        return sb.toString();
+        return builder.build();
     }
 
-    private static int[] getUriIndices(String str) {
-        int i;
-        int[] iArr = new int[4];
-        if (TextUtils.isEmpty(str)) {
-            iArr[0] = -1;
-            return iArr;
+    private static String removeDotSegments(StringBuilder uri, int offset, int limit) {
+        int nextSegmentStart;
+        if (offset >= limit) {
+            return uri.toString();
         }
-        int length = str.length();
-        int indexOf = str.indexOf(35);
-        if (indexOf != -1) {
-            length = indexOf;
+        if (uri.charAt(offset) == '/') {
+            offset++;
         }
-        int indexOf2 = str.indexOf(63);
-        if (indexOf2 == -1 || indexOf2 > length) {
-            indexOf2 = length;
+        int segmentStart = offset;
+        int i = offset;
+        while (i <= limit) {
+            if (i == limit) {
+                nextSegmentStart = i;
+            } else {
+                int nextSegmentStart2 = uri.charAt(i);
+                if (nextSegmentStart2 == 47) {
+                    nextSegmentStart = i + 1;
+                } else {
+                    i++;
+                }
+            }
+            if (i == segmentStart + 1 && uri.charAt(segmentStart) == '.') {
+                uri.delete(segmentStart, nextSegmentStart);
+                limit -= nextSegmentStart - segmentStart;
+                i = segmentStart;
+            } else if (i == segmentStart + 2 && uri.charAt(segmentStart) == '.' && uri.charAt(segmentStart + 1) == '.') {
+                int prevSegmentStart = uri.lastIndexOf("/", segmentStart - 2) + 1;
+                int removeFrom = prevSegmentStart > offset ? prevSegmentStart : offset;
+                uri.delete(removeFrom, nextSegmentStart);
+                limit -= nextSegmentStart - removeFrom;
+                segmentStart = prevSegmentStart;
+                i = prevSegmentStart;
+            } else {
+                i++;
+                segmentStart = i;
+            }
         }
-        int indexOf3 = str.indexOf(47);
-        if (indexOf3 == -1 || indexOf3 > indexOf2) {
-            indexOf3 = indexOf2;
+        return uri.toString();
+    }
+
+    private static int[] getUriIndices(String uriString) {
+        int pathIndex;
+        int[] indices = new int[4];
+        if (TextUtils.isEmpty(uriString)) {
+            indices[0] = -1;
+            return indices;
         }
-        int indexOf4 = str.indexOf(58);
-        if (indexOf4 > indexOf3) {
-            indexOf4 = -1;
+        int length = uriString.length();
+        int fragmentIndex = uriString.indexOf(35);
+        if (fragmentIndex == -1) {
+            fragmentIndex = length;
         }
-        int i2 = indexOf4 + 2;
-        if (i2 < indexOf2 && str.charAt(indexOf4 + 1) == '/' && str.charAt(i2) == '/') {
-            i = str.indexOf(47, indexOf4 + 3);
-            if (i == -1 || i > indexOf2) {
-                i = indexOf2;
+        int queryIndex = uriString.indexOf(63);
+        if (queryIndex == -1 || queryIndex > fragmentIndex) {
+            queryIndex = fragmentIndex;
+        }
+        int schemeIndexLimit = uriString.indexOf(47);
+        if (schemeIndexLimit == -1 || schemeIndexLimit > queryIndex) {
+            schemeIndexLimit = queryIndex;
+        }
+        int schemeIndex = uriString.indexOf(58);
+        if (schemeIndex > schemeIndexLimit) {
+            schemeIndex = -1;
+        }
+        boolean hasAuthority = schemeIndex + 2 < queryIndex && uriString.charAt(schemeIndex + 1) == '/' && uriString.charAt(schemeIndex + 2) == '/';
+        if (hasAuthority) {
+            pathIndex = uriString.indexOf(47, schemeIndex + 3);
+            if (pathIndex == -1 || pathIndex > queryIndex) {
+                pathIndex = queryIndex;
             }
         } else {
-            i = indexOf4 + 1;
+            pathIndex = schemeIndex + 1;
         }
-        iArr[0] = indexOf4;
-        iArr[1] = i;
-        iArr[2] = indexOf2;
-        iArr[3] = length;
-        return iArr;
+        indices[0] = schemeIndex;
+        indices[1] = pathIndex;
+        indices[2] = queryIndex;
+        indices[3] = fragmentIndex;
+        return indices;
     }
 }

@@ -19,18 +19,14 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.concurrent.GuardedBy;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzf implements ServiceConnection {
-    @GuardedBy("this")
     int zza;
     final Messenger zzb;
     zzo zzc;
-    @GuardedBy("this")
     final Queue<zzq<?>> zzd;
-    @GuardedBy("this")
     final SparseArray<zzq<?>> zze;
     final /* synthetic */ zze zzf;
 
@@ -58,53 +54,53 @@ public final class zzf implements ServiceConnection {
     public final synchronized boolean zza(zzq<?> zzqVar) {
         Context context;
         ScheduledExecutorService scheduledExecutorService;
-        int i = this.zza;
-        if (i == 0) {
-            this.zzd.add(zzqVar);
-            Preconditions.checkState(this.zza == 0);
-            if (Log.isLoggable("MessengerIpcClient", 2)) {
-                Log.v("MessengerIpcClient", "Starting bind to GmsCore");
-            }
-            this.zza = 1;
-            Intent intent = new Intent("com.google.android.c2dm.intent.REGISTER");
-            intent.setPackage("com.google.android.gms");
-            ConnectionTracker connectionTracker = ConnectionTracker.getInstance();
-            context = this.zzf.zzb;
-            if (!connectionTracker.bindService(context, intent, this, 1)) {
-                zza(0, "Unable to bind to service");
-            } else {
-                scheduledExecutorService = this.zzf.zzc;
-                scheduledExecutorService.schedule(new Runnable(this) { // from class: com.google.android.gms.cloudmessaging.zzh
-                    private final zzf zza;
+        switch (this.zza) {
+            case 0:
+                this.zzd.add(zzqVar);
+                Preconditions.checkState(this.zza == 0);
+                if (Log.isLoggable("MessengerIpcClient", 2)) {
+                    Log.v("MessengerIpcClient", "Starting bind to GmsCore");
+                }
+                this.zza = 1;
+                Intent intent = new Intent("com.google.android.c2dm.intent.REGISTER");
+                intent.setPackage("com.google.android.gms");
+                ConnectionTracker connectionTracker = ConnectionTracker.getInstance();
+                context = this.zzf.zzb;
+                if (!connectionTracker.bindService(context, intent, this, 1)) {
+                    zza(0, "Unable to bind to service");
+                } else {
+                    scheduledExecutorService = this.zzf.zzc;
+                    scheduledExecutorService.schedule(new Runnable(this) { // from class: com.google.android.gms.cloudmessaging.zzh
+                        private final zzf zza;
 
-                    /* JADX INFO: Access modifiers changed from: package-private */
-                    {
-                        this.zza = this;
-                    }
+                        /* JADX INFO: Access modifiers changed from: package-private */
+                        {
+                            this.zza = this;
+                        }
 
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        this.zza.zzc();
-                    }
-                }, 30L, TimeUnit.SECONDS);
-            }
-            return true;
-        } else if (i == 1) {
-            this.zzd.add(zzqVar);
-            return true;
-        } else if (i == 2) {
-            this.zzd.add(zzqVar);
-            zza();
-            return true;
-        } else {
-            if (i != 3 && i != 4) {
-                int i2 = this.zza;
+                        @Override // java.lang.Runnable
+                        public final void run() {
+                            this.zza.zzc();
+                        }
+                    }, 30L, TimeUnit.SECONDS);
+                }
+                return true;
+            case 1:
+                this.zzd.add(zzqVar);
+                return true;
+            case 2:
+                this.zzd.add(zzqVar);
+                zza();
+                return true;
+            case 3:
+            case 4:
+                return false;
+            default:
+                int i = this.zza;
                 StringBuilder sb = new StringBuilder(26);
                 sb.append("Unknown state: ");
-                sb.append(i2);
+                sb.append(i);
                 throw new IllegalStateException(sb.toString());
-            }
-            return false;
         }
     }
 
@@ -223,7 +219,7 @@ public final class zzf implements ServiceConnection {
                     }
                     if (Log.isLoggable("MessengerIpcClient", 3)) {
                         String valueOf = String.valueOf(poll);
-                        StringBuilder sb = new StringBuilder(valueOf.length() + 8);
+                        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 8);
                         sb.append("Sending ");
                         sb.append(valueOf);
                         Log.d("MessengerIpcClient", sb.toString());
@@ -277,41 +273,40 @@ public final class zzf implements ServiceConnection {
             String valueOf = String.valueOf(str);
             Log.d("MessengerIpcClient", valueOf.length() != 0 ? "Disconnected: ".concat(valueOf) : new String("Disconnected: "));
         }
-        int i2 = this.zza;
-        if (i2 != 0) {
-            if (i2 != 1 && i2 != 2) {
-                if (i2 == 3) {
-                    this.zza = 4;
-                    return;
-                } else if (i2 == 4) {
-                    return;
-                } else {
-                    int i3 = this.zza;
-                    StringBuilder sb = new StringBuilder(26);
-                    sb.append("Unknown state: ");
-                    sb.append(i3);
-                    throw new IllegalStateException(sb.toString());
+        switch (this.zza) {
+            case 0:
+                throw new IllegalStateException();
+            case 1:
+            case 2:
+                if (Log.isLoggable("MessengerIpcClient", 2)) {
+                    Log.v("MessengerIpcClient", "Unbinding service");
                 }
-            }
-            if (Log.isLoggable("MessengerIpcClient", 2)) {
-                Log.v("MessengerIpcClient", "Unbinding service");
-            }
-            this.zza = 4;
-            ConnectionTracker connectionTracker = ConnectionTracker.getInstance();
-            context = this.zzf.zzb;
-            connectionTracker.unbindService(context, this);
-            zzp zzpVar = new zzp(i, str);
-            for (zzq<?> zzqVar : this.zzd) {
-                zzqVar.zza(zzpVar);
-            }
-            this.zzd.clear();
-            for (int i4 = 0; i4 < this.zze.size(); i4++) {
-                this.zze.valueAt(i4).zza(zzpVar);
-            }
-            this.zze.clear();
-            return;
+                this.zza = 4;
+                ConnectionTracker connectionTracker = ConnectionTracker.getInstance();
+                context = this.zzf.zzb;
+                connectionTracker.unbindService(context, this);
+                zzp zzpVar = new zzp(i, str);
+                for (zzq<?> zzqVar : this.zzd) {
+                    zzqVar.zza(zzpVar);
+                }
+                this.zzd.clear();
+                for (int i2 = 0; i2 < this.zze.size(); i2++) {
+                    this.zze.valueAt(i2).zza(zzpVar);
+                }
+                this.zze.clear();
+                return;
+            case 3:
+                this.zza = 4;
+                return;
+            case 4:
+                return;
+            default:
+                int i3 = this.zza;
+                StringBuilder sb = new StringBuilder(26);
+                sb.append("Unknown state: ");
+                sb.append(i3);
+                throw new IllegalStateException(sb.toString());
         }
-        throw new IllegalStateException();
     }
 
     public final synchronized void zzb() {

@@ -6,7 +6,7 @@ import java.lang.ref.ReferenceQueue;
 import java.util.List;
 import java.util.Vector;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzfg {
     private final ConcurrentHashMap<zzff, List<Throwable>> zza = new ConcurrentHashMap<>(16, 0.75f, 10);
     private final ReferenceQueue<Throwable> zzb = new ReferenceQueue<>();
@@ -18,11 +18,14 @@ final class zzfg {
             poll = this.zzb.poll();
         }
         List<Throwable> list = this.zza.get(new zzff(th, null));
-        if (z && list == null) {
-            Vector vector = new Vector(2);
-            List<Throwable> putIfAbsent = this.zza.putIfAbsent(new zzff(th, this.zzb), vector);
-            return putIfAbsent == null ? vector : putIfAbsent;
+        if (!z) {
+            return list;
         }
-        return list;
+        if (list != null) {
+            return list;
+        }
+        Vector vector = new Vector(2);
+        List<Throwable> putIfAbsent = this.zza.putIfAbsent(new zzff(th, this.zzb), vector);
+        return putIfAbsent == null ? vector : putIfAbsent;
     }
 }

@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import java.util.ArrayList;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zah implements Parcelable.Creator<zai> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ zai[] newArray(int i) {
@@ -19,13 +19,16 @@ public final class zah implements Parcelable.Creator<zai> {
         String str = null;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            int fieldId = SafeParcelReader.getFieldId(readHeader);
-            if (fieldId == 1) {
-                arrayList = SafeParcelReader.createStringList(parcel, readHeader);
-            } else if (fieldId == 2) {
-                str = SafeParcelReader.createString(parcel, readHeader);
-            } else {
-                SafeParcelReader.skipUnknownField(parcel, readHeader);
+            switch (SafeParcelReader.getFieldId(readHeader)) {
+                case 1:
+                    arrayList = SafeParcelReader.createStringList(parcel, readHeader);
+                    break;
+                case 2:
+                    str = SafeParcelReader.createString(parcel, readHeader);
+                    break;
+                default:
+                    SafeParcelReader.skipUnknownField(parcel, readHeader);
+                    break;
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

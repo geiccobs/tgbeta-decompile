@@ -2,7 +2,7 @@ package org.telegram.messenger;
 
 import android.os.Build;
 import java.lang.reflect.Field;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class OneUIUtilities {
     public static final int ONE_UI_4_0 = 40000;
     private static Boolean isOneUI;
@@ -11,26 +11,26 @@ public class OneUIUtilities {
     private static float oneUIMinorVersion;
 
     public static boolean isOneUI() {
-        int intValue;
+        int semPlatformInt;
         Boolean bool = isOneUI;
         if (bool != null) {
             return bool.booleanValue();
         }
         try {
-            Field declaredField = Build.VERSION.class.getDeclaredField("SEM_PLATFORM_INT");
-            declaredField.setAccessible(true);
-            intValue = ((Integer) declaredField.get(null)).intValue();
-        } catch (Exception unused) {
-            isOneUI = Boolean.FALSE;
+            Field f = Build.VERSION.class.getDeclaredField("SEM_PLATFORM_INT");
+            f.setAccessible(true);
+            semPlatformInt = ((Integer) f.get(null)).intValue();
+        } catch (Exception e) {
+            isOneUI = false;
         }
-        if (intValue < 100000) {
+        if (semPlatformInt < 100000) {
             return false;
         }
-        int i = intValue - 90000;
+        int i = semPlatformInt - 90000;
         oneUIEncodedVersion = i;
         oneUIMajorVersion = i / 10000;
         oneUIMinorVersion = (i % 10000) / 100.0f;
-        isOneUI = Boolean.TRUE;
+        isOneUI = true;
         return isOneUI.booleanValue();
     }
 

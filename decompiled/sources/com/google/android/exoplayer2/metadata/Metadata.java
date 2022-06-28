@@ -6,63 +6,57 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.util.Util;
 import java.util.Arrays;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class Metadata implements Parcelable {
     public static final Parcelable.Creator<Metadata> CREATOR = new Parcelable.Creator<Metadata>() { // from class: com.google.android.exoplayer2.metadata.Metadata.1
         @Override // android.os.Parcelable.Creator
-        public Metadata createFromParcel(Parcel parcel) {
-            return new Metadata(parcel);
+        public Metadata createFromParcel(Parcel in) {
+            return new Metadata(in);
         }
 
         @Override // android.os.Parcelable.Creator
-        public Metadata[] newArray(int i) {
-            return new Metadata[i];
+        public Metadata[] newArray(int size) {
+            return new Metadata[size];
         }
     };
     private final Entry[] entries;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Entry extends Parcelable {
-
-        /* renamed from: com.google.android.exoplayer2.metadata.Metadata$Entry$-CC */
-        /* loaded from: classes.dex */
-        public final /* synthetic */ class CC {
-            public static byte[] $default$getWrappedMetadataBytes(Entry entry) {
-                return null;
-            }
-
-            public static Format $default$getWrappedMetadataFormat(Entry entry) {
-                return null;
-            }
-        }
-
         byte[] getWrappedMetadataBytes();
 
         Format getWrappedMetadataFormat();
+
+        /* renamed from: com.google.android.exoplayer2.metadata.Metadata$Entry$-CC */
+        /* loaded from: classes3.dex */
+        public final /* synthetic */ class CC {
+            public static Format $default$getWrappedMetadataFormat(Entry _this) {
+                return null;
+            }
+
+            public static byte[] $default$getWrappedMetadataBytes(Entry _this) {
+                return null;
+            }
+        }
     }
 
-    @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
+    public Metadata(Entry... entries) {
+        this.entries = entries;
     }
 
-    public Metadata(Entry... entryArr) {
+    public Metadata(List<? extends Entry> entries) {
+        Entry[] entryArr = new Entry[entries.size()];
         this.entries = entryArr;
+        entries.toArray(entryArr);
     }
 
-    public Metadata(List<? extends Entry> list) {
-        Entry[] entryArr = new Entry[list.size()];
-        this.entries = entryArr;
-        list.toArray(entryArr);
-    }
-
-    Metadata(Parcel parcel) {
-        this.entries = new Entry[parcel.readInt()];
+    Metadata(Parcel in) {
+        this.entries = new Entry[in.readInt()];
         int i = 0;
         while (true) {
             Entry[] entryArr = this.entries;
             if (i < entryArr.length) {
-                entryArr[i] = (Entry) parcel.readParcelable(Entry.class.getClassLoader());
+                entryArr[i] = (Entry) in.readParcelable(Entry.class.getClassLoader());
                 i++;
             } else {
                 return;
@@ -74,26 +68,33 @@ public final class Metadata implements Parcelable {
         return this.entries.length;
     }
 
-    public Entry get(int i) {
-        return this.entries[i];
+    public Entry get(int index) {
+        return this.entries[index];
     }
 
-    public Metadata copyWithAppendedEntriesFrom(Metadata metadata) {
-        return metadata == null ? this : copyWithAppendedEntries(metadata.entries);
+    public Metadata copyWithAppendedEntriesFrom(Metadata other) {
+        if (other == null) {
+            return this;
+        }
+        return copyWithAppendedEntries(other.entries);
     }
 
-    public Metadata copyWithAppendedEntries(Entry... entryArr) {
-        return entryArr.length == 0 ? this : new Metadata((Entry[]) Util.nullSafeArrayConcatenation(this.entries, entryArr));
+    public Metadata copyWithAppendedEntries(Entry... entriesToAppend) {
+        if (entriesToAppend.length == 0) {
+            return this;
+        }
+        return new Metadata((Entry[]) Util.nullSafeArrayConcatenation(this.entries, entriesToAppend));
     }
 
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj != null && Metadata.class == obj.getClass()) {
-            return Arrays.equals(this.entries, ((Metadata) obj).entries);
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
         }
-        return false;
+        Metadata other = (Metadata) obj;
+        return Arrays.equals(this.entries, other.entries);
     }
 
     public int hashCode() {
@@ -105,10 +106,16 @@ public final class Metadata implements Parcelable {
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(this.entries.length);
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override // android.os.Parcelable
+    public void writeToParcel(Parcel dest, int flags) {
+        Entry[] entryArr;
+        dest.writeInt(this.entries.length);
         for (Entry entry : this.entries) {
-            parcel.writeParcelable(entry, 0);
+            dest.writeParcelable(entry, 0);
         }
     }
 }

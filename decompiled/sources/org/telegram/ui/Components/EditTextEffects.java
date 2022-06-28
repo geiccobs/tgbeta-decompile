@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Stack;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.Components.spoilers.SpoilersClickDetector;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class EditTextEffects extends EditText {
+    private static final int SPOILER_TIMEOUT = 10000;
     private boolean isSpoilersRevealed;
     private float lastRippleX;
     private float lastRippleY;
@@ -28,10 +29,10 @@ public class EditTextEffects extends EditText {
     private Stack<SpoilerEffect> spoilersPool = new Stack<>();
     private boolean shouldRevealSpoilersByTouch = true;
     private Path path = new Path();
-    private Runnable spoilerTimeout = new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda4
+    private Runnable spoilerTimeout = new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda2
         @Override // java.lang.Runnable
         public final void run() {
-            EditTextEffects.this.lambda$new$2();
+            EditTextEffects.this.m2563lambda$new$2$orgtelegramuiComponentsEditTextEffects();
         }
     };
     private android.graphics.Rect rect = new android.graphics.Rect();
@@ -42,34 +43,36 @@ public class EditTextEffects extends EditText {
         }
     });
 
-    public /* synthetic */ void lambda$new$2() {
+    /* renamed from: lambda$new$2$org-telegram-ui-Components-EditTextEffects */
+    public /* synthetic */ void m2563lambda$new$2$orgtelegramuiComponentsEditTextEffects() {
         this.postedSpoilerTimeout = false;
         this.isSpoilersRevealed = false;
         invalidateSpoilers();
-        if (this.spoilers.isEmpty()) {
-            return;
-        }
-        this.spoilers.get(0).setOnRippleEndCallback(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda0
-            @Override // java.lang.Runnable
-            public final void run() {
-                EditTextEffects.this.lambda$new$1();
+        if (!this.spoilers.isEmpty()) {
+            this.spoilers.get(0).setOnRippleEndCallback(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda1
+                @Override // java.lang.Runnable
+                public final void run() {
+                    EditTextEffects.this.m2562lambda$new$1$orgtelegramuiComponentsEditTextEffects();
+                }
+            });
+            float rad = (float) Math.sqrt(Math.pow(getWidth(), 2.0d) + Math.pow(getHeight(), 2.0d));
+            for (SpoilerEffect eff : this.spoilers) {
+                eff.startRipple(this.lastRippleX, this.lastRippleY, rad, true);
             }
-        });
-        float sqrt = (float) Math.sqrt(Math.pow(getWidth(), 2.0d) + Math.pow(getHeight(), 2.0d));
-        for (SpoilerEffect spoilerEffect : this.spoilers) {
-            spoilerEffect.startRipple(this.lastRippleX, this.lastRippleY, sqrt, true);
         }
     }
 
-    public /* synthetic */ void lambda$new$0() {
+    /* renamed from: lambda$new$0$org-telegram-ui-Components-EditTextEffects */
+    public /* synthetic */ void m2561lambda$new$0$orgtelegramuiComponentsEditTextEffects() {
         setSpoilersRevealed(false, true);
     }
 
-    public /* synthetic */ void lambda$new$1() {
-        post(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda1
+    /* renamed from: lambda$new$1$org-telegram-ui-Components-EditTextEffects */
+    public /* synthetic */ void m2562lambda$new$1$orgtelegramuiComponentsEditTextEffects() {
+        post(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                EditTextEffects.this.lambda$new$0();
+                EditTextEffects.this.m2561lambda$new$0$orgtelegramuiComponentsEditTextEffects();
             }
         });
     }
@@ -78,76 +81,77 @@ public class EditTextEffects extends EditText {
         super(context);
     }
 
-    public void onSpoilerClicked(SpoilerEffect spoilerEffect, float f, float f2) {
+    public void onSpoilerClicked(SpoilerEffect eff, float x, float y) {
         if (this.isSpoilersRevealed) {
             return;
         }
-        this.lastRippleX = f;
-        this.lastRippleY = f2;
+        this.lastRippleX = x;
+        this.lastRippleY = y;
         this.postedSpoilerTimeout = false;
         removeCallbacks(this.spoilerTimeout);
         setSpoilersRevealed(true, false);
-        spoilerEffect.setOnRippleEndCallback(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda2
+        eff.setOnRippleEndCallback(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
-                EditTextEffects.this.lambda$onSpoilerClicked$4();
+                EditTextEffects.this.m2565xd5a1f33d();
             }
         });
-        float sqrt = (float) Math.sqrt(Math.pow(getWidth(), 2.0d) + Math.pow(getHeight(), 2.0d));
-        for (SpoilerEffect spoilerEffect2 : this.spoilers) {
-            spoilerEffect2.startRipple(f, f2, sqrt);
+        float rad = (float) Math.sqrt(Math.pow(getWidth(), 2.0d) + Math.pow(getHeight(), 2.0d));
+        for (SpoilerEffect ef : this.spoilers) {
+            ef.startRipple(x, y, rad);
         }
     }
 
-    public /* synthetic */ void lambda$onSpoilerClicked$4() {
+    /* renamed from: lambda$onSpoilerClicked$4$org-telegram-ui-Components-EditTextEffects */
+    public /* synthetic */ void m2565xd5a1f33d() {
         post(new Runnable() { // from class: org.telegram.ui.Components.EditTextEffects$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                EditTextEffects.this.lambda$onSpoilerClicked$3();
+                EditTextEffects.this.m2564x12b589de();
             }
         });
     }
 
-    public /* synthetic */ void lambda$onSpoilerClicked$3() {
+    /* renamed from: lambda$onSpoilerClicked$3$org-telegram-ui-Components-EditTextEffects */
+    public /* synthetic */ void m2564x12b589de() {
         invalidateSpoilers();
         checkSpoilerTimeout();
     }
 
     @Override // android.widget.TextView
-    public void onSelectionChanged(int i, int i2) {
-        super.onSelectionChanged(i, i2);
+    public void onSelectionChanged(int selStart, int selEnd) {
+        super.onSelectionChanged(selStart, selEnd);
         if (this.suppressOnTextChanged) {
             return;
         }
-        this.selStart = i;
-        this.selEnd = i2;
+        this.selStart = selStart;
+        this.selEnd = selEnd;
         checkSpoilerTimeout();
     }
 
     private void checkSpoilerTimeout() {
-        TextStyleSpan[] textStyleSpanArr;
         int i;
         int i2;
-        CharSequence text = getLayout() != null ? getLayout().getText() : null;
-        boolean z = false;
-        if (text instanceof Spannable) {
-            Spannable spannable = (Spannable) text;
-            for (TextStyleSpan textStyleSpan : (TextStyleSpan[]) spannable.getSpans(0, spannable.length(), TextStyleSpan.class)) {
-                int spanStart = spannable.getSpanStart(textStyleSpan);
-                int spanEnd = spannable.getSpanEnd(textStyleSpan);
-                if (textStyleSpan.isSpoiler() && ((spanStart > (i = this.selStart) && spanEnd < this.selEnd) || ((i > spanStart && i < spanEnd) || ((i2 = this.selEnd) > spanStart && i2 < spanEnd)))) {
+        boolean onSpoiler = false;
+        CharSequence cs = getLayout() != null ? getLayout().getText() : null;
+        if (cs instanceof Spannable) {
+            Spannable e = (Spannable) cs;
+            TextStyleSpan[] spans = (TextStyleSpan[]) e.getSpans(0, e.length(), TextStyleSpan.class);
+            for (TextStyleSpan span : spans) {
+                int ss = e.getSpanStart(span);
+                int se = e.getSpanEnd(span);
+                if (span.isSpoiler() && ((ss > (i = this.selStart) && se < this.selEnd) || ((i > ss && i < se) || ((i2 = this.selEnd) > ss && i2 < se)))) {
+                    onSpoiler = true;
                     removeCallbacks(this.spoilerTimeout);
                     this.postedSpoilerTimeout = false;
-                    z = true;
                     break;
                 }
             }
         }
-        if (!this.isSpoilersRevealed || z || this.postedSpoilerTimeout) {
-            return;
+        if (this.isSpoilersRevealed && !onSpoiler && !this.postedSpoilerTimeout) {
+            this.postedSpoilerTimeout = true;
+            postDelayed(this.spoilerTimeout, 10000L);
         }
-        this.postedSpoilerTimeout = true;
-        postDelayed(this.spoilerTimeout, 10000L);
     }
 
     @Override // android.view.View
@@ -157,37 +161,36 @@ public class EditTextEffects extends EditText {
     }
 
     @Override // android.view.View
-    public void onSizeChanged(int i, int i2, int i3, int i4) {
-        super.onSizeChanged(i, i2, i3, i4);
+    public void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
         invalidateEffects();
     }
 
     @Override // android.widget.TextView
-    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-        super.onTextChanged(charSequence, i, i2, i3);
+    public void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
+        super.onTextChanged(text, start, lengthBefore, lengthAfter);
         if (!this.suppressOnTextChanged) {
             invalidateEffects();
             Layout layout = getLayout();
-            if (!(charSequence instanceof Spannable) || layout == null) {
-                return;
-            }
-            int lineForOffset = layout.getLineForOffset(i);
-            int primaryHorizontal = (int) layout.getPrimaryHorizontal(i);
-            int lineTop = (int) ((layout.getLineTop(lineForOffset) + layout.getLineBottom(lineForOffset)) / 2.0f);
-            for (SpoilerEffect spoilerEffect : this.spoilers) {
-                if (spoilerEffect.getBounds().contains(primaryHorizontal, lineTop)) {
-                    int i4 = i3 - i2;
-                    this.selStart += i4;
-                    this.selEnd += i4;
-                    onSpoilerClicked(spoilerEffect, primaryHorizontal, lineTop);
-                    return;
+            if ((text instanceof Spannable) && layout != null) {
+                int line = layout.getLineForOffset(start);
+                int x = (int) layout.getPrimaryHorizontal(start);
+                int y = (int) ((layout.getLineTop(line) + layout.getLineBottom(line)) / 2.0f);
+                for (SpoilerEffect eff : this.spoilers) {
+                    if (eff.getBounds().contains(x, y)) {
+                        int selOffset = lengthAfter - lengthBefore;
+                        this.selStart += selOffset;
+                        this.selEnd += selOffset;
+                        onSpoilerClicked(eff, x, y);
+                        return;
+                    }
                 }
             }
         }
     }
 
     @Override // android.widget.EditText, android.widget.TextView
-    public void setText(CharSequence charSequence, TextView.BufferType bufferType) {
+    public void setText(CharSequence text, TextView.BufferType type) {
         if (!this.suppressOnTextChanged) {
             this.isSpoilersRevealed = false;
             Stack<SpoilerEffect> stack = this.spoilersPool;
@@ -195,37 +198,36 @@ public class EditTextEffects extends EditText {
                 stack.clear();
             }
         }
-        super.setText(charSequence, bufferType);
+        super.setText(text, type);
     }
 
-    public void setShouldRevealSpoilersByTouch(boolean z) {
-        this.shouldRevealSpoilersByTouch = z;
+    public void setShouldRevealSpoilersByTouch(boolean shouldRevealSpoilersByTouch) {
+        this.shouldRevealSpoilersByTouch = shouldRevealSpoilersByTouch;
     }
 
     @Override // android.view.View
-    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-        boolean z;
-        if (!this.shouldRevealSpoilersByTouch || !this.clickDetector.onTouchEvent(motionEvent)) {
-            z = false;
-        } else {
-            if (motionEvent.getActionMasked() == 1) {
-                MotionEvent obtain = MotionEvent.obtain(0L, 0L, 3, 0.0f, 0.0f, 0);
-                super.dispatchTouchEvent(obtain);
-                obtain.recycle();
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean detector = false;
+        if (this.shouldRevealSpoilersByTouch && this.clickDetector.onTouchEvent(event)) {
+            int act = event.getActionMasked();
+            if (act == 1) {
+                MotionEvent c = MotionEvent.obtain(0L, 0L, 3, 0.0f, 0.0f, 0);
+                super.dispatchTouchEvent(c);
+                c.recycle();
             }
-            z = true;
+            detector = true;
         }
-        return super.dispatchTouchEvent(motionEvent) || z;
+        return super.dispatchTouchEvent(event) || detector;
     }
 
-    public void setSpoilersRevealed(boolean z, boolean z2) {
-        TextStyleSpan[] textStyleSpanArr;
-        this.isSpoilersRevealed = z;
-        Editable text = getText();
+    public void setSpoilersRevealed(boolean spoilersRevealed, boolean notifyEffects) {
+        this.isSpoilersRevealed = spoilersRevealed;
+        Spannable text = getText();
         if (text != null) {
-            for (TextStyleSpan textStyleSpan : (TextStyleSpan[]) text.getSpans(0, text.length(), TextStyleSpan.class)) {
-                if (textStyleSpan.isSpoiler()) {
-                    textStyleSpan.setSpoilerRevealed(z);
+            TextStyleSpan[] spans = (TextStyleSpan[]) text.getSpans(0, text.length(), TextStyleSpan.class);
+            for (TextStyleSpan span : spans) {
+                if (span.isSpoiler()) {
+                    span.setSpoilerRevealed(spoilersRevealed);
                 }
             }
         }
@@ -233,7 +235,7 @@ public class EditTextEffects extends EditText {
         setText(text, TextView.BufferType.EDITABLE);
         setSelection(this.selStart, this.selEnd);
         this.suppressOnTextChanged = false;
-        if (z2) {
+        if (notifyEffects) {
             invalidateSpoilers();
         }
     }
@@ -242,8 +244,8 @@ public class EditTextEffects extends EditText {
     public void onDraw(Canvas canvas) {
         canvas.save();
         this.path.rewind();
-        for (SpoilerEffect spoilerEffect : this.spoilers) {
-            android.graphics.Rect bounds = spoilerEffect.getBounds();
+        for (SpoilerEffect eff : this.spoilers) {
+            android.graphics.Rect bounds = eff.getBounds();
             this.path.addRect(bounds.left, bounds.top, bounds.right, bounds.bottom, Path.Direction.CW);
         }
         canvas.clipPath(this.path, Region.Op.DIFFERENCE);
@@ -262,14 +264,11 @@ public class EditTextEffects extends EditText {
         this.rect.set(0, getScrollY(), getWidth(), (getScrollY() + getHeight()) - getPaddingBottom());
         canvas.save();
         canvas.clipRect(this.rect);
-        for (SpoilerEffect spoilerEffect2 : this.spoilers) {
-            android.graphics.Rect bounds2 = spoilerEffect2.getBounds();
-            android.graphics.Rect rect = this.rect;
-            int i = rect.top;
-            int i2 = bounds2.bottom;
-            if ((i <= i2 && rect.bottom >= bounds2.top) || (bounds2.top <= rect.bottom && i2 >= i)) {
-                spoilerEffect2.setColor(getPaint().getColor());
-                spoilerEffect2.draw(canvas);
+        for (SpoilerEffect eff2 : this.spoilers) {
+            android.graphics.Rect b = eff2.getBounds();
+            if ((this.rect.top <= b.bottom && this.rect.bottom >= b.top) || (b.top <= this.rect.bottom && b.bottom >= this.rect.top)) {
+                eff2.setColor(getPaint().getColor());
+                eff2.draw(canvas);
             }
         }
         canvas.restore();
@@ -279,9 +278,9 @@ public class EditTextEffects extends EditText {
         TextStyleSpan[] textStyleSpanArr;
         Editable text = getText();
         if (text != null) {
-            for (TextStyleSpan textStyleSpan : (TextStyleSpan[]) text.getSpans(0, text.length(), TextStyleSpan.class)) {
-                if (textStyleSpan.isSpoiler()) {
-                    textStyleSpan.setSpoilerRevealed(this.isSpoilersRevealed);
+            for (TextStyleSpan span : (TextStyleSpan[]) text.getSpans(0, text.length(), TextStyleSpan.class)) {
+                if (span.isSpoiler()) {
+                    span.setSpoilerRevealed(this.isSpoilersRevealed);
                 }
             }
         }

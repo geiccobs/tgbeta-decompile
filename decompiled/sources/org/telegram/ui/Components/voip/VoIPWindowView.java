@@ -13,7 +13,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.VoIPFragment;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VoIPWindowView extends FrameLayout {
     Activity activity;
     private int animationIndex = -1;
@@ -26,21 +26,21 @@ public class VoIPWindowView extends FrameLayout {
     float startY;
     VelocityTracker velocityTracker;
 
-    public VoIPWindowView(Activity activity, boolean z) {
+    public VoIPWindowView(Activity activity, boolean enterAnimation) {
         super(activity);
         this.activity = activity;
         setSystemUiVisibility(1792);
         setFitsSystemWindows(true);
         this.orientationBefore = activity.getRequestedOrientation();
         activity.setRequestedOrientation(1);
-        if (!z) {
+        if (!enterAnimation) {
             this.runEnterTransition = true;
         }
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(i, i2);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (!this.runEnterTransition) {
             this.runEnterTransition = true;
             startEnterTransition();
@@ -48,57 +48,58 @@ public class VoIPWindowView extends FrameLayout {
     }
 
     @Override // android.view.ViewGroup
-    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-        return onTouchEvent(motionEvent);
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return onTouchEvent(ev);
     }
 
     @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent motionEvent) {
+    public boolean onTouchEvent(MotionEvent event) {
         if (this.lockOnScreen) {
             return false;
         }
-        if (motionEvent.getAction() == 0) {
-            this.startX = motionEvent.getX();
-            this.startY = motionEvent.getY();
+        if (event.getAction() == 0) {
+            this.startX = event.getX();
+            this.startY = event.getY();
             if (this.velocityTracker == null) {
                 this.velocityTracker = VelocityTracker.obtain();
             }
             this.velocityTracker.clear();
         } else {
-            float f = 0.0f;
             boolean z = true;
-            if (motionEvent.getAction() == 2) {
-                float x = motionEvent.getX() - this.startX;
-                float y = motionEvent.getY() - this.startY;
-                if (!this.startDragging && Math.abs(x) > AndroidUtilities.getPixelsInCM(0.4f, true) && Math.abs(x) / 3.0f > y) {
-                    this.startX = motionEvent.getX();
+            if (event.getAction() == 2) {
+                float dx = event.getX() - this.startX;
+                float dy = event.getY() - this.startY;
+                if (!this.startDragging && Math.abs(dx) > AndroidUtilities.getPixelsInCM(0.4f, true) && Math.abs(dx) / 3.0f > dy) {
+                    this.startX = event.getX();
+                    dx = 0.0f;
                     this.startDragging = true;
-                    x = 0.0f;
                 }
                 if (this.startDragging) {
-                    if (x >= 0.0f) {
-                        f = x;
+                    if (dx < 0.0f) {
+                        dx = 0.0f;
                     }
                     if (this.velocityTracker == null) {
                         this.velocityTracker = VelocityTracker.obtain();
                     }
-                    this.velocityTracker.addMovement(motionEvent);
-                    setTranslationX(f);
+                    this.velocityTracker.addMovement(event);
+                    setTranslationX(dx);
                 }
                 return this.startDragging;
-            } else if (motionEvent.getAction() == 1 || motionEvent.getAction() == 3) {
-                float translationX = getTranslationX();
+            } else if (event.getAction() == 1 || event.getAction() == 3) {
+                float x = getTranslationX();
                 if (this.velocityTracker == null) {
                     this.velocityTracker = VelocityTracker.obtain();
                 }
                 this.velocityTracker.computeCurrentVelocity(1000);
-                float xVelocity = this.velocityTracker.getXVelocity();
-                float yVelocity = this.velocityTracker.getYVelocity();
-                if (translationX >= getMeasuredWidth() / 3.0f || (xVelocity >= 3500.0f && xVelocity >= yVelocity)) {
+                float velX = this.velocityTracker.getXVelocity();
+                float velY = this.velocityTracker.getYVelocity();
+                if (x >= getMeasuredWidth() / 3.0f || (velX >= 3500.0f && velX >= velY)) {
                     z = false;
                 }
-                if (!z) {
-                    finish(Math.max((int) ((200.0f / getMeasuredWidth()) * (getMeasuredWidth() - getTranslationX())), 50));
+                boolean backAnimation = z;
+                if (!backAnimation) {
+                    float distToMove = getMeasuredWidth() - getTranslationX();
+                    finish(Math.max((int) ((200.0f / getMeasuredWidth()) * distToMove), 50));
                 } else {
                     animate().translationX(0.0f).start();
                 }
@@ -112,36 +113,36 @@ public class VoIPWindowView extends FrameLayout {
         finish(150L);
     }
 
-    public void finish(long j) {
+    public void finish(long animDuration) {
         if (!this.finished) {
             this.finished = true;
             VoIPFragment.clearInstance();
             if (this.lockOnScreen) {
                 try {
-                    ((WindowManager) this.activity.getSystemService("window")).removeView(this);
+                    WindowManager wm = (WindowManager) this.activity.getSystemService("window");
+                    wm.removeView(this);
                     return;
-                } catch (Exception unused) {
+                } catch (Exception e) {
                     return;
                 }
             }
-            final int i = UserConfig.selectedAccount;
-            this.animationIndex = NotificationCenter.getInstance(i).setAnimationInProgress(this.animationIndex, null);
+            final int account = UserConfig.selectedAccount;
+            this.animationIndex = NotificationCenter.getInstance(account).setAnimationInProgress(this.animationIndex, null);
             animate().translationX(getMeasuredWidth()).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.voip.VoIPWindowView.1
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animator) {
-                    NotificationCenter.getInstance(i).onAnimationFinish(VoIPWindowView.this.animationIndex);
+                public void onAnimationEnd(Animator animation) {
+                    NotificationCenter.getInstance(account).onAnimationFinish(VoIPWindowView.this.animationIndex);
                     if (VoIPWindowView.this.getParent() != null) {
-                        VoIPWindowView voIPWindowView = VoIPWindowView.this;
-                        voIPWindowView.activity.setRequestedOrientation(voIPWindowView.orientationBefore);
-                        WindowManager windowManager = (WindowManager) VoIPWindowView.this.activity.getSystemService("window");
+                        VoIPWindowView.this.activity.setRequestedOrientation(VoIPWindowView.this.orientationBefore);
+                        WindowManager wm2 = (WindowManager) VoIPWindowView.this.activity.getSystemService("window");
                         VoIPWindowView.this.setVisibility(8);
                         try {
-                            windowManager.removeView(VoIPWindowView.this);
-                        } catch (Exception unused2) {
+                            wm2.removeView(VoIPWindowView.this);
+                        } catch (Exception e2) {
                         }
                     }
                 }
-            }).setDuration(j).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+            }).setDuration(animDuration).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         }
     }
 
@@ -152,48 +153,49 @@ public class VoIPWindowView extends FrameLayout {
         }
     }
 
-    public void setLockOnScreen(boolean z) {
-        this.lockOnScreen = z;
+    public void setLockOnScreen(boolean lock) {
+        this.lockOnScreen = lock;
     }
 
     public WindowManager.LayoutParams createWindowLayoutParams() {
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-        layoutParams.height = -1;
-        layoutParams.format = -2;
-        layoutParams.width = -1;
-        layoutParams.gravity = 51;
-        layoutParams.type = 99;
-        layoutParams.screenOrientation = 1;
-        int i = Build.VERSION.SDK_INT;
-        if (i >= 28) {
-            layoutParams.layoutInDisplayCutoutMode = 1;
+        WindowManager.LayoutParams windowLayoutParams = new WindowManager.LayoutParams();
+        windowLayoutParams.height = -1;
+        windowLayoutParams.format = -2;
+        windowLayoutParams.width = -1;
+        windowLayoutParams.gravity = 51;
+        windowLayoutParams.type = 99;
+        windowLayoutParams.screenOrientation = 1;
+        if (Build.VERSION.SDK_INT >= 28) {
+            windowLayoutParams.layoutInDisplayCutoutMode = 1;
         }
-        if (i >= 21) {
-            layoutParams.flags = -2147286784;
+        if (Build.VERSION.SDK_INT >= 21) {
+            windowLayoutParams.flags = -2147286784;
         } else {
-            layoutParams.flags = 131072;
+            windowLayoutParams.flags = 131072;
         }
-        layoutParams.flags |= 2621568;
-        return layoutParams;
+        windowLayoutParams.flags |= 2621568;
+        return windowLayoutParams;
     }
 
     public boolean isLockOnScreen() {
         return this.lockOnScreen;
     }
 
-    public void requestFullscreen(boolean z) {
-        if (z) {
+    public void requestFullscreen(boolean request) {
+        if (request) {
             setSystemUiVisibility(getSystemUiVisibility() | 4);
-        } else {
-            setSystemUiVisibility(getSystemUiVisibility() & (-5));
+            return;
         }
+        int flags = getSystemUiVisibility();
+        setSystemUiVisibility(flags & (-5));
     }
 
     public void finishImmediate() {
         if (getParent() != null) {
             this.activity.setRequestedOrientation(this.orientationBefore);
+            WindowManager wm = (WindowManager) this.activity.getSystemService("window");
             setVisibility(8);
-            ((WindowManager) this.activity.getSystemService("window")).removeView(this);
+            wm.removeView(this);
         }
     }
 }

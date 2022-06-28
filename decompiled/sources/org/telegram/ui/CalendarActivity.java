@@ -3,12 +3,10 @@ package org.telegram.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -26,6 +24,8 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.C;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import j$.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,22 +38,11 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$Message;
-import org.telegram.tgnet.TLRPC$MessageMedia;
-import org.telegram.tgnet.TLRPC$PhotoSize;
-import org.telegram.tgnet.TLRPC$TL_error;
-import org.telegram.tgnet.TLRPC$TL_inputMessagesFilterPhotoVideo;
-import org.telegram.tgnet.TLRPC$TL_inputMessagesFilterPhotos;
-import org.telegram.tgnet.TLRPC$TL_inputMessagesFilterVideo;
-import org.telegram.tgnet.TLRPC$TL_messageMediaPhoto;
-import org.telegram.tgnet.TLRPC$TL_messages_getSearchResultsCalendar;
-import org.telegram.tgnet.TLRPC$TL_messages_searchResultsCalendar;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
@@ -70,8 +59,10 @@ import org.telegram.ui.Components.HideViewAfterAnimation;
 import org.telegram.ui.Components.HintView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class CalendarActivity extends BaseFragment {
+    public static final int TYPE_CHAT_ACTIVITY = 0;
+    public static final int TYPE_MEDIA_CALENDAR = 1;
     CalendarAdapter adapter;
     BackDrawable backDrawable;
     private View blurredView;
@@ -114,22 +105,17 @@ public class CalendarActivity extends BaseFragment {
     SparseArray<SparseArray<PeriodDay>> messagesByYearMounth = new SparseArray<>();
     int startOffset = 0;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface Callback {
         void onDateSelected(int i, int i2);
     }
 
-    @Override // org.telegram.ui.ActionBar.BaseFragment
-    public boolean needDelayOpenAnimation() {
-        return true;
-    }
-
-    public CalendarActivity(Bundle bundle, int i, int i2) {
-        super(bundle);
-        this.photosVideosTypeFilter = i;
-        if (i2 != 0) {
+    public CalendarActivity(Bundle args, int photosVideosTypeFilter, int selectedDate) {
+        super(args);
+        this.photosVideosTypeFilter = photosVideosTypeFilter;
+        if (selectedDate != 0) {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(i2 * 1000);
+            calendar.setTimeInMillis(selectedDate * 1000);
             this.selectedYear = calendar.get(1);
             this.selectedMonth = calendar.get(2);
         }
@@ -141,7 +127,7 @@ public class CalendarActivity extends BaseFragment {
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public boolean onFragmentCreate() {
         this.dialogId = getArguments().getLong("dialog_id");
-        this.calendarType = getArguments().getInt("type");
+        this.calendarType = getArguments().getInt(CommonProperties.TYPE);
         if (this.dialogId >= 0) {
             this.canClearHistory = true;
         } else {
@@ -164,11 +150,11 @@ public class CalendarActivity extends BaseFragment {
             int lastSize;
 
             @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-            protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
-                super.onLayout(z, i, i2, i3, i4);
-                int measuredHeight = (getMeasuredHeight() + getMeasuredWidth()) << 16;
-                if (this.lastSize != measuredHeight) {
-                    this.lastSize = measuredHeight;
+            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+                super.onLayout(changed, left, top, right, bottom);
+                int size = (getMeasuredHeight() + getMeasuredWidth()) << 16;
+                if (this.lastSize != size) {
+                    this.lastSize = size;
                     CalendarActivity.this.adapter.notifyDataSetChanged();
                 }
             }
@@ -195,31 +181,34 @@ public class CalendarActivity extends BaseFragment {
         recyclerListView2.setAdapter(calendarAdapter);
         this.listView.addOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.CalendarActivity.3
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrolled(RecyclerView recyclerView, int i, int i2) {
-                super.onScrolled(recyclerView, i, i2);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
                 CalendarActivity.this.checkLoadNext();
             }
         });
-        boolean z = this.calendarType == 0 && this.canClearHistory;
-        this.contentView.addView(this.listView, LayoutHelper.createFrame(-1, -1.0f, 0, 0.0f, 36.0f, 0.0f, z ? 48.0f : 0.0f));
-        final String[] strArr = {LocaleController.getString("CalendarWeekNameShortMonday", R.string.CalendarWeekNameShortMonday), LocaleController.getString("CalendarWeekNameShortTuesday", R.string.CalendarWeekNameShortTuesday), LocaleController.getString("CalendarWeekNameShortWednesday", R.string.CalendarWeekNameShortWednesday), LocaleController.getString("CalendarWeekNameShortThursday", R.string.CalendarWeekNameShortThursday), LocaleController.getString("CalendarWeekNameShortFriday", R.string.CalendarWeekNameShortFriday), LocaleController.getString("CalendarWeekNameShortSaturday", R.string.CalendarWeekNameShortSaturday), LocaleController.getString("CalendarWeekNameShortSunday", R.string.CalendarWeekNameShortSunday)};
-        final Drawable mutate = ContextCompat.getDrawable(context, R.drawable.header_shadow).mutate();
-        this.contentView.addView(new View(context) { // from class: org.telegram.ui.CalendarActivity.4
+        boolean showBottomPanel = this.calendarType == 0 && this.canClearHistory;
+        this.contentView.addView(this.listView, LayoutHelper.createFrame(-1, -1.0f, 0, 0.0f, 36.0f, 0.0f, showBottomPanel ? 48.0f : 0.0f));
+        final String[] daysOfWeek = {LocaleController.getString("CalendarWeekNameShortMonday", R.string.CalendarWeekNameShortMonday), LocaleController.getString("CalendarWeekNameShortTuesday", R.string.CalendarWeekNameShortTuesday), LocaleController.getString("CalendarWeekNameShortWednesday", R.string.CalendarWeekNameShortWednesday), LocaleController.getString("CalendarWeekNameShortThursday", R.string.CalendarWeekNameShortThursday), LocaleController.getString("CalendarWeekNameShortFriday", R.string.CalendarWeekNameShortFriday), LocaleController.getString("CalendarWeekNameShortSaturday", R.string.CalendarWeekNameShortSaturday), LocaleController.getString("CalendarWeekNameShortSunday", R.string.CalendarWeekNameShortSunday)};
+        final Drawable headerShadowDrawable = ContextCompat.getDrawable(context, R.drawable.header_shadow).mutate();
+        View calendarSignatureView = new View(context) { // from class: org.telegram.ui.CalendarActivity.4
             @Override // android.view.View
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
-                float measuredWidth = getMeasuredWidth() / 7.0f;
+                float xStep = getMeasuredWidth() / 7.0f;
                 for (int i = 0; i < 7; i++) {
-                    canvas.drawText(strArr[i], (i * measuredWidth) + (measuredWidth / 2.0f), ((getMeasuredHeight() - AndroidUtilities.dp(2.0f)) / 2.0f) + AndroidUtilities.dp(5.0f), CalendarActivity.this.textPaint2);
+                    float cx = (i * xStep) + (xStep / 2.0f);
+                    float cy = (getMeasuredHeight() - AndroidUtilities.dp(2.0f)) / 2.0f;
+                    canvas.drawText(daysOfWeek[i], cx, AndroidUtilities.dp(5.0f) + cy, CalendarActivity.this.textPaint2);
                 }
-                mutate.setBounds(0, getMeasuredHeight() - AndroidUtilities.dp(3.0f), getMeasuredWidth(), getMeasuredHeight());
-                mutate.draw(canvas);
+                headerShadowDrawable.setBounds(0, getMeasuredHeight() - AndroidUtilities.dp(3.0f), getMeasuredWidth(), getMeasuredHeight());
+                headerShadowDrawable.draw(canvas);
             }
-        }, LayoutHelper.createFrame(-1, 38.0f, 0, 0.0f, 0.0f, 0.0f, 0.0f));
+        };
+        this.contentView.addView(calendarSignatureView, LayoutHelper.createFrame(-1, 38.0f, 0, 0.0f, 0.0f, 0.0f, 0.0f));
         this.actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() { // from class: org.telegram.ui.CalendarActivity.5
             @Override // org.telegram.ui.ActionBar.ActionBar.ActionBarMenuOnItemClick
-            public void onItemClick(int i) {
-                if (i == -1) {
+            public void onItemClick(int id) {
+                if (id == -1) {
                     if (CalendarActivity.this.dateSelectedStart != 0 || CalendarActivity.this.dateSelectedEnd != 0 || CalendarActivity.this.inSelectionMode) {
                         CalendarActivity.this.inSelectionMode = false;
                         CalendarActivity.this.dateSelectedStart = 0;
@@ -246,15 +235,14 @@ public class CalendarActivity extends BaseFragment {
         if (this.monthCount < 3) {
             this.monthCount = 3;
         }
-        BackDrawable backDrawable = new BackDrawable(false);
-        this.backDrawable = backDrawable;
-        this.actionBar.setBackButtonDrawable(backDrawable);
+        this.backDrawable = new BackDrawable(false);
+        this.actionBar.setBackButtonDrawable(this.backDrawable);
         this.backDrawable.setRotation(0.0f, false);
         loadNext();
         updateColors();
         this.activeTextPaint.setColor(-1);
-        if (z) {
-            FrameLayout frameLayout = new FrameLayout(this, context) { // from class: org.telegram.ui.CalendarActivity.6
+        if (showBottomPanel) {
+            FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.CalendarActivity.6
                 @Override // android.view.View
                 public void onDraw(Canvas canvas) {
                     canvas.drawRect(0.0f, 0.0f, getMeasuredWidth(), AndroidUtilities.getShadowHeight(), Theme.dividerPaint);
@@ -269,10 +257,10 @@ public class CalendarActivity extends BaseFragment {
             textView.setGravity(17);
             this.selectDaysButton.setTextSize(1, 15.0f);
             this.selectDaysButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-            this.selectDaysButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda2
+            this.selectDaysButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda1
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    CalendarActivity.this.lambda$createView$0(view);
+                    CalendarActivity.this.m1583lambda$createView$0$orgtelegramuiCalendarActivity(view);
                 }
             });
             this.selectDaysButton.setText(LocaleController.getString("SelectDays", R.string.SelectDays));
@@ -283,30 +271,32 @@ public class CalendarActivity extends BaseFragment {
             textView2.setGravity(17);
             this.removeDaysButton.setTextSize(1, 15.0f);
             this.removeDaysButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-            this.removeDaysButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda1
+            this.removeDaysButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda2
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    CalendarActivity.this.lambda$createView$1(view);
+                    CalendarActivity.this.m1584lambda$createView$1$orgtelegramuiCalendarActivity(view);
                 }
             });
             this.removeDaysButton.setAllCaps(true);
             this.removeDaysButton.setVisibility(8);
             this.bottomBar.addView(this.removeDaysButton, LayoutHelper.createFrame(-1, -1.0f, 0, 0.0f, 0.0f, 0.0f, 0.0f));
             this.contentView.addView(this.bottomBar, LayoutHelper.createFrame(-1, 48.0f, 80, 0.0f, 0.0f, 0.0f, 0.0f));
-            this.selectDaysButton.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Theme.getColor("chat_fieldOverlayText"), 51), 2));
-            this.removeDaysButton.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Theme.getColor("dialogTextRed"), 51), 2));
-            this.selectDaysButton.setTextColor(Theme.getColor("chat_fieldOverlayText"));
-            this.removeDaysButton.setTextColor(Theme.getColor("dialogTextRed"));
+            this.selectDaysButton.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_chat_fieldOverlayText), 51), 2));
+            this.removeDaysButton.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_dialogTextRed), 51), 2));
+            this.selectDaysButton.setTextColor(Theme.getColor(Theme.key_chat_fieldOverlayText));
+            this.removeDaysButton.setTextColor(Theme.getColor(Theme.key_dialogTextRed));
         }
         return this.fragmentView;
     }
 
-    public /* synthetic */ void lambda$createView$0(View view) {
+    /* renamed from: lambda$createView$0$org-telegram-ui-CalendarActivity */
+    public /* synthetic */ void m1583lambda$createView$0$orgtelegramuiCalendarActivity(View view) {
         this.inSelectionMode = true;
         updateTitle();
     }
 
-    public /* synthetic */ void lambda$createView$1(View view) {
+    /* renamed from: lambda$createView$1$org-telegram-ui-CalendarActivity */
+    public /* synthetic */ void m1584lambda$createView$1$orgtelegramuiCalendarActivity(View view) {
         int i = this.lastDaysSelected;
         if (i == 0) {
             if (this.selectDaysHint == null) {
@@ -321,28 +311,27 @@ public class CalendarActivity extends BaseFragment {
         }
         AlertsCreator.createClearDaysDialogAlert(this, i, getMessagesController().getUser(Long.valueOf(this.dialogId)), null, false, new MessagesStorage.BooleanCallback() { // from class: org.telegram.ui.CalendarActivity.7
             @Override // org.telegram.messenger.MessagesStorage.BooleanCallback
-            public void run(boolean z) {
+            public void run(boolean forAll) {
                 CalendarActivity.this.finishFragment();
-                if (((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() >= 2) {
-                    BaseFragment baseFragment = ((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.get(((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() - 2);
-                    if (!(baseFragment instanceof ChatActivity)) {
-                        return;
+                if (CalendarActivity.this.parentLayout.fragmentsStack.size() >= 2) {
+                    BaseFragment fragment = CalendarActivity.this.parentLayout.fragmentsStack.get(CalendarActivity.this.parentLayout.fragmentsStack.size() - 2);
+                    if (fragment instanceof ChatActivity) {
+                        ((ChatActivity) fragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + 86400, forAll);
                     }
-                    ((ChatActivity) baseFragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + 86400, z);
                 }
             }
         }, null);
     }
 
     public void updateColors() {
-        this.actionBar.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+        this.actionBar.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
         this.activeTextPaint.setColor(-1);
-        this.textPaint.setColor(Theme.getColor("windowBackgroundWhiteBlackText"));
-        this.textPaint2.setColor(Theme.getColor("windowBackgroundWhiteBlackText"));
-        this.actionBar.setTitleColor(Theme.getColor("windowBackgroundWhiteBlackText"));
-        this.backDrawable.setColor(Theme.getColor("windowBackgroundWhiteBlackText"));
-        this.actionBar.setItemsColor(Theme.getColor("windowBackgroundWhiteBlackText"), false);
-        this.actionBar.setItemsBackgroundColor(Theme.getColor("listSelectorSDK21"), false);
+        this.textPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        this.textPaint2.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        this.actionBar.setTitleColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        this.backDrawable.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        this.actionBar.setItemsColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), false);
+        this.actionBar.setItemsBackgroundColor(Theme.getColor(Theme.key_listSelector), false);
     }
 
     private void loadNext() {
@@ -350,101 +339,104 @@ public class CalendarActivity extends BaseFragment {
             return;
         }
         this.loading = true;
-        TLRPC$TL_messages_getSearchResultsCalendar tLRPC$TL_messages_getSearchResultsCalendar = new TLRPC$TL_messages_getSearchResultsCalendar();
+        TLRPC.TL_messages_getSearchResultsCalendar req = new TLRPC.TL_messages_getSearchResultsCalendar();
         int i = this.photosVideosTypeFilter;
         if (i == 1) {
-            tLRPC$TL_messages_getSearchResultsCalendar.filter = new TLRPC$TL_inputMessagesFilterPhotos();
+            req.filter = new TLRPC.TL_inputMessagesFilterPhotos();
         } else if (i == 2) {
-            tLRPC$TL_messages_getSearchResultsCalendar.filter = new TLRPC$TL_inputMessagesFilterVideo();
+            req.filter = new TLRPC.TL_inputMessagesFilterVideo();
         } else {
-            tLRPC$TL_messages_getSearchResultsCalendar.filter = new TLRPC$TL_inputMessagesFilterPhotoVideo();
+            req.filter = new TLRPC.TL_inputMessagesFilterPhotoVideo();
         }
-        tLRPC$TL_messages_getSearchResultsCalendar.peer = MessagesController.getInstance(this.currentAccount).getInputPeer(this.dialogId);
-        tLRPC$TL_messages_getSearchResultsCalendar.offset_id = this.lastId;
+        req.peer = MessagesController.getInstance(this.currentAccount).getInputPeer(this.dialogId);
+        req.offset_id = this.lastId;
         final Calendar calendar = Calendar.getInstance();
         this.listView.setItemAnimator(null);
-        getConnectionsManager().sendRequest(tLRPC$TL_messages_getSearchResultsCalendar, new RequestDelegate() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda4
+        getConnectionsManager().sendRequest(req, new RequestDelegate() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda4
             @Override // org.telegram.tgnet.RequestDelegate
-            public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-                CalendarActivity.this.lambda$loadNext$3(calendar, tLObject, tLRPC$TL_error);
+            public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
+                CalendarActivity.this.m1586lambda$loadNext$3$orgtelegramuiCalendarActivity(calendar, tLObject, tL_error);
             }
         });
     }
 
-    public /* synthetic */ void lambda$loadNext$3(final Calendar calendar, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
+    /* renamed from: lambda$loadNext$3$org-telegram-ui-CalendarActivity */
+    public /* synthetic */ void m1586lambda$loadNext$3$orgtelegramuiCalendarActivity(final Calendar calendar, final TLObject response, final TLRPC.TL_error error) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                CalendarActivity.this.lambda$loadNext$2(tLRPC$TL_error, tLObject, calendar);
+                CalendarActivity.this.m1585lambda$loadNext$2$orgtelegramuiCalendarActivity(error, response, calendar);
             }
         });
     }
 
-    public /* synthetic */ void lambda$loadNext$2(TLRPC$TL_error tLRPC$TL_error, TLObject tLObject, Calendar calendar) {
+    /* renamed from: lambda$loadNext$2$org-telegram-ui-CalendarActivity */
+    public /* synthetic */ void m1585lambda$loadNext$2$orgtelegramuiCalendarActivity(TLRPC.TL_error error, TLObject response, Calendar calendar) {
         int i;
         int i2;
-        if (tLRPC$TL_error == null) {
-            TLRPC$TL_messages_searchResultsCalendar tLRPC$TL_messages_searchResultsCalendar = (TLRPC$TL_messages_searchResultsCalendar) tLObject;
+        if (error == null) {
+            TLRPC.TL_messages_searchResultsCalendar res = (TLRPC.TL_messages_searchResultsCalendar) response;
             int i3 = 0;
             while (true) {
                 i = 5;
                 i2 = 2;
-                if (i3 >= tLRPC$TL_messages_searchResultsCalendar.periods.size()) {
+                if (i3 >= res.periods.size()) {
                     break;
                 }
-                calendar.setTimeInMillis(tLRPC$TL_messages_searchResultsCalendar.periods.get(i3).date * 1000);
-                int i4 = (calendar.get(1) * 100) + calendar.get(2);
-                SparseArray<PeriodDay> sparseArray = this.messagesByYearMounth.get(i4);
-                if (sparseArray == null) {
-                    sparseArray = new SparseArray<>();
-                    this.messagesByYearMounth.put(i4, sparseArray);
+                TLRPC.TL_searchResultsCalendarPeriod period = res.periods.get(i3);
+                calendar.setTimeInMillis(period.date * 1000);
+                int month = (calendar.get(1) * 100) + calendar.get(2);
+                SparseArray<PeriodDay> messagesByDays = this.messagesByYearMounth.get(month);
+                if (messagesByDays == null) {
+                    messagesByDays = new SparseArray<>();
+                    this.messagesByYearMounth.put(month, messagesByDays);
                 }
                 PeriodDay periodDay = new PeriodDay();
-                periodDay.messageObject = new MessageObject(this.currentAccount, tLRPC$TL_messages_searchResultsCalendar.messages.get(i3), false, false);
+                MessageObject messageObject = new MessageObject(this.currentAccount, res.messages.get(i3), false, false);
+                periodDay.messageObject = messageObject;
                 periodDay.date = (int) (calendar.getTimeInMillis() / 1000);
-                int i5 = this.startOffset + tLRPC$TL_messages_searchResultsCalendar.periods.get(i3).count;
-                this.startOffset = i5;
-                periodDay.startOffset = i5;
-                int i6 = calendar.get(5) - 1;
-                if (sparseArray.get(i6, null) == null || !sparseArray.get(i6, null).hasImage) {
-                    sparseArray.put(i6, periodDay);
+                int i4 = this.startOffset + res.periods.get(i3).count;
+                this.startOffset = i4;
+                periodDay.startOffset = i4;
+                int index = calendar.get(5) - 1;
+                if (messagesByDays.get(index, null) == null || !messagesByDays.get(index, null).hasImage) {
+                    messagesByDays.put(index, periodDay);
                 }
-                int i7 = this.minMontYear;
-                if (i4 < i7 || i7 == 0) {
-                    this.minMontYear = i4;
+                int i5 = this.minMontYear;
+                if (month < i5 || i5 == 0) {
+                    this.minMontYear = month;
                 }
                 i3++;
             }
-            int currentTimeMillis = (int) (System.currentTimeMillis() / 1000);
-            int i8 = tLRPC$TL_messages_searchResultsCalendar.min_date;
-            this.minDate = i8;
-            while (i8 < currentTimeMillis) {
-                calendar.setTimeInMillis(i8 * 1000);
+            int maxDate = (int) (System.currentTimeMillis() / 1000);
+            this.minDate = res.min_date;
+            int date = res.min_date;
+            while (date < maxDate) {
+                calendar.setTimeInMillis(date * 1000);
                 calendar.set(11, 0);
                 calendar.set(12, 0);
                 calendar.set(13, 0);
                 calendar.set(14, 0);
-                int i9 = (calendar.get(1) * 100) + calendar.get(i2);
-                SparseArray<PeriodDay> sparseArray2 = this.messagesByYearMounth.get(i9);
-                if (sparseArray2 == null) {
-                    sparseArray2 = new SparseArray<>();
-                    this.messagesByYearMounth.put(i9, sparseArray2);
+                int month2 = (calendar.get(1) * 100) + calendar.get(i2);
+                SparseArray<PeriodDay> messagesByDays2 = this.messagesByYearMounth.get(month2);
+                if (messagesByDays2 == null) {
+                    messagesByDays2 = new SparseArray<>();
+                    this.messagesByYearMounth.put(month2, messagesByDays2);
                 }
-                int i10 = calendar.get(i) - 1;
-                if (sparseArray2.get(i10, null) == null) {
+                int index2 = calendar.get(i) - 1;
+                if (messagesByDays2.get(index2, null) == null) {
                     PeriodDay periodDay2 = new PeriodDay();
                     periodDay2.hasImage = false;
                     periodDay2.date = (int) (calendar.getTimeInMillis() / 1000);
-                    sparseArray2.put(i10, periodDay2);
+                    messagesByDays2.put(index2, periodDay2);
                 }
-                i8 += 86400;
+                date += 86400;
                 i = 5;
                 i2 = 2;
             }
             this.loading = false;
-            if (!tLRPC$TL_messages_searchResultsCalendar.messages.isEmpty()) {
-                ArrayList<TLRPC$Message> arrayList = tLRPC$TL_messages_searchResultsCalendar.messages;
-                this.lastId = arrayList.get(arrayList.size() - 1).id;
+            if (!res.messages.isEmpty()) {
+                this.lastId = res.messages.get(res.messages.size() - 1).id;
                 this.endReached = false;
                 checkLoadNext();
             } else {
@@ -454,73 +446,72 @@ public class CalendarActivity extends BaseFragment {
                 this.checkEnterItems = true;
             }
             this.listView.invalidate();
-            int timeInMillis = ((int) (((calendar.getTimeInMillis() / 1000) - tLRPC$TL_messages_searchResultsCalendar.min_date) / 2629800)) + 1;
+            int newMonthCount = ((int) (((calendar.getTimeInMillis() / 1000) - res.min_date) / 2629800)) + 1;
             this.adapter.notifyItemRangeChanged(0, this.monthCount);
-            int i11 = this.monthCount;
-            if (timeInMillis > i11) {
-                this.adapter.notifyItemRangeInserted(i11 + 1, timeInMillis);
-                this.monthCount = timeInMillis;
+            int i6 = this.monthCount;
+            if (newMonthCount > i6) {
+                this.adapter.notifyItemRangeInserted(i6 + 1, newMonthCount);
+                this.monthCount = newMonthCount;
             }
-            if (!this.endReached) {
-                return;
+            if (this.endReached) {
+                resumeDelayedFragmentAnimation();
             }
-            resumeDelayedFragmentAnimation();
         }
     }
 
     public void checkLoadNext() {
+        int currentMonth;
         if (this.loading || this.endReached) {
             return;
         }
-        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
-        for (int i2 = 0; i2 < this.listView.getChildCount(); i2++) {
-            View childAt = this.listView.getChildAt(i2);
-            if (childAt instanceof MonthView) {
-                MonthView monthView = (MonthView) childAt;
-                int i3 = (monthView.currentYear * 100) + monthView.currentMonthInYear;
-                if (i3 < i) {
-                    i = i3;
-                }
+        int listMinMonth = Integer.MAX_VALUE;
+        for (int i = 0; i < this.listView.getChildCount(); i++) {
+            View child = this.listView.getChildAt(i);
+            if ((child instanceof MonthView) && (currentMonth = (((MonthView) child).currentYear * 100) + ((MonthView) child).currentMonthInYear) < listMinMonth) {
+                listMinMonth = currentMonth;
             }
         }
-        int i4 = this.minMontYear;
-        if (((i4 / 100) * 12) + (i4 % 100) + 3 < ((i / 100) * 12) + (i % 100)) {
-            return;
+        int i2 = this.minMontYear;
+        int min1 = ((i2 / 100) * 12) + (i2 % 100);
+        int min2 = ((listMinMonth / 100) * 12) + (listMinMonth % 100);
+        if (min1 + 3 >= min2) {
+            loadNext();
         }
-        loadNext();
     }
 
-    /* loaded from: classes3.dex */
+    /* JADX INFO: Access modifiers changed from: private */
+    /* loaded from: classes4.dex */
     public class CalendarAdapter extends RecyclerView.Adapter {
         private CalendarAdapter() {
             CalendarActivity.this = r1;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            return new RecyclerListView.Holder(new MonthView(viewGroup.getContext()));
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new RecyclerListView.Holder(new MonthView(parent.getContext()));
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            MonthView monthView = (MonthView) viewHolder.itemView;
-            CalendarActivity calendarActivity = CalendarActivity.this;
-            int i2 = calendarActivity.startFromYear - (i / 12);
-            int i3 = calendarActivity.startFromMonth - (i % 12);
-            if (i3 < 0) {
-                i3 += 12;
-                i2--;
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            MonthView monthView = (MonthView) holder.itemView;
+            int year = CalendarActivity.this.startFromYear - (position / 12);
+            int month = CalendarActivity.this.startFromMonth - (position % 12);
+            if (month < 0) {
+                month += 12;
+                year--;
             }
-            monthView.setDate(i2, i3, calendarActivity.messagesByYearMounth.get((i2 * 100) + i3), monthView.currentYear == i2 && monthView.currentMonthInYear == i3);
+            boolean animated = monthView.currentYear == year && monthView.currentMonthInYear == month;
+            monthView.setDate(year, month, CalendarActivity.this.messagesByYearMounth.get((year * 100) + month), animated);
             monthView.startSelectionAnimation(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd);
             monthView.setSelectionValue(1.0f);
             CalendarActivity.this.updateRowSelections(monthView, false);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public long getItemId(int i) {
-            CalendarActivity calendarActivity = CalendarActivity.this;
-            return ((calendarActivity.startFromYear - (i / 12)) * 100) + (calendarActivity.startFromMonth - (i % 12));
+        public long getItemId(int position) {
+            int year = CalendarActivity.this.startFromYear - (position / 12);
+            int month = CalendarActivity.this.startFromMonth - (position % 12);
+            return (year * 100) + month;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -529,8 +520,9 @@ public class CalendarActivity extends BaseFragment {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class MonthView extends FrameLayout {
+        boolean attached;
         int cellCount;
         int currentMonthInYear;
         int currentYear;
@@ -555,75 +547,65 @@ public class CalendarActivity extends BaseFragment {
                 this.titleView.setOnLongClickListener(new View.OnLongClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$$ExternalSyntheticLambda1
                     @Override // android.view.View.OnLongClickListener
                     public final boolean onLongClick(View view) {
-                        boolean lambda$new$0;
-                        lambda$new$0 = CalendarActivity.MonthView.this.lambda$new$0(view);
-                        return lambda$new$0;
+                        return CalendarActivity.MonthView.this.m1588lambda$new$0$orgtelegramuiCalendarActivity$MonthView(view);
                     }
                 });
-                this.titleView.setOnClickListener(new View.OnClickListener(r10) { // from class: org.telegram.ui.CalendarActivity.MonthView.1
+                this.titleView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity.MonthView.1
                     @Override // android.view.View.OnClickListener
                     public void onClick(View view) {
-                        MonthView monthView;
-                        MonthView monthView2 = MonthView.this;
-                        if (monthView2.messagesByDays != null && CalendarActivity.this.inSelectionMode) {
-                            int i = 0;
-                            int i2 = -1;
-                            int i3 = -1;
-                            while (true) {
-                                monthView = MonthView.this;
-                                if (i >= monthView.daysInMonth) {
-                                    break;
-                                }
-                                PeriodDay periodDay = monthView.messagesByDays.get(i, null);
-                                if (periodDay != null) {
-                                    if (i2 == -1) {
-                                        i2 = periodDay.date;
+                        if (MonthView.this.messagesByDays != null && CalendarActivity.this.inSelectionMode) {
+                            int start = -1;
+                            int end = -1;
+                            for (int i = 0; i < MonthView.this.daysInMonth; i++) {
+                                PeriodDay day = MonthView.this.messagesByDays.get(i, null);
+                                if (day != null) {
+                                    if (start == -1) {
+                                        start = day.date;
                                     }
-                                    i3 = periodDay.date;
+                                    end = day.date;
                                 }
-                                i++;
                             }
-                            if (i2 < 0 || i3 < 0) {
-                                return;
+                            if (start >= 0 && end >= 0) {
+                                CalendarActivity.this.dateSelectedStart = start;
+                                CalendarActivity.this.dateSelectedEnd = end;
+                                CalendarActivity.this.updateTitle();
+                                CalendarActivity.this.animateSelection();
                             }
-                            CalendarActivity.this.dateSelectedStart = i2;
-                            CalendarActivity.this.dateSelectedEnd = i3;
-                            CalendarActivity.this.updateTitle();
-                            CalendarActivity.this.animateSelection();
                         }
                     }
                 });
             }
-            this.titleView.setBackground(Theme.createSelectorDrawable(Theme.getColor("listSelectorSDK21"), 2));
+            this.titleView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2));
             this.titleView.setTextSize(15);
             this.titleView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
             this.titleView.setGravity(17);
-            this.titleView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+            this.titleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
             addView(this.titleView, LayoutHelper.createFrame(-1, 28.0f, 0, 0.0f, 12.0f, 0.0f, 4.0f));
             GestureDetectorCompat gestureDetectorCompat = new GestureDetectorCompat(context, new AnonymousClass2(r10, context));
             this.gestureDetector = gestureDetectorCompat;
             gestureDetectorCompat.setIsLongpressEnabled(r10.calendarType == 0 ? true : z);
         }
 
-        public /* synthetic */ boolean lambda$new$0(View view) {
+        /* renamed from: lambda$new$0$org-telegram-ui-CalendarActivity$MonthView */
+        public /* synthetic */ boolean m1588lambda$new$0$orgtelegramuiCalendarActivity$MonthView(View view) {
             if (this.messagesByDays == null) {
                 return false;
             }
-            int i = -1;
-            int i2 = -1;
-            for (int i3 = 0; i3 < this.daysInMonth; i3++) {
-                PeriodDay periodDay = this.messagesByDays.get(i3, null);
-                if (periodDay != null) {
-                    if (i == -1) {
-                        i = periodDay.date;
+            int start = -1;
+            int end = -1;
+            for (int i = 0; i < this.daysInMonth; i++) {
+                PeriodDay day = this.messagesByDays.get(i, null);
+                if (day != null) {
+                    if (start == -1) {
+                        start = day.date;
                     }
-                    i2 = periodDay.date;
+                    end = day.date;
                 }
             }
-            if (i >= 0 && i2 >= 0) {
+            if (start >= 0 && end >= 0) {
                 CalendarActivity.this.inSelectionMode = true;
-                CalendarActivity.this.dateSelectedStart = i;
-                CalendarActivity.this.dateSelectedEnd = i2;
+                CalendarActivity.this.dateSelectedStart = start;
+                CalendarActivity.this.dateSelectedEnd = end;
                 CalendarActivity.this.updateTitle();
                 CalendarActivity.this.animateSelection();
             }
@@ -631,79 +613,68 @@ public class CalendarActivity extends BaseFragment {
         }
 
         /* renamed from: org.telegram.ui.CalendarActivity$MonthView$2 */
-        /* loaded from: classes3.dex */
+        /* loaded from: classes4.dex */
         public class AnonymousClass2 extends GestureDetector.SimpleOnGestureListener {
             final /* synthetic */ Context val$context;
-
-            @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
-            public boolean onDown(MotionEvent motionEvent) {
-                return true;
-            }
+            final /* synthetic */ CalendarActivity val$this$0;
 
             AnonymousClass2(CalendarActivity calendarActivity, Context context) {
-                MonthView.this = r1;
+                MonthView.this = this$1;
+                this.val$this$0 = calendarActivity;
                 this.val$context = context;
             }
 
             @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
-            @SuppressLint({"NotifyDataSetChanged"})
-            public boolean onSingleTapUp(MotionEvent motionEvent) {
-                PeriodDay dayAtCoord;
-                MessageObject messageObject;
-                Callback callback;
-                if (CalendarActivity.this.calendarType == 1 && MonthView.this.messagesByDays != null && (dayAtCoord = getDayAtCoord(motionEvent.getX(), motionEvent.getY())) != null && (messageObject = dayAtCoord.messageObject) != null && (callback = CalendarActivity.this.callback) != null) {
-                    callback.onDateSelected(messageObject.getId(), dayAtCoord.startOffset);
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
+            public boolean onSingleTapUp(MotionEvent e) {
+                PeriodDay day;
+                if (CalendarActivity.this.calendarType == 1 && MonthView.this.messagesByDays != null && (day = getDayAtCoord(e.getX(), e.getY())) != null && day.messageObject != null && CalendarActivity.this.callback != null) {
+                    CalendarActivity.this.callback.onDateSelected(day.messageObject.getId(), day.startOffset);
                     CalendarActivity.this.finishFragment();
                 }
-                MonthView monthView = MonthView.this;
-                if (monthView.messagesByDays != null) {
+                if (MonthView.this.messagesByDays != null) {
                     if (CalendarActivity.this.inSelectionMode) {
-                        PeriodDay dayAtCoord2 = getDayAtCoord(motionEvent.getX(), motionEvent.getY());
-                        if (dayAtCoord2 != null) {
+                        PeriodDay day2 = getDayAtCoord(e.getX(), e.getY());
+                        if (day2 != null) {
                             if (CalendarActivity.this.selectionAnimator != null) {
                                 CalendarActivity.this.selectionAnimator.cancel();
                                 CalendarActivity.this.selectionAnimator = null;
                             }
                             if (CalendarActivity.this.dateSelectedStart != 0 || CalendarActivity.this.dateSelectedEnd != 0) {
-                                if (CalendarActivity.this.dateSelectedStart != dayAtCoord2.date || CalendarActivity.this.dateSelectedEnd != dayAtCoord2.date) {
-                                    if (CalendarActivity.this.dateSelectedStart != dayAtCoord2.date) {
-                                        if (CalendarActivity.this.dateSelectedEnd != dayAtCoord2.date) {
-                                            if (CalendarActivity.this.dateSelectedStart == CalendarActivity.this.dateSelectedEnd) {
-                                                if (dayAtCoord2.date > CalendarActivity.this.dateSelectedEnd) {
-                                                    CalendarActivity.this.dateSelectedEnd = dayAtCoord2.date;
-                                                } else {
-                                                    CalendarActivity.this.dateSelectedStart = dayAtCoord2.date;
-                                                }
-                                            } else {
-                                                CalendarActivity calendarActivity = CalendarActivity.this;
-                                                calendarActivity.dateSelectedStart = calendarActivity.dateSelectedEnd = dayAtCoord2.date;
-                                            }
+                                if (CalendarActivity.this.dateSelectedStart != day2.date || CalendarActivity.this.dateSelectedEnd != day2.date) {
+                                    if (CalendarActivity.this.dateSelectedStart == day2.date) {
+                                        CalendarActivity.this.dateSelectedStart = CalendarActivity.this.dateSelectedEnd;
+                                    } else if (CalendarActivity.this.dateSelectedEnd == day2.date) {
+                                        CalendarActivity.this.dateSelectedEnd = CalendarActivity.this.dateSelectedStart;
+                                    } else if (CalendarActivity.this.dateSelectedStart == CalendarActivity.this.dateSelectedEnd) {
+                                        if (day2.date > CalendarActivity.this.dateSelectedEnd) {
+                                            CalendarActivity.this.dateSelectedEnd = day2.date;
                                         } else {
-                                            CalendarActivity calendarActivity2 = CalendarActivity.this;
-                                            calendarActivity2.dateSelectedEnd = calendarActivity2.dateSelectedStart;
+                                            CalendarActivity.this.dateSelectedStart = day2.date;
                                         }
                                     } else {
-                                        CalendarActivity calendarActivity3 = CalendarActivity.this;
-                                        calendarActivity3.dateSelectedStart = calendarActivity3.dateSelectedEnd;
+                                        CalendarActivity.this.dateSelectedStart = CalendarActivity.this.dateSelectedEnd = day2.date;
                                     }
                                 } else {
-                                    CalendarActivity calendarActivity4 = CalendarActivity.this;
-                                    calendarActivity4.dateSelectedStart = calendarActivity4.dateSelectedEnd = 0;
+                                    CalendarActivity.this.dateSelectedStart = CalendarActivity.this.dateSelectedEnd = 0;
                                 }
                             } else {
-                                CalendarActivity calendarActivity5 = CalendarActivity.this;
-                                calendarActivity5.dateSelectedStart = calendarActivity5.dateSelectedEnd = dayAtCoord2.date;
+                                CalendarActivity.this.dateSelectedStart = CalendarActivity.this.dateSelectedEnd = day2.date;
                             }
                             CalendarActivity.this.updateTitle();
                             CalendarActivity.this.animateSelection();
                         }
                     } else {
-                        PeriodDay dayAtCoord3 = getDayAtCoord(motionEvent.getX(), motionEvent.getY());
-                        if (dayAtCoord3 != null && ((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() >= 2) {
-                            BaseFragment baseFragment = ((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.get(((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() - 2);
-                            if (baseFragment instanceof ChatActivity) {
+                        PeriodDay day3 = getDayAtCoord(e.getX(), e.getY());
+                        if (day3 != null && CalendarActivity.this.parentLayout.fragmentsStack.size() >= 2) {
+                            BaseFragment fragment = CalendarActivity.this.parentLayout.fragmentsStack.get(CalendarActivity.this.parentLayout.fragmentsStack.size() - 2);
+                            if (fragment instanceof ChatActivity) {
                                 CalendarActivity.this.finishFragment();
-                                ((ChatActivity) baseFragment).jumpToDate(dayAtCoord3.date);
+                                ((ChatActivity) fragment).jumpToDate(day3.date);
                             }
                         }
                     }
@@ -711,114 +682,113 @@ public class CalendarActivity extends BaseFragment {
                 return false;
             }
 
-            private PeriodDay getDayAtCoord(float f, float f2) {
-                PeriodDay periodDay;
-                MonthView monthView = MonthView.this;
-                if (monthView.messagesByDays == null) {
+            private PeriodDay getDayAtCoord(float pressedX, float pressedY) {
+                PeriodDay day;
+                if (MonthView.this.messagesByDays == null) {
                     return null;
                 }
-                int i = monthView.startDayOfWeek;
-                float measuredWidth = monthView.getMeasuredWidth() / 7.0f;
-                float dp = AndroidUtilities.dp(52.0f);
-                int dp2 = AndroidUtilities.dp(44.0f) / 2;
-                int i2 = 0;
-                for (int i3 = 0; i3 < MonthView.this.daysInMonth; i3++) {
-                    float f3 = (i * measuredWidth) + (measuredWidth / 2.0f);
-                    float dp3 = (i2 * dp) + (dp / 2.0f) + AndroidUtilities.dp(44.0f);
-                    float f4 = dp2;
-                    if (f >= f3 - f4 && f <= f3 + f4 && f2 >= dp3 - f4 && f2 <= dp3 + f4 && (periodDay = MonthView.this.messagesByDays.get(i3, null)) != null) {
-                        return periodDay;
+                int currentCell = 0;
+                int currentColumn = MonthView.this.startDayOfWeek;
+                float xStep = MonthView.this.getMeasuredWidth() / 7.0f;
+                float yStep = AndroidUtilities.dp(52.0f);
+                int hrad = AndroidUtilities.dp(44.0f) / 2;
+                for (int i = 0; i < MonthView.this.daysInMonth; i++) {
+                    float cx = (currentColumn * xStep) + (xStep / 2.0f);
+                    float cy = (currentCell * yStep) + (yStep / 2.0f) + AndroidUtilities.dp(44.0f);
+                    if (pressedX >= cx - hrad && pressedX <= hrad + cx && pressedY >= cy - hrad && pressedY <= hrad + cy && (day = MonthView.this.messagesByDays.get(i, null)) != null) {
+                        return day;
                     }
-                    i++;
-                    if (i >= 7) {
-                        i2++;
-                        i = 0;
+                    currentColumn++;
+                    if (currentColumn >= 7) {
+                        currentColumn = 0;
+                        currentCell++;
                     }
                 }
                 return null;
             }
 
             @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
-            public void onLongPress(MotionEvent motionEvent) {
-                final PeriodDay dayAtCoord;
-                super.onLongPress(motionEvent);
-                if (CalendarActivity.this.calendarType == 0 && (dayAtCoord = getDayAtCoord(motionEvent.getX(), motionEvent.getY())) != null) {
+            public void onLongPress(MotionEvent e) {
+                final PeriodDay periodDay;
+                super.onLongPress(e);
+                if (CalendarActivity.this.calendarType == 0 && (periodDay = getDayAtCoord(e.getX(), e.getY())) != null) {
                     MonthView.this.performHapticFeedback(0);
                     Bundle bundle = new Bundle();
                     if (CalendarActivity.this.dialogId > 0) {
                         bundle.putLong("user_id", CalendarActivity.this.dialogId);
                     } else {
-                        bundle.putLong("chat_id", -CalendarActivity.this.dialogId);
+                        bundle.putLong(ChatReactionsEditActivity.KEY_CHAT_ID, -CalendarActivity.this.dialogId);
                     }
-                    bundle.putInt("start_from_date", dayAtCoord.date);
+                    bundle.putInt("start_from_date", periodDay.date);
                     bundle.putBoolean("need_remove_previous_same_chat_activity", false);
                     ChatActivity chatActivity = new ChatActivity(bundle);
-                    ActionBarPopupWindow.ActionBarPopupWindowLayout actionBarPopupWindowLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(CalendarActivity.this.getParentActivity(), R.drawable.popup_fixed_alert, CalendarActivity.this.getResourceProvider());
-                    actionBarPopupWindowLayout.setBackgroundColor(CalendarActivity.this.getThemedColor("actionBarDefaultSubmenuBackground"));
-                    ActionBarMenuSubItem actionBarMenuSubItem = new ActionBarMenuSubItem(CalendarActivity.this.getParentActivity(), true, false);
-                    actionBarMenuSubItem.setTextAndIcon(LocaleController.getString("JumpToDate", R.string.JumpToDate), R.drawable.msg_message);
-                    actionBarMenuSubItem.setMinimumWidth(160);
-                    actionBarMenuSubItem.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda2
+                    ActionBarPopupWindow.ActionBarPopupWindowLayout previewMenu = new ActionBarPopupWindow.ActionBarPopupWindowLayout(CalendarActivity.this.getParentActivity(), R.drawable.popup_fixed_alert, CalendarActivity.this.getResourceProvider());
+                    previewMenu.setBackgroundColor(CalendarActivity.this.getThemedColor(Theme.key_actionBarDefaultSubmenuBackground));
+                    ActionBarMenuSubItem cellJump = new ActionBarMenuSubItem(CalendarActivity.this.getParentActivity(), true, false);
+                    cellJump.setTextAndIcon(LocaleController.getString("JumpToDate", R.string.JumpToDate), R.drawable.msg_message);
+                    cellJump.setMinimumWidth(160);
+                    cellJump.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda2
                         @Override // android.view.View.OnClickListener
                         public final void onClick(View view) {
-                            CalendarActivity.MonthView.AnonymousClass2.this.lambda$onLongPress$1(dayAtCoord, view);
+                            CalendarActivity.MonthView.AnonymousClass2.this.m1590x44edf01e(periodDay, view);
                         }
                     });
-                    actionBarPopupWindowLayout.addView(actionBarMenuSubItem);
+                    previewMenu.addView(cellJump);
                     if (CalendarActivity.this.canClearHistory) {
-                        ActionBarMenuSubItem actionBarMenuSubItem2 = new ActionBarMenuSubItem(CalendarActivity.this.getParentActivity(), false, false);
-                        actionBarMenuSubItem2.setTextAndIcon(LocaleController.getString("SelectThisDay", R.string.SelectThisDay), R.drawable.msg_select);
-                        actionBarMenuSubItem2.setMinimumWidth(160);
-                        actionBarMenuSubItem2.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda3
+                        ActionBarMenuSubItem cellSelect = new ActionBarMenuSubItem(CalendarActivity.this.getParentActivity(), false, false);
+                        cellSelect.setTextAndIcon(LocaleController.getString("SelectThisDay", R.string.SelectThisDay), R.drawable.msg_select);
+                        cellSelect.setMinimumWidth(160);
+                        cellSelect.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda3
                             @Override // android.view.View.OnClickListener
                             public final void onClick(View view) {
-                                CalendarActivity.MonthView.AnonymousClass2.this.lambda$onLongPress$2(dayAtCoord, view);
+                                CalendarActivity.MonthView.AnonymousClass2.this.m1591xfe657dbd(periodDay, view);
                             }
                         });
-                        actionBarPopupWindowLayout.addView(actionBarMenuSubItem2);
-                        ActionBarMenuSubItem actionBarMenuSubItem3 = new ActionBarMenuSubItem(CalendarActivity.this.getParentActivity(), false, true);
-                        actionBarMenuSubItem3.setTextAndIcon(LocaleController.getString("ClearHistory", R.string.ClearHistory), R.drawable.msg_delete);
-                        actionBarMenuSubItem3.setMinimumWidth(160);
-                        actionBarMenuSubItem3.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda0
+                        previewMenu.addView(cellSelect);
+                        ActionBarMenuSubItem cellDelete = new ActionBarMenuSubItem(CalendarActivity.this.getParentActivity(), false, true);
+                        cellDelete.setTextAndIcon(LocaleController.getString("ClearHistory", R.string.ClearHistory), R.drawable.msg_delete);
+                        cellDelete.setMinimumWidth(160);
+                        cellDelete.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda0
                             @Override // android.view.View.OnClickListener
                             public final void onClick(View view) {
-                                CalendarActivity.MonthView.AnonymousClass2.this.lambda$onLongPress$3(view);
+                                CalendarActivity.MonthView.AnonymousClass2.this.m1592xb7dd0b5c(view);
                             }
                         });
-                        actionBarPopupWindowLayout.addView(actionBarMenuSubItem3);
+                        previewMenu.addView(cellDelete);
                     }
-                    actionBarPopupWindowLayout.setFitItems(true);
+                    previewMenu.setFitItems(true);
                     CalendarActivity.this.blurredView = new View(this.val$context) { // from class: org.telegram.ui.CalendarActivity.MonthView.2.2
                         @Override // android.view.View
-                        public void setAlpha(float f) {
-                            super.setAlpha(f);
-                            if (((BaseFragment) CalendarActivity.this).fragmentView != null) {
-                                ((BaseFragment) CalendarActivity.this).fragmentView.invalidate();
+                        public void setAlpha(float alpha) {
+                            super.setAlpha(alpha);
+                            if (CalendarActivity.this.fragmentView != null) {
+                                CalendarActivity.this.fragmentView.invalidate();
                             }
                         }
                     };
                     CalendarActivity.this.blurredView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda1
                         @Override // android.view.View.OnClickListener
                         public final void onClick(View view) {
-                            CalendarActivity.MonthView.AnonymousClass2.this.lambda$onLongPress$4(view);
+                            CalendarActivity.MonthView.AnonymousClass2.this.m1593x715498fb(view);
                         }
                     });
                     CalendarActivity.this.blurredView.setVisibility(8);
                     CalendarActivity.this.blurredView.setFitsSystemWindows(true);
-                    ((BaseFragment) CalendarActivity.this).parentLayout.containerView.addView(CalendarActivity.this.blurredView, LayoutHelper.createFrame(-1, -1.0f));
+                    CalendarActivity.this.parentLayout.containerView.addView(CalendarActivity.this.blurredView, LayoutHelper.createFrame(-1, -1.0f));
                     CalendarActivity.this.prepareBlurBitmap();
-                    CalendarActivity.this.presentFragmentAsPreviewWithMenu(chatActivity, actionBarPopupWindowLayout);
+                    CalendarActivity.this.presentFragmentAsPreviewWithMenu(chatActivity, previewMenu);
                 }
             }
 
-            public /* synthetic */ void lambda$onLongPress$1(final PeriodDay periodDay, View view) {
-                if (((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() >= 3) {
-                    final BaseFragment baseFragment = ((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.get(((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() - 3);
-                    if (baseFragment instanceof ChatActivity) {
+            /* renamed from: lambda$onLongPress$1$org-telegram-ui-CalendarActivity$MonthView$2 */
+            public /* synthetic */ void m1590x44edf01e(final PeriodDay periodDay, View view) {
+                if (CalendarActivity.this.parentLayout.fragmentsStack.size() >= 3) {
+                    final BaseFragment fragment = CalendarActivity.this.parentLayout.fragmentsStack.get(CalendarActivity.this.parentLayout.fragmentsStack.size() - 3);
+                    if (fragment instanceof ChatActivity) {
                         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.CalendarActivity$MonthView$2$$ExternalSyntheticLambda4
                             @Override // java.lang.Runnable
                             public final void run() {
-                                CalendarActivity.MonthView.AnonymousClass2.this.lambda$onLongPress$0(baseFragment, periodDay);
+                                CalendarActivity.MonthView.AnonymousClass2.this.m1589x8b76627f(fragment, periodDay);
                             }
                         }, 300L);
                     }
@@ -826,30 +796,31 @@ public class CalendarActivity extends BaseFragment {
                 CalendarActivity.this.finishPreviewFragment();
             }
 
-            public /* synthetic */ void lambda$onLongPress$0(BaseFragment baseFragment, PeriodDay periodDay) {
+            /* renamed from: lambda$onLongPress$0$org-telegram-ui-CalendarActivity$MonthView$2 */
+            public /* synthetic */ void m1589x8b76627f(BaseFragment fragment, PeriodDay periodDay) {
                 CalendarActivity.this.finishFragment();
-                ((ChatActivity) baseFragment).jumpToDate(periodDay.date);
+                ((ChatActivity) fragment).jumpToDate(periodDay.date);
             }
 
-            public /* synthetic */ void lambda$onLongPress$2(PeriodDay periodDay, View view) {
-                CalendarActivity calendarActivity = CalendarActivity.this;
-                calendarActivity.dateSelectedStart = calendarActivity.dateSelectedEnd = periodDay.date;
+            /* renamed from: lambda$onLongPress$2$org-telegram-ui-CalendarActivity$MonthView$2 */
+            public /* synthetic */ void m1591xfe657dbd(PeriodDay periodDay, View view) {
+                CalendarActivity.this.dateSelectedStart = CalendarActivity.this.dateSelectedEnd = periodDay.date;
                 CalendarActivity.this.inSelectionMode = true;
                 CalendarActivity.this.updateTitle();
                 CalendarActivity.this.animateSelection();
                 CalendarActivity.this.finishPreviewFragment();
             }
 
-            public /* synthetic */ void lambda$onLongPress$3(View view) {
-                if (((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() >= 3) {
-                    final BaseFragment baseFragment = ((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.get(((BaseFragment) CalendarActivity.this).parentLayout.fragmentsStack.size() - 3);
-                    if (baseFragment instanceof ChatActivity) {
-                        CalendarActivity calendarActivity = CalendarActivity.this;
-                        AlertsCreator.createClearDaysDialogAlert(calendarActivity, 1, calendarActivity.getMessagesController().getUser(Long.valueOf(CalendarActivity.this.dialogId)), null, false, new MessagesStorage.BooleanCallback() { // from class: org.telegram.ui.CalendarActivity.MonthView.2.1
+            /* renamed from: lambda$onLongPress$3$org-telegram-ui-CalendarActivity$MonthView$2 */
+            public /* synthetic */ void m1592xb7dd0b5c(View view) {
+                if (CalendarActivity.this.parentLayout.fragmentsStack.size() >= 3) {
+                    final BaseFragment fragment = CalendarActivity.this.parentLayout.fragmentsStack.get(CalendarActivity.this.parentLayout.fragmentsStack.size() - 3);
+                    if (fragment instanceof ChatActivity) {
+                        AlertsCreator.createClearDaysDialogAlert(CalendarActivity.this, 1, CalendarActivity.this.getMessagesController().getUser(Long.valueOf(CalendarActivity.this.dialogId)), null, false, new MessagesStorage.BooleanCallback() { // from class: org.telegram.ui.CalendarActivity.MonthView.2.1
                             @Override // org.telegram.messenger.MessagesStorage.BooleanCallback
-                            public void run(boolean z) {
+                            public void run(boolean forAll) {
                                 CalendarActivity.this.finishFragment();
-                                ((ChatActivity) baseFragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + 86400, z);
+                                ((ChatActivity) fragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + 86400, forAll);
                             }
                         }, null);
                     }
@@ -857,24 +828,24 @@ public class CalendarActivity extends BaseFragment {
                 CalendarActivity.this.finishPreviewFragment();
             }
 
-            public /* synthetic */ void lambda$onLongPress$4(View view) {
+            /* renamed from: lambda$onLongPress$4$org-telegram-ui-CalendarActivity$MonthView$2 */
+            public /* synthetic */ void m1593x715498fb(View view) {
                 CalendarActivity.this.finishPreviewFragment();
             }
         }
 
-        public void startSelectionAnimation(int i, int i2) {
+        public void startSelectionAnimation(int fromDate, int toDate) {
             if (this.messagesByDays != null) {
-                for (int i3 = 0; i3 < this.daysInMonth; i3++) {
-                    PeriodDay periodDay = this.messagesByDays.get(i3, null);
-                    if (periodDay != null) {
-                        periodDay.fromSelProgress = periodDay.selectProgress;
-                        int i4 = periodDay.date;
-                        periodDay.toSelProgress = (i4 < i || i4 > i2) ? 0.0f : 1.0f;
-                        periodDay.fromSelSEProgress = periodDay.selectStartEndProgress;
-                        if (i4 == i || i4 == i2) {
-                            periodDay.toSelSEProgress = 1.0f;
+                for (int i = 0; i < this.daysInMonth; i++) {
+                    PeriodDay day = this.messagesByDays.get(i, null);
+                    if (day != null) {
+                        day.fromSelProgress = day.selectProgress;
+                        day.toSelProgress = (day.date < fromDate || day.date > toDate) ? 0.0f : 1.0f;
+                        day.fromSelSEProgress = day.selectStartEndProgress;
+                        if (day.date == fromDate || day.date == toDate) {
+                            day.toSelSEProgress = 1.0f;
                         } else {
-                            periodDay.toSelSEProgress = 0.0f;
+                            day.toSelSEProgress = 0.0f;
                         }
                     }
                 }
@@ -884,393 +855,241 @@ public class CalendarActivity extends BaseFragment {
         public void setSelectionValue(float f) {
             if (this.messagesByDays != null) {
                 for (int i = 0; i < this.daysInMonth; i++) {
-                    PeriodDay periodDay = this.messagesByDays.get(i, null);
-                    if (periodDay != null) {
-                        float f2 = periodDay.fromSelProgress;
-                        periodDay.selectProgress = f2 + ((periodDay.toSelProgress - f2) * f);
-                        float f3 = periodDay.fromSelSEProgress;
-                        periodDay.selectStartEndProgress = f3 + ((periodDay.toSelSEProgress - f3) * f);
+                    PeriodDay day = this.messagesByDays.get(i, null);
+                    if (day != null) {
+                        day.selectProgress = day.fromSelProgress + ((day.toSelProgress - day.fromSelProgress) * f);
+                        day.selectStartEndProgress = day.fromSelSEProgress + ((day.toSelSEProgress - day.fromSelSEProgress) * f);
                     }
                 }
             }
             invalidate();
         }
 
-        public void dismissRowAnimations(boolean z) {
+        public void dismissRowAnimations(boolean animate) {
             for (int i = 0; i < this.rowSelectionPos.size(); i++) {
-                animateRow(this.rowSelectionPos.keyAt(i), 0, 0, false, z);
+                animateRow(this.rowSelectionPos.keyAt(i), 0, 0, false, animate);
             }
         }
 
-        public void animateRow(final int i, int i2, int i3, final boolean z, boolean z2) {
-            final float f;
-            float f2;
-            float f3;
-            ValueAnimator valueAnimator = this.rowAnimators.get(i);
-            if (valueAnimator != null) {
-                valueAnimator.cancel();
+        public void animateRow(final int row, int startColumn, int endColumn, final boolean appear, boolean animate) {
+            float fromAlpha;
+            float cxFrom1;
+            float cxFrom2;
+            ValueAnimator a = this.rowAnimators.get(row);
+            if (a != null) {
+                a.cancel();
             }
-            float measuredWidth = getMeasuredWidth() / 7.0f;
-            RowAnimationValue rowAnimationValue = this.rowSelectionPos.get(i);
-            if (rowAnimationValue != null) {
-                f3 = rowAnimationValue.startX;
-                f2 = rowAnimationValue.endX;
-                f = rowAnimationValue.alpha;
+            float xStep = getMeasuredWidth() / 7.0f;
+            RowAnimationValue p = this.rowSelectionPos.get(row);
+            if (p == null) {
+                cxFrom1 = (startColumn * xStep) + (xStep / 2.0f);
+                cxFrom2 = (startColumn * xStep) + (xStep / 2.0f);
+                fromAlpha = 0.0f;
             } else {
-                f3 = (i2 * measuredWidth) + (measuredWidth / 2.0f);
-                f2 = f3;
-                f = 0.0f;
+                cxFrom1 = p.startX;
+                cxFrom2 = p.endX;
+                fromAlpha = p.alpha;
             }
-            float f4 = z ? (i2 * measuredWidth) + (measuredWidth / 2.0f) : f3;
-            float f5 = z ? (i3 * measuredWidth) + (measuredWidth / 2.0f) : f2;
-            float f6 = z ? 1.0f : 0.0f;
-            final RowAnimationValue rowAnimationValue2 = new RowAnimationValue(f3, f2);
-            this.rowSelectionPos.put(i, rowAnimationValue2);
-            if (z2) {
-                ValueAnimator duration = ValueAnimator.ofFloat(0.0f, 1.0f).setDuration(300L);
-                duration.setInterpolator(Easings.easeInOutQuad);
-                final float f7 = f3;
-                final float f8 = f4;
-                final float f9 = f2;
-                final float f10 = f5;
-                final float f11 = f6;
-                duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$$ExternalSyntheticLambda0
+            final float cxTo1 = appear ? (startColumn * xStep) + (xStep / 2.0f) : cxFrom1;
+            final float cxTo2 = appear ? (endColumn * xStep) + (xStep / 2.0f) : cxFrom2;
+            final float toAlpha = appear ? 1.0f : 0.0f;
+            final RowAnimationValue pr = new RowAnimationValue(cxFrom1, cxFrom2);
+            this.rowSelectionPos.put(row, pr);
+            if (animate) {
+                ValueAnimator anim = ValueAnimator.ofFloat(0.0f, 1.0f).setDuration(300L);
+                anim.setInterpolator(Easings.easeInOutQuad);
+                final float f = cxFrom1;
+                final float cxTo22 = cxFrom2;
+                final float cxTo12 = fromAlpha;
+                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.CalendarActivity$MonthView$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                    public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                        CalendarActivity.MonthView.this.lambda$animateRow$1(rowAnimationValue2, f7, f8, f9, f10, f, f11, valueAnimator2);
+                    public final void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        CalendarActivity.MonthView.this.m1587lambda$animateRow$1$orgtelegramuiCalendarActivity$MonthView(pr, f, cxTo1, cxTo22, cxTo2, cxTo12, toAlpha, valueAnimator);
                     }
                 });
-                final float f12 = f4;
-                final float f13 = f5;
-                final float f14 = f6;
-                duration.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.CalendarActivity.MonthView.3
+                anim.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.CalendarActivity.MonthView.3
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationCancel(Animator animator) {
-                        RowAnimationValue rowAnimationValue3 = rowAnimationValue2;
-                        rowAnimationValue3.startX = f12;
-                        rowAnimationValue3.endX = f13;
-                        rowAnimationValue3.alpha = f14;
+                    public void onAnimationCancel(Animator animation) {
+                        pr.startX = cxTo1;
+                        pr.endX = cxTo2;
+                        pr.alpha = toAlpha;
                         MonthView.this.invalidate();
                     }
 
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animator) {
-                        MonthView.this.rowAnimators.remove(i);
-                        if (!z) {
-                            MonthView.this.rowSelectionPos.remove(i);
+                    public void onAnimationEnd(Animator animation) {
+                        MonthView.this.rowAnimators.remove(row);
+                        if (!appear) {
+                            MonthView.this.rowSelectionPos.remove(row);
                         }
                     }
                 });
-                duration.start();
-                this.rowAnimators.put(i, duration);
+                anim.start();
+                this.rowAnimators.put(row, anim);
                 return;
             }
-            rowAnimationValue2.startX = f4;
-            rowAnimationValue2.endX = f5;
-            rowAnimationValue2.alpha = f6;
+            pr.startX = cxTo1;
+            pr.endX = cxTo2;
+            pr.alpha = toAlpha;
             invalidate();
         }
 
-        public /* synthetic */ void lambda$animateRow$1(RowAnimationValue rowAnimationValue, float f, float f2, float f3, float f4, float f5, float f6, ValueAnimator valueAnimator) {
-            float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-            rowAnimationValue.startX = f + ((f2 - f) * floatValue);
-            rowAnimationValue.endX = f3 + ((f4 - f3) * floatValue);
-            rowAnimationValue.alpha = f5 + ((f6 - f5) * floatValue);
+        /* renamed from: lambda$animateRow$1$org-telegram-ui-CalendarActivity$MonthView */
+        public /* synthetic */ void m1587lambda$animateRow$1$orgtelegramuiCalendarActivity$MonthView(RowAnimationValue pr, float cxFrom1, float cxTo1, float cxFrom2, float cxTo2, float fromAlpha, float toAlpha, ValueAnimator animation) {
+            float val = ((Float) animation.getAnimatedValue()).floatValue();
+            pr.startX = ((cxTo1 - cxFrom1) * val) + cxFrom1;
+            pr.endX = ((cxTo2 - cxFrom2) * val) + cxFrom2;
+            pr.alpha = ((toAlpha - fromAlpha) * val) + fromAlpha;
             invalidate();
         }
 
         @Override // android.view.View
-        @SuppressLint({"ClickableViewAccessibility"})
-        public boolean onTouchEvent(MotionEvent motionEvent) {
-            return this.gestureDetector.onTouchEvent(motionEvent);
+        public boolean onTouchEvent(MotionEvent event) {
+            return this.gestureDetector.onTouchEvent(event);
         }
 
-        public void setDate(int i, int i2, SparseArray<PeriodDay> sparseArray, boolean z) {
-            boolean z2 = false;
-            boolean z3 = (i == this.currentYear && i2 == this.currentMonthInYear) ? false : true;
-            this.currentYear = i;
-            this.currentMonthInYear = i2;
-            this.messagesByDays = sparseArray;
-            if (z3 && this.imagesByDays != null) {
-                for (int i3 = 0; i3 < this.imagesByDays.size(); i3++) {
-                    this.imagesByDays.valueAt(i3).onDetachedFromWindow();
-                    this.imagesByDays.valueAt(i3).setParentView(null);
+        public void setDate(int year, int monthInYear, SparseArray<PeriodDay> messagesByDays, boolean animated) {
+            ImageReceiver imageReceiver;
+            TLRPC.PhotoSize currentPhotoObject;
+            TLRPC.PhotoSize qualityThumb;
+            MessageObject messageObject;
+            boolean dateChanged = (year == this.currentYear && monthInYear == this.currentMonthInYear) ? false : true;
+            this.currentYear = year;
+            this.currentMonthInYear = monthInYear;
+            this.messagesByDays = messagesByDays;
+            ImageReceiver imageReceiver2 = null;
+            if (dateChanged && this.imagesByDays != null) {
+                for (int i = 0; i < this.imagesByDays.size(); i++) {
+                    this.imagesByDays.valueAt(i).onDetachedFromWindow();
+                    this.imagesByDays.valueAt(i).setParentView(null);
                 }
                 this.imagesByDays = null;
             }
-            if (sparseArray != null) {
+            if (messagesByDays != null) {
                 if (this.imagesByDays == null) {
                     this.imagesByDays = new SparseArray<>();
                 }
-                int i4 = 0;
-                while (i4 < sparseArray.size()) {
-                    int keyAt = sparseArray.keyAt(i4);
-                    if (this.imagesByDays.get(keyAt, null) == null && sparseArray.get(keyAt).hasImage) {
-                        ImageReceiver imageReceiver = new ImageReceiver();
-                        imageReceiver.setParentView(this);
-                        MessageObject messageObject = sparseArray.get(keyAt).messageObject;
-                        if (messageObject != null) {
-                            if (messageObject.isVideo()) {
-                                TLRPC$Document document = messageObject.getDocument();
-                                TLRPC$PhotoSize closestPhotoSizeWithSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 50);
-                                TLRPC$PhotoSize closestPhotoSizeWithSize2 = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 320);
-                                if (closestPhotoSizeWithSize == closestPhotoSizeWithSize2) {
-                                    closestPhotoSizeWithSize2 = null;
+                int i2 = 0;
+                while (i2 < messagesByDays.size()) {
+                    int key = messagesByDays.keyAt(i2);
+                    if (this.imagesByDays.get(key, imageReceiver2) != null) {
+                        imageReceiver = imageReceiver2;
+                    } else if (!messagesByDays.get(key).hasImage) {
+                        imageReceiver = imageReceiver2;
+                    } else {
+                        ImageReceiver receiver = new ImageReceiver();
+                        receiver.setParentView(this);
+                        PeriodDay periodDay = messagesByDays.get(key);
+                        MessageObject messageObject2 = periodDay.messageObject;
+                        if (messageObject2 == null) {
+                            imageReceiver = imageReceiver2;
+                        } else {
+                            if (messageObject2.isVideo()) {
+                                TLRPC.Document document = messageObject2.getDocument();
+                                TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 50);
+                                TLRPC.PhotoSize qualityThumb2 = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, GroupCallActivity.TABLET_LIST_SIZE);
+                                if (thumb != qualityThumb2) {
+                                    qualityThumb = qualityThumb2;
+                                } else {
+                                    qualityThumb = null;
                                 }
-                                if (closestPhotoSizeWithSize != null) {
-                                    if (messageObject.strippedThumb != null) {
-                                        imageReceiver.setImage(ImageLocation.getForDocument(closestPhotoSizeWithSize2, document), "44_44", messageObject.strippedThumb, null, messageObject, 0);
-                                    } else {
-                                        imageReceiver.setImage(ImageLocation.getForDocument(closestPhotoSizeWithSize2, document), "44_44", ImageLocation.getForDocument(closestPhotoSizeWithSize, document), "b", (String) null, messageObject, 0);
-                                    }
+                                if (thumb == null) {
+                                    messageObject = messageObject2;
+                                } else if (messageObject2.strippedThumb != null) {
+                                    messageObject = messageObject2;
+                                    receiver.setImage(ImageLocation.getForDocument(qualityThumb, document), "44_44", messageObject2.strippedThumb, null, messageObject, 0);
+                                } else {
+                                    messageObject = messageObject2;
+                                    receiver.setImage(ImageLocation.getForDocument(qualityThumb, document), "44_44", ImageLocation.getForDocument(thumb, document), "b", (String) null, messageObject, 0);
                                 }
+                                imageReceiver = null;
+                            } else if (!(messageObject2.messageOwner.media instanceof TLRPC.TL_messageMediaPhoto) || messageObject2.messageOwner.media.photo == null || messageObject2.photoThumbs.isEmpty()) {
+                                imageReceiver = null;
                             } else {
-                                TLRPC$MessageMedia tLRPC$MessageMedia = messageObject.messageOwner.media;
-                                if ((tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPhoto) && tLRPC$MessageMedia.photo != null && !messageObject.photoThumbs.isEmpty()) {
-                                    TLRPC$PhotoSize closestPhotoSizeWithSize3 = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, 50);
-                                    TLRPC$PhotoSize closestPhotoSizeWithSize4 = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, 320, z2, closestPhotoSizeWithSize3, z2);
-                                    if (messageObject.mediaExists || DownloadController.getInstance(((BaseFragment) CalendarActivity.this).currentAccount).canDownloadMedia(messageObject)) {
-                                        if (closestPhotoSizeWithSize4 == closestPhotoSizeWithSize3) {
-                                            closestPhotoSizeWithSize3 = null;
-                                        }
-                                        long j = 0;
-                                        if (messageObject.strippedThumb != null) {
-                                            ImageLocation forObject = ImageLocation.getForObject(closestPhotoSizeWithSize4, messageObject.photoThumbsObject);
-                                            BitmapDrawable bitmapDrawable = messageObject.strippedThumb;
-                                            if (closestPhotoSizeWithSize4 != null) {
-                                                j = closestPhotoSizeWithSize4.size;
-                                            }
-                                            imageReceiver.setImage(forObject, "44_44", null, null, bitmapDrawable, j, null, messageObject, messageObject.shouldEncryptPhotoOrVideo() ? 2 : 1);
-                                        } else {
-                                            imageReceiver.setImage(ImageLocation.getForObject(closestPhotoSizeWithSize4, messageObject.photoThumbsObject), "44_44", ImageLocation.getForObject(closestPhotoSizeWithSize3, messageObject.photoThumbsObject), "b", closestPhotoSizeWithSize4 != null ? closestPhotoSizeWithSize4.size : 0L, null, messageObject, messageObject.shouldEncryptPhotoOrVideo() ? 2 : 1);
-                                        }
+                                TLRPC.PhotoSize currentPhotoObjectThumb = FileLoader.getClosestPhotoSizeWithSize(messageObject2.photoThumbs, 50);
+                                TLRPC.PhotoSize currentPhotoObject2 = FileLoader.getClosestPhotoSizeWithSize(messageObject2.photoThumbs, GroupCallActivity.TABLET_LIST_SIZE, false, currentPhotoObjectThumb, false);
+                                if (!messageObject2.mediaExists) {
+                                    if (DownloadController.getInstance(CalendarActivity.this.currentAccount).canDownloadMedia(messageObject2)) {
+                                        currentPhotoObject = currentPhotoObject2;
+                                        imageReceiver = null;
+                                    } else if (messageObject2.strippedThumb != null) {
+                                        receiver.setImage(null, null, messageObject2.strippedThumb, null, messageObject2, 0);
+                                        imageReceiver = null;
                                     } else {
-                                        BitmapDrawable bitmapDrawable2 = messageObject.strippedThumb;
-                                        if (bitmapDrawable2 != null) {
-                                            imageReceiver.setImage(null, null, bitmapDrawable2, null, messageObject, 0);
-                                        } else {
-                                            imageReceiver.setImage((ImageLocation) null, (String) null, ImageLocation.getForObject(closestPhotoSizeWithSize3, messageObject.photoThumbsObject), "b", (String) null, messageObject, 0);
-                                        }
+                                        imageReceiver = null;
+                                        receiver.setImage((ImageLocation) null, (String) null, ImageLocation.getForObject(currentPhotoObjectThumb, messageObject2.photoThumbsObject), "b", (String) null, messageObject2, 0);
                                     }
+                                } else {
+                                    currentPhotoObject = currentPhotoObject2;
+                                    imageReceiver = null;
+                                }
+                                TLRPC.PhotoSize currentPhotoObject3 = currentPhotoObject;
+                                if (currentPhotoObject3 == currentPhotoObjectThumb) {
+                                    currentPhotoObjectThumb = null;
+                                }
+                                long j = 0;
+                                if (messageObject2.strippedThumb != null) {
+                                    ImageLocation forObject = ImageLocation.getForObject(currentPhotoObject3, messageObject2.photoThumbsObject);
+                                    BitmapDrawable bitmapDrawable = messageObject2.strippedThumb;
+                                    if (currentPhotoObject3 != null) {
+                                        j = currentPhotoObject3.size;
+                                    }
+                                    receiver.setImage(forObject, "44_44", null, null, bitmapDrawable, j, null, messageObject2, messageObject2.shouldEncryptPhotoOrVideo() ? 2 : 1);
+                                } else {
+                                    ImageLocation forObject2 = ImageLocation.getForObject(currentPhotoObject3, messageObject2.photoThumbsObject);
+                                    ImageLocation forObject3 = ImageLocation.getForObject(currentPhotoObjectThumb, messageObject2.photoThumbsObject);
+                                    if (currentPhotoObject3 != null) {
+                                        j = currentPhotoObject3.size;
+                                    }
+                                    receiver.setImage(forObject2, "44_44", forObject3, "b", j, null, messageObject2, messageObject2.shouldEncryptPhotoOrVideo() ? 2 : 1);
                                 }
                             }
-                            imageReceiver.setRoundRadius(AndroidUtilities.dp(22.0f));
-                            this.imagesByDays.put(keyAt, imageReceiver);
+                            receiver.setRoundRadius(AndroidUtilities.dp(22.0f));
+                            this.imagesByDays.put(key, receiver);
                         }
                     }
-                    i4++;
-                    z2 = false;
+                    i2++;
+                    imageReceiver2 = imageReceiver;
                 }
             }
-            int i5 = i2 + 1;
-            this.daysInMonth = YearMonth.of(i, i5).lengthOfMonth();
+            YearMonth yearMonthObject = YearMonth.of(year, monthInYear + 1);
+            this.daysInMonth = yearMonthObject.lengthOfMonth();
             Calendar calendar = Calendar.getInstance();
-            calendar.set(i, i2, 0);
+            calendar.set(year, monthInYear, 0);
             this.startDayOfWeek = (calendar.get(7) + 6) % 7;
             this.startMonthTime = (int) (calendar.getTimeInMillis() / 1000);
-            int i6 = this.daysInMonth + this.startDayOfWeek;
-            this.cellCount = ((int) (i6 / 7.0f)) + (i6 % 7 == 0 ? 0 : 1);
-            calendar.set(i, i5, 0);
+            int totalColumns = this.daysInMonth + this.startDayOfWeek;
+            this.cellCount = ((int) (totalColumns / 7.0f)) + (totalColumns % 7 == 0 ? 0 : 1);
+            calendar.set(year, monthInYear + 1, 0);
             this.titleView.setText(LocaleController.formatYearMont(calendar.getTimeInMillis() / 1000, true));
             CalendarActivity.this.updateRowSelections(this, false);
         }
 
         @Override // android.widget.FrameLayout, android.view.View
-        protected void onMeasure(int i, int i2) {
-            super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp((this.cellCount * 52) + 44), 1073741824));
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp((this.cellCount * 52) + 44), C.BUFFER_FLAG_ENCRYPTED));
         }
 
+        /* JADX WARN: Incorrect condition in loop: B:11:0x00a2 */
+        /* JADX WARN: Removed duplicated region for block: B:76:0x04e9  */
+        /* JADX WARN: Removed duplicated region for block: B:84:0x04ed A[SYNTHETIC] */
         @Override // android.view.View
-        protected void onDraw(Canvas canvas) {
-            float f;
-            float f2;
-            int i;
-            float f3;
-            float f4;
-            float f5;
-            float f6;
-            float f7;
-            PeriodDay periodDay;
-            super.onDraw(canvas);
-            int i2 = this.startDayOfWeek;
-            float measuredWidth = getMeasuredWidth() / 7.0f;
-            float dp = AndroidUtilities.dp(52.0f);
-            float f8 = 44.0f;
-            int dp2 = AndroidUtilities.dp(44.0f);
-            for (int i3 = 0; i3 < Math.ceil((this.startDayOfWeek + this.daysInMonth) / 7.0f); i3++) {
-                float dp3 = (i3 * dp) + (dp / 2.0f) + AndroidUtilities.dp(44.0f);
-                RowAnimationValue rowAnimationValue = this.rowSelectionPos.get(i3);
-                if (rowAnimationValue != null) {
-                    CalendarActivity.this.selectPaint.setColor(Theme.getColor("chat_messagePanelVoiceBackground"));
-                    CalendarActivity.this.selectPaint.setAlpha((int) (rowAnimationValue.alpha * 40.8f));
-                    RectF rectF = AndroidUtilities.rectTmp;
-                    float f9 = dp2 / 2.0f;
-                    rectF.set(rowAnimationValue.startX - f9, dp3 - f9, rowAnimationValue.endX + f9, dp3 + f9);
-                    float dp4 = AndroidUtilities.dp(32.0f);
-                    canvas.drawRoundRect(rectF, dp4, dp4, CalendarActivity.this.selectPaint);
-                }
-            }
-            int i4 = i2;
-            int i5 = 0;
-            int i6 = 0;
-            while (i6 < this.daysInMonth) {
-                float f10 = (i4 * measuredWidth) + (measuredWidth / 2.0f);
-                float dp5 = (i5 * dp) + (dp / 2.0f) + AndroidUtilities.dp(f8);
-                int currentTimeMillis = (int) (System.currentTimeMillis() / 1000);
-                SparseArray<PeriodDay> sparseArray = this.messagesByDays;
-                PeriodDay periodDay2 = null;
-                if (sparseArray != null) {
-                    periodDay2 = sparseArray.get(i6, null);
-                }
-                int i7 = i6 + 1;
-                if (currentTimeMillis < this.startMonthTime + (i7 * 86400) || (CalendarActivity.this.minDate > 0 && CalendarActivity.this.minDate > this.startMonthTime + ((i6 + 2) * 86400))) {
-                    f = measuredWidth;
-                    f2 = dp;
-                    i = i5;
-                    int alpha = CalendarActivity.this.textPaint.getAlpha();
-                    CalendarActivity.this.textPaint.setAlpha((int) (alpha * 0.3f));
-                    canvas.drawText(Integer.toString(i7), f10, AndroidUtilities.dp(5.0f) + dp5, CalendarActivity.this.textPaint);
-                    CalendarActivity.this.textPaint.setAlpha(alpha);
-                } else if (periodDay2 != null && periodDay2.hasImage) {
-                    if (this.imagesByDays.get(i6) != null) {
-                        if (CalendarActivity.this.checkEnterItems && !periodDay2.wasDrawn) {
-                            periodDay2.enterAlpha = 0.0f;
-                            periodDay2.startEnterDelay = Math.max(0.0f, ((getY() + dp5) / CalendarActivity.this.listView.getMeasuredHeight()) * 150.0f);
-                        }
-                        float f11 = periodDay2.startEnterDelay;
-                        if (f11 > 0.0f) {
-                            float f12 = f11 - 16.0f;
-                            periodDay2.startEnterDelay = f12;
-                            if (f12 < 0.0f) {
-                                periodDay2.startEnterDelay = 0.0f;
-                            } else {
-                                invalidate();
-                            }
-                        }
-                        if (periodDay2.startEnterDelay >= 0.0f) {
-                            float f13 = periodDay2.enterAlpha;
-                            if (f13 != 1.0f) {
-                                float f14 = f13 + 0.07272727f;
-                                periodDay2.enterAlpha = f14;
-                                if (f14 > 1.0f) {
-                                    periodDay2.enterAlpha = 1.0f;
-                                } else {
-                                    invalidate();
-                                }
-                            }
-                        }
-                        f4 = periodDay2.enterAlpha;
-                        if (f4 != 1.0f) {
-                            canvas.save();
-                            float f15 = (0.2f * f4) + 0.8f;
-                            canvas.scale(f15, f15, f10, dp5);
-                        }
-                        int dp6 = (int) (AndroidUtilities.dp(7.0f) * periodDay2.selectProgress);
-                        if (periodDay2.selectStartEndProgress >= 0.01f) {
-                            CalendarActivity.this.selectPaint.setColor(Theme.getColor("windowBackgroundWhite"));
-                            CalendarActivity.this.selectPaint.setAlpha((int) (periodDay2.selectStartEndProgress * 255.0f));
-                            canvas.drawCircle(f10, dp5, AndroidUtilities.dp(44.0f) / 2.0f, CalendarActivity.this.selectPaint);
-                            CalendarActivity.this.selectOutlinePaint.setColor(Theme.getColor("chat_messagePanelVoiceBackground"));
-                            RectF rectF2 = AndroidUtilities.rectTmp;
-                            f = measuredWidth;
-                            rectF2.set(f10 - (AndroidUtilities.dp(44.0f) / 2.0f), dp5 - (AndroidUtilities.dp(44.0f) / 2.0f), (AndroidUtilities.dp(44.0f) / 2.0f) + f10, (AndroidUtilities.dp(44.0f) / 2.0f) + dp5);
-                            periodDay = periodDay2;
-                            f7 = dp5;
-                            i = i5;
-                            f2 = dp;
-                            f3 = f10;
-                            canvas.drawArc(rectF2, -90.0f, 360.0f * periodDay2.selectStartEndProgress, false, CalendarActivity.this.selectOutlinePaint);
-                        } else {
-                            periodDay = periodDay2;
-                            f7 = dp5;
-                            f = measuredWidth;
-                            f2 = dp;
-                            f3 = f10;
-                            i = i5;
-                        }
-                        PeriodDay periodDay3 = periodDay;
-                        this.imagesByDays.get(i6).setAlpha(periodDay3.enterAlpha);
-                        f5 = f7;
-                        this.imagesByDays.get(i6).setImageCoords(f3 - ((AndroidUtilities.dp(44.0f) - dp6) / 2.0f), f5 - ((AndroidUtilities.dp(44.0f) - dp6) / 2.0f), AndroidUtilities.dp(44.0f) - dp6, AndroidUtilities.dp(44.0f) - dp6);
-                        this.imagesByDays.get(i6).draw(canvas);
-                        CalendarActivity.this.blackoutPaint.setColor(ColorUtils.setAlphaComponent(-16777216, (int) (periodDay3.enterAlpha * 80.0f)));
-                        canvas.drawCircle(f3, f5, (AndroidUtilities.dp(44.0f) - dp6) / 2.0f, CalendarActivity.this.blackoutPaint);
-                        periodDay3.wasDrawn = true;
-                        f6 = 1.0f;
-                        if (f4 != 1.0f) {
-                            canvas.restore();
-                        }
-                    } else {
-                        f = measuredWidth;
-                        f2 = dp;
-                        f6 = 1.0f;
-                        f3 = f10;
-                        i = i5;
-                        f5 = dp5;
-                        f4 = 1.0f;
-                    }
-                    if (f4 != f6) {
-                        int alpha2 = CalendarActivity.this.textPaint.getAlpha();
-                        CalendarActivity.this.textPaint.setAlpha((int) (alpha2 * (f6 - f4)));
-                        canvas.drawText(Integer.toString(i7), f3, f5 + AndroidUtilities.dp(5.0f), CalendarActivity.this.textPaint);
-                        CalendarActivity.this.textPaint.setAlpha(alpha2);
-                        int alpha3 = CalendarActivity.this.textPaint.getAlpha();
-                        CalendarActivity.this.activeTextPaint.setAlpha((int) (alpha3 * f4));
-                        canvas.drawText(Integer.toString(i7), f3, f5 + AndroidUtilities.dp(5.0f), CalendarActivity.this.activeTextPaint);
-                        CalendarActivity.this.activeTextPaint.setAlpha(alpha3);
-                    } else {
-                        canvas.drawText(Integer.toString(i7), f3, f5 + AndroidUtilities.dp(5.0f), CalendarActivity.this.activeTextPaint);
-                    }
-                } else {
-                    PeriodDay periodDay4 = periodDay2;
-                    f = measuredWidth;
-                    f2 = dp;
-                    i = i5;
-                    if (periodDay4 != null && periodDay4.selectStartEndProgress >= 0.01f) {
-                        CalendarActivity.this.selectPaint.setColor(Theme.getColor("windowBackgroundWhite"));
-                        CalendarActivity.this.selectPaint.setAlpha((int) (periodDay4.selectStartEndProgress * 255.0f));
-                        canvas.drawCircle(f10, dp5, AndroidUtilities.dp(44.0f) / 2.0f, CalendarActivity.this.selectPaint);
-                        CalendarActivity.this.selectOutlinePaint.setColor(Theme.getColor("chat_messagePanelVoiceBackground"));
-                        RectF rectF3 = AndroidUtilities.rectTmp;
-                        rectF3.set(f10 - (AndroidUtilities.dp(44.0f) / 2.0f), dp5 - (AndroidUtilities.dp(44.0f) / 2.0f), (AndroidUtilities.dp(44.0f) / 2.0f) + f10, (AndroidUtilities.dp(44.0f) / 2.0f) + dp5);
-                        canvas.drawArc(rectF3, -90.0f, 360.0f * periodDay4.selectStartEndProgress, false, CalendarActivity.this.selectOutlinePaint);
-                        CalendarActivity.this.selectPaint.setColor(Theme.getColor("chat_messagePanelVoiceBackground"));
-                        CalendarActivity.this.selectPaint.setAlpha((int) (periodDay4.selectStartEndProgress * 255.0f));
-                        canvas.drawCircle(f10, dp5, (AndroidUtilities.dp(44.0f) - ((int) (AndroidUtilities.dp(7.0f) * periodDay4.selectStartEndProgress))) / 2.0f, CalendarActivity.this.selectPaint);
-                        float f16 = periodDay4.selectStartEndProgress;
-                        if (f16 != 1.0f) {
-                            int alpha4 = CalendarActivity.this.textPaint.getAlpha();
-                            CalendarActivity.this.textPaint.setAlpha((int) (alpha4 * (1.0f - f16)));
-                            canvas.drawText(Integer.toString(i7), f10, AndroidUtilities.dp(5.0f) + dp5, CalendarActivity.this.textPaint);
-                            CalendarActivity.this.textPaint.setAlpha(alpha4);
-                            int alpha5 = CalendarActivity.this.textPaint.getAlpha();
-                            CalendarActivity.this.activeTextPaint.setAlpha((int) (alpha5 * f16));
-                            canvas.drawText(Integer.toString(i7), f10, AndroidUtilities.dp(5.0f) + dp5, CalendarActivity.this.activeTextPaint);
-                            CalendarActivity.this.activeTextPaint.setAlpha(alpha5);
-                        } else {
-                            canvas.drawText(Integer.toString(i7), f10, AndroidUtilities.dp(5.0f) + dp5, CalendarActivity.this.activeTextPaint);
-                        }
-                    } else {
-                        canvas.drawText(Integer.toString(i7), f10, AndroidUtilities.dp(5.0f) + dp5, CalendarActivity.this.textPaint);
-                    }
-                }
-                i4++;
-                if (i4 >= 7) {
-                    i5 = i + 1;
-                    i4 = 0;
-                } else {
-                    i5 = i;
-                }
-                i6 = i7;
-                dp = f2;
-                measuredWidth = f;
-                f8 = 44.0f;
-            }
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        protected void onDraw(android.graphics.Canvas r29) {
+            /*
+                Method dump skipped, instructions count: 1274
+                To view this dump add '--comments-level debug' option
+            */
+            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.CalendarActivity.MonthView.onDraw(android.graphics.Canvas):void");
         }
 
         @Override // android.view.ViewGroup, android.view.View
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
+            this.attached = true;
             if (this.imagesByDays != null) {
                 for (int i = 0; i < this.imagesByDays.size(); i++) {
                     this.imagesByDays.valueAt(i).onAttachedToWindow();
@@ -1281,6 +1100,7 @@ public class CalendarActivity extends BaseFragment {
         @Override // android.view.ViewGroup, android.view.View
         protected void onDetachedFromWindow() {
             super.onDetachedFromWindow();
+            this.attached = false;
             if (this.imagesByDays != null) {
                 for (int i = 0; i < this.imagesByDays.size(); i++) {
                     this.imagesByDays.valueAt(i).onDetachedFromWindow();
@@ -1290,81 +1110,85 @@ public class CalendarActivity extends BaseFragment {
     }
 
     public void updateTitle() {
-        String str;
+        int daysSelected;
+        String title;
         HintView hintView;
         if (!this.canClearHistory) {
             this.actionBar.setTitle(LocaleController.getString("Calendar", R.string.Calendar));
             this.backDrawable.setRotation(0.0f, true);
             return;
         }
-        int i = this.dateSelectedStart;
-        int i2 = this.dateSelectedEnd;
-        int abs = (i == i2 && i == 0) ? 0 : (Math.abs(i - i2) / 86400) + 1;
-        boolean z = this.lastInSelectionMode;
-        int i3 = this.lastDaysSelected;
-        if (abs == i3 && z == this.inSelectionMode) {
-            return;
-        }
-        boolean z2 = i3 > abs;
-        this.lastDaysSelected = abs;
-        boolean z3 = this.inSelectionMode;
-        this.lastInSelectionMode = z3;
-        float f = 1.0f;
-        if (abs > 0) {
-            str = LocaleController.formatPluralString("Days", abs, new Object[0]);
-            this.backDrawable.setRotation(1.0f, true);
-        } else if (z3) {
-            str = LocaleController.getString("SelectDays", R.string.SelectDays);
-            this.backDrawable.setRotation(1.0f, true);
+        int daysSelected2 = this.dateSelectedStart;
+        int i = this.dateSelectedEnd;
+        if (daysSelected2 == i && daysSelected2 == 0) {
+            daysSelected = 0;
         } else {
-            str = LocaleController.getString("Calendar", R.string.Calendar);
-            this.backDrawable.setRotation(0.0f, true);
+            daysSelected = (Math.abs(daysSelected2 - i) / 86400) + 1;
         }
-        if (abs > 1) {
-            this.removeDaysButton.setText(LocaleController.formatString("ClearHistoryForTheseDays", R.string.ClearHistoryForTheseDays, new Object[0]));
-        } else if (abs > 0 || this.inSelectionMode) {
-            this.removeDaysButton.setText(LocaleController.formatString("ClearHistoryForThisDay", R.string.ClearHistoryForThisDay, new Object[0]));
-        }
-        this.actionBar.setTitleAnimated(str, z2, 150L);
-        if ((!this.inSelectionMode || abs > 0) && (hintView = this.selectDaysHint) != null) {
-            hintView.hide();
-        }
-        if (abs > 0 || this.inSelectionMode) {
-            if (this.removeDaysButton.getVisibility() == 8) {
-                this.removeDaysButton.setAlpha(0.0f);
-                this.removeDaysButton.setTranslationY(-AndroidUtilities.dp(20.0f));
+        boolean z = this.lastInSelectionMode;
+        int i2 = this.lastDaysSelected;
+        if (daysSelected != i2 || this.lastInSelectionMode != this.inSelectionMode) {
+            boolean fromBottom = i2 > daysSelected;
+            this.lastDaysSelected = daysSelected;
+            boolean z2 = this.inSelectionMode;
+            this.lastInSelectionMode = z2;
+            float f = 1.0f;
+            if (daysSelected > 0) {
+                title = LocaleController.formatPluralString("Days", daysSelected, new Object[0]);
+                this.backDrawable.setRotation(1.0f, true);
+            } else if (z2) {
+                title = LocaleController.getString("SelectDays", R.string.SelectDays);
+                this.backDrawable.setRotation(1.0f, true);
+            } else {
+                title = LocaleController.getString("Calendar", R.string.Calendar);
+                this.backDrawable.setRotation(0.0f, true);
             }
-            this.removeDaysButton.setVisibility(0);
+            if (daysSelected > 1) {
+                this.removeDaysButton.setText(LocaleController.formatString("ClearHistoryForTheseDays", R.string.ClearHistoryForTheseDays, new Object[0]));
+            } else if (daysSelected > 0 || this.inSelectionMode) {
+                this.removeDaysButton.setText(LocaleController.formatString("ClearHistoryForThisDay", R.string.ClearHistoryForThisDay, new Object[0]));
+            }
+            this.actionBar.setTitleAnimated(title, fromBottom, 150L);
+            if ((!this.inSelectionMode || daysSelected > 0) && (hintView = this.selectDaysHint) != null) {
+                hintView.hide();
+            }
+            if (daysSelected > 0 || this.inSelectionMode) {
+                if (this.removeDaysButton.getVisibility() == 8) {
+                    this.removeDaysButton.setAlpha(0.0f);
+                    this.removeDaysButton.setTranslationY(-AndroidUtilities.dp(20.0f));
+                }
+                this.removeDaysButton.setVisibility(0);
+                this.selectDaysButton.animate().setListener(null).cancel();
+                this.removeDaysButton.animate().setListener(null).cancel();
+                this.selectDaysButton.animate().alpha(0.0f).translationY(AndroidUtilities.dp(20.0f)).setDuration(150L).setListener(new HideViewAfterAnimation(this.selectDaysButton)).start();
+                ViewPropertyAnimator animate = this.removeDaysButton.animate();
+                if (daysSelected == 0) {
+                    f = 0.5f;
+                }
+                animate.alpha(f).translationY(0.0f).start();
+                this.selectDaysButton.setEnabled(false);
+                this.removeDaysButton.setEnabled(true);
+                return;
+            }
+            if (this.selectDaysButton.getVisibility() == 8) {
+                this.selectDaysButton.setAlpha(0.0f);
+                this.selectDaysButton.setTranslationY(AndroidUtilities.dp(20.0f));
+            }
+            this.selectDaysButton.setVisibility(0);
             this.selectDaysButton.animate().setListener(null).cancel();
             this.removeDaysButton.animate().setListener(null).cancel();
-            this.selectDaysButton.animate().alpha(0.0f).translationY(AndroidUtilities.dp(20.0f)).setDuration(150L).setListener(new HideViewAfterAnimation(this.selectDaysButton)).start();
-            ViewPropertyAnimator animate = this.removeDaysButton.animate();
-            if (abs == 0) {
-                f = 0.5f;
-            }
-            animate.alpha(f).translationY(0.0f).start();
-            this.selectDaysButton.setEnabled(false);
-            this.removeDaysButton.setEnabled(true);
-            return;
+            this.selectDaysButton.animate().alpha(1.0f).translationY(0.0f).start();
+            this.removeDaysButton.animate().alpha(0.0f).translationY(-AndroidUtilities.dp(20.0f)).setDuration(150L).setListener(new HideViewAfterAnimation(this.removeDaysButton)).start();
+            this.selectDaysButton.setEnabled(true);
+            this.removeDaysButton.setEnabled(false);
         }
-        if (this.selectDaysButton.getVisibility() == 8) {
-            this.selectDaysButton.setAlpha(0.0f);
-            this.selectDaysButton.setTranslationY(AndroidUtilities.dp(20.0f));
-        }
-        this.selectDaysButton.setVisibility(0);
-        this.selectDaysButton.animate().setListener(null).cancel();
-        this.removeDaysButton.animate().setListener(null).cancel();
-        this.selectDaysButton.animate().alpha(1.0f).translationY(0.0f).start();
-        this.removeDaysButton.animate().alpha(0.0f).translationY(-AndroidUtilities.dp(20.0f)).setDuration(150L).setListener(new HideViewAfterAnimation(this.removeDaysButton)).start();
-        this.selectDaysButton.setEnabled(true);
-        this.removeDaysButton.setEnabled(false);
     }
 
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class PeriodDay {
         int date;
         float enterAlpha;
@@ -1380,7 +1204,8 @@ public class CalendarActivity extends BaseFragment {
         float toSelSEProgress;
         boolean wasDrawn;
 
-        private PeriodDay(CalendarActivity calendarActivity) {
+        private PeriodDay() {
+            CalendarActivity.this = r1;
             this.enterAlpha = 1.0f;
             this.startEnterDelay = 1.0f;
             this.hasImage = true;
@@ -1389,7 +1214,7 @@ public class CalendarActivity extends BaseFragment {
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public ArrayList<ThemeDescription> getThemeDescriptions() {
-        ThemeDescription.ThemeDescriptionDelegate themeDescriptionDelegate = new ThemeDescription.ThemeDescriptionDelegate() { // from class: org.telegram.ui.CalendarActivity.8
+        ThemeDescription.ThemeDescriptionDelegate descriptionDelegate = new ThemeDescription.ThemeDescriptionDelegate() { // from class: org.telegram.ui.CalendarActivity.8
             @Override // org.telegram.ui.ActionBar.ThemeDescription.ThemeDescriptionDelegate
             public /* synthetic */ void onAnimationProgress(float f) {
                 ThemeDescription.ThemeDescriptionDelegate.CC.$default$onAnimationProgress(this, f);
@@ -1401,150 +1226,146 @@ public class CalendarActivity extends BaseFragment {
             }
         };
         new ArrayList();
-        new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "windowBackgroundWhite");
-        new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "windowBackgroundWhiteBlackText");
-        new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, "listSelectorSDK21");
+        new ThemeDescription(null, 0, null, null, null, descriptionDelegate, Theme.key_windowBackgroundWhite);
+        new ThemeDescription(null, 0, null, null, null, descriptionDelegate, Theme.key_windowBackgroundWhiteBlackText);
+        new ThemeDescription(null, 0, null, null, null, descriptionDelegate, Theme.key_listSelector);
         return super.getThemeDescriptions();
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
-    public void onTransitionAnimationStart(boolean z, boolean z2) {
-        super.onTransitionAnimationStart(z, z2);
+    public boolean needDelayOpenAnimation() {
+        return true;
+    }
+
+    @Override // org.telegram.ui.ActionBar.BaseFragment
+    public void onTransitionAnimationStart(boolean isOpen, boolean backward) {
+        super.onTransitionAnimationStart(isOpen, backward);
         this.isOpened = true;
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
-    public void onTransitionAnimationProgress(boolean z, float f) {
-        super.onTransitionAnimationProgress(z, f);
+    public void onTransitionAnimationProgress(boolean isOpen, float progress) {
+        super.onTransitionAnimationProgress(isOpen, progress);
         View view = this.blurredView;
-        if (view == null || view.getVisibility() != 0) {
-            return;
-        }
-        if (z) {
-            this.blurredView.setAlpha(1.0f - f);
-        } else {
-            this.blurredView.setAlpha(f);
+        if (view != null && view.getVisibility() == 0) {
+            if (isOpen) {
+                this.blurredView.setAlpha(1.0f - progress);
+            } else {
+                this.blurredView.setAlpha(progress);
+            }
         }
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
-    public void onTransitionAnimationEnd(boolean z, boolean z2) {
+    public void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
         View view;
-        if (!z || (view = this.blurredView) == null || view.getVisibility() != 0) {
-            return;
+        if (isOpen && (view = this.blurredView) != null && view.getVisibility() == 0) {
+            this.blurredView.setVisibility(8);
+            this.blurredView.setBackground(null);
         }
-        this.blurredView.setVisibility(8);
-        this.blurredView.setBackground(null);
     }
 
     public void animateSelection() {
-        ValueAnimator duration = ValueAnimator.ofFloat(0.0f, 1.0f).setDuration(300L);
-        duration.setInterpolator(CubicBezierInterpolator.DEFAULT);
-        duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda0
+        ValueAnimator a = ValueAnimator.ofFloat(0.0f, 1.0f).setDuration(300L);
+        a.setInterpolator(CubicBezierInterpolator.DEFAULT);
+        a.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.CalendarActivity$$ExternalSyntheticLambda0
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                CalendarActivity.this.lambda$animateSelection$4(valueAnimator);
+                CalendarActivity.this.m1582lambda$animateSelection$4$orgtelegramuiCalendarActivity(valueAnimator);
             }
         });
-        duration.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.CalendarActivity.9
+        a.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.CalendarActivity.9
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationStart(Animator animator) {
-                for (int i = 0; i < CalendarActivity.this.listView.getChildCount(); i++) {
-                    ((MonthView) CalendarActivity.this.listView.getChildAt(i)).startSelectionAnimation(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd);
+            public void onAnimationStart(Animator animation) {
+                for (int j = 0; j < CalendarActivity.this.listView.getChildCount(); j++) {
+                    MonthView m = (MonthView) CalendarActivity.this.listView.getChildAt(j);
+                    m.startSelectionAnimation(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd);
                 }
             }
         });
-        duration.start();
-        this.selectionAnimator = duration;
-        for (int i = 0; i < this.listView.getChildCount(); i++) {
-            updateRowSelections((MonthView) this.listView.getChildAt(i), true);
+        a.start();
+        this.selectionAnimator = a;
+        for (int j = 0; j < this.listView.getChildCount(); j++) {
+            updateRowSelections((MonthView) this.listView.getChildAt(j), true);
         }
-        for (int i2 = 0; i2 < this.listView.getCachedChildCount(); i2++) {
-            MonthView monthView = (MonthView) this.listView.getCachedChildAt(i2);
-            updateRowSelections(monthView, false);
-            monthView.startSelectionAnimation(this.dateSelectedStart, this.dateSelectedEnd);
-            monthView.setSelectionValue(1.0f);
+        for (int j2 = 0; j2 < this.listView.getCachedChildCount(); j2++) {
+            MonthView m = (MonthView) this.listView.getCachedChildAt(j2);
+            updateRowSelections(m, false);
+            m.startSelectionAnimation(this.dateSelectedStart, this.dateSelectedEnd);
+            m.setSelectionValue(1.0f);
         }
-        for (int i3 = 0; i3 < this.listView.getHiddenChildCount(); i3++) {
-            MonthView monthView2 = (MonthView) this.listView.getHiddenChildAt(i3);
-            updateRowSelections(monthView2, false);
-            monthView2.startSelectionAnimation(this.dateSelectedStart, this.dateSelectedEnd);
-            monthView2.setSelectionValue(1.0f);
+        for (int j3 = 0; j3 < this.listView.getHiddenChildCount(); j3++) {
+            MonthView m2 = (MonthView) this.listView.getHiddenChildAt(j3);
+            updateRowSelections(m2, false);
+            m2.startSelectionAnimation(this.dateSelectedStart, this.dateSelectedEnd);
+            m2.setSelectionValue(1.0f);
         }
-        for (int i4 = 0; i4 < this.listView.getAttachedScrapChildCount(); i4++) {
-            MonthView monthView3 = (MonthView) this.listView.getAttachedScrapChildAt(i4);
-            updateRowSelections(monthView3, false);
-            monthView3.startSelectionAnimation(this.dateSelectedStart, this.dateSelectedEnd);
-            monthView3.setSelectionValue(1.0f);
-        }
-    }
-
-    public /* synthetic */ void lambda$animateSelection$4(ValueAnimator valueAnimator) {
-        float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-        for (int i = 0; i < this.listView.getChildCount(); i++) {
-            ((MonthView) this.listView.getChildAt(i)).setSelectionValue(floatValue);
+        for (int j4 = 0; j4 < this.listView.getAttachedScrapChildCount(); j4++) {
+            MonthView m3 = (MonthView) this.listView.getAttachedScrapChildAt(j4);
+            updateRowSelections(m3, false);
+            m3.startSelectionAnimation(this.dateSelectedStart, this.dateSelectedEnd);
+            m3.setSelectionValue(1.0f);
         }
     }
 
-    public void updateRowSelections(MonthView monthView, boolean z) {
-        int i;
-        int i2;
-        int i3;
+    /* renamed from: lambda$animateSelection$4$org-telegram-ui-CalendarActivity */
+    public /* synthetic */ void m1582lambda$animateSelection$4$orgtelegramuiCalendarActivity(ValueAnimator animation) {
+        float selectProgress = ((Float) animation.getAnimatedValue()).floatValue();
+        for (int j = 0; j < this.listView.getChildCount(); j++) {
+            MonthView m = (MonthView) this.listView.getChildAt(j);
+            m.setSelectionValue(selectProgress);
+        }
+    }
+
+    public void updateRowSelections(MonthView m, boolean animate) {
         if (this.dateSelectedStart == 0 || this.dateSelectedEnd == 0) {
-            monthView.dismissRowAnimations(z);
-        } else if (monthView.messagesByDays != null) {
-            if (!z) {
-                monthView.dismissRowAnimations(false);
+            m.dismissRowAnimations(animate);
+        } else if (m.messagesByDays != null) {
+            if (!animate) {
+                m.dismissRowAnimations(false);
             }
-            int i4 = monthView.startDayOfWeek;
-            int i5 = 0;
-            int i6 = -1;
-            int i7 = -1;
-            for (int i8 = 0; i8 < monthView.daysInMonth; i8++) {
-                PeriodDay periodDay = monthView.messagesByDays.get(i8, null);
-                if (periodDay == null || (i3 = periodDay.date) < this.dateSelectedStart || i3 > this.dateSelectedEnd) {
-                    i2 = i6;
-                    i = i7;
-                } else {
-                    if (i6 == -1) {
-                        i6 = i4;
+            int row = 0;
+            int dayInRow = m.startDayOfWeek;
+            int sDay = -1;
+            int eDay = -1;
+            for (int i = 0; i < m.daysInMonth; i++) {
+                PeriodDay day = m.messagesByDays.get(i, null);
+                if (day != null && day.date >= this.dateSelectedStart && day.date <= this.dateSelectedEnd) {
+                    if (sDay == -1) {
+                        sDay = dayInRow;
                     }
-                    i = i4;
-                    i2 = i6;
+                    eDay = dayInRow;
                 }
-                i4++;
-                if (i4 >= 7) {
-                    if (i2 != -1 && i != -1) {
-                        monthView.animateRow(i5, i2, i, true, z);
+                dayInRow++;
+                if (dayInRow >= 7) {
+                    dayInRow = 0;
+                    if (sDay != -1 && eDay != -1) {
+                        m.animateRow(row, sDay, eDay, true, animate);
                     } else {
-                        monthView.animateRow(i5, 0, 0, false, z);
+                        m.animateRow(row, 0, 0, false, animate);
                     }
-                    i5++;
-                    i4 = 0;
-                    i6 = -1;
-                    i7 = -1;
-                } else {
-                    i6 = i2;
-                    i7 = i;
+                    row++;
+                    sDay = -1;
+                    eDay = -1;
                 }
             }
-            if (i6 != -1 && i7 != -1) {
-                monthView.animateRow(i5, i6, i7, true, z);
+            if (sDay != -1 && eDay != -1) {
+                m.animateRow(row, sDay, eDay, true, animate);
             } else {
-                monthView.animateRow(i5, 0, 0, false, z);
+                m.animateRow(row, 0, 0, false, animate);
             }
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static final class RowAnimationValue {
         float alpha;
         float endX;
         float startX;
 
-        RowAnimationValue(float f, float f2) {
-            this.startX = f;
-            this.endX = f2;
+        RowAnimationValue(float s, float e) {
+            this.startX = s;
+            this.endX = e;
         }
     }
 
@@ -1552,14 +1373,14 @@ public class CalendarActivity extends BaseFragment {
         if (this.blurredView == null) {
             return;
         }
-        int measuredWidth = (int) (this.parentLayout.getMeasuredWidth() / 6.0f);
-        int measuredHeight = (int) (this.parentLayout.getMeasuredHeight() / 6.0f);
-        Bitmap createBitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(createBitmap);
+        int w = (int) (this.parentLayout.getMeasuredWidth() / 6.0f);
+        int h = (int) (this.parentLayout.getMeasuredHeight() / 6.0f);
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
         canvas.scale(0.16666667f, 0.16666667f);
         this.parentLayout.draw(canvas);
-        Utilities.stackBlurBitmap(createBitmap, Math.max(7, Math.max(measuredWidth, measuredHeight) / 180));
-        this.blurredView.setBackground(new BitmapDrawable(createBitmap));
+        Utilities.stackBlurBitmap(bitmap, Math.max(7, Math.max(w, h) / 180));
+        this.blurredView.setBackground(new BitmapDrawable(bitmap));
         this.blurredView.setAlpha(0.0f);
         this.blurredView.setVisibility(0);
     }
@@ -1579,6 +1400,7 @@ public class CalendarActivity extends BaseFragment {
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public boolean isLightStatusBar() {
-        return ColorUtils.calculateLuminance(Theme.getColor("windowBackgroundWhite", null, true)) > 0.699999988079071d;
+        int color = Theme.getColor(Theme.key_windowBackgroundWhite, null, true);
+        return ColorUtils.calculateLuminance(color) > 0.699999988079071d;
     }
 }

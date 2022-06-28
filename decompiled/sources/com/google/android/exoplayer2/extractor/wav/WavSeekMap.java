@@ -3,7 +3,7 @@ package com.google.android.exoplayer2.extractor.wav;
 import com.google.android.exoplayer2.extractor.SeekMap;
 import com.google.android.exoplayer2.extractor.SeekPoint;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class WavSeekMap implements SeekMap {
     private final long blockCount;
     private final long durationUs;
@@ -11,18 +11,18 @@ final class WavSeekMap implements SeekMap {
     private final int framesPerBlock;
     private final WavHeader wavHeader;
 
+    public WavSeekMap(WavHeader wavHeader, int framesPerBlock, long dataStartPosition, long dataEndPosition) {
+        this.wavHeader = wavHeader;
+        this.framesPerBlock = framesPerBlock;
+        this.firstBlockPosition = dataStartPosition;
+        long j = (dataEndPosition - dataStartPosition) / wavHeader.blockSize;
+        this.blockCount = j;
+        this.durationUs = blockIndexToTimeUs(j);
+    }
+
     @Override // com.google.android.exoplayer2.extractor.SeekMap
     public boolean isSeekable() {
         return true;
-    }
-
-    public WavSeekMap(WavHeader wavHeader, int i, long j, long j2) {
-        this.wavHeader = wavHeader;
-        this.framesPerBlock = i;
-        this.firstBlockPosition = j;
-        long j3 = (j2 - j) / wavHeader.blockSize;
-        this.blockCount = j3;
-        this.durationUs = blockIndexToTimeUs(j3);
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
@@ -31,19 +31,22 @@ final class WavSeekMap implements SeekMap {
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
-    public SeekMap.SeekPoints getSeekPoints(long j) {
-        long constrainValue = Util.constrainValue((this.wavHeader.frameRateHz * j) / (this.framesPerBlock * 1000000), 0L, this.blockCount - 1);
-        long j2 = this.firstBlockPosition + (this.wavHeader.blockSize * constrainValue);
-        long blockIndexToTimeUs = blockIndexToTimeUs(constrainValue);
-        SeekPoint seekPoint = new SeekPoint(blockIndexToTimeUs, j2);
-        if (blockIndexToTimeUs >= j || constrainValue == this.blockCount - 1) {
+    public SeekMap.SeekPoints getSeekPoints(long timeUs) {
+        long blockIndex = Util.constrainValue((this.wavHeader.frameRateHz * timeUs) / (this.framesPerBlock * 1000000), 0L, this.blockCount - 1);
+        long seekPosition = this.firstBlockPosition + (this.wavHeader.blockSize * blockIndex);
+        long seekTimeUs = blockIndexToTimeUs(blockIndex);
+        SeekPoint seekPoint = new SeekPoint(seekTimeUs, seekPosition);
+        if (seekTimeUs >= timeUs || blockIndex == this.blockCount - 1) {
             return new SeekMap.SeekPoints(seekPoint);
         }
-        long j3 = constrainValue + 1;
-        return new SeekMap.SeekPoints(seekPoint, new SeekPoint(blockIndexToTimeUs(j3), this.firstBlockPosition + (this.wavHeader.blockSize * j3)));
+        long secondBlockIndex = 1 + blockIndex;
+        long secondSeekPosition = this.firstBlockPosition + (this.wavHeader.blockSize * secondBlockIndex);
+        long secondSeekTimeUs = blockIndexToTimeUs(secondBlockIndex);
+        SeekPoint secondSeekPoint = new SeekPoint(secondSeekTimeUs, secondSeekPosition);
+        return new SeekMap.SeekPoints(seekPoint, secondSeekPoint);
     }
 
-    private long blockIndexToTimeUs(long j) {
-        return Util.scaleLargeTimestamp(j * this.framesPerBlock, 1000000L, this.wavHeader.frameRateHz);
+    private long blockIndexToTimeUs(long blockIndex) {
+        return Util.scaleLargeTimestamp(blockIndex * this.framesPerBlock, 1000000L, this.wavHeader.frameRateHz);
     }
 }

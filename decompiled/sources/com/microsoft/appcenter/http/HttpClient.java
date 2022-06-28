@@ -4,10 +4,10 @@ import java.io.Closeable;
 import java.net.URL;
 import java.util.Map;
 import org.json.JSONException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface HttpClient extends Closeable {
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface CallTemplate {
         String buildRequestBody() throws JSONException;
 

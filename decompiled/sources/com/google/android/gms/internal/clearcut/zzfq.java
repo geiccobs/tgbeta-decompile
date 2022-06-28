@@ -1,11 +1,13 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+/* loaded from: classes3.dex */
 public enum zzfq {
     INT(0),
     LONG(0L),
     FLOAT(Float.valueOf(0.0f)),
-    DOUBLE(Double.valueOf(0.0d)),
-    BOOLEAN(Boolean.FALSE),
+    DOUBLE(Double.valueOf((double) FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE)),
+    BOOLEAN(false),
     STRING(""),
     BYTE_STRING(zzbb.zzfi),
     ENUM(null),

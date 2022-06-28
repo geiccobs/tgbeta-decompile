@@ -2,7 +2,7 @@ package com.google.android.exoplayer2;
 
 import android.os.Handler;
 import com.google.android.exoplayer2.util.Assertions;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class PlayerMessage {
     private Handler handler;
     private boolean isCanceled;
@@ -15,25 +15,25 @@ public final class PlayerMessage {
     private final Timeline timeline;
     private int type;
     private int windowIndex;
-    private long positionMs = -9223372036854775807L;
+    private long positionMs = C.TIME_UNSET;
     private boolean deleteAfterDelivery = true;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Sender {
         void sendMessage(PlayerMessage playerMessage);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Target {
         void handleMessage(int i, Object obj) throws ExoPlaybackException;
     }
 
-    public PlayerMessage(Sender sender, Target target, Timeline timeline, int i, Handler handler) {
+    public PlayerMessage(Sender sender, Target target, Timeline timeline, int defaultWindowIndex, Handler defaultHandler) {
         this.sender = sender;
         this.target = target;
         this.timeline = timeline;
-        this.handler = handler;
-        this.windowIndex = i;
+        this.handler = defaultHandler;
+        this.windowIndex = defaultWindowIndex;
     }
 
     public Timeline getTimeline() {
@@ -44,9 +44,9 @@ public final class PlayerMessage {
         return this.target;
     }
 
-    public PlayerMessage setType(int i) {
+    public PlayerMessage setType(int messageType) {
         Assertions.checkState(!this.isSent);
-        this.type = i;
+        this.type = messageType;
         return this;
     }
 
@@ -54,14 +54,20 @@ public final class PlayerMessage {
         return this.type;
     }
 
-    public PlayerMessage setPayload(Object obj) {
+    public PlayerMessage setPayload(Object payload) {
         Assertions.checkState(!this.isSent);
-        this.payload = obj;
+        this.payload = payload;
         return this;
     }
 
     public Object getPayload() {
         return this.payload;
+    }
+
+    public PlayerMessage setHandler(Handler handler) {
+        Assertions.checkState(!this.isSent);
+        this.handler = handler;
+        return this;
     }
 
     public Handler getHandler() {
@@ -72,8 +78,35 @@ public final class PlayerMessage {
         return this.positionMs;
     }
 
+    public PlayerMessage setPosition(long positionMs) {
+        Assertions.checkState(!this.isSent);
+        this.positionMs = positionMs;
+        return this;
+    }
+
+    public PlayerMessage setPosition(int windowIndex, long positionMs) {
+        boolean z = true;
+        Assertions.checkState(!this.isSent);
+        if (positionMs == C.TIME_UNSET) {
+            z = false;
+        }
+        Assertions.checkArgument(z);
+        if (windowIndex < 0 || (!this.timeline.isEmpty() && windowIndex >= this.timeline.getWindowCount())) {
+            throw new IllegalSeekPositionException(this.timeline, windowIndex, positionMs);
+        }
+        this.windowIndex = windowIndex;
+        this.positionMs = positionMs;
+        return this;
+    }
+
     public int getWindowIndex() {
         return this.windowIndex;
+    }
+
+    public PlayerMessage setDeleteAfterDelivery(boolean deleteAfterDelivery) {
+        Assertions.checkState(!this.isSent);
+        this.deleteAfterDelivery = deleteAfterDelivery;
+        return this;
     }
 
     public boolean getDeleteAfterDelivery() {
@@ -82,11 +115,18 @@ public final class PlayerMessage {
 
     public PlayerMessage send() {
         Assertions.checkState(!this.isSent);
-        if (this.positionMs == -9223372036854775807L) {
+        if (this.positionMs == C.TIME_UNSET) {
             Assertions.checkArgument(this.deleteAfterDelivery);
         }
         this.isSent = true;
         this.sender.sendMessage(this);
+        return this;
+    }
+
+    public synchronized PlayerMessage cancel() {
+        Assertions.checkState(this.isSent);
+        this.isCanceled = true;
+        markAsProcessed(false);
         return this;
     }
 
@@ -103,8 +143,8 @@ public final class PlayerMessage {
         return this.isDelivered;
     }
 
-    public synchronized void markAsProcessed(boolean z) {
-        this.isDelivered = z | this.isDelivered;
+    public synchronized void markAsProcessed(boolean isDelivered) {
+        this.isDelivered |= isDelivered;
         this.isProcessed = true;
         notifyAll();
     }

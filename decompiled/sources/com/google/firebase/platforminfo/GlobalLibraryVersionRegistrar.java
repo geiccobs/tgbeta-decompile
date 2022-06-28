@@ -3,12 +3,18 @@ package com.google.firebase.platforminfo;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class GlobalLibraryVersionRegistrar {
     private static volatile GlobalLibraryVersionRegistrar INSTANCE;
     private final Set<LibraryVersion> infos = new HashSet();
 
     GlobalLibraryVersionRegistrar() {
+    }
+
+    public void registerVersion(String sdkName, String version) {
+        synchronized (this.infos) {
+            this.infos.add(LibraryVersion.create(sdkName, version));
+        }
     }
 
     public Set<LibraryVersion> getRegisteredVersions() {
@@ -20,16 +26,17 @@ public class GlobalLibraryVersionRegistrar {
     }
 
     public static GlobalLibraryVersionRegistrar getInstance() {
-        GlobalLibraryVersionRegistrar globalLibraryVersionRegistrar = INSTANCE;
-        if (globalLibraryVersionRegistrar == null) {
+        GlobalLibraryVersionRegistrar localRef = INSTANCE;
+        if (localRef == null) {
             synchronized (GlobalLibraryVersionRegistrar.class) {
-                globalLibraryVersionRegistrar = INSTANCE;
-                if (globalLibraryVersionRegistrar == null) {
-                    globalLibraryVersionRegistrar = new GlobalLibraryVersionRegistrar();
+                localRef = INSTANCE;
+                if (localRef == null) {
+                    GlobalLibraryVersionRegistrar globalLibraryVersionRegistrar = new GlobalLibraryVersionRegistrar();
+                    localRef = globalLibraryVersionRegistrar;
                     INSTANCE = globalLibraryVersionRegistrar;
                 }
             }
         }
-        return globalLibraryVersionRegistrar;
+        return localRef;
     }
 }

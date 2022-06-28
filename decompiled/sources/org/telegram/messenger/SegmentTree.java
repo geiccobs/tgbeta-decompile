@@ -1,150 +1,141 @@
 package org.telegram.messenger;
-
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class SegmentTree {
     private int[] array;
     private Node[] heap;
 
-    private boolean contains(int i, int i2, int i3, int i4) {
-        return i3 >= i && i4 <= i2;
-    }
-
-    private boolean intersects(int i, int i2, int i3, int i4) {
-        return (i <= i3 && i2 >= i3) || (i >= i3 && i <= i4);
-    }
-
-    public SegmentTree(int[] iArr) {
-        this.array = iArr;
-        if (iArr.length < 30) {
+    public SegmentTree(int[] array) {
+        this.array = array;
+        if (array.length < 30) {
             return;
         }
-        this.heap = new Node[(int) (Math.pow(2.0d, Math.floor((Math.log(iArr.length) / Math.log(2.0d)) + 1.0d)) * 2.0d)];
-        build(1, 0, iArr.length);
+        int size = (int) (Math.pow(2.0d, Math.floor((Math.log(array.length) / Math.log(2.0d)) + 1.0d)) * 2.0d);
+        this.heap = new Node[size];
+        build(1, 0, array.length);
     }
 
-    private void build(int i, int i2, int i3) {
-        this.heap[i] = new Node();
+    private void build(int v, int from, int size) {
+        this.heap[v] = new Node();
+        this.heap[v].from = from;
+        this.heap[v].to = (from + size) - 1;
+        if (size == 1) {
+            this.heap[v].sum = this.array[from];
+            this.heap[v].max = this.array[from];
+            this.heap[v].min = this.array[from];
+            return;
+        }
+        build(v * 2, from, size / 2);
+        build((v * 2) + 1, (size / 2) + from, size - (size / 2));
         Node[] nodeArr = this.heap;
-        nodeArr[i].from = i2;
-        nodeArr[i].to = (i2 + i3) - 1;
-        if (i3 == 1) {
-            Node node = nodeArr[i];
-            int[] iArr = this.array;
-            node.sum = iArr[i2];
-            nodeArr[i].max = iArr[i2];
-            nodeArr[i].min = iArr[i2];
-            return;
-        }
-        int i4 = i * 2;
-        int i5 = i3 / 2;
-        build(i4, i2, i5);
-        int i6 = i4 + 1;
-        build(i6, i2 + i5, i3 - i5);
+        nodeArr[v].sum = nodeArr[v * 2].sum + this.heap[(v * 2) + 1].sum;
         Node[] nodeArr2 = this.heap;
-        nodeArr2[i].sum = nodeArr2[i4].sum + nodeArr2[i6].sum;
-        nodeArr2[i].max = Math.max(nodeArr2[i4].max, nodeArr2[i6].max);
+        nodeArr2[v].max = Math.max(nodeArr2[v * 2].max, this.heap[(v * 2) + 1].max);
         Node[] nodeArr3 = this.heap;
-        nodeArr3[i].min = Math.min(nodeArr3[i4].min, nodeArr3[i6].min);
+        nodeArr3[v].min = Math.min(nodeArr3[v * 2].min, this.heap[(v * 2) + 1].min);
     }
 
-    public int rMaxQ(int i, int i2) {
+    public int rMaxQ(int from, int to) {
         int[] iArr = this.array;
         if (iArr.length < 30) {
-            int i3 = Integer.MIN_VALUE;
-            if (i < 0) {
-                i = 0;
+            int max = Integer.MIN_VALUE;
+            if (from < 0) {
+                from = 0;
             }
-            if (i2 > iArr.length - 1) {
-                i2 = iArr.length - 1;
+            if (to > iArr.length - 1) {
+                to = iArr.length - 1;
             }
-            while (i <= i2) {
+            for (int i = from; i <= to; i++) {
                 int[] iArr2 = this.array;
-                if (iArr2[i] > i3) {
-                    i3 = iArr2[i];
+                if (iArr2[i] > max) {
+                    max = iArr2[i];
                 }
-                i++;
             }
-            return i3;
+            return max;
         }
-        return rMaxQ(1, i, i2);
+        return rMaxQ(1, from, to);
     }
 
-    private int rMaxQ(int i, int i2, int i3) {
-        Node node = this.heap[i];
-        if (node.pendingVal != null && contains(node.from, node.to, i2, i3)) {
-            return node.pendingVal.intValue();
+    private int rMaxQ(int v, int from, int to) {
+        Node n = this.heap[v];
+        if (n.pendingVal != null && contains(n.from, n.to, from, to)) {
+            return n.pendingVal.intValue();
         }
-        if (contains(i2, i3, node.from, node.to)) {
-            return this.heap[i].max;
+        if (contains(from, to, n.from, n.to)) {
+            return this.heap[v].max;
         }
-        if (!intersects(i2, i3, node.from, node.to)) {
-            return 0;
+        if (intersects(from, to, n.from, n.to)) {
+            propagate(v);
+            int leftMin = rMaxQ(v * 2, from, to);
+            int rightMin = rMaxQ((v * 2) + 1, from, to);
+            return Math.max(leftMin, rightMin);
         }
-        propagate(i);
-        int i4 = i * 2;
-        return Math.max(rMaxQ(i4, i2, i3), rMaxQ(i4 + 1, i2, i3));
+        return 0;
     }
 
-    public int rMinQ(int i, int i2) {
+    public int rMinQ(int from, int to) {
         int[] iArr = this.array;
         if (iArr.length < 30) {
-            int i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            if (i < 0) {
-                i = 0;
+            int min = Integer.MAX_VALUE;
+            if (from < 0) {
+                from = 0;
             }
-            if (i2 > iArr.length - 1) {
-                i2 = iArr.length - 1;
+            if (to > iArr.length - 1) {
+                to = iArr.length - 1;
             }
-            while (i <= i2) {
+            for (int i = from; i <= to; i++) {
                 int[] iArr2 = this.array;
-                if (iArr2[i] < i3) {
-                    i3 = iArr2[i];
+                if (iArr2[i] < min) {
+                    min = iArr2[i];
                 }
-                i++;
             }
-            return i3;
+            return min;
         }
-        return rMinQ(1, i, i2);
+        return rMinQ(1, from, to);
     }
 
-    private int rMinQ(int i, int i2, int i3) {
-        Node node = this.heap[i];
-        if (node.pendingVal != null && contains(node.from, node.to, i2, i3)) {
-            return node.pendingVal.intValue();
+    private int rMinQ(int v, int from, int to) {
+        Node n = this.heap[v];
+        if (n.pendingVal != null && contains(n.from, n.to, from, to)) {
+            return n.pendingVal.intValue();
         }
-        if (contains(i2, i3, node.from, node.to)) {
-            return this.heap[i].min;
+        if (contains(from, to, n.from, n.to)) {
+            return this.heap[v].min;
         }
-        if (!intersects(i2, i3, node.from, node.to)) {
-            return ConnectionsManager.DEFAULT_DATACENTER_ID;
+        if (intersects(from, to, n.from, n.to)) {
+            propagate(v);
+            int leftMin = rMinQ(v * 2, from, to);
+            int rightMin = rMinQ((v * 2) + 1, from, to);
+            return Math.min(leftMin, rightMin);
         }
-        propagate(i);
-        int i4 = i * 2;
-        return Math.min(rMinQ(i4, i2, i3), rMinQ(i4 + 1, i2, i3));
+        return Integer.MAX_VALUE;
     }
 
-    private void propagate(int i) {
-        Node[] nodeArr = this.heap;
-        Node node = nodeArr[i];
-        Integer num = node.pendingVal;
-        if (num != null) {
-            int i2 = i * 2;
-            change(nodeArr[i2], num.intValue());
-            change(this.heap[i2 + 1], node.pendingVal.intValue());
-            node.pendingVal = null;
+    private void propagate(int v) {
+        Node n = this.heap[v];
+        if (n.pendingVal != null) {
+            change(this.heap[v * 2], n.pendingVal.intValue());
+            change(this.heap[(v * 2) + 1], n.pendingVal.intValue());
+            n.pendingVal = null;
         }
     }
 
-    private void change(Node node, int i) {
-        node.pendingVal = Integer.valueOf(i);
-        node.sum = node.size() * i;
-        node.max = i;
-        node.min = i;
-        this.array[node.from] = i;
+    private void change(Node n, int value) {
+        n.pendingVal = Integer.valueOf(value);
+        n.sum = n.size() * value;
+        n.max = value;
+        n.min = value;
+        this.array[n.from] = value;
     }
 
-    /* loaded from: classes.dex */
+    private boolean contains(int from1, int to1, int from2, int to2) {
+        return from2 >= from1 && to2 <= to1;
+    }
+
+    private boolean intersects(int from1, int to1, int from2, int to2) {
+        return (from1 <= from2 && to1 >= from2) || (from1 >= from2 && from1 <= to2);
+    }
+
+    /* loaded from: classes4.dex */
     public static class Node {
         int from;
         int max;

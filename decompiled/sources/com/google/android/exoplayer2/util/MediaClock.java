@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.util;
 
 import com.google.android.exoplayer2.PlaybackParameters;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface MediaClock {
     PlaybackParameters getPlaybackParameters();
 

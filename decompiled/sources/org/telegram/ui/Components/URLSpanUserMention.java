@@ -4,44 +4,44 @@ import android.text.TextPaint;
 import android.view.View;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.TextStyleSpan;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class URLSpanUserMention extends URLSpanNoUnderline {
     private int currentType;
     private TextStyleSpan.TextStyleRun style;
 
-    public URLSpanUserMention(String str, int i) {
-        this(str, i, null);
+    public URLSpanUserMention(String url, int type) {
+        this(url, type, null);
     }
 
-    public URLSpanUserMention(String str, int i, TextStyleSpan.TextStyleRun textStyleRun) {
-        super(str);
-        this.currentType = i;
-        this.style = textStyleRun;
+    public URLSpanUserMention(String url, int type, TextStyleSpan.TextStyleRun run) {
+        super(url);
+        this.currentType = type;
+        this.style = run;
     }
 
     @Override // org.telegram.ui.Components.URLSpanNoUnderline, android.text.style.URLSpan, android.text.style.ClickableSpan
-    public void onClick(View view) {
-        super.onClick(view);
+    public void onClick(View widget) {
+        super.onClick(widget);
     }
 
     @Override // org.telegram.ui.Components.URLSpanNoUnderline, android.text.style.ClickableSpan, android.text.style.CharacterStyle
-    public void updateDrawState(TextPaint textPaint) {
-        super.updateDrawState(textPaint);
+    public void updateDrawState(TextPaint p) {
+        super.updateDrawState(p);
         int i = this.currentType;
         if (i == 3) {
-            textPaint.setColor(Theme.getColor("windowBackgroundWhiteLinkText"));
+            p.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
         } else if (i == 2) {
-            textPaint.setColor(-1);
+            p.setColor(-1);
         } else if (i == 1) {
-            textPaint.setColor(Theme.getColor("chat_messageLinkOut"));
+            p.setColor(Theme.getColor(Theme.key_chat_messageLinkOut));
         } else {
-            textPaint.setColor(Theme.getColor("chat_messageLinkIn"));
+            p.setColor(Theme.getColor(Theme.key_chat_messageLinkIn));
         }
         TextStyleSpan.TextStyleRun textStyleRun = this.style;
         if (textStyleRun != null) {
-            textStyleRun.applyStyle(textPaint);
+            textStyleRun.applyStyle(p);
         } else {
-            textPaint.setUnderlineText(false);
+            p.setUnderlineText(false);
         }
     }
 }

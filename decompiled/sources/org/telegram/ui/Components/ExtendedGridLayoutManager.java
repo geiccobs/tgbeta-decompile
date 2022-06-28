@@ -5,8 +5,7 @@ import android.util.SparseIntArray;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class ExtendedGridLayoutManager extends GridLayoutManager {
     private int calculatedWidth;
     private final boolean firstRowFullWidth;
@@ -16,9 +15,20 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
     private final boolean lastRowFullWidth;
     private int rowsCount;
 
-    @Override // androidx.recyclerview.widget.GridLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
-    public int getColumnCountForAccessibility(RecyclerView.Recycler recycler, RecyclerView.State state) {
-        return 1;
+    public ExtendedGridLayoutManager(Context context, int spanCount) {
+        this(context, spanCount, false);
+    }
+
+    public ExtendedGridLayoutManager(Context context, int spanCount, boolean lastRowFullWidth) {
+        this(context, spanCount, lastRowFullWidth, false);
+    }
+
+    public ExtendedGridLayoutManager(Context context, int spanCount, boolean lastRowFullWidth, boolean firstRowFullWidth) {
+        super(context, spanCount);
+        this.itemSpans = new SparseIntArray();
+        this.itemsToRow = new SparseIntArray();
+        this.lastRowFullWidth = lastRowFullWidth;
+        this.firstRowFullWidth = firstRowFullWidth;
     }
 
     @Override // androidx.recyclerview.widget.GridLayoutManager, androidx.recyclerview.widget.LinearLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
@@ -26,102 +36,103 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
         return false;
     }
 
-    public ExtendedGridLayoutManager(Context context, int i) {
-        this(context, i, false);
-    }
-
-    public ExtendedGridLayoutManager(Context context, int i, boolean z) {
-        this(context, i, z, false);
-    }
-
-    public ExtendedGridLayoutManager(Context context, int i, boolean z, boolean z2) {
-        super(context, i);
-        this.itemSpans = new SparseIntArray();
-        this.itemsToRow = new SparseIntArray();
-        this.lastRowFullWidth = z;
-        this.firstRowFullWidth = z2;
-    }
-
-    private void prepareLayout(float f) {
-        Size sizeForItem;
-        int i;
-        boolean z;
-        float f2 = f == 0.0f ? 100.0f : f;
+    private void prepareLayout(float viewPortAvailableSize) {
+        float viewPortAvailableSize2;
+        float viewPortAvailableSize3;
+        int requiredSpan;
+        boolean moveToNewRow;
+        float viewPortAvailableSize4;
+        if (viewPortAvailableSize != 0.0f) {
+            viewPortAvailableSize2 = viewPortAvailableSize;
+        } else {
+            viewPortAvailableSize2 = 100.0f;
+        }
         this.itemSpans.clear();
         this.itemsToRow.clear();
-        int i2 = 0;
+        int i = 0;
         this.rowsCount = 0;
         this.firstRowMax = 0;
-        int flowItemCount = getFlowItemCount();
-        if (flowItemCount == 0) {
+        int itemsCount = getFlowItemCount();
+        if (itemsCount == 0) {
             return;
         }
-        int dp = AndroidUtilities.dp(100.0f);
+        int preferredRowSize = AndroidUtilities.dp(100.0f);
         int spanCount = getSpanCount();
-        int i3 = (this.lastRowFullWidth ? 1 : 0) + flowItemCount;
-        int i4 = spanCount;
-        int i5 = 0;
-        int i6 = 0;
-        while (i5 < i3) {
-            if (i5 == 0 && this.firstRowFullWidth) {
+        int spanLeft = spanCount;
+        int currentItemsInRow = 0;
+        int currentItemsSpanAmount = 0;
+        int a = 0;
+        int N = (this.lastRowFullWidth ? 1 : 0) + itemsCount;
+        while (a < N) {
+            if (a == 0 && this.firstRowFullWidth) {
                 SparseIntArray sparseIntArray = this.itemSpans;
-                sparseIntArray.put(i5, sparseIntArray.get(i5) + spanCount);
-                this.itemsToRow.put(i2, this.rowsCount);
+                sparseIntArray.put(a, sparseIntArray.get(a) + spanCount);
+                this.itemsToRow.put(i, this.rowsCount);
                 this.rowsCount++;
-                i4 = spanCount;
-                i6 = 0;
+                currentItemsSpanAmount = 0;
+                currentItemsInRow = 0;
+                spanLeft = spanCount;
+                viewPortAvailableSize3 = viewPortAvailableSize2;
             } else {
-                if ((i5 < flowItemCount ? sizeForItem(i5) : null) == null) {
-                    z = i6 != 0;
-                    i = spanCount;
+                Size size = a < itemsCount ? sizeForItem(a) : null;
+                if (size == null) {
+                    moveToNewRow = currentItemsInRow != 0;
+                    requiredSpan = spanCount;
                 } else {
-                    int min = Math.min(spanCount, (int) Math.floor(spanCount * (((sizeForItem.width / sizeForItem.height) * dp) / f2)));
-                    i = min;
-                    z = i4 < min || (min > 33 && i4 < min + (-15));
+                    requiredSpan = Math.min(spanCount, (int) Math.floor(spanCount * (((size.width / size.height) * preferredRowSize) / viewPortAvailableSize2)));
+                    moveToNewRow = spanLeft < requiredSpan || (requiredSpan > 33 && spanLeft < requiredSpan + (-15));
                 }
-                if (z) {
-                    if (i4 != 0) {
-                        int i7 = i4 / i6;
-                        int i8 = i5 - i6;
-                        int i9 = i8;
-                        while (true) {
-                            int i10 = i8 + i6;
-                            if (i9 >= i10) {
-                                break;
-                            }
-                            if (i9 == i10 - 1) {
+                if (moveToNewRow) {
+                    if (spanLeft == 0) {
+                        viewPortAvailableSize3 = viewPortAvailableSize2;
+                    } else {
+                        int spanPerItem = spanLeft / currentItemsInRow;
+                        int start = a - currentItemsInRow;
+                        int b = start;
+                        while (b < start + currentItemsInRow) {
+                            if (b == (start + currentItemsInRow) - 1) {
                                 SparseIntArray sparseIntArray2 = this.itemSpans;
-                                sparseIntArray2.put(i9, sparseIntArray2.get(i9) + i4);
+                                viewPortAvailableSize4 = viewPortAvailableSize2;
+                                sparseIntArray2.put(b, sparseIntArray2.get(b) + spanLeft);
                             } else {
+                                viewPortAvailableSize4 = viewPortAvailableSize2;
                                 SparseIntArray sparseIntArray3 = this.itemSpans;
-                                sparseIntArray3.put(i9, sparseIntArray3.get(i9) + i7);
+                                sparseIntArray3.put(b, sparseIntArray3.get(b) + spanPerItem);
                             }
-                            i4 -= i7;
-                            i9++;
+                            spanLeft -= spanPerItem;
+                            b++;
+                            viewPortAvailableSize2 = viewPortAvailableSize4;
                         }
-                        this.itemsToRow.put(i5 - 1, this.rowsCount);
+                        viewPortAvailableSize3 = viewPortAvailableSize2;
+                        this.itemsToRow.put(a - 1, this.rowsCount);
                     }
-                    if (i5 == flowItemCount) {
+                    if (a == itemsCount) {
                         break;
                     }
                     this.rowsCount++;
-                    i4 = spanCount;
-                    i6 = 0;
-                } else if (i4 < i) {
-                    i = i4;
+                    currentItemsSpanAmount = 0;
+                    currentItemsInRow = 0;
+                    spanLeft = spanCount;
+                } else {
+                    viewPortAvailableSize3 = viewPortAvailableSize2;
+                    if (spanLeft < requiredSpan) {
+                        requiredSpan = spanLeft;
+                    }
                 }
                 if (this.rowsCount == 0) {
-                    this.firstRowMax = Math.max(this.firstRowMax, i5);
+                    this.firstRowMax = Math.max(this.firstRowMax, a);
                 }
-                if (i5 == flowItemCount - 1 && !this.lastRowFullWidth) {
-                    this.itemsToRow.put(i5, this.rowsCount);
+                if (a == itemsCount - 1 && !this.lastRowFullWidth) {
+                    this.itemsToRow.put(a, this.rowsCount);
                 }
-                i6++;
-                i4 -= i;
-                this.itemSpans.put(i5, i);
+                currentItemsSpanAmount += requiredSpan;
+                currentItemsInRow++;
+                spanLeft -= requiredSpan;
+                this.itemSpans.put(a, requiredSpan);
             }
-            i5++;
-            i2 = 0;
+            a++;
+            viewPortAvailableSize2 = viewPortAvailableSize3;
+            i = 0;
         }
         this.rowsCount++;
     }
@@ -140,11 +151,9 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
         if (size.height == 0.0f) {
             size.height = 100.0f;
         }
-        float f = size.width;
-        float f2 = size.height;
-        float f3 = f / f2;
-        if (f3 > 4.0f || f3 < 0.2f) {
-            float max = Math.max(f, f2);
+        float aspect = size.width / size.height;
+        if (aspect > 4.0f || aspect < 0.2f) {
+            float max = Math.max(size.width, size.height);
             size.width = max;
             size.height = max;
         }
@@ -156,11 +165,10 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
     }
 
     private void checkLayout() {
-        if (this.itemSpans.size() == getFlowItemCount() && this.calculatedWidth == getWidth()) {
-            return;
+        if (this.itemSpans.size() != getFlowItemCount() || this.calculatedWidth != getWidth()) {
+            this.calculatedWidth = getWidth();
+            prepareLayout(getWidth());
         }
-        this.calculatedWidth = getWidth();
-        prepareLayout(getWidth());
     }
 
     public int getSpanSizeForItem(int i) {
@@ -168,16 +176,16 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
         return this.itemSpans.get(i);
     }
 
-    public int getRowsCount(int i) {
+    public int getRowsCount(int width) {
         if (this.rowsCount == 0) {
-            prepareLayout(i);
+            prepareLayout(width);
         }
         return this.rowsCount;
     }
 
     public boolean isLastInRow(int i) {
         checkLayout();
-        return this.itemsToRow.get(i, ConnectionsManager.DEFAULT_DATACENTER_ID) != Integer.MAX_VALUE;
+        return this.itemsToRow.get(i, Integer.MAX_VALUE) != Integer.MAX_VALUE;
     }
 
     public boolean isFirstRow(int i) {
@@ -192,5 +200,10 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
     @Override // androidx.recyclerview.widget.GridLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
     public int getRowCountForAccessibility(RecyclerView.Recycler recycler, RecyclerView.State state) {
         return state.getItemCount();
+    }
+
+    @Override // androidx.recyclerview.widget.GridLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
+    public int getColumnCountForAccessibility(RecyclerView.Recycler recycler, RecyclerView.State state) {
+        return 1;
     }
 }

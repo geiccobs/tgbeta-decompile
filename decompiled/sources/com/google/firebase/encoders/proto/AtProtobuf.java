@@ -2,13 +2,18 @@ package com.google.firebase.encoders.proto;
 
 import com.google.firebase.encoders.proto.Protobuf;
 import java.lang.annotation.Annotation;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AtProtobuf {
     private Protobuf.IntEncoding intEncoding = Protobuf.IntEncoding.DEFAULT;
     private int tag;
 
-    public AtProtobuf tag(int i) {
-        this.tag = i;
+    public AtProtobuf tag(int tag) {
+        this.tag = tag;
+        return this;
+    }
+
+    public AtProtobuf intEncoding(Protobuf.IntEncoding intEncoding) {
+        this.intEncoding = intEncoding;
         return this;
     }
 
@@ -26,8 +31,8 @@ public final class AtProtobuf {
         private final Protobuf.IntEncoding intEncoding;
         private final int tag;
 
-        ProtobufImpl(int i, Protobuf.IntEncoding intEncoding) {
-            this.tag = i;
+        ProtobufImpl(int tag, Protobuf.IntEncoding intEncoding) {
+            this.tag = tag;
             this.intEncoding = intEncoding;
         }
 
@@ -47,15 +52,15 @@ public final class AtProtobuf {
         }
 
         @Override // java.lang.annotation.Annotation
-        public boolean equals(Object obj) {
-            if (this == obj) {
+        public boolean equals(Object other) {
+            if (this == other) {
                 return true;
             }
-            if (!(obj instanceof Protobuf)) {
+            if (!(other instanceof Protobuf)) {
                 return false;
             }
-            Protobuf protobuf = (Protobuf) obj;
-            return this.tag == protobuf.tag() && this.intEncoding.equals(protobuf.intEncoding());
+            Protobuf that = (Protobuf) other;
+            return this.tag == that.tag() && this.intEncoding.equals(that.intEncoding());
         }
 
         @Override // java.lang.annotation.Annotation

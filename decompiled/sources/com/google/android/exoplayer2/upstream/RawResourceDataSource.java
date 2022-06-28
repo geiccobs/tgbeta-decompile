@@ -11,8 +11,9 @@ import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class RawResourceDataSource extends BaseDataSource {
+    public static final String RAW_RESOURCE_SCHEME = "rawresource";
     private AssetFileDescriptor assetFileDescriptor;
     private long bytesRemaining;
     private InputStream inputStream;
@@ -20,19 +21,19 @@ public final class RawResourceDataSource extends BaseDataSource {
     private final Resources resources;
     private Uri uri;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class RawResourceDataSourceException extends IOException {
-        public RawResourceDataSourceException(String str) {
-            super(str);
+        public RawResourceDataSourceException(String message) {
+            super(message);
         }
 
-        public RawResourceDataSourceException(IOException iOException) {
-            super(iOException);
+        public RawResourceDataSourceException(IOException e) {
+            super(e);
         }
     }
 
-    public static Uri buildRawResourceUri(int i) {
-        return Uri.parse("rawresource:///" + i);
+    public static Uri buildRawResourceUri(int rawResourceId) {
+        return Uri.parse("rawresource:///" + rawResourceId);
     }
 
     public RawResourceDataSource(Context context) {
@@ -45,63 +46,67 @@ public final class RawResourceDataSource extends BaseDataSource {
         try {
             Uri uri = dataSpec.uri;
             this.uri = uri;
-            if (!TextUtils.equals("rawresource", uri.getScheme())) {
+            if (!TextUtils.equals(RAW_RESOURCE_SCHEME, uri.getScheme())) {
                 throw new RawResourceDataSourceException("URI must use scheme rawresource");
             }
             try {
-                int parseInt = Integer.parseInt((String) Assertions.checkNotNull(uri.getLastPathSegment()));
+                int resourceId = Integer.parseInt((String) Assertions.checkNotNull(uri.getLastPathSegment()));
                 transferInitializing(dataSpec);
-                AssetFileDescriptor openRawResourceFd = this.resources.openRawResourceFd(parseInt);
-                this.assetFileDescriptor = openRawResourceFd;
-                if (openRawResourceFd == null) {
+                AssetFileDescriptor assetFileDescriptor = this.resources.openRawResourceFd(resourceId);
+                this.assetFileDescriptor = assetFileDescriptor;
+                if (assetFileDescriptor == null) {
                     throw new RawResourceDataSourceException("Resource is compressed: " + uri);
                 }
-                FileInputStream fileInputStream = new FileInputStream(openRawResourceFd.getFileDescriptor());
-                this.inputStream = fileInputStream;
-                fileInputStream.skip(openRawResourceFd.getStartOffset());
-                if (fileInputStream.skip(dataSpec.position) < dataSpec.position) {
+                FileInputStream inputStream = new FileInputStream(assetFileDescriptor.getFileDescriptor());
+                this.inputStream = inputStream;
+                inputStream.skip(assetFileDescriptor.getStartOffset());
+                long skipped = inputStream.skip(dataSpec.position);
+                if (skipped < dataSpec.position) {
                     throw new EOFException();
                 }
-                long j = dataSpec.length;
-                long j2 = -1;
-                if (j != -1) {
-                    this.bytesRemaining = j;
+                long j = -1;
+                if (dataSpec.length != -1) {
+                    this.bytesRemaining = dataSpec.length;
                 } else {
-                    long length = openRawResourceFd.getLength();
-                    if (length != -1) {
-                        j2 = length - dataSpec.position;
+                    long assetFileDescriptorLength = assetFileDescriptor.getLength();
+                    if (assetFileDescriptorLength != -1) {
+                        j = assetFileDescriptorLength - dataSpec.position;
                     }
-                    this.bytesRemaining = j2;
+                    this.bytesRemaining = j;
                 }
                 this.opened = true;
                 transferStarted(dataSpec);
                 return this.bytesRemaining;
-            } catch (NumberFormatException unused) {
+            } catch (NumberFormatException e) {
                 throw new RawResourceDataSourceException("Resource identifier must be an integer.");
             }
-        } catch (IOException e) {
-            throw new RawResourceDataSourceException(e);
+        } catch (IOException e2) {
+            throw new RawResourceDataSourceException(e2);
         }
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] bArr, int i, int i2) throws RawResourceDataSourceException {
-        if (i2 == 0) {
+    public int read(byte[] buffer, int offset, int readLength) throws RawResourceDataSourceException {
+        int i;
+        if (readLength == 0) {
             return 0;
         }
         long j = this.bytesRemaining;
         if (j == 0) {
             return -1;
         }
-        if (j != -1) {
+        if (j == -1) {
+            i = readLength;
+        } else {
             try {
-                i2 = (int) Math.min(j, i2);
+                i = (int) Math.min(j, readLength);
             } catch (IOException e) {
                 throw new RawResourceDataSourceException(e);
             }
         }
-        int read = ((InputStream) Util.castNonNull(this.inputStream)).read(bArr, i, i2);
-        if (read == -1) {
+        int bytesToRead = i;
+        int bytesRead = ((InputStream) Util.castNonNull(this.inputStream)).read(buffer, offset, bytesToRead);
+        if (bytesRead == -1) {
             if (this.bytesRemaining != -1) {
                 throw new RawResourceDataSourceException(new EOFException());
             }
@@ -109,10 +114,10 @@ public final class RawResourceDataSource extends BaseDataSource {
         }
         long j2 = this.bytesRemaining;
         if (j2 != -1) {
-            this.bytesRemaining = j2 - read;
+            this.bytesRemaining = j2 - bytesRead;
         }
-        bytesTransferred(read);
-        return read;
+        bytesTransferred(bytesRead);
+        return bytesRead;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource

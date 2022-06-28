@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.C;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,12 +20,12 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC$Document;
+import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class PremiumStickersPreviewRecycler extends RecyclerListView implements NotificationCenter.NotificationCenterDelegate, PagerHeaderView {
     boolean autoPlayEnabled;
     private boolean checkEffect;
@@ -35,26 +36,24 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
     LinearLayoutManager layoutManager;
     View oldSelectedView;
     private int size;
-    private final ArrayList<TLRPC$Document> premiumStickers = new ArrayList<>();
+    private final ArrayList<TLRPC.Document> premiumStickers = new ArrayList<>();
     boolean firstMeasure = true;
     boolean firstDraw = true;
     Runnable autoScrollRunnable = new Runnable() { // from class: org.telegram.ui.Components.Premium.PremiumStickersPreviewRecycler.1
         @Override // java.lang.Runnable
         public void run() {
-            PremiumStickersPreviewRecycler premiumStickersPreviewRecycler = PremiumStickersPreviewRecycler.this;
-            if (!premiumStickersPreviewRecycler.autoPlayEnabled) {
+            if (!PremiumStickersPreviewRecycler.this.autoPlayEnabled) {
                 return;
             }
-            if (!premiumStickersPreviewRecycler.sortedView.isEmpty()) {
-                ArrayList<StickerView> arrayList = PremiumStickersPreviewRecycler.this.sortedView;
-                int childAdapterPosition = PremiumStickersPreviewRecycler.this.getChildAdapterPosition(arrayList.get(arrayList.size() - 1));
-                if (childAdapterPosition >= 0) {
-                    View findViewByPosition = PremiumStickersPreviewRecycler.this.layoutManager.findViewByPosition(childAdapterPosition + 1);
-                    if (findViewByPosition != null) {
-                        PremiumStickersPreviewRecycler premiumStickersPreviewRecycler2 = PremiumStickersPreviewRecycler.this;
-                        premiumStickersPreviewRecycler2.haptic = false;
-                        premiumStickersPreviewRecycler2.drawEffectForView(findViewByPosition, true);
-                        PremiumStickersPreviewRecycler.this.smoothScrollBy(0, findViewByPosition.getTop() - ((PremiumStickersPreviewRecycler.this.getMeasuredHeight() - findViewByPosition.getMeasuredHeight()) / 2), AndroidUtilities.overshootInterpolator);
+            if (!PremiumStickersPreviewRecycler.this.sortedView.isEmpty()) {
+                StickerView stickerView = PremiumStickersPreviewRecycler.this.sortedView.get(PremiumStickersPreviewRecycler.this.sortedView.size() - 1);
+                int adapterPosition = PremiumStickersPreviewRecycler.this.getChildAdapterPosition(stickerView);
+                if (adapterPosition >= 0) {
+                    View view = PremiumStickersPreviewRecycler.this.layoutManager.findViewByPosition(adapterPosition + 1);
+                    if (view != null) {
+                        PremiumStickersPreviewRecycler.this.haptic = false;
+                        PremiumStickersPreviewRecycler.this.drawEffectForView(view, true);
+                        PremiumStickersPreviewRecycler.this.smoothScrollBy(0, view.getTop() - ((PremiumStickersPreviewRecycler.this.getMeasuredHeight() - view.getMeasuredHeight()) / 2), AndroidUtilities.overshootInterpolator);
                     }
                 }
             }
@@ -66,18 +65,13 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
     Comparator<StickerView> comparator = PremiumStickersPreviewRecycler$$ExternalSyntheticLambda1.INSTANCE;
     int selectStickerOnNextLayout = -1;
 
-    @Override // androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
-    public boolean drawChild(Canvas canvas, View view, long j) {
-        return true;
+    public static /* synthetic */ int lambda$new$0(StickerView o1, StickerView o2) {
+        return (int) ((o1.progress * 100.0f) - (o2.progress * 100.0f));
     }
 
-    public static /* synthetic */ int lambda$new$0(StickerView stickerView, StickerView stickerView2) {
-        return (int) ((stickerView.progress * 100.0f) - (stickerView2.progress * 100.0f));
-    }
-
-    public PremiumStickersPreviewRecycler(Context context, int i) {
+    public PremiumStickersPreviewRecycler(Context context, int currentAccount) {
         super(context);
-        this.currentAccount = i;
+        this.currentAccount = currentAccount;
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         this.layoutManager = linearLayoutManager;
         setLayoutManager(linearLayoutManager);
@@ -85,8 +79,8 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         setClipChildren(false);
         setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.Components.Premium.PremiumStickersPreviewRecycler.2
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrolled(RecyclerView recyclerView, int i2, int i3) {
-                super.onScrolled(recyclerView, i2, i3);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
                 if (recyclerView.getScrollState() == 1) {
                     PremiumStickersPreviewRecycler.this.drawEffectForView(null, true);
                 }
@@ -94,24 +88,23 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
             }
 
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrollStateChanged(RecyclerView recyclerView, int i2) {
-                super.onScrollStateChanged(recyclerView, i2);
-                if (i2 == 1) {
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == 1) {
                     PremiumStickersPreviewRecycler.this.haptic = true;
                 }
-                if (i2 == 0) {
-                    StickerView stickerView = null;
-                    for (int i3 = 0; i3 < recyclerView.getChildCount(); i3++) {
-                        StickerView stickerView2 = (StickerView) PremiumStickersPreviewRecycler.this.getChildAt(i3);
-                        if (stickerView == null || stickerView2.progress > stickerView.progress) {
-                            stickerView = stickerView2;
+                if (newState == 0) {
+                    StickerView scrollToView = null;
+                    for (int i = 0; i < recyclerView.getChildCount(); i++) {
+                        StickerView view = (StickerView) PremiumStickersPreviewRecycler.this.getChildAt(i);
+                        if (scrollToView == null || view.progress > scrollToView.progress) {
+                            scrollToView = view;
                         }
                     }
-                    if (stickerView != null) {
-                        PremiumStickersPreviewRecycler.this.drawEffectForView(stickerView, true);
-                        PremiumStickersPreviewRecycler premiumStickersPreviewRecycler = PremiumStickersPreviewRecycler.this;
-                        premiumStickersPreviewRecycler.haptic = false;
-                        premiumStickersPreviewRecycler.smoothScrollBy(0, stickerView.getTop() - ((PremiumStickersPreviewRecycler.this.getMeasuredHeight() - stickerView.getMeasuredHeight()) / 2), AndroidUtilities.overshootInterpolator);
+                    if (scrollToView != null) {
+                        PremiumStickersPreviewRecycler.this.drawEffectForView(scrollToView, true);
+                        PremiumStickersPreviewRecycler.this.haptic = false;
+                        PremiumStickersPreviewRecycler.this.smoothScrollBy(0, scrollToView.getTop() - ((PremiumStickersPreviewRecycler.this.getMeasuredHeight() - scrollToView.getMeasuredHeight()) / 2), AndroidUtilities.overshootInterpolator);
                     }
                     PremiumStickersPreviewRecycler.this.scheduleAutoScroll();
                     return;
@@ -121,15 +114,16 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         });
         setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Components.Premium.PremiumStickersPreviewRecycler$$ExternalSyntheticLambda2
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
-            public final void onItemClick(View view, int i2) {
-                PremiumStickersPreviewRecycler.this.lambda$new$1(view, i2);
+            public final void onItemClick(View view, int i) {
+                PremiumStickersPreviewRecycler.this.m2905x52e0d79d(view, i);
             }
         });
-        MediaDataController.getInstance(i).preloadPremiumPreviewStickers();
+        MediaDataController.getInstance(currentAccount).preloadPremiumPreviewStickers();
         setStickers();
     }
 
-    public /* synthetic */ void lambda$new$1(View view, int i) {
+    /* renamed from: lambda$new$1$org-telegram-ui-Components-Premium-PremiumStickersPreviewRecycler */
+    public /* synthetic */ void m2905x52e0d79d(View view, int position) {
         if (view != null) {
             drawEffectForView(view, true);
             this.haptic = false;
@@ -138,13 +132,13 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.View
-    public void onMeasure(int i, int i2) {
-        if (View.MeasureSpec.getSize(i2) > View.MeasureSpec.getSize(i)) {
-            this.size = View.MeasureSpec.getSize(i);
+    public void onMeasure(int widthSpec, int heightSpec) {
+        if (View.MeasureSpec.getSize(heightSpec) > View.MeasureSpec.getSize(widthSpec)) {
+            this.size = View.MeasureSpec.getSize(widthSpec);
         } else {
-            this.size = View.MeasureSpec.getSize(i2);
+            this.size = View.MeasureSpec.getSize(heightSpec);
         }
-        super.onMeasure(i, i2);
+        super.onMeasure(widthSpec, heightSpec);
     }
 
     public void scheduleAutoScroll() {
@@ -155,79 +149,80 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         AndroidUtilities.runOnUIThread(this.autoScrollRunnable, 2700L);
     }
 
-    public void drawEffectForView(View view, boolean z) {
+    public void drawEffectForView(View view, boolean animated) {
         this.hasSelectedView = view != null;
         for (int i = 0; i < getChildCount(); i++) {
-            StickerView stickerView = (StickerView) getChildAt(i);
-            if (stickerView == view) {
-                stickerView.setDrawImage(true, true, z);
+            StickerView child = (StickerView) getChildAt(i);
+            if (child != view) {
+                child.setDrawImage(!this.hasSelectedView, false, animated);
             } else {
-                stickerView.setDrawImage(!this.hasSelectedView, false, z);
+                child.setDrawImage(true, true, animated);
             }
         }
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup, android.view.View
-    public void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        super.onLayout(z, i, i2, i3, i4);
+    public void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
         if (this.firstMeasure && !this.premiumStickers.isEmpty() && getChildCount() > 0) {
             this.firstMeasure = false;
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.Premium.PremiumStickersPreviewRecycler$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    PremiumStickersPreviewRecycler.this.lambda$onLayout$2();
+                    PremiumStickersPreviewRecycler.this.m2906xf073dcc1();
                 }
             });
         }
-        int i5 = this.selectStickerOnNextLayout;
-        if (i5 > 0) {
-            RecyclerView.ViewHolder findViewHolderForAdapterPosition = findViewHolderForAdapterPosition(i5);
-            if (findViewHolderForAdapterPosition != null) {
-                drawEffectForView(findViewHolderForAdapterPosition.itemView, false);
+        int i = this.selectStickerOnNextLayout;
+        if (i > 0) {
+            RecyclerView.ViewHolder holder = findViewHolderForAdapterPosition(i);
+            if (holder != null) {
+                drawEffectForView(holder.itemView, false);
             }
             this.selectStickerOnNextLayout = -1;
         }
     }
 
-    public /* synthetic */ void lambda$onLayout$2() {
-        int size = 1073741823 - (1073741823 % this.premiumStickers.size());
+    /* renamed from: lambda$onLayout$2$org-telegram-ui-Components-Premium-PremiumStickersPreviewRecycler */
+    public /* synthetic */ void m2906xf073dcc1() {
+        int startPosition = 1073741823 - (1073741823 % this.premiumStickers.size());
         LinearLayoutManager linearLayoutManager = this.layoutManager;
-        this.selectStickerOnNextLayout = size;
-        linearLayoutManager.scrollToPositionWithOffset(size, (getMeasuredHeight() - getChildAt(0).getMeasuredHeight()) >> 1);
+        this.selectStickerOnNextLayout = startPosition;
+        linearLayoutManager.scrollToPositionWithOffset(startPosition, (getMeasuredHeight() - getChildAt(0).getMeasuredHeight()) >> 1);
         drawEffectForView(null, false);
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, android.view.ViewGroup, android.view.View
     public void dispatchDraw(Canvas canvas) {
+        ArrayList<StickerView> arrayList;
+        ArrayList<StickerView> arrayList2;
+        ArrayList<StickerView> arrayList3;
         if (!this.isVisible) {
             return;
         }
         this.sortedView.clear();
         for (int i = 0; i < getChildCount(); i++) {
-            StickerView stickerView = (StickerView) getChildAt(i);
-            float top = ((stickerView.getTop() + stickerView.getMeasuredHeight()) + (stickerView.getMeasuredHeight() >> 1)) / ((getMeasuredHeight() >> 1) + stickerView.getMeasuredHeight());
-            if (top > 1.0f) {
-                top = 2.0f - top;
+            StickerView child = (StickerView) getChildAt(i);
+            float cY = (getMeasuredHeight() >> 1) + child.getMeasuredHeight();
+            float p = ((child.getTop() + child.getMeasuredHeight()) + (child.getMeasuredHeight() >> 1)) / cY;
+            if (p > 1.0f) {
+                p = 2.0f - p;
             }
-            float clamp = Utilities.clamp(top, 1.0f, 0.0f);
-            stickerView.progress = clamp;
-            stickerView.view.setTranslationX((-getMeasuredWidth()) * 2.0f * (1.0f - this.interpolator.getInterpolation(clamp)));
-            this.sortedView.add(stickerView);
+            float p2 = Utilities.clamp(p, 1.0f, 0.0f);
+            child.progress = p2;
+            child.view.setTranslationX((-getMeasuredWidth()) * 2.0f * (1.0f - this.interpolator.getInterpolation(p2)));
+            this.sortedView.add(child);
         }
         Collections.sort(this.sortedView, this.comparator);
         if ((this.firstDraw || this.checkEffect) && this.sortedView.size() > 0 && !this.premiumStickers.isEmpty()) {
-            ArrayList<StickerView> arrayList = this.sortedView;
-            StickerView stickerView2 = arrayList.get(arrayList.size() - 1);
-            this.oldSelectedView = stickerView2;
-            drawEffectForView(stickerView2, !this.firstDraw);
+            StickerView stickerView = this.sortedView.get(arrayList3.size() - 1);
+            this.oldSelectedView = stickerView;
+            drawEffectForView(stickerView, !this.firstDraw);
             this.firstDraw = false;
             this.checkEffect = false;
         } else {
-            View view = this.oldSelectedView;
-            ArrayList<StickerView> arrayList2 = this.sortedView;
-            if (view != arrayList2.get(arrayList2.size() - 1)) {
-                ArrayList<StickerView> arrayList3 = this.sortedView;
-                this.oldSelectedView = arrayList3.get(arrayList3.size() - 1);
+            if (this.oldSelectedView != this.sortedView.get(arrayList.size() - 1)) {
+                this.oldSelectedView = this.sortedView.get(arrayList2.size() - 1);
                 if (this.haptic) {
                     performHapticFeedback(3);
                 }
@@ -241,46 +236,52 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         }
     }
 
-    public void setOffset(float f) {
-        boolean z = Math.abs(f / ((float) getMeasuredWidth())) < 1.0f;
-        if (this.isVisible != z) {
-            this.isVisible = z;
+    @Override // androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
+    public boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        return true;
+    }
+
+    public void setOffset(float translationX) {
+        float p = Math.abs(translationX / getMeasuredWidth());
+        boolean localVisible = p < 1.0f;
+        if (this.isVisible != localVisible) {
+            this.isVisible = localVisible;
             invalidate();
         }
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class Adapter extends RecyclerListView.SelectionAdapter {
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemCount() {
-            return ConnectionsManager.DEFAULT_DATACENTER_ID;
-        }
-
-        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            return false;
-        }
-
         private Adapter() {
             PremiumStickersPreviewRecycler.this = r1;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            StickerView stickerView = new StickerView(viewGroup.getContext());
-            stickerView.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
-            return new RecyclerListView.Holder(stickerView);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = new StickerView(parent.getContext());
+            view.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
+            return new RecyclerListView.Holder(view);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (PremiumStickersPreviewRecycler.this.premiumStickers.isEmpty()) {
                 return;
             }
-            StickerView stickerView = (StickerView) viewHolder.itemView;
-            stickerView.setSticker((TLRPC$Document) PremiumStickersPreviewRecycler.this.premiumStickers.get(i % PremiumStickersPreviewRecycler.this.premiumStickers.size()));
+            StickerView stickerView = (StickerView) holder.itemView;
+            stickerView.setSticker((TLRPC.Document) PremiumStickersPreviewRecycler.this.premiumStickers.get(position % PremiumStickersPreviewRecycler.this.premiumStickers.size()));
             stickerView.setDrawImage(!PremiumStickersPreviewRecycler.this.hasSelectedView, false, false);
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemCount() {
+            return Integer.MAX_VALUE;
+        }
+
+        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            return false;
         }
     }
 
@@ -298,8 +299,8 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int i, int i2, Object... objArr) {
-        if (i == NotificationCenter.premiumStickersPreviewLoaded) {
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.premiumStickersPreviewLoaded) {
             setStickers();
         }
     }
@@ -311,12 +312,12 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         invalidate();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class StickerView extends FrameLayout {
         boolean animateImage = true;
         private float animateImageProgress;
         ImageReceiver centerImage;
-        TLRPC$Document document;
+        TLRPC.Document document;
         boolean drawEffect;
         ImageReceiver effectImage;
         private float effectProgress;
@@ -324,51 +325,47 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         boolean update;
         View view;
 
-        static /* synthetic */ float access$416(StickerView stickerView, float f) {
-            float f2 = stickerView.effectProgress + f;
-            stickerView.effectProgress = f2;
-            return f2;
+        static /* synthetic */ float access$416(StickerView x0, float x1) {
+            float f = x0.effectProgress + x1;
+            x0.effectProgress = f;
+            return f;
         }
 
-        static /* synthetic */ float access$424(StickerView stickerView, float f) {
-            float f2 = stickerView.effectProgress - f;
-            stickerView.effectProgress = f2;
-            return f2;
+        static /* synthetic */ float access$424(StickerView x0, float x1) {
+            float f = x0.effectProgress - x1;
+            x0.effectProgress = f;
+            return f;
         }
 
-        static /* synthetic */ float access$516(StickerView stickerView, float f) {
-            float f2 = stickerView.animateImageProgress + f;
-            stickerView.animateImageProgress = f2;
-            return f2;
+        static /* synthetic */ float access$516(StickerView x0, float x1) {
+            float f = x0.animateImageProgress + x1;
+            x0.animateImageProgress = f;
+            return f;
         }
 
-        static /* synthetic */ float access$524(StickerView stickerView, float f) {
-            float f2 = stickerView.animateImageProgress - f;
-            stickerView.animateImageProgress = f2;
-            return f2;
+        static /* synthetic */ float access$524(StickerView x0, float x1) {
+            float f = x0.animateImageProgress - x1;
+            x0.animateImageProgress = f;
+            return f;
         }
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public StickerView(Context context) {
             super(context);
-            PremiumStickersPreviewRecycler.this = r3;
-            this.view = new View(context, r3) { // from class: org.telegram.ui.Components.Premium.PremiumStickersPreviewRecycler.StickerView.1
+            PremiumStickersPreviewRecycler.this = r4;
+            this.view = new View(context) { // from class: org.telegram.ui.Components.Premium.PremiumStickersPreviewRecycler.StickerView.1
                 @Override // android.view.View
                 public void draw(Canvas canvas) {
                     super.draw(canvas);
-                    StickerView stickerView = StickerView.this;
-                    if (stickerView.update) {
-                        SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(stickerView.document, "windowBackgroundGray", 0.5f);
-                        StickerView stickerView2 = StickerView.this;
-                        stickerView2.centerImage.setImage(ImageLocation.getForDocument(stickerView2.document), null, svgThumb, "webp", null, 1);
+                    if (StickerView.this.update) {
+                        SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(StickerView.this.document, Theme.key_windowBackgroundGray, 0.5f);
+                        StickerView.this.centerImage.setImage(ImageLocation.getForDocument(StickerView.this.document), null, svgThumb, "webp", null, 1);
                         if (MessageObject.isPremiumSticker(StickerView.this.document)) {
-                            StickerView stickerView3 = StickerView.this;
-                            stickerView3.effectImage.setImage(ImageLocation.getForDocument(MessageObject.getPremiumStickerAnimation(stickerView3.document), StickerView.this.document), "140_140", (ImageLocation) null, (String) null, "tgs", (Object) null, 1);
+                            StickerView.this.effectImage.setImage(ImageLocation.getForDocument(MessageObject.getPremiumStickerAnimation(StickerView.this.document), StickerView.this.document), "140_140", (ImageLocation) null, (String) null, "tgs", (Object) null, 1);
                         }
                     }
-                    StickerView stickerView4 = StickerView.this;
-                    if (stickerView4.drawEffect) {
-                        if (stickerView4.effectProgress == 0.0f) {
+                    if (StickerView.this.drawEffect) {
+                        if (StickerView.this.effectProgress == 0.0f) {
                             StickerView.this.effectProgress = 1.0f;
                             if (StickerView.this.effectImage.getLottieAnimation() != null) {
                                 StickerView.this.effectImage.getLottieAnimation().setCurrentFrame(0, false);
@@ -377,63 +374,48 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
                         if (StickerView.this.effectImage.getLottieAnimation() != null) {
                             StickerView.this.effectImage.getLottieAnimation().start();
                         }
-                        if (StickerView.this.effectImage.getLottieAnimation() != null && StickerView.this.effectImage.getLottieAnimation().isLastFrame()) {
-                            PremiumStickersPreviewRecycler premiumStickersPreviewRecycler = PremiumStickersPreviewRecycler.this;
-                            if (premiumStickersPreviewRecycler.autoPlayEnabled) {
-                                AndroidUtilities.cancelRunOnUIThread(premiumStickersPreviewRecycler.autoScrollRunnable);
-                                AndroidUtilities.runOnUIThread(PremiumStickersPreviewRecycler.this.autoScrollRunnable, 0L);
-                            }
+                        if (StickerView.this.effectImage.getLottieAnimation() != null && StickerView.this.effectImage.getLottieAnimation().isLastFrame() && PremiumStickersPreviewRecycler.this.autoPlayEnabled) {
+                            AndroidUtilities.cancelRunOnUIThread(PremiumStickersPreviewRecycler.this.autoScrollRunnable);
+                            AndroidUtilities.runOnUIThread(PremiumStickersPreviewRecycler.this.autoScrollRunnable, 0L);
                         }
-                    } else if (stickerView4.effectImage.getLottieAnimation() != null) {
+                    } else if (StickerView.this.effectImage.getLottieAnimation() != null) {
                         StickerView.this.effectImage.getLottieAnimation().stop();
                     }
-                    StickerView stickerView5 = StickerView.this;
-                    if (stickerView5.animateImage) {
-                        if (stickerView5.centerImage.getLottieAnimation() != null) {
+                    if (StickerView.this.animateImage) {
+                        if (StickerView.this.centerImage.getLottieAnimation() != null) {
                             StickerView.this.centerImage.getLottieAnimation().start();
                         }
-                    } else if (stickerView5.centerImage.getLottieAnimation() != null) {
+                    } else if (StickerView.this.centerImage.getLottieAnimation() != null) {
                         StickerView.this.centerImage.getLottieAnimation().stop();
                     }
-                    StickerView stickerView6 = StickerView.this;
-                    if (stickerView6.animateImage && stickerView6.animateImageProgress != 1.0f) {
+                    if (StickerView.this.animateImage && StickerView.this.animateImageProgress != 1.0f) {
                         StickerView.access$516(StickerView.this, 0.10666667f);
                         invalidate();
-                    } else {
-                        StickerView stickerView7 = StickerView.this;
-                        if (!stickerView7.animateImage && stickerView7.animateImageProgress != 0.0f) {
-                            StickerView.access$524(StickerView.this, 0.10666667f);
-                            invalidate();
-                        }
+                    } else if (!StickerView.this.animateImage && StickerView.this.animateImageProgress != 0.0f) {
+                        StickerView.access$524(StickerView.this, 0.10666667f);
+                        invalidate();
                     }
-                    StickerView stickerView8 = StickerView.this;
-                    stickerView8.animateImageProgress = Utilities.clamp(stickerView8.animateImageProgress, 1.0f, 0.0f);
-                    StickerView stickerView9 = StickerView.this;
-                    if (stickerView9.drawEffect && stickerView9.effectProgress != 1.0f) {
+                    StickerView stickerView = StickerView.this;
+                    stickerView.animateImageProgress = Utilities.clamp(stickerView.animateImageProgress, 1.0f, 0.0f);
+                    if (StickerView.this.drawEffect && StickerView.this.effectProgress != 1.0f) {
                         StickerView.access$416(StickerView.this, 0.10666667f);
                         invalidate();
-                    } else {
-                        StickerView stickerView10 = StickerView.this;
-                        if (!stickerView10.drawEffect && stickerView10.effectProgress != 0.0f) {
-                            StickerView.access$424(StickerView.this, 0.10666667f);
-                            invalidate();
-                        }
+                    } else if (!StickerView.this.drawEffect && StickerView.this.effectProgress != 0.0f) {
+                        StickerView.access$424(StickerView.this, 0.10666667f);
+                        invalidate();
                     }
-                    StickerView stickerView11 = StickerView.this;
-                    stickerView11.effectProgress = Utilities.clamp(stickerView11.effectProgress, 1.0f, 0.0f);
-                    float f = PremiumStickersPreviewRecycler.this.size * 0.45f;
-                    float f2 = 1.499267f * f;
-                    float measuredWidth = getMeasuredWidth() - f2;
-                    float measuredHeight = (getMeasuredHeight() - f2) / 2.0f;
-                    float f3 = f2 - f;
-                    StickerView.this.centerImage.setImageCoords((f3 - (0.02f * f2)) + measuredWidth, (f3 / 2.0f) + measuredHeight, f, f);
-                    StickerView stickerView12 = StickerView.this;
-                    stickerView12.centerImage.setAlpha((stickerView12.animateImageProgress * 0.7f) + 0.3f);
+                    StickerView stickerView2 = StickerView.this;
+                    stickerView2.effectProgress = Utilities.clamp(stickerView2.effectProgress, 1.0f, 0.0f);
+                    float smallImageSize = PremiumStickersPreviewRecycler.this.size * 0.45f;
+                    float size = 1.499267f * smallImageSize;
+                    float x = getMeasuredWidth() - size;
+                    float y = (getMeasuredHeight() - size) / 2.0f;
+                    StickerView.this.centerImage.setImageCoords(((size - smallImageSize) - (0.02f * size)) + x, ((size - smallImageSize) / 2.0f) + y, smallImageSize, smallImageSize);
+                    StickerView.this.centerImage.setAlpha((StickerView.this.animateImageProgress * 0.7f) + 0.3f);
                     StickerView.this.centerImage.draw(canvas);
                     if (StickerView.this.effectProgress != 0.0f) {
-                        StickerView.this.effectImage.setImageCoords(measuredWidth, measuredHeight, f2, f2);
-                        StickerView stickerView13 = StickerView.this;
-                        stickerView13.effectImage.setAlpha(stickerView13.effectProgress);
+                        StickerView.this.effectImage.setImageCoords(x, y, size, size);
+                        StickerView.this.effectImage.setAlpha(StickerView.this.effectProgress);
                         StickerView.this.effectImage.draw(canvas);
                     }
                 }
@@ -447,34 +429,34 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         }
 
         @Override // android.widget.FrameLayout, android.view.View
-        protected void onMeasure(int i, int i2) {
-            int i3 = (int) (PremiumStickersPreviewRecycler.this.size * 0.6f);
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            int size = (int) (PremiumStickersPreviewRecycler.this.size * 0.6f);
             ViewGroup.LayoutParams layoutParams = this.view.getLayoutParams();
             ViewGroup.LayoutParams layoutParams2 = this.view.getLayoutParams();
-            int dp = i3 - AndroidUtilities.dp(16.0f);
+            int dp = size - AndroidUtilities.dp(16.0f);
             layoutParams2.height = dp;
             layoutParams.width = dp;
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec((int) (i3 * 0.7f), 1073741824));
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec((int) (size * 0.7f), C.BUFFER_FLAG_ENCRYPTED));
         }
 
-        public void setSticker(TLRPC$Document tLRPC$Document) {
-            this.document = tLRPC$Document;
+        public void setSticker(TLRPC.Document document) {
+            this.document = document;
             this.update = true;
         }
 
-        public void setDrawImage(boolean z, boolean z2, boolean z3) {
+        public void setDrawImage(boolean animateImage, boolean drawEffect, boolean animated) {
             float f = 1.0f;
-            if (this.drawEffect != z2) {
-                this.drawEffect = z2;
-                if (!z3) {
-                    this.effectProgress = z2 ? 1.0f : 0.0f;
+            if (this.drawEffect != drawEffect) {
+                this.drawEffect = drawEffect;
+                if (!animated) {
+                    this.effectProgress = drawEffect ? 1.0f : 0.0f;
                 }
                 this.view.invalidate();
             }
-            if (this.animateImage != z) {
-                this.animateImage = z;
-                if (!z3) {
-                    if (!z) {
+            if (this.animateImage != animateImage) {
+                this.animateImage = animateImage;
+                if (!animated) {
+                    if (!animateImage) {
                         f = 0.0f;
                     }
                     this.animateImageProgress = f;
@@ -498,10 +480,10 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
         }
     }
 
-    public void setAutoPlayEnabled(boolean z) {
-        if (this.autoPlayEnabled != z) {
-            this.autoPlayEnabled = z;
-            if (z) {
+    public void setAutoPlayEnabled(boolean b) {
+        if (this.autoPlayEnabled != b) {
+            this.autoPlayEnabled = b;
+            if (b) {
                 scheduleAutoScroll();
                 this.checkEffect = true;
                 invalidate();

@@ -10,29 +10,25 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class FlacDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutputBuffer, FlacDecoderException> {
     private final FlacDecoderJni decoderJni;
     private final FlacStreamMetadata streamMetadata;
 
-    @Override // com.google.android.exoplayer2.decoder.Decoder
-    public String getName() {
-        return "libflac";
-    }
-
-    public FlacDecoder(int i, int i2, int i3, List<byte[]> list) throws FlacDecoderException {
-        super(new DecoderInputBuffer[i], new SimpleOutputBuffer[i2]);
-        Throwable e;
-        if (list.size() != 1) {
+    public FlacDecoder(int numInputBuffers, int numOutputBuffers, int maxInputBufferSize, List<byte[]> initializationData) throws FlacDecoderException {
+        super(new DecoderInputBuffer[numInputBuffers], new SimpleOutputBuffer[numOutputBuffers]);
+        Exception e;
+        if (initializationData.size() != 1) {
             throw new FlacDecoderException("Initialization data must be of length 1");
         }
         FlacDecoderJni flacDecoderJni = new FlacDecoderJni();
         this.decoderJni = flacDecoderJni;
-        flacDecoderJni.setData(ByteBuffer.wrap(list.get(0)));
+        flacDecoderJni.setData(ByteBuffer.wrap(initializationData.get(0)));
         try {
             FlacStreamMetadata decodeStreamMetadata = flacDecoderJni.decodeStreamMetadata();
             this.streamMetadata = decodeStreamMetadata;
-            setInitialInputBufferSize(i3 == -1 ? decodeStreamMetadata.maxFrameSize : i3);
+            int initialInputBufferSize = maxInputBufferSize != -1 ? maxInputBufferSize : decodeStreamMetadata.maxFrameSize;
+            setInitialInputBufferSize(initialInputBufferSize);
         } catch (ParserException e2) {
             throw new FlacDecoderException("Failed to decode StreamInfo", e2);
         } catch (IOException e3) {
@@ -42,6 +38,11 @@ final class FlacDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutputBu
             e = e4;
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override // com.google.android.exoplayer2.decoder.Decoder
+    public String getName() {
+        return "libflac";
     }
 
     @Override // com.google.android.exoplayer2.decoder.SimpleDecoder
@@ -55,18 +56,19 @@ final class FlacDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutputBu
     }
 
     @Override // com.google.android.exoplayer2.decoder.SimpleDecoder
-    public FlacDecoderException createUnexpectedDecodeException(Throwable th) {
-        return new FlacDecoderException("Unexpected decode error", th);
+    public FlacDecoderException createUnexpectedDecodeException(Throwable error) {
+        return new FlacDecoderException("Unexpected decode error", error);
     }
 
-    public FlacDecoderException decode(DecoderInputBuffer decoderInputBuffer, SimpleOutputBuffer simpleOutputBuffer, boolean z) {
-        Throwable e;
-        if (z) {
+    public FlacDecoderException decode(DecoderInputBuffer inputBuffer, SimpleOutputBuffer outputBuffer, boolean reset) {
+        Exception e;
+        if (reset) {
             this.decoderJni.flush();
         }
-        this.decoderJni.setData((ByteBuffer) Util.castNonNull(decoderInputBuffer.data));
+        this.decoderJni.setData((ByteBuffer) Util.castNonNull(inputBuffer.data));
+        ByteBuffer outputData = outputBuffer.init(inputBuffer.timeUs, this.streamMetadata.getMaxDecodedFrameSize());
         try {
-            this.decoderJni.decodeSample(simpleOutputBuffer.init(decoderInputBuffer.timeUs, this.streamMetadata.getMaxDecodedFrameSize()));
+            this.decoderJni.decodeSample(outputData);
             return null;
         } catch (FlacDecoderJni.FlacFrameDecodeException e2) {
             return new FlacDecoderException("Frame decoding failed", e2);

@@ -1,19 +1,18 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzfw implements Cloneable {
+    private static final zzfx zzrl = new zzfx();
     private int mSize;
+    private boolean zzrm;
     private int[] zzrn;
     private zzfx[] zzro;
-
-    static {
-        new zzfx();
-    }
 
     zzfw() {
         this(10);
     }
 
     private zzfw(int i) {
+        this.zzrm = false;
         int i2 = i << 2;
         int i3 = 4;
         while (true) {

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import androidx.core.view.GravityCompat;
 import j$.util.function.Consumer;
 import j$.util.stream.Stream;
 import j$.wrappers.C$r8$wrapper$java$util$stream$Stream$VWRP;
@@ -29,11 +31,11 @@ import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.StickerImageView;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class FilesMigrationService extends Service {
-    public static FilesMigrationBottomSheet filesMigrationBottomSheet = null;
-    public static boolean hasOldFolder = false;
-    public static boolean isRunning = false;
+    public static FilesMigrationBottomSheet filesMigrationBottomSheet;
+    public static boolean hasOldFolder;
+    public static boolean isRunning;
     private static boolean wasShown = false;
     long lastUpdateTime;
     private int movedFilesCount;
@@ -45,24 +47,25 @@ public class FilesMigrationService extends Service {
     }
 
     public static void start() {
-        ApplicationLoader.applicationContext.startService(new Intent(ApplicationLoader.applicationContext, FilesMigrationService.class));
+        Intent intent = new Intent(ApplicationLoader.applicationContext, FilesMigrationService.class);
+        ApplicationLoader.applicationContext.startService(intent);
     }
 
     @Override // android.app.Service
-    public int onStartCommand(Intent intent, int i, int i2) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         NotificationsController.checkOtherNotificationsChannel();
-        Notification build = new Notification.Builder(this, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL).setContentTitle(getText(R.string.MigratingFiles)).setAutoCancel(false).setSmallIcon(R.drawable.notification).build();
+        Notification notification = new Notification.Builder(this, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL).setContentTitle(getText(org.telegram.messenger.beta.R.string.MigratingFiles)).setAutoCancel(false).setSmallIcon(org.telegram.messenger.beta.R.drawable.notification).build();
         isRunning = true;
         new AnonymousClass1().start();
-        startForeground(301, build);
-        return super.onStartCommand(intent, i, i2);
+        startForeground(301, notification);
+        return super.onStartCommand(intent, flags, startId);
     }
 
     /* renamed from: org.telegram.messenger.FilesMigrationService$1 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public class AnonymousClass1 extends Thread {
         AnonymousClass1() {
-            FilesMigrationService.this = r1;
+            FilesMigrationService.this = this$0;
         }
 
         @Override // java.lang.Thread, java.lang.Runnable
@@ -71,12 +74,13 @@ public class FilesMigrationService extends Service {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.FilesMigrationService$1$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    FilesMigrationService.AnonymousClass1.this.lambda$run$0();
+                    FilesMigrationService.AnonymousClass1.this.m278lambda$run$0$orgtelegrammessengerFilesMigrationService$1();
                 }
             });
         }
 
-        public /* synthetic */ void lambda$run$0() {
+        /* renamed from: lambda$run$0$org-telegram-messenger-FilesMigrationService$1 */
+        public /* synthetic */ void m278lambda$run$0$orgtelegrammessengerFilesMigrationService$1() {
             FilesMigrationService.isRunning = false;
             FilesMigrationService.this.stopForeground(true);
             FilesMigrationService.this.stopSelf();
@@ -84,57 +88,68 @@ public class FilesMigrationService extends Service {
     }
 
     public void migrateOldFolder() {
-        ArrayList<File> rootDirs;
-        File externalStorageDirectory = Environment.getExternalStorageDirectory();
-        if (Build.VERSION.SDK_INT >= 19 && !TextUtils.isEmpty(SharedConfig.storageCacheDir) && (rootDirs = AndroidUtilities.getRootDirs()) != null) {
-            int size = rootDirs.size();
-            int i = 0;
+        ArrayList<File> dirs;
+        File path = Environment.getExternalStorageDirectory();
+        if (Build.VERSION.SDK_INT >= 19 && !TextUtils.isEmpty(SharedConfig.storageCacheDir) && (dirs = AndroidUtilities.getRootDirs()) != null) {
+            int a = 0;
+            int N = dirs.size();
             while (true) {
-                if (i >= size) {
+                if (a >= N) {
                     break;
                 }
-                File file = rootDirs.get(i);
-                if (file.getAbsolutePath().startsWith(SharedConfig.storageCacheDir)) {
-                    externalStorageDirectory = file;
+                File dir = dirs.get(a);
+                if (!dir.getAbsolutePath().startsWith(SharedConfig.storageCacheDir)) {
+                    a++;
+                } else {
+                    path = dir;
                     break;
                 }
-                i++;
             }
         }
-        File file2 = new File(ApplicationLoader.applicationContext.getExternalFilesDir(null), "Telegram");
-        File file3 = new File(externalStorageDirectory, "Telegram");
-        this.totalFilesCount = getFilesCount(file3);
-        long currentTimeMillis = System.currentTimeMillis();
-        if (file3.canRead() && file3.canWrite()) {
-            moveDirectory(file3, file2);
+        File newPath = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+        File telegramPath = new File(newPath, "Telegram");
+        File oldPath = new File(path, "Telegram");
+        this.totalFilesCount = getFilesCount(oldPath);
+        long moveStart = System.currentTimeMillis();
+        if (oldPath.canRead() && oldPath.canWrite()) {
+            moveDirectory(oldPath, telegramPath);
         }
-        FileLog.d("move time = " + (System.currentTimeMillis() - currentTimeMillis));
-        ApplicationLoader.applicationContext.getSharedPreferences("systemConfig", 0).edit().putBoolean("migration_to_scoped_storage_finished", true).apply();
+        long dt = System.currentTimeMillis() - moveStart;
+        FileLog.d("move time = " + dt);
+        SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("systemConfig", 0);
+        sharedPreferences.edit().putBoolean("migration_to_scoped_storage_finished", true).apply();
     }
 
-    private int getFilesCount(File file) {
-        File[] listFiles;
-        if (file.exists() && (listFiles = file.listFiles()) != null) {
-            int i = 0;
-            for (int i2 = 0; i2 < listFiles.length; i2++) {
-                i = listFiles[i2].isDirectory() ? i + getFilesCount(listFiles[i2]) : i + 1;
+    private int getFilesCount(File source) {
+        if (!source.exists()) {
+            return 0;
+        }
+        int count = 0;
+        File[] fileList = source.listFiles();
+        if (fileList != null) {
+            for (int i = 0; i < fileList.length; i++) {
+                if (fileList[i].isDirectory()) {
+                    count += getFilesCount(fileList[i]);
+                } else {
+                    count++;
+                }
             }
-            return i;
         }
-        return 0;
+        return count;
     }
 
-    private void moveDirectory(File file, final File file2) {
-        if (file.exists()) {
-            if (!file2.exists() && !file2.mkdir()) {
+    /* JADX WARN: Generic types in debug info not equals: j$.util.stream.Stream != java.util.stream.Stream<java.nio.file.Path> */
+    private void moveDirectory(File source, final File target) {
+        if (source.exists()) {
+            if (!target.exists() && !target.mkdir()) {
                 return;
             }
             try {
-                Stream convert = C$r8$wrapper$java$util$stream$Stream$VWRP.convert(Files.list(file.toPath()));
+                Stream convert = C$r8$wrapper$java$util$stream$Stream$VWRP.convert(Files.list(source.toPath()));
                 convert.forEach(new Consumer() { // from class: org.telegram.messenger.FilesMigrationService$$ExternalSyntheticLambda1
                     @Override // j$.util.function.Consumer
                     public final void accept(Object obj) {
-                        FilesMigrationService.this.lambda$moveDirectory$0(file2, (Path) obj);
+                        FilesMigrationService.this.m276x55fd53fa(target, (Path) obj);
                     }
 
                     @Override // j$.util.function.Consumer
@@ -142,81 +157,90 @@ public class FilesMigrationService extends Service {
                         return consumer.getClass();
                     }
                 });
-                convert.close();
+                if (convert != null) {
+                    convert.close();
+                }
             } catch (Exception e) {
                 FileLog.e(e);
             }
             try {
-                file.delete();
+                source.delete();
             } catch (Exception e2) {
                 FileLog.e(e2);
             }
         }
     }
 
-    public /* synthetic */ void lambda$moveDirectory$0(File file, Path path) {
-        File file2 = new File(file, path.getFileName().toString());
-        if (Files.isDirectory(path, new LinkOption[0])) {
-            moveDirectory(path.toFile(), file2);
+    /* renamed from: lambda$moveDirectory$0$org-telegram-messenger-FilesMigrationService */
+    public /* synthetic */ void m276x55fd53fa(File target, Path path) {
+        File dest = new File(target, path.getFileName().toString());
+        if (!Files.isDirectory(path, new LinkOption[0])) {
+            try {
+                Files.move(path, dest.toPath(), new CopyOption[0]);
+            } catch (Exception e) {
+                FileLog.e((Throwable) e, false);
+                try {
+                    path.toFile().delete();
+                } catch (Exception e1) {
+                    FileLog.e(e1);
+                }
+            }
+            this.movedFilesCount++;
+            updateProgress();
             return;
         }
-        try {
-            Files.move(path, file2.toPath(), new CopyOption[0]);
-        } catch (Exception e) {
-            FileLog.e((Throwable) e, false);
-            try {
-                path.toFile().delete();
-            } catch (Exception e2) {
-                FileLog.e(e2);
-            }
-        }
-        this.movedFilesCount++;
-        updateProgress();
+        moveDirectory(path.toFile(), dest);
     }
 
     private void updateProgress() {
-        if (System.currentTimeMillis() - this.lastUpdateTime > 20 || this.movedFilesCount >= this.totalFilesCount - 1) {
-            final int i = this.movedFilesCount;
+        long time = System.currentTimeMillis();
+        if (time - this.lastUpdateTime > 20 || this.movedFilesCount >= this.totalFilesCount - 1) {
+            final int currentCount = this.movedFilesCount;
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.FilesMigrationService$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    FilesMigrationService.this.lambda$updateProgress$1(i);
+                    FilesMigrationService.this.m277x13efee05(currentCount);
                 }
             });
         }
     }
 
-    public /* synthetic */ void lambda$updateProgress$1(int i) {
-        ((NotificationManager) getSystemService("notification")).notify(301, new Notification.Builder(this, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL).setContentTitle(getText(R.string.MigratingFiles)).setContentText(String.format("%s/%s", Integer.valueOf(i), Integer.valueOf(this.totalFilesCount))).setSmallIcon(R.drawable.notification).setAutoCancel(false).setProgress(this.totalFilesCount, i, false).build());
+    /* renamed from: lambda$updateProgress$1$org-telegram-messenger-FilesMigrationService */
+    public /* synthetic */ void m277x13efee05(int currentCount) {
+        Notification notification = new Notification.Builder(this, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL).setContentTitle(getText(org.telegram.messenger.beta.R.string.MigratingFiles)).setContentText(String.format("%s/%s", Integer.valueOf(currentCount), Integer.valueOf(this.totalFilesCount))).setSmallIcon(org.telegram.messenger.beta.R.drawable.notification).setAutoCancel(false).setProgress(this.totalFilesCount, currentCount, false).build();
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService("notification");
+        mNotificationManager.notify(301, notification);
     }
 
-    public static void checkBottomSheet(BaseFragment baseFragment) {
-        ArrayList<File> rootDirs;
+    public static void checkBottomSheet(BaseFragment fragment) {
+        ArrayList<File> dirs;
         SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("systemConfig", 0);
         if (!Environment.isExternalStorageLegacy() || sharedPreferences.getBoolean("migration_to_scoped_storage_finished", false) || sharedPreferences.getInt("migration_to_scoped_storage_count", 0) >= 5 || wasShown || filesMigrationBottomSheet != null || isRunning) {
             return;
         }
         if (Build.VERSION.SDK_INT >= 30) {
-            File externalStorageDirectory = Environment.getExternalStorageDirectory();
-            if (!TextUtils.isEmpty(SharedConfig.storageCacheDir) && (rootDirs = AndroidUtilities.getRootDirs()) != null) {
-                int size = rootDirs.size();
-                int i = 0;
+            File path = Environment.getExternalStorageDirectory();
+            if (!TextUtils.isEmpty(SharedConfig.storageCacheDir) && (dirs = AndroidUtilities.getRootDirs()) != null) {
+                int a = 0;
+                int N = dirs.size();
                 while (true) {
-                    if (i >= size) {
+                    if (a >= N) {
                         break;
                     }
-                    File file = rootDirs.get(i);
-                    if (file.getAbsolutePath().startsWith(SharedConfig.storageCacheDir)) {
-                        externalStorageDirectory = file;
+                    File dir = dirs.get(a);
+                    if (!dir.getAbsolutePath().startsWith(SharedConfig.storageCacheDir)) {
+                        a++;
+                    } else {
+                        path = dir;
                         break;
                     }
-                    i++;
                 }
             }
-            hasOldFolder = new File(externalStorageDirectory, "Telegram").exists();
+            File oldDirectory = new File(path, "Telegram");
+            hasOldFolder = oldDirectory.exists();
         }
         if (hasOldFolder) {
-            FilesMigrationBottomSheet filesMigrationBottomSheet2 = new FilesMigrationBottomSheet(baseFragment);
+            FilesMigrationBottomSheet filesMigrationBottomSheet2 = new FilesMigrationBottomSheet(fragment);
             filesMigrationBottomSheet = filesMigrationBottomSheet2;
             filesMigrationBottomSheet2.show();
             wasShown = true;
@@ -226,7 +250,7 @@ public class FilesMigrationService extends Service {
         sharedPreferences.edit().putBoolean("migration_to_scoped_storage_finished", true).apply();
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class FilesMigrationBottomSheet extends BottomSheet {
         BaseFragment fragment;
 
@@ -240,70 +264,72 @@ public class FilesMigrationService extends Service {
             return false;
         }
 
-        public FilesMigrationBottomSheet(BaseFragment baseFragment) {
-            super(baseFragment.getParentActivity(), false);
-            this.fragment = baseFragment;
+        public FilesMigrationBottomSheet(BaseFragment fragment) {
+            super(fragment.getParentActivity(), false);
+            this.fragment = fragment;
             setCanceledOnTouchOutside(false);
-            Activity parentActivity = baseFragment.getParentActivity();
-            LinearLayout linearLayout = new LinearLayout(parentActivity);
+            Context context = fragment.getParentActivity();
+            LinearLayout linearLayout = new LinearLayout(context);
             linearLayout.setOrientation(1);
-            StickerImageView stickerImageView = new StickerImageView(parentActivity, this.currentAccount);
-            stickerImageView.setStickerNum(7);
-            stickerImageView.getImageReceiver().setAutoRepeat(1);
-            linearLayout.addView(stickerImageView, LayoutHelper.createLinear(144, 144, 1, 0, 16, 0, 0));
-            TextView textView = new TextView(parentActivity);
-            textView.setGravity(8388611);
-            textView.setTextColor(Theme.getColor("dialogTextBlack"));
-            textView.setTextSize(1, 20.0f);
-            textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-            textView.setText(LocaleController.getString("MigrateOldFolderTitle", R.string.MigrateOldFolderTitle));
-            linearLayout.addView(textView, LayoutHelper.createFrame(-1, -2.0f, 0, 21.0f, 30.0f, 21.0f, 0.0f));
-            TextView textView2 = new TextView(parentActivity);
-            textView2.setGravity(8388611);
-            textView2.setTextSize(1, 15.0f);
-            textView2.setTextColor(Theme.getColor("dialogTextBlack"));
-            textView2.setText(AndroidUtilities.replaceTags(LocaleController.getString("MigrateOldFolderDescription", R.string.MigrateOldFolderDescription)));
-            linearLayout.addView(textView2, LayoutHelper.createFrame(-1, -2.0f, 0, 21.0f, 15.0f, 21.0f, 16.0f));
-            TextView textView3 = new TextView(parentActivity);
-            textView3.setPadding(AndroidUtilities.dp(34.0f), 0, AndroidUtilities.dp(34.0f), 0);
-            textView3.setGravity(17);
-            textView3.setTextSize(1, 14.0f);
-            textView3.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-            textView3.setText(LocaleController.getString("MigrateOldFolderButton", R.string.MigrateOldFolderButton));
-            textView3.setTextColor(Theme.getColor("featuredStickers_buttonText"));
-            textView3.setBackground(Theme.AdaptiveRipple.filledRect("featuredStickers_addButton", 6.0f));
-            linearLayout.addView(textView3, LayoutHelper.createFrame(-1, 48.0f, 0, 16.0f, 15.0f, 16.0f, 16.0f));
-            textView3.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.messenger.FilesMigrationService$FilesMigrationBottomSheet$$ExternalSyntheticLambda0
+            StickerImageView imageView = new StickerImageView(context, this.currentAccount);
+            imageView.setStickerNum(7);
+            imageView.getImageReceiver().setAutoRepeat(1);
+            linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, 1, 0, 16, 0, 0));
+            TextView title = new TextView(context);
+            title.setGravity(GravityCompat.START);
+            title.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+            title.setTextSize(1, 20.0f);
+            title.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            title.setText(LocaleController.getString("MigrateOldFolderTitle", org.telegram.messenger.beta.R.string.MigrateOldFolderTitle));
+            linearLayout.addView(title, LayoutHelper.createFrame(-1, -2.0f, 0, 21.0f, 30.0f, 21.0f, 0.0f));
+            TextView description = new TextView(context);
+            description.setGravity(GravityCompat.START);
+            description.setTextSize(1, 15.0f);
+            description.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+            description.setText(AndroidUtilities.replaceTags(LocaleController.getString("MigrateOldFolderDescription", org.telegram.messenger.beta.R.string.MigrateOldFolderDescription)));
+            linearLayout.addView(description, LayoutHelper.createFrame(-1, -2.0f, 0, 21.0f, 15.0f, 21.0f, 16.0f));
+            TextView buttonTextView = new TextView(context);
+            buttonTextView.setPadding(AndroidUtilities.dp(34.0f), 0, AndroidUtilities.dp(34.0f), 0);
+            buttonTextView.setGravity(17);
+            buttonTextView.setTextSize(1, 14.0f);
+            buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            buttonTextView.setText(LocaleController.getString("MigrateOldFolderButton", org.telegram.messenger.beta.R.string.MigrateOldFolderButton));
+            buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+            buttonTextView.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_featuredStickers_addButton, 6.0f));
+            linearLayout.addView(buttonTextView, LayoutHelper.createFrame(-1, 48.0f, 0, 16.0f, 15.0f, 16.0f, 16.0f));
+            buttonTextView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.messenger.FilesMigrationService$FilesMigrationBottomSheet$$ExternalSyntheticLambda0
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    FilesMigrationService.FilesMigrationBottomSheet.this.lambda$new$0(view);
+                    FilesMigrationService.FilesMigrationBottomSheet.this.m279xaf48eacf(view);
                 }
             });
-            ScrollView scrollView = new ScrollView(parentActivity);
+            ScrollView scrollView = new ScrollView(context);
             scrollView.addView(linearLayout);
             setCustomView(scrollView);
         }
 
-        public /* synthetic */ void lambda$new$0(View view) {
+        /* renamed from: lambda$new$0$org-telegram-messenger-FilesMigrationService$FilesMigrationBottomSheet */
+        public /* synthetic */ void m279xaf48eacf(View view) {
             migrateOldFolder();
         }
 
         public void migrateOldFolder() {
-            Activity parentActivity = this.fragment.getParentActivity();
-            boolean z = true;
-            boolean z2 = parentActivity.checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == 0;
-            if (parentActivity.checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0) {
-                z = false;
+            Activity activity = this.fragment.getParentActivity();
+            boolean canRead = true;
+            boolean canWrite = activity.checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == 0;
+            if (activity.checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0) {
+                canRead = false;
             }
-            if (!z || !z2) {
-                ArrayList arrayList = new ArrayList();
-                if (!z) {
-                    arrayList.add("android.permission.READ_EXTERNAL_STORAGE");
+            if (!canRead || !canWrite) {
+                ArrayList<String> permissions = new ArrayList<>();
+                if (!canRead) {
+                    permissions.add("android.permission.READ_EXTERNAL_STORAGE");
                 }
-                if (!z2) {
-                    arrayList.add("android.permission.WRITE_EXTERNAL_STORAGE");
+                if (!canWrite) {
+                    permissions.add("android.permission.WRITE_EXTERNAL_STORAGE");
                 }
-                parentActivity.requestPermissions((String[]) arrayList.toArray(new String[arrayList.size()]), 4);
+                String[] string = new String[permissions.size()];
+                activity.requestPermissions((String[]) permissions.toArray(string), 4);
                 return;
             }
             FilesMigrationService.start();

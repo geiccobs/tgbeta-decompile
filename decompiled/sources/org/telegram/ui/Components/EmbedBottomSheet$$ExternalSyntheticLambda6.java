@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import androidx.arch.core.util.Function;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class EmbedBottomSheet$$ExternalSyntheticLambda6 implements Function {
     public static final /* synthetic */ EmbedBottomSheet$$ExternalSyntheticLambda6 INSTANCE = new EmbedBottomSheet$$ExternalSyntheticLambda6();
 

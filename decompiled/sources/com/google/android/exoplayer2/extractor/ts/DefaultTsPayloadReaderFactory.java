@@ -4,23 +4,44 @@ import android.util.SparseArray;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.ts.TsPayloadReader;
 import com.google.android.exoplayer2.text.cea.Cea708InitializationData;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DefaultTsPayloadReaderFactory implements TsPayloadReader.Factory {
+    private static final int DESCRIPTOR_TAG_CAPTION_SERVICE = 134;
+    public static final int FLAG_ALLOW_NON_IDR_KEYFRAMES = 1;
+    public static final int FLAG_DETECT_ACCESS_UNITS = 8;
+    public static final int FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS = 64;
+    public static final int FLAG_IGNORE_AAC_STREAM = 2;
+    public static final int FLAG_IGNORE_H264_STREAM = 4;
+    public static final int FLAG_IGNORE_SPLICE_INFO_STREAM = 16;
+    public static final int FLAG_OVERRIDE_CAPTION_DESCRIPTORS = 32;
     private final List<Format> closedCaptionFormats;
     private final int flags;
 
-    public DefaultTsPayloadReaderFactory(int i) {
-        this(i, Collections.singletonList(Format.createTextSampleFormat(null, "application/cea-608", 0, null)));
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface Flags {
     }
 
-    public DefaultTsPayloadReaderFactory(int i, List<Format> list) {
-        this.flags = i;
-        this.closedCaptionFormats = list;
+    public DefaultTsPayloadReaderFactory() {
+        this(0);
+    }
+
+    public DefaultTsPayloadReaderFactory(int flags) {
+        this(flags, Collections.singletonList(Format.createTextSampleFormat(null, MimeTypes.APPLICATION_CEA608, 0, null)));
+    }
+
+    public DefaultTsPayloadReaderFactory(int flags, List<Format> closedCaptionFormats) {
+        this.flags = flags;
+        this.closedCaptionFormats = closedCaptionFormats;
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.TsPayloadReader.Factory
@@ -28,61 +49,57 @@ public final class DefaultTsPayloadReaderFactory implements TsPayloadReader.Fact
         return new SparseArray<>();
     }
 
+    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
     @Override // com.google.android.exoplayer2.extractor.ts.TsPayloadReader.Factory
-    public TsPayloadReader createPayloadReader(int i, TsPayloadReader.EsInfo esInfo) {
-        if (i != 2) {
-            if (i == 3 || i == 4) {
+    public TsPayloadReader createPayloadReader(int streamType, TsPayloadReader.EsInfo esInfo) {
+        switch (streamType) {
+            case 2:
+                return new PesReader(new H262Reader(buildUserDataReader(esInfo)));
+            case 3:
+            case 4:
                 return new PesReader(new MpegAudioReader(esInfo.language));
-            }
-            if (i == 15) {
+            case 15:
                 if (!isSet(2)) {
                     return new PesReader(new AdtsReader(false, esInfo.language));
                 }
                 return null;
-            } else if (i == 17) {
+            case 17:
                 if (!isSet(2)) {
                     return new PesReader(new LatmReader(esInfo.language));
                 }
                 return null;
-            } else if (i == 21) {
+            case 21:
                 return new PesReader(new Id3Reader());
-            } else {
-                if (i == 27) {
-                    if (!isSet(4)) {
-                        return new PesReader(new H264Reader(buildSeiReader(esInfo), isSet(1), isSet(8)));
-                    }
-                    return null;
-                } else if (i == 36) {
-                    return new PesReader(new H265Reader(buildSeiReader(esInfo)));
-                } else {
-                    if (i != 89) {
-                        if (i != 138) {
-                            if (i != 172) {
-                                if (i != 129) {
-                                    if (i != 130) {
-                                        if (i == 134) {
-                                            if (!isSet(16)) {
-                                                return new SectionReader(new SpliceInfoSectionReader());
-                                            }
-                                            return null;
-                                        } else if (i != 135) {
-                                            return null;
-                                        }
-                                    } else if (!isSet(64)) {
-                                        return null;
-                                    }
-                                }
-                                return new PesReader(new Ac3Reader(esInfo.language));
-                            }
-                            return new PesReader(new Ac4Reader(esInfo.language));
-                        }
-                        return new PesReader(new DtsReader(esInfo.language));
-                    }
-                    return new PesReader(new DvbSubtitleReader(esInfo.dvbSubtitleInfos));
+            case 27:
+                if (!isSet(4)) {
+                    return new PesReader(new H264Reader(buildSeiReader(esInfo), isSet(1), isSet(8)));
                 }
-            }
+                return null;
+            case 36:
+                return new PesReader(new H265Reader(buildSeiReader(esInfo)));
+            case TsExtractor.TS_STREAM_TYPE_DVBSUBS /* 89 */:
+                return new PesReader(new DvbSubtitleReader(esInfo.dvbSubtitleInfos));
+            case TsExtractor.TS_STREAM_TYPE_AC3 /* 129 */:
+            case TsExtractor.TS_STREAM_TYPE_E_AC3 /* 135 */:
+                return new PesReader(new Ac3Reader(esInfo.language));
+            case TsExtractor.TS_STREAM_TYPE_HDMV_DTS /* 130 */:
+                if (!isSet(64)) {
+                    return null;
+                }
+                break;
+            case 134:
+                if (!isSet(16)) {
+                    return new SectionReader(new SpliceInfoSectionReader());
+                }
+                return null;
+            case TsExtractor.TS_STREAM_TYPE_DTS /* 138 */:
+                break;
+            case TsExtractor.TS_STREAM_TYPE_AC4 /* 172 */:
+                return new PesReader(new Ac4Reader(esInfo.language));
+            default:
+                return null;
         }
-        return new PesReader(new H262Reader(buildUserDataReader(esInfo)));
+        return new PesReader(new DtsReader(esInfo.language));
     }
 
     private SeiReader buildSeiReader(TsPayloadReader.EsInfo esInfo) {
@@ -94,51 +111,50 @@ public final class DefaultTsPayloadReaderFactory implements TsPayloadReader.Fact
     }
 
     private List<Format> getClosedCaptionFormats(TsPayloadReader.EsInfo esInfo) {
-        int i;
-        String str;
-        List<byte[]> list;
+        int accessibilityChannel;
+        String mimeType;
         if (isSet(32)) {
             return this.closedCaptionFormats;
         }
-        ParsableByteArray parsableByteArray = new ParsableByteArray(esInfo.descriptorBytes);
-        List<Format> list2 = this.closedCaptionFormats;
-        while (parsableByteArray.bytesLeft() > 0) {
-            int readUnsignedByte = parsableByteArray.readUnsignedByte();
-            int position = parsableByteArray.getPosition() + parsableByteArray.readUnsignedByte();
-            if (readUnsignedByte == 134) {
-                list2 = new ArrayList<>();
-                int readUnsignedByte2 = parsableByteArray.readUnsignedByte() & 31;
-                for (int i2 = 0; i2 < readUnsignedByte2; i2++) {
-                    String readString = parsableByteArray.readString(3);
-                    int readUnsignedByte3 = parsableByteArray.readUnsignedByte();
-                    boolean z = true;
-                    boolean z2 = (readUnsignedByte3 & ConnectionsManager.RequestFlagNeedQuickAck) != 0;
-                    if (z2) {
-                        i = readUnsignedByte3 & 63;
-                        str = "application/cea-708";
+        ParsableByteArray scratchDescriptorData = new ParsableByteArray(esInfo.descriptorBytes);
+        List<Format> closedCaptionFormats = this.closedCaptionFormats;
+        while (scratchDescriptorData.bytesLeft() > 0) {
+            int descriptorTag = scratchDescriptorData.readUnsignedByte();
+            int descriptorLength = scratchDescriptorData.readUnsignedByte();
+            int nextDescriptorPosition = scratchDescriptorData.getPosition() + descriptorLength;
+            if (descriptorTag == 134) {
+                closedCaptionFormats = new ArrayList();
+                int numberOfServices = scratchDescriptorData.readUnsignedByte() & 31;
+                for (int i = 0; i < numberOfServices; i++) {
+                    String language = scratchDescriptorData.readString(3);
+                    int captionTypeByte = scratchDescriptorData.readUnsignedByte();
+                    boolean isWideAspectRatio = false;
+                    boolean isDigital = (captionTypeByte & 128) != 0;
+                    if (isDigital) {
+                        mimeType = MimeTypes.APPLICATION_CEA708;
+                        accessibilityChannel = captionTypeByte & 63;
                     } else {
-                        str = "application/cea-608";
-                        i = 1;
+                        mimeType = MimeTypes.APPLICATION_CEA608;
+                        accessibilityChannel = 1;
                     }
-                    byte readUnsignedByte4 = (byte) parsableByteArray.readUnsignedByte();
-                    parsableByteArray.skipBytes(1);
-                    if (z2) {
-                        if ((readUnsignedByte4 & 64) == 0) {
-                            z = false;
+                    byte flags = (byte) scratchDescriptorData.readUnsignedByte();
+                    scratchDescriptorData.skipBytes(1);
+                    List<byte[]> initializationData = null;
+                    if (isDigital) {
+                        if ((flags & 64) != 0) {
+                            isWideAspectRatio = true;
                         }
-                        list = Cea708InitializationData.buildData(z);
-                    } else {
-                        list = null;
+                        initializationData = Cea708InitializationData.buildData(isWideAspectRatio);
                     }
-                    list2.add(Format.createTextSampleFormat(null, str, null, -1, 0, readString, i, null, Long.MAX_VALUE, list));
+                    closedCaptionFormats.add(Format.createTextSampleFormat(null, mimeType, null, -1, 0, language, accessibilityChannel, null, Long.MAX_VALUE, initializationData));
                 }
             }
-            parsableByteArray.setPosition(position);
+            scratchDescriptorData.setPosition(nextDescriptorPosition);
         }
-        return list2;
+        return closedCaptionFormats;
     }
 
-    private boolean isSet(int i) {
-        return (i & this.flags) != 0;
+    private boolean isSet(int flag) {
+        return (this.flags & flag) != 0;
     }
 }

@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzmf {
     public static boolean zzd(byte b) {
         return b >= 0;
@@ -12,10 +12,6 @@ final class zzmf {
 
     public static boolean zzf(byte b) {
         return b < -16;
-    }
-
-    private static boolean zzg(byte b) {
-        return b > -65;
     }
 
     public static void zzb(byte b, char[] cArr, int i) {
@@ -43,5 +39,9 @@ final class zzmf {
         int i2 = ((b & 7) << 18) | ((b2 & 63) << 12) | ((b3 & 63) << 6) | (b4 & 63);
         cArr[i] = (char) ((i2 >>> 10) + 55232);
         cArr[i + 1] = (char) ((i2 & 1023) + 56320);
+    }
+
+    private static boolean zzg(byte b) {
+        return b > -65;
     }
 }

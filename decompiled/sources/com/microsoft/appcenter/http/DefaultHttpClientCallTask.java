@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +18,11 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONObject;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DefaultHttpClientCallTask extends AsyncTask<Void, Void, Object> {
+    private static final int DEFAULT_STRING_BUILDER_CAPACITY = 16;
+    private static final int MAX_PRETTIFY_LOG_LENGTH = 4096;
+    private static final int MIN_GZIP_LENGTH = 1400;
     private final HttpClient.CallTemplate mCallTemplate;
     private final boolean mCompressionEnabled;
     private final Map<String, String> mHeaders;
@@ -30,34 +34,34 @@ public class DefaultHttpClientCallTask extends AsyncTask<Void, Void, Object> {
     private static final Pattern TOKEN_REGEX_JSON = Pattern.compile("token\":\"[^\"]+\"");
     private static final Pattern REDIRECT_URI_REGEX_JSON = Pattern.compile("redirect_uri\":\"[^\"]+\"");
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Tracker {
         void onFinish(DefaultHttpClientCallTask defaultHttpClientCallTask);
 
         void onStart(DefaultHttpClientCallTask defaultHttpClientCallTask);
     }
 
-    public DefaultHttpClientCallTask(String str, String str2, Map<String, String> map, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback, Tracker tracker, boolean z) {
-        this.mUrl = str;
-        this.mMethod = str2;
-        this.mHeaders = map;
+    public DefaultHttpClientCallTask(String url, String method, Map<String, String> headers, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback, Tracker tracker, boolean compressionEnabled) {
+        this.mUrl = url;
+        this.mMethod = method;
+        this.mHeaders = headers;
         this.mCallTemplate = callTemplate;
         this.mServiceCallback = serviceCallback;
         this.mTracker = tracker;
-        this.mCompressionEnabled = z;
+        this.mCompressionEnabled = compressionEnabled;
     }
 
     private static InputStream getInputStream(HttpsURLConnection httpsURLConnection) throws IOException {
-        int responseCode = httpsURLConnection.getResponseCode();
-        if (responseCode >= 200 && responseCode < 400) {
+        int status = httpsURLConnection.getResponseCode();
+        if (status >= 200 && status < 400) {
             return httpsURLConnection.getInputStream();
         }
         return httpsURLConnection.getErrorStream();
     }
 
-    private void writePayload(OutputStream outputStream, byte[] bArr) throws IOException {
-        for (int i = 0; i < bArr.length; i += 1024) {
-            outputStream.write(bArr, i, Math.min(bArr.length - i, 1024));
+    private void writePayload(OutputStream out, byte[] payload) throws IOException {
+        for (int i = 0; i < payload.length; i += 1024) {
+            out.write(payload, i, Math.min(payload.length - i, 1024));
             if (isCancelled()) {
                 return;
             }
@@ -65,52 +69,48 @@ public class DefaultHttpClientCallTask extends AsyncTask<Void, Void, Object> {
     }
 
     private String readResponse(HttpsURLConnection httpsURLConnection) throws IOException {
-        StringBuilder sb = new StringBuilder(Math.max(httpsURLConnection.getContentLength(), 16));
-        InputStream inputStream = getInputStream(httpsURLConnection);
+        StringBuilder builder = new StringBuilder(Math.max(httpsURLConnection.getContentLength(), 16));
+        InputStream stream = getInputStream(httpsURLConnection);
         try {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-            char[] cArr = new char[1024];
+            Reader reader = new InputStreamReader(stream, "UTF-8");
+            char[] buffer = new char[1024];
             do {
-                int read = inputStreamReader.read(cArr);
-                if (read <= 0) {
+                int len = reader.read(buffer);
+                if (len <= 0) {
                     break;
                 }
-                sb.append(cArr, 0, read);
+                builder.append(buffer, 0, len);
             } while (!isCancelled());
-            return sb.toString();
+            return builder.toString();
         } finally {
-            inputStream.close();
+            stream.close();
         }
     }
 
     private HttpResponse doHttpCall() throws Exception {
-        byte[] bArr;
-        String str;
-        String str2;
+        String logPayload;
         HttpClient.CallTemplate callTemplate;
         URL url = new URL(this.mUrl);
-        HttpsURLConnection createHttpsConnection = HttpUtils.createHttpsConnection(url);
+        HttpsURLConnection httpsURLConnection = HttpUtils.createHttpsConnection(url);
         try {
-            createHttpsConnection.setRequestMethod(this.mMethod);
-            boolean z = false;
-            if (!this.mMethod.equals("POST") || (callTemplate = this.mCallTemplate) == null) {
-                str = null;
-                bArr = null;
-            } else {
-                str = callTemplate.buildRequestBody();
-                bArr = str.getBytes("UTF-8");
-                if (this.mCompressionEnabled && bArr.length >= 1400) {
-                    z = true;
-                }
-                if (!this.mHeaders.containsKey("Content-Type")) {
-                    this.mHeaders.put("Content-Type", "application/json");
+            httpsURLConnection.setRequestMethod(this.mMethod);
+            String payload = null;
+            byte[] binaryPayload = null;
+            boolean shouldCompress = false;
+            boolean isPost = this.mMethod.equals(DefaultHttpClient.METHOD_POST);
+            if (isPost && (callTemplate = this.mCallTemplate) != null) {
+                payload = callTemplate.buildRequestBody();
+                binaryPayload = payload.getBytes("UTF-8");
+                shouldCompress = this.mCompressionEnabled && binaryPayload.length >= MIN_GZIP_LENGTH;
+                if (!this.mHeaders.containsKey(DefaultHttpClient.CONTENT_TYPE_KEY)) {
+                    this.mHeaders.put(DefaultHttpClient.CONTENT_TYPE_KEY, "application/json");
                 }
             }
-            if (z) {
+            if (shouldCompress) {
                 this.mHeaders.put("Content-Encoding", "gzip");
             }
-            for (Map.Entry<String, String> entry : this.mHeaders.entrySet()) {
-                createHttpsConnection.setRequestProperty(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, String> header : this.mHeaders.entrySet()) {
+                httpsURLConnection.setRequestProperty(header.getKey(), header.getValue());
             }
             if (isCancelled()) {
                 return null;
@@ -119,59 +119,60 @@ public class DefaultHttpClientCallTask extends AsyncTask<Void, Void, Object> {
             if (callTemplate2 != null) {
                 callTemplate2.onBeforeCalling(url, this.mHeaders);
             }
-            if (bArr != null) {
+            if (binaryPayload != null) {
                 if (AppCenterLog.getLogLevel() <= 2) {
-                    if (str.length() < 4096) {
-                        str = TOKEN_REGEX_URL_ENCODED.matcher(str).replaceAll("token=***");
-                        if ("application/json".equals(this.mHeaders.get("Content-Type"))) {
-                            str = new JSONObject(str).toString(2);
+                    if (payload.length() < 4096) {
+                        payload = TOKEN_REGEX_URL_ENCODED.matcher(payload).replaceAll("token=***");
+                        if ("application/json".equals(this.mHeaders.get(DefaultHttpClient.CONTENT_TYPE_KEY))) {
+                            payload = new JSONObject(payload).toString(2);
                         }
                     }
-                    AppCenterLog.verbose("AppCenter", str);
+                    AppCenterLog.verbose("AppCenter", payload);
                 }
-                if (z) {
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(bArr.length);
-                    GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(byteArrayOutputStream);
-                    gZIPOutputStream.write(bArr);
-                    gZIPOutputStream.close();
-                    bArr = byteArrayOutputStream.toByteArray();
+                if (shouldCompress) {
+                    ByteArrayOutputStream gzipBuffer = new ByteArrayOutputStream(binaryPayload.length);
+                    GZIPOutputStream gzipStream = new GZIPOutputStream(gzipBuffer);
+                    gzipStream.write(binaryPayload);
+                    gzipStream.close();
+                    binaryPayload = gzipBuffer.toByteArray();
                 }
-                createHttpsConnection.setDoOutput(true);
-                createHttpsConnection.setFixedLengthStreamingMode(bArr.length);
-                OutputStream outputStream = createHttpsConnection.getOutputStream();
-                writePayload(outputStream, bArr);
-                outputStream.close();
+                httpsURLConnection.setDoOutput(true);
+                httpsURLConnection.setFixedLengthStreamingMode(binaryPayload.length);
+                OutputStream out = httpsURLConnection.getOutputStream();
+                writePayload(out, binaryPayload);
+                out.close();
             }
             if (isCancelled()) {
                 return null;
             }
-            int responseCode = createHttpsConnection.getResponseCode();
-            String readResponse = readResponse(createHttpsConnection);
+            int status = httpsURLConnection.getResponseCode();
+            String response = readResponse(httpsURLConnection);
             if (AppCenterLog.getLogLevel() <= 2) {
-                String headerField = createHttpsConnection.getHeaderField("Content-Type");
-                if (headerField != null && !headerField.startsWith("text/") && !headerField.startsWith("application/")) {
-                    str2 = "<binary>";
-                    AppCenterLog.verbose("AppCenter", "HTTP response status=" + responseCode + " payload=" + str2);
+                String contentType = httpsURLConnection.getHeaderField(DefaultHttpClient.CONTENT_TYPE_KEY);
+                if (contentType != null && !contentType.startsWith("text/") && !contentType.startsWith("application/")) {
+                    logPayload = "<binary>";
+                    AppCenterLog.verbose("AppCenter", "HTTP response status=" + status + " payload=" + logPayload);
                 }
-                str2 = REDIRECT_URI_REGEX_JSON.matcher(TOKEN_REGEX_JSON.matcher(readResponse).replaceAll("token\":\"***\"")).replaceAll("redirect_uri\":\"***\"");
-                AppCenterLog.verbose("AppCenter", "HTTP response status=" + responseCode + " payload=" + str2);
+                String logPayload2 = TOKEN_REGEX_JSON.matcher(response).replaceAll("token\":\"***\"");
+                logPayload = REDIRECT_URI_REGEX_JSON.matcher(logPayload2).replaceAll("redirect_uri\":\"***\"");
+                AppCenterLog.verbose("AppCenter", "HTTP response status=" + status + " payload=" + logPayload);
             }
             HashMap hashMap = new HashMap();
-            for (Map.Entry entry2 : createHttpsConnection.getHeaderFields().entrySet()) {
-                hashMap.put(entry2.getKey(), ((List) entry2.getValue()).iterator().next());
+            for (Map.Entry<String, List<String>> header2 : httpsURLConnection.getHeaderFields().entrySet()) {
+                hashMap.put(header2.getKey(), header2.getValue().iterator().next());
             }
-            HttpResponse httpResponse = new HttpResponse(responseCode, readResponse, hashMap);
-            if (responseCode >= 200 && responseCode < 300) {
+            HttpResponse httpResponse = new HttpResponse(status, response, hashMap);
+            if (status >= 200 && status < 300) {
                 return httpResponse;
             }
             throw new HttpException(httpResponse);
         } finally {
-            createHttpsConnection.disconnect();
+            httpsURLConnection.disconnect();
         }
     }
 
-    public Object doInBackground(Void... voidArr) {
-        TrafficStats.setThreadStatsTag(-667034599);
+    public Object doInBackground(Void... params) {
+        TrafficStats.setThreadStatsTag(HttpUtils.THREAD_STATS_TAG);
         try {
             return doHttpCall();
         } catch (Exception e) {
@@ -187,19 +188,20 @@ public class DefaultHttpClientCallTask extends AsyncTask<Void, Void, Object> {
     }
 
     @Override // android.os.AsyncTask
-    protected void onPostExecute(Object obj) {
+    protected void onPostExecute(Object result) {
         this.mTracker.onFinish(this);
-        if (obj instanceof Exception) {
-            this.mServiceCallback.onCallFailed((Exception) obj);
+        if (result instanceof Exception) {
+            this.mServiceCallback.onCallFailed((Exception) result);
             return;
         }
-        this.mServiceCallback.onCallSucceeded((HttpResponse) obj);
+        HttpResponse response = (HttpResponse) result;
+        this.mServiceCallback.onCallSucceeded(response);
     }
 
     @Override // android.os.AsyncTask
-    protected void onCancelled(Object obj) {
-        if ((obj instanceof HttpResponse) || (obj instanceof HttpException)) {
-            onPostExecute(obj);
+    protected void onCancelled(Object result) {
+        if ((result instanceof HttpResponse) || (result instanceof HttpException)) {
+            onPostExecute(result);
         } else {
             this.mTracker.onFinish(this);
         }

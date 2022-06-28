@@ -3,7 +3,8 @@ package org.telegram.ui.Cells;
 import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
-/* loaded from: classes3.dex */
+import com.google.android.exoplayer2.C;
+/* loaded from: classes4.dex */
 public class EmptyCell extends FrameLayout {
     private int cellHeight;
 
@@ -11,20 +12,20 @@ public class EmptyCell extends FrameLayout {
         this(context, 8);
     }
 
-    public EmptyCell(Context context, int i) {
+    public EmptyCell(Context context, int height) {
         super(context);
-        this.cellHeight = i;
+        this.cellHeight = height;
     }
 
-    public void setHeight(int i) {
-        if (this.cellHeight != i) {
-            this.cellHeight = i;
+    public void setHeight(int height) {
+        if (this.cellHeight != height) {
+            this.cellHeight = height;
             requestLayout();
         }
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(this.cellHeight, 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(this.cellHeight, C.BUFFER_FLAG_ENCRYPTED));
     }
 }

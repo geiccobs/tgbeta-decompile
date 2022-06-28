@@ -8,7 +8,7 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import com.google.android.gms.internal.icing.zzbp;
 import com.google.firebase.appindexing.Action;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzc extends AbstractSafeParcelable implements Action {
     public static final Parcelable.Creator<zzc> CREATOR = new zzd();
     private final String zza;
@@ -31,7 +31,7 @@ public final class zzc extends AbstractSafeParcelable implements Action {
         } else {
             this.zzg = Bundle.EMPTY;
         }
-        ClassLoader classLoader = zzc.class.getClassLoader();
+        ClassLoader classLoader = getClass().getClassLoader();
         zzbp.zza(classLoader);
         this.zzg.setClassLoader(classLoader);
     }

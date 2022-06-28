@@ -2,7 +2,7 @@ package org.telegram.ui.Components;
 
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.ui.Components.ChatAttachAlert;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class ChatAttachAlert$AttachBotButton$1$$ExternalSyntheticLambda0 implements ImageReceiver.ImageReceiverDelegate {
     public static final /* synthetic */ ChatAttachAlert$AttachBotButton$1$$ExternalSyntheticLambda0 INSTANCE = new ChatAttachAlert$AttachBotButton$1$$ExternalSyntheticLambda0();
 

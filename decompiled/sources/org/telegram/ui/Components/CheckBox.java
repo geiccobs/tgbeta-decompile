@@ -14,14 +14,16 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
-import androidx.annotation.Keep;
+import androidx.core.app.NotificationCompat;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class CheckBox extends View {
-    private static Paint backgroundPaint;
-    private static Paint eraser;
-    private static Paint eraser2;
-    private static Paint paint;
+    private static Paint backgroundPaint = null;
+    private static Paint checkPaint = null;
+    private static Paint eraser = null;
+    private static Paint eraser2 = null;
+    private static Paint paint = null;
+    private static final float progressBounceDiff = 0.2f;
     private boolean attachedToWindow;
     private Canvas bitmapCanvas;
     private ObjectAnimator checkAnimator;
@@ -40,7 +42,7 @@ public class CheckBox extends View {
     private boolean isCheckAnimation = true;
     private int size = 22;
 
-    public CheckBox(Context context, int i) {
+    public CheckBox(Context context, int resId) {
         super(context);
         if (paint == null) {
             paint = new Paint(1);
@@ -64,76 +66,74 @@ public class CheckBox extends View {
         this.textPaint = textPaint;
         textPaint.setTextSize(AndroidUtilities.dp(18.0f));
         this.textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        this.checkDrawable = context.getResources().getDrawable(i).mutate();
+        this.checkDrawable = context.getResources().getDrawable(resId).mutate();
     }
 
     @Override // android.view.View
-    public void setVisibility(int i) {
-        super.setVisibility(i);
-        if (i == 0 && this.drawBitmap == null) {
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (visibility == 0 && this.drawBitmap == null) {
             try {
                 this.drawBitmap = Bitmap.createBitmap(AndroidUtilities.dp(this.size), AndroidUtilities.dp(this.size), Bitmap.Config.ARGB_4444);
                 this.bitmapCanvas = new Canvas(this.drawBitmap);
                 this.checkBitmap = Bitmap.createBitmap(AndroidUtilities.dp(this.size), AndroidUtilities.dp(this.size), Bitmap.Config.ARGB_4444);
                 this.checkCanvas = new Canvas(this.checkBitmap);
-            } catch (Throwable unused) {
+            } catch (Throwable th) {
             }
         }
     }
 
-    @Keep
-    public void setProgress(float f) {
-        if (this.progress == f) {
+    public void setProgress(float value) {
+        if (this.progress == value) {
             return;
         }
-        this.progress = f;
+        this.progress = value;
         invalidate();
     }
 
-    public void setDrawBackground(boolean z) {
-        this.drawBackground = z;
+    public void setDrawBackground(boolean value) {
+        this.drawBackground = value;
     }
 
-    public void setHasBorder(boolean z) {
-        this.hasBorder = z;
+    public void setHasBorder(boolean value) {
+        this.hasBorder = value;
     }
 
-    public void setCheckOffset(int i) {
-        this.checkOffset = i;
+    public void setCheckOffset(int value) {
+        this.checkOffset = value;
     }
 
-    public void setSize(int i) {
-        this.size = i;
-        if (i == 40) {
+    public void setSize(int size) {
+        this.size = size;
+        if (size == 40) {
             this.textPaint.setTextSize(AndroidUtilities.dp(24.0f));
         }
     }
 
-    public void setStrokeWidth(int i) {
-        backgroundPaint.setStrokeWidth(i);
+    public void setStrokeWidth(int value) {
+        backgroundPaint.setStrokeWidth(value);
     }
 
-    @Keep
     public float getProgress() {
         return this.progress;
     }
 
-    public void setColor(int i, int i2) {
-        this.color = i;
-        this.checkDrawable.setColorFilter(new PorterDuffColorFilter(i2, PorterDuff.Mode.MULTIPLY));
-        this.textPaint.setColor(i2);
+    public void setColor(int backgroundColor, int checkColor) {
+        this.color = backgroundColor;
+        this.checkDrawable.setColorFilter(new PorterDuffColorFilter(checkColor, PorterDuff.Mode.MULTIPLY));
+        this.textPaint.setColor(checkColor);
         invalidate();
     }
 
     @Override // android.view.View
-    public void setBackgroundColor(int i) {
-        this.color = i;
+    public void setBackgroundColor(int backgroundColor) {
+        this.color = backgroundColor;
         invalidate();
     }
 
-    public void setCheckColor(int i) {
-        this.checkDrawable.setColorFilter(new PorterDuffColorFilter(i, PorterDuff.Mode.MULTIPLY));
-        this.textPaint.setColor(i);
+    public void setCheckColor(int checkColor) {
+        this.checkDrawable.setColorFilter(new PorterDuffColorFilter(checkColor, PorterDuff.Mode.MULTIPLY));
+        this.textPaint.setColor(checkColor);
         invalidate();
     }
 
@@ -145,16 +145,16 @@ public class CheckBox extends View {
         }
     }
 
-    private void animateToCheckedState(boolean z) {
-        this.isCheckAnimation = z;
+    private void animateToCheckedState(boolean newCheckedState) {
+        this.isCheckAnimation = newCheckedState;
         float[] fArr = new float[1];
-        fArr[0] = z ? 1.0f : 0.0f;
-        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, "progress", fArr);
+        fArr[0] = newCheckedState ? 1.0f : 0.0f;
+        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, NotificationCompat.CATEGORY_PROGRESS, fArr);
         this.checkAnimator = ofFloat;
         ofFloat.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.CheckBox.1
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                if (animator.equals(CheckBox.this.checkAnimator)) {
+            public void onAnimationEnd(Animator animation) {
+                if (animation.equals(CheckBox.this.checkAnimator)) {
                     CheckBox.this.checkAnimator = null;
                 }
                 if (!CheckBox.this.isChecked) {
@@ -179,66 +179,100 @@ public class CheckBox extends View {
     }
 
     @Override // android.view.View
-    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        super.onLayout(z, i, i2, i3, i4);
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
     }
 
-    public void setChecked(boolean z, boolean z2) {
-        setChecked(-1, z, z2);
+    public void setChecked(boolean checked, boolean animated) {
+        setChecked(-1, checked, animated);
     }
 
-    public void setNum(int i) {
-        if (i >= 0) {
-            this.checkedText = "" + (i + 1);
+    public void setNum(int num) {
+        if (num >= 0) {
+            this.checkedText = "" + (num + 1);
         } else if (this.checkAnimator == null) {
             this.checkedText = null;
         }
         invalidate();
     }
 
-    public void setChecked(int i, boolean z, boolean z2) {
-        if (i >= 0) {
-            this.checkedText = "" + (i + 1);
+    public void setChecked(int num, boolean checked, boolean animated) {
+        if (num >= 0) {
+            this.checkedText = "" + (num + 1);
             invalidate();
         }
-        if (z == this.isChecked) {
+        if (checked == this.isChecked) {
             return;
         }
-        this.isChecked = z;
-        if (this.attachedToWindow && z2) {
-            animateToCheckedState(z);
+        this.isChecked = checked;
+        if (this.attachedToWindow && animated) {
+            animateToCheckedState(checked);
             return;
         }
         cancelCheckAnimator();
-        setProgress(z ? 1.0f : 0.0f);
+        setProgress(checked ? 1.0f : 0.0f);
     }
 
     public boolean isChecked() {
         return this.isChecked;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:32:0x0084  */
-    /* JADX WARN: Removed duplicated region for block: B:35:0x00ca  */
-    /* JADX WARN: Removed duplicated region for block: B:38:0x010d  */
-    /* JADX WARN: Removed duplicated region for block: B:43:0x013b  */
     @Override // android.view.View
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    protected void onDraw(android.graphics.Canvas r12) {
-        /*
-            Method dump skipped, instructions count: 418
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.CheckBox.onDraw(android.graphics.Canvas):void");
+    protected void onDraw(Canvas canvas) {
+        String str;
+        if (getVisibility() != 0 || this.drawBitmap == null || this.checkBitmap == null) {
+            return;
+        }
+        if (this.drawBackground || this.progress != 0.0f) {
+            eraser2.setStrokeWidth(AndroidUtilities.dp(this.size + 6));
+            this.drawBitmap.eraseColor(0);
+            float rad = getMeasuredWidth() / 2;
+            float roundProgressCheckState = this.progress;
+            float roundProgress = roundProgressCheckState >= 0.5f ? 1.0f : roundProgressCheckState / 0.5f;
+            float checkProgress = roundProgressCheckState < 0.5f ? 0.0f : (roundProgressCheckState - 0.5f) / 0.5f;
+            if (!this.isCheckAnimation) {
+                roundProgressCheckState = 1.0f - roundProgressCheckState;
+            }
+            if (roundProgressCheckState < 0.2f) {
+                rad -= (AndroidUtilities.dp(2.0f) * roundProgressCheckState) / 0.2f;
+            } else if (roundProgressCheckState < 0.4f) {
+                rad -= AndroidUtilities.dp(2.0f) - ((AndroidUtilities.dp(2.0f) * (roundProgressCheckState - 0.2f)) / 0.2f);
+            }
+            if (this.drawBackground) {
+                paint.setColor(1140850688);
+                canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, rad - AndroidUtilities.dp(1.0f), paint);
+                canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, rad - AndroidUtilities.dp(1.0f), backgroundPaint);
+            }
+            paint.setColor(this.color);
+            if (this.hasBorder) {
+                rad -= AndroidUtilities.dp(2.0f);
+            }
+            this.bitmapCanvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, rad, paint);
+            this.bitmapCanvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, (1.0f - roundProgress) * rad, eraser);
+            canvas.drawBitmap(this.drawBitmap, 0.0f, 0.0f, (Paint) null);
+            this.checkBitmap.eraseColor(0);
+            if (this.checkedText != null) {
+                this.checkCanvas.drawText(this.checkedText, (getMeasuredWidth() - ((int) Math.ceil(this.textPaint.measureText(str)))) / 2, AndroidUtilities.dp(this.size == 40 ? 28.0f : 21.0f), this.textPaint);
+            } else {
+                int w = this.checkDrawable.getIntrinsicWidth();
+                int h = this.checkDrawable.getIntrinsicHeight();
+                int x = (getMeasuredWidth() - w) / 2;
+                int y = (getMeasuredHeight() - h) / 2;
+                Drawable drawable = this.checkDrawable;
+                int i = this.checkOffset;
+                drawable.setBounds(x, y + i, x + w, y + h + i);
+                this.checkDrawable.draw(this.checkCanvas);
+            }
+            this.checkCanvas.drawCircle((getMeasuredWidth() / 2) - AndroidUtilities.dp(2.5f), (getMeasuredHeight() / 2) + AndroidUtilities.dp(4.0f), ((getMeasuredWidth() + AndroidUtilities.dp(6.0f)) / 2) * (1.0f - checkProgress), eraser2);
+            canvas.drawBitmap(this.checkBitmap, 0.0f, 0.0f, (Paint) null);
+        }
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
-        accessibilityNodeInfo.setClassName("android.widget.CheckBox");
-        accessibilityNodeInfo.setCheckable(true);
-        accessibilityNodeInfo.setChecked(this.isChecked);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName("android.widget.CheckBox");
+        info.setCheckable(true);
+        info.setChecked(this.isChecked);
     }
 }

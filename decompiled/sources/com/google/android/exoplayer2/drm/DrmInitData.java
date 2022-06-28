@@ -11,17 +11,17 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DrmInitData implements Comparator<SchemeData>, Parcelable {
     public static final Parcelable.Creator<DrmInitData> CREATOR = new Parcelable.Creator<DrmInitData>() { // from class: com.google.android.exoplayer2.drm.DrmInitData.1
         @Override // android.os.Parcelable.Creator
-        public DrmInitData createFromParcel(Parcel parcel) {
-            return new DrmInitData(parcel);
+        public DrmInitData createFromParcel(Parcel in) {
+            return new DrmInitData(in);
         }
 
         @Override // android.os.Parcelable.Creator
-        public DrmInitData[] newArray(int i) {
-            return new DrmInitData[i];
+        public DrmInitData[] newArray(int size) {
+            return new DrmInitData[size];
         }
     };
     private int hashCode;
@@ -29,97 +29,106 @@ public final class DrmInitData implements Comparator<SchemeData>, Parcelable {
     private final SchemeData[] schemeDatas;
     public final String schemeType;
 
-    @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
-    }
-
-    public static DrmInitData createSessionCreationData(DrmInitData drmInitData, DrmInitData drmInitData2) {
-        String str;
+    public static DrmInitData createSessionCreationData(DrmInitData manifestData, DrmInitData mediaData) {
         SchemeData[] schemeDataArr;
         SchemeData[] schemeDataArr2;
-        ArrayList arrayList = new ArrayList();
-        if (drmInitData != null) {
-            str = drmInitData.schemeType;
-            for (SchemeData schemeData : drmInitData.schemeDatas) {
-                if (schemeData.hasData()) {
-                    arrayList.add(schemeData);
-                }
-            }
-        } else {
-            str = null;
-        }
-        if (drmInitData2 != null) {
-            if (str == null) {
-                str = drmInitData2.schemeType;
-            }
-            int size = arrayList.size();
-            for (SchemeData schemeData2 : drmInitData2.schemeDatas) {
-                if (schemeData2.hasData() && !containsSchemeDataWithUuid(arrayList, size, schemeData2.uuid)) {
-                    arrayList.add(schemeData2);
+        ArrayList<SchemeData> result = new ArrayList<>();
+        String schemeType = null;
+        if (manifestData != null) {
+            schemeType = manifestData.schemeType;
+            for (SchemeData data : manifestData.schemeDatas) {
+                if (data.hasData()) {
+                    result.add(data);
                 }
             }
         }
-        if (arrayList.isEmpty()) {
+        if (mediaData != null) {
+            if (schemeType == null) {
+                schemeType = mediaData.schemeType;
+            }
+            int manifestDatasCount = result.size();
+            for (SchemeData data2 : mediaData.schemeDatas) {
+                if (data2.hasData() && !containsSchemeDataWithUuid(result, manifestDatasCount, data2.uuid)) {
+                    result.add(data2);
+                }
+            }
+        }
+        if (result.isEmpty()) {
             return null;
         }
-        return new DrmInitData(str, arrayList);
+        return new DrmInitData(schemeType, result);
     }
 
-    public DrmInitData(List<SchemeData> list) {
-        this(null, false, (SchemeData[]) list.toArray(new SchemeData[0]));
+    public DrmInitData(List<SchemeData> schemeDatas) {
+        this(null, false, (SchemeData[]) schemeDatas.toArray(new SchemeData[0]));
     }
 
-    public DrmInitData(String str, List<SchemeData> list) {
-        this(str, false, (SchemeData[]) list.toArray(new SchemeData[0]));
+    public DrmInitData(String schemeType, List<SchemeData> schemeDatas) {
+        this(schemeType, false, (SchemeData[]) schemeDatas.toArray(new SchemeData[0]));
     }
 
-    public DrmInitData(SchemeData... schemeDataArr) {
-        this((String) null, schemeDataArr);
+    public DrmInitData(SchemeData... schemeDatas) {
+        this((String) null, schemeDatas);
     }
 
-    public DrmInitData(String str, SchemeData... schemeDataArr) {
-        this(str, true, schemeDataArr);
+    public DrmInitData(String schemeType, SchemeData... schemeDatas) {
+        this(schemeType, true, schemeDatas);
     }
 
-    private DrmInitData(String str, boolean z, SchemeData... schemeDataArr) {
-        this.schemeType = str;
-        schemeDataArr = z ? (SchemeData[]) schemeDataArr.clone() : schemeDataArr;
+    private DrmInitData(String schemeType, boolean cloneSchemeDatas, SchemeData... schemeDatas) {
+        this.schemeType = schemeType;
+        schemeDatas = cloneSchemeDatas ? (SchemeData[]) schemeDatas.clone() : schemeDatas;
+        this.schemeDatas = schemeDatas;
+        this.schemeDataCount = schemeDatas.length;
+        Arrays.sort(schemeDatas, this);
+    }
+
+    DrmInitData(Parcel in) {
+        this.schemeType = in.readString();
+        SchemeData[] schemeDataArr = (SchemeData[]) Util.castNonNull((SchemeData[]) in.createTypedArray(SchemeData.CREATOR));
         this.schemeDatas = schemeDataArr;
         this.schemeDataCount = schemeDataArr.length;
-        Arrays.sort(schemeDataArr, this);
     }
 
-    DrmInitData(Parcel parcel) {
-        this.schemeType = parcel.readString();
-        SchemeData[] schemeDataArr = (SchemeData[]) Util.castNonNull((SchemeData[]) parcel.createTypedArray(SchemeData.CREATOR));
-        this.schemeDatas = schemeDataArr;
-        this.schemeDataCount = schemeDataArr.length;
+    @Deprecated
+    public SchemeData get(UUID uuid) {
+        SchemeData[] schemeDataArr;
+        for (SchemeData schemeData : this.schemeDatas) {
+            if (schemeData.matches(uuid)) {
+                return schemeData;
+            }
+        }
+        return null;
     }
 
-    public SchemeData get(int i) {
-        return this.schemeDatas[i];
+    public SchemeData get(int index) {
+        return this.schemeDatas[index];
     }
 
-    public DrmInitData copyWithSchemeType(String str) {
-        return Util.areEqual(this.schemeType, str) ? this : new DrmInitData(str, false, this.schemeDatas);
+    public DrmInitData copyWithSchemeType(String schemeType) {
+        if (Util.areEqual(this.schemeType, schemeType)) {
+            return this;
+        }
+        return new DrmInitData(schemeType, false, this.schemeDatas);
     }
 
     public DrmInitData merge(DrmInitData drmInitData) {
         String str;
         String str2 = this.schemeType;
         Assertions.checkState(str2 == null || (str = drmInitData.schemeType) == null || TextUtils.equals(str2, str));
-        String str3 = this.schemeType;
-        if (str3 == null) {
-            str3 = drmInitData.schemeType;
+        String mergedSchemeType = this.schemeType;
+        if (mergedSchemeType == null) {
+            mergedSchemeType = drmInitData.schemeType;
         }
-        return new DrmInitData(str3, (SchemeData[]) Util.nullSafeArrayConcatenation(this.schemeDatas, drmInitData.schemeDatas));
+        SchemeData[] mergedSchemeDatas = (SchemeData[]) Util.nullSafeArrayConcatenation(this.schemeDatas, drmInitData.schemeDatas);
+        return new DrmInitData(mergedSchemeType, mergedSchemeDatas);
     }
 
     public int hashCode() {
         if (this.hashCode == 0) {
             String str = this.schemeType;
-            this.hashCode = ((str == null ? 0 : str.hashCode()) * 31) + Arrays.hashCode(this.schemeDatas);
+            int result = str == null ? 0 : str.hashCode();
+            this.hashCode = (result * 31) + Arrays.hashCode(this.schemeDatas);
         }
         return this.hashCode;
     }
@@ -129,47 +138,51 @@ public final class DrmInitData implements Comparator<SchemeData>, Parcelable {
         if (this == obj) {
             return true;
         }
-        if (obj == null || DrmInitData.class != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        DrmInitData drmInitData = (DrmInitData) obj;
-        return Util.areEqual(this.schemeType, drmInitData.schemeType) && Arrays.equals(this.schemeDatas, drmInitData.schemeDatas);
+        DrmInitData other = (DrmInitData) obj;
+        return Util.areEqual(this.schemeType, other.schemeType) && Arrays.equals(this.schemeDatas, other.schemeDatas);
     }
 
-    public int compare(SchemeData schemeData, SchemeData schemeData2) {
-        UUID uuid = C.UUID_NIL;
-        if (uuid.equals(schemeData.uuid)) {
-            return uuid.equals(schemeData2.uuid) ? 0 : 1;
+    public int compare(SchemeData first, SchemeData second) {
+        if (C.UUID_NIL.equals(first.uuid)) {
+            return C.UUID_NIL.equals(second.uuid) ? 0 : 1;
         }
-        return schemeData.uuid.compareTo(schemeData2.uuid);
+        return first.uuid.compareTo(second.uuid);
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(this.schemeType);
-        parcel.writeTypedArray(this.schemeDatas, 0);
+    public int describeContents() {
+        return 0;
     }
 
-    private static boolean containsSchemeDataWithUuid(ArrayList<SchemeData> arrayList, int i, UUID uuid) {
-        for (int i2 = 0; i2 < i; i2++) {
-            if (arrayList.get(i2).uuid.equals(uuid)) {
+    @Override // android.os.Parcelable
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.schemeType);
+        dest.writeTypedArray(this.schemeDatas, 0);
+    }
+
+    private static boolean containsSchemeDataWithUuid(ArrayList<SchemeData> datas, int limit, UUID uuid) {
+        for (int i = 0; i < limit; i++) {
+            if (datas.get(i).uuid.equals(uuid)) {
                 return true;
             }
         }
         return false;
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class SchemeData implements Parcelable {
         public static final Parcelable.Creator<SchemeData> CREATOR = new Parcelable.Creator<SchemeData>() { // from class: com.google.android.exoplayer2.drm.DrmInitData.SchemeData.1
             @Override // android.os.Parcelable.Creator
-            public SchemeData createFromParcel(Parcel parcel) {
-                return new SchemeData(parcel);
+            public SchemeData createFromParcel(Parcel in) {
+                return new SchemeData(in);
             }
 
             @Override // android.os.Parcelable.Creator
-            public SchemeData[] newArray(int i) {
-                return new SchemeData[i];
+            public SchemeData[] newArray(int size) {
+                return new SchemeData[size];
             }
         };
         public final byte[] data;
@@ -178,43 +191,38 @@ public final class DrmInitData implements Comparator<SchemeData>, Parcelable {
         public final String mimeType;
         private final UUID uuid;
 
-        @Override // android.os.Parcelable
-        public int describeContents() {
-            return 0;
+        public SchemeData(UUID uuid, String mimeType, byte[] data) {
+            this(uuid, null, mimeType, data);
         }
 
-        public SchemeData(UUID uuid, String str, byte[] bArr) {
-            this(uuid, null, str, bArr);
-        }
-
-        public SchemeData(UUID uuid, String str, String str2, byte[] bArr) {
+        public SchemeData(UUID uuid, String licenseServerUrl, String mimeType, byte[] data) {
             this.uuid = (UUID) Assertions.checkNotNull(uuid);
-            this.licenseServerUrl = str;
-            this.mimeType = (String) Assertions.checkNotNull(str2);
-            this.data = bArr;
+            this.licenseServerUrl = licenseServerUrl;
+            this.mimeType = (String) Assertions.checkNotNull(mimeType);
+            this.data = data;
         }
 
-        SchemeData(Parcel parcel) {
-            this.uuid = new UUID(parcel.readLong(), parcel.readLong());
-            this.licenseServerUrl = parcel.readString();
-            this.mimeType = (String) Util.castNonNull(parcel.readString());
-            this.data = parcel.createByteArray();
+        SchemeData(Parcel in) {
+            this.uuid = new UUID(in.readLong(), in.readLong());
+            this.licenseServerUrl = in.readString();
+            this.mimeType = (String) Util.castNonNull(in.readString());
+            this.data = in.createByteArray();
         }
 
-        public boolean matches(UUID uuid) {
-            return C.UUID_NIL.equals(this.uuid) || uuid.equals(this.uuid);
+        public boolean matches(UUID schemeUuid) {
+            return C.UUID_NIL.equals(this.uuid) || schemeUuid.equals(this.uuid);
         }
 
-        public boolean canReplace(SchemeData schemeData) {
-            return hasData() && !schemeData.hasData() && matches(schemeData.uuid);
+        public boolean canReplace(SchemeData other) {
+            return hasData() && !other.hasData() && matches(other.uuid);
         }
 
         public boolean hasData() {
             return this.data != null;
         }
 
-        public SchemeData copyWithData(byte[] bArr) {
-            return new SchemeData(this.uuid, this.licenseServerUrl, this.mimeType, bArr);
+        public SchemeData copyWithData(byte[] data) {
+            return new SchemeData(this.uuid, this.licenseServerUrl, this.mimeType, data);
         }
 
         public boolean equals(Object obj) {
@@ -224,26 +232,33 @@ public final class DrmInitData implements Comparator<SchemeData>, Parcelable {
             if (obj == this) {
                 return true;
             }
-            SchemeData schemeData = (SchemeData) obj;
-            return Util.areEqual(this.licenseServerUrl, schemeData.licenseServerUrl) && Util.areEqual(this.mimeType, schemeData.mimeType) && Util.areEqual(this.uuid, schemeData.uuid) && Arrays.equals(this.data, schemeData.data);
+            SchemeData other = (SchemeData) obj;
+            return Util.areEqual(this.licenseServerUrl, other.licenseServerUrl) && Util.areEqual(this.mimeType, other.mimeType) && Util.areEqual(this.uuid, other.uuid) && Arrays.equals(this.data, other.data);
         }
 
         public int hashCode() {
             if (this.hashCode == 0) {
-                int hashCode = this.uuid.hashCode() * 31;
+                int result = this.uuid.hashCode();
+                int i = result * 31;
                 String str = this.licenseServerUrl;
-                this.hashCode = ((((hashCode + (str == null ? 0 : str.hashCode())) * 31) + this.mimeType.hashCode()) * 31) + Arrays.hashCode(this.data);
+                int result2 = i + (str == null ? 0 : str.hashCode());
+                this.hashCode = (((result2 * 31) + this.mimeType.hashCode()) * 31) + Arrays.hashCode(this.data);
             }
             return this.hashCode;
         }
 
         @Override // android.os.Parcelable
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeLong(this.uuid.getMostSignificantBits());
-            parcel.writeLong(this.uuid.getLeastSignificantBits());
-            parcel.writeString(this.licenseServerUrl);
-            parcel.writeString(this.mimeType);
-            parcel.writeByteArray(this.data);
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override // android.os.Parcelable
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(this.uuid.getMostSignificantBits());
+            dest.writeLong(this.uuid.getLeastSignificantBits());
+            dest.writeString(this.licenseServerUrl);
+            dest.writeString(this.mimeType);
+            dest.writeByteArray(this.data);
         }
     }
 }

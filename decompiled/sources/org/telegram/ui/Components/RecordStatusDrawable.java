@@ -6,7 +6,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class RecordStatusDrawable extends StatusDrawable {
     Paint currentPaint;
     private float progress;
@@ -16,17 +16,8 @@ public class RecordStatusDrawable extends StatusDrawable {
     private RectF rect = new RectF();
     int alpha = 255;
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return 0;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
-
-    public RecordStatusDrawable(boolean z) {
-        if (z) {
+    public RecordStatusDrawable(boolean createPaint) {
+        if (createPaint) {
             Paint paint = new Paint(1);
             this.currentPaint = paint;
             paint.setStyle(Paint.Style.STROKE);
@@ -36,26 +27,26 @@ public class RecordStatusDrawable extends StatusDrawable {
     }
 
     @Override // org.telegram.ui.Components.StatusDrawable
-    public void setIsChat(boolean z) {
-        this.isChat = z;
+    public void setIsChat(boolean value) {
+        this.isChat = value;
     }
 
     @Override // org.telegram.ui.Components.StatusDrawable
-    public void setColor(int i) {
+    public void setColor(int color) {
         Paint paint = this.currentPaint;
         if (paint != null) {
-            paint.setColor(i);
+            paint.setColor(color);
         }
     }
 
     private void update() {
-        long currentTimeMillis = System.currentTimeMillis();
-        long j = currentTimeMillis - this.lastUpdateTime;
-        this.lastUpdateTime = currentTimeMillis;
-        if (j > 50) {
-            j = 50;
+        long newTime = System.currentTimeMillis();
+        long dt = newTime - this.lastUpdateTime;
+        this.lastUpdateTime = newTime;
+        if (dt > 50) {
+            dt = 50;
         }
-        this.progress += ((float) j) / 800.0f;
+        this.progress += ((float) dt) / 800.0f;
         while (true) {
             float f = this.progress;
             if (f > 1.0f) {
@@ -95,17 +86,16 @@ public class RecordStatusDrawable extends StatusDrawable {
             f = 1.0f;
         }
         canvas.translate(0.0f, intrinsicHeight + AndroidUtilities.dp(f));
-        for (int i = 0; i < 4; i++) {
-            if (i == 0) {
+        for (int a = 0; a < 4; a++) {
+            if (a == 0) {
                 paint.setAlpha((int) (this.alpha * this.progress));
-            } else if (i == 3) {
+            } else if (a == 3) {
                 paint.setAlpha((int) (this.alpha * (1.0f - this.progress)));
             } else {
                 paint.setAlpha(this.alpha);
             }
-            float dp = (AndroidUtilities.dp(4.0f) * i) + (AndroidUtilities.dp(4.0f) * this.progress);
-            float f2 = -dp;
-            this.rect.set(f2, f2, dp, dp);
+            float side = (AndroidUtilities.dp(4.0f) * a) + (AndroidUtilities.dp(4.0f) * this.progress);
+            this.rect.set(-side, -side, side, side);
             canvas.drawArc(this.rect, -15.0f, 30.0f, false, paint);
         }
         canvas.restore();
@@ -115,8 +105,17 @@ public class RecordStatusDrawable extends StatusDrawable {
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-        this.alpha = i;
+    public void setAlpha(int alpha) {
+        this.alpha = alpha;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter cf) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return 0;
     }
 
     @Override // android.graphics.drawable.Drawable

@@ -2,12 +2,22 @@ package com.google.android.exoplayer2.upstream;
 
 import android.net.Uri;
 import com.google.android.exoplayer2.util.Assertions;
+import com.microsoft.appcenter.http.DefaultHttpClient;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DataSpec {
+    public static final int FLAG_ALLOW_CACHE_FRAGMENTATION = 4;
+    public static final int FLAG_ALLOW_GZIP = 1;
+    public static final int FLAG_DONT_CACHE_IF_LENGTH_UNKNOWN = 2;
+    public static final int HTTP_METHOD_GET = 1;
+    public static final int HTTP_METHOD_HEAD = 3;
+    public static final int HTTP_METHOD_POST = 2;
     public final long absoluteStreamPosition;
     public final int flags;
     public final byte[] httpBody;
@@ -18,60 +28,71 @@ public final class DataSpec {
     public final long position;
     public final Uri uri;
 
-    private static int inferHttpMethod(byte[] bArr) {
-        return bArr != null ? 2 : 1;
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface Flags {
     }
 
-    public DataSpec(Uri uri, int i) {
-        this(uri, 0L, -1L, null, i);
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface HttpMethod {
     }
 
-    public DataSpec(Uri uri, long j, long j2, String str) {
-        this(uri, j, j, j2, str, 0);
+    public DataSpec(Uri uri) {
+        this(uri, 0);
     }
 
-    public DataSpec(Uri uri, long j, long j2, String str, int i) {
-        this(uri, j, j, j2, str, i);
+    public DataSpec(Uri uri, int flags) {
+        this(uri, 0L, -1L, null, flags);
     }
 
-    public DataSpec(Uri uri, long j, long j2, String str, int i, Map<String, String> map) {
-        this(uri, inferHttpMethod(null), null, j, j, j2, str, i, map);
+    public DataSpec(Uri uri, long absoluteStreamPosition, long length, String key) {
+        this(uri, absoluteStreamPosition, absoluteStreamPosition, length, key, 0);
     }
 
-    public DataSpec(Uri uri, long j, long j2, long j3, String str, int i) {
-        this(uri, null, j, j2, j3, str, i);
+    public DataSpec(Uri uri, long absoluteStreamPosition, long length, String key, int flags) {
+        this(uri, absoluteStreamPosition, absoluteStreamPosition, length, key, flags);
     }
 
-    public DataSpec(Uri uri, byte[] bArr, long j, long j2, long j3, String str, int i) {
-        this(uri, inferHttpMethod(bArr), bArr, j, j2, j3, str, i);
+    public DataSpec(Uri uri, long absoluteStreamPosition, long length, String key, int flags, Map<String, String> httpRequestHeaders) {
+        this(uri, inferHttpMethod(null), null, absoluteStreamPosition, absoluteStreamPosition, length, key, flags, httpRequestHeaders);
     }
 
-    public DataSpec(Uri uri, int i, byte[] bArr, long j, long j2, long j3, String str, int i2) {
-        this(uri, i, bArr, j, j2, j3, str, i2, Collections.emptyMap());
+    public DataSpec(Uri uri, long absoluteStreamPosition, long position, long length, String key, int flags) {
+        this(uri, null, absoluteStreamPosition, position, length, key, flags);
     }
 
-    public DataSpec(Uri uri, int i, byte[] bArr, long j, long j2, long j3, String str, int i2, Map<String, String> map) {
-        byte[] bArr2 = bArr;
+    public DataSpec(Uri uri, byte[] postBody, long absoluteStreamPosition, long position, long length, String key, int flags) {
+        this(uri, inferHttpMethod(postBody), postBody, absoluteStreamPosition, position, length, key, flags);
+    }
+
+    public DataSpec(Uri uri, int httpMethod, byte[] httpBody, long absoluteStreamPosition, long position, long length, String key, int flags) {
+        this(uri, httpMethod, httpBody, absoluteStreamPosition, position, length, key, flags, Collections.emptyMap());
+    }
+
+    public DataSpec(Uri uri, int httpMethod, byte[] httpBody, long absoluteStreamPosition, long position, long length, String key, int flags, Map<String, String> httpRequestHeaders) {
         boolean z = true;
-        Assertions.checkArgument(j >= 0);
-        Assertions.checkArgument(j2 >= 0);
-        if (j3 <= 0 && j3 != -1) {
+        Assertions.checkArgument(absoluteStreamPosition >= 0);
+        Assertions.checkArgument(position >= 0);
+        if (length <= 0 && length != -1) {
             z = false;
         }
         Assertions.checkArgument(z);
         this.uri = uri;
-        this.httpMethod = i;
-        this.httpBody = (bArr2 == null || bArr2.length == 0) ? null : bArr2;
-        this.absoluteStreamPosition = j;
-        this.position = j2;
-        this.length = j3;
-        this.key = str;
-        this.flags = i2;
-        this.httpRequestHeaders = Collections.unmodifiableMap(new HashMap(map));
+        this.httpMethod = httpMethod;
+        this.httpBody = (httpBody == null || httpBody.length == 0) ? null : httpBody;
+        this.absoluteStreamPosition = absoluteStreamPosition;
+        this.position = position;
+        this.length = length;
+        this.key = key;
+        this.flags = flags;
+        this.httpRequestHeaders = Collections.unmodifiableMap(new HashMap(httpRequestHeaders));
     }
 
-    public boolean isFlagSet(int i) {
-        return (this.flags & i) == i;
+    public boolean isFlagSet(int flag) {
+        return (this.flags & flag) == flag;
     }
 
     public String toString() {
@@ -82,29 +103,50 @@ public final class DataSpec {
         return getStringForHttpMethod(this.httpMethod);
     }
 
-    public static String getStringForHttpMethod(int i) {
-        if (i != 1) {
-            if (i == 2) {
-                return "POST";
-            }
-            if (i != 3) {
-                throw new AssertionError(i);
-            }
-            return "HEAD";
+    public static String getStringForHttpMethod(int httpMethod) {
+        switch (httpMethod) {
+            case 1:
+                return DefaultHttpClient.METHOD_GET;
+            case 2:
+                return DefaultHttpClient.METHOD_POST;
+            case 3:
+                return "HEAD";
+            default:
+                throw new AssertionError(httpMethod);
         }
-        return "GET";
     }
 
-    public DataSpec subrange(long j) {
-        long j2 = this.length;
-        long j3 = -1;
-        if (j2 != -1) {
-            j3 = j2 - j;
+    public DataSpec subrange(long offset) {
+        long j = this.length;
+        long j2 = -1;
+        if (j != -1) {
+            j2 = j - offset;
         }
-        return subrange(j, j3);
+        return subrange(offset, j2);
     }
 
-    public DataSpec subrange(long j, long j2) {
-        return (j == 0 && this.length == j2) ? this : new DataSpec(this.uri, this.httpMethod, this.httpBody, this.absoluteStreamPosition + j, this.position + j, j2, this.key, this.flags, this.httpRequestHeaders);
+    public DataSpec subrange(long offset, long length) {
+        if (offset == 0 && this.length == length) {
+            return this;
+        }
+        return new DataSpec(this.uri, this.httpMethod, this.httpBody, this.absoluteStreamPosition + offset, this.position + offset, length, this.key, this.flags, this.httpRequestHeaders);
+    }
+
+    public DataSpec withUri(Uri uri) {
+        return new DataSpec(uri, this.httpMethod, this.httpBody, this.absoluteStreamPosition, this.position, this.length, this.key, this.flags, this.httpRequestHeaders);
+    }
+
+    public DataSpec withRequestHeaders(Map<String, String> requestHeaders) {
+        return new DataSpec(this.uri, this.httpMethod, this.httpBody, this.absoluteStreamPosition, this.position, this.length, this.key, this.flags, requestHeaders);
+    }
+
+    public DataSpec withAdditionalHeaders(Map<String, String> requestHeaders) {
+        Map<String, String> totalHeaders = new HashMap<>(this.httpRequestHeaders);
+        totalHeaders.putAll(requestHeaders);
+        return new DataSpec(this.uri, this.httpMethod, this.httpBody, this.absoluteStreamPosition, this.position, this.length, this.key, this.flags, totalHeaders);
+    }
+
+    private static int inferHttpMethod(byte[] postBody) {
+        return postBody != null ? 2 : 1;
     }
 }

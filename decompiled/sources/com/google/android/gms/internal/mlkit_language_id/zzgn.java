@@ -1,10 +1,9 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.RandomAccess;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzgn<E> extends zzdi<E> implements RandomAccess {
     private static final zzgn<Object> zza;
     private E[] zzb;
@@ -12,6 +11,10 @@ final class zzgn<E> extends zzdi<E> implements RandomAccess {
 
     public static <E> zzgn<E> zzd() {
         return (zzgn<E>) zza;
+    }
+
+    zzgn() {
+        this(new Object[10], 0);
     }
 
     private zzgn(E[] eArr, int i) {
@@ -31,11 +34,11 @@ final class zzgn<E> extends zzdi<E> implements RandomAccess {
         int i2 = this.zzc;
         this.zzc = i2 + 1;
         eArr2[i2] = e;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
     public final void add(int i, E e) {
         int i2;
         zzc();
@@ -53,7 +56,7 @@ final class zzgn<E> extends zzdi<E> implements RandomAccess {
         }
         this.zzb[i] = e;
         this.zzc++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // java.util.AbstractList, java.util.List
@@ -62,7 +65,7 @@ final class zzgn<E> extends zzdi<E> implements RandomAccess {
         return this.zzb[i];
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
     public final E remove(int i) {
         int i2;
         zzc();
@@ -73,18 +76,18 @@ final class zzgn<E> extends zzdi<E> implements RandomAccess {
             System.arraycopy(eArr, i + 1, eArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return e;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
     public final E set(int i, E e) {
         zzc();
         zza(i);
         E[] eArr = this.zzb;
         E e2 = eArr[i];
         eArr[i] = e;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return e2;
     }
 

@@ -5,12 +5,12 @@ import com.google.android.datatransport.runtime.dagger.internal.Preconditions;
 import com.google.android.datatransport.runtime.scheduling.jobscheduling.SchedulerConfig;
 import com.google.android.datatransport.runtime.time.Clock;
 import javax.inject.Provider;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SchedulingConfigModule_ConfigFactory implements Factory<SchedulerConfig> {
     private final Provider<Clock> clockProvider;
 
-    public SchedulingConfigModule_ConfigFactory(Provider<Clock> provider) {
-        this.clockProvider = provider;
+    public SchedulingConfigModule_ConfigFactory(Provider<Clock> clockProvider) {
+        this.clockProvider = clockProvider;
     }
 
     @Override // javax.inject.Provider
@@ -18,8 +18,8 @@ public final class SchedulingConfigModule_ConfigFactory implements Factory<Sched
         return config(this.clockProvider.get());
     }
 
-    public static SchedulingConfigModule_ConfigFactory create(Provider<Clock> provider) {
-        return new SchedulingConfigModule_ConfigFactory(provider);
+    public static SchedulingConfigModule_ConfigFactory create(Provider<Clock> clockProvider) {
+        return new SchedulingConfigModule_ConfigFactory(clockProvider);
     }
 
     public static SchedulerConfig config(Clock clock) {

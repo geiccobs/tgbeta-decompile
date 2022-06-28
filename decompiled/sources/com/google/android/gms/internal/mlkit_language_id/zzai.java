@@ -1,8 +1,8 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
-import org.telegram.messenger.FileLoader;
+import com.google.android.gms.location.LocationRequest;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public enum zzai implements zzet {
     NO_ERROR(0),
     INCOMPATIBLE_INPUT(1),
@@ -15,11 +15,11 @@ public enum zzai implements zzet {
     MEDIAPIPE_ERROR(9),
     TIME_OUT_FETCHING_MODEL_METADATA(5),
     MODEL_NOT_DOWNLOADED(100),
-    URI_EXPIRED(FileLoader.MEDIA_DIR_VIDEO_PUBLIC),
+    URI_EXPIRED(101),
     NO_NETWORK_CONNECTION(102),
     METERED_NETWORK(103),
-    DOWNLOAD_FAILED(104),
-    MODEL_INFO_DOWNLOAD_UNSUCCESSFUL_HTTP_STATUS(105),
+    DOWNLOAD_FAILED(LocationRequest.PRIORITY_LOW_POWER),
+    MODEL_INFO_DOWNLOAD_UNSUCCESSFUL_HTTP_STATUS(LocationRequest.PRIORITY_NO_POWER),
     MODEL_INFO_DOWNLOAD_NO_HASH(106),
     MODEL_INFO_DOWNLOAD_CONNECTION_FAILED(107),
     NO_VALID_MODEL(108),
@@ -33,6 +33,8 @@ public enum zzai implements zzet {
     MODEL_HASH_MISMATCH(116),
     UNKNOWN_ERROR(9999);
     
+    private static final zzes<zzai> zzac = new zzes<zzai>() { // from class: com.google.android.gms.internal.mlkit_language_id.zzah
+    };
     private final int zzad;
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzet
@@ -46,15 +48,10 @@ public enum zzai implements zzet {
 
     @Override // java.lang.Enum
     public final String toString() {
-        return "<" + zzai.class.getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzad + " name=" + name() + '>';
+        return "<" + getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzad + " name=" + name() + '>';
     }
 
     zzai(int i) {
         this.zzad = i;
-    }
-
-    static {
-        new Object() { // from class: com.google.android.gms.internal.mlkit_language_id.zzah
-        };
     }
 }

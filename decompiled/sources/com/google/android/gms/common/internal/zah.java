@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zah implements Handler.Callback {
     @NotOnlyInitialized
     private final zak zaa;
@@ -51,10 +51,11 @@ public final class zah implements Handler.Callback {
             Preconditions.checkState(z);
             ArrayList arrayList = new ArrayList(this.zab);
             int i = this.zaf.get();
-            int size = arrayList.size();
+            ArrayList arrayList2 = arrayList;
+            int size = arrayList2.size();
             int i2 = 0;
             while (i2 < size) {
-                Object obj = arrayList.get(i2);
+                Object obj = arrayList2.get(i2);
                 i2++;
                 GoogleApiClient.ConnectionCallbacks connectionCallbacks = (GoogleApiClient.ConnectionCallbacks) obj;
                 if (!this.zae || !this.zaa.isConnected() || this.zaf.get() != i) {
@@ -75,10 +76,11 @@ public final class zah implements Handler.Callback {
             this.zag = true;
             ArrayList arrayList = new ArrayList(this.zab);
             int i2 = this.zaf.get();
-            int size = arrayList.size();
+            ArrayList arrayList2 = arrayList;
+            int size = arrayList2.size();
             int i3 = 0;
             while (i3 < size) {
-                Object obj = arrayList.get(i3);
+                Object obj = arrayList2.get(i3);
                 i3++;
                 GoogleApiClient.ConnectionCallbacks connectionCallbacks = (GoogleApiClient.ConnectionCallbacks) obj;
                 if (!this.zae || this.zaf.get() != i2) {
@@ -98,10 +100,11 @@ public final class zah implements Handler.Callback {
         synchronized (this.zai) {
             ArrayList arrayList = new ArrayList(this.zad);
             int i = this.zaf.get();
-            int size = arrayList.size();
+            ArrayList arrayList2 = arrayList;
+            int size = arrayList2.size();
             int i2 = 0;
             while (i2 < size) {
-                Object obj = arrayList.get(i2);
+                Object obj = arrayList2.get(i2);
                 i2++;
                 GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener = (GoogleApiClient.OnConnectionFailedListener) obj;
                 if (this.zae && this.zaf.get() == i) {
@@ -119,7 +122,7 @@ public final class zah implements Handler.Callback {
         synchronized (this.zai) {
             if (this.zab.contains(connectionCallbacks)) {
                 String valueOf = String.valueOf(connectionCallbacks);
-                StringBuilder sb = new StringBuilder(valueOf.length() + 62);
+                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 62);
                 sb.append("registerConnectionCallbacks(): listener ");
                 sb.append(valueOf);
                 sb.append(" is already registered");
@@ -134,12 +137,37 @@ public final class zah implements Handler.Callback {
         }
     }
 
+    public final boolean zab(GoogleApiClient.ConnectionCallbacks connectionCallbacks) {
+        boolean contains;
+        Preconditions.checkNotNull(connectionCallbacks);
+        synchronized (this.zai) {
+            contains = this.zab.contains(connectionCallbacks);
+        }
+        return contains;
+    }
+
+    public final void zac(GoogleApiClient.ConnectionCallbacks connectionCallbacks) {
+        Preconditions.checkNotNull(connectionCallbacks);
+        synchronized (this.zai) {
+            if (!this.zab.remove(connectionCallbacks)) {
+                String valueOf = String.valueOf(connectionCallbacks);
+                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 52);
+                sb.append("unregisterConnectionCallbacks(): listener ");
+                sb.append(valueOf);
+                sb.append(" not found");
+                Log.w("GmsClientEvents", sb.toString());
+            } else if (this.zag) {
+                this.zac.add(connectionCallbacks);
+            }
+        }
+    }
+
     public final void zaa(GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         Preconditions.checkNotNull(onConnectionFailedListener);
         synchronized (this.zai) {
             if (this.zad.contains(onConnectionFailedListener)) {
                 String valueOf = String.valueOf(onConnectionFailedListener);
-                StringBuilder sb = new StringBuilder(valueOf.length() + 67);
+                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 67);
                 sb.append("registerConnectionFailedListener(): listener ");
                 sb.append(valueOf);
                 sb.append(" is already registered");
@@ -150,12 +178,21 @@ public final class zah implements Handler.Callback {
         }
     }
 
+    public final boolean zab(GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
+        boolean contains;
+        Preconditions.checkNotNull(onConnectionFailedListener);
+        synchronized (this.zai) {
+            contains = this.zad.contains(onConnectionFailedListener);
+        }
+        return contains;
+    }
+
     public final void zac(GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         Preconditions.checkNotNull(onConnectionFailedListener);
         synchronized (this.zai) {
             if (!this.zad.remove(onConnectionFailedListener)) {
                 String valueOf = String.valueOf(onConnectionFailedListener);
-                StringBuilder sb = new StringBuilder(valueOf.length() + 57);
+                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 57);
                 sb.append("unregisterConnectionFailedListener(): listener ");
                 sb.append(valueOf);
                 sb.append(" not found");
@@ -166,8 +203,7 @@ public final class zah implements Handler.Callback {
 
     @Override // android.os.Handler.Callback
     public final boolean handleMessage(Message message) {
-        int i = message.what;
-        if (i == 1) {
+        if (message.what == 1) {
             GoogleApiClient.ConnectionCallbacks connectionCallbacks = (GoogleApiClient.ConnectionCallbacks) message.obj;
             synchronized (this.zai) {
                 if (this.zae && this.zaa.isConnected() && this.zab.contains(connectionCallbacks)) {
@@ -176,6 +212,7 @@ public final class zah implements Handler.Callback {
             }
             return true;
         }
+        int i = message.what;
         StringBuilder sb = new StringBuilder(45);
         sb.append("Don't know how to handle message: ");
         sb.append(i);

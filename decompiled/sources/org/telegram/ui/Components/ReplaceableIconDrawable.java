@@ -7,7 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class ReplaceableIconDrawable extends Drawable implements Animator.AnimatorListener {
     private ValueAnimator animation;
     private ColorFilter colorFilter;
@@ -17,40 +17,19 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
     private int currentResId = 0;
     private float progress = 1.0f;
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.animation.Animator.AnimatorListener
-    public void onAnimationCancel(Animator animator) {
-    }
-
-    @Override // android.animation.Animator.AnimatorListener
-    public void onAnimationRepeat(Animator animator) {
-    }
-
-    @Override // android.animation.Animator.AnimatorListener
-    public void onAnimationStart(Animator animator) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-    }
-
     public ReplaceableIconDrawable(Context context) {
         this.context = context;
     }
 
-    public void setIcon(int i, boolean z) {
-        if (this.currentResId == i) {
+    public void setIcon(int resId, boolean animated) {
+        if (this.currentResId == resId) {
             return;
         }
-        setIcon(ContextCompat.getDrawable(this.context, i).mutate(), z);
-        this.currentResId = i;
+        setIcon(ContextCompat.getDrawable(this.context, resId).mutate(), animated);
+        this.currentResId = resId;
     }
 
-    public void setIcon(Drawable drawable, boolean z) {
+    public void setIcon(Drawable drawable, boolean animated) {
         if (drawable == null) {
             this.currentDrawable = null;
             this.outDrawable = null;
@@ -58,7 +37,7 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
             return;
         }
         if (getBounds() == null || getBounds().isEmpty()) {
-            z = false;
+            animated = false;
         }
         Drawable drawable2 = this.currentDrawable;
         if (drawable == drawable2) {
@@ -76,7 +55,7 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
             valueAnimator.removeAllListeners();
             this.animation.cancel();
         }
-        if (!z) {
+        if (!animated) {
             this.progress = 1.0f;
             this.outDrawable = null;
             return;
@@ -86,7 +65,7 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
         ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ReplaceableIconDrawable$$ExternalSyntheticLambda0
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                ReplaceableIconDrawable.this.lambda$setIcon$0(valueAnimator2);
+                ReplaceableIconDrawable.this.m2958xd9f8d97e(valueAnimator2);
             }
         });
         this.animation.addListener(this);
@@ -94,57 +73,58 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
         this.animation.start();
     }
 
-    public /* synthetic */ void lambda$setIcon$0(ValueAnimator valueAnimator) {
-        this.progress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$setIcon$0$org-telegram-ui-Components-ReplaceableIconDrawable */
+    public /* synthetic */ void m2958xd9f8d97e(ValueAnimator animation) {
+        this.progress = ((Float) animation.getAnimatedValue()).floatValue();
         invalidateSelf();
     }
 
     @Override // android.graphics.drawable.Drawable
-    protected void onBoundsChange(android.graphics.Rect rect) {
-        super.onBoundsChange(rect);
-        updateBounds(this.currentDrawable, rect);
-        updateBounds(this.outDrawable, rect);
+    protected void onBoundsChange(android.graphics.Rect bounds) {
+        super.onBoundsChange(bounds);
+        updateBounds(this.currentDrawable, bounds);
+        updateBounds(this.outDrawable, bounds);
     }
 
-    private void updateBounds(Drawable drawable, android.graphics.Rect rect) {
-        int i;
-        int i2;
-        int i3;
-        int i4;
-        if (drawable == null) {
+    private void updateBounds(Drawable d, android.graphics.Rect bounds) {
+        int top;
+        int offset;
+        int left;
+        int offset2;
+        if (d == null) {
             return;
         }
-        if (drawable.getIntrinsicHeight() < 0) {
-            i2 = rect.top;
-            i = rect.bottom;
+        if (d.getIntrinsicHeight() < 0) {
+            offset = bounds.top;
+            top = bounds.bottom;
         } else {
-            int height = (rect.height() - drawable.getIntrinsicHeight()) / 2;
-            int i5 = rect.top;
-            int i6 = i5 + height;
-            i = i5 + height + drawable.getIntrinsicHeight();
-            i2 = i6;
+            int top2 = bounds.height();
+            int offset3 = (top2 - d.getIntrinsicHeight()) / 2;
+            int top3 = bounds.top + offset3;
+            offset = top3;
+            top = bounds.top + offset3 + d.getIntrinsicHeight();
         }
-        if (drawable.getIntrinsicWidth() < 0) {
-            i4 = rect.left;
-            i3 = rect.right;
+        if (d.getIntrinsicWidth() < 0) {
+            offset2 = bounds.left;
+            left = bounds.right;
         } else {
-            int width = (rect.width() - drawable.getIntrinsicWidth()) / 2;
-            int i7 = rect.left;
-            int i8 = i7 + width;
-            i3 = i7 + width + drawable.getIntrinsicWidth();
-            i4 = i8;
+            int left2 = bounds.width();
+            int offset4 = (left2 - d.getIntrinsicWidth()) / 2;
+            int left3 = bounds.left + offset4;
+            offset2 = left3;
+            left = bounds.left + offset4 + d.getIntrinsicWidth();
         }
-        drawable.setBounds(i4, i2, i3, i);
+        d.setBounds(offset2, offset, left, top);
     }
 
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
-        int centerX = getBounds().centerX();
-        int centerY = getBounds().centerY();
+        int cX = getBounds().centerX();
+        int cY = getBounds().centerY();
         if (this.progress != 1.0f && this.currentDrawable != null) {
             canvas.save();
             float f = this.progress;
-            canvas.scale(f, f, centerX, centerY);
+            canvas.scale(f, f, cX, cY);
             this.currentDrawable.setAlpha((int) (this.progress * 255.0f));
             this.currentDrawable.draw(canvas);
             canvas.restore();
@@ -157,20 +137,23 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
         }
         float f2 = this.progress;
         if (f2 != 1.0f && this.outDrawable != null) {
-            float f3 = 1.0f - f2;
+            float progressRev = 1.0f - f2;
             canvas.save();
-            canvas.scale(f3, f3, centerX, centerY);
-            this.outDrawable.setAlpha((int) (f3 * 255.0f));
+            canvas.scale(progressRev, progressRev, cX, cY);
+            this.outDrawable.setAlpha((int) (255.0f * progressRev));
             this.outDrawable.draw(canvas);
             canvas.restore();
             return;
         }
         Drawable drawable2 = this.outDrawable;
-        if (drawable2 == null) {
-            return;
+        if (drawable2 != null) {
+            drawable2.setAlpha(255);
+            this.outDrawable.draw(canvas);
         }
-        drawable2.setAlpha(255);
-        this.outDrawable.draw(canvas);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int alpha) {
     }
 
     @Override // android.graphics.drawable.Drawable
@@ -187,9 +170,26 @@ public class ReplaceableIconDrawable extends Drawable implements Animator.Animat
         invalidateSelf();
     }
 
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
     @Override // android.animation.Animator.AnimatorListener
-    public void onAnimationEnd(Animator animator) {
+    public void onAnimationEnd(Animator animation) {
         this.outDrawable = null;
         invalidateSelf();
+    }
+
+    @Override // android.animation.Animator.AnimatorListener
+    public void onAnimationStart(Animator animation) {
+    }
+
+    @Override // android.animation.Animator.AnimatorListener
+    public void onAnimationCancel(Animator animation) {
+    }
+
+    @Override // android.animation.Animator.AnimatorListener
+    public void onAnimationRepeat(Animator animation) {
     }
 }

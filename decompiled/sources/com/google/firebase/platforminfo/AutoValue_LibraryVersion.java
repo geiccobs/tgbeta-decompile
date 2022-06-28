@@ -1,20 +1,21 @@
 package com.google.firebase.platforminfo;
 
 import javax.annotation.Nonnull;
+/* JADX INFO: Access modifiers changed from: package-private */
 /* loaded from: classes.dex */
 public final class AutoValue_LibraryVersion extends LibraryVersion {
     private final String libraryName;
     private final String version;
 
-    public AutoValue_LibraryVersion(String str, String str2) {
-        if (str == null) {
+    public AutoValue_LibraryVersion(String libraryName, String version) {
+        if (libraryName == null) {
             throw new NullPointerException("Null libraryName");
         }
-        this.libraryName = str;
-        if (str2 == null) {
+        this.libraryName = libraryName;
+        if (version == null) {
             throw new NullPointerException("Null version");
         }
-        this.version = str2;
+        this.version = version;
     }
 
     @Override // com.google.firebase.platforminfo.LibraryVersion
@@ -33,18 +34,19 @@ public final class AutoValue_LibraryVersion extends LibraryVersion {
         return "LibraryVersion{libraryName=" + this.libraryName + ", version=" + this.version + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof LibraryVersion)) {
+        if (!(o instanceof LibraryVersion)) {
             return false;
         }
-        LibraryVersion libraryVersion = (LibraryVersion) obj;
-        return this.libraryName.equals(libraryVersion.getLibraryName()) && this.version.equals(libraryVersion.getVersion());
+        LibraryVersion that = (LibraryVersion) o;
+        return this.libraryName.equals(that.getLibraryName()) && this.version.equals(that.getVersion());
     }
 
     public int hashCode() {
-        return ((this.libraryName.hashCode() ^ 1000003) * 1000003) ^ this.version.hashCode();
+        int h$ = 1 * 1000003;
+        return ((h$ ^ this.libraryName.hashCode()) * 1000003) ^ this.version.hashCode();
     }
 }

@@ -9,14 +9,11 @@ import android.util.Log;
 import com.google.android.gms.common.util.PlatformVersion;
 import com.google.android.gms.common.wrappers.Wrappers;
 import java.util.List;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzr {
     private final Context zza;
-    @GuardedBy("this")
     private int zzb;
-    @GuardedBy("this")
     private int zzc = 0;
 
     public zzr(Context context) {
@@ -71,7 +68,7 @@ public final class zzr {
             return Wrappers.packageManager(this.zza).getPackageInfo(str, 0);
         } catch (PackageManager.NameNotFoundException e) {
             String valueOf = String.valueOf(e);
-            StringBuilder sb = new StringBuilder(valueOf.length() + 23);
+            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 23);
             sb.append("Failed to find package ");
             sb.append(valueOf);
             Log.w("Metadata", sb.toString());

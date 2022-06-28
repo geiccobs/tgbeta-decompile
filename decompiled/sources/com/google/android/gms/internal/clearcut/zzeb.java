@@ -1,10 +1,9 @@
 package com.google.android.gms.internal.clearcut;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes.dex */
-final class zzeb<E> extends zzav<E> {
+/* loaded from: classes3.dex */
+public final class zzeb<E> extends zzav<E> {
     private static final zzeb<Object> zznf;
     private final List<E> zzls;
 
@@ -26,11 +25,11 @@ final class zzeb<E> extends zzav<E> {
         return (zzeb<E>) zznf;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final void add(int i, E e) {
         zzw();
         this.zzls.add(i, e);
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // java.util.AbstractList, java.util.List
@@ -38,19 +37,19 @@ final class zzeb<E> extends zzav<E> {
         return this.zzls.get(i);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final E remove(int i) {
         zzw();
         E remove = this.zzls.remove(i);
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return remove;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final E set(int i, E e) {
         zzw();
         E e2 = this.zzls.set(i, e);
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return e2;
     }
 

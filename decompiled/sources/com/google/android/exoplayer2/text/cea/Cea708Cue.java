@@ -2,21 +2,24 @@ package com.google.android.exoplayer2.text.cea;
 
 import android.text.Layout;
 import com.google.android.exoplayer2.text.Cue;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class Cea708Cue extends Cue implements Comparable<Cea708Cue> {
     public final int priority;
 
-    public Cea708Cue(CharSequence charSequence, Layout.Alignment alignment, float f, int i, int i2, float f2, int i3, float f3, boolean z, int i4, int i5) {
-        super(charSequence, alignment, f, i, i2, f2, i3, f3, z, i4);
-        this.priority = i5;
+    public Cea708Cue(CharSequence text, Layout.Alignment textAlignment, float line, int lineType, int lineAnchor, float position, int positionAnchor, float size, boolean windowColorSet, int windowColor, int priority) {
+        super(text, textAlignment, line, lineType, lineAnchor, position, positionAnchor, size, windowColorSet, windowColor);
+        this.priority = priority;
     }
 
-    public int compareTo(Cea708Cue cea708Cue) {
-        int i = cea708Cue.priority;
+    public int compareTo(Cea708Cue other) {
+        int i = other.priority;
         int i2 = this.priority;
         if (i < i2) {
             return -1;
         }
-        return i > i2 ? 1 : 0;
+        if (i > i2) {
+            return 1;
+        }
+        return 0;
     }
 }

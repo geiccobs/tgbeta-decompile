@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import android.view.View;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class ColorPicker$$ExternalSyntheticLambda4 implements View.OnClickListener {
     public static final /* synthetic */ ColorPicker$$ExternalSyntheticLambda4 INSTANCE = new ColorPicker$$ExternalSyntheticLambda4();
 

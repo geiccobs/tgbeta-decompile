@@ -9,69 +9,79 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ErrorAttachmentLog extends AbstractLog {
+    static final Charset CHARSET = Charset.forName("UTF-8");
+    private static final String CONTENT_TYPE = "contentType";
+    public static final String CONTENT_TYPE_TEXT_PLAIN = "text/plain";
+    static final String DATA = "data";
+    private static final String ERROR_ID = "errorId";
+    private static final String FILE_NAME = "fileName";
+    public static final String TYPE = "errorAttachment";
     private String contentType;
     private byte[] data;
     private UUID errorId;
     private String fileName;
     private UUID id;
 
+    public static ErrorAttachmentLog attachmentWithText(String text, String fileName) {
+        if (text == null) {
+            text = "";
+        }
+        return attachmentWithBinary(text.getBytes(CHARSET), fileName, CONTENT_TYPE_TEXT_PLAIN);
+    }
+
+    public static ErrorAttachmentLog attachmentWithBinary(byte[] data, String fileName, String contentType) {
+        ErrorAttachmentLog attachmentLog = new ErrorAttachmentLog();
+        attachmentLog.setData(data);
+        attachmentLog.setFileName(fileName);
+        attachmentLog.setContentType(contentType);
+        return attachmentLog;
+    }
+
     @Override // com.microsoft.appcenter.ingestion.models.Log
     public String getType() {
-        return "errorAttachment";
-    }
-
-    static {
-        Charset.forName("UTF-8");
-    }
-
-    public static ErrorAttachmentLog attachmentWithBinary(byte[] bArr, String str, String str2) {
-        ErrorAttachmentLog errorAttachmentLog = new ErrorAttachmentLog();
-        errorAttachmentLog.setData(bArr);
-        errorAttachmentLog.setFileName(str);
-        errorAttachmentLog.setContentType(str2);
-        return errorAttachmentLog;
+        return TYPE;
     }
 
     public UUID getId() {
         return this.id;
     }
 
-    public void setId(UUID uuid) {
-        this.id = uuid;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public UUID getErrorId() {
         return this.errorId;
     }
 
-    public void setErrorId(UUID uuid) {
-        this.errorId = uuid;
+    public void setErrorId(UUID errorId) {
+        this.errorId = errorId;
     }
 
     public String getContentType() {
         return this.contentType;
     }
 
-    public void setContentType(String str) {
-        this.contentType = str;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getFileName() {
         return this.fileName;
     }
 
-    public void setFileName(String str) {
-        this.fileName = str;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public byte[] getData() {
         return this.data;
     }
 
-    public void setData(byte[] bArr) {
-        this.data = bArr;
+    public void setData(byte[] data) {
+        this.data = data;
     }
 
     public boolean isValid() {
@@ -79,71 +89,73 @@ public class ErrorAttachmentLog extends AbstractLog {
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject jSONObject) throws JSONException {
-        super.read(jSONObject);
-        setId(UUID.fromString(jSONObject.getString("id")));
-        setErrorId(UUID.fromString(jSONObject.getString("errorId")));
-        setContentType(jSONObject.getString("contentType"));
-        setFileName(jSONObject.optString("fileName", null));
+    public void read(JSONObject object) throws JSONException {
+        super.read(object);
+        setId(UUID.fromString(object.getString("id")));
+        setErrorId(UUID.fromString(object.getString(ERROR_ID)));
+        setContentType(object.getString(CONTENT_TYPE));
+        setFileName(object.optString(FILE_NAME, null));
         try {
-            setData(Base64.decode(jSONObject.getString("data"), 0));
+            setData(Base64.decode(object.getString("data"), 0));
         } catch (IllegalArgumentException e) {
             throw new JSONException(e.getMessage());
         }
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer jSONStringer) throws JSONException {
-        super.write(jSONStringer);
-        JSONUtils.write(jSONStringer, "id", getId());
-        JSONUtils.write(jSONStringer, "errorId", getErrorId());
-        JSONUtils.write(jSONStringer, "contentType", getContentType());
-        JSONUtils.write(jSONStringer, "fileName", getFileName());
-        JSONUtils.write(jSONStringer, "data", Base64.encodeToString(getData(), 2));
+    public void write(JSONStringer writer) throws JSONException {
+        super.write(writer);
+        JSONUtils.write(writer, "id", getId());
+        JSONUtils.write(writer, ERROR_ID, getErrorId());
+        JSONUtils.write(writer, CONTENT_TYPE, getContentType());
+        JSONUtils.write(writer, FILE_NAME, getFileName());
+        JSONUtils.write(writer, "data", Base64.encodeToString(getData(), 2));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || ErrorAttachmentLog.class != obj.getClass() || !super.equals(obj)) {
+        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
             return false;
         }
-        ErrorAttachmentLog errorAttachmentLog = (ErrorAttachmentLog) obj;
+        ErrorAttachmentLog that = (ErrorAttachmentLog) o;
         UUID uuid = this.id;
-        if (uuid == null ? errorAttachmentLog.id != null : !uuid.equals(errorAttachmentLog.id)) {
+        if (uuid == null ? that.id != null : !uuid.equals(that.id)) {
             return false;
         }
         UUID uuid2 = this.errorId;
-        if (uuid2 == null ? errorAttachmentLog.errorId != null : !uuid2.equals(errorAttachmentLog.errorId)) {
+        if (uuid2 == null ? that.errorId != null : !uuid2.equals(that.errorId)) {
             return false;
         }
         String str = this.contentType;
-        if (str == null ? errorAttachmentLog.contentType != null : !str.equals(errorAttachmentLog.contentType)) {
+        if (str == null ? that.contentType != null : !str.equals(that.contentType)) {
             return false;
         }
         String str2 = this.fileName;
-        if (str2 == null ? errorAttachmentLog.fileName != null : !str2.equals(errorAttachmentLog.fileName)) {
+        if (str2 == null ? that.fileName != null : !str2.equals(that.fileName)) {
             return false;
         }
-        return Arrays.equals(this.data, errorAttachmentLog.data);
+        return Arrays.equals(this.data, that.data);
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
     public int hashCode() {
-        int hashCode = super.hashCode() * 31;
+        int result = super.hashCode();
+        int i = result * 31;
         UUID uuid = this.id;
-        int i = 0;
-        int hashCode2 = (hashCode + (uuid != null ? uuid.hashCode() : 0)) * 31;
+        int i2 = 0;
+        int result2 = i + (uuid != null ? uuid.hashCode() : 0);
+        int result3 = result2 * 31;
         UUID uuid2 = this.errorId;
-        int hashCode3 = (hashCode2 + (uuid2 != null ? uuid2.hashCode() : 0)) * 31;
+        int result4 = (result3 + (uuid2 != null ? uuid2.hashCode() : 0)) * 31;
         String str = this.contentType;
-        int hashCode4 = (hashCode3 + (str != null ? str.hashCode() : 0)) * 31;
+        int result5 = (result4 + (str != null ? str.hashCode() : 0)) * 31;
         String str2 = this.fileName;
         if (str2 != null) {
-            i = str2.hashCode();
+            i2 = str2.hashCode();
         }
-        return ((hashCode4 + i) * 31) + Arrays.hashCode(this.data);
+        return ((result5 + i2) * 31) + Arrays.hashCode(this.data);
     }
 }

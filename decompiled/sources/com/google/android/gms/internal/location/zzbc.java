@@ -8,7 +8,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzbc extends AbstractSafeParcelable {
     public static final Parcelable.Creator<zzbc> CREATOR = new zzbd();
     final int zza;
@@ -40,6 +40,11 @@ public final class zzbc extends AbstractSafeParcelable {
             zzaiVar = null;
         }
         return new zzbc(2, null, zzbdVar, null, null, zzaiVar);
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public static zzbc zzb(zzba zzbaVar, PendingIntent pendingIntent, zzai zzaiVar) {
+        return new zzbc(1, zzbaVar, null, pendingIntent, null, zzaiVar);
     }
 
     /* JADX WARN: Multi-variable type inference failed */

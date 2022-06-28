@@ -1,9 +1,9 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzco extends IOException {
-    private zzdo zzkw;
+    private zzdo zzkw = null;
 
     public zzco(String str) {
         super(str);

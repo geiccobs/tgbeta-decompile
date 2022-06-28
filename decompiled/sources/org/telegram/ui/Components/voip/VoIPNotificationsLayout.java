@@ -26,7 +26,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.voip.VoIPNotificationsLayout;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VoIPNotificationsLayout extends LinearLayout {
     boolean lockAnimation;
     Runnable onViewsUpdated;
@@ -36,58 +36,59 @@ public class VoIPNotificationsLayout extends LinearLayout {
     ArrayList<NotificationView> viewToAdd = new ArrayList<>();
     ArrayList<NotificationView> viewToRemove = new ArrayList<>();
 
+    /* JADX WARN: Type inference failed for: r1v5, types: [org.telegram.ui.Components.voip.VoIPNotificationsLayout$1] */
     public VoIPNotificationsLayout(Context context) {
         super(context);
         setOrientation(1);
         if (Build.VERSION.SDK_INT >= 19) {
             TransitionSet transitionSet = new TransitionSet();
             this.transitionSet = transitionSet;
-            transitionSet.addTransition(new Fade(2).setDuration(150L)).addTransition(new ChangeBounds().setDuration(200L)).addTransition(new Visibility(this) { // from class: org.telegram.ui.Components.voip.VoIPNotificationsLayout.1
+            transitionSet.addTransition(new Fade(2).setDuration(150L)).addTransition(new ChangeBounds().setDuration(200L)).addTransition(new Visibility() { // from class: org.telegram.ui.Components.voip.VoIPNotificationsLayout.1
                 @Override // android.transition.Visibility
-                public Animator onAppear(ViewGroup viewGroup, View view, TransitionValues transitionValues, TransitionValues transitionValues2) {
-                    AnimatorSet animatorSet = new AnimatorSet();
+                public Animator onAppear(ViewGroup sceneRoot, View view, TransitionValues startValues, TransitionValues endValues) {
+                    AnimatorSet set = new AnimatorSet();
                     view.setAlpha(0.0f);
-                    animatorSet.playTogether(ObjectAnimator.ofFloat(view, View.ALPHA, 0.0f, 1.0f), ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, view.getMeasuredHeight(), 0.0f));
-                    animatorSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
-                    return animatorSet;
+                    set.playTogether(ObjectAnimator.ofFloat(view, View.ALPHA, 0.0f, 1.0f), ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, view.getMeasuredHeight(), 0.0f));
+                    set.setInterpolator(CubicBezierInterpolator.DEFAULT);
+                    return set;
                 }
             }.setDuration(200L));
             this.transitionSet.setOrdering(0);
         }
     }
 
-    public void addNotification(int i, String str, String str2, boolean z) {
-        if (this.viewsByTag.get(str2) != null) {
+    public void addNotification(int iconRes, String text, String tag, boolean animated) {
+        if (this.viewsByTag.get(tag) != null) {
             return;
         }
-        NotificationView notificationView = new NotificationView(getContext());
-        notificationView.tag = str2;
-        notificationView.iconView.setImageResource(i);
-        notificationView.textView.setText(str);
-        this.viewsByTag.put(str2, notificationView);
-        if (z) {
-            notificationView.startAnimation();
+        NotificationView view = new NotificationView(getContext());
+        view.tag = tag;
+        view.iconView.setImageResource(iconRes);
+        view.textView.setText(text);
+        this.viewsByTag.put(tag, view);
+        if (animated) {
+            view.startAnimation();
         }
         if (this.lockAnimation) {
-            this.viewToAdd.add(notificationView);
+            this.viewToAdd.add(view);
             return;
         }
         this.wasChanged = true;
-        addView(notificationView, LayoutHelper.createLinear(-2, -2, 1, 4, 0, 0, 4));
+        addView(view, LayoutHelper.createLinear(-2, -2, 1, 4, 0, 0, 4));
     }
 
-    public void removeNotification(String str) {
-        NotificationView remove = this.viewsByTag.remove(str);
-        if (remove != null) {
+    public void removeNotification(String tag) {
+        NotificationView view = this.viewsByTag.remove(tag);
+        if (view != null) {
             if (this.lockAnimation) {
-                if (this.viewToAdd.remove(remove)) {
+                if (this.viewToAdd.remove(view)) {
                     return;
                 }
-                this.viewToRemove.add(remove);
+                this.viewToRemove.add(view);
                 return;
             }
             this.wasChanged = true;
-            removeView(remove);
+            removeView(view);
         }
     }
 
@@ -96,67 +97,75 @@ public class VoIPNotificationsLayout extends LinearLayout {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.voip.VoIPNotificationsLayout$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                VoIPNotificationsLayout.this.lambda$lock$0();
+                VoIPNotificationsLayout.this.m3260x22e335d6();
             }
         }, 700L);
     }
 
-    public /* synthetic */ void lambda$lock$0() {
+    /* renamed from: lambda$lock$0$org-telegram-ui-Components-voip-VoIPNotificationsLayout */
+    public /* synthetic */ void m3260x22e335d6() {
         this.lockAnimation = false;
         runDelayed();
     }
 
     private void runDelayed() {
-        if (!this.viewToAdd.isEmpty() || !this.viewToRemove.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= 19 && getParent() != null) {
+        if (this.viewToAdd.isEmpty() && this.viewToRemove.isEmpty()) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 19) {
+            ViewParent parent = getParent();
+            if (parent != null) {
                 TransitionManager.beginDelayedTransition(this, this.transitionSet);
             }
-            int i = 0;
-            while (i < this.viewToAdd.size()) {
-                NotificationView notificationView = this.viewToAdd.get(i);
-                int i2 = 0;
-                while (true) {
-                    if (i2 >= this.viewToRemove.size()) {
-                        break;
-                    } else if (notificationView.tag.equals(this.viewToRemove.get(i2).tag)) {
+        }
+        int i = 0;
+        while (i < this.viewToAdd.size()) {
+            NotificationView view = this.viewToAdd.get(i);
+            int j = 0;
+            while (true) {
+                if (j < this.viewToRemove.size()) {
+                    if (!view.tag.equals(this.viewToRemove.get(j).tag)) {
+                        j++;
+                    } else {
                         this.viewToAdd.remove(i);
-                        this.viewToRemove.remove(i2);
+                        this.viewToRemove.remove(j);
                         i--;
                         break;
-                    } else {
-                        i2++;
                     }
+                } else {
+                    break;
                 }
-                i++;
             }
-            for (int i3 = 0; i3 < this.viewToAdd.size(); i3++) {
-                addView(this.viewToAdd.get(i3), LayoutHelper.createLinear(-2, -2, 1, 4, 0, 0, 4));
-            }
-            for (int i4 = 0; i4 < this.viewToRemove.size(); i4++) {
-                removeView(this.viewToRemove.get(i4));
-            }
-            this.viewsByTag.clear();
-            for (int i5 = 0; i5 < getChildCount(); i5++) {
-                NotificationView notificationView2 = (NotificationView) getChildAt(i5);
-                this.viewsByTag.put(notificationView2.tag, notificationView2);
-            }
-            this.viewToAdd.clear();
-            this.viewToRemove.clear();
-            lock();
-            Runnable runnable = this.onViewsUpdated;
-            if (runnable == null) {
-                return;
-            }
+            i++;
+        }
+        for (int i2 = 0; i2 < this.viewToAdd.size(); i2++) {
+            addView(this.viewToAdd.get(i2), LayoutHelper.createLinear(-2, -2, 1, 4, 0, 0, 4));
+        }
+        for (int i3 = 0; i3 < this.viewToRemove.size(); i3++) {
+            removeView(this.viewToRemove.get(i3));
+        }
+        this.viewsByTag.clear();
+        for (int i4 = 0; i4 < getChildCount(); i4++) {
+            NotificationView v = (NotificationView) getChildAt(i4);
+            this.viewsByTag.put(v.tag, v);
+        }
+        this.viewToAdd.clear();
+        this.viewToRemove.clear();
+        lock();
+        Runnable runnable = this.onViewsUpdated;
+        if (runnable != null) {
             runnable.run();
         }
     }
 
     public void beforeLayoutChanges() {
         this.wasChanged = false;
-        if (this.lockAnimation || Build.VERSION.SDK_INT < 19 || getParent() == null) {
-            return;
+        if (!this.lockAnimation && Build.VERSION.SDK_INT >= 19) {
+            ViewParent parent = getParent();
+            if (parent != null) {
+                TransitionManager.beginDelayedTransition(this, this.transitionSet);
+            }
         }
-        TransitionManager.beginDelayedTransition(this, this.transitionSet);
     }
 
     public void animateLayoutChanges() {
@@ -167,11 +176,11 @@ public class VoIPNotificationsLayout extends LinearLayout {
     }
 
     public int getChildsHight() {
-        int childCount = getChildCount();
-        return (childCount > 0 ? AndroidUtilities.dp(16.0f) : 0) + (childCount * AndroidUtilities.dp(32.0f));
+        int n = getChildCount();
+        return (n > 0 ? AndroidUtilities.dp(16.0f) : 0) + (AndroidUtilities.dp(32.0f) * n);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class NotificationView extends FrameLayout {
         ImageView iconView;
         public String tag;
@@ -196,12 +205,13 @@ public class VoIPNotificationsLayout extends LinearLayout {
             postDelayed(new Runnable() { // from class: org.telegram.ui.Components.voip.VoIPNotificationsLayout$NotificationView$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    VoIPNotificationsLayout.NotificationView.this.lambda$startAnimation$0();
+                    VoIPNotificationsLayout.NotificationView.this.m3261x4c597b27();
                 }
             }, 400L);
         }
 
-        public /* synthetic */ void lambda$startAnimation$0() {
+        /* renamed from: lambda$startAnimation$0$org-telegram-ui-Components-voip-VoIPNotificationsLayout$NotificationView */
+        public /* synthetic */ void m3261x4c597b27() {
             if (Build.VERSION.SDK_INT >= 19) {
                 TransitionSet transitionSet = new TransitionSet();
                 transitionSet.addTransition(new Fade(1).setDuration(150L)).addTransition(new ChangeBounds().setDuration(200L));
@@ -215,7 +225,7 @@ public class VoIPNotificationsLayout extends LinearLayout {
         }
     }
 
-    public void setOnViewsUpdated(Runnable runnable) {
-        this.onViewsUpdated = runnable;
+    public void setOnViewsUpdated(Runnable onViewsUpdated) {
+        this.onViewsUpdated = onViewsUpdated;
     }
 }

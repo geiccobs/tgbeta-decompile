@@ -1,20 +1,20 @@
 package com.google.android.exoplayer2.util;
 
 import android.text.TextUtils;
+import androidx.core.internal.view.SupportMenu;
+import androidx.core.view.InputDeviceCompat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class ColorParser {
     private static final Map<String, Integer> COLOR_MAP;
+    private static final String RGB = "rgb";
+    private static final String RGBA = "rgba";
     private static final Pattern RGB_PATTERN = Pattern.compile("^rgb\\((\\d{1,3}),(\\d{1,3}),(\\d{1,3})\\)$");
     private static final Pattern RGBA_PATTERN_INT_ALPHA = Pattern.compile("^rgba\\((\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3})\\)$");
     private static final Pattern RGBA_PATTERN_FLOAT_ALPHA = Pattern.compile("^rgba\\((\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d*\\.?\\d*?)\\)$");
-
-    private static int argb(int i, int i2, int i3, int i4) {
-        return (i << 24) | (i2 << 16) | (i3 << 8) | i4;
-    }
 
     static {
         HashMap hashMap = new HashMap();
@@ -139,7 +139,7 @@ public final class ColorParser {
         hashMap.put("powderblue", -5185306);
         hashMap.put("purple", -8388480);
         hashMap.put("rebeccapurple", -10079335);
-        hashMap.put("red", -65536);
+        hashMap.put("red", Integer.valueOf((int) SupportMenu.CATEGORY_MASK));
         hashMap.put("rosybrown", -4419697);
         hashMap.put("royalblue", -12490271);
         hashMap.put("saddlebrown", -7650029);
@@ -166,57 +166,64 @@ public final class ColorParser {
         hashMap.put("wheat", -663885);
         hashMap.put("white", -1);
         hashMap.put("whitesmoke", -657931);
-        hashMap.put("yellow", -256);
+        hashMap.put("yellow", Integer.valueOf((int) InputDeviceCompat.SOURCE_ANY));
         hashMap.put("yellowgreen", -6632142);
     }
 
-    public static int parseTtmlColor(String str) {
-        return parseColorInternal(str, false);
+    public static int parseTtmlColor(String colorExpression) {
+        return parseColorInternal(colorExpression, false);
     }
 
-    public static int parseCssColor(String str) {
-        return parseColorInternal(str, true);
+    public static int parseCssColor(String colorExpression) {
+        return parseColorInternal(colorExpression, true);
     }
 
-    private static int parseColorInternal(String str, boolean z) {
+    private static int parseColorInternal(String colorExpression, boolean alphaHasFloatFormat) {
         int i;
-        Assertions.checkArgument(!TextUtils.isEmpty(str));
-        String replace = str.replace(" ", "");
-        if (replace.charAt(0) == '#') {
-            int parseLong = (int) Long.parseLong(replace.substring(1), 16);
-            if (replace.length() == 7) {
-                return (-16777216) | parseLong;
+        Assertions.checkArgument(!TextUtils.isEmpty(colorExpression));
+        String colorExpression2 = colorExpression.replace(" ", "");
+        if (colorExpression2.charAt(0) == '#') {
+            int color = (int) Long.parseLong(colorExpression2.substring(1), 16);
+            if (colorExpression2.length() == 7) {
+                return (-16777216) | color;
             }
-            if (replace.length() != 9) {
-                throw new IllegalArgumentException();
+            if (colorExpression2.length() == 9) {
+                return ((color & 255) << 24) | (color >>> 8);
             }
-            return ((parseLong & 255) << 24) | (parseLong >>> 8);
+            throw new IllegalArgumentException();
         }
-        if (replace.startsWith("rgba")) {
-            Matcher matcher = (z ? RGBA_PATTERN_FLOAT_ALPHA : RGBA_PATTERN_INT_ALPHA).matcher(replace);
+        if (colorExpression2.startsWith(RGBA)) {
+            Matcher matcher = (alphaHasFloatFormat ? RGBA_PATTERN_FLOAT_ALPHA : RGBA_PATTERN_INT_ALPHA).matcher(colorExpression2);
             if (matcher.matches()) {
-                if (z) {
+                if (alphaHasFloatFormat) {
                     i = (int) (Float.parseFloat(matcher.group(4)) * 255.0f);
                 } else {
                     i = Integer.parseInt(matcher.group(4), 10);
                 }
                 return argb(i, Integer.parseInt(matcher.group(1), 10), Integer.parseInt(matcher.group(2), 10), Integer.parseInt(matcher.group(3), 10));
             }
-        } else if (replace.startsWith("rgb")) {
-            Matcher matcher2 = RGB_PATTERN.matcher(replace);
+        } else if (colorExpression2.startsWith(RGB)) {
+            Matcher matcher2 = RGB_PATTERN.matcher(colorExpression2);
             if (matcher2.matches()) {
                 return rgb(Integer.parseInt(matcher2.group(1), 10), Integer.parseInt(matcher2.group(2), 10), Integer.parseInt(matcher2.group(3), 10));
             }
         } else {
-            Integer num = COLOR_MAP.get(Util.toLowerInvariant(replace));
-            if (num != null) {
-                return num.intValue();
+            Integer color2 = COLOR_MAP.get(Util.toLowerInvariant(colorExpression2));
+            if (color2 != null) {
+                return color2.intValue();
             }
         }
         throw new IllegalArgumentException();
     }
 
-    private static int rgb(int i, int i2, int i3) {
-        return argb(255, i, i2, i3);
+    private static int argb(int alpha, int red, int green, int blue) {
+        return (alpha << 24) | (red << 16) | (green << 8) | blue;
+    }
+
+    private static int rgb(int red, int green, int blue) {
+        return argb(255, red, green, blue);
+    }
+
+    private ColorParser() {
     }
 }

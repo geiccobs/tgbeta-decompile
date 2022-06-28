@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import org.telegram.messenger.ImageReceiver;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class TextPaintImageReceiverSpan$$ExternalSyntheticLambda0 implements ImageReceiver.ImageReceiverDelegate {
     public static final /* synthetic */ TextPaintImageReceiverSpan$$ExternalSyntheticLambda0 INSTANCE = new TextPaintImageReceiverSpan$$ExternalSyntheticLambda0();
 

@@ -2,18 +2,17 @@ package org.webrtc;
 
 import org.webrtc.VideoFrame;
 import org.webrtc.VideoProcessor;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class NativeCapturerObserver implements CapturerObserver {
     private final NativeAndroidVideoTrackSource nativeAndroidVideoTrackSource;
 
-    @CalledByNative
-    public NativeCapturerObserver(long j) {
-        this.nativeAndroidVideoTrackSource = new NativeAndroidVideoTrackSource(j);
+    public NativeCapturerObserver(long nativeSource) {
+        this.nativeAndroidVideoTrackSource = new NativeAndroidVideoTrackSource(nativeSource);
     }
 
     @Override // org.webrtc.CapturerObserver
-    public void onCapturerStarted(boolean z) {
-        this.nativeAndroidVideoTrackSource.setState(z);
+    public void onCapturerStarted(boolean success) {
+        this.nativeAndroidVideoTrackSource.setState(success);
     }
 
     @Override // org.webrtc.CapturerObserver
@@ -26,13 +25,13 @@ public class NativeCapturerObserver implements CapturerObserver {
     }
 
     @Override // org.webrtc.CapturerObserver
-    public void onFrameCaptured(VideoFrame videoFrame) {
-        VideoProcessor.FrameAdaptationParameters adaptFrame = this.nativeAndroidVideoTrackSource.adaptFrame(videoFrame);
-        if (adaptFrame == null || adaptFrame.cropWidth == 0 || adaptFrame.cropHeight == 0) {
+    public void onFrameCaptured(VideoFrame frame) {
+        VideoProcessor.FrameAdaptationParameters parameters = this.nativeAndroidVideoTrackSource.adaptFrame(frame);
+        if (parameters == null || parameters.cropWidth == 0 || parameters.cropHeight == 0) {
             return;
         }
-        VideoFrame.Buffer cropAndScale = videoFrame.getBuffer().cropAndScale(adaptFrame.cropX, adaptFrame.cropY, adaptFrame.cropWidth, adaptFrame.cropHeight, adaptFrame.scaleWidth, adaptFrame.scaleHeight);
-        this.nativeAndroidVideoTrackSource.onFrameCaptured(new VideoFrame(cropAndScale, videoFrame.getRotation(), adaptFrame.timestampNs));
-        cropAndScale.release();
+        VideoFrame.Buffer adaptedBuffer = frame.getBuffer().cropAndScale(parameters.cropX, parameters.cropY, parameters.cropWidth, parameters.cropHeight, parameters.scaleWidth, parameters.scaleHeight);
+        this.nativeAndroidVideoTrackSource.onFrameCaptured(new VideoFrame(adaptedBuffer, frame.getRotation(), parameters.timestampNs));
+        adaptedBuffer.release();
     }
 }

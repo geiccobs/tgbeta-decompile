@@ -9,7 +9,7 @@ import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class IcyDataSource implements DataSource {
     private int bytesUntilMetadata;
     private final Listener listener;
@@ -17,18 +17,18 @@ final class IcyDataSource implements DataSource {
     private final byte[] metadataLengthByteHolder;
     private final DataSource upstream;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Listener {
         void onIcyMetadata(ParsableByteArray parsableByteArray);
     }
 
-    public IcyDataSource(DataSource dataSource, int i, Listener listener) {
-        Assertions.checkArgument(i > 0);
-        this.upstream = dataSource;
-        this.metadataIntervalBytes = i;
+    public IcyDataSource(DataSource upstream, int metadataIntervalBytes, Listener listener) {
+        Assertions.checkArgument(metadataIntervalBytes > 0);
+        this.upstream = upstream;
+        this.metadataIntervalBytes = metadataIntervalBytes;
         this.listener = listener;
         this.metadataLengthByteHolder = new byte[1];
-        this.bytesUntilMetadata = i;
+        this.bytesUntilMetadata = metadataIntervalBytes;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
@@ -42,18 +42,18 @@ final class IcyDataSource implements DataSource {
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] bArr, int i, int i2) throws IOException {
+    public int read(byte[] buffer, int offset, int readLength) throws IOException {
         if (this.bytesUntilMetadata == 0) {
             if (!readMetadata()) {
                 return -1;
             }
             this.bytesUntilMetadata = this.metadataIntervalBytes;
         }
-        int read = this.upstream.read(bArr, i, Math.min(this.bytesUntilMetadata, i2));
-        if (read != -1) {
-            this.bytesUntilMetadata -= read;
+        int bytesRead = this.upstream.read(buffer, offset, Math.min(this.bytesUntilMetadata, readLength));
+        if (bytesRead != -1) {
+            this.bytesUntilMetadata -= bytesRead;
         }
-        return read;
+        return bytesRead;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
@@ -75,26 +75,26 @@ final class IcyDataSource implements DataSource {
         if (this.upstream.read(this.metadataLengthByteHolder, 0, 1) == -1) {
             return false;
         }
-        int i = (this.metadataLengthByteHolder[0] & 255) << 4;
-        if (i == 0) {
+        int metadataLength = (this.metadataLengthByteHolder[0] & 255) << 4;
+        if (metadataLength == 0) {
             return true;
         }
-        byte[] bArr = new byte[i];
-        int i2 = i;
-        int i3 = 0;
-        while (i2 > 0) {
-            int read = this.upstream.read(bArr, i3, i2);
-            if (read == -1) {
+        int offset = 0;
+        int lengthRemaining = metadataLength;
+        byte[] metadata = new byte[metadataLength];
+        while (lengthRemaining > 0) {
+            int bytesRead = this.upstream.read(metadata, offset, lengthRemaining);
+            if (bytesRead == -1) {
                 return false;
             }
-            i3 += read;
-            i2 -= read;
+            offset += bytesRead;
+            lengthRemaining -= bytesRead;
         }
-        while (i > 0 && bArr[i - 1] == 0) {
-            i--;
+        while (metadataLength > 0 && metadata[metadataLength - 1] == 0) {
+            metadataLength--;
         }
-        if (i > 0) {
-            this.listener.onIcyMetadata(new ParsableByteArray(bArr, i));
+        if (metadataLength > 0) {
+            this.listener.onIcyMetadata(new ParsableByteArray(metadata, metadataLength));
         }
         return true;
     }

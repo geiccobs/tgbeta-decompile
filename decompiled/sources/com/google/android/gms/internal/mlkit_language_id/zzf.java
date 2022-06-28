@@ -3,17 +3,19 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.util.Arrays;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzf {
     private final String zza;
     private final zze zzb;
     private zze zzc;
+    private boolean zzd;
 
     /* JADX INFO: Access modifiers changed from: private */
     public zzf(String str) {
         zze zzeVar = new zze();
         this.zzb = zzeVar;
         this.zzc = zzeVar;
+        this.zzd = false;
         this.zza = (String) zzg.zza(str);
     }
 
@@ -34,9 +36,8 @@ public final class zzf {
         while (zzeVar != null) {
             Object obj = zzeVar.zzb;
             sb.append(str);
-            String str2 = zzeVar.zza;
-            if (str2 != null) {
-                sb.append(str2);
+            if (zzeVar.zza != null) {
+                sb.append(zzeVar.zza);
                 sb.append('=');
             }
             if (obj != null && obj.getClass().isArray()) {

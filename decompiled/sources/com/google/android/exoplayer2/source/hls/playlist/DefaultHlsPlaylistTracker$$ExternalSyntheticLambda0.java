@@ -3,7 +3,7 @@ package com.google.android.exoplayer2.source.hls.playlist;
 import com.google.android.exoplayer2.source.hls.HlsDataSourceFactory;
 import com.google.android.exoplayer2.source.hls.playlist.HlsPlaylistTracker;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class DefaultHlsPlaylistTracker$$ExternalSyntheticLambda0 implements HlsPlaylistTracker.Factory {
     public static final /* synthetic */ DefaultHlsPlaylistTracker$$ExternalSyntheticLambda0 INSTANCE = new DefaultHlsPlaylistTracker$$ExternalSyntheticLambda0();
 

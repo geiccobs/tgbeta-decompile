@@ -3,7 +3,7 @@ package org.webrtc;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VideoCodecInfo {
     public static final String H264_CONSTRAINED_BASELINE_3_1 = "42e01f";
     public static final String H264_CONSTRAINED_HIGH_3_1 = "640c1f";
@@ -18,18 +18,17 @@ public class VideoCodecInfo {
     @Deprecated
     public final int payload;
 
-    @CalledByNative
-    public VideoCodecInfo(String str, Map<String, String> map) {
+    public VideoCodecInfo(String name, Map<String, String> params) {
         this.payload = 0;
-        this.name = str;
-        this.params = map;
+        this.name = name;
+        this.params = params;
     }
 
     @Deprecated
-    public VideoCodecInfo(int i, String str, Map<String, String> map) {
-        this.payload = i;
-        this.name = str;
-        this.params = map;
+    public VideoCodecInfo(int payload, String name, Map<String, String> params) {
+        this.payload = payload;
+        this.name = name;
+        this.params = params;
     }
 
     public boolean equals(Object obj) {
@@ -42,20 +41,19 @@ public class VideoCodecInfo {
         if (!(obj instanceof VideoCodecInfo)) {
             return false;
         }
-        VideoCodecInfo videoCodecInfo = (VideoCodecInfo) obj;
-        return this.name.equalsIgnoreCase(videoCodecInfo.name) && this.params.equals(videoCodecInfo.params);
+        VideoCodecInfo otherInfo = (VideoCodecInfo) obj;
+        return this.name.equalsIgnoreCase(otherInfo.name) && this.params.equals(otherInfo.params);
     }
 
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{this.name.toUpperCase(Locale.ROOT), this.params});
+        Object[] values = {this.name.toUpperCase(Locale.ROOT), this.params};
+        return Arrays.hashCode(values);
     }
 
-    @CalledByNative
     public String getName() {
         return this.name;
     }
 
-    @CalledByNative
     Map getParams() {
         return this.params;
     }

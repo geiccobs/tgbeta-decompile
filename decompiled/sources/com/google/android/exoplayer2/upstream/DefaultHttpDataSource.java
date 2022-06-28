@@ -1,6 +1,7 @@
 package com.google.android.exoplayer2.upstream;
 
 import android.net.Uri;
+import android.text.TextUtils;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
@@ -21,12 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSource {
-    private static final Pattern CONTENT_RANGE_HEADER = Pattern.compile("^bytes (\\d+)-(\\d+)/(\\d+)$");
-    private static final AtomicReference<byte[]> skipBufferReference = new AtomicReference<>();
+    public static final int DEFAULT_CONNECT_TIMEOUT_MILLIS = 8000;
+    public static final int DEFAULT_READ_TIMEOUT_MILLIS = 8000;
+    private static final int HTTP_STATUS_PERMANENT_REDIRECT = 308;
+    private static final int HTTP_STATUS_TEMPORARY_REDIRECT = 307;
+    private static final long MAX_BYTES_TO_DRAIN = 2048;
+    private static final int MAX_REDIRECTS = 20;
+    private static final String TAG = "DefaultHttpDataSource";
     private final boolean allowCrossProtocolRedirects;
     private long bytesRead;
     private long bytesSkipped;
@@ -40,28 +47,54 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     private InputStream inputStream;
     private boolean opened;
     private final int readTimeoutMillis;
-    private final HttpDataSource.RequestProperties requestProperties = new HttpDataSource.RequestProperties();
+    private final HttpDataSource.RequestProperties requestProperties;
     private int responseCode;
     private final String userAgent;
+    private static final Pattern CONTENT_RANGE_HEADER = Pattern.compile("^bytes (\\d+)-(\\d+)/(\\d+)$");
+    private static final AtomicReference<byte[]> skipBufferReference = new AtomicReference<>();
 
-    public DefaultHttpDataSource(String str, int i, int i2, boolean z, HttpDataSource.RequestProperties requestProperties) {
+    public DefaultHttpDataSource(String userAgent) {
+        this(userAgent, 8000, 8000);
+    }
+
+    public DefaultHttpDataSource(String userAgent, int connectTimeoutMillis, int readTimeoutMillis) {
+        this(userAgent, connectTimeoutMillis, readTimeoutMillis, false, null);
+    }
+
+    public DefaultHttpDataSource(String userAgent, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects, HttpDataSource.RequestProperties defaultRequestProperties) {
         super(true);
-        this.userAgent = Assertions.checkNotEmpty(str);
-        this.connectTimeoutMillis = i;
-        this.readTimeoutMillis = i2;
-        this.allowCrossProtocolRedirects = z;
-        this.defaultRequestProperties = requestProperties;
+        this.userAgent = Assertions.checkNotEmpty(userAgent);
+        this.requestProperties = new HttpDataSource.RequestProperties();
+        this.connectTimeoutMillis = connectTimeoutMillis;
+        this.readTimeoutMillis = readTimeoutMillis;
+        this.allowCrossProtocolRedirects = allowCrossProtocolRedirects;
+        this.defaultRequestProperties = defaultRequestProperties;
     }
 
     @Deprecated
-    public DefaultHttpDataSource(String str, Predicate<String> predicate, int i, int i2, boolean z, HttpDataSource.RequestProperties requestProperties) {
+    public DefaultHttpDataSource(String userAgent, Predicate<String> contentTypePredicate) {
+        this(userAgent, contentTypePredicate, 8000, 8000);
+    }
+
+    @Deprecated
+    public DefaultHttpDataSource(String userAgent, Predicate<String> contentTypePredicate, int connectTimeoutMillis, int readTimeoutMillis) {
+        this(userAgent, contentTypePredicate, connectTimeoutMillis, readTimeoutMillis, false, null);
+    }
+
+    @Deprecated
+    public DefaultHttpDataSource(String userAgent, Predicate<String> contentTypePredicate, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects, HttpDataSource.RequestProperties defaultRequestProperties) {
         super(true);
-        this.userAgent = Assertions.checkNotEmpty(str);
-        this.contentTypePredicate = predicate;
-        this.connectTimeoutMillis = i;
-        this.readTimeoutMillis = i2;
-        this.allowCrossProtocolRedirects = z;
-        this.defaultRequestProperties = requestProperties;
+        this.userAgent = Assertions.checkNotEmpty(userAgent);
+        this.contentTypePredicate = contentTypePredicate;
+        this.requestProperties = new HttpDataSource.RequestProperties();
+        this.connectTimeoutMillis = connectTimeoutMillis;
+        this.readTimeoutMillis = readTimeoutMillis;
+        this.allowCrossProtocolRedirects = allowCrossProtocolRedirects;
+        this.defaultRequestProperties = defaultRequestProperties;
+    }
+
+    public void setContentTypePredicate(Predicate<String> contentTypePredicate) {
+        this.contentTypePredicate = contentTypePredicate;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
@@ -73,10 +106,37 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
         return Uri.parse(httpURLConnection.getURL().toString());
     }
 
+    @Override // com.google.android.exoplayer2.upstream.HttpDataSource
+    public int getResponseCode() {
+        int i;
+        if (this.connection == null || (i = this.responseCode) <= 0) {
+            return -1;
+        }
+        return i;
+    }
+
     @Override // com.google.android.exoplayer2.upstream.BaseDataSource, com.google.android.exoplayer2.upstream.DataSource
     public Map<String, List<String>> getResponseHeaders() {
         HttpURLConnection httpURLConnection = this.connection;
         return httpURLConnection == null ? Collections.emptyMap() : httpURLConnection.getHeaderFields();
+    }
+
+    @Override // com.google.android.exoplayer2.upstream.HttpDataSource
+    public void setRequestProperty(String name, String value) {
+        Assertions.checkNotNull(name);
+        Assertions.checkNotNull(value);
+        this.requestProperties.set(name, value);
+    }
+
+    @Override // com.google.android.exoplayer2.upstream.HttpDataSource
+    public void clearRequestProperty(String name) {
+        Assertions.checkNotNull(name);
+        this.requestProperties.remove(name);
+    }
+
+    @Override // com.google.android.exoplayer2.upstream.HttpDataSource
+    public void clearAllRequestProperties() {
+        this.requestProperties.clear();
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
@@ -94,13 +154,13 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
                 String responseMessage = this.connection.getResponseMessage();
                 int i = this.responseCode;
                 if (i < 200 || i > 299) {
-                    Map<String, List<String>> headerFields = this.connection.getHeaderFields();
+                    Map<String, List<String>> headers = this.connection.getHeaderFields();
                     closeConnectionQuietly();
-                    HttpDataSource.InvalidResponseCodeException invalidResponseCodeException = new HttpDataSource.InvalidResponseCodeException(this.responseCode, responseMessage, headerFields, dataSpec);
+                    HttpDataSource.InvalidResponseCodeException exception = new HttpDataSource.InvalidResponseCodeException(this.responseCode, responseMessage, headers, dataSpec);
                     if (this.responseCode == 416) {
-                        invalidResponseCodeException.initCause(new DataSourceException(0));
+                        exception.initCause(new DataSourceException(0));
                     }
-                    throw invalidResponseCodeException;
+                    throw exception;
                 }
                 String contentType = this.connection.getContentType();
                 Predicate<String> predicate = this.contentTypePredicate;
@@ -108,25 +168,21 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
                     closeConnectionQuietly();
                     throw new HttpDataSource.InvalidContentTypeException(contentType, dataSpec);
                 }
-                if (this.responseCode == 200) {
-                    long j2 = dataSpec.position;
-                    if (j2 != 0) {
-                        j = j2;
-                    }
+                if (this.responseCode == 200 && dataSpec.position != 0) {
+                    j = dataSpec.position;
                 }
                 this.bytesToSkip = j;
                 boolean isCompressed = isCompressed(this.connection);
                 if (!isCompressed) {
-                    long j3 = dataSpec.length;
-                    long j4 = -1;
-                    if (j3 != -1) {
-                        this.bytesToRead = j3;
+                    long j2 = -1;
+                    if (dataSpec.length != -1) {
+                        this.bytesToRead = dataSpec.length;
                     } else {
                         long contentLength = getContentLength(this.connection);
                         if (contentLength != -1) {
-                            j4 = contentLength - this.bytesToSkip;
+                            j2 = contentLength - this.bytesToSkip;
                         }
-                        this.bytesToRead = j4;
+                        this.bytesToRead = j2;
                     }
                 } else {
                     this.bytesToRead = dataSpec.length;
@@ -153,10 +209,10 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] bArr, int i, int i2) throws HttpDataSource.HttpDataSourceException {
+    public int read(byte[] buffer, int offset, int readLength) throws HttpDataSource.HttpDataSourceException {
         try {
             skipInternal();
-            return readInternal(bArr, i, i2);
+            return readInternal(buffer, offset, readLength);
         } catch (IOException e) {
             throw new HttpDataSource.HttpDataSourceException(e, this.dataSpec, 2);
         }
@@ -183,205 +239,164 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
         }
     }
 
+    protected final HttpURLConnection getConnection() {
+        return this.connection;
+    }
+
+    protected final long bytesSkipped() {
+        return this.bytesSkipped;
+    }
+
+    protected final long bytesRead() {
+        return this.bytesRead;
+    }
+
     protected final long bytesRemaining() {
         long j = this.bytesToRead;
         return j == -1 ? j : j - this.bytesRead;
     }
 
     private HttpURLConnection makeConnection(DataSpec dataSpec) throws IOException {
-        HttpURLConnection makeConnection;
-        DataSpec dataSpec2 = dataSpec;
-        URL url = new URL(dataSpec2.uri.toString());
-        int i = dataSpec2.httpMethod;
-        byte[] bArr = dataSpec2.httpBody;
-        long j = dataSpec2.position;
-        long j2 = dataSpec2.length;
-        boolean isFlagSet = dataSpec2.isFlagSet(1);
+        HttpURLConnection connection;
+        URL url = new URL(dataSpec.uri.toString());
+        int httpMethod = dataSpec.httpMethod;
+        byte[] httpBody = dataSpec.httpBody;
+        long position = dataSpec.position;
+        long length = dataSpec.length;
+        boolean allowGzip = dataSpec.isFlagSet(1);
         if (!this.allowCrossProtocolRedirects) {
-            return makeConnection(url, i, bArr, j, j2, isFlagSet, true, dataSpec2.httpRequestHeaders);
+            return makeConnection(url, httpMethod, httpBody, position, length, allowGzip, true, dataSpec.httpRequestHeaders);
         }
-        int i2 = 0;
+        int redirectCount = 0;
         while (true) {
-            int i3 = i2 + 1;
-            if (i2 <= 20) {
-                byte[] bArr2 = bArr;
-                long j3 = j2;
-                long j4 = j;
-                makeConnection = makeConnection(url, i, bArr, j, j2, isFlagSet, false, dataSpec2.httpRequestHeaders);
-                int responseCode = makeConnection.getResponseCode();
-                String headerField = makeConnection.getHeaderField("Location");
-                if ((i == 1 || i == 3) && (responseCode == 300 || responseCode == 301 || responseCode == 302 || responseCode == 303 || responseCode == 307 || responseCode == 308)) {
-                    makeConnection.disconnect();
-                    url = handleRedirect(url, headerField);
-                } else if (i != 2 || (responseCode != 300 && responseCode != 301 && responseCode != 302 && responseCode != 303)) {
+            int redirectCount2 = redirectCount + 1;
+            if (redirectCount <= 20) {
+                long position2 = position;
+                connection = makeConnection(url, httpMethod, httpBody, position2, length, allowGzip, false, dataSpec.httpRequestHeaders);
+                int responseCode = connection.getResponseCode();
+                String location = connection.getHeaderField("Location");
+                if ((httpMethod == 1 || httpMethod == 3) && (responseCode == 300 || responseCode == 301 || responseCode == 302 || responseCode == 303 || responseCode == HTTP_STATUS_TEMPORARY_REDIRECT || responseCode == HTTP_STATUS_PERMANENT_REDIRECT)) {
+                    connection.disconnect();
+                    url = handleRedirect(url, location);
+                } else if (httpMethod != 2 || (responseCode != 300 && responseCode != 301 && responseCode != 302 && responseCode != 303)) {
                     break;
                 } else {
-                    makeConnection.disconnect();
-                    url = handleRedirect(url, headerField);
-                    bArr2 = null;
-                    i = 1;
+                    connection.disconnect();
+                    url = handleRedirect(url, location);
+                    httpMethod = 1;
+                    httpBody = null;
                 }
-                i2 = i3;
-                bArr = bArr2;
-                j2 = j3;
-                j = j4;
-                dataSpec2 = dataSpec;
+                redirectCount = redirectCount2;
+                position = position2;
             } else {
-                throw new NoRouteToHostException("Too many redirects: " + i3);
+                throw new NoRouteToHostException("Too many redirects: " + redirectCount2);
             }
         }
-        return makeConnection;
+        return connection;
     }
 
-    private HttpURLConnection makeConnection(URL url, int i, byte[] bArr, long j, long j2, boolean z, boolean z2, Map<String, String> map) throws IOException {
-        HttpURLConnection openConnection = openConnection(url);
-        openConnection.setConnectTimeout(this.connectTimeoutMillis);
-        openConnection.setReadTimeout(this.readTimeoutMillis);
-        HashMap hashMap = new HashMap();
+    private HttpURLConnection makeConnection(URL url, int httpMethod, byte[] httpBody, long position, long length, boolean allowGzip, boolean followRedirects, Map<String, String> requestParameters) throws IOException {
+        HttpURLConnection connection = openConnection(url);
+        connection.setConnectTimeout(this.connectTimeoutMillis);
+        connection.setReadTimeout(this.readTimeoutMillis);
+        Map<String, String> requestHeaders = new HashMap<>();
         HttpDataSource.RequestProperties requestProperties = this.defaultRequestProperties;
         if (requestProperties != null) {
-            hashMap.putAll(requestProperties.getSnapshot());
+            requestHeaders.putAll(requestProperties.getSnapshot());
         }
-        hashMap.putAll(this.requestProperties.getSnapshot());
-        hashMap.putAll(map);
-        for (Map.Entry entry : hashMap.entrySet()) {
-            openConnection.setRequestProperty((String) entry.getKey(), (String) entry.getValue());
+        requestHeaders.putAll(this.requestProperties.getSnapshot());
+        requestHeaders.putAll(requestParameters);
+        for (Map.Entry<String, String> property : requestHeaders.entrySet()) {
+            connection.setRequestProperty(property.getKey(), property.getValue());
         }
-        if (j != 0 || j2 != -1) {
-            String str = "bytes=" + j + "-";
-            if (j2 != -1) {
-                str = str + ((j + j2) - 1);
+        if (position != 0 || length != -1) {
+            String rangeRequest = "bytes=" + position + "-";
+            if (length != -1) {
+                rangeRequest = rangeRequest + ((position + length) - 1);
             }
-            openConnection.setRequestProperty("Range", str);
+            connection.setRequestProperty("Range", rangeRequest);
         }
-        openConnection.setRequestProperty("User-Agent", this.userAgent);
-        openConnection.setRequestProperty("Accept-Encoding", z ? "gzip" : "identity");
-        openConnection.setInstanceFollowRedirects(z2);
-        openConnection.setDoOutput(bArr != null);
-        openConnection.setRequestMethod(DataSpec.getStringForHttpMethod(i));
-        if (bArr != null) {
-            openConnection.setFixedLengthStreamingMode(bArr.length);
-            openConnection.connect();
-            OutputStream outputStream = openConnection.getOutputStream();
-            outputStream.write(bArr);
-            outputStream.close();
+        connection.setRequestProperty("User-Agent", this.userAgent);
+        connection.setRequestProperty("Accept-Encoding", allowGzip ? "gzip" : "identity");
+        connection.setInstanceFollowRedirects(followRedirects);
+        connection.setDoOutput(httpBody != null);
+        connection.setRequestMethod(DataSpec.getStringForHttpMethod(httpMethod));
+        if (httpBody != null) {
+            connection.setFixedLengthStreamingMode(httpBody.length);
+            connection.connect();
+            OutputStream os = connection.getOutputStream();
+            os.write(httpBody);
+            os.close();
         } else {
-            openConnection.connect();
+            connection.connect();
         }
-        return openConnection;
+        return connection;
     }
 
     HttpURLConnection openConnection(URL url) throws IOException {
         return (HttpURLConnection) url.openConnection();
     }
 
-    private static URL handleRedirect(URL url, String str) throws IOException {
-        if (str == null) {
+    private static URL handleRedirect(URL originalUrl, String location) throws IOException {
+        if (location == null) {
             throw new ProtocolException("Null location redirect");
         }
-        URL url2 = new URL(url, str);
-        String protocol = url2.getProtocol();
-        if ("https".equals(protocol) || "http".equals(protocol)) {
-            return url2;
+        URL url = new URL(originalUrl, location);
+        String protocol = url.getProtocol();
+        if (!"https".equals(protocol) && !"http".equals(protocol)) {
+            throw new ProtocolException("Unsupported protocol redirect: " + protocol);
         }
-        throw new ProtocolException("Unsupported protocol redirect: " + protocol);
+        return url;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:25:? A[RETURN, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:9:0x003a  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    private static long getContentLength(java.net.HttpURLConnection r10) {
-        /*
-            java.lang.String r0 = "Content-Length"
-            java.lang.String r0 = r10.getHeaderField(r0)
-            boolean r1 = android.text.TextUtils.isEmpty(r0)
-            java.lang.String r2 = "]"
-            java.lang.String r3 = "DefaultHttpDataSource"
-            if (r1 != 0) goto L2c
-            long r4 = java.lang.Long.parseLong(r0)     // Catch: java.lang.NumberFormatException -> L15
-            goto L2e
-        L15:
-            java.lang.StringBuilder r1 = new java.lang.StringBuilder
-            r1.<init>()
-            java.lang.String r4 = "Unexpected Content-Length ["
-            r1.append(r4)
-            r1.append(r0)
-            r1.append(r2)
-            java.lang.String r1 = r1.toString()
-            com.google.android.exoplayer2.util.Log.e(r3, r1)
-        L2c:
-            r4 = -1
-        L2e:
-            java.lang.String r1 = "Content-Range"
-            java.lang.String r10 = r10.getHeaderField(r1)
-            boolean r1 = android.text.TextUtils.isEmpty(r10)
-            if (r1 != 0) goto La4
-            java.util.regex.Pattern r1 = com.google.android.exoplayer2.upstream.DefaultHttpDataSource.CONTENT_RANGE_HEADER
-            java.util.regex.Matcher r1 = r1.matcher(r10)
-            boolean r6 = r1.find()
-            if (r6 == 0) goto La4
-            r6 = 2
-            java.lang.String r6 = r1.group(r6)     // Catch: java.lang.NumberFormatException -> L8d
-            long r6 = java.lang.Long.parseLong(r6)     // Catch: java.lang.NumberFormatException -> L8d
-            r8 = 1
-            java.lang.String r1 = r1.group(r8)     // Catch: java.lang.NumberFormatException -> L8d
-            long r8 = java.lang.Long.parseLong(r1)     // Catch: java.lang.NumberFormatException -> L8d
-            long r6 = r6 - r8
-            r8 = 1
-            long r6 = r6 + r8
-            r8 = 0
-            int r1 = (r4 > r8 ? 1 : (r4 == r8 ? 0 : -1))
-            if (r1 >= 0) goto L64
-            r4 = r6
-            goto La4
-        L64:
-            int r1 = (r4 > r6 ? 1 : (r4 == r6 ? 0 : -1))
-            if (r1 == 0) goto La4
-            java.lang.StringBuilder r1 = new java.lang.StringBuilder     // Catch: java.lang.NumberFormatException -> L8d
-            r1.<init>()     // Catch: java.lang.NumberFormatException -> L8d
-            java.lang.String r8 = "Inconsistent headers ["
-            r1.append(r8)     // Catch: java.lang.NumberFormatException -> L8d
-            r1.append(r0)     // Catch: java.lang.NumberFormatException -> L8d
-            java.lang.String r0 = "] ["
-            r1.append(r0)     // Catch: java.lang.NumberFormatException -> L8d
-            r1.append(r10)     // Catch: java.lang.NumberFormatException -> L8d
-            r1.append(r2)     // Catch: java.lang.NumberFormatException -> L8d
-            java.lang.String r0 = r1.toString()     // Catch: java.lang.NumberFormatException -> L8d
-            com.google.android.exoplayer2.util.Log.w(r3, r0)     // Catch: java.lang.NumberFormatException -> L8d
-            long r0 = java.lang.Math.max(r4, r6)     // Catch: java.lang.NumberFormatException -> L8d
-            r4 = r0
-            goto La4
-        L8d:
-            java.lang.StringBuilder r0 = new java.lang.StringBuilder
-            r0.<init>()
-            java.lang.String r1 = "Unexpected Content-Range ["
-            r0.append(r1)
-            r0.append(r10)
-            r0.append(r2)
-            java.lang.String r10 = r0.toString()
-            com.google.android.exoplayer2.util.Log.e(r3, r10)
-        La4:
-            return r4
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.google.android.exoplayer2.upstream.DefaultHttpDataSource.getContentLength(java.net.HttpURLConnection):long");
+    private static long getContentLength(HttpURLConnection connection) {
+        long contentLength = -1;
+        String contentLengthHeader = connection.getHeaderField("Content-Length");
+        if (!TextUtils.isEmpty(contentLengthHeader)) {
+            try {
+                contentLength = Long.parseLong(contentLengthHeader);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Unexpected Content-Length [" + contentLengthHeader + "]");
+            }
+        }
+        String contentRangeHeader = connection.getHeaderField("Content-Range");
+        if (!TextUtils.isEmpty(contentRangeHeader)) {
+            Matcher matcher = CONTENT_RANGE_HEADER.matcher(contentRangeHeader);
+            if (matcher.find()) {
+                try {
+                    long contentLengthFromRange = (Long.parseLong(matcher.group(2)) - Long.parseLong(matcher.group(1))) + 1;
+                    if (contentLength < 0) {
+                        return contentLengthFromRange;
+                    }
+                    if (contentLength != contentLengthFromRange) {
+                        Log.w(TAG, "Inconsistent headers [" + contentLengthHeader + "] [" + contentRangeHeader + "]");
+                        return Math.max(contentLength, contentLengthFromRange);
+                    }
+                    return contentLength;
+                } catch (NumberFormatException e2) {
+                    Log.e(TAG, "Unexpected Content-Range [" + contentRangeHeader + "]");
+                    return contentLength;
+                }
+            }
+            return contentLength;
+        }
+        return contentLength;
     }
 
     private void skipInternal() throws IOException {
         if (this.bytesSkipped == this.bytesToSkip) {
             return;
         }
-        byte[] andSet = skipBufferReference.getAndSet(null);
-        if (andSet == null) {
-            andSet = new byte[4096];
+        byte[] skipBuffer = skipBufferReference.getAndSet(null);
+        if (skipBuffer == null) {
+            skipBuffer = new byte[4096];
         }
         while (true) {
             long j = this.bytesSkipped;
             long j2 = this.bytesToSkip;
             if (j != j2) {
-                int read = this.inputStream.read(andSet, 0, (int) Math.min(j2 - j, andSet.length));
+                int readLength = (int) Math.min(j2 - j, skipBuffer.length);
+                int read = this.inputStream.read(skipBuffer, 0, readLength);
                 if (Thread.currentThread().isInterrupted()) {
                     throw new InterruptedIOException();
                 }
@@ -391,25 +406,25 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
                 this.bytesSkipped += read;
                 bytesTransferred(read);
             } else {
-                skipBufferReference.set(andSet);
+                skipBufferReference.set(skipBuffer);
                 return;
             }
         }
     }
 
-    private int readInternal(byte[] bArr, int i, int i2) throws IOException {
-        if (i2 == 0) {
+    private int readInternal(byte[] buffer, int offset, int readLength) throws IOException {
+        if (readLength == 0) {
             return 0;
         }
         long j = this.bytesToRead;
         if (j != -1) {
-            long j2 = j - this.bytesRead;
-            if (j2 == 0) {
+            long bytesRemaining = j - this.bytesRead;
+            if (bytesRemaining == 0) {
                 return -1;
             }
-            i2 = (int) Math.min(i2, j2);
+            readLength = (int) Math.min(readLength, bytesRemaining);
         }
-        int read = this.inputStream.read(bArr, i, i2);
+        int read = this.inputStream.read(buffer, offset, readLength);
         if (read == -1) {
             if (this.bytesToRead != -1) {
                 throw new EOFException();
@@ -421,27 +436,27 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
         return read;
     }
 
-    private static void maybeTerminateInputStream(HttpURLConnection httpURLConnection, long j) {
-        int i = Util.SDK_INT;
-        if (i == 19 || i == 20) {
-            try {
-                InputStream inputStream = httpURLConnection.getInputStream();
-                if (j == -1) {
-                    if (inputStream.read() == -1) {
-                        return;
-                    }
-                } else if (j <= 2048) {
+    private static void maybeTerminateInputStream(HttpURLConnection connection, long bytesRemaining) {
+        if (Util.SDK_INT != 19 && Util.SDK_INT != 20) {
+            return;
+        }
+        try {
+            InputStream inputStream = connection.getInputStream();
+            if (bytesRemaining == -1) {
+                if (inputStream.read() == -1) {
                     return;
                 }
-                String name = inputStream.getClass().getName();
-                if (!"com.android.okhttp.internal.http.HttpTransport$ChunkedInputStream".equals(name) && !"com.android.okhttp.internal.http.HttpTransport$FixedLengthInputStream".equals(name)) {
-                    return;
-                }
-                Method declaredMethod = inputStream.getClass().getSuperclass().getDeclaredMethod("unexpectedEndOfInput", new Class[0]);
-                declaredMethod.setAccessible(true);
-                declaredMethod.invoke(inputStream, new Object[0]);
-            } catch (Exception unused) {
+            } else if (bytesRemaining <= MAX_BYTES_TO_DRAIN) {
+                return;
             }
+            String className = inputStream.getClass().getName();
+            if ("com.android.okhttp.internal.http.HttpTransport$ChunkedInputStream".equals(className) || "com.android.okhttp.internal.http.HttpTransport$FixedLengthInputStream".equals(className)) {
+                Class<?> superclass = inputStream.getClass().getSuperclass();
+                Method unexpectedEndOfInput = superclass.getDeclaredMethod("unexpectedEndOfInput", new Class[0]);
+                unexpectedEndOfInput.setAccessible(true);
+                unexpectedEndOfInput.invoke(inputStream, new Object[0]);
+            }
+        } catch (Exception e) {
         }
     }
 
@@ -451,13 +466,14 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
             try {
                 httpURLConnection.disconnect();
             } catch (Exception e) {
-                Log.e("DefaultHttpDataSource", "Unexpected error while disconnecting", e);
+                Log.e(TAG, "Unexpected error while disconnecting", e);
             }
             this.connection = null;
         }
     }
 
-    private static boolean isCompressed(HttpURLConnection httpURLConnection) {
-        return "gzip".equalsIgnoreCase(httpURLConnection.getHeaderField("Content-Encoding"));
+    private static boolean isCompressed(HttpURLConnection connection) {
+        String contentEncoding = connection.getHeaderField("Content-Encoding");
+        return "gzip".equalsIgnoreCase(contentEncoding);
     }
 }

@@ -1,5 +1,5 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class TimestampAligner {
     private volatile long nativeTimestampAligner = nativeCreateTimestampAligner();
 
@@ -15,9 +15,9 @@ public class TimestampAligner {
         return nativeRtcTimeNanos();
     }
 
-    public long translateTimestamp(long j) {
+    public long translateTimestamp(long cameraTimeNs) {
         checkNativeAlignerExists();
-        return nativeTranslateTimestamp(this.nativeTimestampAligner, j);
+        return nativeTranslateTimestamp(this.nativeTimestampAligner, cameraTimeNs);
     }
 
     public void dispose() {
@@ -27,9 +27,8 @@ public class TimestampAligner {
     }
 
     private void checkNativeAlignerExists() {
-        if (this.nativeTimestampAligner != 0) {
-            return;
+        if (this.nativeTimestampAligner == 0) {
+            throw new IllegalStateException("TimestampAligner has been disposed.");
         }
-        throw new IllegalStateException("TimestampAligner has been disposed.");
     }
 }

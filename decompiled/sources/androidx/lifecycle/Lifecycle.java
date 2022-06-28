@@ -1,5 +1,5 @@
 package androidx.lifecycle;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class Lifecycle {
 
     /* loaded from: classes.dex */
@@ -19,7 +19,7 @@ public abstract class Lifecycle {
 
     public abstract void removeObserver(LifecycleObserver lifecycleObserver);
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public enum State {
         DESTROYED,
         INITIALIZED,

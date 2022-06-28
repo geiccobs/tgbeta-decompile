@@ -11,7 +11,7 @@ import android.view.View;
 import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.voip.VoIPService;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VoIPTimerView extends View {
     String currentTimeStr;
     StaticLayout timerLayout;
@@ -23,11 +23,12 @@ public class VoIPTimerView extends View {
     Runnable updater = new Runnable() { // from class: org.telegram.ui.Components.voip.VoIPTimerView$$ExternalSyntheticLambda0
         @Override // java.lang.Runnable
         public final void run() {
-            VoIPTimerView.this.lambda$new$0();
+            VoIPTimerView.this.m3272lambda$new$0$orgtelegramuiComponentsvoipVoIPTimerView();
         }
     };
 
-    public /* synthetic */ void lambda$new$0() {
+    /* renamed from: lambda$new$0$org-telegram-ui-Components-voip-VoIPTimerView */
+    public /* synthetic */ void m3272lambda$new$0$orgtelegramuiComponentsvoipVoIPTimerView() {
         if (getVisibility() == 0) {
             updateTimer();
         }
@@ -43,40 +44,40 @@ public class VoIPTimerView extends View {
     }
 
     @Override // android.view.View
-    protected void onMeasure(int i, int i2) {
-        StaticLayout staticLayout = this.timerLayout;
-        if (staticLayout != null) {
-            setMeasuredDimension(View.MeasureSpec.getSize(i), staticLayout.getHeight());
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        StaticLayout timerLayout = this.timerLayout;
+        if (timerLayout != null) {
+            setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), timerLayout.getHeight());
         } else {
-            setMeasuredDimension(View.MeasureSpec.getSize(i), AndroidUtilities.dp(15.0f));
+            setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), AndroidUtilities.dp(15.0f));
         }
     }
 
     public void updateTimer() {
         removeCallbacks(this.updater);
-        VoIPService sharedInstance = VoIPService.getSharedInstance();
-        if (sharedInstance == null) {
+        VoIPService service = VoIPService.getSharedInstance();
+        if (service == null) {
             return;
         }
-        String formatLongDuration = AndroidUtilities.formatLongDuration((int) (sharedInstance.getCallDuration() / 1000));
-        String str = this.currentTimeStr;
-        if (str == null || !str.equals(formatLongDuration)) {
-            this.currentTimeStr = formatLongDuration;
+        String str = AndroidUtilities.formatLongDuration((int) (service.getCallDuration() / 1000));
+        String str2 = this.currentTimeStr;
+        if (str2 == null || !str2.equals(str)) {
+            this.currentTimeStr = str;
             if (this.timerLayout == null) {
                 requestLayout();
             }
-            String str2 = this.currentTimeStr;
+            String str3 = this.currentTimeStr;
             TextPaint textPaint = this.textPaint;
-            this.timerLayout = new StaticLayout(str2, textPaint, (int) textPaint.measureText(str2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            this.timerLayout = new StaticLayout(str3, textPaint, (int) textPaint.measureText(str3), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
         postDelayed(this.updater, 300L);
         invalidate();
     }
 
     @Override // android.view.View
-    public void setVisibility(int i) {
-        if (getVisibility() != i) {
-            if (i == 0) {
+    public void setVisibility(int visibility) {
+        if (getVisibility() != visibility) {
+            if (visibility == 0) {
                 this.currentTimeStr = "00:00";
                 String str = this.currentTimeStr;
                 TextPaint textPaint = this.textPaint;
@@ -87,36 +88,32 @@ public class VoIPTimerView extends View {
                 this.timerLayout = null;
             }
         }
-        super.setVisibility(i);
+        super.setVisibility(visibility);
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        StaticLayout staticLayout = this.timerLayout;
-        int i = 0;
-        int width = staticLayout == null ? 0 : staticLayout.getWidth() + AndroidUtilities.dp(21.0f);
+        StaticLayout timerLayout = this.timerLayout;
+        int totalWidth = timerLayout == null ? 0 : timerLayout.getWidth() + AndroidUtilities.dp(21.0f);
         canvas.save();
-        canvas.translate((getMeasuredWidth() - width) / 2.0f, 0.0f);
+        canvas.translate((getMeasuredWidth() - totalWidth) / 2.0f, 0.0f);
         canvas.save();
         canvas.translate(0.0f, (getMeasuredHeight() - AndroidUtilities.dp(11.0f)) / 2.0f);
-        while (i < 4) {
-            int i2 = i + 1;
-            Paint paint = i2 > this.signalBarCount ? this.inactivePaint : this.activePaint;
-            float f = i;
-            this.rectF.set(AndroidUtilities.dpf2(4.16f) * f, AndroidUtilities.dpf2(2.75f) * (3 - i), (AndroidUtilities.dpf2(4.16f) * f) + AndroidUtilities.dpf2(2.75f), AndroidUtilities.dp(11.0f));
-            canvas.drawRoundRect(this.rectF, AndroidUtilities.dpf2(0.7f), AndroidUtilities.dpf2(0.7f), paint);
-            i = i2;
+        for (int i = 0; i < 4; i++) {
+            Paint p = i + 1 > this.signalBarCount ? this.inactivePaint : this.activePaint;
+            this.rectF.set(AndroidUtilities.dpf2(4.16f) * i, AndroidUtilities.dpf2(2.75f) * (3 - i), (AndroidUtilities.dpf2(4.16f) * i) + AndroidUtilities.dpf2(2.75f), AndroidUtilities.dp(11.0f));
+            canvas.drawRoundRect(this.rectF, AndroidUtilities.dpf2(0.7f), AndroidUtilities.dpf2(0.7f), p);
         }
         canvas.restore();
-        if (staticLayout != null) {
+        if (timerLayout != null) {
             canvas.translate(AndroidUtilities.dp(21.0f), 0.0f);
-            staticLayout.draw(canvas);
+            timerLayout.draw(canvas);
         }
         canvas.restore();
     }
 
-    public void setSignalBarCount(int i) {
-        this.signalBarCount = i;
+    public void setSignalBarCount(int count) {
+        this.signalBarCount = count;
         invalidate();
     }
 }

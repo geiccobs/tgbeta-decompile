@@ -1,7 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzep implements Comparable<zzep>, Map.Entry<K, V> {
     private V value;
     private final /* synthetic */ zzei zzos;
@@ -72,7 +72,7 @@ public final class zzep implements Comparable<zzep>, Map.Entry<K, V> {
     public final String toString() {
         String valueOf = String.valueOf(this.zzov);
         String valueOf2 = String.valueOf(this.value);
-        StringBuilder sb = new StringBuilder(valueOf.length() + 1 + valueOf2.length());
+        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 1 + String.valueOf(valueOf2).length());
         sb.append(valueOf);
         sb.append("=");
         sb.append(valueOf2);

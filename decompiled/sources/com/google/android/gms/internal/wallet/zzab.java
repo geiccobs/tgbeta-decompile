@@ -1,6 +1,7 @@
 package com.google.android.gms.internal.wallet;
 
 import android.accounts.Account;
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -15,11 +16,13 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
 import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.wallet.AutoResolvableVoidResult;
+import com.google.android.gms.wallet.CreateWalletObjectsRequest;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzab extends GmsClient<zzs> {
     private final Context zze;
     private final int zzf;
@@ -86,7 +89,7 @@ public final class zzab extends GmsClient<zzs> {
         return "com.google.android.gms.wallet.service.BIND";
     }
 
-    @Override // com.google.android.gms.common.internal.BaseGmsClient
+    @Override // com.google.android.gms.common.internal.BaseGmsClient, com.google.android.gms.common.api.Api.Client
     public final boolean requiresAccount() {
         return true;
     }
@@ -94,6 +97,28 @@ public final class zzab extends GmsClient<zzs> {
     @Override // com.google.android.gms.common.internal.BaseGmsClient
     public final boolean usesClientTelemetry() {
         return true;
+    }
+
+    public final void zzp(CreateWalletObjectsRequest createWalletObjectsRequest, int i) {
+        zzw zzwVar = new zzw((Activity) this.zze, i);
+        try {
+            ((zzs) getService()).zzc(createWalletObjectsRequest, zzt(), zzwVar);
+        } catch (RemoteException e) {
+            Log.e("WalletClientImpl", "RemoteException creating wallet objects", e);
+            zzwVar.zzg(8, Bundle.EMPTY);
+        }
+    }
+
+    public final void zzq(CreateWalletObjectsRequest createWalletObjectsRequest, TaskCompletionSource<AutoResolvableVoidResult> taskCompletionSource) {
+        Bundle zzt = zzt();
+        zzt.putBoolean("com.google.android.gms.wallet.EXTRA_USING_AUTO_RESOLVABLE_RESULT", true);
+        zzz zzzVar = new zzz(taskCompletionSource);
+        try {
+            ((zzs) getService()).zzc(createWalletObjectsRequest, zzt, zzzVar);
+        } catch (RemoteException e) {
+            Log.e("WalletClientImpl", "RemoteException creating wallet objects", e);
+            zzzVar.zzg(8, Bundle.EMPTY);
+        }
     }
 
     public final void zzr(IsReadyToPayRequest isReadyToPayRequest, TaskCompletionSource<Boolean> taskCompletionSource) throws RemoteException {

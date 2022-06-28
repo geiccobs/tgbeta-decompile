@@ -1,7 +1,7 @@
 package com.google.android.datatransport.runtime.scheduling.persistence;
 
 import com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class AutoValue_EventStoreConfig extends EventStoreConfig {
     private final int criticalSectionEnterTimeoutMs;
     private final long eventCleanUpAge;
@@ -9,12 +9,12 @@ final class AutoValue_EventStoreConfig extends EventStoreConfig {
     private final int maxBlobByteSizePerRow;
     private final long maxStorageSizeInBytes;
 
-    private AutoValue_EventStoreConfig(long j, int i, int i2, long j2, int i3) {
-        this.maxStorageSizeInBytes = j;
-        this.loadBatchSize = i;
-        this.criticalSectionEnterTimeoutMs = i2;
-        this.eventCleanUpAge = j2;
-        this.maxBlobByteSizePerRow = i3;
+    private AutoValue_EventStoreConfig(long maxStorageSizeInBytes, int loadBatchSize, int criticalSectionEnterTimeoutMs, long eventCleanUpAge, int maxBlobByteSizePerRow) {
+        this.maxStorageSizeInBytes = maxStorageSizeInBytes;
+        this.loadBatchSize = loadBatchSize;
+        this.criticalSectionEnterTimeoutMs = criticalSectionEnterTimeoutMs;
+        this.eventCleanUpAge = eventCleanUpAge;
+        this.maxBlobByteSizePerRow = maxBlobByteSizePerRow;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
@@ -51,25 +51,26 @@ final class AutoValue_EventStoreConfig extends EventStoreConfig {
         return "EventStoreConfig{maxStorageSizeInBytes=" + this.maxStorageSizeInBytes + ", loadBatchSize=" + this.loadBatchSize + ", criticalSectionEnterTimeoutMs=" + this.criticalSectionEnterTimeoutMs + ", eventCleanUpAge=" + this.eventCleanUpAge + ", maxBlobByteSizePerRow=" + this.maxBlobByteSizePerRow + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof EventStoreConfig)) {
+        if (!(o instanceof EventStoreConfig)) {
             return false;
         }
-        EventStoreConfig eventStoreConfig = (EventStoreConfig) obj;
-        return this.maxStorageSizeInBytes == eventStoreConfig.getMaxStorageSizeInBytes() && this.loadBatchSize == eventStoreConfig.getLoadBatchSize() && this.criticalSectionEnterTimeoutMs == eventStoreConfig.getCriticalSectionEnterTimeoutMs() && this.eventCleanUpAge == eventStoreConfig.getEventCleanUpAge() && this.maxBlobByteSizePerRow == eventStoreConfig.getMaxBlobByteSizePerRow();
+        EventStoreConfig that = (EventStoreConfig) o;
+        return this.maxStorageSizeInBytes == that.getMaxStorageSizeInBytes() && this.loadBatchSize == that.getLoadBatchSize() && this.criticalSectionEnterTimeoutMs == that.getCriticalSectionEnterTimeoutMs() && this.eventCleanUpAge == that.getEventCleanUpAge() && this.maxBlobByteSizePerRow == that.getMaxBlobByteSizePerRow();
     }
 
     public int hashCode() {
+        int h$ = 1 * 1000003;
         long j = this.maxStorageSizeInBytes;
         long j2 = this.eventCleanUpAge;
-        return this.maxBlobByteSizePerRow ^ ((((((((((int) (j ^ (j >>> 32))) ^ 1000003) * 1000003) ^ this.loadBatchSize) * 1000003) ^ this.criticalSectionEnterTimeoutMs) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003);
+        return ((((((((h$ ^ ((int) (j ^ (j >>> 32)))) * 1000003) ^ this.loadBatchSize) * 1000003) ^ this.criticalSectionEnterTimeoutMs) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003) ^ this.maxBlobByteSizePerRow;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class Builder extends EventStoreConfig.Builder {
         private Integer criticalSectionEnterTimeoutMs;
         private Long eventCleanUpAge;
@@ -78,55 +79,55 @@ final class AutoValue_EventStoreConfig extends EventStoreConfig {
         private Long maxStorageSizeInBytes;
 
         @Override // com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig.Builder
-        EventStoreConfig.Builder setMaxStorageSizeInBytes(long j) {
-            this.maxStorageSizeInBytes = Long.valueOf(j);
+        EventStoreConfig.Builder setMaxStorageSizeInBytes(long maxStorageSizeInBytes) {
+            this.maxStorageSizeInBytes = Long.valueOf(maxStorageSizeInBytes);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig.Builder
-        EventStoreConfig.Builder setLoadBatchSize(int i) {
-            this.loadBatchSize = Integer.valueOf(i);
+        EventStoreConfig.Builder setLoadBatchSize(int loadBatchSize) {
+            this.loadBatchSize = Integer.valueOf(loadBatchSize);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig.Builder
-        EventStoreConfig.Builder setCriticalSectionEnterTimeoutMs(int i) {
-            this.criticalSectionEnterTimeoutMs = Integer.valueOf(i);
+        EventStoreConfig.Builder setCriticalSectionEnterTimeoutMs(int criticalSectionEnterTimeoutMs) {
+            this.criticalSectionEnterTimeoutMs = Integer.valueOf(criticalSectionEnterTimeoutMs);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig.Builder
-        EventStoreConfig.Builder setEventCleanUpAge(long j) {
-            this.eventCleanUpAge = Long.valueOf(j);
+        EventStoreConfig.Builder setEventCleanUpAge(long eventCleanUpAge) {
+            this.eventCleanUpAge = Long.valueOf(eventCleanUpAge);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig.Builder
-        EventStoreConfig.Builder setMaxBlobByteSizePerRow(int i) {
-            this.maxBlobByteSizePerRow = Integer.valueOf(i);
+        EventStoreConfig.Builder setMaxBlobByteSizePerRow(int maxBlobByteSizePerRow) {
+            this.maxBlobByteSizePerRow = Integer.valueOf(maxBlobByteSizePerRow);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.persistence.EventStoreConfig.Builder
         EventStoreConfig build() {
-            String str = "";
+            String missing = "";
             if (this.maxStorageSizeInBytes == null) {
-                str = str + " maxStorageSizeInBytes";
+                missing = missing + " maxStorageSizeInBytes";
             }
             if (this.loadBatchSize == null) {
-                str = str + " loadBatchSize";
+                missing = missing + " loadBatchSize";
             }
             if (this.criticalSectionEnterTimeoutMs == null) {
-                str = str + " criticalSectionEnterTimeoutMs";
+                missing = missing + " criticalSectionEnterTimeoutMs";
             }
             if (this.eventCleanUpAge == null) {
-                str = str + " eventCleanUpAge";
+                missing = missing + " eventCleanUpAge";
             }
             if (this.maxBlobByteSizePerRow == null) {
-                str = str + " maxBlobByteSizePerRow";
+                missing = missing + " maxBlobByteSizePerRow";
             }
-            if (!str.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + str);
+            if (!missing.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + missing);
             }
             return new AutoValue_EventStoreConfig(this.maxStorageSizeInBytes.longValue(), this.loadBatchSize.intValue(), this.criticalSectionEnterTimeoutMs.intValue(), this.eventCleanUpAge.longValue(), this.maxBlobByteSizePerRow.intValue());
         }

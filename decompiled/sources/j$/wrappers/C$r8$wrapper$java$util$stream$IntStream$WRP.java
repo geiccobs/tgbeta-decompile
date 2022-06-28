@@ -1,6 +1,7 @@
 package j$.wrappers;
 
-import j$.util.AbstractC0033a;
+import j$.util.IntSummaryStatisticsConversions;
+import j$.util.OptionalConversions;
 import java.util.IntSummaryStatistics;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -21,194 +22,193 @@ import java.util.stream.Stream;
 /* renamed from: j$.wrappers.$r8$wrapper$java$util$stream$IntStream$-WRP */
 /* loaded from: classes2.dex */
 public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$WRP implements IntStream {
-    final /* synthetic */ j$.util.stream.IntStream a;
+    final /* synthetic */ j$.util.stream.IntStream wrappedValue;
 
     private /* synthetic */ C$r8$wrapper$java$util$stream$IntStream$WRP(j$.util.stream.IntStream intStream) {
-        this.a = intStream;
+        this.wrappedValue = intStream;
     }
 
     public static /* synthetic */ IntStream convert(j$.util.stream.IntStream intStream) {
         if (intStream == null) {
             return null;
         }
-        return intStream instanceof C$r8$wrapper$java$util$stream$IntStream$VWRP ? ((C$r8$wrapper$java$util$stream$IntStream$VWRP) intStream).a : new C$r8$wrapper$java$util$stream$IntStream$WRP(intStream);
+        return intStream instanceof C$r8$wrapper$java$util$stream$IntStream$VWRP ? ((C$r8$wrapper$java$util$stream$IntStream$VWRP) intStream).wrappedValue : new C$r8$wrapper$java$util$stream$IntStream$WRP(intStream);
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ boolean allMatch(IntPredicate intPredicate) {
-        return this.a.C(V.a(intPredicate));
+        return this.wrappedValue.allMatch(C$r8$wrapper$java$util$function$IntPredicate$VWRP.convert(intPredicate));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ boolean anyMatch(IntPredicate intPredicate) {
-        return this.a.F(V.a(intPredicate));
+        return this.wrappedValue.anyMatch(C$r8$wrapper$java$util$function$IntPredicate$VWRP.convert(intPredicate));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ DoubleStream asDoubleStream() {
-        return M0.n0(this.a.asDoubleStream());
+        return C$r8$wrapper$java$util$stream$DoubleStream$WRP.convert(this.wrappedValue.asDoubleStream());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ LongStream asLongStream() {
-        return O0.n0(this.a.asLongStream());
+        return C$r8$wrapper$java$util$stream$LongStream$WRP.convert(this.wrappedValue.asLongStream());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ OptionalDouble average() {
-        return AbstractC0033a.u(this.a.average());
+        return OptionalConversions.convert(this.wrappedValue.average());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ Stream boxed() {
-        return P0.n0(this.a.boxed());
+        return C$r8$wrapper$java$util$stream$Stream$WRP.convert(this.wrappedValue.boxed());
     }
 
     @Override // java.util.stream.BaseStream, java.lang.AutoCloseable
     public /* synthetic */ void close() {
-        this.a.close();
+        this.wrappedValue.close();
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ Object collect(Supplier supplier, ObjIntConsumer objIntConsumer, BiConsumer biConsumer) {
-        return this.a.k0(z0.a(supplier), t0.a(objIntConsumer), C0226q.a(biConsumer));
+        return this.wrappedValue.collect(C$r8$wrapper$java$util$function$Supplier$VWRP.convert(supplier), C$r8$wrapper$java$util$function$ObjIntConsumer$VWRP.convert(objIntConsumer), C$r8$wrapper$java$util$function$BiConsumer$VWRP.convert(biConsumer));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ long count() {
-        return this.a.count();
+        return this.wrappedValue.count();
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream distinct() {
-        return convert(this.a.distinct());
+        return convert(this.wrappedValue.distinct());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream filter(IntPredicate intPredicate) {
-        return convert(this.a.h(V.a(intPredicate)));
+        return convert(this.wrappedValue.filter(C$r8$wrapper$java$util$function$IntPredicate$VWRP.convert(intPredicate)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ OptionalInt findAny() {
-        return AbstractC0033a.v(this.a.findAny());
+        return OptionalConversions.convert(this.wrappedValue.findAny());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ OptionalInt findFirst() {
-        return AbstractC0033a.v(this.a.findFirst());
+        return OptionalConversions.convert(this.wrappedValue.findFirst());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream flatMap(IntFunction intFunction) {
-        return convert(this.a.P(T.a(intFunction)));
+        return convert(this.wrappedValue.flatMap(C$r8$wrapper$java$util$function$IntFunction$VWRP.convert(intFunction)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ void forEach(IntConsumer intConsumer) {
-        this.a.U(Q.b(intConsumer));
+        this.wrappedValue.forEach(C$r8$wrapper$java$util$function$IntConsumer$VWRP.convert(intConsumer));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ void forEachOrdered(IntConsumer intConsumer) {
-        this.a.I(Q.b(intConsumer));
+        this.wrappedValue.forEachOrdered(C$r8$wrapper$java$util$function$IntConsumer$VWRP.convert(intConsumer));
     }
 
     @Override // java.util.stream.BaseStream
     public /* synthetic */ boolean isParallel() {
-        return this.a.isParallel();
+        return this.wrappedValue.isParallel();
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream limit(long j) {
-        return convert(this.a.limit(j));
+        return convert(this.wrappedValue.limit(j));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream map(IntUnaryOperator intUnaryOperator) {
-        return convert(this.a.q(C0197b0.b(intUnaryOperator)));
+        return convert(this.wrappedValue.map(C$r8$wrapper$java$util$function$IntUnaryOperator$VWRP.convert(intUnaryOperator)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ DoubleStream mapToDouble(IntToDoubleFunction intToDoubleFunction) {
-        return M0.n0(this.a.A(X.b(intToDoubleFunction)));
+        return C$r8$wrapper$java$util$stream$DoubleStream$WRP.convert(this.wrappedValue.mapToDouble(C$r8$wrapper$java$util$function$IntToDoubleFunction$VWRP.convert(intToDoubleFunction)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ LongStream mapToLong(IntToLongFunction intToLongFunction) {
-        return O0.n0(this.a.f(Z.a(intToLongFunction)));
+        return C$r8$wrapper$java$util$stream$LongStream$WRP.convert(this.wrappedValue.mapToLong(C$r8$wrapper$java$util$function$IntToLongFunction$VWRP.convert(intToLongFunction)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ Stream mapToObj(IntFunction intFunction) {
-        return P0.n0(this.a.J(T.a(intFunction)));
+        return C$r8$wrapper$java$util$stream$Stream$WRP.convert(this.wrappedValue.mapToObj(C$r8$wrapper$java$util$function$IntFunction$VWRP.convert(intFunction)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ OptionalInt max() {
-        return AbstractC0033a.v(this.a.max());
+        return OptionalConversions.convert(this.wrappedValue.max());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ OptionalInt min() {
-        return AbstractC0033a.v(this.a.min());
+        return OptionalConversions.convert(this.wrappedValue.min());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ boolean noneMatch(IntPredicate intPredicate) {
-        return this.a.v(V.a(intPredicate));
+        return this.wrappedValue.noneMatch(C$r8$wrapper$java$util$function$IntPredicate$VWRP.convert(intPredicate));
     }
 
     /* JADX WARN: Type inference failed for: r2v2, types: [java.util.stream.IntStream, java.util.stream.BaseStream] */
     @Override // java.util.stream.BaseStream
     public /* synthetic */ IntStream onClose(Runnable runnable) {
-        return I0.n0(this.a.onClose(runnable));
+        return C$r8$wrapper$java$util$stream$BaseStream$WRP.convert(this.wrappedValue.onClose(runnable));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream peek(IntConsumer intConsumer) {
-        return convert(this.a.c0(Q.b(intConsumer)));
+        return convert(this.wrappedValue.peek(C$r8$wrapper$java$util$function$IntConsumer$VWRP.convert(intConsumer)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ int reduce(int i, IntBinaryOperator intBinaryOperator) {
-        return this.a.N(i, O.a(intBinaryOperator));
+        return this.wrappedValue.reduce(i, C$r8$wrapper$java$util$function$IntBinaryOperator$VWRP.convert(intBinaryOperator));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ OptionalInt reduce(IntBinaryOperator intBinaryOperator) {
-        return AbstractC0033a.v(this.a.a0(O.a(intBinaryOperator)));
+        return OptionalConversions.convert(this.wrappedValue.reduce(C$r8$wrapper$java$util$function$IntBinaryOperator$VWRP.convert(intBinaryOperator)));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream skip(long j) {
-        return convert(this.a.skip(j));
+        return convert(this.wrappedValue.skip(j));
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ IntStream sorted() {
-        return convert(this.a.sorted());
+        return convert(this.wrappedValue.sorted());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ int sum() {
-        return this.a.sum();
+        return this.wrappedValue.sum();
     }
 
     @Override // java.util.stream.IntStream
-    public IntSummaryStatistics summaryStatistics() {
-        this.a.summaryStatistics();
-        throw new Error("Java 8+ API desugaring (library desugaring) cannot convert to java.util.IntSummaryStatistics");
+    public /* synthetic */ IntSummaryStatistics summaryStatistics() {
+        return IntSummaryStatisticsConversions.convert(this.wrappedValue.summaryStatistics());
     }
 
     @Override // java.util.stream.IntStream
     public /* synthetic */ int[] toArray() {
-        return this.a.toArray();
+        return this.wrappedValue.toArray();
     }
 
     /* JADX WARN: Type inference failed for: r0v2, types: [java.util.stream.IntStream, java.util.stream.BaseStream] */
     @Override // java.util.stream.BaseStream
     public /* synthetic */ IntStream unordered() {
-        return I0.n0(this.a.unordered());
+        return C$r8$wrapper$java$util$stream$BaseStream$WRP.convert(this.wrappedValue.unordered());
     }
 }

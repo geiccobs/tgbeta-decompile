@@ -3,11 +3,19 @@ package com.google.android.gms.internal.mlkit_common;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzy {
+    public static void zza(boolean z, @NullableDecl Object obj) {
+        if (!z) {
+            throw new IllegalStateException(String.valueOf(obj));
+        }
+    }
+
     @NonNullDecl
     public static <T> T zza(@NonNullDecl T t) {
-        t.getClass();
+        if (t == null) {
+            throw new NullPointerException();
+        }
         return t;
     }
 

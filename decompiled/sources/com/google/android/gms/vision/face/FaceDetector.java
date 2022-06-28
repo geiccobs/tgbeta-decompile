@@ -6,7 +6,6 @@ import android.media.Image;
 import android.os.Build;
 import android.util.Log;
 import android.util.SparseArray;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.internal.vision.zzs;
 import com.google.android.gms.internal.vision.zzw;
@@ -17,15 +16,20 @@ import com.google.android.gms.vision.face.internal.client.zzf;
 import com.google.android.gms.vision.zzc;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class FaceDetector extends Detector<Face> {
+    public static final int ACCURATE_MODE = 1;
+    public static final int ALL_CLASSIFICATIONS = 1;
+    public static final int ALL_LANDMARKS = 1;
+    public static final int CONTOUR_LANDMARKS = 2;
+    public static final int FAST_MODE = 0;
+    public static final int NO_CLASSIFICATIONS = 0;
+    public static final int NO_LANDMARKS = 0;
+    public static final int SELFIE_MODE = 2;
     private final zzc zza;
-    @GuardedBy("lock")
     private final zzb zzb;
     private final Object zzc;
-    @GuardedBy("lock")
     private boolean zzd;
 
     @Override // com.google.android.gms.vision.Detector
@@ -54,7 +58,7 @@ public final class FaceDetector extends Detector<Face> {
     }
 
     /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class Builder {
         private final Context zza;
         private int zzb = 0;
@@ -64,11 +68,10 @@ public final class FaceDetector extends Detector<Face> {
         private int zzf = 0;
         private float zzg = -1.0f;
 
-        public Builder(@RecentlyNonNull Context context) {
+        public Builder(Context context) {
             this.zza = context;
         }
 
-        @RecentlyNonNull
         public Builder setLandmarkType(int i) {
             if (i != 0 && i != 1 && i != 2) {
                 StringBuilder sb = new StringBuilder(34);
@@ -80,25 +83,53 @@ public final class FaceDetector extends Detector<Face> {
             return this;
         }
 
-        @RecentlyNonNull
+        public Builder setProminentFaceOnly(boolean z) {
+            this.zzc = z;
+            return this;
+        }
+
+        public Builder setClassificationType(int i) {
+            if (i != 0 && i != 1) {
+                StringBuilder sb = new StringBuilder(40);
+                sb.append("Invalid classification type: ");
+                sb.append(i);
+                throw new IllegalArgumentException(sb.toString());
+            }
+            this.zzd = i;
+            return this;
+        }
+
         public Builder setTrackingEnabled(boolean z) {
             this.zze = z;
             return this;
         }
 
-        @RecentlyNonNull
         public Builder setMode(int i) {
-            if (i != 0 && i != 1 && i != 2) {
-                StringBuilder sb = new StringBuilder(25);
-                sb.append("Invalid mode: ");
-                sb.append(i);
+            switch (i) {
+                case 0:
+                case 1:
+                case 2:
+                    this.zzf = i;
+                    return this;
+                default:
+                    StringBuilder sb = new StringBuilder(25);
+                    sb.append("Invalid mode: ");
+                    sb.append(i);
+                    throw new IllegalArgumentException(sb.toString());
+            }
+        }
+
+        public Builder setMinFaceSize(float f) {
+            if (f < 0.0f || f > 1.0f) {
+                StringBuilder sb = new StringBuilder(47);
+                sb.append("Invalid proportional face size: ");
+                sb.append(f);
                 throw new IllegalArgumentException(sb.toString());
             }
-            this.zzf = i;
+            this.zzg = f;
             return this;
         }
 
-        @RecentlyNonNull
         public FaceDetector build() {
             zzf zzfVar = new zzf();
             zzfVar.zza = this.zzf;
@@ -114,8 +145,8 @@ public final class FaceDetector extends Detector<Face> {
         }
     }
 
-    @RecentlyNonNull
-    public final SparseArray<Face> detect(@RecentlyNonNull Frame frame) {
+    @Override // com.google.android.gms.vision.Detector
+    public final SparseArray<Face> detect(Frame frame) {
         Face[] faceArr;
         ByteBuffer byteBuffer;
         if (frame == null) {
@@ -157,8 +188,29 @@ public final class FaceDetector extends Detector<Face> {
         return sparseArray;
     }
 
+    @Override // com.google.android.gms.vision.Detector
+    public final boolean setFocus(int i) {
+        boolean zza;
+        int zzb = this.zza.zzb(i);
+        synchronized (this.zzc) {
+            if (!this.zzd) {
+                throw new RuntimeException("Cannot use detector after release()");
+            }
+            zza = this.zzb.zza(zzb);
+        }
+        return zza;
+    }
+
+    @Override // com.google.android.gms.vision.Detector
     public final boolean isOperational() {
         return this.zzb.zzb();
+    }
+
+    private FaceDetector() {
+        this.zza = new zzc();
+        this.zzc = new Object();
+        this.zzd = true;
+        throw new IllegalStateException("Default constructor called");
     }
 
     private FaceDetector(zzb zzbVar) {
@@ -170,11 +222,11 @@ public final class FaceDetector extends Detector<Face> {
 
     public static boolean zzb(zzf zzfVar) {
         boolean z;
-        if (zzfVar.zza == 2 || zzfVar.zzb != 2) {
-            z = true;
-        } else {
+        if (zzfVar.zza != 2 && zzfVar.zzb == 2) {
             Log.e("FaceDetector", "Contour is not supported for non-SELFIE mode.");
             z = false;
+        } else {
+            z = true;
         }
         if (zzfVar.zzb == 2 && zzfVar.zzc == 1) {
             Log.e("FaceDetector", "Classification is not supported with contour.");

@@ -1,13 +1,11 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzfe {
+    private static final zzef zza = zzef.zza();
+    private zzdn zzb;
     private volatile zzfz zzc;
     private volatile zzdn zzd;
-
-    public int hashCode() {
-        return 1;
-    }
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -31,6 +29,10 @@ public class zzfe {
         return zzb(zzfzVar2.zzn()).equals(zzfzVar2);
     }
 
+    public int hashCode() {
+        return 1;
+    }
+
     private final zzfz zzb(zzfz zzfzVar) {
         if (this.zzc == null) {
             synchronized (this) {
@@ -38,7 +40,7 @@ public class zzfe {
                     try {
                         this.zzc = zzfzVar;
                         this.zzd = zzdn.zza;
-                    } catch (zzez unused) {
+                    } catch (zzez e) {
                         this.zzc = zzfzVar;
                         this.zzd = zzdn.zza;
                     }
@@ -50,6 +52,7 @@ public class zzfe {
 
     public final zzfz zza(zzfz zzfzVar) {
         zzfz zzfzVar2 = this.zzc;
+        this.zzb = null;
         this.zzd = null;
         this.zzc = zzfzVar;
         return zzfzVar2;
@@ -59,10 +62,10 @@ public class zzfe {
         if (this.zzd != null) {
             return this.zzd.zza();
         }
-        if (this.zzc == null) {
-            return 0;
+        if (this.zzc != null) {
+            return this.zzc.zzj();
         }
-        return this.zzc.zzj();
+        return 0;
     }
 
     public final zzdn zzc() {
@@ -80,9 +83,5 @@ public class zzfe {
             }
             return this.zzd;
         }
-    }
-
-    static {
-        zzef.zza();
     }
 }

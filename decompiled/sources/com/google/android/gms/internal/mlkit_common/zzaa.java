@@ -2,7 +2,7 @@ package com.google.android.gms.internal.mlkit_common;
 
 import java.util.NoSuchElementException;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 abstract class zzaa<E> extends zzaj<E> {
     private final int zza;
     private int zzb;

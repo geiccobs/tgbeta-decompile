@@ -3,7 +3,6 @@ package org.telegram.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -28,22 +27,14 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
 import org.telegram.messenger.WebFile;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$Message;
-import org.telegram.tgnet.TLRPC$MessageMedia;
-import org.telegram.tgnet.TLRPC$PhotoSize;
-import org.telegram.tgnet.TLRPC$TL_messageActionUserUpdatedPhoto;
-import org.telegram.tgnet.TLRPC$TL_messageMediaInvoice;
-import org.telegram.tgnet.TLRPC$TL_messageMediaPhoto;
-import org.telegram.tgnet.TLRPC$TL_messageMediaWebPage;
-import org.telegram.tgnet.TLRPC$TL_messageService;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class PinchToZoomHelper {
     Callback callback;
     private View child;
@@ -83,54 +74,30 @@ public class PinchToZoomHelper {
     private ImageReceiver fullImage = new ImageReceiver();
     private float[] clipTopBottom = new float[2];
 
-    /* loaded from: classes3.dex */
-    public interface Callback {
-
-        /* renamed from: org.telegram.ui.PinchToZoomHelper$Callback$-CC */
-        /* loaded from: classes3.dex */
-        public final /* synthetic */ class CC {
-            public static TextureView $default$getCurrentTextureView(Callback callback) {
-                return null;
-            }
-
-            public static void $default$onZoomFinished(Callback callback, MessageObject messageObject) {
-            }
-        }
-
-        TextureView getCurrentTextureView();
-
-        void onZoomFinished(MessageObject messageObject);
-
-        void onZoomStarted(MessageObject messageObject);
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface ClipBoundsListener {
         void getClipTopBottom(float[] fArr);
     }
 
-    protected void drawOverlays(Canvas canvas, float f, float f2, float f3, float f4, float f5) {
+    static /* synthetic */ float access$1416(PinchToZoomHelper x0, float x1) {
+        float f = x0.progressToFullView + x1;
+        x0.progressToFullView = f;
+        return f;
     }
 
-    static /* synthetic */ float access$1416(PinchToZoomHelper pinchToZoomHelper, float f) {
-        float f2 = pinchToZoomHelper.progressToFullView + f;
-        pinchToZoomHelper.progressToFullView = f2;
-        return f2;
+    static /* synthetic */ float access$616(PinchToZoomHelper x0, float x1) {
+        float f = x0.enterProgress + x1;
+        x0.enterProgress = f;
+        return f;
     }
 
-    static /* synthetic */ float access$616(PinchToZoomHelper pinchToZoomHelper, float f) {
-        float f2 = pinchToZoomHelper.enterProgress + f;
-        pinchToZoomHelper.enterProgress = f2;
-        return f2;
+    public PinchToZoomHelper(ViewGroup parentView, ViewGroup fragmentView) {
+        this.parentView = parentView;
+        this.fragmentView = fragmentView;
     }
 
-    public PinchToZoomHelper(ViewGroup viewGroup, ViewGroup viewGroup2) {
-        this.parentView = viewGroup;
-        this.fragmentView = viewGroup2;
-    }
-
-    public void startZoom(View view, ImageReceiver imageReceiver, MessageObject messageObject) {
-        this.child = view;
+    public void startZoom(View child, ImageReceiver image, MessageObject messageObject) {
+        this.child = child;
         this.messageObject = messageObject;
         if (this.overlayView == null) {
             ZoomOverlayView zoomOverlayView = new ZoomOverlayView(this.parentView.getContext());
@@ -140,9 +107,9 @@ public class PinchToZoomHelper {
             this.overlayView.setEnabled(false);
         }
         if (this.fullImage == null) {
-            ImageReceiver imageReceiver2 = new ImageReceiver();
-            this.fullImage = imageReceiver2;
-            imageReceiver2.setCrossfadeAlpha((byte) 2);
+            ImageReceiver imageReceiver = new ImageReceiver();
+            this.fullImage = imageReceiver;
+            imageReceiver.setCrossfadeAlpha((byte) 2);
             this.fullImage.setCrossfadeWithOldImage(false);
             this.fullImage.onAttachedToWindow();
         }
@@ -151,35 +118,37 @@ public class PinchToZoomHelper {
         this.finishProgress = 1.0f;
         this.progressToFullView = 0.0f;
         setFullImage(messageObject);
-        this.imageX = imageReceiver.getImageX();
-        this.imageY = imageReceiver.getImageY();
-        this.imageHeight = imageReceiver.getImageHeight();
-        this.imageWidth = imageReceiver.getImageWidth();
-        this.fullImageHeight = imageReceiver.getBitmapHeight();
-        float bitmapWidth = imageReceiver.getBitmapWidth();
+        this.imageX = image.getImageX();
+        this.imageY = image.getImageY();
+        this.imageHeight = image.getImageHeight();
+        this.imageWidth = image.getImageWidth();
+        this.fullImageHeight = image.getBitmapHeight();
+        float bitmapWidth = image.getBitmapWidth();
         this.fullImageWidth = bitmapWidth;
         float f = this.fullImageHeight;
         float f2 = this.imageHeight;
         float f3 = this.imageWidth;
-        if (f / bitmapWidth == f2 / f3) {
-            this.fullImageHeight = f2;
-            this.fullImageWidth = f3;
-        } else if (f / bitmapWidth < f2 / f3) {
-            this.fullImageWidth = (bitmapWidth / f) * f2;
-            this.fullImageHeight = f2;
+        if (f / bitmapWidth != f2 / f3) {
+            if (f / bitmapWidth < f2 / f3) {
+                this.fullImageWidth = (bitmapWidth / f) * f2;
+                this.fullImageHeight = f2;
+            } else {
+                this.fullImageHeight = (f / bitmapWidth) * f3;
+                this.fullImageWidth = f3;
+            }
         } else {
-            this.fullImageHeight = (f / bitmapWidth) * f3;
+            this.fullImageHeight = f2;
             this.fullImageWidth = f3;
         }
         if (messageObject != null && messageObject.isVideo() && MediaController.getInstance().isPlayingMessage(messageObject)) {
             this.isHardwareVideo = true;
             MediaController.getInstance().setTextureView(this.overlayView.videoTextureView, this.overlayView.aspectRatioFrameLayout, this.overlayView.videoPlayerContainer, true);
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.overlayView.videoPlayerContainer.getLayoutParams();
-            this.overlayView.videoPlayerContainer.setTag(R.id.parent_tag, imageReceiver);
-            if (layoutParams.width != imageReceiver.getImageWidth() || layoutParams.height != imageReceiver.getImageHeight()) {
+            this.overlayView.videoPlayerContainer.setTag(R.id.parent_tag, image);
+            if (layoutParams.width != image.getImageWidth() || layoutParams.height != image.getImageHeight()) {
                 this.overlayView.aspectRatioFrameLayout.setResizeMode(3);
-                layoutParams.width = (int) imageReceiver.getImageWidth();
-                layoutParams.height = (int) imageReceiver.getImageHeight();
+                layoutParams.width = (int) image.getImageWidth();
+                layoutParams.height = (int) image.getImageHeight();
                 this.overlayView.videoPlayerContainer.setLayoutParams(layoutParams);
             }
             this.overlayView.videoTextureView.setScaleX(1.0f);
@@ -187,24 +156,23 @@ public class PinchToZoomHelper {
             if (this.callback != null) {
                 this.overlayView.backupImageView.setImageBitmap(this.callback.getCurrentTextureView().getBitmap((int) this.fullImageWidth, (int) this.fullImageHeight));
                 this.overlayView.backupImageView.setSize((int) this.fullImageWidth, (int) this.fullImageHeight);
-                this.overlayView.backupImageView.getImageReceiver().setRoundRadius(imageReceiver.getRoundRadius());
+                this.overlayView.backupImageView.getImageReceiver().setRoundRadius(image.getRoundRadius());
             }
             this.overlayView.videoPlayerContainer.setVisibility(0);
         } else {
             this.isHardwareVideo = false;
-            ImageReceiver imageReceiver3 = new ImageReceiver();
-            this.childImage = imageReceiver3;
-            imageReceiver3.onAttachedToWindow();
-            Drawable drawable = imageReceiver.getDrawable();
+            ImageReceiver imageReceiver2 = new ImageReceiver();
+            this.childImage = imageReceiver2;
+            imageReceiver2.onAttachedToWindow();
+            Drawable drawable = image.getDrawable();
             this.childImage.setImageBitmap(drawable);
             if (drawable instanceof AnimatedFileDrawable) {
-                AnimatedFileDrawable animatedFileDrawable = (AnimatedFileDrawable) drawable;
-                animatedFileDrawable.addSecondParentView(this.overlayView);
-                animatedFileDrawable.setInvalidateParentViewWithSecond(true);
+                ((AnimatedFileDrawable) drawable).addSecondParentView(this.overlayView);
+                ((AnimatedFileDrawable) drawable).setInvalidateParentViewWithSecond(true);
             }
             this.childImage.setImageCoords(this.imageX, this.imageY, this.imageWidth, this.imageHeight);
-            this.childImage.setRoundRadius(imageReceiver.getRoundRadius());
-            this.fullImage.setRoundRadius(imageReceiver.getRoundRadius());
+            this.childImage.setRoundRadius(image.getRoundRadius());
+            this.fullImage.setRoundRadius(image.getRoundRadius());
             this.overlayView.videoPlayerContainer.setVisibility(8);
         }
         Callback callback = this.callback;
@@ -215,40 +183,42 @@ public class PinchToZoomHelper {
     }
 
     private void setFullImage(MessageObject messageObject) {
-        if (messageObject != null && messageObject.isPhoto()) {
-            int[] iArr = new int[1];
-            ImageLocation imageLocation = getImageLocation(messageObject, iArr);
-            if (imageLocation != null) {
-                this.fullImage.setImage(imageLocation, null, null, null, null, iArr[0], null, messageObject, messageObject.isWebpage() ? 1 : 0);
-                this.fullImage.setCrossfadeAlpha((byte) 2);
-            }
-            updateViewsLocation();
+        if (messageObject == null || !messageObject.isPhoto()) {
+            return;
         }
+        int[] size = new int[1];
+        ImageLocation imageLocation = getImageLocation(messageObject, size);
+        if (imageLocation != null) {
+            boolean cacheOnly = messageObject != null && messageObject.isWebpage();
+            this.fullImage.setImage(imageLocation, null, null, null, null, size[0], null, messageObject, cacheOnly ? 1 : 0);
+            this.fullImage.setCrossfadeAlpha((byte) 2);
+        }
+        updateViewsLocation();
     }
 
     public boolean updateViewsLocation() {
-        float f = 0.0f;
-        float f2 = 0.0f;
-        float f3 = 0.0f;
-        for (View view = this.child; view != this.parentView; view = (View) view.getParent()) {
-            if (view == null) {
+        float parentOffsetX = 0.0f;
+        float parentOffsetY = 0.0f;
+        for (View currentView = this.child; currentView != this.parentView; currentView = (View) currentView.getParent()) {
+            if (currentView == null) {
                 return false;
             }
-            f2 += view.getLeft();
-            f3 += view.getTop();
+            parentOffsetX += currentView.getLeft();
+            parentOffsetY += currentView.getTop();
         }
-        float f4 = 0.0f;
-        for (View view2 = this.child; view2 != this.fragmentView; view2 = (View) view2.getParent()) {
-            if (view2 == null) {
+        float fragmentOffsetX = 0.0f;
+        float fragmentOffsetY = 0.0f;
+        for (View currentView2 = this.child; currentView2 != this.fragmentView; currentView2 = (View) currentView2.getParent()) {
+            if (currentView2 == null) {
                 return false;
             }
-            f += view2.getLeft();
-            f4 += view2.getTop();
+            fragmentOffsetX += currentView2.getLeft();
+            fragmentOffsetY += currentView2.getTop();
         }
-        this.fragmentOffsetX = f;
-        this.fragmentOffsetY = f4;
-        this.parentOffsetX = f2;
-        this.parentOffsetY = f3;
+        this.fragmentOffsetX = fragmentOffsetX;
+        this.fragmentOffsetY = fragmentOffsetY;
+        this.parentOffsetX = parentOffsetX;
+        this.parentOffsetY = parentOffsetY;
         return true;
     }
 
@@ -264,7 +234,7 @@ public class PinchToZoomHelper {
         ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.PinchToZoomHelper$$ExternalSyntheticLambda0
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                PinchToZoomHelper.this.lambda$finishZoom$0(valueAnimator);
+                PinchToZoomHelper.this.m4304lambda$finishZoom$0$orgtelegramuiPinchToZoomHelper(valueAnimator);
             }
         });
         this.finishTransition.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.PinchToZoomHelper.1
@@ -273,11 +243,10 @@ public class PinchToZoomHelper {
             }
 
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                PinchToZoomHelper pinchToZoomHelper = PinchToZoomHelper.this;
-                if (pinchToZoomHelper.finishTransition != null) {
-                    pinchToZoomHelper.finishTransition = null;
-                    pinchToZoomHelper.clear();
+            public void onAnimationEnd(Animator animation) {
+                if (PinchToZoomHelper.this.finishTransition != null) {
+                    PinchToZoomHelper.this.finishTransition = null;
+                    PinchToZoomHelper.this.clear();
                 }
             }
         });
@@ -286,7 +255,8 @@ public class PinchToZoomHelper {
         this.finishTransition.start();
     }
 
-    public /* synthetic */ void lambda$finishZoom$0(ValueAnimator valueAnimator) {
+    /* renamed from: lambda$finishZoom$0$org-telegram-ui-PinchToZoomHelper */
+    public /* synthetic */ void m4304lambda$finishZoom$0$orgtelegramuiPinchToZoomHelper(ValueAnimator valueAnimator) {
         this.finishProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         invalidateViews();
     }
@@ -331,42 +301,50 @@ public class PinchToZoomHelper {
         this.messageObject = null;
     }
 
+    public boolean inOverlayMode() {
+        return this.inOverlayMode;
+    }
+
     public boolean isInOverlayMode() {
         return this.inOverlayMode;
     }
 
-    public boolean isInOverlayModeFor(View view) {
-        return this.inOverlayMode && view == this.child;
+    public boolean isInOverlayModeFor(View child) {
+        return this.inOverlayMode && child == this.child;
     }
 
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        if (!updateViewsLocation() || this.child == null) {
-            return false;
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (updateViewsLocation() && this.child != null) {
+            ev.offsetLocation(-this.fragmentOffsetX, -this.fragmentOffsetY);
+            return this.child.onTouchEvent(ev);
         }
-        motionEvent.offsetLocation(-this.fragmentOffsetX, -this.fragmentOffsetY);
-        return this.child.onTouchEvent(motionEvent);
+        return false;
     }
 
-    public Bitmap getVideoBitmap(int i, int i2) {
+    public Bitmap getVideoBitmap(int w, int h) {
         ZoomOverlayView zoomOverlayView = this.overlayView;
         if (zoomOverlayView == null) {
             return null;
         }
-        return zoomOverlayView.videoTextureView.getBitmap(i, i2);
+        return zoomOverlayView.videoTextureView.getBitmap(w, h);
     }
 
     public ImageReceiver getPhotoImage() {
         return this.childImage;
     }
 
-    public boolean zoomEnabled(View view, ImageReceiver imageReceiver) {
-        if (imageReceiver.getDrawable() instanceof AnimatedFileDrawable) {
-            return !((AnimatedFileDrawable) imageReceiver.getDrawable()).isLoadingStream();
+    public boolean zoomEnabled(View child, ImageReceiver receiver) {
+        Drawable drawable = receiver.getDrawable();
+        if (drawable instanceof AnimatedFileDrawable) {
+            if (((AnimatedFileDrawable) receiver.getDrawable()).isLoadingStream()) {
+                return false;
+            }
+            return true;
         }
-        return imageReceiver.hasNotThumb();
+        return receiver.hasNotThumb();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class ZoomOverlayView extends FrameLayout {
         private Paint aspectPaint;
         private Path aspectPath;
@@ -384,27 +362,29 @@ public class PinchToZoomHelper {
             if (Build.VERSION.SDK_INT >= 21) {
                 FrameLayout frameLayout = new FrameLayout(context);
                 this.videoPlayerContainer = frameLayout;
-                frameLayout.setOutlineProvider(new ViewOutlineProvider(this, r5) { // from class: org.telegram.ui.PinchToZoomHelper.ZoomOverlayView.1
+                frameLayout.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.PinchToZoomHelper.ZoomOverlayView.1
+                    {
+                        ZoomOverlayView.this = this;
+                    }
+
                     @Override // android.view.ViewOutlineProvider
-                    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                     public void getOutline(View view, Outline outline) {
                         ImageReceiver imageReceiver = (ImageReceiver) view.getTag(R.id.parent_tag);
                         if (imageReceiver != null) {
-                            int[] roundRadius = imageReceiver.getRoundRadius();
-                            int i = 0;
-                            for (int i2 = 0; i2 < 4; i2++) {
-                                i = Math.max(i, roundRadius[i2]);
+                            int[] rad = imageReceiver.getRoundRadius();
+                            int maxRad = 0;
+                            for (int a = 0; a < 4; a++) {
+                                maxRad = Math.max(maxRad, rad[a]);
                             }
-                            outline.setRoundRect(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight(), i);
+                            outline.setRoundRect(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight(), maxRad);
                             return;
                         }
-                        int i3 = AndroidUtilities.roundMessageSize;
-                        outline.setOval(0, 0, i3, i3);
+                        outline.setOval(0, 0, AndroidUtilities.roundMessageSize, AndroidUtilities.roundMessageSize);
                     }
                 });
                 this.videoPlayerContainer.setClipToOutline(true);
             } else {
-                this.videoPlayerContainer = new FrameLayout(context, r5) { // from class: org.telegram.ui.PinchToZoomHelper.ZoomOverlayView.2
+                this.videoPlayerContainer = new FrameLayout(context) { // from class: org.telegram.ui.PinchToZoomHelper.ZoomOverlayView.2
                     RectF rect = new RectF();
 
                     {
@@ -412,29 +392,28 @@ public class PinchToZoomHelper {
                     }
 
                     @Override // android.view.View
-                    protected void onSizeChanged(int i, int i2, int i3, int i4) {
-                        super.onSizeChanged(i, i2, i3, i4);
+                    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+                        super.onSizeChanged(w, h, oldw, oldh);
                         ZoomOverlayView.this.aspectPath.reset();
                         ImageReceiver imageReceiver = (ImageReceiver) getTag(R.id.parent_tag);
                         if (imageReceiver == null) {
-                            float f = i / 2;
-                            ZoomOverlayView.this.aspectPath.addCircle(f, i2 / 2, f, Path.Direction.CW);
+                            ZoomOverlayView.this.aspectPath.addCircle(w / 2, h / 2, w / 2, Path.Direction.CW);
                         } else {
-                            int[] roundRadius = imageReceiver.getRoundRadius();
-                            int i5 = 0;
-                            for (int i6 = 0; i6 < 4; i6++) {
-                                i5 = Math.max(i5, roundRadius[i6]);
+                            int[] rad = imageReceiver.getRoundRadius();
+                            int maxRad = 0;
+                            for (int a = 0; a < 4; a++) {
+                                maxRad = Math.max(maxRad, rad[a]);
                             }
-                            this.rect.set(0.0f, 0.0f, i, i2);
+                            this.rect.set(0.0f, 0.0f, w, h);
                             ZoomOverlayView.this.aspectPath.addRoundRect(this.rect, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), Path.Direction.CW);
                         }
                         ZoomOverlayView.this.aspectPath.toggleInverseFillType();
                     }
 
                     @Override // android.view.View
-                    public void setVisibility(int i) {
-                        super.setVisibility(i);
-                        if (i == 0) {
+                    public void setVisibility(int visibility) {
+                        super.setVisibility(visibility);
+                        if (visibility == 0) {
                             setLayerType(2, null);
                         }
                     }
@@ -471,12 +450,7 @@ public class PinchToZoomHelper {
 
         @Override // android.view.ViewGroup, android.view.View
         protected void dispatchDraw(Canvas canvas) {
-            float f;
-            float f2;
-            PinchToZoomHelper pinchToZoomHelper;
-            ClipBoundsListener clipBoundsListener;
-            PinchToZoomHelper pinchToZoomHelper2 = PinchToZoomHelper.this;
-            if (pinchToZoomHelper2.finishTransition == null && pinchToZoomHelper2.enterProgress != 1.0f) {
+            if (PinchToZoomHelper.this.finishTransition == null && PinchToZoomHelper.this.enterProgress != 1.0f) {
                 PinchToZoomHelper.access$616(PinchToZoomHelper.this, 0.07272727f);
                 if (PinchToZoomHelper.this.enterProgress > 1.0f) {
                     PinchToZoomHelper.this.enterProgress = 1.0f;
@@ -484,153 +458,140 @@ public class PinchToZoomHelper {
                     PinchToZoomHelper.this.invalidateViews();
                 }
             }
-            float interpolation = PinchToZoomHelper.this.finishProgress * CubicBezierInterpolator.DEFAULT.getInterpolation(PinchToZoomHelper.this.enterProgress);
-            float measuredHeight = getMeasuredHeight();
-            if (interpolation != 1.0f && (clipBoundsListener = (pinchToZoomHelper = PinchToZoomHelper.this).clipBoundsListener) != null) {
-                clipBoundsListener.getClipTopBottom(pinchToZoomHelper.clipTopBottom);
+            float progress = PinchToZoomHelper.this.finishProgress * CubicBezierInterpolator.DEFAULT.getInterpolation(PinchToZoomHelper.this.enterProgress);
+            float clipTop = 0.0f;
+            float clipBottom = getMeasuredHeight();
+            if (progress != 1.0f && PinchToZoomHelper.this.clipBoundsListener != null) {
+                PinchToZoomHelper.this.clipBoundsListener.getClipTopBottom(PinchToZoomHelper.this.clipTopBottom);
                 canvas.save();
-                float f3 = 1.0f - interpolation;
-                float f4 = PinchToZoomHelper.this.clipTopBottom[0] * f3;
-                float measuredHeight2 = (getMeasuredHeight() * interpolation) + (PinchToZoomHelper.this.clipTopBottom[1] * f3);
-                canvas.clipRect(0.0f, f4, getMeasuredWidth(), measuredHeight2);
+                clipTop = PinchToZoomHelper.this.clipTopBottom[0] * (1.0f - progress);
+                clipBottom = (PinchToZoomHelper.this.clipTopBottom[1] * (1.0f - progress)) + (getMeasuredHeight() * progress);
+                canvas.clipRect(0.0f, clipTop, getMeasuredWidth(), clipBottom);
                 drawImage(canvas);
                 super.dispatchDraw(canvas);
                 canvas.restore();
-                f2 = f4;
-                f = measuredHeight2;
             } else {
                 drawImage(canvas);
                 super.dispatchDraw(canvas);
-                f = measuredHeight;
-                f2 = 0.0f;
             }
-            PinchToZoomHelper.this.drawOverlays(canvas, 1.0f - interpolation, PinchToZoomHelper.this.parentOffsetX - getLeft(), PinchToZoomHelper.this.parentOffsetY - getTop(), f2, f);
+            float parentOffsetX = PinchToZoomHelper.this.parentOffsetX - getLeft();
+            float parentOffsetY = PinchToZoomHelper.this.parentOffsetY - getTop();
+            PinchToZoomHelper.this.drawOverlays(canvas, 1.0f - progress, parentOffsetX, parentOffsetY, clipTop, clipBottom);
         }
 
         private void drawImage(Canvas canvas) {
-            if (!PinchToZoomHelper.this.inOverlayMode || PinchToZoomHelper.this.child == null || PinchToZoomHelper.this.parentView == null) {
-                return;
-            }
-            PinchToZoomHelper.this.updateViewsLocation();
-            float left = PinchToZoomHelper.this.parentOffsetX - getLeft();
-            float top = PinchToZoomHelper.this.parentOffsetY - getTop();
-            canvas.save();
-            PinchToZoomHelper pinchToZoomHelper = PinchToZoomHelper.this;
-            float f = ((pinchToZoomHelper.pinchScale * pinchToZoomHelper.finishProgress) + 1.0f) - PinchToZoomHelper.this.finishProgress;
-            PinchToZoomHelper pinchToZoomHelper2 = PinchToZoomHelper.this;
-            canvas.scale(f, f, pinchToZoomHelper2.pinchCenterX + left, pinchToZoomHelper2.pinchCenterY + top);
-            PinchToZoomHelper pinchToZoomHelper3 = PinchToZoomHelper.this;
-            PinchToZoomHelper pinchToZoomHelper4 = PinchToZoomHelper.this;
-            canvas.translate((pinchToZoomHelper3.pinchTranslationX * pinchToZoomHelper3.finishProgress) + left, (pinchToZoomHelper4.pinchTranslationY * pinchToZoomHelper4.finishProgress) + top);
-            if (PinchToZoomHelper.this.fullImage != null && PinchToZoomHelper.this.fullImage.hasNotThumb()) {
-                if (PinchToZoomHelper.this.progressToFullView != 1.0f) {
-                    PinchToZoomHelper.access$1416(PinchToZoomHelper.this, 0.10666667f);
-                    if (PinchToZoomHelper.this.progressToFullView > 1.0f) {
-                        PinchToZoomHelper.this.progressToFullView = 1.0f;
-                    } else {
-                        PinchToZoomHelper.this.invalidateViews();
-                    }
-                }
-                PinchToZoomHelper.this.fullImage.setAlpha(PinchToZoomHelper.this.progressToFullView);
-            }
-            float f2 = PinchToZoomHelper.this.imageX;
-            float f3 = PinchToZoomHelper.this.imageY;
-            if (PinchToZoomHelper.this.imageHeight != PinchToZoomHelper.this.fullImageHeight || PinchToZoomHelper.this.imageWidth != PinchToZoomHelper.this.fullImageWidth) {
-                float f4 = f < 1.0f ? 0.0f : f < 1.4f ? (f - 1.0f) / 0.4f : 1.0f;
-                float f5 = ((PinchToZoomHelper.this.fullImageWidth - PinchToZoomHelper.this.imageWidth) / 2.0f) * f4;
-                float f6 = PinchToZoomHelper.this.imageX - f5;
-                float f7 = ((PinchToZoomHelper.this.fullImageHeight - PinchToZoomHelper.this.imageHeight) / 2.0f) * f4;
-                float f8 = PinchToZoomHelper.this.imageY - f7;
-                if (PinchToZoomHelper.this.childImage != null) {
-                    PinchToZoomHelper.this.childImage.setImageCoords(f6, f8, PinchToZoomHelper.this.imageWidth + (f5 * 2.0f), PinchToZoomHelper.this.imageHeight + (f7 * 2.0f));
-                }
-                f3 = f8;
-                f2 = f6;
-            }
-            if (!PinchToZoomHelper.this.isHardwareVideo) {
-                if (PinchToZoomHelper.this.childImage != null) {
+            float p;
+            if (PinchToZoomHelper.this.inOverlayMode && PinchToZoomHelper.this.child != null && PinchToZoomHelper.this.parentView != null) {
+                PinchToZoomHelper.this.updateViewsLocation();
+                float parentOffsetX = PinchToZoomHelper.this.parentOffsetX - getLeft();
+                float parentOffsetY = PinchToZoomHelper.this.parentOffsetY - getTop();
+                canvas.save();
+                float s = ((PinchToZoomHelper.this.pinchScale * PinchToZoomHelper.this.finishProgress) + 1.0f) - PinchToZoomHelper.this.finishProgress;
+                canvas.scale(s, s, PinchToZoomHelper.this.pinchCenterX + parentOffsetX, PinchToZoomHelper.this.pinchCenterY + parentOffsetY);
+                canvas.translate((PinchToZoomHelper.this.pinchTranslationX * PinchToZoomHelper.this.finishProgress) + parentOffsetX, (PinchToZoomHelper.this.pinchTranslationY * PinchToZoomHelper.this.finishProgress) + parentOffsetY);
+                if (PinchToZoomHelper.this.fullImage != null && PinchToZoomHelper.this.fullImage.hasNotThumb()) {
                     if (PinchToZoomHelper.this.progressToFullView != 1.0f) {
-                        PinchToZoomHelper.this.childImage.draw(canvas);
-                        PinchToZoomHelper.this.fullImage.setImageCoords(PinchToZoomHelper.this.childImage.getImageX(), PinchToZoomHelper.this.childImage.getImageY(), PinchToZoomHelper.this.childImage.getImageWidth(), PinchToZoomHelper.this.childImage.getImageHeight());
-                        PinchToZoomHelper.this.fullImage.draw(canvas);
+                        PinchToZoomHelper.access$1416(PinchToZoomHelper.this, 0.10666667f);
+                        if (PinchToZoomHelper.this.progressToFullView > 1.0f) {
+                            PinchToZoomHelper.this.progressToFullView = 1.0f;
+                        } else {
+                            PinchToZoomHelper.this.invalidateViews();
+                        }
+                    }
+                    PinchToZoomHelper.this.fullImage.setAlpha(PinchToZoomHelper.this.progressToFullView);
+                }
+                float x = PinchToZoomHelper.this.imageX;
+                float y = PinchToZoomHelper.this.imageY;
+                if (PinchToZoomHelper.this.imageHeight != PinchToZoomHelper.this.fullImageHeight || PinchToZoomHelper.this.imageWidth != PinchToZoomHelper.this.fullImageWidth) {
+                    if (s < 1.0f) {
+                        p = 0.0f;
+                    } else if (s < 1.4f) {
+                        p = (s - 1.0f) / 0.4f;
                     } else {
-                        PinchToZoomHelper.this.fullImage.setImageCoords(PinchToZoomHelper.this.childImage.getImageX(), PinchToZoomHelper.this.childImage.getImageY(), PinchToZoomHelper.this.childImage.getImageWidth(), PinchToZoomHelper.this.childImage.getImageHeight());
-                        PinchToZoomHelper.this.fullImage.draw(canvas);
+                        p = 1.0f;
+                    }
+                    float verticalPadding = (PinchToZoomHelper.this.fullImageHeight - PinchToZoomHelper.this.imageHeight) / 2.0f;
+                    float horizontalPadding = (PinchToZoomHelper.this.fullImageWidth - PinchToZoomHelper.this.imageWidth) / 2.0f;
+                    x = PinchToZoomHelper.this.imageX - (horizontalPadding * p);
+                    y = PinchToZoomHelper.this.imageY - (verticalPadding * p);
+                    if (PinchToZoomHelper.this.childImage != null) {
+                        PinchToZoomHelper.this.childImage.setImageCoords(x, y, PinchToZoomHelper.this.imageWidth + (horizontalPadding * p * 2.0f), PinchToZoomHelper.this.imageHeight + (verticalPadding * p * 2.0f));
                     }
                 }
-            } else {
-                FrameLayout frameLayout = this.videoPlayerContainer;
-                PinchToZoomHelper pinchToZoomHelper5 = PinchToZoomHelper.this;
-                frameLayout.setPivotX(pinchToZoomHelper5.pinchCenterX - pinchToZoomHelper5.imageX);
-                FrameLayout frameLayout2 = this.videoPlayerContainer;
-                PinchToZoomHelper pinchToZoomHelper6 = PinchToZoomHelper.this;
-                frameLayout2.setPivotY(pinchToZoomHelper6.pinchCenterY - pinchToZoomHelper6.imageY);
-                this.videoPlayerContainer.setScaleY(f);
-                this.videoPlayerContainer.setScaleX(f);
-                FrameLayout frameLayout3 = this.videoPlayerContainer;
-                float f9 = f2 + left;
-                PinchToZoomHelper pinchToZoomHelper7 = PinchToZoomHelper.this;
-                frameLayout3.setTranslationX(f9 + (pinchToZoomHelper7.pinchTranslationX * f * pinchToZoomHelper7.finishProgress));
-                FrameLayout frameLayout4 = this.videoPlayerContainer;
-                float f10 = f3 + top;
-                PinchToZoomHelper pinchToZoomHelper8 = PinchToZoomHelper.this;
-                frameLayout4.setTranslationY(f10 + (pinchToZoomHelper8.pinchTranslationY * f * pinchToZoomHelper8.finishProgress));
+                if (!PinchToZoomHelper.this.isHardwareVideo) {
+                    if (PinchToZoomHelper.this.childImage != null) {
+                        if (PinchToZoomHelper.this.progressToFullView != 1.0f) {
+                            PinchToZoomHelper.this.childImage.draw(canvas);
+                            PinchToZoomHelper.this.fullImage.setImageCoords(PinchToZoomHelper.this.childImage.getImageX(), PinchToZoomHelper.this.childImage.getImageY(), PinchToZoomHelper.this.childImage.getImageWidth(), PinchToZoomHelper.this.childImage.getImageHeight());
+                            PinchToZoomHelper.this.fullImage.draw(canvas);
+                        } else {
+                            PinchToZoomHelper.this.fullImage.setImageCoords(PinchToZoomHelper.this.childImage.getImageX(), PinchToZoomHelper.this.childImage.getImageY(), PinchToZoomHelper.this.childImage.getImageWidth(), PinchToZoomHelper.this.childImage.getImageHeight());
+                            PinchToZoomHelper.this.fullImage.draw(canvas);
+                        }
+                    }
+                } else {
+                    this.videoPlayerContainer.setPivotX(PinchToZoomHelper.this.pinchCenterX - PinchToZoomHelper.this.imageX);
+                    this.videoPlayerContainer.setPivotY(PinchToZoomHelper.this.pinchCenterY - PinchToZoomHelper.this.imageY);
+                    this.videoPlayerContainer.setScaleY(s);
+                    this.videoPlayerContainer.setScaleX(s);
+                    this.videoPlayerContainer.setTranslationX(x + parentOffsetX + (PinchToZoomHelper.this.pinchTranslationX * s * PinchToZoomHelper.this.finishProgress));
+                    this.videoPlayerContainer.setTranslationY(y + parentOffsetY + (PinchToZoomHelper.this.pinchTranslationY * s * PinchToZoomHelper.this.finishProgress));
+                }
+                canvas.restore();
             }
-            canvas.restore();
         }
     }
 
-    private ImageLocation getImageLocation(MessageObject messageObject, int[] iArr) {
-        TLRPC$Message tLRPC$Message = messageObject.messageOwner;
-        if (tLRPC$Message instanceof TLRPC$TL_messageService) {
-            if (tLRPC$Message.action instanceof TLRPC$TL_messageActionUserUpdatedPhoto) {
+    protected void drawOverlays(Canvas canvas, float alpha, float parentOffsetX, float parentOffsetY, float clipTop, float clipBottom) {
+    }
+
+    private ImageLocation getImageLocation(MessageObject message, int[] size) {
+        if (message.messageOwner instanceof TLRPC.TL_messageService) {
+            if (message.messageOwner.action instanceof TLRPC.TL_messageActionUserUpdatedPhoto) {
                 return null;
             }
-            TLRPC$PhotoSize closestPhotoSizeWithSize = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, AndroidUtilities.getPhotoSize());
-            if (closestPhotoSizeWithSize != null) {
-                if (iArr != null) {
-                    iArr[0] = closestPhotoSizeWithSize.size;
-                    if (iArr[0] == 0) {
-                        iArr[0] = -1;
+            TLRPC.PhotoSize sizeFull = FileLoader.getClosestPhotoSizeWithSize(message.photoThumbs, AndroidUtilities.getPhotoSize());
+            if (sizeFull != null) {
+                if (size != null) {
+                    size[0] = sizeFull.size;
+                    if (size[0] == 0) {
+                        size[0] = -1;
                     }
                 }
-                return ImageLocation.getForObject(closestPhotoSizeWithSize, messageObject.photoThumbsObject);
-            } else if (iArr != null) {
-                iArr[0] = -1;
+                return ImageLocation.getForObject(sizeFull, message.photoThumbsObject);
+            } else if (size != null) {
+                size[0] = -1;
             }
+        } else if (((message.messageOwner.media instanceof TLRPC.TL_messageMediaPhoto) && message.messageOwner.media.photo != null) || ((message.messageOwner.media instanceof TLRPC.TL_messageMediaWebPage) && message.messageOwner.media.webpage != null)) {
+            if (message.isGif()) {
+                return ImageLocation.getForDocument(message.getDocument());
+            }
+            TLRPC.PhotoSize sizeFull2 = FileLoader.getClosestPhotoSizeWithSize(message.photoThumbs, AndroidUtilities.getPhotoSize(), false, null, true);
+            if (sizeFull2 != null) {
+                if (size != null) {
+                    size[0] = sizeFull2.size;
+                    if (size[0] == 0) {
+                        size[0] = -1;
+                    }
+                }
+                return ImageLocation.getForObject(sizeFull2, message.photoThumbsObject);
+            } else if (size != null) {
+                size[0] = -1;
+            }
+        } else if (message.messageOwner.media instanceof TLRPC.TL_messageMediaInvoice) {
+            return ImageLocation.getForWebFile(WebFile.createWithWebDocument(((TLRPC.TL_messageMediaInvoice) message.messageOwner.media).photo));
         } else {
-            TLRPC$MessageMedia tLRPC$MessageMedia = tLRPC$Message.media;
-            if (((tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPhoto) && tLRPC$MessageMedia.photo != null) || ((tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaWebPage) && tLRPC$MessageMedia.webpage != null)) {
-                if (messageObject.isGif()) {
-                    return ImageLocation.getForDocument(messageObject.getDocument());
-                }
-                TLRPC$PhotoSize closestPhotoSizeWithSize2 = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, AndroidUtilities.getPhotoSize(), false, null, true);
-                if (closestPhotoSizeWithSize2 != null) {
-                    if (iArr != null) {
-                        iArr[0] = closestPhotoSizeWithSize2.size;
-                        if (iArr[0] == 0) {
-                            iArr[0] = -1;
+            if (message.getDocument() != null) {
+                TLRPC.Document document = message.getDocument();
+                if (MessageObject.isDocumentHasThumb(message.getDocument())) {
+                    TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 90);
+                    if (size != null) {
+                        size[0] = thumb.size;
+                        if (size[0] == 0) {
+                            size[0] = -1;
                         }
                     }
-                    return ImageLocation.getForObject(closestPhotoSizeWithSize2, messageObject.photoThumbsObject);
-                } else if (iArr != null) {
-                    iArr[0] = -1;
-                }
-            } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaInvoice) {
-                return ImageLocation.getForWebFile(WebFile.createWithWebDocument(((TLRPC$TL_messageMediaInvoice) tLRPC$MessageMedia).photo));
-            } else {
-                if (messageObject.getDocument() != null) {
-                    TLRPC$Document document = messageObject.getDocument();
-                    if (MessageObject.isDocumentHasThumb(messageObject.getDocument())) {
-                        TLRPC$PhotoSize closestPhotoSizeWithSize3 = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 90);
-                        if (iArr != null) {
-                            iArr[0] = closestPhotoSizeWithSize3.size;
-                            if (iArr[0] == 0) {
-                                iArr[0] = -1;
-                            }
-                        }
-                        return ImageLocation.getForDocument(closestPhotoSizeWithSize3, document);
-                    }
+                    return ImageLocation.getForDocument(thumb, document);
                 }
             }
         }
@@ -641,83 +602,111 @@ public class PinchToZoomHelper {
         this.clipBoundsListener = clipBoundsListener;
     }
 
+    /* loaded from: classes4.dex */
+    public interface Callback {
+        TextureView getCurrentTextureView();
+
+        void onZoomFinished(MessageObject messageObject);
+
+        void onZoomStarted(MessageObject messageObject);
+
+        /* renamed from: org.telegram.ui.PinchToZoomHelper$Callback$-CC */
+        /* loaded from: classes4.dex */
+        public final /* synthetic */ class CC {
+            public static TextureView $default$getCurrentTextureView(Callback _this) {
+                return null;
+            }
+
+            public static void $default$onZoomStarted(Callback _this, MessageObject messageObject) {
+            }
+
+            public static void $default$onZoomFinished(Callback _this, MessageObject messageObject) {
+            }
+        }
+    }
+
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
 
-    public boolean checkPinchToZoom(MotionEvent motionEvent, View view, ImageReceiver imageReceiver, MessageObject messageObject) {
-        if (!zoomEnabled(view, imageReceiver)) {
+    public boolean checkPinchToZoom(MotionEvent ev, View child, ImageReceiver image, MessageObject messageObject) {
+        if (!zoomEnabled(child, image)) {
             return false;
         }
-        if (motionEvent.getActionMasked() == 0 || motionEvent.getActionMasked() == 5) {
-            if (!this.isInPinchToZoomTouchMode && motionEvent.getPointerCount() == 2) {
-                this.pinchStartDistance = (float) Math.hypot(motionEvent.getX(1) - motionEvent.getX(0), motionEvent.getY(1) - motionEvent.getY(0));
-                float x = (motionEvent.getX(0) + motionEvent.getX(1)) / 2.0f;
+        if (ev.getActionMasked() == 0 || ev.getActionMasked() == 5) {
+            if (!this.isInPinchToZoomTouchMode && ev.getPointerCount() == 2) {
+                this.pinchStartDistance = (float) Math.hypot(ev.getX(1) - ev.getX(0), ev.getY(1) - ev.getY(0));
+                float x = (ev.getX(0) + ev.getX(1)) / 2.0f;
                 this.pinchCenterX = x;
                 this.pinchStartCenterX = x;
-                float y = (motionEvent.getY(0) + motionEvent.getY(1)) / 2.0f;
+                float y = (ev.getY(0) + ev.getY(1)) / 2.0f;
                 this.pinchCenterY = y;
                 this.pinchStartCenterY = y;
                 this.pinchScale = 1.0f;
-                this.pointerId1 = motionEvent.getPointerId(0);
-                this.pointerId2 = motionEvent.getPointerId(1);
+                this.pointerId1 = ev.getPointerId(0);
+                this.pointerId2 = ev.getPointerId(1);
                 this.isInPinchToZoomTouchMode = true;
             }
-        } else if (motionEvent.getActionMasked() == 2 && this.isInPinchToZoomTouchMode) {
-            int i = -1;
-            int i2 = -1;
-            for (int i3 = 0; i3 < motionEvent.getPointerCount(); i3++) {
-                if (this.pointerId1 == motionEvent.getPointerId(i3)) {
-                    i = i3;
+        } else if (ev.getActionMasked() == 2 && this.isInPinchToZoomTouchMode) {
+            int index1 = -1;
+            int index2 = -1;
+            for (int i = 0; i < ev.getPointerCount(); i++) {
+                if (this.pointerId1 == ev.getPointerId(i)) {
+                    index1 = i;
                 }
-                if (this.pointerId2 == motionEvent.getPointerId(i3)) {
-                    i2 = i3;
+                if (this.pointerId2 == ev.getPointerId(i)) {
+                    index2 = i;
                 }
             }
-            if (i == -1 || i2 == -1) {
+            if (index1 == -1 || index2 == -1) {
                 this.isInPinchToZoomTouchMode = false;
-                view.getParent().requestDisallowInterceptTouchEvent(false);
+                child.getParent().requestDisallowInterceptTouchEvent(false);
                 finishZoom();
                 return false;
             }
-            float hypot = ((float) Math.hypot(motionEvent.getX(i2) - motionEvent.getX(i), motionEvent.getY(i2) - motionEvent.getY(i))) / this.pinchStartDistance;
+            float hypot = ((float) Math.hypot(ev.getX(index2) - ev.getX(index1), ev.getY(index2) - ev.getY(index1))) / this.pinchStartDistance;
             this.pinchScale = hypot;
             if (hypot > 1.005f && !isInOverlayMode()) {
-                this.pinchStartDistance = (float) Math.hypot(motionEvent.getX(i2) - motionEvent.getX(i), motionEvent.getY(i2) - motionEvent.getY(i));
-                float x2 = (motionEvent.getX(i) + motionEvent.getX(i2)) / 2.0f;
+                this.pinchStartDistance = (float) Math.hypot(ev.getX(index2) - ev.getX(index1), ev.getY(index2) - ev.getY(index1));
+                float x2 = (ev.getX(index1) + ev.getX(index2)) / 2.0f;
                 this.pinchCenterX = x2;
                 this.pinchStartCenterX = x2;
-                float y2 = (motionEvent.getY(i) + motionEvent.getY(i2)) / 2.0f;
+                float y2 = (ev.getY(index1) + ev.getY(index2)) / 2.0f;
                 this.pinchCenterY = y2;
                 this.pinchStartCenterY = y2;
                 this.pinchScale = 1.0f;
                 this.pinchTranslationX = 0.0f;
                 this.pinchTranslationY = 0.0f;
-                view.getParent().requestDisallowInterceptTouchEvent(true);
-                startZoom(view, imageReceiver, messageObject);
+                child.getParent().requestDisallowInterceptTouchEvent(true);
+                startZoom(child, image, messageObject);
             }
-            float x3 = this.pinchStartCenterX - ((motionEvent.getX(i) + motionEvent.getX(i2)) / 2.0f);
-            float y3 = this.pinchStartCenterY - ((motionEvent.getY(i) + motionEvent.getY(i2)) / 2.0f);
+            float newPinchCenterX = (ev.getX(index1) + ev.getX(index2)) / 2.0f;
+            float newPinchCenterY = (ev.getY(index1) + ev.getY(index2)) / 2.0f;
+            float moveDx = this.pinchStartCenterX - newPinchCenterX;
+            float moveDy = this.pinchStartCenterY - newPinchCenterY;
             float f = this.pinchScale;
-            this.pinchTranslationX = (-x3) / f;
-            this.pinchTranslationY = (-y3) / f;
+            this.pinchTranslationX = (-moveDx) / f;
+            this.pinchTranslationY = (-moveDy) / f;
             invalidateViews();
-        } else if ((motionEvent.getActionMasked() == 1 || ((motionEvent.getActionMasked() == 6 && checkPointerIds(motionEvent)) || motionEvent.getActionMasked() == 3)) && this.isInPinchToZoomTouchMode) {
-            this.isInPinchToZoomTouchMode = false;
-            view.getParent().requestDisallowInterceptTouchEvent(false);
-            finishZoom();
+        } else {
+            int index12 = ev.getActionMasked();
+            if ((index12 == 1 || ((ev.getActionMasked() == 6 && checkPointerIds(ev)) || ev.getActionMasked() == 3)) && this.isInPinchToZoomTouchMode) {
+                this.isInPinchToZoomTouchMode = false;
+                child.getParent().requestDisallowInterceptTouchEvent(false);
+                finishZoom();
+            }
         }
-        return isInOverlayModeFor(view);
+        return isInOverlayModeFor(child);
     }
 
-    private boolean checkPointerIds(MotionEvent motionEvent) {
-        if (motionEvent.getPointerCount() < 2) {
+    private boolean checkPointerIds(MotionEvent ev) {
+        if (ev.getPointerCount() < 2) {
             return false;
         }
-        if (this.pointerId1 == motionEvent.getPointerId(0) && this.pointerId2 == motionEvent.getPointerId(1)) {
+        if (this.pointerId1 == ev.getPointerId(0) && this.pointerId2 == ev.getPointerId(1)) {
             return true;
         }
-        return this.pointerId1 == motionEvent.getPointerId(1) && this.pointerId2 == motionEvent.getPointerId(0);
+        return this.pointerId1 == ev.getPointerId(1) && this.pointerId2 == ev.getPointerId(0);
     }
 
     public void invalidateViews() {

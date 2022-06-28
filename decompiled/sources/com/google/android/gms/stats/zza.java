@@ -1,4 +1,6 @@
 package com.google.android.gms.stats;
-/* loaded from: classes.dex */
-final class zza {
+
+import com.google.android.gms.stats.WakeLock;
+/* loaded from: classes3.dex */
+final class zza implements WakeLock.zza {
 }

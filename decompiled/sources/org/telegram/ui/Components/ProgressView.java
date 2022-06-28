@@ -3,7 +3,7 @@ package org.telegram.ui.Components;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class ProgressView {
     public int height;
     public int width;
@@ -12,17 +12,16 @@ public class ProgressView {
     private Paint innerPaint = new Paint();
     private Paint outerPaint = new Paint();
 
-    public void setProgressColors(int i, int i2) {
-        this.innerPaint.setColor(i);
-        this.outerPaint.setColor(i2);
+    public void setProgressColors(int innerColor, int outerColor) {
+        this.innerPaint.setColor(innerColor);
+        this.outerPaint.setColor(outerColor);
     }
 
-    public void setProgress(float f) {
-        this.currentProgress = f;
-        if (f < 0.0f) {
+    public void setProgress(float progress) {
+        this.currentProgress = progress;
+        if (progress < 0.0f) {
             this.currentProgress = 0.0f;
-        } else if (f <= 1.0f) {
-        } else {
+        } else if (progress > 1.0f) {
             this.currentProgress = 1.0f;
         }
     }

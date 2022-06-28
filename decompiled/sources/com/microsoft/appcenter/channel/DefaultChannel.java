@@ -34,8 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DefaultChannel implements Channel {
+    static final int CLEAR_BATCH_SIZE = 100;
+    private static final long MINIMUM_TRANSMISSION_INTERVAL = 3000;
+    static final String START_TIMER_PREFIX = "startTimerPrefix.";
     private final Handler mAppCenterHandler;
     private String mAppSecret;
     private final Context mContext;
@@ -50,13 +53,13 @@ public class DefaultChannel implements Channel {
     private final Collection<Channel.Listener> mListeners;
     private final Persistence mPersistence;
 
-    public DefaultChannel(Context context, String str, LogSerializer logSerializer, HttpClient httpClient, Handler handler) {
-        this(context, str, buildDefaultPersistence(context, logSerializer), new AppCenterIngestion(httpClient, logSerializer), handler);
+    public DefaultChannel(Context context, String appSecret, LogSerializer logSerializer, HttpClient httpClient, Handler appCenterHandler) {
+        this(context, appSecret, buildDefaultPersistence(context, logSerializer), new AppCenterIngestion(httpClient, logSerializer), appCenterHandler);
     }
 
-    DefaultChannel(Context context, String str, Persistence persistence, Ingestion ingestion, Handler handler) {
+    DefaultChannel(Context context, String appSecret, Persistence persistence, Ingestion ingestion, Handler appCenterHandler) {
         this.mContext = context;
-        this.mAppSecret = str;
+        this.mAppSecret = appSecret;
         this.mInstallId = IdHelper.getInstallId();
         this.mGroupStates = new HashMap();
         this.mListeners = new LinkedHashSet();
@@ -65,28 +68,28 @@ public class DefaultChannel implements Channel {
         HashSet hashSet = new HashSet();
         this.mIngestions = hashSet;
         hashSet.add(ingestion);
-        this.mAppCenterHandler = handler;
+        this.mAppCenterHandler = appCenterHandler;
         this.mEnabled = true;
     }
 
     private static Persistence buildDefaultPersistence(Context context, LogSerializer logSerializer) {
-        DatabasePersistence databasePersistence = new DatabasePersistence(context);
-        databasePersistence.setLogSerializer(logSerializer);
-        return databasePersistence;
+        Persistence persistence = new DatabasePersistence(context);
+        persistence.setLogSerializer(logSerializer);
+        return persistence;
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public boolean setMaxStorageSize(long j) {
-        return this.mPersistence.setMaxStorageSize(j);
+    public boolean setMaxStorageSize(long maxStorageSizeInBytes) {
+        return this.mPersistence.setMaxStorageSize(maxStorageSizeInBytes);
     }
 
-    private boolean checkStateDidNotChange(GroupState groupState, int i) {
-        return i == this.mCurrentState && groupState == this.mGroupStates.get(groupState.mName);
+    private boolean checkStateDidNotChange(GroupState groupState, int stateSnapshot) {
+        return stateSnapshot == this.mCurrentState && groupState == this.mGroupStates.get(groupState.mName);
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void setAppSecret(String str) {
-        this.mAppSecret = str;
+    public void setAppSecret(String appSecret) {
+        this.mAppSecret = appSecret;
         if (this.mEnabled) {
             for (GroupState groupState : this.mGroupStates.values()) {
                 if (groupState.mIngestion == this.mIngestion) {
@@ -97,39 +100,88 @@ public class DefaultChannel implements Channel {
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void addGroup(String str, int i, long j, int i2, Ingestion ingestion, Channel.GroupListener groupListener) {
-        AppCenterLog.debug("AppCenter", "addGroup(" + str + ")");
+    public void addGroup(String groupName, int maxLogsPerBatch, long batchTimeInterval, int maxParallelBatches, Ingestion ingestion, Channel.GroupListener groupListener) {
+        AppCenterLog.debug("AppCenter", "addGroup(" + groupName + ")");
         Ingestion ingestion2 = ingestion == null ? this.mIngestion : ingestion;
         this.mIngestions.add(ingestion2);
-        GroupState groupState = new GroupState(str, i, j, i2, ingestion2, groupListener);
-        this.mGroupStates.put(str, groupState);
-        groupState.mPendingLogCount = this.mPersistence.countLogs(str);
+        GroupState groupState = new GroupState(groupName, maxLogsPerBatch, batchTimeInterval, maxParallelBatches, ingestion2, groupListener);
+        this.mGroupStates.put(groupName, groupState);
+        groupState.mPendingLogCount = this.mPersistence.countLogs(groupName);
         if (this.mAppSecret != null || this.mIngestion != ingestion2) {
             checkPendingLogs(groupState);
         }
         for (Channel.Listener listener : this.mListeners) {
-            listener.onGroupAdded(str, groupListener, j);
+            listener.onGroupAdded(groupName, groupListener, batchTimeInterval);
         }
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void removeGroup(String str) {
-        AppCenterLog.debug("AppCenter", "removeGroup(" + str + ")");
-        GroupState remove = this.mGroupStates.remove(str);
-        if (remove != null) {
-            cancelTimer(remove);
+    public void removeGroup(String groupName) {
+        AppCenterLog.debug("AppCenter", "removeGroup(" + groupName + ")");
+        GroupState groupState = this.mGroupStates.remove(groupName);
+        if (groupState != null) {
+            cancelTimer(groupState);
         }
         for (Channel.Listener listener : this.mListeners) {
-            listener.onGroupRemoved(str);
+            listener.onGroupRemoved(groupName);
         }
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void setEnabled(boolean z) {
-        if (this.mEnabled == z) {
+    public void pauseGroup(String groupName, String targetToken) {
+        GroupState groupState = this.mGroupStates.get(groupName);
+        if (groupState != null) {
+            if (targetToken != null) {
+                String targetKey = PartAUtils.getTargetKey(targetToken);
+                if (groupState.mPausedTargetKeys.add(targetKey)) {
+                    AppCenterLog.debug("AppCenter", "pauseGroup(" + groupName + ", " + targetKey + ")");
+                }
+            } else if (!groupState.mPaused) {
+                AppCenterLog.debug("AppCenter", "pauseGroup(" + groupName + ")");
+                groupState.mPaused = true;
+                cancelTimer(groupState);
+            }
+            for (Channel.Listener listener : this.mListeners) {
+                listener.onPaused(groupName, targetToken);
+            }
+        }
+    }
+
+    @Override // com.microsoft.appcenter.channel.Channel
+    public void resumeGroup(String groupName, String targetToken) {
+        GroupState groupState = this.mGroupStates.get(groupName);
+        if (groupState != null) {
+            if (targetToken != null) {
+                String targetKey = PartAUtils.getTargetKey(targetToken);
+                if (groupState.mPausedTargetKeys.remove(targetKey)) {
+                    AppCenterLog.debug("AppCenter", "resumeGroup(" + groupName + ", " + targetKey + ")");
+                    groupState.mPendingLogCount = this.mPersistence.countLogs(groupName);
+                    checkPendingLogs(groupState);
+                }
+            } else if (groupState.mPaused) {
+                AppCenterLog.debug("AppCenter", "resumeGroup(" + groupName + ")");
+                groupState.mPaused = false;
+                checkPendingLogs(groupState);
+            }
+            for (Channel.Listener listener : this.mListeners) {
+                listener.onResumed(groupName, targetToken);
+            }
+        }
+    }
+
+    @Override // com.microsoft.appcenter.channel.Channel
+    public boolean isEnabled() {
+        return this.mEnabled;
+    }
+
+    @Override // com.microsoft.appcenter.channel.Channel
+    public void setEnabled(boolean enabled) {
+        if (this.mEnabled == enabled) {
             return;
         }
-        if (z) {
+        if (!enabled) {
+            suspend(true, new CancellationException());
+        } else {
             this.mEnabled = true;
             this.mDiscardLogs = false;
             this.mCurrentState++;
@@ -139,45 +191,48 @@ public class DefaultChannel implements Channel {
             for (GroupState groupState : this.mGroupStates.values()) {
                 checkPendingLogs(groupState);
             }
-        } else {
-            suspend(true, new CancellationException());
         }
         for (Channel.Listener listener : this.mListeners) {
-            listener.onGloballyEnabled(z);
+            listener.onGloballyEnabled(enabled);
         }
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void setLogUrl(String str) {
-        this.mIngestion.setLogUrl(str);
+    public void setLogUrl(String logUrl) {
+        this.mIngestion.setLogUrl(logUrl);
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void clear(String str) {
-        if (!this.mGroupStates.containsKey(str)) {
+    public void clear(String groupName) {
+        if (!this.mGroupStates.containsKey(groupName)) {
             return;
         }
-        AppCenterLog.debug("AppCenter", "clear(" + str + ")");
-        this.mPersistence.deleteLogs(str);
+        AppCenterLog.debug("AppCenter", "clear(" + groupName + ")");
+        this.mPersistence.deleteLogs(groupName);
         for (Channel.Listener listener : this.mListeners) {
-            listener.onClear(str);
+            listener.onClear(groupName);
         }
     }
 
-    private void suspend(boolean z, Exception exc) {
+    @Override // com.microsoft.appcenter.channel.Channel
+    public void invalidateDeviceCache() {
+        this.mDevice = null;
+    }
+
+    private void suspend(boolean deleteLogs, Exception exception) {
         Channel.GroupListener groupListener;
         this.mEnabled = false;
-        this.mDiscardLogs = z;
+        this.mDiscardLogs = deleteLogs;
         this.mCurrentState++;
         for (GroupState groupState : this.mGroupStates.values()) {
             cancelTimer(groupState);
-            Iterator<Map.Entry<String, List<Log>>> it = groupState.mSendingBatches.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<String, List<Log>> next = it.next();
-                it.remove();
-                if (z && (groupListener = groupState.mListener) != null) {
-                    for (Log log : next.getValue()) {
-                        groupListener.onFailure(log, exc);
+            Iterator<Map.Entry<String, List<Log>>> iterator = groupState.mSendingBatches.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, List<Log>> entry = iterator.next();
+                iterator.remove();
+                if (deleteLogs && (groupListener = groupState.mListener) != null) {
+                    for (Log log : entry.getValue()) {
+                        groupListener.onFailure(log, exception);
                     }
                 }
             }
@@ -189,7 +244,7 @@ public class DefaultChannel implements Channel {
                 AppCenterLog.error("AppCenter", "Failed to close ingestion: " + ingestion, e);
             }
         }
-        if (z) {
+        if (deleteLogs) {
             for (GroupState groupState2 : this.mGroupStates.values()) {
                 deleteLogsOnSuspended(groupState2);
             }
@@ -199,15 +254,15 @@ public class DefaultChannel implements Channel {
     }
 
     private void deleteLogsOnSuspended(GroupState groupState) {
-        ArrayList<Log> arrayList = new ArrayList();
-        this.mPersistence.getLogs(groupState.mName, Collections.emptyList(), 100, arrayList);
-        if (arrayList.size() > 0 && groupState.mListener != null) {
-            for (Log log : arrayList) {
+        List<Log> logs = new ArrayList<>();
+        this.mPersistence.getLogs(groupState.mName, Collections.emptyList(), 100, logs);
+        if (logs.size() > 0 && groupState.mListener != null) {
+            for (Log log : logs) {
                 groupState.mListener.onBeforeSending(log);
                 groupState.mListener.onFailure(log, new CancellationException());
             }
         }
-        if (arrayList.size() >= 100 && groupState.mListener != null) {
+        if (logs.size() >= 100 && groupState.mListener != null) {
             deleteLogsOnSuspended(groupState);
         } else {
             this.mPersistence.deleteLogs(groupState.mName);
@@ -218,7 +273,7 @@ public class DefaultChannel implements Channel {
         if (groupState.mScheduled) {
             groupState.mScheduled = false;
             this.mAppCenterHandler.removeCallbacks(groupState.mRunnable);
-            SharedPreferencesManager.remove("startTimerPrefix." + groupState.mName);
+            SharedPreferencesManager.remove(START_TIMER_PREFIX + groupState.mName);
         }
     }
 
@@ -226,52 +281,50 @@ public class DefaultChannel implements Channel {
         if (!this.mEnabled) {
             return;
         }
-        int i = groupState.mPendingLogCount;
-        int min = Math.min(i, groupState.mMaxLogsPerBatch);
-        AppCenterLog.debug("AppCenter", "triggerIngestion(" + groupState.mName + ") pendingLogCount=" + i);
+        int pendingLogCount = groupState.mPendingLogCount;
+        int maxFetch = Math.min(pendingLogCount, groupState.mMaxLogsPerBatch);
+        AppCenterLog.debug("AppCenter", "triggerIngestion(" + groupState.mName + ") pendingLogCount=" + pendingLogCount);
         cancelTimer(groupState);
         if (groupState.mSendingBatches.size() == groupState.mMaxParallelBatches) {
             AppCenterLog.debug("AppCenter", "Already sending " + groupState.mMaxParallelBatches + " batches of analytics data to the server.");
             return;
         }
-        ArrayList<Log> arrayList = new ArrayList(min);
-        String logs = this.mPersistence.getLogs(groupState.mName, groupState.mPausedTargetKeys, min, arrayList);
-        groupState.mPendingLogCount -= min;
-        if (logs == null) {
+        List<Log> batch = new ArrayList<>(maxFetch);
+        String batchId = this.mPersistence.getLogs(groupState.mName, groupState.mPausedTargetKeys, maxFetch, batch);
+        groupState.mPendingLogCount -= maxFetch;
+        if (batchId == null) {
             return;
         }
-        AppCenterLog.debug("AppCenter", "ingestLogs(" + groupState.mName + "," + logs + ") pendingLogCount=" + groupState.mPendingLogCount);
+        AppCenterLog.debug("AppCenter", "ingestLogs(" + groupState.mName + "," + batchId + ") pendingLogCount=" + groupState.mPendingLogCount);
         if (groupState.mListener != null) {
-            for (Log log : arrayList) {
+            for (Log log : batch) {
                 groupState.mListener.onBeforeSending(log);
             }
         }
-        groupState.mSendingBatches.put(logs, arrayList);
-        sendLogs(groupState, this.mCurrentState, arrayList, logs);
+        groupState.mSendingBatches.put(batchId, batch);
+        sendLogs(groupState, this.mCurrentState, batch, batchId);
     }
 
-    private void sendLogs(final GroupState groupState, final int i, List<Log> list, final String str) {
+    private void sendLogs(final GroupState groupState, final int currentState, List<Log> batch, final String batchId) {
         LogContainer logContainer = new LogContainer();
-        logContainer.setLogs(list);
+        logContainer.setLogs(batch);
         groupState.mIngestion.sendAsync(this.mAppSecret, this.mInstallId, logContainer, new ServiceCallback() { // from class: com.microsoft.appcenter.channel.DefaultChannel.1
             @Override // com.microsoft.appcenter.http.ServiceCallback
             public void onCallSucceeded(HttpResponse httpResponse) {
                 DefaultChannel.this.mAppCenterHandler.post(new Runnable() { // from class: com.microsoft.appcenter.channel.DefaultChannel.1.1
                     @Override // java.lang.Runnable
                     public void run() {
-                        AnonymousClass1 anonymousClass1 = AnonymousClass1.this;
-                        DefaultChannel.this.handleSendingSuccess(groupState, str);
+                        DefaultChannel.this.handleSendingSuccess(groupState, batchId);
                     }
                 });
             }
 
             @Override // com.microsoft.appcenter.http.ServiceCallback
-            public void onCallFailed(final Exception exc) {
+            public void onCallFailed(final Exception e) {
                 DefaultChannel.this.mAppCenterHandler.post(new Runnable() { // from class: com.microsoft.appcenter.channel.DefaultChannel.1.2
                     @Override // java.lang.Runnable
                     public void run() {
-                        AnonymousClass1 anonymousClass1 = AnonymousClass1.this;
-                        DefaultChannel.this.handleSendingFailure(groupState, str, exc);
+                        DefaultChannel.this.handleSendingFailure(groupState, batchId, e);
                     }
                 });
             }
@@ -279,24 +332,24 @@ public class DefaultChannel implements Channel {
         this.mAppCenterHandler.post(new Runnable() { // from class: com.microsoft.appcenter.channel.DefaultChannel.2
             @Override // java.lang.Runnable
             public void run() {
-                DefaultChannel.this.checkPendingLogsAfterPost(groupState, i);
+                DefaultChannel.this.checkPendingLogsAfterPost(groupState, currentState);
             }
         });
     }
 
-    public void checkPendingLogsAfterPost(GroupState groupState, int i) {
-        if (checkStateDidNotChange(groupState, i)) {
+    public void checkPendingLogsAfterPost(GroupState groupState, int currentState) {
+        if (checkStateDidNotChange(groupState, currentState)) {
             checkPendingLogs(groupState);
         }
     }
 
-    public void handleSendingSuccess(GroupState groupState, String str) {
-        List<Log> remove = groupState.mSendingBatches.remove(str);
-        if (remove != null) {
-            this.mPersistence.deleteLogs(groupState.mName, str);
+    public void handleSendingSuccess(GroupState groupState, String batchId) {
+        List<Log> removedLogsForBatchId = groupState.mSendingBatches.remove(batchId);
+        if (removedLogsForBatchId != null) {
+            this.mPersistence.deleteLogs(groupState.mName, batchId);
             Channel.GroupListener groupListener = groupState.mListener;
             if (groupListener != null) {
-                for (Log log : remove) {
+                for (Log log : removedLogsForBatchId) {
                     groupListener.onSuccess(log);
                 }
             }
@@ -304,43 +357,40 @@ public class DefaultChannel implements Channel {
         }
     }
 
-    public void handleSendingFailure(GroupState groupState, String str, Exception exc) {
-        String str2 = groupState.mName;
-        List<Log> remove = groupState.mSendingBatches.remove(str);
-        if (remove != null) {
-            AppCenterLog.error("AppCenter", "Sending logs groupName=" + str2 + " id=" + str + " failed", exc);
-            boolean isRecoverableError = HttpUtils.isRecoverableError(exc);
-            if (isRecoverableError) {
-                groupState.mPendingLogCount += remove.size();
+    public void handleSendingFailure(GroupState groupState, String batchId, Exception e) {
+        String groupName = groupState.mName;
+        List<Log> removedLogsForBatchId = groupState.mSendingBatches.remove(batchId);
+        if (removedLogsForBatchId != null) {
+            AppCenterLog.error("AppCenter", "Sending logs groupName=" + groupName + " id=" + batchId + " failed", e);
+            boolean recoverableError = HttpUtils.isRecoverableError(e);
+            if (recoverableError) {
+                groupState.mPendingLogCount += removedLogsForBatchId.size();
             } else {
                 Channel.GroupListener groupListener = groupState.mListener;
                 if (groupListener != null) {
-                    for (Log log : remove) {
-                        groupListener.onFailure(log, exc);
+                    for (Log log : removedLogsForBatchId) {
+                        groupListener.onFailure(log, e);
                     }
                 }
             }
-            suspend(!isRecoverableError, exc);
+            suspend(!recoverableError, e);
         }
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
-    public void enqueue(Log log, String str, int i) {
-        boolean z;
-        GroupState groupState = this.mGroupStates.get(str);
+    public void enqueue(Log log, String groupName, int flags) {
+        GroupState groupState = this.mGroupStates.get(groupName);
         if (groupState == null) {
-            AppCenterLog.error("AppCenter", "Invalid group name:" + str);
+            AppCenterLog.error("AppCenter", "Invalid group name:" + groupName);
         } else if (this.mDiscardLogs) {
             AppCenterLog.warn("AppCenter", "Channel is disabled, the log is discarded.");
-            Channel.GroupListener groupListener = groupState.mListener;
-            if (groupListener == null) {
-                return;
+            if (groupState.mListener != null) {
+                groupState.mListener.onBeforeSending(log);
+                groupState.mListener.onFailure(log, new CancellationException());
             }
-            groupListener.onBeforeSending(log);
-            groupState.mListener.onFailure(log, new CancellationException());
         } else {
             for (Channel.Listener listener : this.mListeners) {
-                listener.onPreparingLog(log, str);
+                listener.onPreparingLog(log, groupName);
             }
             if (log.getDevice() == null) {
                 if (this.mDevice == null) {
@@ -357,44 +407,47 @@ public class DefaultChannel implements Channel {
                 log.setTimestamp(new Date());
             }
             for (Channel.Listener listener2 : this.mListeners) {
-                listener2.onPreparedLog(log, str, i);
+                listener2.onPreparedLog(log, groupName, flags);
             }
-            loop2: while (true) {
-                z = false;
-                for (Channel.Listener listener3 : this.mListeners) {
-                    if (z || listener3.shouldFilter(log)) {
-                        z = true;
-                    }
+            boolean filteredOut = false;
+            Iterator<Channel.Listener> it = this.mListeners.iterator();
+            while (true) {
+                boolean z = true;
+                if (!it.hasNext()) {
+                    break;
                 }
+                Channel.Listener listener3 = it.next();
+                if (!filteredOut && !listener3.shouldFilter(log)) {
+                    z = false;
+                }
+                filteredOut = z;
             }
-            if (z) {
+            if (filteredOut) {
                 AppCenterLog.debug("AppCenter", "Log of type '" + log.getType() + "' was filtered out by listener(s)");
             } else if (this.mAppSecret == null && groupState.mIngestion == this.mIngestion) {
                 AppCenterLog.debug("AppCenter", "Log of type '" + log.getType() + "' was not filtered out by listener(s) but no app secret was provided. Not persisting/sending the log.");
             } else {
                 try {
-                    this.mPersistence.putLog(log, str, i);
-                    Iterator<String> it = log.getTransmissionTargetTokens().iterator();
-                    String targetKey = it.hasNext() ? PartAUtils.getTargetKey(it.next()) : null;
+                    this.mPersistence.putLog(log, groupName, flags);
+                    Iterator<String> targetKeys = log.getTransmissionTargetTokens().iterator();
+                    String targetKey = targetKeys.hasNext() ? PartAUtils.getTargetKey(targetKeys.next()) : null;
                     if (groupState.mPausedTargetKeys.contains(targetKey)) {
                         AppCenterLog.debug("AppCenter", "Transmission target ikey=" + targetKey + " is paused.");
                         return;
                     }
                     groupState.mPendingLogCount++;
                     AppCenterLog.debug("AppCenter", "enqueue(" + groupState.mName + ") pendingLogCount=" + groupState.mPendingLogCount);
-                    if (this.mEnabled) {
-                        checkPendingLogs(groupState);
-                    } else {
+                    if (!this.mEnabled) {
                         AppCenterLog.debug("AppCenter", "Channel is temporarily disabled, log was saved to disk.");
+                    } else {
+                        checkPendingLogs(groupState);
                     }
                 } catch (Persistence.PersistenceException e2) {
                     AppCenterLog.error("AppCenter", "Error persisting log", e2);
-                    Channel.GroupListener groupListener2 = groupState.mListener;
-                    if (groupListener2 == null) {
-                        return;
+                    if (groupState.mListener != null) {
+                        groupState.mListener.onBeforeSending(log);
+                        groupState.mListener.onFailure(log, e2);
                     }
-                    groupListener2.onBeforeSending(log);
-                    groupState.mListener.onFailure(log, e2);
                 }
             }
         }
@@ -402,54 +455,56 @@ public class DefaultChannel implements Channel {
 
     void checkPendingLogs(GroupState groupState) {
         AppCenterLog.debug("AppCenter", String.format("checkPendingLogs(%s) pendingLogCount=%s batchTimeInterval=%s", groupState.mName, Integer.valueOf(groupState.mPendingLogCount), Long.valueOf(groupState.mBatchTimeInterval)));
-        Long resolveTriggerInterval = resolveTriggerInterval(groupState);
-        if (resolveTriggerInterval == null || groupState.mPaused) {
+        Long batchTimeInterval = resolveTriggerInterval(groupState);
+        if (batchTimeInterval == null || groupState.mPaused) {
             return;
         }
-        if (resolveTriggerInterval.longValue() == 0) {
+        if (batchTimeInterval.longValue() == 0) {
             triggerIngestion(groupState);
-        } else if (groupState.mScheduled) {
-        } else {
+        } else if (!groupState.mScheduled) {
             groupState.mScheduled = true;
-            this.mAppCenterHandler.postDelayed(groupState.mRunnable, resolveTriggerInterval.longValue());
+            this.mAppCenterHandler.postDelayed(groupState.mRunnable, batchTimeInterval.longValue());
         }
     }
 
     private Long resolveTriggerInterval(GroupState groupState) {
-        if (groupState.mBatchTimeInterval > 3000) {
+        if (groupState.mBatchTimeInterval > MINIMUM_TRANSMISSION_INTERVAL) {
             return resolveCustomTriggerInterval(groupState);
         }
         return resolveDefaultTriggerInterval(groupState);
     }
 
     private Long resolveCustomTriggerInterval(GroupState groupState) {
-        long currentTimeMillis = System.currentTimeMillis();
-        long j = SharedPreferencesManager.getLong("startTimerPrefix." + groupState.mName);
-        if (groupState.mPendingLogCount <= 0) {
-            if (j + groupState.mBatchTimeInterval >= currentTimeMillis) {
-                return null;
+        long now = System.currentTimeMillis();
+        long startTimer = SharedPreferencesManager.getLong(START_TIMER_PREFIX + groupState.mName);
+        if (groupState.mPendingLogCount > 0) {
+            if (startTimer != 0 && startTimer <= now) {
+                return Long.valueOf(Math.max(groupState.mBatchTimeInterval - (now - startTimer), 0L));
             }
-            SharedPreferencesManager.remove("startTimerPrefix." + groupState.mName);
-            AppCenterLog.debug("AppCenter", "The timer for " + groupState.mName + " channel finished.");
-            return null;
-        } else if (j == 0 || j > currentTimeMillis) {
-            SharedPreferencesManager.putLong("startTimerPrefix." + groupState.mName, currentTimeMillis);
+            SharedPreferencesManager.putLong(START_TIMER_PREFIX + groupState.mName, now);
             AppCenterLog.debug("AppCenter", "The timer value for " + groupState.mName + " has been saved.");
             return Long.valueOf(groupState.mBatchTimeInterval);
+        } else if (groupState.mBatchTimeInterval + startTimer < now) {
+            SharedPreferencesManager.remove(START_TIMER_PREFIX + groupState.mName);
+            AppCenterLog.debug("AppCenter", "The timer for " + groupState.mName + " channel finished.");
+            return null;
         } else {
-            return Long.valueOf(Math.max(groupState.mBatchTimeInterval - (currentTimeMillis - j), 0L));
+            return null;
         }
     }
 
     private Long resolveDefaultTriggerInterval(GroupState groupState) {
-        int i = groupState.mPendingLogCount;
-        if (i >= groupState.mMaxLogsPerBatch) {
+        if (groupState.mPendingLogCount >= groupState.mMaxLogsPerBatch) {
             return 0L;
         }
-        if (i <= 0) {
+        if (groupState.mPendingLogCount <= 0) {
             return null;
         }
         return Long.valueOf(groupState.mBatchTimeInterval);
+    }
+
+    GroupState getGroupState(String groupName) {
+        return this.mGroupStates.get(groupName);
     }
 
     @Override // com.microsoft.appcenter.channel.Channel
@@ -467,7 +522,7 @@ public class DefaultChannel implements Channel {
         suspend(false, new CancellationException());
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public class GroupState {
         final long mBatchTimeInterval;
         final Ingestion mIngestion;
@@ -483,20 +538,19 @@ public class DefaultChannel implements Channel {
         final Runnable mRunnable = new Runnable() { // from class: com.microsoft.appcenter.channel.DefaultChannel.GroupState.1
             @Override // java.lang.Runnable
             public void run() {
-                GroupState groupState = GroupState.this;
-                groupState.mScheduled = false;
-                DefaultChannel.this.triggerIngestion(groupState);
+                GroupState.this.mScheduled = false;
+                DefaultChannel.this.triggerIngestion(GroupState.this);
             }
         };
 
-        GroupState(String str, int i, long j, int i2, Ingestion ingestion, Channel.GroupListener groupListener) {
-            DefaultChannel.this = r1;
-            this.mName = str;
-            this.mMaxLogsPerBatch = i;
-            this.mBatchTimeInterval = j;
-            this.mMaxParallelBatches = i2;
+        GroupState(String name, int maxLogsPerBatch, long batchTimeInterval, int maxParallelBatches, Ingestion ingestion, Channel.GroupListener listener) {
+            DefaultChannel.this = this$0;
+            this.mName = name;
+            this.mMaxLogsPerBatch = maxLogsPerBatch;
+            this.mBatchTimeInterval = batchTimeInterval;
+            this.mMaxParallelBatches = maxParallelBatches;
             this.mIngestion = ingestion;
-            this.mListener = groupListener;
+            this.mListener = listener;
         }
     }
 }

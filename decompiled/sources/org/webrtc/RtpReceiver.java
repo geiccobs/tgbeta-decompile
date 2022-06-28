@@ -1,15 +1,14 @@
 package org.webrtc;
 
 import org.webrtc.MediaStreamTrack;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class RtpReceiver {
     private MediaStreamTrack cachedTrack;
     private long nativeObserver;
     private long nativeRtpReceiver;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface Observer {
-        @CalledByNative("Observer")
         void onFirstPacketReceived(MediaStreamTrack.MediaType mediaType);
     }
 
@@ -25,10 +24,10 @@ public class RtpReceiver {
 
     private static native void nativeUnsetObserver(long j, long j2);
 
-    @CalledByNative
-    public RtpReceiver(long j) {
-        this.nativeRtpReceiver = j;
-        this.cachedTrack = MediaStreamTrack.createMediaStreamTrack(nativeGetTrack(j));
+    public RtpReceiver(long nativeRtpReceiver) {
+        this.nativeRtpReceiver = nativeRtpReceiver;
+        long nativeTrack = nativeGetTrack(nativeRtpReceiver);
+        this.cachedTrack = MediaStreamTrack.createMediaStreamTrack(nativeTrack);
     }
 
     public MediaStreamTrack track() {
@@ -45,7 +44,6 @@ public class RtpReceiver {
         return nativeGetId(this.nativeRtpReceiver);
     }
 
-    @CalledByNative
     public void dispose() {
         checkRtpReceiverExists();
         this.cachedTrack.dispose();
@@ -73,9 +71,8 @@ public class RtpReceiver {
     }
 
     private void checkRtpReceiverExists() {
-        if (this.nativeRtpReceiver != 0) {
-            return;
+        if (this.nativeRtpReceiver == 0) {
+            throw new IllegalStateException("RtpReceiver has been disposed.");
         }
-        throw new IllegalStateException("RtpReceiver has been disposed.");
     }
 }

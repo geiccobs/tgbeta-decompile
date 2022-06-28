@@ -6,6 +6,7 @@ import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.NotFoundException;
+import com.google.zxing.Reader;
 import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
@@ -17,38 +18,44 @@ import com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData;
 import com.google.zxing.qrcode.detector.Detector;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
-public class QRCodeReader {
+/* loaded from: classes3.dex */
+public class QRCodeReader implements Reader {
     private static final ResultPoint[] NO_POINTS = new ResultPoint[0];
     private final Decoder decoder = new Decoder();
 
-    public Result decode(BinaryBitmap binaryBitmap) throws NotFoundException, ChecksumException, FormatException {
-        return decode(binaryBitmap, null);
+    public final Decoder getDecoder() {
+        return this.decoder;
     }
 
-    public final Result decode(BinaryBitmap binaryBitmap, Map<DecodeHintType, ?> map) throws NotFoundException, ChecksumException, FormatException {
-        ResultPoint[] resultPointArr;
+    @Override // com.google.zxing.Reader
+    public Result decode(BinaryBitmap image) throws NotFoundException, ChecksumException, FormatException {
+        return decode(image, null);
+    }
+
+    @Override // com.google.zxing.Reader
+    public final Result decode(BinaryBitmap image, Map<DecodeHintType, ?> hints) throws NotFoundException, ChecksumException, FormatException {
         DecoderResult decoderResult;
-        if (map != null && map.containsKey(DecodeHintType.PURE_BARCODE)) {
-            decoderResult = this.decoder.decode(extractPureBits(binaryBitmap.getBlackMatrix()), map);
-            resultPointArr = NO_POINTS;
+        ResultPoint[] points;
+        if (hints != null && hints.containsKey(DecodeHintType.PURE_BARCODE)) {
+            BitMatrix bits = extractPureBits(image.getBlackMatrix());
+            decoderResult = this.decoder.decode(bits, hints);
+            points = NO_POINTS;
         } else {
-            DetectorResult detect = new Detector(binaryBitmap.getBlackMatrix()).detect(map);
-            DecoderResult decode = this.decoder.decode(detect.getBits(), map);
-            resultPointArr = detect.getPoints();
-            decoderResult = decode;
+            DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);
+            decoderResult = this.decoder.decode(detectorResult.getBits(), hints);
+            points = detectorResult.getPoints();
         }
         if (decoderResult.getOther() instanceof QRCodeDecoderMetaData) {
-            ((QRCodeDecoderMetaData) decoderResult.getOther()).applyMirroredCorrection(resultPointArr);
+            ((QRCodeDecoderMetaData) decoderResult.getOther()).applyMirroredCorrection(points);
         }
-        Result result = new Result(decoderResult.getText(), decoderResult.getRawBytes(), resultPointArr, BarcodeFormat.QR_CODE);
+        Result result = new Result(decoderResult.getText(), decoderResult.getRawBytes(), points, BarcodeFormat.QR_CODE);
         List<byte[]> byteSegments = decoderResult.getByteSegments();
         if (byteSegments != null) {
             result.putMetadata(ResultMetadataType.BYTE_SEGMENTS, byteSegments);
         }
-        String eCLevel = decoderResult.getECLevel();
-        if (eCLevel != null) {
-            result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, eCLevel);
+        String ecLevel = decoderResult.getECLevel();
+        if (ecLevel != null) {
+            result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
         }
         if (decoderResult.hasStructuredAppend()) {
             result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_SEQUENCE, Integer.valueOf(decoderResult.getStructuredAppendSequenceNumber()));
@@ -57,82 +64,93 @@ public class QRCodeReader {
         return result;
     }
 
-    private static BitMatrix extractPureBits(BitMatrix bitMatrix) throws NotFoundException {
-        int[] topLeftOnBit = bitMatrix.getTopLeftOnBit();
-        int[] bottomRightOnBit = bitMatrix.getBottomRightOnBit();
-        if (topLeftOnBit == null || bottomRightOnBit == null) {
-            throw NotFoundException.getNotFoundInstance();
-        }
-        float moduleSize = moduleSize(topLeftOnBit, bitMatrix);
-        int i = topLeftOnBit[1];
-        int i2 = bottomRightOnBit[1];
-        int i3 = topLeftOnBit[0];
-        int i4 = bottomRightOnBit[0];
-        if (i3 >= i4 || i >= i2) {
-            throw NotFoundException.getNotFoundInstance();
-        }
-        int i5 = i2 - i;
-        if (i5 != i4 - i3 && (i4 = i3 + i5) >= bitMatrix.getWidth()) {
-            throw NotFoundException.getNotFoundInstance();
-        }
-        int round = Math.round(((i4 - i3) + 1) / moduleSize);
-        int round2 = Math.round((i5 + 1) / moduleSize);
-        if (round <= 0 || round2 <= 0) {
-            throw NotFoundException.getNotFoundInstance();
-        }
-        if (round2 != round) {
-            throw NotFoundException.getNotFoundInstance();
-        }
-        int i6 = (int) (moduleSize / 2.0f);
-        int i7 = i + i6;
-        int i8 = i3 + i6;
-        int i9 = (((int) ((round - 1) * moduleSize)) + i8) - i4;
-        if (i9 > 0) {
-            if (i9 > i6) {
-                throw NotFoundException.getNotFoundInstance();
-            }
-            i8 -= i9;
-        }
-        int i10 = (((int) ((round2 - 1) * moduleSize)) + i7) - i2;
-        if (i10 > 0) {
-            if (i10 > i6) {
-                throw NotFoundException.getNotFoundInstance();
-            }
-            i7 -= i10;
-        }
-        BitMatrix bitMatrix2 = new BitMatrix(round, round2, 1);
-        for (int i11 = 0; i11 < round2; i11++) {
-            int i12 = ((int) (i11 * moduleSize)) + i7;
-            for (int i13 = 0; i13 < round; i13++) {
-                if (bitMatrix.get(((int) (i13 * moduleSize)) + i8, i12)) {
-                    bitMatrix2.set(i13, i11);
-                }
-            }
-        }
-        return bitMatrix2;
+    @Override // com.google.zxing.Reader
+    public void reset() {
     }
 
-    private static float moduleSize(int[] iArr, BitMatrix bitMatrix) throws NotFoundException {
-        int height = bitMatrix.getHeight();
-        int width = bitMatrix.getWidth();
-        int i = iArr[0];
-        boolean z = true;
-        int i2 = iArr[1];
-        int i3 = 0;
-        while (i < width && i2 < height) {
-            if (z != bitMatrix.get(i, i2)) {
-                i3++;
-                if (i3 == 5) {
-                    break;
-                }
-                z = !z;
-            }
-            i++;
-            i2++;
-        }
-        if (i == width || i2 == height) {
+    private static BitMatrix extractPureBits(BitMatrix image) throws NotFoundException {
+        int[] leftTopBlack = image.getTopLeftOnBit();
+        int[] rightBottomBlack = image.getBottomRightOnBit();
+        if (leftTopBlack == null || rightBottomBlack == null) {
             throw NotFoundException.getNotFoundInstance();
         }
-        return (i - iArr[0]) / 7.0f;
+        float moduleSize = moduleSize(leftTopBlack, image);
+        int top = leftTopBlack[1];
+        int bottom = rightBottomBlack[1];
+        int left = leftTopBlack[0];
+        int right = rightBottomBlack[0];
+        if (left >= right || top >= bottom) {
+            throw NotFoundException.getNotFoundInstance();
+        }
+        if (bottom - top == right - left || (right = left + (bottom - top)) < image.getWidth()) {
+            int matrixWidth = Math.round(((right - left) + 1) / moduleSize);
+            int matrixHeight = Math.round(((bottom - top) + 1) / moduleSize);
+            if (matrixWidth <= 0 || matrixHeight <= 0) {
+                throw NotFoundException.getNotFoundInstance();
+            }
+            if (matrixHeight != matrixWidth) {
+                throw NotFoundException.getNotFoundInstance();
+            }
+            int nudge = (int) (moduleSize / 2.0f);
+            int top2 = top + nudge;
+            int left2 = left + nudge;
+            int nudgedTooFarRight = (((int) ((matrixWidth - 1) * moduleSize)) + left2) - right;
+            if (nudgedTooFarRight > 0) {
+                if (nudgedTooFarRight > nudge) {
+                    throw NotFoundException.getNotFoundInstance();
+                }
+                left2 -= nudgedTooFarRight;
+            }
+            int nudgedTooFarDown = (((int) ((matrixHeight - 1) * moduleSize)) + top2) - bottom;
+            if (nudgedTooFarDown > 0) {
+                if (nudgedTooFarDown > nudge) {
+                    throw NotFoundException.getNotFoundInstance();
+                }
+                top2 -= nudgedTooFarDown;
+            }
+            BitMatrix bits = new BitMatrix(matrixWidth, matrixHeight, 1);
+            int y = 0;
+            while (y < matrixHeight) {
+                int iOffset = ((int) (y * moduleSize)) + top2;
+                int[] leftTopBlack2 = leftTopBlack;
+                int x = 0;
+                while (x < matrixWidth) {
+                    int[] rightBottomBlack2 = rightBottomBlack;
+                    if (image.get(((int) (x * moduleSize)) + left2, iOffset)) {
+                        bits.set(x, y);
+                    }
+                    x++;
+                    rightBottomBlack = rightBottomBlack2;
+                }
+                y++;
+                leftTopBlack = leftTopBlack2;
+            }
+            return bits;
+        }
+        throw NotFoundException.getNotFoundInstance();
+    }
+
+    private static float moduleSize(int[] leftTopBlack, BitMatrix image) throws NotFoundException {
+        int height = image.getHeight();
+        int width = image.getWidth();
+        int x = leftTopBlack[0];
+        int y = leftTopBlack[1];
+        boolean inBlack = true;
+        int transitions = 0;
+        while (x < width && y < height) {
+            if (inBlack != image.get(x, y)) {
+                transitions++;
+                if (transitions == 5) {
+                    break;
+                }
+                inBlack = !inBlack;
+            }
+            x++;
+            y++;
+        }
+        if (x == width || y == height) {
+            throw NotFoundException.getNotFoundInstance();
+        }
+        return (x - leftTopBlack[0]) / 7.0f;
     }
 }

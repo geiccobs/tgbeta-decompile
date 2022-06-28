@@ -2,27 +2,25 @@ package org.webrtc;
 
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class MediaConstraints {
     public final List<KeyValuePair> mandatory = new ArrayList();
     public final List<KeyValuePair> optional = new ArrayList();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class KeyValuePair {
         private final String key;
         private final String value;
 
-        public KeyValuePair(String str, String str2) {
-            this.key = str;
-            this.value = str2;
+        public KeyValuePair(String key, String value) {
+            this.key = key;
+            this.value = value;
         }
 
-        @CalledByNative("KeyValuePair")
         public String getKey() {
             return this.key;
         }
 
-        @CalledByNative("KeyValuePair")
         public String getValue() {
             return this.value;
         }
@@ -31,15 +29,15 @@ public class MediaConstraints {
             return this.key + ": " + this.value;
         }
 
-        public boolean equals(Object obj) {
-            if (this == obj) {
+        public boolean equals(Object other) {
+            if (this == other) {
                 return true;
             }
-            if (obj == null || getClass() != obj.getClass()) {
+            if (other == null || getClass() != other.getClass()) {
                 return false;
             }
-            KeyValuePair keyValuePair = (KeyValuePair) obj;
-            return this.key.equals(keyValuePair.key) && this.value.equals(keyValuePair.value);
+            KeyValuePair that = (KeyValuePair) other;
+            return this.key.equals(that.key) && this.value.equals(that.value);
         }
 
         public int hashCode() {
@@ -48,27 +46,25 @@ public class MediaConstraints {
     }
 
     private static String stringifyKeyValuePairList(List<KeyValuePair> list) {
-        StringBuilder sb = new StringBuilder("[");
-        for (KeyValuePair keyValuePair : list) {
-            if (sb.length() > 1) {
-                sb.append(", ");
+        StringBuilder builder = new StringBuilder("[");
+        for (KeyValuePair pair : list) {
+            if (builder.length() > 1) {
+                builder.append(", ");
             }
-            sb.append(keyValuePair.toString());
+            builder.append(pair.toString());
         }
-        sb.append("]");
-        return sb.toString();
+        builder.append("]");
+        return builder.toString();
     }
 
     public String toString() {
         return "mandatory: " + stringifyKeyValuePairList(this.mandatory) + ", optional: " + stringifyKeyValuePairList(this.optional);
     }
 
-    @CalledByNative
     List<KeyValuePair> getMandatory() {
         return this.mandatory;
     }
 
-    @CalledByNative
     List<KeyValuePair> getOptional() {
         return this.optional;
     }

@@ -5,38 +5,39 @@ import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Build;
 import android.util.SparseArray;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.internal.vision.zzs;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 import java.nio.ByteBuffer;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class BarcodeDetector extends Detector<Barcode> {
     private final com.google.android.gms.internal.vision.zzm zza;
+
+    private BarcodeDetector() {
+        throw new IllegalStateException("Default constructor called");
+    }
 
     private BarcodeDetector(com.google.android.gms.internal.vision.zzm zzmVar) {
         this.zza = zzmVar;
     }
 
     /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class Builder {
         private Context zza;
         private com.google.android.gms.internal.vision.zzk zzb = new com.google.android.gms.internal.vision.zzk();
 
-        public Builder(@RecentlyNonNull Context context) {
+        public Builder(Context context) {
             this.zza = context;
         }
 
-        @RecentlyNonNull
         public Builder setBarcodeFormats(int i) {
             this.zzb.zza = i;
             return this;
         }
 
-        @RecentlyNonNull
         public BarcodeDetector build() {
             return new BarcodeDetector(new com.google.android.gms.internal.vision.zzm(this.zza, this.zzb));
         }
@@ -48,8 +49,8 @@ public final class BarcodeDetector extends Detector<Barcode> {
         this.zza.zzc();
     }
 
-    @RecentlyNonNull
-    public final SparseArray<Barcode> detect(@RecentlyNonNull Frame frame) {
+    @Override // com.google.android.gms.vision.Detector
+    public final SparseArray<Barcode> detect(Frame frame) {
         Barcode[] barcodeArr;
         if (frame == null) {
             throw new IllegalArgumentException("No frame supplied.");
@@ -72,6 +73,7 @@ public final class BarcodeDetector extends Detector<Barcode> {
         return sparseArray;
     }
 
+    @Override // com.google.android.gms.vision.Detector
     public final boolean isOperational() {
         return this.zza.zzb();
     }

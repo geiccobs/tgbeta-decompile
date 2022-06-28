@@ -6,7 +6,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import java.util.ArrayList;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzp implements Parcelable.Creator<zzo> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ zzo createFromParcel(Parcel parcel) {
@@ -16,15 +16,19 @@ public final class zzp implements Parcelable.Creator<zzo> {
         String[] strArr = null;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            int fieldId = SafeParcelReader.getFieldId(readHeader);
-            if (fieldId == 1) {
-                status = (Status) SafeParcelReader.createParcelable(parcel, readHeader, Status.CREATOR);
-            } else if (fieldId == 2) {
-                arrayList = SafeParcelReader.createTypedList(parcel, readHeader, zzx.CREATOR);
-            } else if (fieldId == 3) {
-                strArr = SafeParcelReader.createStringArray(parcel, readHeader);
-            } else {
-                SafeParcelReader.skipUnknownField(parcel, readHeader);
+            switch (SafeParcelReader.getFieldId(readHeader)) {
+                case 1:
+                    status = (Status) SafeParcelReader.createParcelable(parcel, readHeader, Status.CREATOR);
+                    break;
+                case 2:
+                    arrayList = SafeParcelReader.createTypedList(parcel, readHeader, zzx.CREATOR);
+                    break;
+                case 3:
+                    strArr = SafeParcelReader.createStringArray(parcel, readHeader);
+                    break;
+                default:
+                    SafeParcelReader.skipUnknownField(parcel, readHeader);
+                    break;
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

@@ -50,19 +50,19 @@
     <style name="TMessages_AppWidget_Badge" parent="@style/Base_TMessages_AppWidget_Badge">
         <item name="android:textColor">@color/widget_badge</item>
     </style>
-    <style name="TextAppearance_Compat_Notification" parent="@android:style/TextAppearance.StatusBar.EventContent">
+    <style name="TextAppearance.Compat.Notification" parent="@android:style/TextAppearance.StatusBar.EventContent">
     </style>
-    <style name="TextAppearance_Compat_Notification_Info" parent="@style/TextAppearance_Compat_Notification">
+    <style name="TextAppearance.Compat.Notification.Info" parent="@style/TextAppearance.Compat.Notification">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
-    <style name="TextAppearance_Compat_Notification_Line2" parent="@style/TextAppearance_Compat_Notification_Info">
+    <style name="TextAppearance.Compat.Notification.Line2" parent="@style/TextAppearance.Compat.Notification.Info">
     </style>
-    <style name="TextAppearance_Compat_Notification_Time" parent="@style/TextAppearance_Compat_Notification">
+    <style name="TextAppearance.Compat.Notification.Time" parent="@style/TextAppearance.Compat.Notification">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
-    <style name="TextAppearance_Compat_Notification_Title" parent="@android:style/TextAppearance.StatusBar.EventContent.Title">
+    <style name="TextAppearance.Compat.Notification.Title" parent="@android:style/TextAppearance.StatusBar.EventContent.Title">
     </style>
     <style name="Theme_TMessages" parent="@android:style/Theme.Holo.Light">
         <item name="android:colorBackground">@android:color/white</item>
@@ -218,11 +218,11 @@
         <item name="maskedWalletDetailsLogoTextColor">@color/wallet_bright_foreground_holo_dark</item>
         <item name="maskedWalletDetailsTextAppearance">@style/WalletFragmentDefaultDetailsTextAppearance</item>
     </style>
-    <style name="Widget_Compat_NotificationActionContainer">
+    <style name="Widget.Compat.NotificationActionContainer">
     </style>
-    <style name="Widget_Compat_NotificationActionText">
+    <style name="Widget.Compat.NotificationActionText">
     </style>
-    <style name="Widget_Support_CoordinatorLayout" parent="@android:style/Widget">
+    <style name="Widget.Support.CoordinatorLayout" parent="@android:style/Widget">
         <item name="statusBarBackground">#000000</item>
     </style>
     <style name="scrollbarShapeStyle">

@@ -1,9 +1,7 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public interface RefCounted {
-    @CalledByNative
     void release();
 
-    @CalledByNative
     void retain();
 }

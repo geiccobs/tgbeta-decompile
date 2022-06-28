@@ -3,9 +3,13 @@ package com.google.android.gms.common.internal;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
+import com.google.android.search.verification.client.SearchActionVerificationClientUtil;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzj {
+    private static final Uri zza;
+    private static final Uri zzb;
+
     public static Intent zza(String str) {
         Uri fromParts = Uri.fromParts("package", str, null);
         Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
@@ -27,11 +31,13 @@ public final class zzj {
 
     public static Intent zza() {
         Intent intent = new Intent("com.google.android.clockwork.home.UPDATE_ANDROID_WEAR_ACTION");
-        intent.setPackage("com.google.android.wearable.app");
+        intent.setPackage(SearchActionVerificationClientUtil.ANDROID_WEAR_PACKAGE);
         return intent;
     }
 
     static {
-        Uri.parse("https://plus.google.com/").buildUpon().appendPath("circles").appendPath("find").build();
+        Uri parse = Uri.parse("https://plus.google.com/");
+        zza = parse;
+        zzb = parse.buildUpon().appendPath("circles").appendPath("find").build();
     }
 }

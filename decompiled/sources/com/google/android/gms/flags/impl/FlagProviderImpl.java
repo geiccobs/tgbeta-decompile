@@ -4,11 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.util.Log;
-import com.google.android.gms.common.util.DynamiteApi;
 import com.google.android.gms.dynamic.IObjectWrapper;
 import com.google.android.gms.dynamic.ObjectWrapper;
-@DynamiteApi
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class FlagProviderImpl extends com.google.android.gms.flags.zzd {
     private boolean zzu = false;
     private SharedPreferences zzv;
@@ -22,30 +20,42 @@ public class FlagProviderImpl extends com.google.android.gms.flags.zzd {
         try {
             this.zzv = zzj.zza(context.createPackageContext("com.google.android.gms", 0));
             this.zzu = true;
-        } catch (PackageManager.NameNotFoundException unused) {
-        } catch (Exception e) {
-            String valueOf = String.valueOf(e.getMessage());
+        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Exception e2) {
+            String valueOf = String.valueOf(e2.getMessage());
             Log.w("FlagProviderImpl", valueOf.length() != 0 ? "Could not retrieve sdk flags, continuing with defaults: ".concat(valueOf) : new String("Could not retrieve sdk flags, continuing with defaults: "));
         }
     }
 
     @Override // com.google.android.gms.flags.zzc
     public boolean getBooleanFlagValue(String str, boolean z, int i) {
-        return !this.zzu ? z : zzb.zza(this.zzv, str, Boolean.valueOf(z)).booleanValue();
+        if (!this.zzu) {
+            return z;
+        }
+        return zzb.zza(this.zzv, str, Boolean.valueOf(z)).booleanValue();
     }
 
     @Override // com.google.android.gms.flags.zzc
     public int getIntFlagValue(String str, int i, int i2) {
-        return !this.zzu ? i : zzd.zza(this.zzv, str, Integer.valueOf(i)).intValue();
+        if (!this.zzu) {
+            return i;
+        }
+        return zzd.zza(this.zzv, str, Integer.valueOf(i)).intValue();
     }
 
     @Override // com.google.android.gms.flags.zzc
     public long getLongFlagValue(String str, long j, int i) {
-        return !this.zzu ? j : zzf.zza(this.zzv, str, Long.valueOf(j)).longValue();
+        if (!this.zzu) {
+            return j;
+        }
+        return zzf.zza(this.zzv, str, Long.valueOf(j)).longValue();
     }
 
     @Override // com.google.android.gms.flags.zzc
     public String getStringFlagValue(String str, String str2, int i) {
-        return !this.zzu ? str2 : zzh.zza(this.zzv, str, str2);
+        if (!this.zzu) {
+            return str2;
+        }
+        return zzh.zza(this.zzv, str, str2);
     }
 }

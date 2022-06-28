@@ -2,7 +2,7 @@ package org.webrtc;
 
 import java.nio.ByteBuffer;
 import org.webrtc.VideoFrame;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class NV12Buffer implements VideoFrame.Buffer {
     private final ByteBuffer buffer;
     private final int height;
@@ -18,13 +18,13 @@ public class NV12Buffer implements VideoFrame.Buffer {
         return VideoFrame.Buffer.CC.$default$getBufferType(this);
     }
 
-    public NV12Buffer(int i, int i2, int i3, int i4, ByteBuffer byteBuffer, Runnable runnable) {
-        this.width = i;
-        this.height = i2;
-        this.stride = i3;
-        this.sliceHeight = i4;
-        this.buffer = byteBuffer;
-        this.refCountDelegate = new RefCountDelegate(runnable);
+    public NV12Buffer(int width, int height, int stride, int sliceHeight, ByteBuffer buffer, Runnable releaseCallback) {
+        this.width = width;
+        this.height = height;
+        this.stride = stride;
+        this.sliceHeight = sliceHeight;
+        this.buffer = buffer;
+        this.refCountDelegate = new RefCountDelegate(releaseCallback);
     }
 
     @Override // org.webrtc.VideoFrame.Buffer
@@ -55,9 +55,9 @@ public class NV12Buffer implements VideoFrame.Buffer {
     }
 
     @Override // org.webrtc.VideoFrame.Buffer
-    public VideoFrame.Buffer cropAndScale(int i, int i2, int i3, int i4, int i5, int i6) {
-        JavaI420Buffer allocate = JavaI420Buffer.allocate(i5, i6);
-        nativeCropAndScale(i, i2, i3, i4, i5, i6, this.buffer, this.width, this.height, this.stride, this.sliceHeight, allocate.getDataY(), allocate.getStrideY(), allocate.getDataU(), allocate.getStrideU(), allocate.getDataV(), allocate.getStrideV());
-        return allocate;
+    public VideoFrame.Buffer cropAndScale(int cropX, int cropY, int cropWidth, int cropHeight, int scaleWidth, int scaleHeight) {
+        JavaI420Buffer newBuffer = JavaI420Buffer.allocate(scaleWidth, scaleHeight);
+        nativeCropAndScale(cropX, cropY, cropWidth, cropHeight, scaleWidth, scaleHeight, this.buffer, this.width, this.height, this.stride, this.sliceHeight, newBuffer.getDataY(), newBuffer.getStrideY(), newBuffer.getDataU(), newBuffer.getStrideU(), newBuffer.getDataV(), newBuffer.getStrideV());
+        return newBuffer;
     }
 }

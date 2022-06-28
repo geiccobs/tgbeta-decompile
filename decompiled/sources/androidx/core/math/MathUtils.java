@@ -1,11 +1,46 @@
 package androidx.core.math;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class MathUtils {
+    private MathUtils() {
+    }
+
     public static float clamp(float value, float min, float max) {
-        return value < min ? min : value > max ? max : value;
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
+    }
+
+    public static double clamp(double value, double min, double max) {
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
     }
 
     public static int clamp(int value, int min, int max) {
-        return value < min ? min : value > max ? max : value;
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
+    }
+
+    public static long clamp(long value, long min, long max) {
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
     }
 }

@@ -6,7 +6,7 @@ import java.lang.ref.ReferenceQueue;
 import java.util.List;
 import java.util.Vector;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzp {
     private final ConcurrentHashMap<zzo, List<Throwable>> zza = new ConcurrentHashMap<>(16, 0.75f, 10);
     private final ReferenceQueue<Throwable> zzb = new ReferenceQueue<>();

@@ -2,15 +2,13 @@ package com.google.android.gms.internal.firebase_messaging;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzl {
-    static {
-        new zzj();
-    }
+    private static final OutputStream zza = new zzj();
 
     public static byte[] zza(InputStream inputStream) throws IOException {
         ArrayDeque arrayDeque = new ArrayDeque(20);
@@ -31,12 +29,12 @@ public final class zzl {
             }
             long j = i;
             long j2 = j + j;
-            i = j2 > 2147483647L ? ConnectionsManager.DEFAULT_DATACENTER_ID : j2 < -2147483648L ? Integer.MIN_VALUE : (int) j2;
+            i = j2 > 2147483647L ? Integer.MAX_VALUE : j2 < -2147483648L ? Integer.MIN_VALUE : (int) j2;
         }
-        if (inputStream.read() == -1) {
-            return zzc(arrayDeque, 2147483639);
+        if (inputStream.read() != -1) {
+            throw new OutOfMemoryError("input is too large to fit in a byte array");
         }
-        throw new OutOfMemoryError("input is too large to fit in a byte array");
+        return zzc(arrayDeque, 2147483639);
     }
 
     public static InputStream zzb(InputStream inputStream, long j) {

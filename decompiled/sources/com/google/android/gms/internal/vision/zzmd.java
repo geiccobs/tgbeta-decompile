@@ -1,11 +1,15 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzmd {
     private static final zzme zza;
 
     public static boolean zza(byte[] bArr) {
         return zza.zza(bArr, 0, bArr.length);
+    }
+
+    public static boolean zza(byte[] bArr, int i, int i2) {
+        return zza.zza(bArr, i, i2);
     }
 
     public static int zzb(int i) {
@@ -29,23 +33,18 @@ public final class zzmd {
         return (i ^ (i2 << 8)) ^ (i3 << 16);
     }
 
-    public static boolean zza(byte[] bArr, int i, int i2) {
-        return zza.zza(bArr, i, i2);
-    }
-
     public static int zzd(byte[] bArr, int i, int i2) {
         byte b = bArr[i - 1];
-        int i3 = i2 - i;
-        if (i3 != 0) {
-            if (i3 == 1) {
+        switch (i2 - i) {
+            case 0:
+                return zzb(b);
+            case 1:
                 return zzb(b, bArr[i]);
-            }
-            if (i3 == 2) {
+            case 2:
                 return zzb(b, bArr[i], bArr[i + 1]);
-            }
-            throw new AssertionError();
+            default:
+                throw new AssertionError();
         }
-        return zzb(b);
     }
 
     public static int zza(CharSequence charSequence) {
@@ -84,13 +83,13 @@ public final class zzmd {
                 i3 += i;
             }
         }
-        if (i3 >= length) {
-            return i3;
+        if (i3 < length) {
+            StringBuilder sb = new StringBuilder(54);
+            sb.append("UTF-8 length does not fit in int: ");
+            sb.append(i3 + 4294967296L);
+            throw new IllegalArgumentException(sb.toString());
         }
-        StringBuilder sb = new StringBuilder(54);
-        sb.append("UTF-8 length does not fit in int: ");
-        sb.append(i3 + 4294967296L);
-        throw new IllegalArgumentException(sb.toString());
+        return i3;
     }
 
     public static int zza(CharSequence charSequence, byte[] bArr, int i, int i2) {

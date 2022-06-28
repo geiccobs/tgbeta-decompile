@@ -1,11 +1,11 @@
 package com.google.firebase.abt;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class AbtException extends Exception {
-    public AbtException(String str) {
-        super(str);
+    public AbtException(String message) {
+        super(message);
     }
 
-    public AbtException(String str, Exception exc) {
-        super(str, exc);
+    public AbtException(String message, Exception cause) {
+        super(message, cause);
     }
 }

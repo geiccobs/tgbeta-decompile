@@ -2,8 +2,21 @@ package com.google.android.exoplayer2.text.ttml;
 
 import android.text.Layout;
 import com.google.android.exoplayer2.util.Assertions;
-/* loaded from: classes.dex */
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+/* loaded from: classes3.dex */
 final class TtmlStyle {
+    public static final int FONT_SIZE_UNIT_EM = 2;
+    public static final int FONT_SIZE_UNIT_PERCENT = 3;
+    public static final int FONT_SIZE_UNIT_PIXEL = 1;
+    private static final int OFF = 0;
+    private static final int ON = 1;
+    public static final int STYLE_BOLD = 1;
+    public static final int STYLE_BOLD_ITALIC = 3;
+    public static final int STYLE_ITALIC = 2;
+    public static final int STYLE_NORMAL = 0;
+    public static final int UNSPECIFIED = -1;
     private int backgroundColor;
     private int fontColor;
     private String fontFamily;
@@ -18,6 +31,24 @@ final class TtmlStyle {
     private int bold = -1;
     private int italic = -1;
     private int fontSizeUnit = -1;
+
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface FontSizeUnit {
+    }
+
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    private @interface OptionalBoolean {
+    }
+
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface StyleFlags {
+    }
 
     public int getStyle() {
         int i = this.bold;
@@ -36,9 +67,9 @@ final class TtmlStyle {
         return this.linethrough == 1;
     }
 
-    public TtmlStyle setLinethrough(boolean z) {
+    public TtmlStyle setLinethrough(boolean linethrough) {
         Assertions.checkState(this.inheritableStyle == null);
-        this.linethrough = z ? 1 : 0;
+        this.linethrough = linethrough ? 1 : 0;
         return this;
     }
 
@@ -46,21 +77,21 @@ final class TtmlStyle {
         return this.underline == 1;
     }
 
-    public TtmlStyle setUnderline(boolean z) {
+    public TtmlStyle setUnderline(boolean underline) {
         Assertions.checkState(this.inheritableStyle == null);
-        this.underline = z ? 1 : 0;
+        this.underline = underline ? 1 : 0;
         return this;
     }
 
-    public TtmlStyle setBold(boolean z) {
+    public TtmlStyle setBold(boolean bold) {
         Assertions.checkState(this.inheritableStyle == null);
-        this.bold = z ? 1 : 0;
+        this.bold = bold ? 1 : 0;
         return this;
     }
 
-    public TtmlStyle setItalic(boolean z) {
+    public TtmlStyle setItalic(boolean italic) {
         Assertions.checkState(this.inheritableStyle == null);
-        this.italic = z ? 1 : 0;
+        this.italic = italic ? 1 : 0;
         return this;
     }
 
@@ -68,9 +99,9 @@ final class TtmlStyle {
         return this.fontFamily;
     }
 
-    public TtmlStyle setFontFamily(String str) {
+    public TtmlStyle setFontFamily(String fontFamily) {
         Assertions.checkState(this.inheritableStyle == null);
-        this.fontFamily = str;
+        this.fontFamily = fontFamily;
         return this;
     }
 
@@ -81,9 +112,9 @@ final class TtmlStyle {
         return this.fontColor;
     }
 
-    public TtmlStyle setFontColor(int i) {
+    public TtmlStyle setFontColor(int fontColor) {
         Assertions.checkState(this.inheritableStyle == null);
-        this.fontColor = i;
+        this.fontColor = fontColor;
         this.hasFontColor = true;
         return this;
     }
@@ -99,8 +130,8 @@ final class TtmlStyle {
         return this.backgroundColor;
     }
 
-    public TtmlStyle setBackgroundColor(int i) {
-        this.backgroundColor = i;
+    public TtmlStyle setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
         this.hasBackgroundColor = true;
         return this;
     }
@@ -109,46 +140,50 @@ final class TtmlStyle {
         return this.hasBackgroundColor;
     }
 
-    public TtmlStyle chain(TtmlStyle ttmlStyle) {
-        return inherit(ttmlStyle, true);
+    public TtmlStyle inherit(TtmlStyle ancestor) {
+        return inherit(ancestor, false);
     }
 
-    private TtmlStyle inherit(TtmlStyle ttmlStyle, boolean z) {
-        if (ttmlStyle != null) {
-            if (!this.hasFontColor && ttmlStyle.hasFontColor) {
-                setFontColor(ttmlStyle.fontColor);
+    public TtmlStyle chain(TtmlStyle ancestor) {
+        return inherit(ancestor, true);
+    }
+
+    private TtmlStyle inherit(TtmlStyle ancestor, boolean chaining) {
+        if (ancestor != null) {
+            if (!this.hasFontColor && ancestor.hasFontColor) {
+                setFontColor(ancestor.fontColor);
             }
             if (this.bold == -1) {
-                this.bold = ttmlStyle.bold;
+                this.bold = ancestor.bold;
             }
             if (this.italic == -1) {
-                this.italic = ttmlStyle.italic;
+                this.italic = ancestor.italic;
             }
             if (this.fontFamily == null) {
-                this.fontFamily = ttmlStyle.fontFamily;
+                this.fontFamily = ancestor.fontFamily;
             }
             if (this.linethrough == -1) {
-                this.linethrough = ttmlStyle.linethrough;
+                this.linethrough = ancestor.linethrough;
             }
             if (this.underline == -1) {
-                this.underline = ttmlStyle.underline;
+                this.underline = ancestor.underline;
             }
             if (this.textAlign == null) {
-                this.textAlign = ttmlStyle.textAlign;
+                this.textAlign = ancestor.textAlign;
             }
             if (this.fontSizeUnit == -1) {
-                this.fontSizeUnit = ttmlStyle.fontSizeUnit;
-                this.fontSize = ttmlStyle.fontSize;
+                this.fontSizeUnit = ancestor.fontSizeUnit;
+                this.fontSize = ancestor.fontSize;
             }
-            if (z && !this.hasBackgroundColor && ttmlStyle.hasBackgroundColor) {
-                setBackgroundColor(ttmlStyle.backgroundColor);
+            if (chaining && !this.hasBackgroundColor && ancestor.hasBackgroundColor) {
+                setBackgroundColor(ancestor.backgroundColor);
             }
         }
         return this;
     }
 
-    public TtmlStyle setId(String str) {
-        this.id = str;
+    public TtmlStyle setId(String id) {
+        this.id = id;
         return this;
     }
 
@@ -160,18 +195,18 @@ final class TtmlStyle {
         return this.textAlign;
     }
 
-    public TtmlStyle setTextAlign(Layout.Alignment alignment) {
-        this.textAlign = alignment;
+    public TtmlStyle setTextAlign(Layout.Alignment textAlign) {
+        this.textAlign = textAlign;
         return this;
     }
 
-    public TtmlStyle setFontSize(float f) {
-        this.fontSize = f;
+    public TtmlStyle setFontSize(float fontSize) {
+        this.fontSize = fontSize;
         return this;
     }
 
-    public TtmlStyle setFontSizeUnit(int i) {
-        this.fontSizeUnit = i;
+    public TtmlStyle setFontSizeUnit(int fontSizeUnit) {
+        this.fontSizeUnit = fontSizeUnit;
         return this;
     }
 

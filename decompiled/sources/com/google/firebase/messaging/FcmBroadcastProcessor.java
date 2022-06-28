@@ -1,6 +1,5 @@
 package com.google.firebase.messaging;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Base64;
@@ -9,25 +8,31 @@ import com.google.android.gms.common.util.PlatformVersion;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.messaging.Constants;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import javax.annotation.concurrent.GuardedBy;
+import java.util.concurrent.ExecutorService;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class FcmBroadcastProcessor {
-    @GuardedBy("lock")
     private static WithinAppServiceConnection fcmServiceConn;
     private static final Object lock = new Object();
     private final Context context;
-    private final Executor executor = FcmBroadcastProcessor$$Lambda$0.$instance;
+    private final Executor executor;
 
     public FcmBroadcastProcessor(Context context) {
         this.context = context;
+        this.executor = FcmBroadcastProcessor$$Lambda$0.$instance;
+    }
+
+    public FcmBroadcastProcessor(Context context, ExecutorService executorService) {
+        this.context = context;
+        this.executor = executorService;
     }
 
     private static Task<Integer> bindToMessagingService(Context context, Intent intent) {
-        if (Log.isLoggable("FirebaseMessaging", 3)) {
-            Log.d("FirebaseMessaging", "Binding to service");
+        if (Log.isLoggable(Constants.TAG, 3)) {
+            Log.d(Constants.TAG, "Binding to service");
         }
         return getServiceConnection(context, "com.google.firebase.MESSAGING_EVENT").sendIntent(intent).continueWith(FcmBroadcastProcessor$$Lambda$3.$instance, FcmBroadcastProcessor$$Lambda$4.$instance);
     }
@@ -52,19 +57,27 @@ public class FcmBroadcastProcessor {
     }
 
     public static final /* synthetic */ Task lambda$startMessagingService$2$FcmBroadcastProcessor(Context context, Intent intent, Task task) throws Exception {
-        return (!PlatformVersion.isAtLeastO() || ((Integer) task.getResult()).intValue() != 402) ? task : bindToMessagingService(context, intent).continueWith(FcmBroadcastProcessor$$Lambda$5.$instance, FcmBroadcastProcessor$$Lambda$6.$instance);
+        if (!PlatformVersion.isAtLeastO() || ((Integer) task.getResult()).intValue() != 402) {
+            return task;
+        }
+        return bindToMessagingService(context, intent).continueWith(FcmBroadcastProcessor$$Lambda$5.$instance, FcmBroadcastProcessor$$Lambda$6.$instance);
+    }
+
+    public static void reset() {
+        synchronized (lock) {
+            fcmServiceConn = null;
+        }
     }
 
     public Task<Integer> process(Intent intent) {
         String stringExtra = intent.getStringExtra("gcm.rawData64");
         if (stringExtra != null) {
-            intent.putExtra("rawData", Base64.decode(stringExtra, 0));
+            intent.putExtra(Constants.MessagePayloadKeys.RAW_DATA, Base64.decode(stringExtra, 0));
             intent.removeExtra("gcm.rawData64");
         }
         return startMessagingService(this.context, intent);
     }
 
-    @SuppressLint({"InlinedApi"})
     public Task<Integer> startMessagingService(Context context, Intent intent) {
         boolean z = false;
         if (PlatformVersion.isAtLeastO() && context.getApplicationInfo().targetSdkVersion >= 26) {

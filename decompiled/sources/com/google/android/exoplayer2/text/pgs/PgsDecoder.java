@@ -11,10 +11,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.zip.Inflater;
-import org.telegram.messenger.R;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class PgsDecoder extends SimpleSubtitleDecoder {
+    private static final byte INFLATE_HEADER = 120;
+    private static final int SECTION_TYPE_BITMAP_PICTURE = 21;
+    private static final int SECTION_TYPE_END = 128;
+    private static final int SECTION_TYPE_IDENTIFIER = 22;
+    private static final int SECTION_TYPE_PALETTE = 20;
     private Inflater inflater;
     private final ParsableByteArray buffer = new ParsableByteArray();
     private final ParsableByteArray inflatedBuffer = new ParsableByteArray();
@@ -25,65 +28,61 @@ public final class PgsDecoder extends SimpleSubtitleDecoder {
     }
 
     @Override // com.google.android.exoplayer2.text.SimpleSubtitleDecoder
-    protected Subtitle decode(byte[] bArr, int i, boolean z) throws SubtitleDecoderException {
-        this.buffer.reset(bArr, i);
+    protected Subtitle decode(byte[] data, int size, boolean reset) throws SubtitleDecoderException {
+        this.buffer.reset(data, size);
         maybeInflateData(this.buffer);
         this.cueBuilder.reset();
-        ArrayList arrayList = new ArrayList();
+        ArrayList<Cue> cues = new ArrayList<>();
         while (this.buffer.bytesLeft() >= 3) {
-            Cue readNextSection = readNextSection(this.buffer, this.cueBuilder);
-            if (readNextSection != null) {
-                arrayList.add(readNextSection);
+            Cue cue = readNextSection(this.buffer, this.cueBuilder);
+            if (cue != null) {
+                cues.add(cue);
             }
         }
-        return new PgsSubtitle(Collections.unmodifiableList(arrayList));
+        return new PgsSubtitle(Collections.unmodifiableList(cues));
     }
 
-    private void maybeInflateData(ParsableByteArray parsableByteArray) {
-        if (parsableByteArray.bytesLeft() <= 0 || parsableByteArray.peekUnsignedByte() != 120) {
-            return;
+    private void maybeInflateData(ParsableByteArray buffer) {
+        if (buffer.bytesLeft() > 0 && buffer.peekUnsignedByte() == 120) {
+            if (this.inflater == null) {
+                this.inflater = new Inflater();
+            }
+            if (Util.inflate(buffer, this.inflatedBuffer, this.inflater)) {
+                buffer.reset(this.inflatedBuffer.data, this.inflatedBuffer.limit());
+            }
         }
-        if (this.inflater == null) {
-            this.inflater = new Inflater();
-        }
-        if (!Util.inflate(parsableByteArray, this.inflatedBuffer, this.inflater)) {
-            return;
-        }
-        ParsableByteArray parsableByteArray2 = this.inflatedBuffer;
-        parsableByteArray.reset(parsableByteArray2.data, parsableByteArray2.limit());
     }
 
-    private static Cue readNextSection(ParsableByteArray parsableByteArray, CueBuilder cueBuilder) {
-        int limit = parsableByteArray.limit();
-        int readUnsignedByte = parsableByteArray.readUnsignedByte();
-        int readUnsignedShort = parsableByteArray.readUnsignedShort();
-        int position = parsableByteArray.getPosition() + readUnsignedShort;
-        Cue cue = null;
-        if (position > limit) {
-            parsableByteArray.setPosition(limit);
+    private static Cue readNextSection(ParsableByteArray buffer, CueBuilder cueBuilder) {
+        int limit = buffer.limit();
+        int sectionType = buffer.readUnsignedByte();
+        int sectionLength = buffer.readUnsignedShort();
+        int nextSectionPosition = buffer.getPosition() + sectionLength;
+        if (nextSectionPosition > limit) {
+            buffer.setPosition(limit);
             return null;
         }
-        if (readUnsignedByte == 128) {
-            cue = cueBuilder.build();
-            cueBuilder.reset();
-        } else {
-            switch (readUnsignedByte) {
-                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                    cueBuilder.parsePaletteSection(parsableByteArray, readUnsignedShort);
-                    break;
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
-                    cueBuilder.parseBitmapSection(parsableByteArray, readUnsignedShort);
-                    break;
-                case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
-                    cueBuilder.parseIdentifierSection(parsableByteArray, readUnsignedShort);
-                    break;
-            }
+        Cue cue = null;
+        switch (sectionType) {
+            case 20:
+                cueBuilder.parsePaletteSection(buffer, sectionLength);
+                break;
+            case 21:
+                cueBuilder.parseBitmapSection(buffer, sectionLength);
+                break;
+            case 22:
+                cueBuilder.parseIdentifierSection(buffer, sectionLength);
+                break;
+            case 128:
+                cue = cueBuilder.build();
+                cueBuilder.reset();
+                break;
         }
-        parsableByteArray.setPosition(position);
+        buffer.setPosition(nextSectionPosition);
         return cue;
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class CueBuilder {
         private int bitmapHeight;
         private int bitmapWidth;
@@ -95,102 +94,111 @@ public final class PgsDecoder extends SimpleSubtitleDecoder {
         private final ParsableByteArray bitmapData = new ParsableByteArray();
         private final int[] colors = new int[256];
 
-        public void parsePaletteSection(ParsableByteArray parsableByteArray, int i) {
-            if (i % 5 != 2) {
+        public void parsePaletteSection(ParsableByteArray buffer, int sectionLength) {
+            if (sectionLength % 5 != 2) {
                 return;
             }
-            parsableByteArray.skipBytes(2);
+            buffer.skipBytes(2);
             Arrays.fill(this.colors, 0);
-            int i2 = i / 5;
-            int i3 = 0;
-            while (i3 < i2) {
-                int readUnsignedByte = parsableByteArray.readUnsignedByte();
-                int readUnsignedByte2 = parsableByteArray.readUnsignedByte();
-                int readUnsignedByte3 = parsableByteArray.readUnsignedByte();
-                int readUnsignedByte4 = parsableByteArray.readUnsignedByte();
-                int readUnsignedByte5 = parsableByteArray.readUnsignedByte();
-                double d = readUnsignedByte2;
-                double d2 = readUnsignedByte3 - 128;
+            int i = 0;
+            for (int entryCount = sectionLength / 5; i < entryCount; entryCount = entryCount) {
+                int index = buffer.readUnsignedByte();
+                int y = buffer.readUnsignedByte();
+                int cr = buffer.readUnsignedByte();
+                int cb = buffer.readUnsignedByte();
+                int a = buffer.readUnsignedByte();
+                double d = y;
+                double d2 = cr - 128;
                 Double.isNaN(d2);
                 Double.isNaN(d);
-                int i4 = i3;
-                double d3 = readUnsignedByte4 - 128;
+                int r = (int) (d + (d2 * 1.402d));
+                double d3 = y;
+                double d4 = cb - 128;
+                Double.isNaN(d4);
                 Double.isNaN(d3);
-                Double.isNaN(d);
-                Double.isNaN(d2);
-                Double.isNaN(d3);
-                Double.isNaN(d);
-                this.colors[readUnsignedByte] = Util.constrainValue((int) (d + (d3 * 1.772d)), 0, 255) | (Util.constrainValue((int) ((d - (0.34414d * d3)) - (d2 * 0.71414d)), 0, 255) << 8) | (readUnsignedByte5 << 24) | (Util.constrainValue((int) ((1.402d * d2) + d), 0, 255) << 16);
-                i3 = i4 + 1;
+                double d5 = cr - 128;
+                Double.isNaN(d5);
+                int g = (int) ((d3 - (d4 * 0.34414d)) - (d5 * 0.71414d));
+                double d6 = y;
+                double d7 = cb - 128;
+                Double.isNaN(d7);
+                Double.isNaN(d6);
+                int b = (int) (d6 + (d7 * 1.772d));
+                this.colors[index] = (a << 24) | (Util.constrainValue(r, 0, 255) << 16) | (Util.constrainValue(g, 0, 255) << 8) | Util.constrainValue(b, 0, 255);
+                i++;
             }
             this.colorsSet = true;
         }
 
-        public void parseBitmapSection(ParsableByteArray parsableByteArray, int i) {
-            int readUnsignedInt24;
-            if (i < 4) {
+        public void parseBitmapSection(ParsableByteArray buffer, int sectionLength) {
+            int totalLength;
+            if (sectionLength < 4) {
                 return;
             }
-            parsableByteArray.skipBytes(3);
-            int i2 = i - 4;
-            if ((parsableByteArray.readUnsignedByte() & ConnectionsManager.RequestFlagNeedQuickAck) != 0) {
-                if (i2 < 7 || (readUnsignedInt24 = parsableByteArray.readUnsignedInt24()) < 4) {
+            buffer.skipBytes(3);
+            boolean isBaseSection = (buffer.readUnsignedByte() & 128) != 0;
+            int sectionLength2 = sectionLength - 4;
+            if (isBaseSection) {
+                if (sectionLength2 < 7 || (totalLength = buffer.readUnsignedInt24()) < 4) {
                     return;
                 }
-                this.bitmapWidth = parsableByteArray.readUnsignedShort();
-                this.bitmapHeight = parsableByteArray.readUnsignedShort();
-                this.bitmapData.reset(readUnsignedInt24 - 4);
-                i2 -= 7;
+                this.bitmapWidth = buffer.readUnsignedShort();
+                this.bitmapHeight = buffer.readUnsignedShort();
+                this.bitmapData.reset(totalLength - 4);
+                sectionLength2 -= 7;
             }
             int position = this.bitmapData.getPosition();
             int limit = this.bitmapData.limit();
-            if (position >= limit || i2 <= 0) {
-                return;
+            if (position < limit && sectionLength2 > 0) {
+                int bytesToRead = Math.min(sectionLength2, limit - position);
+                buffer.readBytes(this.bitmapData.data, position, bytesToRead);
+                this.bitmapData.setPosition(position + bytesToRead);
             }
-            int min = Math.min(i2, limit - position);
-            parsableByteArray.readBytes(this.bitmapData.data, position, min);
-            this.bitmapData.setPosition(position + min);
         }
 
-        public void parseIdentifierSection(ParsableByteArray parsableByteArray, int i) {
-            if (i < 19) {
+        public void parseIdentifierSection(ParsableByteArray buffer, int sectionLength) {
+            if (sectionLength < 19) {
                 return;
             }
-            this.planeWidth = parsableByteArray.readUnsignedShort();
-            this.planeHeight = parsableByteArray.readUnsignedShort();
-            parsableByteArray.skipBytes(11);
-            this.bitmapX = parsableByteArray.readUnsignedShort();
-            this.bitmapY = parsableByteArray.readUnsignedShort();
+            this.planeWidth = buffer.readUnsignedShort();
+            this.planeHeight = buffer.readUnsignedShort();
+            buffer.skipBytes(11);
+            this.bitmapX = buffer.readUnsignedShort();
+            this.bitmapY = buffer.readUnsignedShort();
         }
 
         public Cue build() {
-            int i;
+            int runLength;
             if (this.planeWidth == 0 || this.planeHeight == 0 || this.bitmapWidth == 0 || this.bitmapHeight == 0 || this.bitmapData.limit() == 0 || this.bitmapData.getPosition() != this.bitmapData.limit() || !this.colorsSet) {
                 return null;
             }
             this.bitmapData.setPosition(0);
-            int i2 = this.bitmapWidth * this.bitmapHeight;
-            int[] iArr = new int[i2];
-            int i3 = 0;
-            while (i3 < i2) {
-                int readUnsignedByte = this.bitmapData.readUnsignedByte();
-                if (readUnsignedByte != 0) {
-                    i = i3 + 1;
-                    iArr[i3] = this.colors[readUnsignedByte];
+            int[] argbBitmapData = new int[this.bitmapWidth * this.bitmapHeight];
+            int argbBitmapDataIndex = 0;
+            while (argbBitmapDataIndex < argbBitmapData.length) {
+                int colorIndex = this.bitmapData.readUnsignedByte();
+                if (colorIndex != 0) {
+                    argbBitmapData[argbBitmapDataIndex] = this.colors[colorIndex];
+                    argbBitmapDataIndex++;
                 } else {
-                    int readUnsignedByte2 = this.bitmapData.readUnsignedByte();
-                    if (readUnsignedByte2 != 0) {
-                        i = ((readUnsignedByte2 & 64) == 0 ? readUnsignedByte2 & 63 : ((readUnsignedByte2 & 63) << 8) | this.bitmapData.readUnsignedByte()) + i3;
-                        Arrays.fill(iArr, i3, i, (readUnsignedByte2 & ConnectionsManager.RequestFlagNeedQuickAck) == 0 ? 0 : this.colors[this.bitmapData.readUnsignedByte()]);
+                    int switchBits = this.bitmapData.readUnsignedByte();
+                    if (switchBits != 0) {
+                        if ((switchBits & 64) == 0) {
+                            runLength = switchBits & 63;
+                        } else {
+                            runLength = ((switchBits & 63) << 8) | this.bitmapData.readUnsignedByte();
+                        }
+                        int color = (switchBits & 128) == 0 ? 0 : this.colors[this.bitmapData.readUnsignedByte()];
+                        Arrays.fill(argbBitmapData, argbBitmapDataIndex, argbBitmapDataIndex + runLength, color);
+                        argbBitmapDataIndex += runLength;
                     }
                 }
-                i3 = i;
             }
-            Bitmap createBitmap = Bitmap.createBitmap(iArr, this.bitmapWidth, this.bitmapHeight, Bitmap.Config.ARGB_8888);
-            int i4 = this.planeWidth;
-            float f = this.bitmapX / i4;
-            int i5 = this.planeHeight;
-            return new Cue(createBitmap, f, 0, this.bitmapY / i5, 0, this.bitmapWidth / i4, this.bitmapHeight / i5);
+            Bitmap bitmap = Bitmap.createBitmap(argbBitmapData, this.bitmapWidth, this.bitmapHeight, Bitmap.Config.ARGB_8888);
+            int i = this.planeWidth;
+            float f = this.bitmapX / i;
+            int i2 = this.planeHeight;
+            return new Cue(bitmap, f, 0, this.bitmapY / i2, 0, this.bitmapWidth / i, this.bitmapHeight / i2);
         }
 
         public void reset() {

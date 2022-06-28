@@ -2,7 +2,7 @@ package org.telegram.ui;
 
 import org.telegram.ui.CacheControlActivity;
 import org.telegram.ui.Components.SlideChooseView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class CacheControlActivity$ListAdapter$$ExternalSyntheticLambda0 implements SlideChooseView.Callback {
     public static final /* synthetic */ CacheControlActivity$ListAdapter$$ExternalSyntheticLambda0 INSTANCE = new CacheControlActivity$ListAdapter$$ExternalSyntheticLambda0();
 

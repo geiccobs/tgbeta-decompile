@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DashManifest implements FilterableManifest<DashManifest> {
     public final long availabilityStartTimeMs;
     public final long durationMs;
@@ -23,98 +23,103 @@ public class DashManifest implements FilterableManifest<DashManifest> {
     public final long timeShiftBufferDepthMs;
     public final UtcTimingElement utcTiming;
 
-    public DashManifest(long j, long j2, long j3, boolean z, long j4, long j5, long j6, long j7, ProgramInformation programInformation, UtcTimingElement utcTimingElement, Uri uri, List<Period> list) {
-        this.availabilityStartTimeMs = j;
-        this.durationMs = j2;
-        this.minBufferTimeMs = j3;
-        this.dynamic = z;
-        this.minUpdatePeriodMs = j4;
-        this.timeShiftBufferDepthMs = j5;
-        this.suggestedPresentationDelayMs = j6;
-        this.publishTimeMs = j7;
+    @Deprecated
+    public DashManifest(long availabilityStartTimeMs, long durationMs, long minBufferTimeMs, boolean dynamic, long minUpdatePeriodMs, long timeShiftBufferDepthMs, long suggestedPresentationDelayMs, long publishTimeMs, UtcTimingElement utcTiming, Uri location, List<Period> periods) {
+        this(availabilityStartTimeMs, durationMs, minBufferTimeMs, dynamic, minUpdatePeriodMs, timeShiftBufferDepthMs, suggestedPresentationDelayMs, publishTimeMs, null, utcTiming, location, periods);
+    }
+
+    public DashManifest(long availabilityStartTimeMs, long durationMs, long minBufferTimeMs, boolean dynamic, long minUpdatePeriodMs, long timeShiftBufferDepthMs, long suggestedPresentationDelayMs, long publishTimeMs, ProgramInformation programInformation, UtcTimingElement utcTiming, Uri location, List<Period> periods) {
+        this.availabilityStartTimeMs = availabilityStartTimeMs;
+        this.durationMs = durationMs;
+        this.minBufferTimeMs = minBufferTimeMs;
+        this.dynamic = dynamic;
+        this.minUpdatePeriodMs = minUpdatePeriodMs;
+        this.timeShiftBufferDepthMs = timeShiftBufferDepthMs;
+        this.suggestedPresentationDelayMs = suggestedPresentationDelayMs;
+        this.publishTimeMs = publishTimeMs;
         this.programInformation = programInformation;
-        this.utcTiming = utcTimingElement;
-        this.location = uri;
-        this.periods = list == null ? Collections.emptyList() : list;
+        this.utcTiming = utcTiming;
+        this.location = location;
+        this.periods = periods == null ? Collections.emptyList() : periods;
     }
 
     public final int getPeriodCount() {
         return this.periods.size();
     }
 
-    public final Period getPeriod(int i) {
-        return this.periods.get(i);
+    public final Period getPeriod(int index) {
+        return this.periods.get(index);
     }
 
-    public final long getPeriodDurationMs(int i) {
-        long j;
-        if (i == this.periods.size() - 1) {
-            long j2 = this.durationMs;
-            if (j2 == -9223372036854775807L) {
-                return -9223372036854775807L;
-            }
-            j = j2 - this.periods.get(i).startMs;
-        } else {
-            j = this.periods.get(i + 1).startMs - this.periods.get(i).startMs;
+    public final long getPeriodDurationMs(int index) {
+        if (index == this.periods.size() - 1) {
+            long j = this.durationMs;
+            return j == C.TIME_UNSET ? C.TIME_UNSET : j - this.periods.get(index).startMs;
         }
-        return j;
+        return this.periods.get(index + 1).startMs - this.periods.get(index).startMs;
     }
 
-    public final long getPeriodDurationUs(int i) {
-        return C.msToUs(getPeriodDurationMs(i));
+    public final long getPeriodDurationUs(int index) {
+        return C.msToUs(getPeriodDurationMs(index));
     }
 
     @Override // com.google.android.exoplayer2.offline.FilterableManifest
-    public final DashManifest copy(List<StreamKey> list) {
-        long j;
-        LinkedList linkedList = new LinkedList(list);
-        Collections.sort(linkedList);
-        linkedList.add(new StreamKey(-1, -1, -1));
-        ArrayList arrayList = new ArrayList();
-        long j2 = 0;
-        int i = 0;
+    public final DashManifest copy(List<StreamKey> streamKeys) {
+        long newDuration;
+        LinkedList<StreamKey> keys = new LinkedList<>(streamKeys);
+        Collections.sort(keys);
+        keys.add(new StreamKey(-1, -1, -1));
+        ArrayList<Period> copyPeriods = new ArrayList<>();
+        int periodIndex = 0;
+        long shiftMs = 0;
         while (true) {
-            j = -9223372036854775807L;
-            if (i >= getPeriodCount()) {
+            int periodCount = getPeriodCount();
+            newDuration = C.TIME_UNSET;
+            if (periodIndex >= periodCount) {
                 break;
             }
-            if (((StreamKey) linkedList.peek()).periodIndex != i) {
-                long periodDurationMs = getPeriodDurationMs(i);
-                if (periodDurationMs != -9223372036854775807L) {
-                    j2 += periodDurationMs;
+            if (keys.peek().periodIndex != periodIndex) {
+                long periodDurationMs = getPeriodDurationMs(periodIndex);
+                if (periodDurationMs != C.TIME_UNSET) {
+                    shiftMs += periodDurationMs;
                 }
             } else {
-                Period period = getPeriod(i);
-                arrayList.add(new Period(period.id, period.startMs - j2, copyAdaptationSets(period.adaptationSets, linkedList), period.eventStreams));
+                Period period = getPeriod(periodIndex);
+                ArrayList<AdaptationSet> copyAdaptationSets = copyAdaptationSets(period.adaptationSets, keys);
+                Period copiedPeriod = new Period(period.id, period.startMs - shiftMs, copyAdaptationSets, period.eventStreams);
+                copyPeriods.add(copiedPeriod);
             }
-            i++;
+            periodIndex++;
         }
-        long j3 = this.durationMs;
-        if (j3 != -9223372036854775807L) {
-            j = j3 - j2;
+        long j = this.durationMs;
+        if (j != C.TIME_UNSET) {
+            newDuration = j - shiftMs;
         }
-        return new DashManifest(this.availabilityStartTimeMs, j, this.minBufferTimeMs, this.dynamic, this.minUpdatePeriodMs, this.timeShiftBufferDepthMs, this.suggestedPresentationDelayMs, this.publishTimeMs, this.programInformation, this.utcTiming, this.location, arrayList);
+        return new DashManifest(this.availabilityStartTimeMs, newDuration, this.minBufferTimeMs, this.dynamic, this.minUpdatePeriodMs, this.timeShiftBufferDepthMs, this.suggestedPresentationDelayMs, this.publishTimeMs, this.programInformation, this.utcTiming, this.location, copyPeriods);
     }
 
-    private static ArrayList<AdaptationSet> copyAdaptationSets(List<AdaptationSet> list, LinkedList<StreamKey> linkedList) {
-        StreamKey poll = linkedList.poll();
-        int i = poll.periodIndex;
-        ArrayList<AdaptationSet> arrayList = new ArrayList<>();
-        do {
-            int i2 = poll.groupIndex;
-            AdaptationSet adaptationSet = list.get(i2);
-            List<Representation> list2 = adaptationSet.representations;
-            ArrayList arrayList2 = new ArrayList();
+    private static ArrayList<AdaptationSet> copyAdaptationSets(List<AdaptationSet> adaptationSets, LinkedList<StreamKey> keys) {
+        StreamKey key = keys.poll();
+        int periodIndex = key.periodIndex;
+        ArrayList<AdaptationSet> copyAdaptationSets = new ArrayList<>();
+        while (true) {
+            int adaptationSetIndex = key.groupIndex;
+            AdaptationSet adaptationSet = adaptationSets.get(adaptationSetIndex);
+            List<Representation> representations = adaptationSet.representations;
+            ArrayList<Representation> copyRepresentations = new ArrayList<>();
             do {
-                arrayList2.add(list2.get(poll.trackIndex));
-                poll = linkedList.poll();
-                if (poll.periodIndex != i) {
+                Representation representation = representations.get(key.trackIndex);
+                copyRepresentations.add(representation);
+                key = keys.poll();
+                if (key.periodIndex != periodIndex) {
                     break;
                 }
-            } while (poll.groupIndex == i2);
-            arrayList.add(new AdaptationSet(adaptationSet.id, adaptationSet.type, arrayList2, adaptationSet.accessibilityDescriptors, adaptationSet.essentialProperties, adaptationSet.supplementalProperties));
-        } while (poll.periodIndex == i);
-        linkedList.addFirst(poll);
-        return arrayList;
+            } while (key.groupIndex == adaptationSetIndex);
+            copyAdaptationSets.add(new AdaptationSet(adaptationSet.id, adaptationSet.type, copyRepresentations, adaptationSet.accessibilityDescriptors, adaptationSet.essentialProperties, adaptationSet.supplementalProperties));
+            if (key.periodIndex != periodIndex) {
+                keys.addFirst(key);
+                return copyAdaptationSets;
+            }
+        }
     }
 }

@@ -1,11 +1,12 @@
 package org.webrtc.audio;
 
 import android.media.AudioManager;
+import com.google.android.exoplayer2.text.ttml.TtmlNode;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.webrtc.Logging;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VolumeLogger {
     private static final String TAG = "VolumeLogger";
     private static final String THREAD_NAME = "WebRtcVolumeLevelLoggerThread";
@@ -18,7 +19,7 @@ public class VolumeLogger {
     }
 
     public void start() {
-        Logging.d(TAG, "start" + WebRtcAudioUtils.getThreadInfo());
+        Logging.d(TAG, TtmlNode.START + WebRtcAudioUtils.getThreadInfo());
         if (this.timer != null) {
             return;
         }
@@ -29,15 +30,15 @@ public class VolumeLogger {
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class LogVolumeTask extends TimerTask {
         private final int maxRingVolume;
         private final int maxVoiceCallVolume;
 
-        LogVolumeTask(int i, int i2) {
+        LogVolumeTask(int maxRingVolume, int maxVoiceCallVolume) {
             VolumeLogger.this = r1;
-            this.maxRingVolume = i;
-            this.maxVoiceCallVolume = i2;
+            this.maxRingVolume = maxRingVolume;
+            this.maxVoiceCallVolume = maxVoiceCallVolume;
         }
 
         @Override // java.util.TimerTask, java.lang.Runnable
@@ -45,8 +46,7 @@ public class VolumeLogger {
             int mode = VolumeLogger.this.audioManager.getMode();
             if (mode == 1) {
                 Logging.d(VolumeLogger.TAG, "STREAM_RING stream volume: " + VolumeLogger.this.audioManager.getStreamVolume(2) + " (max=" + this.maxRingVolume + ")");
-            } else if (mode != 3) {
-            } else {
+            } else if (mode == 3) {
                 Logging.d(VolumeLogger.TAG, "VOICE_CALL stream volume: " + VolumeLogger.this.audioManager.getStreamVolume(0) + " (max=" + this.maxVoiceCallVolume + ")");
             }
         }

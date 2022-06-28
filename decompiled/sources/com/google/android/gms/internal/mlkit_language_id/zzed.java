@@ -1,17 +1,18 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzed implements zzib {
     private final zzea zza;
 
     public static zzed zza(zzea zzeaVar) {
-        zzed zzedVar = zzeaVar.zza;
-        return zzedVar != null ? zzedVar : new zzed(zzeaVar);
+        if (zzeaVar.zza != null) {
+            return zzeaVar.zza;
+        }
+        return new zzed(zzeaVar);
     }
 
     private zzed(zzea zzeaVar) {
@@ -490,14 +491,14 @@ final class zzed implements zzib {
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzib
     public final <K, V> void zza(int i, zzfq<K, V> zzfqVar, Map<K, V> map) throws IOException {
-        Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
-        if (!it.hasNext()) {
-            return;
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            this.zza.zza(i, 2);
+            this.zza.zzb(zzej.zza(zzfqVar.zza, 1, entry.getKey()) + zzej.zza(zzfqVar.zzb, 2, entry.getValue()));
+            zzea zzeaVar = this.zza;
+            K key = entry.getKey();
+            V value = entry.getValue();
+            zzej.zza(zzeaVar, zzfqVar.zza, 1, key);
+            zzej.zza(zzeaVar, zzfqVar.zzb, 2, value);
         }
-        Map.Entry<K, V> next = it.next();
-        this.zza.zza(i, 2);
-        next.getKey();
-        next.getValue();
-        throw null;
     }
 }

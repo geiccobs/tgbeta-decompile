@@ -1,37 +1,42 @@
 package com.google.firebase.remoteconfig.internal;
 
 import java.util.Date;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ConfigContainer {
+    static final String ABT_EXPERIMENTS_KEY = "abt_experiments_key";
+    static final String CONFIGS_KEY = "configs_key";
     private static final Date DEFAULTS_FETCH_TIME = new Date(0);
+    static final String FETCH_TIME_KEY = "fetch_time_key";
+    static final String PERSONALIZATION_METADATA_KEY = "personalization_metadata_key";
     private JSONArray abtExperiments;
     private JSONObject configsJson;
     private JSONObject containerJson;
     private Date fetchTime;
     private JSONObject personalizationMetadata;
 
-    private ConfigContainer(JSONObject jSONObject, Date date, JSONArray jSONArray, JSONObject jSONObject2) throws JSONException {
-        JSONObject jSONObject3 = new JSONObject();
-        jSONObject3.put("configs_key", jSONObject);
-        jSONObject3.put("fetch_time_key", date.getTime());
-        jSONObject3.put("abt_experiments_key", jSONArray);
-        jSONObject3.put("personalization_metadata_key", jSONObject2);
-        this.configsJson = jSONObject;
-        this.fetchTime = date;
-        this.abtExperiments = jSONArray;
-        this.personalizationMetadata = jSONObject2;
-        this.containerJson = jSONObject3;
+    private ConfigContainer(JSONObject configsJson, Date fetchTime, JSONArray abtExperiments, JSONObject personalizationMetadata) throws JSONException {
+        JSONObject containerJson = new JSONObject();
+        containerJson.put(CONFIGS_KEY, configsJson);
+        containerJson.put(FETCH_TIME_KEY, fetchTime.getTime());
+        containerJson.put(ABT_EXPERIMENTS_KEY, abtExperiments);
+        containerJson.put(PERSONALIZATION_METADATA_KEY, personalizationMetadata);
+        this.configsJson = configsJson;
+        this.fetchTime = fetchTime;
+        this.abtExperiments = abtExperiments;
+        this.personalizationMetadata = personalizationMetadata;
+        this.containerJson = containerJson;
     }
 
-    public static ConfigContainer copyOf(JSONObject jSONObject) throws JSONException {
-        JSONObject optJSONObject = jSONObject.optJSONObject("personalization_metadata_key");
-        if (optJSONObject == null) {
-            optJSONObject = new JSONObject();
+    public static ConfigContainer copyOf(JSONObject containerJson) throws JSONException {
+        JSONObject personalizationMetadataJSON = containerJson.optJSONObject(PERSONALIZATION_METADATA_KEY);
+        if (personalizationMetadataJSON == null) {
+            personalizationMetadataJSON = new JSONObject();
         }
-        return new ConfigContainer(jSONObject.getJSONObject("configs_key"), new Date(jSONObject.getLong("fetch_time_key")), jSONObject.getJSONArray("abt_experiments_key"), optJSONObject);
+        return new ConfigContainer(containerJson.getJSONObject(CONFIGS_KEY), new Date(containerJson.getLong(FETCH_TIME_KEY)), containerJson.getJSONArray(ABT_EXPERIMENTS_KEY), personalizationMetadataJSON);
     }
 
     public JSONObject getConfigs() {
@@ -54,21 +59,22 @@ public class ConfigContainer {
         return this.containerJson.toString();
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj instanceof ConfigContainer) {
-            return this.containerJson.toString().equals(((ConfigContainer) obj).toString());
+        if (!(o instanceof ConfigContainer)) {
+            return false;
         }
-        return false;
+        ConfigContainer that = (ConfigContainer) o;
+        return this.containerJson.toString().equals(that.toString());
     }
 
     public int hashCode() {
         return this.containerJson.hashCode();
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class Builder {
         private JSONArray builderAbtExperiments;
         private JSONObject builderConfigsJson;
@@ -82,31 +88,43 @@ public class ConfigContainer {
             this.builderPersonalizationMetadata = new JSONObject();
         }
 
-        public Builder replaceConfigsWith(JSONObject jSONObject) {
+        public Builder(ConfigContainer otherContainer) {
+            this.builderConfigsJson = otherContainer.getConfigs();
+            this.builderFetchTime = otherContainer.getFetchTime();
+            this.builderAbtExperiments = otherContainer.getAbtExperiments();
+            this.builderPersonalizationMetadata = otherContainer.getPersonalizationMetadata();
+        }
+
+        public Builder replaceConfigsWith(Map<String, String> configsMap) {
+            this.builderConfigsJson = new JSONObject(configsMap);
+            return this;
+        }
+
+        public Builder replaceConfigsWith(JSONObject configsJson) {
             try {
-                this.builderConfigsJson = new JSONObject(jSONObject.toString());
-            } catch (JSONException unused) {
+                this.builderConfigsJson = new JSONObject(configsJson.toString());
+            } catch (JSONException e) {
             }
             return this;
         }
 
-        public Builder withFetchTime(Date date) {
-            this.builderFetchTime = date;
+        public Builder withFetchTime(Date fetchTime) {
+            this.builderFetchTime = fetchTime;
             return this;
         }
 
-        public Builder withAbtExperiments(JSONArray jSONArray) {
+        public Builder withAbtExperiments(JSONArray abtExperiments) {
             try {
-                this.builderAbtExperiments = new JSONArray(jSONArray.toString());
-            } catch (JSONException unused) {
+                this.builderAbtExperiments = new JSONArray(abtExperiments.toString());
+            } catch (JSONException e) {
             }
             return this;
         }
 
-        public Builder withPersonalizationMetadata(JSONObject jSONObject) {
+        public Builder withPersonalizationMetadata(JSONObject personalizationMetadata) {
             try {
-                this.builderPersonalizationMetadata = new JSONObject(jSONObject.toString());
-            } catch (JSONException unused) {
+                this.builderPersonalizationMetadata = new JSONObject(personalizationMetadata.toString());
+            } catch (JSONException e) {
             }
             return this;
         }
@@ -118,5 +136,9 @@ public class ConfigContainer {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static Builder newBuilder(ConfigContainer otherContainer) {
+        return new Builder(otherContainer);
     }
 }

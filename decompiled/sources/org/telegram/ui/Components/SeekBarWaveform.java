@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.RectF;
 import android.graphics.Shader;
 import android.os.SystemClock;
 import android.view.View;
@@ -16,7 +15,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.ui.Components.SeekBar;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class SeekBarWaveform {
     private static Paint paintInner;
     private static Paint paintOuter;
@@ -69,27 +68,27 @@ public class SeekBarWaveform {
         this.delegate = seekBarDelegate;
     }
 
-    public void setColors(int i, int i2, int i3) {
-        this.innerColor = i;
-        this.outerColor = i2;
-        this.selectedColor = i3;
+    public void setColors(int inner, int outer, int selected) {
+        this.innerColor = inner;
+        this.outerColor = outer;
+        this.selectedColor = selected;
     }
 
-    public void setWaveform(byte[] bArr) {
-        this.waveformBytes = bArr;
+    public void setWaveform(byte[] waveform) {
+        this.waveformBytes = waveform;
         this.heights = calculateHeights((int) (this.width / AndroidUtilities.dpf2(3.0f)));
     }
 
-    public void setSelected(boolean z) {
-        this.selected = z;
+    public void setSelected(boolean value) {
+        this.selected = value;
     }
 
-    public void setMessageObject(MessageObject messageObject) {
-        MessageObject messageObject2;
-        if (this.animatedValues != null && (messageObject2 = this.messageObject) != null && messageObject != null && messageObject2.getId() != messageObject.getId()) {
+    public void setMessageObject(MessageObject object) {
+        MessageObject messageObject;
+        if (this.animatedValues != null && (messageObject = this.messageObject) != null && object != null && messageObject.getId() != object.getId()) {
             this.animatedValues.clear();
         }
-        this.messageObject = messageObject;
+        this.messageObject = object;
     }
 
     public void setParentView(View view) {
@@ -102,40 +101,40 @@ public class SeekBarWaveform {
         return this.startDraging;
     }
 
-    public boolean onTouch(int i, float f, float f2) {
+    public boolean onTouch(int action, float x, float y) {
         SeekBar.SeekBarDelegate seekBarDelegate;
-        if (i == 0) {
-            if (0.0f <= f && f <= this.width && f2 >= 0.0f && f2 <= this.height) {
-                this.startX = f;
+        if (action == 0) {
+            if (0.0f <= x && x <= this.width && y >= 0.0f && y <= this.height) {
+                this.startX = x;
                 this.pressed = true;
-                this.thumbDX = (int) (f - this.thumbX);
+                this.thumbDX = (int) (x - this.thumbX);
                 this.startDraging = false;
                 return true;
             }
-        } else if (i == 1 || i == 3) {
+        } else if (action == 1 || action == 3) {
             if (this.pressed) {
-                if (i == 1 && (seekBarDelegate = this.delegate) != null) {
+                if (action == 1 && (seekBarDelegate = this.delegate) != null) {
                     seekBarDelegate.onSeekBarDrag(this.thumbX / this.width);
                 }
                 this.pressed = false;
                 return true;
             }
-        } else if (i == 2 && this.pressed) {
+        } else if (action == 2 && this.pressed) {
             if (this.startDraging) {
-                int i2 = (int) (f - this.thumbDX);
-                this.thumbX = i2;
-                if (i2 < 0) {
+                int i = (int) (x - this.thumbDX);
+                this.thumbX = i;
+                if (i < 0) {
                     this.thumbX = 0;
                 } else {
-                    int i3 = this.width;
-                    if (i2 > i3) {
-                        this.thumbX = i3;
+                    int i2 = this.width;
+                    if (i > i2) {
+                        this.thumbX = i2;
                     }
                 }
                 this.progress = this.thumbX / this.width;
             }
-            float f3 = this.startX;
-            if (f3 != -1.0f && Math.abs(f - f3) > AndroidUtilities.getPixelsInCM(0.2f, true)) {
+            float f = this.startX;
+            if (f != -1.0f && Math.abs(x - f) > AndroidUtilities.getPixelsInCM(0.2f, true)) {
                 View view = this.parentView;
                 if (view != null && view.getParent() != null) {
                     this.parentView.getParent().requestDisallowInterceptTouchEvent(true);
@@ -152,59 +151,55 @@ public class SeekBarWaveform {
         return this.thumbX / this.width;
     }
 
-    public void setProgress(float f) {
-        setProgress(f, false);
+    public void setProgress(float progress) {
+        setProgress(progress, false);
     }
 
-    public void setProgress(float f, boolean z) {
-        boolean z2 = this.isUnread;
-        this.progress = z2 ? 1.0f : f;
-        int i = z2 ? this.width : this.thumbX;
-        if (z && i != 0 && f == 0.0f) {
+    public void setProgress(float progress, boolean animated) {
+        boolean z = this.isUnread;
+        this.progress = z ? 1.0f : progress;
+        int currentThumbX = z ? this.width : this.thumbX;
+        if (animated && currentThumbX != 0 && progress == 0.0f) {
             this.clearProgress = 0.0f;
-        } else if (!z) {
+        } else if (!animated) {
             this.clearProgress = 1.0f;
         }
-        int ceil = (int) Math.ceil(this.width * f);
+        int ceil = (int) Math.ceil(this.width * progress);
         this.thumbX = ceil;
         if (ceil < 0) {
             this.thumbX = 0;
             return;
         }
-        int i2 = this.width;
-        if (ceil <= i2) {
-            return;
+        int i = this.width;
+        if (ceil > i) {
+            this.thumbX = i;
         }
-        this.thumbX = i2;
     }
 
     public boolean isDragging() {
         return this.pressed;
     }
 
-    public void setSize(int i, int i2) {
-        setSize(i, i2, i, i);
+    public void setSize(int w, int h) {
+        setSize(w, h, w, w);
     }
 
-    public void setSize(int i, int i2, int i3, int i4) {
-        this.width = i;
-        this.height = i2;
+    public void setSize(int w, int h, int fromW, int toW) {
+        this.width = w;
+        this.height = h;
         float[] fArr = this.heights;
-        if (fArr == null || fArr.length != ((int) (i / AndroidUtilities.dpf2(3.0f)))) {
+        if (fArr == null || fArr.length != ((int) (w / AndroidUtilities.dpf2(3.0f)))) {
             this.heights = calculateHeights((int) (this.width / AndroidUtilities.dpf2(3.0f)));
         }
-        if (i3 == i4 || (this.fromWidth == i3 && this.toWidth == i4)) {
-            if (i3 != i4) {
-                return;
-            }
+        if (fromW != toW && (this.fromWidth != fromW || this.toWidth != toW)) {
+            this.fromWidth = fromW;
+            this.toWidth = toW;
+            this.fromHeights = calculateHeights((int) (fromW / AndroidUtilities.dpf2(3.0f)));
+            this.toHeights = calculateHeights((int) (this.toWidth / AndroidUtilities.dpf2(3.0f)));
+        } else if (fromW == toW) {
             this.toHeights = null;
             this.fromHeights = null;
-            return;
         }
-        this.fromWidth = i3;
-        this.toWidth = i4;
-        this.fromHeights = calculateHeights((int) (i3 / AndroidUtilities.dpf2(3.0f)));
-        this.toHeights = calculateHeights((int) (this.toWidth / AndroidUtilities.dpf2(3.0f)));
     }
 
     public void setSent() {
@@ -215,86 +210,94 @@ public class SeekBarWaveform {
         }
     }
 
-    private float[] calculateHeights(int i) {
-        byte[] bArr = this.waveformBytes;
-        if (bArr == null || i <= 0) {
+    private float[] calculateHeights(int count) {
+        int samplesCount;
+        SeekBarWaveform seekBarWaveform = this;
+        byte[] bArr = seekBarWaveform.waveformBytes;
+        if (bArr == null || count <= 0) {
             return null;
         }
-        float[] fArr = new float[i];
-        int i2 = 5;
-        int length = (bArr.length * 8) / 5;
-        float f = length / i;
-        int i3 = 0;
-        int i4 = 0;
-        float f2 = 0.0f;
-        int i5 = 0;
-        while (i3 < length) {
-            if (i3 == i4) {
-                int i6 = i4;
-                int i7 = 0;
-                while (i4 == i6) {
-                    f2 += f;
-                    i6 = (int) f2;
-                    i7++;
+        float[] heights = new float[count];
+        int samplesCount2 = (bArr.length * 8) / 5;
+        float samplesPerBar = samplesCount2 / count;
+        float barCounter = 0.0f;
+        int nextBarNum = 0;
+        int barNum = 0;
+        int a = 0;
+        while (a < samplesCount2) {
+            if (a != nextBarNum) {
+                samplesCount = samplesCount2;
+            } else {
+                int drawBarCount = 0;
+                int lastBarNum = nextBarNum;
+                while (lastBarNum == nextBarNum) {
+                    barCounter += samplesPerBar;
+                    nextBarNum = (int) barCounter;
+                    drawBarCount++;
                 }
-                int i8 = i3 * 5;
-                int i9 = i8 / 8;
-                int i10 = i8 - (i9 * 8);
-                int i11 = 8 - i10;
-                int i12 = 5 - i11;
-                byte min = (byte) ((this.waveformBytes[i9] >> i10) & ((2 << (Math.min(i2, i11) - 1)) - 1));
-                if (i12 > 0) {
-                    int i13 = i9 + 1;
-                    byte[] bArr2 = this.waveformBytes;
-                    if (i13 < bArr2.length) {
-                        min = (byte) (((byte) (min << i12)) | (bArr2[i13] & ((2 << (i12 - 1)) - 1)));
+                int bitPointer = a * 5;
+                int byteNum = bitPointer / 8;
+                int byteBitOffset = bitPointer - (byteNum * 8);
+                int currentByteCount = 8 - byteBitOffset;
+                int nextByteRest = 5 - currentByteCount;
+                byte value = (byte) ((seekBarWaveform.waveformBytes[byteNum] >> byteBitOffset) & ((2 << (Math.min(5, currentByteCount) - 1)) - 1));
+                if (nextByteRest > 0) {
+                    int i = byteNum + 1;
+                    samplesCount = samplesCount2;
+                    byte[] bArr2 = seekBarWaveform.waveformBytes;
+                    if (i < bArr2.length) {
+                        value = (byte) ((bArr2[byteNum + 1] & ((2 << (nextByteRest - 1)) - 1)) | ((byte) (value << nextByteRest)));
+                    }
+                } else {
+                    samplesCount = samplesCount2;
+                }
+                int b = 0;
+                while (b < drawBarCount) {
+                    if (barNum < heights.length) {
+                        heights[barNum] = Math.max(0.0f, (value * 7) / 31.0f);
+                        b++;
+                        barNum++;
+                    } else {
+                        return heights;
                     }
                 }
-                int i14 = 0;
-                while (i14 < i7) {
-                    if (i5 >= i) {
-                        return fArr;
-                    }
-                    fArr[i5] = Math.max(0.0f, (min * 7) / 31.0f);
-                    i14++;
-                    i5++;
-                }
-                i4 = i6;
+                continue;
             }
-            i3++;
-            i2 = 5;
+            a++;
+            seekBarWaveform = this;
+            samplesCount2 = samplesCount;
         }
-        return fArr;
+        return heights;
     }
 
-    public void draw(Canvas canvas, View view) {
+    public void draw(Canvas canvas, View parentView) {
         int i;
-        float f;
         float[] fArr;
         if (this.waveformBytes == null || (i = this.width) == 0) {
             return;
         }
-        float dpf2 = i / AndroidUtilities.dpf2(3.0f);
-        if (dpf2 <= 0.1f) {
+        float totalBarsCount = i / AndroidUtilities.dpf2(3.0f);
+        if (totalBarsCount <= 0.1f) {
             return;
         }
-        float f2 = this.clearProgress;
-        if (f2 != 1.0f) {
-            float f3 = f2 + 0.10666667f;
-            this.clearProgress = f3;
-            if (f3 > 1.0f) {
+        float f = this.clearProgress;
+        if (f != 1.0f) {
+            float f2 = f + 0.10666667f;
+            this.clearProgress = f2;
+            if (f2 > 1.0f) {
                 this.clearProgress = 1.0f;
             } else {
-                view.invalidate();
+                parentView.invalidate();
             }
         }
-        float f4 = this.appearFloat.set(1.0f);
+        float appearProgress = this.appearFloat.set(1.0f);
         Path path = this.path;
         if (path == null) {
             this.path = new Path();
         } else {
             path.reset();
         }
+        float alpha = 0.0f;
         Path path2 = this.alphaPath;
         if (path2 == null) {
             this.alphaPath = new Path();
@@ -302,55 +305,49 @@ public class SeekBarWaveform {
             path2.reset();
         }
         float[] fArr2 = this.fromHeights;
-        int i2 = 0;
         if (fArr2 != null && (fArr = this.toHeights) != null) {
-            int i3 = this.width;
-            int i4 = this.fromWidth;
-            float f5 = (i3 - i4) / (this.toWidth - i4);
-            int max = Math.max(fArr2.length, fArr.length);
-            int min = Math.min(this.fromHeights.length, this.toHeights.length);
+            int i2 = this.width;
+            int i3 = this.fromWidth;
+            float t = (i2 - i3) / (this.toWidth - i3);
+            int maxlen = Math.max(fArr2.length, fArr.length);
+            int minlen = Math.min(this.fromHeights.length, this.toHeights.length);
             float[] fArr3 = this.fromHeights;
             int length = fArr3.length;
             float[] fArr4 = this.toHeights;
-            float[] fArr5 = length < fArr4.length ? fArr3 : fArr4;
-            float[] fArr6 = fArr3.length < fArr4.length ? fArr4 : fArr3;
-            if (fArr3.length >= fArr4.length) {
-                f5 = 1.0f - f5;
-            }
-            int i5 = -1;
-            int i6 = 0;
-            f = 0.0f;
-            while (i6 < max) {
-                float f6 = i6;
-                int i7 = max;
-                int clamp = MathUtils.clamp((int) Math.floor((f6 / max) * min), 0, min - 1);
-                if (i5 < clamp) {
-                    addBar(this.path, AndroidUtilities.lerp(clamp, f6, f5) * AndroidUtilities.dpf2(3.0f), AndroidUtilities.dpf2(AndroidUtilities.lerp(fArr5[clamp], fArr6[i6], f5)));
-                    i5 = clamp;
+            float[] minarr = length < fArr4.length ? fArr3 : fArr4;
+            float[] maxarr = fArr3.length < fArr4.length ? fArr4 : fArr3;
+            float T = fArr3.length < fArr4.length ? t : 1.0f - t;
+            int k = -1;
+            int barNum = 0;
+            while (barNum < maxlen) {
+                float appearProgress2 = appearProgress;
+                int l = MathUtils.clamp((int) Math.floor((barNum / maxlen) * minlen), 0, minlen - 1);
+                if (k < l) {
+                    float x = AndroidUtilities.lerp(l, barNum, T) * AndroidUtilities.dpf2(3.0f);
+                    float h = AndroidUtilities.dpf2(AndroidUtilities.lerp(minarr[l], maxarr[barNum], T));
+                    addBar(this.path, x, h);
+                    k = l;
                 } else {
-                    addBar(this.alphaPath, AndroidUtilities.lerp(clamp, f6, f5) * AndroidUtilities.dpf2(3.0f), AndroidUtilities.dpf2(AndroidUtilities.lerp(fArr5[clamp], fArr6[i6], f5)));
-                    f = f5;
+                    float x2 = AndroidUtilities.lerp(l, barNum, T) * AndroidUtilities.dpf2(3.0f);
+                    float h2 = AndroidUtilities.dpf2(AndroidUtilities.lerp(minarr[l], maxarr[barNum], T));
+                    addBar(this.alphaPath, x2, h2);
+                    alpha = T;
                 }
-                i6++;
-                max = i7;
+                barNum++;
+                appearProgress = appearProgress2;
             }
-        } else {
-            if (this.heights != null) {
-                while (true) {
-                    float f7 = i2;
-                    if (f7 >= dpf2 || i2 >= this.heights.length) {
-                        break;
-                    }
-                    addBar(this.path, AndroidUtilities.dpf2(3.0f) * f7, AndroidUtilities.dpf2(this.heights[i2]) * MathUtils.clamp((f4 * dpf2) - f7, 0.0f, 1.0f));
-                    i2++;
-                }
+        } else if (this.heights != null) {
+            for (int barNum2 = 0; barNum2 < totalBarsCount && barNum2 < this.heights.length; barNum2++) {
+                float x3 = barNum2 * AndroidUtilities.dpf2(3.0f);
+                float bart = MathUtils.clamp((appearProgress * totalBarsCount) - barNum2, 0.0f, 1.0f);
+                float h3 = AndroidUtilities.dpf2(this.heights[barNum2]) * bart;
+                addBar(this.path, x3, h3);
             }
-            f = 0.0f;
         }
-        if (f > 0.0f) {
+        if (alpha > 0.0f) {
             canvas.save();
             canvas.clipPath(this.alphaPath);
-            drawFill(canvas, f);
+            drawFill(canvas, alpha);
             canvas.restore();
         }
         canvas.save();
@@ -359,27 +356,27 @@ public class SeekBarWaveform {
         canvas.restore();
     }
 
-    private void drawFill(Canvas canvas, float f) {
+    private void drawFill(Canvas canvas, float alpha) {
         Paint paint;
         Paint paint2;
-        float dpf2 = AndroidUtilities.dpf2(2.0f);
+        float strokeWidth = AndroidUtilities.dpf2(2.0f);
         MessageObject messageObject = this.messageObject;
         boolean z = messageObject != null && messageObject.isContentUnread() && !this.messageObject.isOut() && this.progress <= 0.0f;
         this.isUnread = z;
         paintInner.setColor(z ? this.outerColor : this.selected ? this.selectedColor : this.innerColor);
         paintOuter.setColor(this.outerColor);
         this.loadingFloat.setParent(this.parentView);
-        float f2 = this.loadingFloat.set((!this.loading || MediaController.getInstance().isPlayingMessage(this.messageObject)) ? 0.0f : 1.0f);
+        boolean isPlaying = MediaController.getInstance().isPlayingMessage(this.messageObject);
+        float loadingT = this.loadingFloat.set((!this.loading || isPlaying) ? 0.0f : 1.0f);
         Paint paint3 = paintInner;
-        paint3.setColor(ColorUtils.blendARGB(paint3.getColor(), this.innerColor, f2));
-        float f3 = 1.0f - f2;
-        paintOuter.setAlpha((int) (paint.getAlpha() * f3 * f));
-        paintInner.setAlpha((int) (paint2.getAlpha() * f));
-        canvas.drawRect(0.0f, 0.0f, this.width + dpf2, this.height, paintInner);
-        if (f2 < 1.0f) {
-            canvas.drawRect(0.0f, 0.0f, this.progress * (this.width + dpf2) * f3, this.height, paintOuter);
+        paint3.setColor(ColorUtils.blendARGB(paint3.getColor(), this.innerColor, loadingT));
+        paintOuter.setAlpha((int) (paint.getAlpha() * (1.0f - loadingT) * alpha));
+        paintInner.setAlpha((int) (paint2.getAlpha() * alpha));
+        canvas.drawRect(0.0f, 0.0f, this.width + strokeWidth, this.height, paintInner);
+        if (loadingT < 1.0f) {
+            canvas.drawRect(0.0f, 0.0f, this.progress * (this.width + strokeWidth) * (1.0f - loadingT), this.height, paintOuter);
         }
-        if (f2 > 0.0f) {
+        if (loadingT > 0.0f) {
             if (this.loadingPaint == null || Math.abs(this.loadingPaintWidth - this.width) > AndroidUtilities.dp(8.0f) || this.loadingPaintColor1 != this.innerColor || this.loadingPaintColor2 != this.outerColor) {
                 if (this.loadingPaint == null) {
                     this.loadingPaint = new Paint(1);
@@ -387,44 +384,42 @@ public class SeekBarWaveform {
                 this.loadingPaintColor1 = this.innerColor;
                 this.loadingPaintColor2 = this.outerColor;
                 Paint paint4 = this.loadingPaint;
-                float f4 = this.width;
-                this.loadingPaintWidth = f4;
+                float f = this.width;
+                this.loadingPaintWidth = f;
                 int i = this.loadingPaintColor1;
-                paint4.setShader(new LinearGradient(0.0f, 0.0f, f4, 0.0f, new int[]{i, this.loadingPaintColor2, i}, new float[]{0.0f, 0.2f, 0.4f}, Shader.TileMode.CLAMP));
+                paint4.setShader(new LinearGradient(0.0f, 0.0f, f, 0.0f, new int[]{i, this.loadingPaintColor2, i}, new float[]{0.0f, 0.2f, 0.4f}, Shader.TileMode.CLAMP));
             }
-            this.loadingPaint.setAlpha((int) (f2 * 255.0f * f));
+            this.loadingPaint.setAlpha((int) (255.0f * loadingT * alpha));
             canvas.save();
-            float pow = ((((float) Math.pow(((float) (SystemClock.elapsedRealtime() - this.loadingStart)) / 270.0f, 0.75d)) % 1.6f) - 0.6f) * this.loadingPaintWidth;
-            canvas.translate(pow, 0.0f);
-            canvas.drawRect(-pow, 0.0f, (this.width + 5) - pow, this.height, this.loadingPaint);
+            float t = ((float) (SystemClock.elapsedRealtime() - this.loadingStart)) / 270.0f;
+            float dx = ((((float) Math.pow(t, 0.75d)) % 1.6f) - 0.6f) * this.loadingPaintWidth;
+            canvas.translate(dx, 0.0f);
+            canvas.drawRect(-dx, 0.0f, (this.width + 5) - dx, this.height, this.loadingPaint);
             canvas.restore();
             View view = this.parentView;
-            if (view == null) {
-                return;
+            if (view != null) {
+                view.invalidate();
             }
-            view.invalidate();
         }
     }
 
-    private void addBar(Path path, float f, float f2) {
-        float dpf2 = AndroidUtilities.dpf2(2.0f);
-        int dp = (this.height - AndroidUtilities.dp(14.0f)) / 2;
-        float f3 = f2 * this.waveScaling;
-        RectF rectF = AndroidUtilities.rectTmp;
-        float f4 = dpf2 / 2.0f;
-        rectF.set((AndroidUtilities.dpf2(1.0f) + f) - f4, AndroidUtilities.dp(7.0f) + dp + ((-f3) - f4), f + AndroidUtilities.dpf2(1.0f) + f4, dp + AndroidUtilities.dp(7.0f) + f3 + f4);
-        path.addRoundRect(rectF, dpf2, dpf2, Path.Direction.CW);
+    private void addBar(Path path, float x, float h) {
+        float strokeWidth = AndroidUtilities.dpf2(2.0f);
+        int y = (this.height - AndroidUtilities.dp(14.0f)) / 2;
+        float h2 = h * this.waveScaling;
+        AndroidUtilities.rectTmp.set((AndroidUtilities.dpf2(1.0f) + x) - (strokeWidth / 2.0f), AndroidUtilities.dp(7.0f) + y + ((-h2) - (strokeWidth / 2.0f)), AndroidUtilities.dpf2(1.0f) + x + (strokeWidth / 2.0f), AndroidUtilities.dp(7.0f) + y + (strokeWidth / 2.0f) + h2);
+        path.addRoundRect(AndroidUtilities.rectTmp, strokeWidth, strokeWidth, Path.Direction.CW);
     }
 
-    public void setWaveScaling(float f) {
-        this.waveScaling = f;
+    public void setWaveScaling(float waveScaling) {
+        this.waveScaling = waveScaling;
     }
 
-    public void setLoading(boolean z) {
-        if (!this.loading && z && this.loadingFloat.get() <= 0.0f) {
+    public void setLoading(boolean loading) {
+        if (!this.loading && loading && this.loadingFloat.get() <= 0.0f) {
             this.loadingStart = SystemClock.elapsedRealtime();
         }
-        this.loading = z;
+        this.loading = loading;
         View view = this.parentView;
         if (view != null) {
             view.invalidate();

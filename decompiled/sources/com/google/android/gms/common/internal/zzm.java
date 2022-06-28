@@ -4,7 +4,7 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import com.google.android.gms.dynamic.IObjectWrapper;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface zzm extends IInterface {
     IObjectWrapper zzb() throws RemoteException;
 

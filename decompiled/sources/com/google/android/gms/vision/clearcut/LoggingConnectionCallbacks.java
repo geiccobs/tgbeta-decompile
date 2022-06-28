@@ -1,16 +1,13 @@
 package com.google.android.gms.vision.clearcut;
 
 import android.os.Bundle;
-import androidx.annotation.Keep;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-@Keep
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class LoggingConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     @Override // com.google.android.gms.common.api.internal.ConnectionCallbacks
-    public void onConnected(@RecentlyNonNull Bundle bundle) {
+    public void onConnected(Bundle bundle) {
         throw new NoSuchMethodError();
     }
 
@@ -20,7 +17,7 @@ public class LoggingConnectionCallbacks implements GoogleApiClient.ConnectionCal
     }
 
     @Override // com.google.android.gms.common.api.internal.OnConnectionFailedListener
-    public void onConnectionFailed(@RecentlyNonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(ConnectionResult connectionResult) {
         throw new NoSuchMethodError();
     }
 }

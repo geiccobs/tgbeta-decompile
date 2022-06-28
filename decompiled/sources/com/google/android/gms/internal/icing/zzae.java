@@ -9,7 +9,7 @@ import com.google.android.gms.common.api.internal.OnConnectionFailedListener;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzae extends GmsClient<zzaa> {
     public zzae(Context context, Looper looper, ClientSettings clientSettings, ConnectionCallbacks connectionCallbacks, OnConnectionFailedListener onConnectionFailedListener) {
         super(context, looper, 19, clientSettings, connectionCallbacks, onConnectionFailedListener);

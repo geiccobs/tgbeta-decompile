@@ -1,5 +1,7 @@
 package org.telegram.ui;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -11,7 +13,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.style.CharacterStyle;
+import android.text.style.ClickableSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +25,12 @@ import android.widget.FrameLayout;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.messaging.Constants;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
@@ -30,45 +38,14 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$InputPrivacyRule;
-import org.telegram.tgnet.TLRPC$InputUser;
-import org.telegram.tgnet.TLRPC$KeyboardButton;
-import org.telegram.tgnet.TLRPC$PrivacyRule;
-import org.telegram.tgnet.TLRPC$TL_account_privacyRules;
-import org.telegram.tgnet.TLRPC$TL_account_setPrivacy;
-import org.telegram.tgnet.TLRPC$TL_error;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyAddedByPhone;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyChatInvite;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyForwards;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneCall;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneNumber;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneP2P;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyProfilePhoto;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyStatusTimestamp;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowChatParticipants;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowUsers;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueDisallowChatParticipants;
-import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueDisallowUsers;
-import org.telegram.tgnet.TLRPC$TL_message;
-import org.telegram.tgnet.TLRPC$TL_messageFwdHeader;
-import org.telegram.tgnet.TLRPC$TL_messageMediaEmpty;
-import org.telegram.tgnet.TLRPC$TL_peerUser;
-import org.telegram.tgnet.TLRPC$TL_privacyValueAllowAll;
-import org.telegram.tgnet.TLRPC$TL_privacyValueAllowChatParticipants;
-import org.telegram.tgnet.TLRPC$TL_privacyValueAllowContacts;
-import org.telegram.tgnet.TLRPC$TL_privacyValueAllowUsers;
-import org.telegram.tgnet.TLRPC$TL_privacyValueDisallowAll;
-import org.telegram.tgnet.TLRPC$TL_privacyValueDisallowChatParticipants;
-import org.telegram.tgnet.TLRPC$TL_privacyValueDisallowUsers;
-import org.telegram.tgnet.TLRPC$TL_reactionCount;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -81,6 +58,7 @@ import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSelectionHelper;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.BackgroundGradientDrawable;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.HintView;
 import org.telegram.ui.Components.LayoutHelper;
@@ -89,8 +67,20 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.GroupCreateActivity;
 import org.telegram.ui.PrivacyControlActivity;
 import org.telegram.ui.PrivacyUsersActivity;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class PrivacyControlActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+    public static final int PRIVACY_RULES_TYPE_ADDED_BY_PHONE = 7;
+    public static final int PRIVACY_RULES_TYPE_CALLS = 2;
+    public static final int PRIVACY_RULES_TYPE_FORWARDS = 5;
+    public static final int PRIVACY_RULES_TYPE_INVITE = 1;
+    public static final int PRIVACY_RULES_TYPE_LASTSEEN = 0;
+    public static final int PRIVACY_RULES_TYPE_P2P = 3;
+    public static final int PRIVACY_RULES_TYPE_PHONE = 6;
+    public static final int PRIVACY_RULES_TYPE_PHOTO = 4;
+    public static final int TYPE_CONTACTS = 2;
+    public static final int TYPE_EVERYBODY = 0;
+    public static final int TYPE_NOBODY = 1;
+    private static final int done_button = 1;
     private int alwaysShareRow;
     private ArrayList<Long> currentMinus;
     private ArrayList<Long> currentPlus;
@@ -124,69 +114,51 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     private int shareDetailRow;
     private int shareSectionRow;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class MessageCell extends FrameLayout {
         private Drawable backgroundDrawable;
         private BackgroundGradientDrawable.Disposable backgroundGradientDisposable;
         private ChatMessageCell cell;
         private HintView hintView;
+        private final Runnable invalidateRunnable = new Runnable() { // from class: org.telegram.ui.PrivacyControlActivity$MessageCell$$ExternalSyntheticLambda0
+            @Override // java.lang.Runnable
+            public final void run() {
+                PrivacyControlActivity.MessageCell.this.invalidate();
+            }
+        };
         private MessageObject messageObject;
         private Drawable shadowDrawable;
 
-        @Override // android.view.ViewGroup, android.view.View
-        protected void dispatchSetPressed(boolean z) {
-        }
-
-        @Override // android.view.ViewGroup, android.view.View
-        public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override // android.view.ViewGroup
-        public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override // android.view.View
-        public boolean onTouchEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
-        public MessageCell(PrivacyControlActivity privacyControlActivity, Context context) {
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public MessageCell(Context context) {
             super(context);
-            new Runnable() { // from class: org.telegram.ui.PrivacyControlActivity$MessageCell$$ExternalSyntheticLambda0
-                @Override // java.lang.Runnable
-                public final void run() {
-                    PrivacyControlActivity.MessageCell.this.invalidate();
-                }
-            };
+            PrivacyControlActivity.this = r18;
             setWillNotDraw(false);
             setClipToPadding(false);
-            this.shadowDrawable = Theme.getThemedDrawable(context, (int) R.drawable.greydivider_bottom, "windowBackgroundGrayShadow");
+            this.shadowDrawable = Theme.getThemedDrawable(context, (int) R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
             setPadding(0, AndroidUtilities.dp(11.0f), 0, AndroidUtilities.dp(11.0f));
-            TLRPC$User user = MessagesController.getInstance(((BaseFragment) privacyControlActivity).currentAccount).getUser(Long.valueOf(UserConfig.getInstance(((BaseFragment) privacyControlActivity).currentAccount).getClientUserId()));
-            TLRPC$TL_message tLRPC$TL_message = new TLRPC$TL_message();
-            tLRPC$TL_message.message = LocaleController.getString("PrivacyForwardsMessageLine", R.string.PrivacyForwardsMessageLine);
-            tLRPC$TL_message.date = (((int) (System.currentTimeMillis() / 1000)) - 3600) + 60;
-            tLRPC$TL_message.dialog_id = 1L;
-            tLRPC$TL_message.flags = 261;
-            tLRPC$TL_message.from_id = new TLRPC$TL_peerUser();
-            tLRPC$TL_message.id = 1;
-            TLRPC$TL_messageFwdHeader tLRPC$TL_messageFwdHeader = new TLRPC$TL_messageFwdHeader();
-            tLRPC$TL_message.fwd_from = tLRPC$TL_messageFwdHeader;
-            tLRPC$TL_messageFwdHeader.from_name = ContactsController.formatName(user.first_name, user.last_name);
-            tLRPC$TL_message.media = new TLRPC$TL_messageMediaEmpty();
-            tLRPC$TL_message.out = false;
-            TLRPC$TL_peerUser tLRPC$TL_peerUser = new TLRPC$TL_peerUser();
-            tLRPC$TL_message.peer_id = tLRPC$TL_peerUser;
-            tLRPC$TL_peerUser.user_id = UserConfig.getInstance(((BaseFragment) privacyControlActivity).currentAccount).getClientUserId();
-            MessageObject messageObject = new MessageObject(((BaseFragment) privacyControlActivity).currentAccount, tLRPC$TL_message, true, false);
+            int date = ((int) (System.currentTimeMillis() / 1000)) - 3600;
+            TLRPC.User currentUser = MessagesController.getInstance(r18.currentAccount).getUser(Long.valueOf(UserConfig.getInstance(r18.currentAccount).getClientUserId()));
+            TLRPC.Message message = new TLRPC.TL_message();
+            message.message = LocaleController.getString("PrivacyForwardsMessageLine", R.string.PrivacyForwardsMessageLine);
+            message.date = date + 60;
+            message.dialog_id = 1L;
+            message.flags = 261;
+            message.from_id = new TLRPC.TL_peerUser();
+            message.id = 1;
+            message.fwd_from = new TLRPC.TL_messageFwdHeader();
+            message.fwd_from.from_name = ContactsController.formatName(currentUser.first_name, currentUser.last_name);
+            message.media = new TLRPC.TL_messageMediaEmpty();
+            message.out = false;
+            message.peer_id = new TLRPC.TL_peerUser();
+            message.peer_id.user_id = UserConfig.getInstance(r18.currentAccount).getClientUserId();
+            MessageObject messageObject = new MessageObject(r18.currentAccount, message, true, false);
             this.messageObject = messageObject;
             messageObject.eventId = 1L;
-            messageObject.resetLayout();
+            this.messageObject.resetLayout();
             ChatMessageCell chatMessageCell = new ChatMessageCell(context);
             this.cell = chatMessageCell;
-            chatMessageCell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate(this, privacyControlActivity) { // from class: org.telegram.ui.PrivacyControlActivity.MessageCell.1
+            chatMessageCell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate() { // from class: org.telegram.ui.PrivacyControlActivity.MessageCell.1
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
                 public /* synthetic */ boolean canDrawOutboundsContent() {
                     return ChatMessageCell.ChatMessageCellDelegate.CC.$default$canDrawOutboundsContent(this);
@@ -203,23 +175,23 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ void didLongPressBotButton(ChatMessageCell chatMessageCell2, TLRPC$KeyboardButton tLRPC$KeyboardButton) {
-                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didLongPressBotButton(this, chatMessageCell2, tLRPC$KeyboardButton);
+                public /* synthetic */ void didLongPressBotButton(ChatMessageCell chatMessageCell2, TLRPC.KeyboardButton keyboardButton) {
+                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didLongPressBotButton(this, chatMessageCell2, keyboardButton);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ boolean didLongPressChannelAvatar(ChatMessageCell chatMessageCell2, TLRPC$Chat tLRPC$Chat, int i, float f, float f2) {
-                    return ChatMessageCell.ChatMessageCellDelegate.CC.$default$didLongPressChannelAvatar(this, chatMessageCell2, tLRPC$Chat, i, f, f2);
+                public /* synthetic */ boolean didLongPressChannelAvatar(ChatMessageCell chatMessageCell2, TLRPC.Chat chat, int i, float f, float f2) {
+                    return ChatMessageCell.ChatMessageCellDelegate.CC.$default$didLongPressChannelAvatar(this, chatMessageCell2, chat, i, f, f2);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ boolean didLongPressUserAvatar(ChatMessageCell chatMessageCell2, TLRPC$User tLRPC$User, float f, float f2) {
-                    return ChatMessageCell.ChatMessageCellDelegate.CC.$default$didLongPressUserAvatar(this, chatMessageCell2, tLRPC$User, f, f2);
+                public /* synthetic */ boolean didLongPressUserAvatar(ChatMessageCell chatMessageCell2, TLRPC.User user, float f, float f2) {
+                    return ChatMessageCell.ChatMessageCellDelegate.CC.$default$didLongPressUserAvatar(this, chatMessageCell2, user, f, f2);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ void didPressBotButton(ChatMessageCell chatMessageCell2, TLRPC$KeyboardButton tLRPC$KeyboardButton) {
-                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressBotButton(this, chatMessageCell2, tLRPC$KeyboardButton);
+                public /* synthetic */ void didPressBotButton(ChatMessageCell chatMessageCell2, TLRPC.KeyboardButton keyboardButton) {
+                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressBotButton(this, chatMessageCell2, keyboardButton);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
@@ -228,8 +200,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ void didPressChannelAvatar(ChatMessageCell chatMessageCell2, TLRPC$Chat tLRPC$Chat, int i, float f, float f2) {
-                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressChannelAvatar(this, chatMessageCell2, tLRPC$Chat, i, f, f2);
+                public /* synthetic */ void didPressChannelAvatar(ChatMessageCell chatMessageCell2, TLRPC.Chat chat, int i, float f, float f2) {
+                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressChannelAvatar(this, chatMessageCell2, chat, i, f, f2);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
@@ -263,8 +235,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ void didPressReaction(ChatMessageCell chatMessageCell2, TLRPC$TL_reactionCount tLRPC$TL_reactionCount, boolean z) {
-                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressReaction(this, chatMessageCell2, tLRPC$TL_reactionCount, z);
+                public /* synthetic */ void didPressReaction(ChatMessageCell chatMessageCell2, TLRPC.TL_reactionCount tL_reactionCount, boolean z) {
+                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressReaction(this, chatMessageCell2, tL_reactionCount, z);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
@@ -288,8 +260,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
-                public /* synthetic */ void didPressUserAvatar(ChatMessageCell chatMessageCell2, TLRPC$User tLRPC$User, float f, float f2) {
-                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressUserAvatar(this, chatMessageCell2, tLRPC$User, f, f2);
+                public /* synthetic */ void didPressUserAvatar(ChatMessageCell chatMessageCell2, TLRPC.User user, float f, float f2) {
+                    ChatMessageCell.ChatMessageCellDelegate.CC.$default$didPressUserAvatar(this, chatMessageCell2, user, f, f2);
                 }
 
                 @Override // org.telegram.ui.Cells.ChatMessageCell.ChatMessageCellDelegate
@@ -397,9 +369,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     ChatMessageCell.ChatMessageCellDelegate.CC.$default$videoTimerReached(this);
                 }
             });
-            ChatMessageCell chatMessageCell2 = this.cell;
-            chatMessageCell2.isChat = false;
-            chatMessageCell2.setFullyDraw(true);
+            this.cell.isChat = false;
+            this.cell.setFullyDraw(true);
             this.cell.setMessageObject(this.messageObject, null, false, false);
             addView(this.cell, LayoutHelper.createLinear(-1, -2));
             HintView hintView = new HintView(context, 1, true);
@@ -415,14 +386,14 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
-            Drawable cachedWallpaperNonBlocking = Theme.getCachedWallpaperNonBlocking();
-            if (cachedWallpaperNonBlocking != null && this.backgroundDrawable != cachedWallpaperNonBlocking) {
+            Drawable newDrawable = Theme.getCachedWallpaperNonBlocking();
+            if (newDrawable != null && this.backgroundDrawable != newDrawable) {
                 BackgroundGradientDrawable.Disposable disposable = this.backgroundGradientDisposable;
                 if (disposable != null) {
                     disposable.dispose();
                     this.backgroundGradientDisposable = null;
                 }
-                this.backgroundDrawable = cachedWallpaperNonBlocking;
+                this.backgroundDrawable = newDrawable;
             }
             Drawable drawable = this.backgroundDrawable;
             if ((drawable instanceof ColorDrawable) || (drawable instanceof GradientDrawable) || (drawable instanceof MotionBackgroundDrawable)) {
@@ -434,21 +405,24 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     drawable2.draw(canvas);
                 }
             } else if (drawable instanceof BitmapDrawable) {
-                if (((BitmapDrawable) drawable).getTileModeX() == Shader.TileMode.REPEAT) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                if (bitmapDrawable.getTileModeX() == Shader.TileMode.REPEAT) {
                     canvas.save();
-                    float f = 2.0f / AndroidUtilities.density;
-                    canvas.scale(f, f);
-                    this.backgroundDrawable.setBounds(0, 0, (int) Math.ceil(getMeasuredWidth() / f), (int) Math.ceil(getMeasuredHeight() / f));
+                    float scale = 2.0f / AndroidUtilities.density;
+                    canvas.scale(scale, scale);
+                    this.backgroundDrawable.setBounds(0, 0, (int) Math.ceil(getMeasuredWidth() / scale), (int) Math.ceil(getMeasuredHeight() / scale));
                 } else {
-                    int measuredHeight = getMeasuredHeight();
-                    float max = Math.max(getMeasuredWidth() / this.backgroundDrawable.getIntrinsicWidth(), measuredHeight / this.backgroundDrawable.getIntrinsicHeight());
-                    int ceil = (int) Math.ceil(this.backgroundDrawable.getIntrinsicWidth() * max);
-                    int ceil2 = (int) Math.ceil(this.backgroundDrawable.getIntrinsicHeight() * max);
-                    int measuredWidth = (getMeasuredWidth() - ceil) / 2;
-                    int i = (measuredHeight - ceil2) / 2;
+                    int viewHeight = getMeasuredHeight();
+                    float scaleX = getMeasuredWidth() / this.backgroundDrawable.getIntrinsicWidth();
+                    float scaleY = viewHeight / this.backgroundDrawable.getIntrinsicHeight();
+                    float scale2 = Math.max(scaleX, scaleY);
+                    int width = (int) Math.ceil(this.backgroundDrawable.getIntrinsicWidth() * scale2);
+                    int height = (int) Math.ceil(this.backgroundDrawable.getIntrinsicHeight() * scale2);
+                    int x = (getMeasuredWidth() - width) / 2;
+                    int y = (viewHeight - height) / 2;
                     canvas.save();
-                    canvas.clipRect(0, 0, ceil, getMeasuredHeight());
-                    this.backgroundDrawable.setBounds(measuredWidth, i, ceil + measuredWidth, ceil2 + i);
+                    canvas.clipRect(0, 0, width, getMeasuredHeight());
+                    this.backgroundDrawable.setBounds(x, y, x + width, y + height);
                 }
                 this.backgroundDrawable.draw(canvas);
                 canvas.restore();
@@ -469,6 +443,25 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             }
         }
 
+        @Override // android.view.ViewGroup
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            return false;
+        }
+
+        @Override // android.view.ViewGroup, android.view.View
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            return false;
+        }
+
+        @Override // android.view.ViewGroup, android.view.View
+        protected void dispatchSetPressed(boolean pressed) {
+        }
+
+        @Override // android.view.View
+        public boolean onTouchEvent(MotionEvent event) {
+            return false;
+        }
+
         @Override // android.view.View
         public void invalidate() {
             super.invalidate();
@@ -476,15 +469,15 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         }
     }
 
-    public PrivacyControlActivity(int i) {
-        this(i, false);
+    public PrivacyControlActivity(int type) {
+        this(type, false);
     }
 
-    public PrivacyControlActivity(int i, boolean z) {
+    public PrivacyControlActivity(int type, boolean load) {
         this.initialPlus = new ArrayList<>();
         this.initialMinus = new ArrayList<>();
-        this.rulesType = i;
-        if (z) {
+        this.rulesType = type;
+        if (load) {
             ContactsController.getInstance(this.currentAccount).loadPrivacySettings();
         }
     }
@@ -511,7 +504,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public View createView(Context context) {
         if (this.rulesType == 5) {
-            this.messageCell = new MessageCell(this, context);
+            this.messageCell = new MessageCell(context);
         }
         this.actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         this.actionBar.setAllowOverlayTitle(true);
@@ -533,19 +526,18 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         }
         this.actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() { // from class: org.telegram.ui.PrivacyControlActivity.1
             @Override // org.telegram.ui.ActionBar.ActionBar.ActionBarMenuOnItemClick
-            public void onItemClick(int i2) {
-                if (i2 == -1) {
-                    if (!PrivacyControlActivity.this.checkDiscard()) {
-                        return;
+            public void onItemClick(int id) {
+                if (id == -1) {
+                    if (PrivacyControlActivity.this.checkDiscard()) {
+                        PrivacyControlActivity.this.finishFragment();
                     }
-                    PrivacyControlActivity.this.finishFragment();
-                } else if (i2 != 1) {
-                } else {
+                } else if (id == 1) {
                     PrivacyControlActivity.this.processDone();
                 }
             }
         });
-        this.doneButton = this.actionBar.createMenu().addItemWithWidth(1, R.drawable.ic_ab_done, AndroidUtilities.dp(56.0f), LocaleController.getString("Done", R.string.Done));
+        ActionBarMenu menu = this.actionBar.createMenu();
+        this.doneButton = menu.addItemWithWidth(1, R.drawable.ic_ab_done, AndroidUtilities.dp(56.0f), LocaleController.getString("Done", R.string.Done));
         boolean hasChanges = hasChanges();
         float f = 1.0f;
         this.doneButton.setAlpha(hasChanges ? 1.0f : 0.0f);
@@ -557,133 +549,134 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         view.setScaleY(f);
         this.doneButton.setEnabled(hasChanges);
         this.listAdapter = new ListAdapter(context);
-        FrameLayout frameLayout = new FrameLayout(context);
-        this.fragmentView = frameLayout;
-        FrameLayout frameLayout2 = frameLayout;
-        frameLayout2.setBackgroundColor(Theme.getColor("windowBackgroundGray"));
+        this.fragmentView = new FrameLayout(context);
+        FrameLayout frameLayout = (FrameLayout) this.fragmentView;
+        frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
         RecyclerListView recyclerListView = new RecyclerListView(context);
         this.listView = recyclerListView;
         recyclerListView.setLayoutManager(new LinearLayoutManager(context, 1, false));
         this.listView.setVerticalScrollBarEnabled(false);
         ((DefaultItemAnimator) this.listView.getItemAnimator()).setDelayAnimations(false);
-        frameLayout2.addView(this.listView, LayoutHelper.createFrame(-1, -1.0f));
+        frameLayout.addView(this.listView, LayoutHelper.createFrame(-1, -1.0f));
         this.listView.setAdapter(this.listAdapter);
         this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda7
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
             public final void onItemClick(View view2, int i2) {
-                PrivacyControlActivity.this.lambda$createView$2(view2, i2);
+                PrivacyControlActivity.this.m4328lambda$createView$2$orgtelegramuiPrivacyControlActivity(view2, i2);
             }
         });
         setMessageText();
         return this.fragmentView;
     }
 
-    public /* synthetic */ void lambda$createView$2(View view, final int i) {
-        ArrayList<Long> arrayList;
-        int i2 = this.nobodyRow;
-        int i3 = 0;
+    /* renamed from: lambda$createView$2$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4328lambda$createView$2$orgtelegramuiPrivacyControlActivity(View view, final int position) {
+        int newType;
+        int newType2;
+        ArrayList<Long> createFromArray;
+        int i = this.nobodyRow;
         boolean z = true;
-        if (i == i2 || i == this.everybodyRow || i == this.myContactsRow) {
-            if (i == i2) {
-                i3 = 1;
-            } else if (i != this.everybodyRow) {
-                i3 = 2;
+        int i2 = 1;
+        if (position == i || position == this.everybodyRow || position == this.myContactsRow) {
+            if (position == i) {
+                newType = 1;
+            } else if (position == this.everybodyRow) {
+                newType = 0;
+            } else {
+                newType = 2;
             }
-            if (i3 == this.currentType) {
+            if (newType == this.currentType) {
                 return;
             }
-            this.currentType = i3;
+            this.currentType = newType;
             updateDoneButton();
             updateRows(true);
-        } else if (i == this.phoneContactsRow || i == this.phoneEverybodyRow) {
-            if (i != this.phoneEverybodyRow) {
-                i3 = 1;
+        } else if (position == this.phoneContactsRow || position == this.phoneEverybodyRow) {
+            if (position == this.phoneEverybodyRow) {
+                newType2 = 0;
+            } else {
+                newType2 = 1;
             }
-            if (i3 == this.currentSubType) {
+            if (newType2 == this.currentSubType) {
                 return;
             }
-            this.currentSubType = i3;
+            this.currentSubType = newType2;
             updateDoneButton();
             updateRows(true);
         } else {
-            int i4 = this.neverShareRow;
-            if (i == i4 || i == this.alwaysShareRow) {
-                if (i == i4) {
-                    arrayList = this.currentMinus;
+            int i3 = this.neverShareRow;
+            if (position == i3 || position == this.alwaysShareRow) {
+                if (position == i3) {
+                    createFromArray = this.currentMinus;
                 } else {
-                    arrayList = this.currentPlus;
+                    createFromArray = this.currentPlus;
                 }
-                if (arrayList.isEmpty()) {
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean(i == this.neverShareRow ? "isNeverShare" : "isAlwaysShare", true);
-                    if (this.rulesType != 0) {
-                        i3 = 1;
+                if (createFromArray.isEmpty()) {
+                    Bundle args = new Bundle();
+                    args.putBoolean(position == this.neverShareRow ? "isNeverShare" : "isAlwaysShare", true);
+                    if (this.rulesType == 0) {
+                        i2 = 0;
                     }
-                    bundle.putInt("chatAddType", i3);
-                    GroupCreateActivity groupCreateActivity = new GroupCreateActivity(bundle);
-                    groupCreateActivity.setDelegate(new GroupCreateActivity.GroupCreateActivityDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda8
+                    args.putInt("chatAddType", i2);
+                    GroupCreateActivity fragment = new GroupCreateActivity(args);
+                    fragment.setDelegate(new GroupCreateActivity.GroupCreateActivityDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda8
                         @Override // org.telegram.ui.GroupCreateActivity.GroupCreateActivityDelegate
-                        public final void didSelectUsers(ArrayList arrayList2) {
-                            PrivacyControlActivity.this.lambda$createView$0(i, arrayList2);
+                        public final void didSelectUsers(ArrayList arrayList) {
+                            PrivacyControlActivity.this.m4326lambda$createView$0$orgtelegramuiPrivacyControlActivity(position, arrayList);
                         }
                     });
-                    presentFragment(groupCreateActivity);
+                    presentFragment(fragment);
                     return;
                 }
                 boolean z2 = this.rulesType != 0;
-                if (i != this.alwaysShareRow) {
+                if (position != this.alwaysShareRow) {
                     z = false;
                 }
-                PrivacyUsersActivity privacyUsersActivity = new PrivacyUsersActivity(0, arrayList, z2, z);
-                privacyUsersActivity.setDelegate(new PrivacyUsersActivity.PrivacyActivityDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda9
+                PrivacyUsersActivity fragment2 = new PrivacyUsersActivity(0, createFromArray, z2, z);
+                fragment2.setDelegate(new PrivacyUsersActivity.PrivacyActivityDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda9
                     @Override // org.telegram.ui.PrivacyUsersActivity.PrivacyActivityDelegate
-                    public final void didUpdateUserList(ArrayList arrayList2, boolean z3) {
-                        PrivacyControlActivity.this.lambda$createView$1(i, arrayList2, z3);
+                    public final void didUpdateUserList(ArrayList arrayList, boolean z3) {
+                        PrivacyControlActivity.this.m4327lambda$createView$1$orgtelegramuiPrivacyControlActivity(position, arrayList, z3);
                     }
                 });
-                presentFragment(privacyUsersActivity);
-            } else if (i != this.p2pRow) {
-            } else {
+                presentFragment(fragment2);
+            } else if (position == this.p2pRow) {
                 presentFragment(new PrivacyControlActivity(3));
             }
         }
     }
 
-    public /* synthetic */ void lambda$createView$0(int i, ArrayList arrayList) {
-        int i2 = 0;
-        if (i == this.neverShareRow) {
-            this.currentMinus = arrayList;
-            while (i2 < this.currentMinus.size()) {
-                this.currentPlus.remove(this.currentMinus.get(i2));
-                i2++;
+    /* renamed from: lambda$createView$0$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4326lambda$createView$0$orgtelegramuiPrivacyControlActivity(int position, ArrayList ids) {
+        if (position == this.neverShareRow) {
+            this.currentMinus = ids;
+            for (int a = 0; a < this.currentMinus.size(); a++) {
+                this.currentPlus.remove(this.currentMinus.get(a));
             }
         } else {
-            this.currentPlus = arrayList;
-            while (i2 < this.currentPlus.size()) {
-                this.currentMinus.remove(this.currentPlus.get(i2));
-                i2++;
+            this.currentPlus = ids;
+            for (int a2 = 0; a2 < this.currentPlus.size(); a2++) {
+                this.currentMinus.remove(this.currentPlus.get(a2));
             }
         }
         updateDoneButton();
         this.listAdapter.notifyDataSetChanged();
     }
 
-    public /* synthetic */ void lambda$createView$1(int i, ArrayList arrayList, boolean z) {
-        int i2 = 0;
-        if (i == this.neverShareRow) {
-            this.currentMinus = arrayList;
-            if (z) {
-                while (i2 < this.currentMinus.size()) {
-                    this.currentPlus.remove(this.currentMinus.get(i2));
-                    i2++;
+    /* renamed from: lambda$createView$1$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4327lambda$createView$1$orgtelegramuiPrivacyControlActivity(int position, ArrayList ids, boolean added) {
+        if (position == this.neverShareRow) {
+            this.currentMinus = ids;
+            if (added) {
+                for (int a = 0; a < this.currentMinus.size(); a++) {
+                    this.currentPlus.remove(this.currentMinus.get(a));
                 }
             }
         } else {
-            this.currentPlus = arrayList;
-            if (z) {
-                while (i2 < this.currentPlus.size()) {
-                    this.currentMinus.remove(this.currentPlus.get(i2));
-                    i2++;
+            this.currentPlus = ids;
+            if (added) {
+                for (int a2 = 0; a2 < this.currentPlus.size(); a2++) {
+                    this.currentMinus.remove(this.currentPlus.get(a2));
                 }
             }
         }
@@ -692,14 +685,13 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int i, int i2, Object... objArr) {
+    public void didReceivedNotification(int id, int account, Object... args) {
         MessageCell messageCell;
-        if (i == NotificationCenter.privacyRulesUpdated) {
+        if (id == NotificationCenter.privacyRulesUpdated) {
             checkPrivacy();
-        } else if (i == NotificationCenter.emojiLoaded) {
+        } else if (id == NotificationCenter.emojiLoaded) {
             this.listView.invalidateViews();
-        } else if (i != NotificationCenter.didSetNewWallpapper || (messageCell = this.messageCell) == null) {
-        } else {
+        } else if (id == NotificationCenter.didSetNewWallpapper && (messageCell = this.messageCell) != null) {
             messageCell.invalidate();
         }
     }
@@ -716,168 +708,139 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     }
 
     private void applyCurrentPrivacySettings() {
-        TLRPC$InputUser inputUser;
-        TLRPC$InputUser inputUser2;
-        TLRPC$TL_account_setPrivacy tLRPC$TL_account_setPrivacy = new TLRPC$TL_account_setPrivacy();
+        TLRPC.InputUser inputUser;
+        TLRPC.InputUser inputUser2;
+        TLRPC.TL_account_setPrivacy req = new TLRPC.TL_account_setPrivacy();
         int i = this.rulesType;
         if (i == 6) {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyPhoneNumber();
+            req.key = new TLRPC.TL_inputPrivacyKeyPhoneNumber();
             if (this.currentType == 1) {
-                TLRPC$TL_account_setPrivacy tLRPC$TL_account_setPrivacy2 = new TLRPC$TL_account_setPrivacy();
-                tLRPC$TL_account_setPrivacy2.key = new TLRPC$TL_inputPrivacyKeyAddedByPhone();
+                TLRPC.TL_account_setPrivacy req2 = new TLRPC.TL_account_setPrivacy();
+                req2.key = new TLRPC.TL_inputPrivacyKeyAddedByPhone();
                 if (this.currentSubType == 0) {
-                    tLRPC$TL_account_setPrivacy2.rules.add(new TLRPC$InputPrivacyRule() { // from class: org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowAll
-                        public static int constructor = 407582158;
-
-                        @Override // org.telegram.tgnet.TLObject
-                        public void serializeToStream(AbstractSerializedData abstractSerializedData) {
-                            abstractSerializedData.writeInt32(constructor);
-                        }
-                    });
+                    req2.rules.add(new TLRPC.TL_inputPrivacyValueAllowAll());
                 } else {
-                    tLRPC$TL_account_setPrivacy2.rules.add(new TLRPC$InputPrivacyRule() { // from class: org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowContacts
-                        public static int constructor = 218751099;
-
-                        @Override // org.telegram.tgnet.TLObject
-                        public void serializeToStream(AbstractSerializedData abstractSerializedData) {
-                            abstractSerializedData.writeInt32(constructor);
-                        }
-                    });
+                    req2.rules.add(new TLRPC.TL_inputPrivacyValueAllowContacts());
                 }
-                ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_account_setPrivacy2, new RequestDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda5
+                ConnectionsManager.getInstance(this.currentAccount).sendRequest(req2, new RequestDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda5
                     @Override // org.telegram.tgnet.RequestDelegate
-                    public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-                        PrivacyControlActivity.this.lambda$applyCurrentPrivacySettings$4(tLObject, tLRPC$TL_error);
+                    public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
+                        PrivacyControlActivity.this.m4321xd2c174b(tLObject, tL_error);
                     }
                 }, 2);
             }
         } else if (i == 5) {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyForwards();
+            req.key = new TLRPC.TL_inputPrivacyKeyForwards();
         } else if (i == 4) {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyProfilePhoto();
+            req.key = new TLRPC.TL_inputPrivacyKeyProfilePhoto();
         } else if (i == 3) {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyPhoneP2P();
+            req.key = new TLRPC.TL_inputPrivacyKeyPhoneP2P();
         } else if (i == 2) {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyPhoneCall();
+            req.key = new TLRPC.TL_inputPrivacyKeyPhoneCall();
         } else if (i == 1) {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyChatInvite();
+            req.key = new TLRPC.TL_inputPrivacyKeyChatInvite();
         } else {
-            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyStatusTimestamp();
+            req.key = new TLRPC.TL_inputPrivacyKeyStatusTimestamp();
         }
         if (this.currentType != 0 && this.currentPlus.size() > 0) {
-            TLRPC$TL_inputPrivacyValueAllowUsers tLRPC$TL_inputPrivacyValueAllowUsers = new TLRPC$TL_inputPrivacyValueAllowUsers();
-            TLRPC$TL_inputPrivacyValueAllowChatParticipants tLRPC$TL_inputPrivacyValueAllowChatParticipants = new TLRPC$TL_inputPrivacyValueAllowChatParticipants();
-            for (int i2 = 0; i2 < this.currentPlus.size(); i2++) {
-                long longValue = this.currentPlus.get(i2).longValue();
-                if (DialogObject.isUserDialog(longValue)) {
-                    TLRPC$User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(longValue));
+            TLRPC.TL_inputPrivacyValueAllowUsers usersRule = new TLRPC.TL_inputPrivacyValueAllowUsers();
+            TLRPC.TL_inputPrivacyValueAllowChatParticipants chatsRule = new TLRPC.TL_inputPrivacyValueAllowChatParticipants();
+            for (int a = 0; a < this.currentPlus.size(); a++) {
+                long id = this.currentPlus.get(a).longValue();
+                if (DialogObject.isUserDialog(id)) {
+                    TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(id));
                     if (user != null && (inputUser2 = MessagesController.getInstance(this.currentAccount).getInputUser(user)) != null) {
-                        tLRPC$TL_inputPrivacyValueAllowUsers.users.add(inputUser2);
+                        usersRule.users.add(inputUser2);
                     }
                 } else {
-                    tLRPC$TL_inputPrivacyValueAllowChatParticipants.chats.add(Long.valueOf(-longValue));
+                    chatsRule.chats.add(Long.valueOf(-id));
                 }
             }
-            tLRPC$TL_account_setPrivacy.rules.add(tLRPC$TL_inputPrivacyValueAllowUsers);
-            tLRPC$TL_account_setPrivacy.rules.add(tLRPC$TL_inputPrivacyValueAllowChatParticipants);
+            req.rules.add(usersRule);
+            req.rules.add(chatsRule);
         }
         if (this.currentType != 1 && this.currentMinus.size() > 0) {
-            TLRPC$TL_inputPrivacyValueDisallowUsers tLRPC$TL_inputPrivacyValueDisallowUsers = new TLRPC$TL_inputPrivacyValueDisallowUsers();
-            TLRPC$TL_inputPrivacyValueDisallowChatParticipants tLRPC$TL_inputPrivacyValueDisallowChatParticipants = new TLRPC$TL_inputPrivacyValueDisallowChatParticipants();
-            for (int i3 = 0; i3 < this.currentMinus.size(); i3++) {
-                long longValue2 = this.currentMinus.get(i3).longValue();
-                if (DialogObject.isUserDialog(longValue2)) {
-                    TLRPC$User user2 = getMessagesController().getUser(Long.valueOf(longValue2));
+            TLRPC.TL_inputPrivacyValueDisallowUsers usersRule2 = new TLRPC.TL_inputPrivacyValueDisallowUsers();
+            TLRPC.TL_inputPrivacyValueDisallowChatParticipants chatsRule2 = new TLRPC.TL_inputPrivacyValueDisallowChatParticipants();
+            for (int a2 = 0; a2 < this.currentMinus.size(); a2++) {
+                long id2 = this.currentMinus.get(a2).longValue();
+                if (DialogObject.isUserDialog(id2)) {
+                    TLRPC.User user2 = getMessagesController().getUser(Long.valueOf(id2));
                     if (user2 != null && (inputUser = getMessagesController().getInputUser(user2)) != null) {
-                        tLRPC$TL_inputPrivacyValueDisallowUsers.users.add(inputUser);
+                        usersRule2.users.add(inputUser);
                     }
                 } else {
-                    tLRPC$TL_inputPrivacyValueDisallowChatParticipants.chats.add(Long.valueOf(-longValue2));
+                    chatsRule2.chats.add(Long.valueOf(-id2));
                 }
             }
-            tLRPC$TL_account_setPrivacy.rules.add(tLRPC$TL_inputPrivacyValueDisallowUsers);
-            tLRPC$TL_account_setPrivacy.rules.add(tLRPC$TL_inputPrivacyValueDisallowChatParticipants);
+            req.rules.add(usersRule2);
+            req.rules.add(chatsRule2);
         }
-        int i4 = this.currentType;
-        if (i4 == 0) {
-            tLRPC$TL_account_setPrivacy.rules.add(new TLRPC$InputPrivacyRule() { // from class: org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowAll
-                public static int constructor = 407582158;
-
-                @Override // org.telegram.tgnet.TLObject
-                public void serializeToStream(AbstractSerializedData abstractSerializedData) {
-                    abstractSerializedData.writeInt32(constructor);
-                }
-            });
-        } else if (i4 == 1) {
-            tLRPC$TL_account_setPrivacy.rules.add(new TLRPC$InputPrivacyRule() { // from class: org.telegram.tgnet.TLRPC$TL_inputPrivacyValueDisallowAll
-                public static int constructor = -697604407;
-
-                @Override // org.telegram.tgnet.TLObject
-                public void serializeToStream(AbstractSerializedData abstractSerializedData) {
-                    abstractSerializedData.writeInt32(constructor);
-                }
-            });
-        } else if (i4 == 2) {
-            tLRPC$TL_account_setPrivacy.rules.add(new TLRPC$InputPrivacyRule() { // from class: org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowContacts
-                public static int constructor = 218751099;
-
-                @Override // org.telegram.tgnet.TLObject
-                public void serializeToStream(AbstractSerializedData abstractSerializedData) {
-                    abstractSerializedData.writeInt32(constructor);
-                }
-            });
+        int i2 = this.currentType;
+        if (i2 == 0) {
+            req.rules.add(new TLRPC.TL_inputPrivacyValueAllowAll());
+        } else if (i2 == 1) {
+            req.rules.add(new TLRPC.TL_inputPrivacyValueDisallowAll());
+        } else if (i2 == 2) {
+            req.rules.add(new TLRPC.TL_inputPrivacyValueAllowContacts());
         }
-        final AlertDialog alertDialog = null;
+        AlertDialog progressDialog = null;
         if (getParentActivity() != null) {
-            alertDialog = new AlertDialog(getParentActivity(), 3);
-            alertDialog.setCanCancel(false);
-            alertDialog.show();
+            progressDialog = new AlertDialog(getParentActivity(), 3);
+            progressDialog.setCanCancel(false);
+            progressDialog.show();
         }
-        ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_account_setPrivacy, new RequestDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda6
+        final AlertDialog progressDialogFinal = progressDialog;
+        ConnectionsManager.getInstance(this.currentAccount).sendRequest(req, new RequestDelegate() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda6
             @Override // org.telegram.tgnet.RequestDelegate
-            public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-                PrivacyControlActivity.this.lambda$applyCurrentPrivacySettings$6(alertDialog, tLObject, tLRPC$TL_error);
+            public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
+                PrivacyControlActivity.this.m4323xbb67f909(progressDialogFinal, tLObject, tL_error);
             }
         }, 2);
     }
 
-    public /* synthetic */ void lambda$applyCurrentPrivacySettings$4(final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
+    /* renamed from: lambda$applyCurrentPrivacySettings$4$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4321xd2c174b(final TLObject response, final TLRPC.TL_error error) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                PrivacyControlActivity.this.lambda$applyCurrentPrivacySettings$3(tLRPC$TL_error, tLObject);
+                PrivacyControlActivity.this.m4320xb60e266c(error, response);
             }
         });
     }
 
-    public /* synthetic */ void lambda$applyCurrentPrivacySettings$3(TLRPC$TL_error tLRPC$TL_error, TLObject tLObject) {
-        if (tLRPC$TL_error == null) {
-            ContactsController.getInstance(this.currentAccount).setPrivacyRules(((TLRPC$TL_account_privacyRules) tLObject).rules, 7);
+    /* renamed from: lambda$applyCurrentPrivacySettings$3$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4320xb60e266c(TLRPC.TL_error error, TLObject response) {
+        if (error == null) {
+            TLRPC.TL_account_privacyRules privacyRules = (TLRPC.TL_account_privacyRules) response;
+            ContactsController.getInstance(this.currentAccount).setPrivacyRules(privacyRules.rules, 7);
         }
     }
 
-    public /* synthetic */ void lambda$applyCurrentPrivacySettings$6(final AlertDialog alertDialog, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
+    /* renamed from: lambda$applyCurrentPrivacySettings$6$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4323xbb67f909(final AlertDialog progressDialogFinal, final TLObject response, final TLRPC.TL_error error) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
-                PrivacyControlActivity.this.lambda$applyCurrentPrivacySettings$5(alertDialog, tLRPC$TL_error, tLObject);
+                PrivacyControlActivity.this.m4322x644a082a(progressDialogFinal, error, response);
             }
         });
     }
 
-    public /* synthetic */ void lambda$applyCurrentPrivacySettings$5(AlertDialog alertDialog, TLRPC$TL_error tLRPC$TL_error, TLObject tLObject) {
-        if (alertDialog != null) {
+    /* renamed from: lambda$applyCurrentPrivacySettings$5$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4322x644a082a(AlertDialog progressDialogFinal, TLRPC.TL_error error, TLObject response) {
+        if (progressDialogFinal != null) {
             try {
-                alertDialog.dismiss();
+                progressDialogFinal.dismiss();
             } catch (Exception e) {
                 FileLog.e(e);
             }
         }
-        if (tLRPC$TL_error == null) {
-            TLRPC$TL_account_privacyRules tLRPC$TL_account_privacyRules = (TLRPC$TL_account_privacyRules) tLObject;
-            MessagesController.getInstance(this.currentAccount).putUsers(tLRPC$TL_account_privacyRules.users, false);
-            MessagesController.getInstance(this.currentAccount).putChats(tLRPC$TL_account_privacyRules.chats, false);
-            ContactsController.getInstance(this.currentAccount).setPrivacyRules(tLRPC$TL_account_privacyRules.rules, this.rulesType);
+        if (error == null) {
+            TLRPC.TL_account_privacyRules privacyRules = (TLRPC.TL_account_privacyRules) response;
+            MessagesController.getInstance(this.currentAccount).putUsers(privacyRules.users, false);
+            MessagesController.getInstance(this.currentAccount).putChats(privacyRules.chats, false);
+            ContactsController.getInstance(this.currentAccount).setPrivacyRules(privacyRules.rules, this.rulesType);
             finishFragment();
             return;
         }
@@ -898,42 +861,46 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     private void checkPrivacy() {
         this.currentPlus = new ArrayList<>();
         this.currentMinus = new ArrayList<>();
-        ArrayList<TLRPC$PrivacyRule> privacyRules = ContactsController.getInstance(this.currentAccount).getPrivacyRules(this.rulesType);
+        ArrayList<TLRPC.PrivacyRule> privacyRules = ContactsController.getInstance(this.currentAccount).getPrivacyRules(this.rulesType);
         if (privacyRules == null || privacyRules.size() == 0) {
             this.currentType = 1;
         } else {
-            char c = 65535;
-            for (int i = 0; i < privacyRules.size(); i++) {
-                TLRPC$PrivacyRule tLRPC$PrivacyRule = privacyRules.get(i);
-                if (tLRPC$PrivacyRule instanceof TLRPC$TL_privacyValueAllowChatParticipants) {
-                    TLRPC$TL_privacyValueAllowChatParticipants tLRPC$TL_privacyValueAllowChatParticipants = (TLRPC$TL_privacyValueAllowChatParticipants) tLRPC$PrivacyRule;
-                    int size = tLRPC$TL_privacyValueAllowChatParticipants.chats.size();
-                    for (int i2 = 0; i2 < size; i2++) {
-                        this.currentPlus.add(Long.valueOf(-tLRPC$TL_privacyValueAllowChatParticipants.chats.get(i2).longValue()));
+            int type = -1;
+            for (int a = 0; a < privacyRules.size(); a++) {
+                TLRPC.PrivacyRule rule = privacyRules.get(a);
+                if (rule instanceof TLRPC.TL_privacyValueAllowChatParticipants) {
+                    TLRPC.TL_privacyValueAllowChatParticipants privacyValueAllowChatParticipants = (TLRPC.TL_privacyValueAllowChatParticipants) rule;
+                    int N = privacyValueAllowChatParticipants.chats.size();
+                    for (int b = 0; b < N; b++) {
+                        this.currentPlus.add(Long.valueOf(-privacyValueAllowChatParticipants.chats.get(b).longValue()));
                     }
-                } else if (tLRPC$PrivacyRule instanceof TLRPC$TL_privacyValueDisallowChatParticipants) {
-                    TLRPC$TL_privacyValueDisallowChatParticipants tLRPC$TL_privacyValueDisallowChatParticipants = (TLRPC$TL_privacyValueDisallowChatParticipants) tLRPC$PrivacyRule;
-                    int size2 = tLRPC$TL_privacyValueDisallowChatParticipants.chats.size();
-                    for (int i3 = 0; i3 < size2; i3++) {
-                        this.currentMinus.add(Long.valueOf(-tLRPC$TL_privacyValueDisallowChatParticipants.chats.get(i3).longValue()));
+                } else if (rule instanceof TLRPC.TL_privacyValueDisallowChatParticipants) {
+                    TLRPC.TL_privacyValueDisallowChatParticipants privacyValueDisallowChatParticipants = (TLRPC.TL_privacyValueDisallowChatParticipants) rule;
+                    int N2 = privacyValueDisallowChatParticipants.chats.size();
+                    for (int b2 = 0; b2 < N2; b2++) {
+                        this.currentMinus.add(Long.valueOf(-privacyValueDisallowChatParticipants.chats.get(b2).longValue()));
                     }
-                } else if (tLRPC$PrivacyRule instanceof TLRPC$TL_privacyValueAllowUsers) {
-                    this.currentPlus.addAll(((TLRPC$TL_privacyValueAllowUsers) tLRPC$PrivacyRule).users);
-                } else if (tLRPC$PrivacyRule instanceof TLRPC$TL_privacyValueDisallowUsers) {
-                    this.currentMinus.addAll(((TLRPC$TL_privacyValueDisallowUsers) tLRPC$PrivacyRule).users);
-                } else if (c == 65535) {
-                    if (tLRPC$PrivacyRule instanceof TLRPC$TL_privacyValueAllowAll) {
-                        c = 0;
+                } else if (rule instanceof TLRPC.TL_privacyValueAllowUsers) {
+                    TLRPC.TL_privacyValueAllowUsers privacyValueAllowUsers = (TLRPC.TL_privacyValueAllowUsers) rule;
+                    this.currentPlus.addAll(privacyValueAllowUsers.users);
+                } else if (rule instanceof TLRPC.TL_privacyValueDisallowUsers) {
+                    TLRPC.TL_privacyValueDisallowUsers privacyValueDisallowUsers = (TLRPC.TL_privacyValueDisallowUsers) rule;
+                    this.currentMinus.addAll(privacyValueDisallowUsers.users);
+                } else if (type == -1) {
+                    if (rule instanceof TLRPC.TL_privacyValueAllowAll) {
+                        type = 0;
+                    } else if (rule instanceof TLRPC.TL_privacyValueDisallowAll) {
+                        type = 1;
                     } else {
-                        c = tLRPC$PrivacyRule instanceof TLRPC$TL_privacyValueDisallowAll ? (char) 1 : (char) 2;
+                        type = 2;
                     }
                 }
             }
-            if (c == 0 || (c == 65535 && this.currentMinus.size() > 0)) {
+            if (type == 0 || (type == -1 && this.currentMinus.size() > 0)) {
                 this.currentType = 0;
-            } else if (c == 2 || (c == 65535 && this.currentMinus.size() > 0 && this.currentPlus.size() > 0)) {
+            } else if (type == 2 || (type == -1 && this.currentMinus.size() > 0 && this.currentPlus.size() > 0)) {
                 this.currentType = 2;
-            } else if (c == 1 || (c == 65535 && this.currentPlus.size() > 0)) {
+            } else if (type == 1 || (type == -1 && this.currentPlus.size() > 0)) {
                 this.currentType = 1;
             }
             View view = this.doneButton;
@@ -950,27 +917,27 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         this.initialPlus.addAll(this.currentPlus);
         this.initialMinus.addAll(this.currentMinus);
         if (this.rulesType == 6) {
-            ArrayList<TLRPC$PrivacyRule> privacyRules2 = ContactsController.getInstance(this.currentAccount).getPrivacyRules(7);
+            ArrayList<TLRPC.PrivacyRule> privacyRules2 = ContactsController.getInstance(this.currentAccount).getPrivacyRules(7);
             if (privacyRules2 == null || privacyRules2.size() == 0) {
                 this.currentSubType = 0;
             } else {
-                int i4 = 0;
+                int a2 = 0;
                 while (true) {
-                    if (i4 >= privacyRules2.size()) {
+                    if (a2 >= privacyRules2.size()) {
                         break;
                     }
-                    TLRPC$PrivacyRule tLRPC$PrivacyRule2 = privacyRules2.get(i4);
-                    if (tLRPC$PrivacyRule2 instanceof TLRPC$TL_privacyValueAllowAll) {
+                    TLRPC.PrivacyRule rule2 = privacyRules2.get(a2);
+                    if (rule2 instanceof TLRPC.TL_privacyValueAllowAll) {
                         this.currentSubType = 0;
                         break;
-                    } else if (tLRPC$PrivacyRule2 instanceof TLRPC$TL_privacyValueDisallowAll) {
+                    } else if (rule2 instanceof TLRPC.TL_privacyValueDisallowAll) {
                         this.currentSubType = 2;
                         break;
-                    } else if (tLRPC$PrivacyRule2 instanceof TLRPC$TL_privacyValueAllowContacts) {
+                    } else if (!(rule2 instanceof TLRPC.TL_privacyValueAllowContacts)) {
+                        a2++;
+                    } else {
                         this.currentSubType = 1;
                         break;
-                    } else {
-                        i4++;
                     }
                 }
             }
@@ -998,91 +965,92 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         return !this.initialMinus.equals(this.currentMinus);
     }
 
-    private void updateRows(boolean z) {
-        RecyclerView.ViewHolder findContainingViewHolder;
-        int i;
-        int i2 = this.alwaysShareRow;
-        int i3 = this.neverShareRow;
-        int i4 = this.phoneDetailRow;
-        int i5 = this.detailRow;
-        int i6 = this.currentType;
-        boolean z2 = i6 == 1 && this.currentSubType == 1;
+    private void updateRows(boolean animated) {
+        RecyclerView.ViewHolder holder;
+        int checkedType;
+        int checkedType2;
+        int prevAlwaysShareRow = this.alwaysShareRow;
+        int prevNeverShareRow = this.neverShareRow;
+        int prevPhoneDetailRow = this.phoneDetailRow;
+        int prevDetailRow = this.detailRow;
+        int i = this.currentType;
+        boolean newSubtype = i == 1 && this.currentSubType == 1;
         this.rowCount = 0;
-        int i7 = this.rulesType;
-        if (i7 == 5) {
+        int i2 = this.rulesType;
+        if (i2 == 5) {
             this.rowCount = 0 + 1;
             this.messageRow = 0;
         } else {
             this.messageRow = -1;
         }
-        int i8 = this.rowCount;
-        int i9 = i8 + 1;
-        this.rowCount = i9;
-        this.sectionRow = i8;
-        int i10 = i9 + 1;
-        this.rowCount = i10;
-        this.everybodyRow = i9;
-        int i11 = i10 + 1;
-        this.rowCount = i11;
-        this.myContactsRow = i10;
-        if (i7 != 0 && i7 != 2 && i7 != 3 && i7 != 5 && i7 != 6) {
-            this.nobodyRow = -1;
+        int i3 = this.rowCount;
+        int i4 = i3 + 1;
+        this.rowCount = i4;
+        this.sectionRow = i3;
+        int i5 = i4 + 1;
+        this.rowCount = i5;
+        this.everybodyRow = i4;
+        int i6 = i5 + 1;
+        this.rowCount = i6;
+        this.myContactsRow = i5;
+        if (i2 == 0 || i2 == 2 || i2 == 3 || i2 == 5 || i2 == 6) {
+            this.rowCount = i6 + 1;
+            this.nobodyRow = i6;
         } else {
-            this.rowCount = i11 + 1;
-            this.nobodyRow = i11;
+            this.nobodyRow = -1;
         }
-        if (i7 == 6 && i6 == 1) {
-            int i12 = this.rowCount;
-            int i13 = i12 + 1;
-            this.rowCount = i13;
-            this.phoneDetailRow = i12;
-            int i14 = i13 + 1;
-            this.rowCount = i14;
-            this.phoneSectionRow = i13;
-            int i15 = i14 + 1;
-            this.rowCount = i15;
-            this.phoneEverybodyRow = i14;
-            this.rowCount = i15 + 1;
-            this.phoneContactsRow = i15;
+        if (i2 == 6 && i == 1) {
+            int i7 = this.rowCount;
+            int i8 = i7 + 1;
+            this.rowCount = i8;
+            this.phoneDetailRow = i7;
+            int i9 = i8 + 1;
+            this.rowCount = i9;
+            this.phoneSectionRow = i8;
+            int i10 = i9 + 1;
+            this.rowCount = i10;
+            this.phoneEverybodyRow = i9;
+            this.rowCount = i10 + 1;
+            this.phoneContactsRow = i10;
         } else {
             this.phoneDetailRow = -1;
             this.phoneSectionRow = -1;
             this.phoneEverybodyRow = -1;
             this.phoneContactsRow = -1;
         }
-        int i16 = this.rowCount;
-        int i17 = i16 + 1;
-        this.rowCount = i17;
-        this.detailRow = i16;
-        int i18 = i17 + 1;
-        this.rowCount = i18;
-        this.shareSectionRow = i17;
-        if (i6 == 1 || i6 == 2) {
-            this.rowCount = i18 + 1;
-            this.alwaysShareRow = i18;
+        int i11 = this.rowCount;
+        int i12 = i11 + 1;
+        this.rowCount = i12;
+        this.detailRow = i11;
+        int i13 = i12 + 1;
+        this.rowCount = i13;
+        this.shareSectionRow = i12;
+        if (i == 1 || i == 2) {
+            this.rowCount = i13 + 1;
+            this.alwaysShareRow = i13;
         } else {
             this.alwaysShareRow = -1;
         }
-        if (i6 == 0 || i6 == 2) {
-            int i19 = this.rowCount;
-            this.rowCount = i19 + 1;
-            this.neverShareRow = i19;
+        if (i == 0 || i == 2) {
+            int i14 = this.rowCount;
+            this.rowCount = i14 + 1;
+            this.neverShareRow = i14;
         } else {
             this.neverShareRow = -1;
         }
-        int i20 = this.rowCount;
-        int i21 = i20 + 1;
-        this.rowCount = i21;
-        this.shareDetailRow = i20;
-        if (i7 == 2) {
-            int i22 = i21 + 1;
-            this.rowCount = i22;
-            this.p2pSectionRow = i21;
-            int i23 = i22 + 1;
-            this.rowCount = i23;
-            this.p2pRow = i22;
-            this.rowCount = i23 + 1;
-            this.p2pDetailRow = i23;
+        int i15 = this.rowCount;
+        int i16 = i15 + 1;
+        this.rowCount = i16;
+        this.shareDetailRow = i15;
+        if (i2 == 2) {
+            int i17 = i16 + 1;
+            this.rowCount = i17;
+            this.p2pSectionRow = i16;
+            int i18 = i17 + 1;
+            this.rowCount = i18;
+            this.p2pRow = i17;
+            this.rowCount = i18 + 1;
+            this.p2pDetailRow = i18;
         } else {
             this.p2pSectionRow = -1;
             this.p2pRow = -1;
@@ -1091,75 +1059,81 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         setMessageText();
         ListAdapter listAdapter = this.listAdapter;
         if (listAdapter != null) {
-            if (z) {
-                int childCount = this.listView.getChildCount();
-                for (int i24 = 0; i24 < childCount; i24++) {
-                    View childAt = this.listView.getChildAt(i24);
-                    if ((childAt instanceof RadioCell) && (findContainingViewHolder = this.listView.findContainingViewHolder(childAt)) != null) {
-                        int adapterPosition = findContainingViewHolder.getAdapterPosition();
-                        RadioCell radioCell = (RadioCell) childAt;
-                        int i25 = this.everybodyRow;
-                        if (adapterPosition == i25 || adapterPosition == this.myContactsRow || adapterPosition == this.nobodyRow) {
-                            if (adapterPosition == i25) {
-                                i = 0;
+            if (animated) {
+                int count = this.listView.getChildCount();
+                for (int a = 0; a < count; a++) {
+                    View child = this.listView.getChildAt(a);
+                    if ((child instanceof RadioCell) && (holder = this.listView.findContainingViewHolder(child)) != null) {
+                        int position = holder.getAdapterPosition();
+                        RadioCell radioCell = (RadioCell) child;
+                        int i19 = this.everybodyRow;
+                        if (position == i19 || position == this.myContactsRow || position == this.nobodyRow) {
+                            if (position == i19) {
+                                checkedType = 0;
                             } else {
-                                i = adapterPosition == this.myContactsRow ? 2 : 1;
+                                int checkedType3 = this.myContactsRow;
+                                if (position == checkedType3) {
+                                    checkedType = 2;
+                                } else {
+                                    checkedType = 1;
+                                }
                             }
-                            radioCell.setChecked(this.currentType == i, true);
+                            radioCell.setChecked(this.currentType == checkedType, true);
                         } else {
-                            radioCell.setChecked(this.currentSubType == (adapterPosition == this.phoneContactsRow ? 1 : 0), true);
+                            if (position == this.phoneContactsRow) {
+                                checkedType2 = 1;
+                            } else {
+                                checkedType2 = 0;
+                            }
+                            radioCell.setChecked(this.currentSubType == checkedType2, true);
                         }
                     }
                 }
-                if (this.prevSubtypeContacts != z2) {
-                    this.listAdapter.notifyItemChanged(i5);
+                if (this.prevSubtypeContacts != newSubtype) {
+                    this.listAdapter.notifyItemChanged(prevDetailRow);
                 }
-                int i26 = this.alwaysShareRow;
-                if ((i26 == -1 && i2 != -1 && this.neverShareRow != -1 && i3 == -1) || (i26 != -1 && i2 == -1 && this.neverShareRow == -1 && i3 != -1)) {
-                    ListAdapter listAdapter2 = this.listAdapter;
-                    if (i26 != -1) {
-                        i2 = i3;
-                    }
-                    listAdapter2.notifyItemChanged(i2);
-                    int i27 = this.phoneDetailRow;
-                    if (i27 == -1 && i4 != -1) {
-                        this.listAdapter.notifyItemRangeRemoved(i4, 4);
+                int i20 = this.alwaysShareRow;
+                if ((i20 == -1 && prevAlwaysShareRow != -1 && this.neverShareRow != -1 && prevNeverShareRow == -1) || (i20 != -1 && prevAlwaysShareRow == -1 && this.neverShareRow == -1 && prevNeverShareRow != -1)) {
+                    this.listAdapter.notifyItemChanged(i20 == -1 ? prevAlwaysShareRow : prevNeverShareRow);
+                    int i21 = this.phoneDetailRow;
+                    if (i21 == -1 && prevPhoneDetailRow != -1) {
+                        this.listAdapter.notifyItemRangeRemoved(prevPhoneDetailRow, 4);
                         return;
-                    } else if (i27 == -1 || i4 != -1) {
+                    } else if (i21 != -1 && prevPhoneDetailRow == -1) {
+                        this.listAdapter.notifyItemRangeInserted(i21, 4);
                         return;
                     } else {
-                        this.listAdapter.notifyItemRangeInserted(i27, 4);
                         return;
                     }
                 }
-                if (i26 == -1 && i2 != -1) {
-                    this.listAdapter.notifyItemRemoved(i2);
-                } else if (i26 != -1 && i2 == -1) {
-                    this.listAdapter.notifyItemInserted(i26);
+                if (i20 == -1 && prevAlwaysShareRow != -1) {
+                    this.listAdapter.notifyItemRemoved(prevAlwaysShareRow);
+                } else if (i20 != -1 && prevAlwaysShareRow == -1) {
+                    this.listAdapter.notifyItemInserted(i20);
                 }
-                int i28 = this.neverShareRow;
-                if (i28 == -1 && i3 != -1) {
-                    this.listAdapter.notifyItemRemoved(i3);
-                    int i29 = this.phoneDetailRow;
-                    if (i29 == -1 && i4 != -1) {
-                        this.listAdapter.notifyItemRangeRemoved(i4, 4);
+                int i22 = this.neverShareRow;
+                if (i22 == -1 && prevNeverShareRow != -1) {
+                    this.listAdapter.notifyItemRemoved(prevNeverShareRow);
+                    int i23 = this.phoneDetailRow;
+                    if (i23 == -1 && prevPhoneDetailRow != -1) {
+                        this.listAdapter.notifyItemRangeRemoved(prevPhoneDetailRow, 4);
                         return;
-                    } else if (i29 == -1 || i4 != -1) {
+                    } else if (i23 != -1 && prevPhoneDetailRow == -1) {
+                        this.listAdapter.notifyItemRangeInserted(i23, 4);
                         return;
                     } else {
-                        this.listAdapter.notifyItemRangeInserted(i29, 4);
                         return;
                     }
-                } else if (i28 == -1 || i3 != -1) {
-                    return;
-                } else {
-                    int i30 = this.phoneDetailRow;
-                    if (i30 == -1 && i4 != -1) {
-                        this.listAdapter.notifyItemRangeRemoved(i4, 4);
-                    } else if (i30 != -1 && i4 == -1) {
-                        this.listAdapter.notifyItemRangeInserted(i30, 4);
+                } else if (i22 != -1 && prevNeverShareRow == -1) {
+                    int i24 = this.phoneDetailRow;
+                    if (i24 == -1 && prevPhoneDetailRow != -1) {
+                        this.listAdapter.notifyItemRangeRemoved(prevPhoneDetailRow, 4);
+                    } else if (i24 != -1 && prevPhoneDetailRow == -1) {
+                        this.listAdapter.notifyItemRangeInserted(i24, 4);
                     }
                     this.listAdapter.notifyItemInserted(this.neverShareRow);
+                    return;
+                } else {
                     return;
                 }
             }
@@ -1170,7 +1144,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     private void setMessageText() {
         MessageCell messageCell = this.messageCell;
         if (messageCell != null) {
-            messageCell.messageObject.messageOwner.fwd_from.from_id = new TLRPC$TL_peerUser();
+            messageCell.messageObject.messageOwner.fwd_from.from_id = new TLRPC.TL_peerUser();
             int i = this.currentType;
             if (i == 0) {
                 this.messageCell.hintView.setOverrideText(LocaleController.getString("PrivacyForwardsEverybody", R.string.PrivacyForwardsEverybody));
@@ -1205,8 +1179,9 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             return;
         }
         if (this.currentType != 0 && this.rulesType == 0) {
-            final SharedPreferences globalMainSettings = MessagesController.getGlobalMainSettings();
-            if (!globalMainSettings.getBoolean("privacyAlertShowed", false)) {
+            final SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+            boolean showed = preferences.getBoolean("privacyAlertShowed", false);
+            if (!showed) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
                 if (this.rulesType == 1) {
                     builder.setMessage(LocaleController.getString("WhoCanAddMeInfo", R.string.WhoCanAddMeInfo));
@@ -1217,7 +1192,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda2
                     @Override // android.content.DialogInterface.OnClickListener
                     public final void onClick(DialogInterface dialogInterface, int i) {
-                        PrivacyControlActivity.this.lambda$processDone$7(globalMainSettings, dialogInterface, i);
+                        PrivacyControlActivity.this.m4329lambda$processDone$7$orgtelegramuiPrivacyControlActivity(preferences, dialogInterface, i);
                     }
                 });
                 builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
@@ -1228,9 +1203,10 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         applyCurrentPrivacySettings();
     }
 
-    public /* synthetic */ void lambda$processDone$7(SharedPreferences sharedPreferences, DialogInterface dialogInterface, int i) {
+    /* renamed from: lambda$processDone$7$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4329lambda$processDone$7$orgtelegramuiPrivacyControlActivity(SharedPreferences preferences, DialogInterface dialogInterface, int i) {
         applyCurrentPrivacySettings();
-        sharedPreferences.edit().putBoolean("privacyAlertShowed", true).commit();
+        preferences.edit().putBoolean("privacyAlertShowed", true).commit();
     }
 
     public boolean checkDiscard() {
@@ -1238,16 +1214,16 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
             builder.setTitle(LocaleController.getString("UserRestrictionsApplyChanges", R.string.UserRestrictionsApplyChanges));
             builder.setMessage(LocaleController.getString("PrivacySettingsChangedAlert", R.string.PrivacySettingsChangedAlert));
-            builder.setPositiveButton(LocaleController.getString("ApplyTheme", R.string.ApplyTheme), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda1
+            builder.setPositiveButton(LocaleController.getString("ApplyTheme", R.string.ApplyTheme), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda0
                 @Override // android.content.DialogInterface.OnClickListener
                 public final void onClick(DialogInterface dialogInterface, int i) {
-                    PrivacyControlActivity.this.lambda$checkDiscard$8(dialogInterface, i);
+                    PrivacyControlActivity.this.m4324lambda$checkDiscard$8$orgtelegramuiPrivacyControlActivity(dialogInterface, i);
                 }
             });
-            builder.setNegativeButton(LocaleController.getString("PassportDiscard", R.string.PassportDiscard), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda0
+            builder.setNegativeButton(LocaleController.getString("PassportDiscard", R.string.PassportDiscard), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.PrivacyControlActivity$$ExternalSyntheticLambda1
                 @Override // android.content.DialogInterface.OnClickListener
                 public final void onClick(DialogInterface dialogInterface, int i) {
-                    PrivacyControlActivity.this.lambda$checkDiscard$9(dialogInterface, i);
+                    PrivacyControlActivity.this.m4325lambda$checkDiscard$9$orgtelegramuiPrivacyControlActivity(dialogInterface, i);
                 }
             });
             showDialog(builder.create());
@@ -1256,11 +1232,13 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         return true;
     }
 
-    public /* synthetic */ void lambda$checkDiscard$8(DialogInterface dialogInterface, int i) {
+    /* renamed from: lambda$checkDiscard$8$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4324lambda$checkDiscard$8$orgtelegramuiPrivacyControlActivity(DialogInterface dialogInterface, int i) {
         processDone();
     }
 
-    public /* synthetic */ void lambda$checkDiscard$9(DialogInterface dialogInterface, int i) {
+    /* renamed from: lambda$checkDiscard$9$org-telegram-ui-PrivacyControlActivity */
+    public /* synthetic */ void m4325lambda$checkDiscard$9$orgtelegramuiPrivacyControlActivity(DialogInterface dialog, int which) {
         finishFragment();
     }
 
@@ -1269,7 +1247,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         return checkDiscard();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class ListAdapter extends RecyclerListView.SelectionAdapter {
         private Context mContext;
 
@@ -1279,9 +1257,9 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            int adapterPosition = viewHolder.getAdapterPosition();
-            return adapterPosition == PrivacyControlActivity.this.nobodyRow || adapterPosition == PrivacyControlActivity.this.everybodyRow || adapterPosition == PrivacyControlActivity.this.myContactsRow || adapterPosition == PrivacyControlActivity.this.neverShareRow || adapterPosition == PrivacyControlActivity.this.alwaysShareRow || (adapterPosition == PrivacyControlActivity.this.p2pRow && !ContactsController.getInstance(((BaseFragment) PrivacyControlActivity.this).currentAccount).getLoadingPrivicyInfo(3));
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            int position = holder.getAdapterPosition();
+            return position == PrivacyControlActivity.this.nobodyRow || position == PrivacyControlActivity.this.everybodyRow || position == PrivacyControlActivity.this.myContactsRow || position == PrivacyControlActivity.this.neverShareRow || position == PrivacyControlActivity.this.alwaysShareRow || (position == PrivacyControlActivity.this.p2pRow && !ContactsController.getInstance(PrivacyControlActivity.this.currentAccount).getLoadingPrivicyInfo(3));
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -1290,146 +1268,392 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view;
-            View view2;
-            if (i == 0) {
-                view2 = new TextSettingsCell(this.mContext);
-                view2.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
-            } else {
-                if (i == 1) {
+            switch (viewType) {
+                case 0:
+                    View view2 = new TextSettingsCell(this.mContext);
+                    view2.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    view = view2;
+                    break;
+                case 1:
                     view = new TextInfoPrivacyCell(this.mContext);
-                } else if (i == 2) {
-                    view2 = new HeaderCell(this.mContext);
-                    view2.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
-                } else if (i == 3) {
-                    view2 = new RadioCell(this.mContext);
-                    view2.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
-                } else if (i == 4) {
+                    break;
+                case 2:
+                    View view3 = new HeaderCell(this.mContext);
+                    view3.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    view = view3;
+                    break;
+                case 3:
+                    View view4 = new RadioCell(this.mContext);
+                    view4.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    view = view4;
+                    break;
+                case 4:
                     view = PrivacyControlActivity.this.messageCell;
-                } else {
+                    break;
+                default:
                     view = new ShadowSectionCell(this.mContext);
-                    CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor("windowBackgroundGray")), Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, "windowBackgroundGrayShadow"));
+                    Drawable drawable = Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow);
+                    CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), drawable);
                     combinedDrawable.setFullsize(true);
                     view.setBackgroundDrawable(combinedDrawable);
-                }
-                return new RecyclerListView.Holder(view);
+                    break;
             }
-            view = view2;
             return new RecyclerListView.Holder(view);
         }
 
         private int getUsersCount(ArrayList<Long> arrayList) {
-            int i = 0;
-            for (int i2 = 0; i2 < arrayList.size(); i2++) {
-                long longValue = arrayList.get(i2).longValue();
-                if (longValue > 0) {
-                    i++;
+            int count = 0;
+            for (int a = 0; a < arrayList.size(); a++) {
+                long id = arrayList.get(a).longValue();
+                if (id > 0) {
+                    count++;
                 } else {
-                    TLRPC$Chat chat = PrivacyControlActivity.this.getMessagesController().getChat(Long.valueOf(-longValue));
+                    TLRPC.Chat chat = PrivacyControlActivity.this.getMessagesController().getChat(Long.valueOf(-id));
                     if (chat != null) {
-                        i += chat.participants_count;
+                        count += chat.participants_count;
                     }
                 }
             }
-            return i;
-        }
-
-        /* JADX WARN: Code restructure failed: missing block: B:151:0x03c2, code lost:
-            if (org.telegram.ui.PrivacyControlActivity.this.rulesType == 2) goto L128;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:153:0x03cc, code lost:
-            if (r12 == org.telegram.ui.PrivacyControlActivity.this.p2pDetailRow) goto L154;
-         */
-        /* JADX WARN: Removed duplicated region for block: B:156:0x03d3  */
-        /* JADX WARN: Removed duplicated region for block: B:211:? A[RETURN, SYNTHETIC] */
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r11, int r12) {
-            /*
-                Method dump skipped, instructions count: 1249
-                To view this dump add '--comments-level debug' option
-            */
-            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.PrivacyControlActivity.ListAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");
+            return count;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int i) {
-            if (i == PrivacyControlActivity.this.alwaysShareRow || i == PrivacyControlActivity.this.neverShareRow || i == PrivacyControlActivity.this.p2pRow) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            String value;
+            String value2;
+            String value3;
+            boolean z = false;
+            boolean z2 = true;
+            switch (holder.getItemViewType()) {
+                case 0:
+                    TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
+                    if (position == PrivacyControlActivity.this.alwaysShareRow) {
+                        if (PrivacyControlActivity.this.currentPlus.size() != 0) {
+                            value3 = LocaleController.formatPluralString("Users", getUsersCount(PrivacyControlActivity.this.currentPlus), new Object[0]);
+                        } else {
+                            value3 = LocaleController.getString("EmpryUsersPlaceholder", R.string.EmpryUsersPlaceholder);
+                        }
+                        if (PrivacyControlActivity.this.rulesType != 0) {
+                            String string = LocaleController.getString("AlwaysAllow", R.string.AlwaysAllow);
+                            if (PrivacyControlActivity.this.neverShareRow != -1) {
+                                z = true;
+                            }
+                            textCell.setTextAndValue(string, value3, z);
+                            return;
+                        }
+                        String string2 = LocaleController.getString("AlwaysShareWith", R.string.AlwaysShareWith);
+                        if (PrivacyControlActivity.this.neverShareRow != -1) {
+                            z = true;
+                        }
+                        textCell.setTextAndValue(string2, value3, z);
+                        return;
+                    } else if (position == PrivacyControlActivity.this.neverShareRow) {
+                        if (PrivacyControlActivity.this.currentMinus.size() != 0) {
+                            value2 = LocaleController.formatPluralString("Users", getUsersCount(PrivacyControlActivity.this.currentMinus), new Object[0]);
+                        } else {
+                            value2 = LocaleController.getString("EmpryUsersPlaceholder", R.string.EmpryUsersPlaceholder);
+                        }
+                        if (PrivacyControlActivity.this.rulesType != 0) {
+                            textCell.setTextAndValue(LocaleController.getString("NeverAllow", R.string.NeverAllow), value2, false);
+                            return;
+                        } else {
+                            textCell.setTextAndValue(LocaleController.getString("NeverShareWith", R.string.NeverShareWith), value2, false);
+                            return;
+                        }
+                    } else if (position == PrivacyControlActivity.this.p2pRow) {
+                        if (ContactsController.getInstance(PrivacyControlActivity.this.currentAccount).getLoadingPrivicyInfo(3)) {
+                            value = LocaleController.getString("Loading", R.string.Loading);
+                        } else {
+                            value = PrivacySettingsActivity.formatRulesString(PrivacyControlActivity.this.getAccountInstance(), 3);
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("PrivacyP2P2", R.string.PrivacyP2P2), value, false);
+                        return;
+                    } else {
+                        return;
+                    }
+                case 1:
+                    TextInfoPrivacyCell privacyCell = (TextInfoPrivacyCell) holder.itemView;
+                    int backgroundResId = 0;
+                    if (position == PrivacyControlActivity.this.detailRow) {
+                        if (PrivacyControlActivity.this.rulesType != 6) {
+                            if (PrivacyControlActivity.this.rulesType != 5) {
+                                if (PrivacyControlActivity.this.rulesType != 4) {
+                                    if (PrivacyControlActivity.this.rulesType != 3) {
+                                        if (PrivacyControlActivity.this.rulesType != 2) {
+                                            if (PrivacyControlActivity.this.rulesType == 1) {
+                                                privacyCell.setText(LocaleController.getString("WhoCanAddMeInfo", R.string.WhoCanAddMeInfo));
+                                            } else {
+                                                privacyCell.setText(LocaleController.getString("CustomHelp", R.string.CustomHelp));
+                                            }
+                                        } else {
+                                            privacyCell.setText(LocaleController.getString("WhoCanCallMeInfo", R.string.WhoCanCallMeInfo));
+                                        }
+                                    } else {
+                                        privacyCell.setText(LocaleController.getString("PrivacyCallsP2PHelp", R.string.PrivacyCallsP2PHelp));
+                                    }
+                                } else {
+                                    privacyCell.setText(LocaleController.getString("PrivacyProfilePhotoInfo", R.string.PrivacyProfilePhotoInfo));
+                                }
+                            } else {
+                                privacyCell.setText(LocaleController.getString("PrivacyForwardsInfo", R.string.PrivacyForwardsInfo));
+                            }
+                        } else {
+                            PrivacyControlActivity privacyControlActivity = PrivacyControlActivity.this;
+                            if (privacyControlActivity.prevSubtypeContacts = privacyControlActivity.currentType == 1 && PrivacyControlActivity.this.currentSubType == 1) {
+                                privacyCell.setText(LocaleController.getString("PrivacyPhoneInfo3", R.string.PrivacyPhoneInfo3));
+                            } else {
+                                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+                                final String phoneLinkStr = String.format(Locale.ENGLISH, "https://t.me/+%s", PrivacyControlActivity.this.getUserConfig().getClientPhone());
+                                SpannableString phoneLink = new SpannableString(phoneLinkStr);
+                                phoneLink.setSpan(new ClickableSpan() { // from class: org.telegram.ui.PrivacyControlActivity.ListAdapter.1
+                                    @Override // android.text.style.ClickableSpan
+                                    public void onClick(View view) {
+                                        ClipboardManager clipboard = (ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard");
+                                        ClipData clip = ClipData.newPlainText(Constants.ScionAnalytics.PARAM_LABEL, phoneLinkStr);
+                                        clipboard.setPrimaryClip(clip);
+                                        BulletinFactory.of(PrivacyControlActivity.this).createCopyLinkBulletin(LocaleController.getString("LinkCopied", R.string.LinkCopied), PrivacyControlActivity.this.getResourceProvider()).show();
+                                    }
+                                }, 0, phoneLinkStr.length(), 33);
+                                spannableStringBuilder.append((CharSequence) LocaleController.getString("PrivacyPhoneInfo", R.string.PrivacyPhoneInfo)).append((CharSequence) "\n\n").append((CharSequence) LocaleController.getString("PrivacyPhoneInfo4", R.string.PrivacyPhoneInfo4)).append((CharSequence) "\n").append((CharSequence) phoneLink);
+                                privacyCell.setText(spannableStringBuilder);
+                            }
+                        }
+                        backgroundResId = R.drawable.greydivider;
+                    } else if (position == PrivacyControlActivity.this.shareDetailRow) {
+                        if (PrivacyControlActivity.this.rulesType != 6) {
+                            if (PrivacyControlActivity.this.rulesType != 5) {
+                                if (PrivacyControlActivity.this.rulesType != 4) {
+                                    if (PrivacyControlActivity.this.rulesType != 3) {
+                                        if (PrivacyControlActivity.this.rulesType != 2) {
+                                            if (PrivacyControlActivity.this.rulesType == 1) {
+                                                privacyCell.setText(LocaleController.getString("CustomShareInfo", R.string.CustomShareInfo));
+                                            } else {
+                                                privacyCell.setText(LocaleController.getString("CustomShareSettingsHelp", R.string.CustomShareSettingsHelp));
+                                            }
+                                        } else {
+                                            privacyCell.setText(LocaleController.getString("CustomCallInfo", R.string.CustomCallInfo));
+                                        }
+                                    } else {
+                                        privacyCell.setText(LocaleController.getString("CustomP2PInfo", R.string.CustomP2PInfo));
+                                    }
+                                } else {
+                                    privacyCell.setText(LocaleController.getString("PrivacyProfilePhotoInfo2", R.string.PrivacyProfilePhotoInfo2));
+                                }
+                            } else {
+                                privacyCell.setText(LocaleController.getString("PrivacyForwardsInfo2", R.string.PrivacyForwardsInfo2));
+                            }
+                        } else {
+                            privacyCell.setText(LocaleController.getString("PrivacyPhoneInfo2", R.string.PrivacyPhoneInfo2));
+                        }
+                        if (PrivacyControlActivity.this.rulesType == 2) {
+                            backgroundResId = R.drawable.greydivider;
+                        } else {
+                            backgroundResId = R.drawable.greydivider_bottom;
+                        }
+                    } else if (position == PrivacyControlActivity.this.p2pDetailRow) {
+                        backgroundResId = R.drawable.greydivider_bottom;
+                    }
+                    if (backgroundResId != 0) {
+                        Drawable drawable = Theme.getThemedDrawable(this.mContext, backgroundResId, Theme.key_windowBackgroundGrayShadow);
+                        CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), drawable);
+                        combinedDrawable.setFullsize(true);
+                        privacyCell.setBackgroundDrawable(combinedDrawable);
+                        return;
+                    }
+                    return;
+                case 2:
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    if (position == PrivacyControlActivity.this.sectionRow) {
+                        if (PrivacyControlActivity.this.rulesType != 6) {
+                            if (PrivacyControlActivity.this.rulesType != 5) {
+                                if (PrivacyControlActivity.this.rulesType != 4) {
+                                    if (PrivacyControlActivity.this.rulesType != 3) {
+                                        if (PrivacyControlActivity.this.rulesType != 2) {
+                                            if (PrivacyControlActivity.this.rulesType == 1) {
+                                                headerCell.setText(LocaleController.getString("WhoCanAddMe", R.string.WhoCanAddMe));
+                                                return;
+                                            } else {
+                                                headerCell.setText(LocaleController.getString("LastSeenTitle", R.string.LastSeenTitle));
+                                                return;
+                                            }
+                                        }
+                                        headerCell.setText(LocaleController.getString("WhoCanCallMe", R.string.WhoCanCallMe));
+                                        return;
+                                    }
+                                    headerCell.setText(LocaleController.getString("P2PEnabledWith", R.string.P2PEnabledWith));
+                                    return;
+                                }
+                                headerCell.setText(LocaleController.getString("PrivacyProfilePhotoTitle", R.string.PrivacyProfilePhotoTitle));
+                                return;
+                            }
+                            headerCell.setText(LocaleController.getString("PrivacyForwardsTitle", R.string.PrivacyForwardsTitle));
+                            return;
+                        }
+                        headerCell.setText(LocaleController.getString("PrivacyPhoneTitle", R.string.PrivacyPhoneTitle));
+                        return;
+                    } else if (position != PrivacyControlActivity.this.shareSectionRow) {
+                        if (position != PrivacyControlActivity.this.p2pSectionRow) {
+                            if (position == PrivacyControlActivity.this.phoneSectionRow) {
+                                headerCell.setText(LocaleController.getString("PrivacyPhoneTitle2", R.string.PrivacyPhoneTitle2));
+                                return;
+                            }
+                            return;
+                        }
+                        headerCell.setText(LocaleController.getString("PrivacyP2PHeader", R.string.PrivacyP2PHeader));
+                        return;
+                    } else {
+                        headerCell.setText(LocaleController.getString("AddExceptions", R.string.AddExceptions));
+                        return;
+                    }
+                case 3:
+                    RadioCell radioCell = (RadioCell) holder.itemView;
+                    if (position == PrivacyControlActivity.this.everybodyRow || position == PrivacyControlActivity.this.myContactsRow || position == PrivacyControlActivity.this.nobodyRow) {
+                        if (position == PrivacyControlActivity.this.everybodyRow) {
+                            if (PrivacyControlActivity.this.rulesType == 3) {
+                                String string3 = LocaleController.getString("P2PEverybody", R.string.P2PEverybody);
+                                if (PrivacyControlActivity.this.currentType == 0) {
+                                    z = true;
+                                }
+                                radioCell.setText(string3, z, true);
+                                return;
+                            }
+                            String string4 = LocaleController.getString("LastSeenEverybody", R.string.LastSeenEverybody);
+                            if (PrivacyControlActivity.this.currentType == 0) {
+                                z = true;
+                            }
+                            radioCell.setText(string4, z, true);
+                            return;
+                        } else if (position == PrivacyControlActivity.this.myContactsRow) {
+                            if (PrivacyControlActivity.this.rulesType == 3) {
+                                String string5 = LocaleController.getString("P2PContacts", R.string.P2PContacts);
+                                boolean z3 = PrivacyControlActivity.this.currentType == 2;
+                                if (PrivacyControlActivity.this.nobodyRow != -1) {
+                                    z = true;
+                                }
+                                radioCell.setText(string5, z3, z);
+                                return;
+                            }
+                            String string6 = LocaleController.getString("LastSeenContacts", R.string.LastSeenContacts);
+                            boolean z4 = PrivacyControlActivity.this.currentType == 2;
+                            if (PrivacyControlActivity.this.nobodyRow != -1) {
+                                z = true;
+                            }
+                            radioCell.setText(string6, z4, z);
+                            return;
+                        } else if (PrivacyControlActivity.this.rulesType == 3) {
+                            String string7 = LocaleController.getString("P2PNobody", R.string.P2PNobody);
+                            if (PrivacyControlActivity.this.currentType != 1) {
+                                z2 = false;
+                            }
+                            radioCell.setText(string7, z2, false);
+                            return;
+                        } else {
+                            String string8 = LocaleController.getString("LastSeenNobody", R.string.LastSeenNobody);
+                            if (PrivacyControlActivity.this.currentType != 1) {
+                                z2 = false;
+                            }
+                            radioCell.setText(string8, z2, false);
+                            return;
+                        }
+                    } else if (position != PrivacyControlActivity.this.phoneContactsRow) {
+                        if (position == PrivacyControlActivity.this.phoneEverybodyRow) {
+                            String string9 = LocaleController.getString("LastSeenEverybody", R.string.LastSeenEverybody);
+                            if (PrivacyControlActivity.this.currentSubType == 0) {
+                                z = true;
+                            }
+                            radioCell.setText(string9, z, true);
+                            return;
+                        }
+                        return;
+                    } else {
+                        String string10 = LocaleController.getString("LastSeenContacts", R.string.LastSeenContacts);
+                        if (PrivacyControlActivity.this.currentSubType != 1) {
+                            z2 = false;
+                        }
+                        radioCell.setText(string10, z2, false);
+                        return;
+                    }
+                default:
+                    return;
+            }
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemViewType(int position) {
+            if (position == PrivacyControlActivity.this.alwaysShareRow || position == PrivacyControlActivity.this.neverShareRow || position == PrivacyControlActivity.this.p2pRow) {
                 return 0;
             }
-            if (i == PrivacyControlActivity.this.shareDetailRow || i == PrivacyControlActivity.this.detailRow || i == PrivacyControlActivity.this.p2pDetailRow) {
-                return 1;
-            }
-            if (i == PrivacyControlActivity.this.sectionRow || i == PrivacyControlActivity.this.shareSectionRow || i == PrivacyControlActivity.this.p2pSectionRow || i == PrivacyControlActivity.this.phoneSectionRow) {
+            if (position != PrivacyControlActivity.this.shareDetailRow && position != PrivacyControlActivity.this.detailRow && position != PrivacyControlActivity.this.p2pDetailRow) {
+                if (position != PrivacyControlActivity.this.sectionRow && position != PrivacyControlActivity.this.shareSectionRow && position != PrivacyControlActivity.this.p2pSectionRow && position != PrivacyControlActivity.this.phoneSectionRow) {
+                    if (position != PrivacyControlActivity.this.everybodyRow && position != PrivacyControlActivity.this.myContactsRow && position != PrivacyControlActivity.this.nobodyRow && position != PrivacyControlActivity.this.phoneEverybodyRow && position != PrivacyControlActivity.this.phoneContactsRow) {
+                        if (position == PrivacyControlActivity.this.messageRow) {
+                            return 4;
+                        }
+                        return position == PrivacyControlActivity.this.phoneDetailRow ? 5 : 0;
+                    }
+                    return 3;
+                }
                 return 2;
             }
-            if (i == PrivacyControlActivity.this.everybodyRow || i == PrivacyControlActivity.this.myContactsRow || i == PrivacyControlActivity.this.nobodyRow || i == PrivacyControlActivity.this.phoneEverybodyRow || i == PrivacyControlActivity.this.phoneContactsRow) {
-                return 3;
-            }
-            if (i == PrivacyControlActivity.this.messageRow) {
-                return 4;
-            }
-            return i == PrivacyControlActivity.this.phoneDetailRow ? 5 : 0;
+            return 1;
         }
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public ArrayList<ThemeDescription> getThemeDescriptions() {
-        ArrayList<ThemeDescription> arrayList = new ArrayList<>();
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextSettingsCell.class, HeaderCell.class, RadioCell.class}, null, null, null, "windowBackgroundWhite"));
-        arrayList.add(new ThemeDescription(this.fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "windowBackgroundWhite"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "actionBarDefault"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, "actionBarDefault"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, "actionBarDefaultIcon"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, "actionBarDefaultTitle"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, "actionBarDefaultSelector"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, "listSelectorSDK21"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, "divider"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteValueText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextInfoPrivacyCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteGrayText4"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{TextInfoPrivacyCell.class}, null, null, null, "windowBackgroundGrayShadow"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextInfoPrivacyCell.class}, null, null, null, "windowBackgroundGray"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{ShadowSectionCell.class}, null, null, null, "windowBackgroundGrayShadow"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{ShadowSectionCell.class}, null, null, null, "windowBackgroundGray"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{HeaderCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlueHeader"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{RadioCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlackText"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKBOX, new Class[]{RadioCell.class}, new String[]{"radioButton"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "radioBackground"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKBOXCHECK, new Class[]{RadioCell.class}, new String[]{"radioButton"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "radioBackgroundChecked"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgInDrawable, Theme.chat_msgInMediaDrawable}, null, "chat_inBubble"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgInSelectedDrawable, Theme.chat_msgInMediaSelectedDrawable}, null, "chat_inBubbleSelected"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgInDrawable.getShadowDrawables(), null, "chat_inBubbleShadow"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgInMediaDrawable.getShadowDrawables(), null, "chat_inBubbleShadow"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, "chat_outBubble"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, "chat_outBubbleGradient"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, "chat_outBubbleGradient2"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, "chat_outBubbleGradient3"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutSelectedDrawable, Theme.chat_msgOutMediaSelectedDrawable}, null, "chat_outBubbleSelected"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgOutDrawable.getShadowDrawables(), null, "chat_outBubbleShadow"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgOutMediaDrawable.getShadowDrawables(), null, "chat_outBubbleShadow"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_messageTextIn"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_messageTextOut"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckDrawable}, null, "chat_outSentCheck"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckSelectedDrawable}, null, "chat_outSentCheckSelected"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckReadDrawable, Theme.chat_msgOutHalfCheckDrawable}, null, "chat_outSentCheckRead"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckReadSelectedDrawable, Theme.chat_msgOutHalfCheckSelectedDrawable}, null, "chat_outSentCheckReadSelected"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgMediaCheckDrawable, Theme.chat_msgMediaHalfCheckDrawable}, null, "chat_mediaSentCheck"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_inReplyLine"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_outReplyLine"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_inReplyNameText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_outReplyNameText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_inReplyMessageText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_outReplyMessageText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_inReplyMediaMessageSelectedText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_outReplyMediaMessageSelectedText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_inTimeText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_outTimeText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_inTimeSelectedText"));
-        arrayList.add(new ThemeDescription(this.listView, 0, null, null, null, null, "chat_outTimeSelectedText"));
-        return arrayList;
+        ArrayList<ThemeDescription> themeDescriptions = new ArrayList<>();
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextSettingsCell.class, HeaderCell.class, RadioCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
+        themeDescriptions.add(new ThemeDescription(this.fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundWhite));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, Theme.key_actionBarDefaultSelector));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, Theme.key_listSelector));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, Theme.key_divider));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"valueTextView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteValueText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextInfoPrivacyCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteGrayText4));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{TextInfoPrivacyCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextInfoPrivacyCell.class}, null, null, null, Theme.key_windowBackgroundGray));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{ShadowSectionCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{ShadowSectionCell.class}, null, null, null, Theme.key_windowBackgroundGray));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{HeaderCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlueHeader));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{RadioCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKBOX, new Class[]{RadioCell.class}, new String[]{"radioButton"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_radioBackground));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CHECKBOXCHECK, new Class[]{RadioCell.class}, new String[]{"radioButton"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_radioBackgroundChecked));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgInDrawable, Theme.chat_msgInMediaDrawable}, null, Theme.key_chat_inBubble));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgInSelectedDrawable, Theme.chat_msgInMediaSelectedDrawable}, null, Theme.key_chat_inBubbleSelected));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgInDrawable.getShadowDrawables(), null, Theme.key_chat_inBubbleShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgInMediaDrawable.getShadowDrawables(), null, Theme.key_chat_inBubbleShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, Theme.key_chat_outBubble));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, Theme.key_chat_outBubbleGradient1));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, Theme.key_chat_outBubbleGradient2));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutDrawable, Theme.chat_msgOutMediaDrawable}, null, Theme.key_chat_outBubbleGradient3));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutSelectedDrawable, Theme.chat_msgOutMediaSelectedDrawable}, null, Theme.key_chat_outBubbleSelected));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgOutDrawable.getShadowDrawables(), null, Theme.key_chat_outBubbleShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, Theme.chat_msgOutMediaDrawable.getShadowDrawables(), null, Theme.key_chat_outBubbleShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_messageTextIn));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_messageTextOut));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckDrawable}, null, Theme.key_chat_outSentCheck));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckSelectedDrawable}, null, Theme.key_chat_outSentCheckSelected));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckReadDrawable, Theme.chat_msgOutHalfCheckDrawable}, null, Theme.key_chat_outSentCheckRead));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgOutCheckReadSelectedDrawable, Theme.chat_msgOutHalfCheckSelectedDrawable}, null, Theme.key_chat_outSentCheckReadSelected));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, new Drawable[]{Theme.chat_msgMediaCheckDrawable, Theme.chat_msgMediaHalfCheckDrawable}, null, Theme.key_chat_mediaSentCheck));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_inReplyLine));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_outReplyLine));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_inReplyNameText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_outReplyNameText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_inReplyMessageText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_outReplyMessageText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_inReplyMediaMessageSelectedText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_outReplyMediaMessageSelectedText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_inTimeText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_outTimeText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_inTimeSelectedText));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, null, null, null, null, Theme.key_chat_outTimeSelectedText));
+        return themeDescriptions;
     }
 }

@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class ModelResource {
     private final AtomicInteger zza = new AtomicInteger(0);
     protected final TaskQueue taskQueue = new TaskQueue();

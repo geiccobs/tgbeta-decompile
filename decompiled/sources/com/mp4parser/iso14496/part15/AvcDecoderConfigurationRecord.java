@@ -1,13 +1,19 @@
 package com.mp4parser.iso14496.part15;
 
+import com.coremedia.iso.Hex;
 import com.coremedia.iso.IsoTypeReader;
 import com.coremedia.iso.IsoTypeWriter;
+import com.googlecode.mp4parser.authoring.tracks.CleanInputStream;
 import com.googlecode.mp4parser.boxes.mp4.objectdescriptors.BitReaderBuffer;
 import com.googlecode.mp4parser.boxes.mp4.objectdescriptors.BitWriterBuffer;
+import com.googlecode.mp4parser.h264.model.PictureParameterSet;
+import com.googlecode.mp4parser.h264.model.SeqParameterSet;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class AvcDecoderConfigurationRecord {
     public int avcLevelIndication;
     public int avcProfileIndication;
@@ -42,7 +48,7 @@ public class AvcDecoderConfigurationRecord {
         this.bitDepthChromaMinus8PaddingBits = 31;
     }
 
-    public AvcDecoderConfigurationRecord(ByteBuffer byteBuffer) {
+    public AvcDecoderConfigurationRecord(ByteBuffer content) {
         int i;
         this.sequenceParameterSets = new ArrayList();
         this.pictureParameterSets = new ArrayList();
@@ -56,42 +62,47 @@ public class AvcDecoderConfigurationRecord {
         this.chromaFormatPaddingBits = 31;
         this.bitDepthLumaMinus8PaddingBits = 31;
         this.bitDepthChromaMinus8PaddingBits = 31;
-        this.configurationVersion = IsoTypeReader.readUInt8(byteBuffer);
-        this.avcProfileIndication = IsoTypeReader.readUInt8(byteBuffer);
-        this.profileCompatibility = IsoTypeReader.readUInt8(byteBuffer);
-        this.avcLevelIndication = IsoTypeReader.readUInt8(byteBuffer);
-        BitReaderBuffer bitReaderBuffer = new BitReaderBuffer(byteBuffer);
-        this.lengthSizeMinusOnePaddingBits = bitReaderBuffer.readBits(6);
-        this.lengthSizeMinusOne = bitReaderBuffer.readBits(2);
-        this.numberOfSequenceParameterSetsPaddingBits = bitReaderBuffer.readBits(3);
-        int readBits = bitReaderBuffer.readBits(5);
-        for (int i2 = 0; i2 < readBits; i2++) {
-            byte[] bArr = new byte[IsoTypeReader.readUInt16(byteBuffer)];
-            byteBuffer.get(bArr);
-            this.sequenceParameterSets.add(bArr);
+        this.configurationVersion = IsoTypeReader.readUInt8(content);
+        this.avcProfileIndication = IsoTypeReader.readUInt8(content);
+        this.profileCompatibility = IsoTypeReader.readUInt8(content);
+        this.avcLevelIndication = IsoTypeReader.readUInt8(content);
+        BitReaderBuffer brb = new BitReaderBuffer(content);
+        this.lengthSizeMinusOnePaddingBits = brb.readBits(6);
+        this.lengthSizeMinusOne = brb.readBits(2);
+        this.numberOfSequenceParameterSetsPaddingBits = brb.readBits(3);
+        int numberOfSeuqenceParameterSets = brb.readBits(5);
+        for (int i2 = 0; i2 < numberOfSeuqenceParameterSets; i2++) {
+            int sequenceParameterSetLength = IsoTypeReader.readUInt16(content);
+            byte[] sequenceParameterSetNALUnit = new byte[sequenceParameterSetLength];
+            content.get(sequenceParameterSetNALUnit);
+            this.sequenceParameterSets.add(sequenceParameterSetNALUnit);
         }
-        long readUInt8 = IsoTypeReader.readUInt8(byteBuffer);
-        for (int i3 = 0; i3 < readUInt8; i3++) {
-            byte[] bArr2 = new byte[IsoTypeReader.readUInt16(byteBuffer)];
-            byteBuffer.get(bArr2);
-            this.pictureParameterSets.add(bArr2);
+        int i3 = IsoTypeReader.readUInt8(content);
+        long numberOfPictureParameterSets = i3;
+        for (int i4 = 0; i4 < numberOfPictureParameterSets; i4++) {
+            int pictureParameterSetLength = IsoTypeReader.readUInt16(content);
+            byte[] pictureParameterSetNALUnit = new byte[pictureParameterSetLength];
+            content.get(pictureParameterSetNALUnit);
+            this.pictureParameterSets.add(pictureParameterSetNALUnit);
         }
-        if (byteBuffer.remaining() < 4) {
+        int i5 = content.remaining();
+        if (i5 < 4) {
             this.hasExts = false;
         }
         if (this.hasExts && ((i = this.avcProfileIndication) == 100 || i == 110 || i == 122 || i == 144)) {
-            BitReaderBuffer bitReaderBuffer2 = new BitReaderBuffer(byteBuffer);
-            this.chromaFormatPaddingBits = bitReaderBuffer2.readBits(6);
-            this.chromaFormat = bitReaderBuffer2.readBits(2);
-            this.bitDepthLumaMinus8PaddingBits = bitReaderBuffer2.readBits(5);
-            this.bitDepthLumaMinus8 = bitReaderBuffer2.readBits(3);
-            this.bitDepthChromaMinus8PaddingBits = bitReaderBuffer2.readBits(5);
-            this.bitDepthChromaMinus8 = bitReaderBuffer2.readBits(3);
-            long readUInt82 = IsoTypeReader.readUInt8(byteBuffer);
-            for (int i4 = 0; i4 < readUInt82; i4++) {
-                byte[] bArr3 = new byte[IsoTypeReader.readUInt16(byteBuffer)];
-                byteBuffer.get(bArr3);
-                this.sequenceParameterSetExts.add(bArr3);
+            BitReaderBuffer brb2 = new BitReaderBuffer(content);
+            this.chromaFormatPaddingBits = brb2.readBits(6);
+            this.chromaFormat = brb2.readBits(2);
+            this.bitDepthLumaMinus8PaddingBits = brb2.readBits(5);
+            this.bitDepthLumaMinus8 = brb2.readBits(3);
+            this.bitDepthChromaMinus8PaddingBits = brb2.readBits(5);
+            this.bitDepthChromaMinus8 = brb2.readBits(3);
+            long numOfSequenceParameterSetExt = IsoTypeReader.readUInt8(content);
+            for (int i6 = 0; i6 < numOfSequenceParameterSetExt; i6++) {
+                int sequenceParameterSetExtLength = IsoTypeReader.readUInt16(content);
+                byte[] sequenceParameterSetExtNALUnit = new byte[sequenceParameterSetExtLength];
+                content.get(sequenceParameterSetExtNALUnit);
+                this.sequenceParameterSetExts.add(sequenceParameterSetExtNALUnit);
             }
             return;
         }
@@ -105,56 +116,105 @@ public class AvcDecoderConfigurationRecord {
         IsoTypeWriter.writeUInt8(byteBuffer, this.avcProfileIndication);
         IsoTypeWriter.writeUInt8(byteBuffer, this.profileCompatibility);
         IsoTypeWriter.writeUInt8(byteBuffer, this.avcLevelIndication);
-        BitWriterBuffer bitWriterBuffer = new BitWriterBuffer(byteBuffer);
-        bitWriterBuffer.writeBits(this.lengthSizeMinusOnePaddingBits, 6);
-        bitWriterBuffer.writeBits(this.lengthSizeMinusOne, 2);
-        bitWriterBuffer.writeBits(this.numberOfSequenceParameterSetsPaddingBits, 3);
-        bitWriterBuffer.writeBits(this.pictureParameterSets.size(), 5);
-        for (byte[] bArr : this.sequenceParameterSets) {
-            IsoTypeWriter.writeUInt16(byteBuffer, bArr.length);
-            byteBuffer.put(bArr);
+        BitWriterBuffer bwb = new BitWriterBuffer(byteBuffer);
+        bwb.writeBits(this.lengthSizeMinusOnePaddingBits, 6);
+        bwb.writeBits(this.lengthSizeMinusOne, 2);
+        bwb.writeBits(this.numberOfSequenceParameterSetsPaddingBits, 3);
+        bwb.writeBits(this.pictureParameterSets.size(), 5);
+        for (byte[] sequenceParameterSetNALUnit : this.sequenceParameterSets) {
+            IsoTypeWriter.writeUInt16(byteBuffer, sequenceParameterSetNALUnit.length);
+            byteBuffer.put(sequenceParameterSetNALUnit);
         }
         IsoTypeWriter.writeUInt8(byteBuffer, this.pictureParameterSets.size());
-        for (byte[] bArr2 : this.pictureParameterSets) {
-            IsoTypeWriter.writeUInt16(byteBuffer, bArr2.length);
-            byteBuffer.put(bArr2);
+        for (byte[] pictureParameterSetNALUnit : this.pictureParameterSets) {
+            IsoTypeWriter.writeUInt16(byteBuffer, pictureParameterSetNALUnit.length);
+            byteBuffer.put(pictureParameterSetNALUnit);
         }
         if (this.hasExts) {
             int i = this.avcProfileIndication;
-            if (i != 100 && i != 110 && i != 122 && i != 144) {
-                return;
-            }
-            BitWriterBuffer bitWriterBuffer2 = new BitWriterBuffer(byteBuffer);
-            bitWriterBuffer2.writeBits(this.chromaFormatPaddingBits, 6);
-            bitWriterBuffer2.writeBits(this.chromaFormat, 2);
-            bitWriterBuffer2.writeBits(this.bitDepthLumaMinus8PaddingBits, 5);
-            bitWriterBuffer2.writeBits(this.bitDepthLumaMinus8, 3);
-            bitWriterBuffer2.writeBits(this.bitDepthChromaMinus8PaddingBits, 5);
-            bitWriterBuffer2.writeBits(this.bitDepthChromaMinus8, 3);
-            for (byte[] bArr3 : this.sequenceParameterSetExts) {
-                IsoTypeWriter.writeUInt16(byteBuffer, bArr3.length);
-                byteBuffer.put(bArr3);
+            if (i == 100 || i == 110 || i == 122 || i == 144) {
+                BitWriterBuffer bwb2 = new BitWriterBuffer(byteBuffer);
+                bwb2.writeBits(this.chromaFormatPaddingBits, 6);
+                bwb2.writeBits(this.chromaFormat, 2);
+                bwb2.writeBits(this.bitDepthLumaMinus8PaddingBits, 5);
+                bwb2.writeBits(this.bitDepthLumaMinus8, 3);
+                bwb2.writeBits(this.bitDepthChromaMinus8PaddingBits, 5);
+                bwb2.writeBits(this.bitDepthChromaMinus8, 3);
+                for (byte[] sequenceParameterSetExtNALUnit : this.sequenceParameterSetExts) {
+                    IsoTypeWriter.writeUInt16(byteBuffer, sequenceParameterSetExtNALUnit.length);
+                    byteBuffer.put(sequenceParameterSetExtNALUnit);
+                }
             }
         }
     }
 
     public long getContentSize() {
         int i;
-        long j = 6;
-        for (byte[] bArr : this.sequenceParameterSets) {
-            j = j + 2 + bArr.length;
+        long size = 5 + 1;
+        for (byte[] sequenceParameterSetNALUnit : this.sequenceParameterSets) {
+            size = size + 2 + sequenceParameterSetNALUnit.length;
         }
-        long j2 = j + 1;
-        for (byte[] bArr2 : this.pictureParameterSets) {
-            j2 = j2 + 2 + bArr2.length;
+        long size2 = size + 1;
+        for (byte[] pictureParameterSetNALUnit : this.pictureParameterSets) {
+            size2 = size2 + 2 + pictureParameterSetNALUnit.length;
         }
         if (this.hasExts && ((i = this.avcProfileIndication) == 100 || i == 110 || i == 122 || i == 144)) {
-            j2 += 4;
-            for (byte[] bArr3 : this.sequenceParameterSetExts) {
-                j2 = j2 + 2 + bArr3.length;
+            size2 += 4;
+            for (byte[] sequenceParameterSetExtNALUnit : this.sequenceParameterSetExts) {
+                size2 = size2 + 2 + sequenceParameterSetExtNALUnit.length;
             }
         }
-        return j2;
+        return size2;
+    }
+
+    public String[] getPPS() {
+        ArrayList<String> l = new ArrayList<>();
+        for (byte[] pictureParameterSet : this.pictureParameterSets) {
+            try {
+                String details = PictureParameterSet.read(new ByteArrayInputStream(pictureParameterSet, 1, pictureParameterSet.length - 1)).toString();
+                l.add(details);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return (String[]) l.toArray(new String[l.size()]);
+    }
+
+    public String[] getSPS() {
+        ArrayList<String> l = new ArrayList<>();
+        for (byte[] sequenceParameterSet : this.sequenceParameterSets) {
+            String detail = "not parsable";
+            try {
+                detail = SeqParameterSet.read(new CleanInputStream(new ByteArrayInputStream(sequenceParameterSet, 1, sequenceParameterSet.length - 1))).toString();
+            } catch (IOException e) {
+            }
+            l.add(detail);
+        }
+        return (String[]) l.toArray(new String[l.size()]);
+    }
+
+    public List<String> getSequenceParameterSetsAsStrings() {
+        List<String> result = new ArrayList<>(this.sequenceParameterSets.size());
+        for (byte[] parameterSet : this.sequenceParameterSets) {
+            result.add(Hex.encodeHex(parameterSet));
+        }
+        return result;
+    }
+
+    public List<String> getSequenceParameterSetExtsAsStrings() {
+        List<String> result = new ArrayList<>(this.sequenceParameterSetExts.size());
+        for (byte[] parameterSet : this.sequenceParameterSetExts) {
+            result.add(Hex.encodeHex(parameterSet));
+        }
+        return result;
+    }
+
+    public List<String> getPictureParameterSetsAsStrings() {
+        List<String> result = new ArrayList<>(this.pictureParameterSets.size());
+        for (byte[] parameterSet : this.pictureParameterSets) {
+            result.add(Hex.encodeHex(parameterSet));
+        }
+        return result;
     }
 
     public String toString() {

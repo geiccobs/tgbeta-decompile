@@ -4,24 +4,24 @@ import android.content.Context;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.TransferListener;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final class ExtendedDefaultDataSourceFactory implements DataSource.Factory {
     private final DataSource.Factory baseDataSourceFactory;
     private final Context context;
     private final TransferListener listener;
 
-    public ExtendedDefaultDataSourceFactory(Context context, String str) {
-        this(context, str, (TransferListener) null);
+    public ExtendedDefaultDataSourceFactory(Context context, String userAgent) {
+        this(context, userAgent, (TransferListener) null);
     }
 
-    public ExtendedDefaultDataSourceFactory(Context context, String str, TransferListener transferListener) {
-        this(context, transferListener, new DefaultHttpDataSourceFactory(str, transferListener));
+    public ExtendedDefaultDataSourceFactory(Context context, String userAgent, TransferListener listener) {
+        this(context, listener, new DefaultHttpDataSourceFactory(userAgent, listener));
     }
 
-    public ExtendedDefaultDataSourceFactory(Context context, TransferListener transferListener, DataSource.Factory factory) {
+    public ExtendedDefaultDataSourceFactory(Context context, TransferListener listener, DataSource.Factory baseDataSourceFactory) {
         this.context = context.getApplicationContext();
-        this.listener = transferListener;
-        this.baseDataSourceFactory = factory;
+        this.listener = listener;
+        this.baseDataSourceFactory = baseDataSourceFactory;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource.Factory

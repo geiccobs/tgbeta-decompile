@@ -3,7 +3,7 @@ package com.google.android.gms.identity.intents.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzb implements Parcelable.Creator<UserAddress> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ UserAddress createFromParcel(Parcel parcel) {

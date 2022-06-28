@@ -10,38 +10,67 @@ import com.google.android.datatransport.runtime.scheduling.jobscheduling.WorkIni
 import com.google.android.datatransport.runtime.time.Clock;
 import java.util.Collections;
 import java.util.Set;
-/* loaded from: classes.dex */
+import java.util.concurrent.Callable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+@Singleton
+/* loaded from: classes3.dex */
 public class TransportRuntime implements TransportInternal {
-    private static volatile TransportRuntimeComponent instance;
+    private static volatile TransportRuntimeComponent instance = null;
     private final Clock eventClock;
     private final Scheduler scheduler;
     private final Uploader uploader;
     private final Clock uptimeClock;
 
-    public TransportRuntime(Clock clock, Clock clock2, Scheduler scheduler, Uploader uploader, WorkInitializer workInitializer) {
-        this.eventClock = clock;
-        this.uptimeClock = clock2;
+    @Inject
+    public TransportRuntime(Clock eventClock, Clock uptimeClock, Scheduler scheduler, Uploader uploader, WorkInitializer initializer) {
+        this.eventClock = eventClock;
+        this.uptimeClock = uptimeClock;
         this.scheduler = scheduler;
         this.uploader = uploader;
-        workInitializer.ensureContextsScheduled();
+        initializer.ensureContextsScheduled();
     }
 
-    public static void initialize(Context context) {
+    public static void initialize(Context applicationContext) {
         if (instance == null) {
             synchronized (TransportRuntime.class) {
                 if (instance == null) {
-                    instance = DaggerTransportRuntimeComponent.builder().setApplicationContext(context).build();
+                    instance = DaggerTransportRuntimeComponent.builder().setApplicationContext(applicationContext).build();
                 }
             }
         }
     }
 
     public static TransportRuntime getInstance() {
-        TransportRuntimeComponent transportRuntimeComponent = instance;
-        if (transportRuntimeComponent == null) {
+        TransportRuntimeComponent localRef = instance;
+        if (localRef == null) {
             throw new IllegalStateException("Not initialized!");
         }
-        return transportRuntimeComponent.getTransportRuntime();
+        return localRef.getTransportRuntime();
+    }
+
+    static void withInstance(TransportRuntimeComponent component, Callable<Void> callable) throws Throwable {
+        TransportRuntimeComponent original;
+        synchronized (TransportRuntime.class) {
+            original = instance;
+            instance = component;
+        }
+        try {
+            callable.call();
+            synchronized (TransportRuntime.class) {
+                instance = original;
+            }
+        } catch (Throwable th) {
+            synchronized (TransportRuntime.class) {
+                instance = original;
+                throw th;
+            }
+        }
+    }
+
+    @Deprecated
+    public TransportFactory newFactory(String backendName) {
+        return new TransportFactoryImpl(getSupportedEncodings(null), TransportContext.builder().setBackendName(backendName).build(), this);
     }
 
     public TransportFactory newFactory(Destination destination) {
@@ -50,7 +79,8 @@ public class TransportRuntime implements TransportInternal {
 
     private static Set<Encoding> getSupportedEncodings(Destination destination) {
         if (destination instanceof EncodedDestination) {
-            return Collections.unmodifiableSet(((EncodedDestination) destination).getSupportedEncodings());
+            EncodedDestination encodedDestination = (EncodedDestination) destination;
+            return Collections.unmodifiableSet(encodedDestination.getSupportedEncodings());
         }
         return Collections.singleton(Encoding.of("proto"));
     }
@@ -60,11 +90,11 @@ public class TransportRuntime implements TransportInternal {
     }
 
     @Override // com.google.android.datatransport.runtime.TransportInternal
-    public void send(SendRequest sendRequest, TransportScheduleCallback transportScheduleCallback) {
-        this.scheduler.schedule(sendRequest.getTransportContext().withPriority(sendRequest.getEvent().getPriority()), convert(sendRequest), transportScheduleCallback);
+    public void send(SendRequest request, TransportScheduleCallback callback) {
+        this.scheduler.schedule(request.getTransportContext().withPriority(request.getEvent().getPriority()), convert(request), callback);
     }
 
-    private EventInternal convert(SendRequest sendRequest) {
-        return EventInternal.builder().setEventMillis(this.eventClock.getTime()).setUptimeMillis(this.uptimeClock.getTime()).setTransportName(sendRequest.getTransportName()).setEncodedPayload(new EncodedPayload(sendRequest.getEncoding(), sendRequest.getPayload())).setCode(sendRequest.getEvent().getCode()).build();
+    private EventInternal convert(SendRequest request) {
+        return EventInternal.builder().setEventMillis(this.eventClock.getTime()).setUptimeMillis(this.uptimeClock.getTime()).setTransportName(request.getTransportName()).setEncodedPayload(new EncodedPayload(request.getEncoding(), request.getPayload())).setCode(request.getEvent().getCode()).build();
     }
 }

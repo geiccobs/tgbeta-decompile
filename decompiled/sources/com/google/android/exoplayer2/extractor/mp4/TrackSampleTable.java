@@ -2,8 +2,8 @@ package com.google.android.exoplayer2.extractor.mp4;
 
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes.dex */
-final class TrackSampleTable {
+/* loaded from: classes3.dex */
+public final class TrackSampleTable {
     public final long durationUs;
     public final int[] flags;
     public final int maximumSize;
@@ -13,38 +13,40 @@ final class TrackSampleTable {
     public final long[] timestampsUs;
     public final Track track;
 
-    public TrackSampleTable(Track track, long[] jArr, int[] iArr, int i, long[] jArr2, int[] iArr2, long j) {
+    public TrackSampleTable(Track track, long[] offsets, int[] sizes, int maximumSize, long[] timestampsUs, int[] flags, long durationUs) {
         boolean z = false;
-        Assertions.checkArgument(iArr.length == jArr2.length);
-        Assertions.checkArgument(jArr.length == jArr2.length);
-        Assertions.checkArgument(iArr2.length == jArr2.length ? true : z);
+        Assertions.checkArgument(sizes.length == timestampsUs.length);
+        Assertions.checkArgument(offsets.length == timestampsUs.length);
+        Assertions.checkArgument(flags.length == timestampsUs.length ? true : z);
         this.track = track;
-        this.offsets = jArr;
-        this.sizes = iArr;
-        this.maximumSize = i;
-        this.timestampsUs = jArr2;
-        this.flags = iArr2;
-        this.durationUs = j;
-        this.sampleCount = jArr.length;
-        if (iArr2.length > 0) {
-            int length = iArr2.length - 1;
-            iArr2[length] = iArr2[length] | 536870912;
+        this.offsets = offsets;
+        this.sizes = sizes;
+        this.maximumSize = maximumSize;
+        this.timestampsUs = timestampsUs;
+        this.flags = flags;
+        this.durationUs = durationUs;
+        this.sampleCount = offsets.length;
+        if (flags.length > 0) {
+            int length = flags.length - 1;
+            flags[length] = flags[length] | 536870912;
         }
     }
 
-    public int getIndexOfEarlierOrEqualSynchronizationSample(long j) {
-        for (int binarySearchFloor = Util.binarySearchFloor(this.timestampsUs, j, true, false); binarySearchFloor >= 0; binarySearchFloor--) {
-            if ((this.flags[binarySearchFloor] & 1) != 0) {
-                return binarySearchFloor;
+    public int getIndexOfEarlierOrEqualSynchronizationSample(long timeUs) {
+        int startIndex = Util.binarySearchFloor(this.timestampsUs, timeUs, true, false);
+        for (int i = startIndex; i >= 0; i--) {
+            if ((this.flags[i] & 1) != 0) {
+                return i;
             }
         }
         return -1;
     }
 
-    public int getIndexOfLaterOrEqualSynchronizationSample(long j) {
-        for (int binarySearchCeil = Util.binarySearchCeil(this.timestampsUs, j, true, false); binarySearchCeil < this.timestampsUs.length; binarySearchCeil++) {
-            if ((this.flags[binarySearchCeil] & 1) != 0) {
-                return binarySearchCeil;
+    public int getIndexOfLaterOrEqualSynchronizationSample(long timeUs) {
+        int startIndex = Util.binarySearchCeil(this.timestampsUs, timeUs, true, false);
+        for (int i = startIndex; i < this.timestampsUs.length; i++) {
+            if ((this.flags[i] & 1) != 0) {
+                return i;
             }
         }
         return -1;

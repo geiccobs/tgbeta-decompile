@@ -2,16 +2,15 @@ package com.google.android.gms.common;
 
 import android.os.RemoteException;
 import android.util.Log;
+import com.google.android.exoplayer2.C;
 import com.google.android.gms.common.internal.Preconditions;
-import com.google.android.gms.common.internal.zzm;
-import com.google.android.gms.common.internal.zzo;
 import com.google.android.gms.dynamic.IObjectWrapper;
 import com.google.android.gms.dynamic.ObjectWrapper;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
-abstract class zzd extends zzo {
+/* loaded from: classes3.dex */
+public abstract class zzd extends com.google.android.gms.common.internal.zzo {
     private int zza;
 
     public zzd(byte[] bArr) {
@@ -19,7 +18,7 @@ abstract class zzd extends zzo {
         this.zza = Arrays.hashCode(bArr);
     }
 
-    abstract byte[] zza();
+    public abstract byte[] zza();
 
     public int hashCode() {
         return this.zza;
@@ -27,18 +26,19 @@ abstract class zzd extends zzo {
 
     public boolean equals(Object obj) {
         IObjectWrapper zzb;
-        if (obj != null && (obj instanceof zzm)) {
-            try {
-                zzm zzmVar = (zzm) obj;
-                if (zzmVar.zzc() != hashCode() || (zzb = zzmVar.zzb()) == null) {
-                    return false;
-                }
-                return Arrays.equals(zza(), (byte[]) ObjectWrapper.unwrap(zzb));
-            } catch (RemoteException e) {
-                Log.e("GoogleCertificates", "Failed to get Google certificates from remote", e);
-            }
+        if (obj == null || !(obj instanceof com.google.android.gms.common.internal.zzm)) {
+            return false;
         }
-        return false;
+        try {
+            com.google.android.gms.common.internal.zzm zzmVar = (com.google.android.gms.common.internal.zzm) obj;
+            if (zzmVar.zzc() != hashCode() || (zzb = zzmVar.zzb()) == null) {
+                return false;
+            }
+            return Arrays.equals(zza(), (byte[]) ObjectWrapper.unwrap(zzb));
+        } catch (RemoteException e) {
+            Log.e("GoogleCertificates", "Failed to get Google certificates from remote", e);
+            return false;
+        }
     }
 
     @Override // com.google.android.gms.common.internal.zzm
@@ -53,7 +53,7 @@ abstract class zzd extends zzo {
 
     public static byte[] zza(String str) {
         try {
-            return str.getBytes("ISO-8859-1");
+            return str.getBytes(C.ISO88591_NAME);
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError(e);
         }

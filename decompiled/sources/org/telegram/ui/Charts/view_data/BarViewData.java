@@ -2,7 +2,7 @@ package org.telegram.ui.Charts.view_data;
 
 import android.graphics.Paint;
 import org.telegram.ui.Charts.data.ChartData;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class BarViewData extends LineViewData {
     public int blendColor = 0;
     public final Paint unselectedPaint;

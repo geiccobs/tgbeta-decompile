@@ -11,6 +11,7 @@ import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
 import j$.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,26 +29,14 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$ChatInvite;
-import org.telegram.tgnet.TLRPC$EncryptedChat;
-import org.telegram.tgnet.TLRPC$Message;
-import org.telegram.tgnet.TLRPC$Peer;
-import org.telegram.tgnet.TLRPC$TL_dialog;
-import org.telegram.tgnet.TLRPC$TL_error;
-import org.telegram.tgnet.TLRPC$TL_inputMessagesFilterEmpty;
-import org.telegram.tgnet.TLRPC$TL_inputPeerEmpty;
-import org.telegram.tgnet.TLRPC$TL_messages_searchGlobal;
-import org.telegram.tgnet.TLRPC$TL_topPeer;
-import org.telegram.tgnet.TLRPC$User;
-import org.telegram.tgnet.TLRPC$messages_Messages;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DialogsSearchAdapter;
 import org.telegram.ui.Adapters.FiltersView;
@@ -61,10 +50,11 @@ import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.FilteredSearchView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
     private Runnable cancelShowMoreAnimation;
     private int currentItemCount;
+    private String currentMessagesQuery;
     private DialogsSearchAdapterDelegate delegate;
     private int dialogsType;
     private FilteredSearchView.Delegate filtersDelegate;
@@ -89,7 +79,15 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
     private Runnable searchRunnable2;
     private boolean searchWas;
     public View showMoreHeader;
+    public int showMoreLastItem;
     int waitingResponseCount;
+    private final int VIEW_TYPE_PROFILE_CELL = 0;
+    private final int VIEW_TYPE_GRAY_SECTION = 1;
+    private final int VIEW_TYPE_DIALOG_CELL = 2;
+    private final int VIEW_TYPE_LOADING = 3;
+    private final int VIEW_TYPE_HASHTAG_CELL = 4;
+    private final int VIEW_TYPE_CATEGORY_LIST = 5;
+    private final int VIEW_TYPE_ADD_BY_PHONE = 6;
     private ArrayList<Object> searchResult = new ArrayList<>();
     private ArrayList<CharSequence> searchResultNames = new ArrayList<>();
     private ArrayList<MessageObject> searchResultMessages = new ArrayList<>();
@@ -106,14 +104,14 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
     boolean phoneCollapsed = true;
     private long selfUserId = UserConfig.getInstance(this.currentAccount).getClientUserId();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static class DialogSearchResult {
         public int date;
         public CharSequence name;
         public TLObject object;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface DialogsSearchAdapterDelegate {
         void didPressedOnSubDialog(long j);
 
@@ -128,91 +126,77 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         void searchStateChanged(boolean z, boolean z2);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface OnRecentSearchLoaded {
         void setRecentSearch(ArrayList<RecentSearchObject> arrayList, LongSparseArray<RecentSearchObject> longSparseArray);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static class RecentSearchObject {
         public int date;
         public long did;
         public TLObject object;
     }
 
-    @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public long getItemId(int i) {
-        return i;
-    }
-
     public boolean isSearching() {
         return this.waitingResponseCount > 0;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static class CategoryAdapterRecycler extends RecyclerListView.SelectionAdapter {
         private final int currentAccount;
         private boolean drawChecked;
+        private boolean forceDarkTheme;
         private final Context mContext;
 
-        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            return true;
-        }
-
-        public CategoryAdapterRecycler(Context context, int i, boolean z) {
-            this.drawChecked = z;
+        public CategoryAdapterRecycler(Context context, int account, boolean drawChecked) {
+            this.drawChecked = drawChecked;
             this.mContext = context;
-            this.currentAccount = i;
+            this.currentAccount = account;
         }
 
-        public void setIndex(int i) {
+        public void setIndex(int value) {
             notifyDataSetChanged();
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            HintDialogCell hintDialogCell = new HintDialogCell(this.mContext, this.drawChecked);
-            hintDialogCell.setLayoutParams(new RecyclerView.LayoutParams(AndroidUtilities.dp(80.0f), AndroidUtilities.dp(86.0f)));
-            return new RecyclerListView.Holder(hintDialogCell);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            HintDialogCell cell = new HintDialogCell(this.mContext, this.drawChecked);
+            cell.setLayoutParams(new RecyclerView.LayoutParams(AndroidUtilities.dp(80.0f), AndroidUtilities.dp(86.0f)));
+            return new RecyclerListView.Holder(cell);
+        }
+
+        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            return true;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            TLRPC$Chat tLRPC$Chat;
-            String str;
-            HintDialogCell hintDialogCell = (HintDialogCell) viewHolder.itemView;
-            TLRPC$TL_topPeer tLRPC$TL_topPeer = MediaDataController.getInstance(this.currentAccount).hints.get(i);
-            new TLRPC$TL_dialog();
-            TLRPC$Peer tLRPC$Peer = tLRPC$TL_topPeer.peer;
-            long j = tLRPC$Peer.user_id;
-            TLRPC$User tLRPC$User = null;
-            if (j != 0) {
-                tLRPC$User = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(tLRPC$TL_topPeer.peer.user_id));
-                tLRPC$Chat = null;
-            } else {
-                long j2 = tLRPC$Peer.channel_id;
-                if (j2 != 0) {
-                    j = -j2;
-                    tLRPC$Chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(tLRPC$TL_topPeer.peer.channel_id));
-                } else {
-                    long j3 = tLRPC$Peer.chat_id;
-                    if (j3 != 0) {
-                        j = -j3;
-                        tLRPC$Chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(tLRPC$TL_topPeer.peer.chat_id));
-                    } else {
-                        tLRPC$Chat = null;
-                        j = 0;
-                    }
-                }
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            HintDialogCell cell = (HintDialogCell) holder.itemView;
+            TLRPC.TL_topPeer peer = MediaDataController.getInstance(this.currentAccount).hints.get(position);
+            new TLRPC.TL_dialog();
+            TLRPC.Chat chat = null;
+            TLRPC.User user = null;
+            long did = 0;
+            if (peer.peer.user_id != 0) {
+                did = peer.peer.user_id;
+                user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(peer.peer.user_id));
+            } else if (peer.peer.channel_id != 0) {
+                did = -peer.peer.channel_id;
+                chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(peer.peer.channel_id));
+            } else if (peer.peer.chat_id != 0) {
+                did = -peer.peer.chat_id;
+                chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(peer.peer.chat_id));
             }
-            hintDialogCell.setTag(Long.valueOf(j));
-            if (tLRPC$User != null) {
-                str = UserObject.getFirstName(tLRPC$User);
-            } else {
-                str = tLRPC$Chat != null ? tLRPC$Chat.title : "";
+            cell.setTag(Long.valueOf(did));
+            String name = "";
+            if (user != null) {
+                name = UserObject.getFirstName(user);
+            } else if (chat != null) {
+                name = chat.title;
             }
-            hintDialogCell.setDialog(j, true, str);
+            cell.setDialog(did, true, name);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -221,8 +205,8 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         }
     }
 
-    public DialogsSearchAdapter(Context context, int i, int i2, DefaultItemAnimator defaultItemAnimator) {
-        this.itemAnimator = defaultItemAnimator;
+    public DialogsSearchAdapter(Context context, int messagesSearch, int type, DefaultItemAnimator itemAnimator) {
+        this.itemAnimator = itemAnimator;
         SearchAdapterHelper searchAdapterHelper = new SearchAdapterHelper(false);
         this.searchAdapterHelper = searchAdapterHelper;
         searchAdapterHelper.setDelegate(new SearchAdapterHelper.SearchAdapterHelperDelegate() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter.1
@@ -237,14 +221,13 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             }
 
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
-            public void onDataSetChanged(int i3) {
-                DialogsSearchAdapter dialogsSearchAdapter = DialogsSearchAdapter.this;
-                dialogsSearchAdapter.waitingResponseCount--;
-                dialogsSearchAdapter.lastGlobalSearchId = i3;
-                if (DialogsSearchAdapter.this.lastLocalSearchId != i3) {
+            public void onDataSetChanged(int searchId) {
+                DialogsSearchAdapter.this.waitingResponseCount--;
+                DialogsSearchAdapter.this.lastGlobalSearchId = searchId;
+                if (DialogsSearchAdapter.this.lastLocalSearchId != searchId) {
                     DialogsSearchAdapter.this.searchResult.clear();
                 }
-                if (DialogsSearchAdapter.this.lastMessagesSearchId != i3) {
+                if (DialogsSearchAdapter.this.lastMessagesSearchId != searchId) {
                     DialogsSearchAdapter.this.searchResultMessages.clear();
                 }
                 DialogsSearchAdapter.this.searchWas = true;
@@ -259,8 +242,8 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
 
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
             public void onSetHashtags(ArrayList<SearchAdapterHelper.HashtagObject> arrayList, HashMap<String, SearchAdapterHelper.HashtagObject> hashMap) {
-                for (int i3 = 0; i3 < arrayList.size(); i3++) {
-                    DialogsSearchAdapter.this.searchResultHashtags.add(arrayList.get(i3).hashtag);
+                for (int a = 0; a < arrayList.size(); a++) {
+                    DialogsSearchAdapter.this.searchResultHashtags.add(arrayList.get(a).hashtag);
                 }
                 if (DialogsSearchAdapter.this.delegate != null) {
                     DialogsSearchAdapter.this.delegate.searchStateChanged(DialogsSearchAdapter.this.waitingResponseCount > 0, false);
@@ -269,13 +252,13 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             }
 
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
-            public boolean canApplySearchResults(int i3) {
-                return i3 == DialogsSearchAdapter.this.lastSearchId;
+            public boolean canApplySearchResults(int searchId) {
+                return searchId == DialogsSearchAdapter.this.lastSearchId;
             }
         });
         this.mContext = context;
-        this.needMessagesSearch = i;
-        this.dialogsType = i2;
+        this.needMessagesSearch = messagesSearch;
+        this.dialogsType = type;
         loadRecentSearch();
         MediaDataController.getInstance(this.currentAccount).loadHints(true);
     }
@@ -284,8 +267,8 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         return this.innerListView;
     }
 
-    public void setDelegate(DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate) {
-        this.delegate = dialogsSearchAdapterDelegate;
+    public void setDelegate(DialogsSearchAdapterDelegate delegate) {
+        this.delegate = delegate;
     }
 
     public boolean isMessagesSearchEndReached() {
@@ -303,16 +286,16 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         return this.lastMessagesSearchString;
     }
 
-    private void searchMessagesInternal(final String str, final int i) {
+    private void searchMessagesInternal(final String query, final int searchId) {
         if (this.needMessagesSearch != 0) {
-            if (TextUtils.isEmpty(this.lastMessagesSearchString) && TextUtils.isEmpty(str)) {
+            if (TextUtils.isEmpty(this.lastMessagesSearchString) && TextUtils.isEmpty(query)) {
                 return;
             }
             if (this.reqId != 0) {
                 ConnectionsManager.getInstance(this.currentAccount).cancelRequest(this.reqId, true);
                 this.reqId = 0;
             }
-            if (TextUtils.isEmpty(str)) {
+            if (TextUtils.isEmpty(query)) {
                 this.filteredRecentQuery = null;
                 this.searchResultMessages.clear();
                 this.lastReqId = 0;
@@ -321,111 +304,122 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
                 notifyDataSetChanged();
                 return;
             }
-            filterRecent(str);
+            filterRecent(query);
             this.searchAdapterHelper.mergeResults(this.searchResult, this.filteredRecentSearchObjects);
-            final TLRPC$TL_messages_searchGlobal tLRPC$TL_messages_searchGlobal = new TLRPC$TL_messages_searchGlobal();
-            tLRPC$TL_messages_searchGlobal.limit = 20;
-            tLRPC$TL_messages_searchGlobal.q = str;
-            tLRPC$TL_messages_searchGlobal.filter = new TLRPC$TL_inputMessagesFilterEmpty();
-            tLRPC$TL_messages_searchGlobal.flags |= 1;
-            tLRPC$TL_messages_searchGlobal.folder_id = this.folderId;
-            if (str.equals(this.lastMessagesSearchString) && !this.searchResultMessages.isEmpty()) {
+            final TLRPC.TL_messages_searchGlobal req = new TLRPC.TL_messages_searchGlobal();
+            req.limit = 20;
+            req.q = query;
+            req.filter = new TLRPC.TL_inputMessagesFilterEmpty();
+            req.flags |= 1;
+            req.folder_id = this.folderId;
+            if (query.equals(this.lastMessagesSearchString) && !this.searchResultMessages.isEmpty()) {
                 ArrayList<MessageObject> arrayList = this.searchResultMessages;
-                MessageObject messageObject = arrayList.get(arrayList.size() - 1);
-                tLRPC$TL_messages_searchGlobal.offset_id = messageObject.getId();
-                tLRPC$TL_messages_searchGlobal.offset_rate = this.nextSearchRate;
-                tLRPC$TL_messages_searchGlobal.offset_peer = MessagesController.getInstance(this.currentAccount).getInputPeer(MessageObject.getPeerId(messageObject.messageOwner.peer_id));
+                MessageObject lastMessage = arrayList.get(arrayList.size() - 1);
+                req.offset_id = lastMessage.getId();
+                req.offset_rate = this.nextSearchRate;
+                long id = MessageObject.getPeerId(lastMessage.messageOwner.peer_id);
+                req.offset_peer = MessagesController.getInstance(this.currentAccount).getInputPeer(id);
             } else {
-                tLRPC$TL_messages_searchGlobal.offset_rate = 0;
-                tLRPC$TL_messages_searchGlobal.offset_id = 0;
-                tLRPC$TL_messages_searchGlobal.offset_peer = new TLRPC$TL_inputPeerEmpty();
+                req.offset_rate = 0;
+                req.offset_id = 0;
+                req.offset_peer = new TLRPC.TL_inputPeerEmpty();
             }
-            this.lastMessagesSearchString = str;
-            final int i2 = this.lastReqId + 1;
-            this.lastReqId = i2;
-            this.reqId = ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_messages_searchGlobal, new RequestDelegate() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda21
+            this.lastMessagesSearchString = query;
+            final int currentReqId = this.lastReqId + 1;
+            this.lastReqId = currentReqId;
+            this.reqId = ConnectionsManager.getInstance(this.currentAccount).sendRequest(req, new RequestDelegate() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda13
                 @Override // org.telegram.tgnet.RequestDelegate
-                public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-                    DialogsSearchAdapter.this.lambda$searchMessagesInternal$1(str, i2, i, tLRPC$TL_messages_searchGlobal, tLObject, tLRPC$TL_error);
+                public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
+                    DialogsSearchAdapter.this.m1474xbfab1706(query, currentReqId, searchId, req, tLObject, tL_error);
                 }
             }, 2);
         }
     }
 
-    public /* synthetic */ void lambda$searchMessagesInternal$1(final String str, final int i, final int i2, final TLRPC$TL_messages_searchGlobal tLRPC$TL_messages_searchGlobal, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
-        final ArrayList arrayList = new ArrayList();
-        if (tLRPC$TL_error == null) {
-            TLRPC$messages_Messages tLRPC$messages_Messages = (TLRPC$messages_Messages) tLObject;
-            LongSparseArray longSparseArray = new LongSparseArray();
-            LongSparseArray longSparseArray2 = new LongSparseArray();
-            for (int i3 = 0; i3 < tLRPC$messages_Messages.chats.size(); i3++) {
-                TLRPC$Chat tLRPC$Chat = tLRPC$messages_Messages.chats.get(i3);
-                longSparseArray.put(tLRPC$Chat.id, tLRPC$Chat);
+    /* renamed from: lambda$searchMessagesInternal$1$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1474xbfab1706(final String query, final int currentReqId, final int searchId, final TLRPC.TL_messages_searchGlobal req, final TLObject response, final TLRPC.TL_error error) {
+        final ArrayList<MessageObject> messageObjects = new ArrayList<>();
+        if (error == null) {
+            TLRPC.messages_Messages res = (TLRPC.messages_Messages) response;
+            LongSparseArray<TLRPC.Chat> chatsMap = new LongSparseArray<>();
+            LongSparseArray<TLRPC.User> usersMap = new LongSparseArray<>();
+            for (int a = 0; a < res.chats.size(); a++) {
+                TLRPC.Chat chat = res.chats.get(a);
+                chatsMap.put(chat.id, chat);
             }
-            for (int i4 = 0; i4 < tLRPC$messages_Messages.users.size(); i4++) {
-                TLRPC$User tLRPC$User = tLRPC$messages_Messages.users.get(i4);
-                longSparseArray2.put(tLRPC$User.id, tLRPC$User);
+            for (int a2 = 0; a2 < res.users.size(); a2++) {
+                TLRPC.User user = res.users.get(a2);
+                usersMap.put(user.id, user);
             }
-            for (int i5 = 0; i5 < tLRPC$messages_Messages.messages.size(); i5++) {
-                MessageObject messageObject = new MessageObject(this.currentAccount, tLRPC$messages_Messages.messages.get(i5), (LongSparseArray<TLRPC$User>) longSparseArray2, (LongSparseArray<TLRPC$Chat>) longSparseArray, false, true);
-                arrayList.add(messageObject);
-                messageObject.setQuery(str);
+            for (int a3 = 0; a3 < res.messages.size(); a3++) {
+                TLRPC.Message message = res.messages.get(a3);
+                MessageObject messageObject = new MessageObject(this.currentAccount, message, usersMap, chatsMap, false, true);
+                messageObjects.add(messageObject);
+                messageObject.setQuery(query);
             }
         }
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda8
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda23
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$searchMessagesInternal$0(i, i2, tLRPC$TL_error, str, tLObject, tLRPC$TL_messages_searchGlobal, arrayList);
+                DialogsSearchAdapter.this.m1473x4a30f0c5(currentReqId, searchId, error, query, response, req, messageObjects);
             }
         });
     }
 
-    public /* synthetic */ void lambda$searchMessagesInternal$0(int i, int i2, TLRPC$TL_error tLRPC$TL_error, String str, TLObject tLObject, TLRPC$TL_messages_searchGlobal tLRPC$TL_messages_searchGlobal, ArrayList arrayList) {
-        if (i == this.lastReqId && (i2 <= 0 || i2 == this.lastSearchId)) {
+    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<java.lang.Long, java.lang.Integer> */
+    /* renamed from: lambda$searchMessagesInternal$0$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1473x4a30f0c5(int currentReqId, int searchId, TLRPC.TL_error error, String query, TLObject response, TLRPC.TL_messages_searchGlobal req, ArrayList messageObjects) {
+        boolean z;
+        if (currentReqId == this.lastReqId && (searchId <= 0 || searchId == this.lastSearchId)) {
             this.waitingResponseCount--;
-            if (tLRPC$TL_error == null) {
-                TLRPC$messages_Messages tLRPC$messages_Messages = (TLRPC$messages_Messages) tLObject;
-                MessagesStorage.getInstance(this.currentAccount).putUsersAndChats(tLRPC$messages_Messages.users, tLRPC$messages_Messages.chats, true, true);
-                MessagesController.getInstance(this.currentAccount).putUsers(tLRPC$messages_Messages.users, false);
-                MessagesController.getInstance(this.currentAccount).putChats(tLRPC$messages_Messages.chats, false);
-                if (tLRPC$TL_messages_searchGlobal.offset_id == 0) {
+            if (error == null) {
+                this.currentMessagesQuery = query;
+                TLRPC.messages_Messages res = (TLRPC.messages_Messages) response;
+                MessagesStorage.getInstance(this.currentAccount).putUsersAndChats(res.users, res.chats, true, true);
+                MessagesController.getInstance(this.currentAccount).putUsers(res.users, false);
+                MessagesController.getInstance(this.currentAccount).putChats(res.chats, false);
+                if (req.offset_id == 0) {
                     this.searchResultMessages.clear();
                 }
-                this.nextSearchRate = tLRPC$messages_Messages.next_rate;
-                for (int i3 = 0; i3 < tLRPC$messages_Messages.messages.size(); i3++) {
-                    TLRPC$Message tLRPC$Message = tLRPC$messages_Messages.messages.get(i3);
-                    int i4 = MessagesController.getInstance(this.currentAccount).deletedHistory.get(MessageObject.getDialogId(tLRPC$Message));
-                    if (i4 == 0 || tLRPC$Message.id > i4) {
-                        this.searchResultMessages.add((MessageObject) arrayList.get(i3));
-                        long dialogId = MessageObject.getDialogId(tLRPC$Message);
-                        ConcurrentHashMap<Long, Integer> concurrentHashMap = tLRPC$Message.out ? MessagesController.getInstance(this.currentAccount).dialogs_read_outbox_max : MessagesController.getInstance(this.currentAccount).dialogs_read_inbox_max;
-                        Integer num = concurrentHashMap.get(Long.valueOf(dialogId));
-                        if (num == null) {
-                            num = Integer.valueOf(MessagesStorage.getInstance(this.currentAccount).getDialogReadMax(tLRPC$Message.out, dialogId));
-                            concurrentHashMap.put(Long.valueOf(dialogId), num);
+                this.nextSearchRate = res.next_rate;
+                for (int a = 0; a < res.messages.size(); a++) {
+                    TLRPC.Message message = res.messages.get(a);
+                    long did = MessageObject.getDialogId(message);
+                    int maxId = MessagesController.getInstance(this.currentAccount).deletedHistory.get(did);
+                    if (maxId == 0 || message.id > maxId) {
+                        this.searchResultMessages.add((MessageObject) messageObjects.get(a));
+                        long dialog_id = MessageObject.getDialogId(message);
+                        ConcurrentHashMap<Long, Integer> concurrentHashMap = message.out ? MessagesController.getInstance(this.currentAccount).dialogs_read_outbox_max : MessagesController.getInstance(this.currentAccount).dialogs_read_inbox_max;
+                        Integer value = concurrentHashMap.get(Long.valueOf(dialog_id));
+                        if (value == null) {
+                            value = Integer.valueOf(MessagesStorage.getInstance(this.currentAccount).getDialogReadMax(message.out, dialog_id));
+                            concurrentHashMap.put(Long.valueOf(dialog_id), value);
                         }
-                        tLRPC$Message.unread = num.intValue() < tLRPC$Message.id;
+                        message.unread = value.intValue() < message.id;
                     }
                 }
                 this.searchWas = true;
-                this.messagesSearchEndReached = tLRPC$messages_Messages.messages.size() != 20;
-                if (i2 > 0) {
-                    this.lastMessagesSearchId = i2;
-                    if (this.lastLocalSearchId != i2) {
+                this.messagesSearchEndReached = res.messages.size() != 20;
+                if (searchId > 0) {
+                    this.lastMessagesSearchId = searchId;
+                    if (this.lastLocalSearchId != searchId) {
                         this.searchResult.clear();
                     }
-                    if (this.lastGlobalSearchId != i2) {
+                    if (this.lastGlobalSearchId != searchId) {
                         this.searchAdapterHelper.clear();
                     }
                 }
                 this.searchAdapterHelper.mergeResults(this.searchResult, this.filteredRecentSearchObjects);
                 DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
-                if (dialogsSearchAdapterDelegate != null) {
+                if (dialogsSearchAdapterDelegate == null) {
+                    z = true;
+                } else {
+                    z = true;
                     dialogsSearchAdapterDelegate.searchStateChanged(this.waitingResponseCount > 0, true);
                     this.delegate.runResultsEnterAnimation();
                 }
-                this.globalSearchCollapsed = true;
-                this.phoneCollapsed = true;
+                this.globalSearchCollapsed = z;
+                this.phoneCollapsed = z;
                 notifyDataSetChanged();
             }
         }
@@ -446,399 +440,405 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
     }
 
     public void loadRecentSearch() {
-        loadRecentSearch(this.currentAccount, this.dialogsType, new OnRecentSearchLoaded() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda22
+        loadRecentSearch(this.currentAccount, this.dialogsType, new OnRecentSearchLoaded() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda14
             @Override // org.telegram.ui.Adapters.DialogsSearchAdapter.OnRecentSearchLoaded
             public final void setRecentSearch(ArrayList arrayList, LongSparseArray longSparseArray) {
-                DialogsSearchAdapter.this.lambda$loadRecentSearch$2(arrayList, longSparseArray);
+                DialogsSearchAdapter.this.m1457xa34cacff(arrayList, longSparseArray);
             }
         });
     }
 
-    public static void loadRecentSearch(final int i, final int i2, final OnRecentSearchLoaded onRecentSearchLoaded) {
-        MessagesStorage.getInstance(i).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda4
+    public static void loadRecentSearch(final int currentAccount, final int dialogsType, final OnRecentSearchLoaded callback) {
+        MessagesStorage.getInstance(currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda19
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.lambda$loadRecentSearch$5(i, i2, onRecentSearchLoaded);
+                DialogsSearchAdapter.lambda$loadRecentSearch$5(currentAccount, dialogsType, callback);
             }
         });
     }
 
-    public static /* synthetic */ void lambda$loadRecentSearch$5(int i, int i2, final OnRecentSearchLoaded onRecentSearchLoaded) {
-        boolean z;
+    public static /* synthetic */ void lambda$loadRecentSearch$5(int currentAccount, int dialogsType, final OnRecentSearchLoaded callback) {
+        Exception e;
+        final ArrayList<RecentSearchObject> arrayList;
+        final LongSparseArray<RecentSearchObject> hashMap;
         try {
-            SQLiteCursor queryFinalized = MessagesStorage.getInstance(i).getDatabase().queryFinalized("SELECT did, date FROM search_recent WHERE 1", new Object[0]);
-            ArrayList<Long> arrayList = new ArrayList<>();
-            ArrayList arrayList2 = new ArrayList();
-            ArrayList arrayList3 = new ArrayList();
+            SQLiteCursor cursor = MessagesStorage.getInstance(currentAccount).getDatabase().queryFinalized("SELECT did, date FROM search_recent WHERE 1", new Object[0]);
+            ArrayList<Long> usersToLoad = new ArrayList<>();
+            ArrayList<Long> chatsToLoad = new ArrayList<>();
+            ArrayList<Integer> encryptedToLoad = new ArrayList<>();
             new ArrayList();
-            final ArrayList arrayList4 = new ArrayList();
-            final LongSparseArray longSparseArray = new LongSparseArray();
-            while (queryFinalized.next()) {
-                long longValue = queryFinalized.longValue(0);
-                if (DialogObject.isEncryptedDialog(longValue)) {
-                    if (i2 == 0 || i2 == 3) {
-                        int encryptedChatId = DialogObject.getEncryptedChatId(longValue);
-                        if (!arrayList3.contains(Integer.valueOf(encryptedChatId))) {
-                            arrayList3.add(Integer.valueOf(encryptedChatId));
-                            z = true;
+            arrayList = new ArrayList<>();
+            hashMap = new LongSparseArray<>();
+            while (cursor.next()) {
+                long did = cursor.longValue(0);
+                boolean add = false;
+                if (DialogObject.isEncryptedDialog(did)) {
+                    if (dialogsType == 0 || dialogsType == 3) {
+                        int encryptedChatId = DialogObject.getEncryptedChatId(did);
+                        if (!encryptedToLoad.contains(Integer.valueOf(encryptedChatId))) {
+                            encryptedToLoad.add(Integer.valueOf(encryptedChatId));
+                            add = true;
                         }
                     }
-                    z = false;
-                } else if (DialogObject.isUserDialog(longValue)) {
-                    if (i2 != 2 && !arrayList.contains(Long.valueOf(longValue))) {
-                        arrayList.add(Long.valueOf(longValue));
-                        z = true;
+                } else if (DialogObject.isUserDialog(did)) {
+                    if (dialogsType != 2 && !usersToLoad.contains(Long.valueOf(did))) {
+                        usersToLoad.add(Long.valueOf(did));
+                        add = true;
                     }
-                    z = false;
-                } else {
-                    long j = -longValue;
-                    if (!arrayList2.contains(Long.valueOf(j))) {
-                        arrayList2.add(Long.valueOf(j));
-                        z = true;
-                    }
-                    z = false;
+                } else if (!chatsToLoad.contains(Long.valueOf(-did))) {
+                    chatsToLoad.add(Long.valueOf(-did));
+                    add = true;
                 }
-                if (z) {
+                if (add) {
                     RecentSearchObject recentSearchObject = new RecentSearchObject();
-                    recentSearchObject.did = longValue;
-                    recentSearchObject.date = queryFinalized.intValue(1);
-                    arrayList4.add(recentSearchObject);
-                    longSparseArray.put(recentSearchObject.did, recentSearchObject);
+                    recentSearchObject.did = did;
+                    recentSearchObject.date = cursor.intValue(1);
+                    arrayList.add(recentSearchObject);
+                    hashMap.put(recentSearchObject.did, recentSearchObject);
                 }
             }
-            queryFinalized.dispose();
-            ArrayList<TLRPC$User> arrayList5 = new ArrayList<>();
-            if (!arrayList3.isEmpty()) {
-                ArrayList<TLRPC$EncryptedChat> arrayList6 = new ArrayList<>();
-                MessagesStorage.getInstance(i).getEncryptedChatsInternal(TextUtils.join(",", arrayList3), arrayList6, arrayList);
-                for (int i3 = 0; i3 < arrayList6.size(); i3++) {
-                    RecentSearchObject recentSearchObject2 = (RecentSearchObject) longSparseArray.get(DialogObject.makeEncryptedDialogId(arrayList6.get(i3).id));
+            cursor.dispose();
+            ArrayList<TLRPC.User> users = new ArrayList<>();
+            if (!encryptedToLoad.isEmpty()) {
+                ArrayList<TLRPC.EncryptedChat> encryptedChats = new ArrayList<>();
+                MessagesStorage.getInstance(currentAccount).getEncryptedChatsInternal(TextUtils.join(",", encryptedToLoad), encryptedChats, usersToLoad);
+                for (int a = 0; a < encryptedChats.size(); a++) {
+                    RecentSearchObject recentSearchObject2 = hashMap.get(DialogObject.makeEncryptedDialogId(encryptedChats.get(a).id));
                     if (recentSearchObject2 != null) {
-                        recentSearchObject2.object = arrayList6.get(i3);
+                        recentSearchObject2.object = encryptedChats.get(a);
                     }
                 }
             }
-            if (!arrayList2.isEmpty()) {
-                ArrayList<TLRPC$Chat> arrayList7 = new ArrayList<>();
-                MessagesStorage.getInstance(i).getChatsInternal(TextUtils.join(",", arrayList2), arrayList7);
-                for (int i4 = 0; i4 < arrayList7.size(); i4++) {
-                    TLRPC$Chat tLRPC$Chat = arrayList7.get(i4);
-                    long j2 = -tLRPC$Chat.id;
-                    if (tLRPC$Chat.migrated_to != null) {
-                        RecentSearchObject recentSearchObject3 = (RecentSearchObject) longSparseArray.get(j2);
-                        longSparseArray.remove(j2);
+            if (!chatsToLoad.isEmpty()) {
+                ArrayList<TLRPC.Chat> chats = new ArrayList<>();
+                MessagesStorage.getInstance(currentAccount).getChatsInternal(TextUtils.join(",", chatsToLoad), chats);
+                for (int a2 = 0; a2 < chats.size(); a2++) {
+                    TLRPC.Chat chat = chats.get(a2);
+                    long did2 = -chat.id;
+                    if (chat.migrated_to != null) {
+                        RecentSearchObject recentSearchObject3 = hashMap.get(did2);
+                        hashMap.remove(did2);
                         if (recentSearchObject3 != null) {
-                            arrayList4.remove(recentSearchObject3);
+                            arrayList.remove(recentSearchObject3);
                         }
                     } else {
-                        RecentSearchObject recentSearchObject4 = (RecentSearchObject) longSparseArray.get(j2);
+                        RecentSearchObject recentSearchObject4 = hashMap.get(did2);
                         if (recentSearchObject4 != null) {
-                            recentSearchObject4.object = tLRPC$Chat;
+                            recentSearchObject4.object = chat;
                         }
                     }
                 }
             }
-            if (!arrayList.isEmpty()) {
-                MessagesStorage.getInstance(i).getUsersInternal(TextUtils.join(",", arrayList), arrayList5);
-                for (int i5 = 0; i5 < arrayList5.size(); i5++) {
-                    TLRPC$User tLRPC$User = arrayList5.get(i5);
-                    RecentSearchObject recentSearchObject5 = (RecentSearchObject) longSparseArray.get(tLRPC$User.id);
+            if (!usersToLoad.isEmpty()) {
+                MessagesStorage.getInstance(currentAccount).getUsersInternal(TextUtils.join(",", usersToLoad), users);
+                for (int a3 = 0; a3 < users.size(); a3++) {
+                    TLRPC.User user = users.get(a3);
+                    RecentSearchObject recentSearchObject5 = hashMap.get(user.id);
                     if (recentSearchObject5 != null) {
-                        recentSearchObject5.object = tLRPC$User;
+                        recentSearchObject5.object = user;
                     }
                 }
             }
-            Collections.sort(arrayList4, DialogsSearchAdapter$$ExternalSyntheticLambda19.INSTANCE);
-            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda5
+            Collections.sort(arrayList, DialogsSearchAdapter$$ExternalSyntheticLambda10.INSTANCE);
+        } catch (Exception e2) {
+            e = e2;
+        }
+        try {
+            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda20
                 @Override // java.lang.Runnable
                 public final void run() {
-                    DialogsSearchAdapter.OnRecentSearchLoaded.this.setRecentSearch(arrayList4, longSparseArray);
+                    DialogsSearchAdapter.OnRecentSearchLoaded.this.setRecentSearch(arrayList, hashMap);
                 }
             });
-        } catch (Exception e) {
+        } catch (Exception e3) {
+            e = e3;
             FileLog.e(e);
         }
     }
 
-    public static /* synthetic */ int lambda$loadRecentSearch$3(RecentSearchObject recentSearchObject, RecentSearchObject recentSearchObject2) {
-        int i = recentSearchObject.date;
-        int i2 = recentSearchObject2.date;
-        if (i < i2) {
+    public static /* synthetic */ int lambda$loadRecentSearch$3(RecentSearchObject lhs, RecentSearchObject rhs) {
+        if (lhs.date < rhs.date) {
             return 1;
         }
-        return i > i2 ? -1 : 0;
+        if (lhs.date > rhs.date) {
+            return -1;
+        }
+        return 0;
     }
 
-    public void putRecentSearch(final long j, TLObject tLObject) {
-        RecentSearchObject recentSearchObject = this.recentSearchObjectsById.get(j);
+    public void putRecentSearch(final long did, TLObject object) {
+        RecentSearchObject recentSearchObject = this.recentSearchObjectsById.get(did);
         if (recentSearchObject == null) {
             recentSearchObject = new RecentSearchObject();
-            this.recentSearchObjectsById.put(j, recentSearchObject);
+            this.recentSearchObjectsById.put(did, recentSearchObject);
         } else {
             this.recentSearchObjects.remove(recentSearchObject);
         }
         this.recentSearchObjects.add(0, recentSearchObject);
-        recentSearchObject.did = j;
-        recentSearchObject.object = tLObject;
+        recentSearchObject.did = did;
+        recentSearchObject.object = object;
         recentSearchObject.date = (int) (System.currentTimeMillis() / 1000);
         notifyDataSetChanged();
-        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda12
+        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$putRecentSearch$6(j);
+                DialogsSearchAdapter.this.m1467x2f7d5292(did);
             }
         });
     }
 
-    public /* synthetic */ void lambda$putRecentSearch$6(long j) {
+    /* renamed from: lambda$putRecentSearch$6$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1467x2f7d5292(long did) {
         try {
-            SQLitePreparedStatement executeFast = MessagesStorage.getInstance(this.currentAccount).getDatabase().executeFast("REPLACE INTO search_recent VALUES(?, ?)");
-            executeFast.requery();
-            executeFast.bindLong(1, j);
-            executeFast.bindInteger(2, (int) (System.currentTimeMillis() / 1000));
-            executeFast.step();
-            executeFast.dispose();
+            SQLitePreparedStatement state = MessagesStorage.getInstance(this.currentAccount).getDatabase().executeFast("REPLACE INTO search_recent VALUES(?, ?)");
+            state.requery();
+            state.bindLong(1, did);
+            state.bindInteger(2, (int) (System.currentTimeMillis() / 1000));
+            state.step();
+            state.dispose();
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
     public void clearRecentSearch() {
-        final StringBuilder sb;
+        StringBuilder queryFilter = null;
         if (this.searchWas) {
-            sb = null;
             while (this.filteredRecentSearchObjects.size() > 0) {
-                RecentSearchObject remove = this.filteredRecentSearchObjects.remove(0);
-                this.recentSearchObjects.remove(remove);
-                this.recentSearchObjectsById.remove(remove.did);
-                if (sb == null) {
-                    sb = new StringBuilder("did IN (");
-                    sb.append(remove.did);
+                RecentSearchObject obj = this.filteredRecentSearchObjects.remove(0);
+                this.recentSearchObjects.remove(obj);
+                this.recentSearchObjectsById.remove(obj.did);
+                if (queryFilter == null) {
+                    queryFilter = new StringBuilder("did IN (");
+                    queryFilter.append(obj.did);
                 } else {
-                    sb.append(", ");
-                    sb.append(remove.did);
+                    queryFilter.append(", ");
+                    queryFilter.append(obj.did);
                 }
             }
-            if (sb == null) {
-                sb = new StringBuilder("1");
+            if (queryFilter == null) {
+                queryFilter = new StringBuilder(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE);
             } else {
-                sb.append(")");
+                queryFilter.append(")");
             }
         } else {
             this.filteredRecentSearchObjects.clear();
             this.recentSearchObjects.clear();
             this.recentSearchObjectsById.clear();
-            sb = new StringBuilder("1");
+            queryFilter = new StringBuilder(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE);
         }
+        final StringBuilder finalQueryFilter = queryFilter;
         notifyDataSetChanged();
-        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda16
+        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda7
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$clearRecentSearch$7(sb);
+                DialogsSearchAdapter.this.m1456x988c9e51(finalQueryFilter);
             }
         });
     }
 
-    public /* synthetic */ void lambda$clearRecentSearch$7(StringBuilder sb) {
+    /* renamed from: lambda$clearRecentSearch$7$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1456x988c9e51(StringBuilder finalQueryFilter) {
         try {
-            sb.insert(0, "DELETE FROM search_recent WHERE ");
-            MessagesStorage.getInstance(this.currentAccount).getDatabase().executeFast(sb.toString()).stepThis().dispose();
+            finalQueryFilter.insert(0, "DELETE FROM search_recent WHERE ");
+            MessagesStorage.getInstance(this.currentAccount).getDatabase().executeFast(finalQueryFilter.toString()).stepThis().dispose();
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public void removeRecentSearch(final long j) {
-        RecentSearchObject recentSearchObject = this.recentSearchObjectsById.get(j);
-        if (recentSearchObject == null) {
+    public void removeRecentSearch(final long did) {
+        RecentSearchObject object = this.recentSearchObjectsById.get(did);
+        if (object == null) {
             return;
         }
-        this.recentSearchObjectsById.remove(j);
-        this.recentSearchObjects.remove(recentSearchObject);
+        this.recentSearchObjectsById.remove(did);
+        this.recentSearchObjects.remove(object);
         notifyDataSetChanged();
-        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda11
+        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$removeRecentSearch$8(j);
+                DialogsSearchAdapter.this.m1468xfb99f9e3(did);
             }
         });
     }
 
-    public /* synthetic */ void lambda$removeRecentSearch$8(long j) {
+    /* renamed from: lambda$removeRecentSearch$8$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1468xfb99f9e3(long did) {
         try {
             SQLiteDatabase database = MessagesStorage.getInstance(this.currentAccount).getDatabase();
-            database.executeFast("DELETE FROM search_recent WHERE did = " + j).stepThis().dispose();
+            database.executeFast("DELETE FROM search_recent WHERE did = " + did).stepThis().dispose();
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public void addHashtagsFromMessage(CharSequence charSequence) {
-        this.searchAdapterHelper.addHashtagsFromMessage(charSequence);
+    public void addHashtagsFromMessage(CharSequence message) {
+        this.searchAdapterHelper.addHashtagsFromMessage(message);
     }
 
     /* renamed from: setRecentSearch */
-    public void lambda$loadRecentSearch$2(ArrayList<RecentSearchObject> arrayList, LongSparseArray<RecentSearchObject> longSparseArray) {
+    public void m1457xa34cacff(ArrayList<RecentSearchObject> arrayList, LongSparseArray<RecentSearchObject> hashMap) {
         this.recentSearchObjects = arrayList;
-        this.recentSearchObjectsById = longSparseArray;
-        for (int i = 0; i < this.recentSearchObjects.size(); i++) {
-            RecentSearchObject recentSearchObject = this.recentSearchObjects.get(i);
-            TLObject tLObject = recentSearchObject.object;
-            if (tLObject instanceof TLRPC$User) {
-                MessagesController.getInstance(this.currentAccount).putUser((TLRPC$User) recentSearchObject.object, true);
-            } else if (tLObject instanceof TLRPC$Chat) {
-                MessagesController.getInstance(this.currentAccount).putChat((TLRPC$Chat) recentSearchObject.object, true);
-            } else if (tLObject instanceof TLRPC$EncryptedChat) {
-                MessagesController.getInstance(this.currentAccount).putEncryptedChat((TLRPC$EncryptedChat) recentSearchObject.object, true);
+        this.recentSearchObjectsById = hashMap;
+        for (int a = 0; a < this.recentSearchObjects.size(); a++) {
+            RecentSearchObject recentSearchObject = this.recentSearchObjects.get(a);
+            if (recentSearchObject.object instanceof TLRPC.User) {
+                MessagesController.getInstance(this.currentAccount).putUser((TLRPC.User) recentSearchObject.object, true);
+            } else if (recentSearchObject.object instanceof TLRPC.Chat) {
+                MessagesController.getInstance(this.currentAccount).putChat((TLRPC.Chat) recentSearchObject.object, true);
+            } else if (recentSearchObject.object instanceof TLRPC.EncryptedChat) {
+                MessagesController.getInstance(this.currentAccount).putEncryptedChat((TLRPC.EncryptedChat) recentSearchObject.object, true);
             }
         }
         notifyDataSetChanged();
     }
 
-    private void searchDialogsInternal(final String str, final int i) {
+    private void searchDialogsInternal(final String query, final int searchId) {
         if (this.needMessagesSearch == 2) {
             return;
         }
-        final String lowerCase = str.trim().toLowerCase();
-        if (lowerCase.length() == 0) {
+        final String q = query.trim().toLowerCase();
+        if (q.length() == 0) {
             this.lastSearchId = 0;
             updateSearchResults(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), this.lastSearchId);
             return;
         }
-        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda15
+        MessagesStorage.getInstance(this.currentAccount).getStorageQueue().postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda6
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$searchDialogsInternal$10(lowerCase, i, str);
+                DialogsSearchAdapter.this.m1471x16ee3c0b(q, searchId, query);
             }
         });
     }
 
-    public /* synthetic */ void lambda$searchDialogsInternal$10(String str, int i, String str2) {
-        ArrayList<Object> arrayList = new ArrayList<>();
-        ArrayList<CharSequence> arrayList2 = new ArrayList<>();
-        ArrayList<TLRPC$User> arrayList3 = new ArrayList<>();
-        MessagesStorage.getInstance(this.currentAccount).localSearch(this.dialogsType, str, arrayList, arrayList2, arrayList3, -1);
-        updateSearchResults(arrayList, arrayList2, arrayList3, i);
-        FiltersView.fillTipDates(str, this.localTipDates);
+    /* renamed from: lambda$searchDialogsInternal$10$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1471x16ee3c0b(String q, int searchId, String query) {
+        ArrayList<Object> resultArray = new ArrayList<>();
+        ArrayList<CharSequence> resultArrayNames = new ArrayList<>();
+        ArrayList<TLRPC.User> encUsers = new ArrayList<>();
+        MessagesStorage.getInstance(this.currentAccount).localSearch(this.dialogsType, q, resultArray, resultArrayNames, encUsers, -1);
+        updateSearchResults(resultArray, resultArrayNames, encUsers, searchId);
+        FiltersView.fillTipDates(q, this.localTipDates);
         this.localTipArchive = false;
-        if (str.length() >= 3 && (LocaleController.getString("ArchiveSearchFilter", R.string.ArchiveSearchFilter).toLowerCase().startsWith(str) || "archive".startsWith(str2))) {
+        if (q.length() >= 3 && (LocaleController.getString("ArchiveSearchFilter", R.string.ArchiveSearchFilter).toLowerCase().startsWith(q) || "archive".startsWith(query))) {
             this.localTipArchive = true;
         }
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda6
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda21
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$searchDialogsInternal$9();
+                DialogsSearchAdapter.this.m1472xd91b03c3();
             }
         });
     }
 
-    public /* synthetic */ void lambda$searchDialogsInternal$9() {
+    /* renamed from: lambda$searchDialogsInternal$9$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1472xd91b03c3() {
         FilteredSearchView.Delegate delegate = this.filtersDelegate;
         if (delegate != null) {
             delegate.updateFiltersView(false, null, this.localTipDates, this.localTipArchive);
         }
     }
 
-    private void updateSearchResults(final ArrayList<Object> arrayList, final ArrayList<CharSequence> arrayList2, final ArrayList<TLRPC$User> arrayList3, final int i) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda10
+    private void updateSearchResults(final ArrayList<Object> result, final ArrayList<CharSequence> names, final ArrayList<TLRPC.User> encUsers, final int searchId) {
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$updateSearchResults$12(i, arrayList, arrayList2, arrayList3);
+                DialogsSearchAdapter.this.m1476xbfa838c8(searchId, result, names, encUsers);
             }
         });
     }
 
-    public /* synthetic */ void lambda$updateSearchResults$12(int i, ArrayList arrayList, ArrayList arrayList2, ArrayList arrayList3) {
-        final long j;
-        boolean z;
+    /* renamed from: lambda$updateSearchResults$12$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1476xbfa838c8(int searchId, ArrayList result, ArrayList names, ArrayList encUsers) {
         this.waitingResponseCount--;
-        if (i != this.lastSearchId) {
+        if (searchId != this.lastSearchId) {
             return;
         }
-        this.lastLocalSearchId = i;
-        if (this.lastGlobalSearchId != i) {
+        this.lastLocalSearchId = searchId;
+        if (this.lastGlobalSearchId != searchId) {
             this.searchAdapterHelper.clear();
         }
-        if (this.lastMessagesSearchId != i) {
+        if (this.lastMessagesSearchId != searchId) {
             this.searchResultMessages.clear();
         }
         this.searchWas = true;
-        int size = this.filteredRecentSearchObjects.size();
-        boolean z2 = false;
-        int i2 = 0;
-        while (i2 < arrayList.size()) {
-            final Object obj = arrayList.get(i2);
-            if (obj instanceof TLRPC$User) {
-                TLRPC$User tLRPC$User = (TLRPC$User) obj;
-                MessagesController.getInstance(this.currentAccount).putUser(tLRPC$User, true);
-                j = tLRPC$User.id;
-            } else if (obj instanceof TLRPC$Chat) {
-                TLRPC$Chat tLRPC$Chat = (TLRPC$Chat) obj;
-                MessagesController.getInstance(this.currentAccount).putChat(tLRPC$Chat, true);
-                j = -tLRPC$Chat.id;
-            } else {
-                if (obj instanceof TLRPC$EncryptedChat) {
-                    MessagesController.getInstance(this.currentAccount).putEncryptedChat((TLRPC$EncryptedChat) obj, true);
+        int recentCount = this.filteredRecentSearchObjects.size();
+        int a = 0;
+        while (a < result.size()) {
+            final Object obj = result.get(a);
+            long dialogId = 0;
+            if (obj instanceof TLRPC.User) {
+                TLRPC.User user = (TLRPC.User) obj;
+                MessagesController.getInstance(this.currentAccount).putUser(user, true);
+                dialogId = user.id;
+            } else if (obj instanceof TLRPC.Chat) {
+                TLRPC.Chat chat = (TLRPC.Chat) obj;
+                MessagesController.getInstance(this.currentAccount).putChat(chat, true);
+                dialogId = -chat.id;
+            } else if (obj instanceof TLRPC.EncryptedChat) {
+                MessagesController.getInstance(this.currentAccount).putEncryptedChat((TLRPC.EncryptedChat) obj, true);
+            }
+            if (dialogId != 0) {
+                TLRPC.Dialog dialog = MessagesController.getInstance(this.currentAccount).dialogs_dict.get(dialogId);
+                if (dialog == null) {
+                    final long finalDialogId = dialogId;
+                    MessagesStorage.getInstance(this.currentAccount).getDialogFolderId(dialogId, new MessagesStorage.IntCallback() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda12
+                        @Override // org.telegram.messenger.MessagesStorage.IntCallback
+                        public final void run(int i) {
+                            DialogsSearchAdapter.this.m1475x4a2e1287(finalDialogId, obj, i);
+                        }
+                    });
                 }
-                j = 0;
             }
-            if (j != 0 && MessagesController.getInstance(this.currentAccount).dialogs_dict.get(j) == null) {
-                MessagesStorage.getInstance(this.currentAccount).getDialogFolderId(j, new MessagesStorage.IntCallback() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda20
-                    @Override // org.telegram.messenger.MessagesStorage.IntCallback
-                    public final void run(int i3) {
-                        DialogsSearchAdapter.this.lambda$updateSearchResults$11(j, obj, i3);
-                    }
-                });
-            }
-            int i3 = 0;
+            boolean foundInRecent = false;
+            int j = 0;
             while (true) {
-                if (i3 < size) {
-                    RecentSearchObject recentSearchObject = this.filteredRecentSearchObjects.get(i3);
-                    if (recentSearchObject != null && recentSearchObject.did == j) {
-                        z = true;
+                if (j < recentCount) {
+                    RecentSearchObject o = this.filteredRecentSearchObjects.get(j);
+                    if (o == null || o.did != dialogId) {
+                        j++;
+                    } else {
+                        foundInRecent = true;
                         break;
                     }
-                    i3++;
                 } else {
-                    z = false;
                     break;
                 }
             }
-            if (z) {
-                arrayList.remove(i2);
-                arrayList2.remove(i2);
-                i2--;
+            if (foundInRecent) {
+                result.remove(a);
+                names.remove(a);
+                a--;
             }
-            i2++;
+            a++;
         }
-        MessagesController.getInstance(this.currentAccount).putUsers(arrayList3, true);
-        this.searchResult = arrayList;
-        this.searchResultNames = arrayList2;
-        this.searchAdapterHelper.mergeResults(arrayList, this.filteredRecentSearchObjects);
+        int a2 = this.currentAccount;
+        MessagesController.getInstance(a2).putUsers(encUsers, true);
+        this.searchResult = result;
+        this.searchResultNames = names;
+        this.searchAdapterHelper.mergeResults(result, this.filteredRecentSearchObjects);
         notifyDataSetChanged();
         DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
-        if (dialogsSearchAdapterDelegate == null) {
-            return;
+        if (dialogsSearchAdapterDelegate != null) {
+            dialogsSearchAdapterDelegate.searchStateChanged(this.waitingResponseCount > 0, true);
+            this.delegate.runResultsEnterAnimation();
         }
-        if (this.waitingResponseCount > 0) {
-            z2 = true;
-        }
-        dialogsSearchAdapterDelegate.searchStateChanged(z2, true);
-        this.delegate.runResultsEnterAnimation();
     }
 
-    public /* synthetic */ void lambda$updateSearchResults$11(long j, Object obj, int i) {
-        if (i != -1) {
-            TLRPC$TL_dialog tLRPC$TL_dialog = new TLRPC$TL_dialog();
-            tLRPC$TL_dialog.id = j;
-            if (i != 0) {
-                tLRPC$TL_dialog.folder_id = i;
+    /* renamed from: lambda$updateSearchResults$11$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1475x4a2e1287(long finalDialogId, Object obj, int param) {
+        if (param != -1) {
+            TLRPC.Dialog newDialog = new TLRPC.TL_dialog();
+            newDialog.id = finalDialogId;
+            if (param != 0) {
+                newDialog.folder_id = param;
             }
-            if (obj instanceof TLRPC$Chat) {
-                tLRPC$TL_dialog.flags = ChatObject.isChannel((TLRPC$Chat) obj) ? 1 : 0;
+            if (obj instanceof TLRPC.Chat) {
+                newDialog.flags = ChatObject.isChannel((TLRPC.Chat) obj) ? 1 : 0;
             }
-            MessagesController.getInstance(this.currentAccount).dialogs_dict.put(j, tLRPC$TL_dialog);
-            MessagesController.getInstance(this.currentAccount).getAllDialogs().add(tLRPC$TL_dialog);
+            MessagesController.getInstance(this.currentAccount).dialogs_dict.put(finalDialogId, newDialog);
+            MessagesController.getInstance(this.currentAccount).getAllDialogs().add(newDialog);
             MessagesController.getInstance(this.currentAccount).sortDialogs(null);
         }
     }
@@ -853,131 +853,139 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         notifyDataSetChanged();
     }
 
-    public void searchDialogs(final String str, int i) {
-        if (str == null || !str.equals(this.lastSearchText) || (i != this.folderId && !TextUtils.isEmpty(str))) {
-            this.lastSearchText = str;
-            this.folderId = i;
-            if (this.searchRunnable != null) {
-                Utilities.searchQueue.cancelRunnable(this.searchRunnable);
-                this.searchRunnable = null;
+    public void searchDialogs(final String text, int folderId) {
+        final String query;
+        if (text != null && text.equals(this.lastSearchText) && (folderId == this.folderId || TextUtils.isEmpty(text))) {
+            return;
+        }
+        this.lastSearchText = text;
+        this.folderId = folderId;
+        if (this.searchRunnable != null) {
+            Utilities.searchQueue.cancelRunnable(this.searchRunnable);
+            this.searchRunnable = null;
+        }
+        Runnable runnable = this.searchRunnable2;
+        if (runnable != null) {
+            AndroidUtilities.cancelRunOnUIThread(runnable);
+            this.searchRunnable2 = null;
+        }
+        if (text != null) {
+            query = text.trim();
+        } else {
+            query = null;
+        }
+        if (TextUtils.isEmpty(query)) {
+            this.filteredRecentQuery = null;
+            this.searchAdapterHelper.unloadRecentHashtags();
+            this.searchResult.clear();
+            this.searchResultNames.clear();
+            this.searchResultHashtags.clear();
+            this.searchAdapterHelper.mergeResults(null, null);
+            SearchAdapterHelper searchAdapterHelper = this.searchAdapterHelper;
+            int i = this.dialogsType;
+            searchAdapterHelper.queryServerSearch(null, true, true, i != 11, i != 11, i == 2 || i == 11, 0L, i == 0, 0, 0);
+            this.searchWas = false;
+            this.lastSearchId = 0;
+            this.waitingResponseCount = 0;
+            this.globalSearchCollapsed = true;
+            this.phoneCollapsed = true;
+            DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
+            if (dialogsSearchAdapterDelegate != null) {
+                dialogsSearchAdapterDelegate.searchStateChanged(false, true);
             }
-            Runnable runnable = this.searchRunnable2;
-            if (runnable != null) {
-                AndroidUtilities.cancelRunOnUIThread(runnable);
-                this.searchRunnable2 = null;
-            }
-            final String trim = str != null ? str.trim() : null;
-            if (TextUtils.isEmpty(trim)) {
-                this.filteredRecentQuery = null;
-                this.searchAdapterHelper.unloadRecentHashtags();
-                this.searchResult.clear();
-                this.searchResultNames.clear();
-                this.searchResultHashtags.clear();
-                this.searchAdapterHelper.mergeResults(null, null);
-                SearchAdapterHelper searchAdapterHelper = this.searchAdapterHelper;
-                int i2 = this.dialogsType;
-                searchAdapterHelper.queryServerSearch(null, true, true, i2 != 11, i2 != 11, i2 == 2 || i2 == 11, 0L, i2 == 0, 0, 0);
-                this.searchWas = false;
-                this.lastSearchId = 0;
-                this.waitingResponseCount = 0;
-                this.globalSearchCollapsed = true;
-                this.phoneCollapsed = true;
-                DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
-                if (dialogsSearchAdapterDelegate != null) {
-                    dialogsSearchAdapterDelegate.searchStateChanged(false, true);
-                }
-                searchMessagesInternal(null, 0);
-                notifyDataSetChanged();
-                this.localTipDates.clear();
-                this.localTipArchive = false;
-                FilteredSearchView.Delegate delegate = this.filtersDelegate;
-                if (delegate == null) {
-                    return;
-                }
+            searchMessagesInternal(null, 0);
+            notifyDataSetChanged();
+            this.localTipDates.clear();
+            this.localTipArchive = false;
+            FilteredSearchView.Delegate delegate = this.filtersDelegate;
+            if (delegate != null) {
                 delegate.updateFiltersView(false, null, this.localTipDates, false);
                 return;
             }
-            filterRecent(trim);
-            this.searchAdapterHelper.mergeResults(this.searchResult, this.filteredRecentSearchObjects);
-            if (this.needMessagesSearch != 2 && trim.startsWith("#") && trim.length() == 1) {
-                this.messagesSearchEndReached = true;
-                if (this.searchAdapterHelper.loadRecentHashtags()) {
-                    this.searchResultMessages.clear();
-                    this.searchResultHashtags.clear();
-                    ArrayList<SearchAdapterHelper.HashtagObject> hashtags = this.searchAdapterHelper.getHashtags();
-                    for (int i3 = 0; i3 < hashtags.size(); i3++) {
-                        this.searchResultHashtags.add(hashtags.get(i3).hashtag);
-                    }
-                    this.globalSearchCollapsed = true;
-                    this.phoneCollapsed = true;
-                    this.waitingResponseCount = 0;
-                    notifyDataSetChanged();
-                    DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate2 = this.delegate;
-                    if (dialogsSearchAdapterDelegate2 != null) {
-                        dialogsSearchAdapterDelegate2.searchStateChanged(false, false);
-                    }
-                }
-            } else {
-                this.searchResultHashtags.clear();
-            }
-            final int i4 = this.lastSearchId + 1;
-            this.lastSearchId = i4;
-            this.waitingResponseCount = 3;
-            this.globalSearchCollapsed = true;
-            this.phoneCollapsed = true;
-            notifyDataSetChanged();
-            DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate3 = this.delegate;
-            if (dialogsSearchAdapterDelegate3 != null) {
-                dialogsSearchAdapterDelegate3.searchStateChanged(true, false);
-            }
-            DispatchQueue dispatchQueue = Utilities.searchQueue;
-            Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda14
-                @Override // java.lang.Runnable
-                public final void run() {
-                    DialogsSearchAdapter.this.lambda$searchDialogs$14(trim, i4, str);
-                }
-            };
-            this.searchRunnable = runnable2;
-            dispatchQueue.postRunnable(runnable2, 300L);
+            return;
         }
-    }
-
-    public /* synthetic */ void lambda$searchDialogs$14(final String str, final int i, final String str2) {
-        this.searchRunnable = null;
-        searchDialogsInternal(str, i);
-        Runnable runnable = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda9
+        filterRecent(query);
+        this.searchAdapterHelper.mergeResults(this.searchResult, this.filteredRecentSearchObjects);
+        if (this.needMessagesSearch != 2 && query.startsWith("#") && query.length() == 1) {
+            this.messagesSearchEndReached = true;
+            if (this.searchAdapterHelper.loadRecentHashtags()) {
+                this.searchResultMessages.clear();
+                this.searchResultHashtags.clear();
+                ArrayList<SearchAdapterHelper.HashtagObject> hashtags = this.searchAdapterHelper.getHashtags();
+                for (int a = 0; a < hashtags.size(); a++) {
+                    this.searchResultHashtags.add(hashtags.get(a).hashtag);
+                }
+                this.globalSearchCollapsed = true;
+                this.phoneCollapsed = true;
+                this.waitingResponseCount = 0;
+                notifyDataSetChanged();
+                DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate2 = this.delegate;
+                if (dialogsSearchAdapterDelegate2 != null) {
+                    dialogsSearchAdapterDelegate2.searchStateChanged(false, false);
+                }
+            }
+        } else {
+            this.searchResultHashtags.clear();
+        }
+        final int searchId = this.lastSearchId + 1;
+        this.lastSearchId = searchId;
+        this.waitingResponseCount = 3;
+        this.globalSearchCollapsed = true;
+        this.phoneCollapsed = true;
+        notifyDataSetChanged();
+        DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate3 = this.delegate;
+        if (dialogsSearchAdapterDelegate3 != null) {
+            dialogsSearchAdapterDelegate3.searchStateChanged(true, false);
+        }
+        DispatchQueue dispatchQueue = Utilities.searchQueue;
+        Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda5
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsSearchAdapter.this.lambda$searchDialogs$13(i, str, str2);
+                DialogsSearchAdapter.this.m1470x4783704c(query, searchId, text);
+            }
+        };
+        this.searchRunnable = runnable2;
+        dispatchQueue.postRunnable(runnable2, 300L);
+    }
+
+    /* renamed from: lambda$searchDialogs$14$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1470x4783704c(final String query, final int searchId, final String text) {
+        this.searchRunnable = null;
+        searchDialogsInternal(query, searchId);
+        Runnable runnable = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda24
+            @Override // java.lang.Runnable
+            public final void run() {
+                DialogsSearchAdapter.this.m1469xd2094a0b(searchId, query, text);
             }
         };
         this.searchRunnable2 = runnable;
         AndroidUtilities.runOnUIThread(runnable);
     }
 
-    public /* synthetic */ void lambda$searchDialogs$13(int i, String str, String str2) {
+    /* renamed from: lambda$searchDialogs$13$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1469xd2094a0b(int searchId, String query, String text) {
         this.searchRunnable2 = null;
-        if (i != this.lastSearchId) {
+        if (searchId != this.lastSearchId) {
             return;
         }
-        if (this.needMessagesSearch != 2) {
-            SearchAdapterHelper searchAdapterHelper = this.searchAdapterHelper;
-            int i2 = this.dialogsType;
-            searchAdapterHelper.queryServerSearch(str, true, i2 != 4, true, (i2 == 4 || i2 == 11) ? false : true, i2 == 2 || i2 == 1, 0L, i2 == 0, 0, i);
-        } else {
+        if (this.needMessagesSearch == 2) {
             this.waitingResponseCount -= 2;
+        } else {
+            SearchAdapterHelper searchAdapterHelper = this.searchAdapterHelper;
+            int i = this.dialogsType;
+            searchAdapterHelper.queryServerSearch(query, true, i != 4, true, (i == 4 || i == 11) ? false : true, i == 2 || i == 1, 0L, i == 0, 0, searchId);
         }
         if (this.needMessagesSearch == 0) {
             this.waitingResponseCount--;
         } else {
-            searchMessagesInternal(str2, i);
+            searchMessagesInternal(text, searchId);
         }
     }
 
     public int getRecentItemsCount() {
-        ArrayList<RecentSearchObject> arrayList = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
+        ArrayList<RecentSearchObject> recent = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
         int i = 1;
-        int size = !arrayList.isEmpty() ? arrayList.size() + 1 : 0;
+        int size = !recent.isEmpty() ? recent.size() + 1 : 0;
         if (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) {
             i = 0;
         }
@@ -985,317 +993,328 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
     }
 
     public int getRecentResultsCount() {
-        ArrayList<RecentSearchObject> arrayList = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
-        if (arrayList != null) {
-            return arrayList.size();
+        ArrayList<RecentSearchObject> recent = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
+        if (recent != null) {
+            return recent.size();
         }
         return 0;
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
     public int getItemCount() {
-        int i = 0;
-        int i2 = 3;
         if (this.waitingResponseCount == 3) {
             return 0;
         }
+        int count = 0;
         if (!this.searchResultHashtags.isEmpty()) {
-            return this.searchResultHashtags.size() + 1 + 0;
+            int count2 = 0 + this.searchResultHashtags.size() + 1;
+            return count2;
         }
         if (isRecentSearchDisplayed()) {
-            i = 0 + getRecentItemsCount();
+            count = 0 + getRecentItemsCount();
             if (!this.searchWas) {
-                return i;
+                return count;
             }
         }
-        int size = this.searchResult.size();
-        int size2 = this.searchAdapterHelper.getLocalServerSearch().size();
-        int i3 = i + size + size2;
-        int size3 = this.searchAdapterHelper.getGlobalSearch().size();
-        if (size3 > 3 && this.globalSearchCollapsed) {
-            size3 = 3;
+        int resultsCount = this.searchResult.size();
+        int localServerCount = this.searchAdapterHelper.getLocalServerSearch().size();
+        int count3 = count + resultsCount + localServerCount;
+        int globalCount = this.searchAdapterHelper.getGlobalSearch().size();
+        if (globalCount > 3 && this.globalSearchCollapsed) {
+            globalCount = 3;
         }
-        int size4 = this.searchAdapterHelper.getPhoneSearch().size();
-        if (size4 <= 3 || !this.phoneCollapsed) {
-            i2 = size4;
+        int phoneCount = this.searchAdapterHelper.getPhoneSearch().size();
+        if (phoneCount > 3 && this.phoneCollapsed) {
+            phoneCount = 3;
         }
-        int size5 = this.searchResultMessages.size();
-        if (size + size2 > 0 && getRecentItemsCount() > 0) {
-            i3++;
+        int messagesCount = this.searchResultMessages.size();
+        if (resultsCount + localServerCount > 0 && getRecentItemsCount() > 0) {
+            count3++;
         }
-        if (size3 != 0) {
-            i3 += size3 + 1;
+        if (globalCount != 0) {
+            count3 += globalCount + 1;
         }
-        if (i2 != 0) {
-            i3 += i2;
+        if (phoneCount != 0) {
+            count3 += phoneCount;
         }
-        if (size5 != 0) {
-            i3 += size5 + 1 + (!this.messagesSearchEndReached ? 1 : 0);
+        if (messagesCount != 0) {
+            count3 += messagesCount + 1 + (!this.messagesSearchEndReached ? 1 : 0);
         }
-        this.currentItemCount = i3;
-        return i3;
+        this.currentItemCount = count3;
+        return count3;
     }
 
     public Object getItem(int i) {
-        int i2;
-        Object obj;
+        TLRPC.Chat chat;
         if (!this.searchResultHashtags.isEmpty()) {
             if (i <= 0) {
                 return null;
             }
             return this.searchResultHashtags.get(i - 1);
         }
-        int i3 = 0;
+        int messagesCount = 0;
         if (isRecentSearchDisplayed()) {
-            int i4 = (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) ? 0 : 1;
-            ArrayList<RecentSearchObject> arrayList = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
-            if (i > i4 && (i2 = (i - 1) - i4) < arrayList.size()) {
-                TLObject tLObject = arrayList.get(i2).object;
-                if (tLObject instanceof TLRPC$User) {
-                    obj = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(((TLRPC$User) tLObject).id));
-                    if (obj == null) {
-                        return tLObject;
+            int offset = (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) ? 0 : 1;
+            ArrayList<RecentSearchObject> recent = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
+            if (i > offset && (i - 1) - offset < recent.size()) {
+                TLObject object = recent.get((i - 1) - offset).object;
+                if (object instanceof TLRPC.User) {
+                    TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(((TLRPC.User) object).id));
+                    if (user != null) {
+                        return user;
                     }
-                } else if (!(tLObject instanceof TLRPC$Chat) || (obj = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(((TLRPC$Chat) tLObject).id))) == null) {
-                    return tLObject;
+                    return object;
+                } else if ((object instanceof TLRPC.Chat) && (chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(((TLRPC.Chat) object).id))) != null) {
+                    return chat;
+                } else {
+                    return object;
                 }
-                return obj;
             }
             i -= getRecentItemsCount();
         }
         ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
         ArrayList<TLObject> localServerSearch = this.searchAdapterHelper.getLocalServerSearch();
         ArrayList<Object> phoneSearch = this.searchAdapterHelper.getPhoneSearch();
-        int size = this.searchResult.size();
-        int size2 = localServerSearch.size();
-        if (size + size2 > 0 && getRecentItemsCount() > 0) {
+        int localCount = this.searchResult.size();
+        int localServerCount = localServerSearch.size();
+        if (localCount + localServerCount > 0 && getRecentItemsCount() > 0) {
             if (i == 0) {
                 return null;
             }
             i--;
         }
-        int size3 = phoneSearch.size();
-        if (size3 > 3 && this.phoneCollapsed) {
-            size3 = 3;
+        int phoneCount = phoneSearch.size();
+        if (phoneCount > 3 && this.phoneCollapsed) {
+            phoneCount = 3;
         }
-        int size4 = globalSearch.isEmpty() ? 0 : globalSearch.size() + 1;
-        if (size4 > 4 && this.globalSearchCollapsed) {
-            size4 = 4;
+        int globalCount = globalSearch.isEmpty() ? 0 : globalSearch.size() + 1;
+        if (globalCount > 4 && this.globalSearchCollapsed) {
+            globalCount = 4;
         }
         if (!this.searchResultMessages.isEmpty()) {
-            i3 = this.searchResultMessages.size() + 1;
+            messagesCount = this.searchResultMessages.size() + 1;
         }
-        if (i >= 0 && i < size) {
+        if (i >= 0 && i < localCount) {
             return this.searchResult.get(i);
         }
-        int i5 = i - size;
-        if (i5 >= 0 && i5 < size2) {
-            return localServerSearch.get(i5);
+        int i2 = i - localCount;
+        if (i2 >= 0 && i2 < localServerCount) {
+            return localServerSearch.get(i2);
         }
-        int i6 = i5 - size2;
-        if (i6 >= 0 && i6 < size3) {
-            return phoneSearch.get(i6);
+        int i3 = i2 - localServerCount;
+        if (i3 >= 0 && i3 < phoneCount) {
+            return phoneSearch.get(i3);
         }
-        int i7 = i6 - size3;
-        if (i7 > 0 && i7 < size4) {
-            return globalSearch.get(i7 - 1);
+        int i4 = i3 - phoneCount;
+        if (i4 > 0 && i4 < globalCount) {
+            return globalSearch.get(i4 - 1);
         }
-        int i8 = i7 - size4;
-        if (i8 > 0 && i8 < i3) {
-            return this.searchResultMessages.get(i8 - 1);
+        int i5 = i4 - globalCount;
+        if (i5 > 0 && i5 < messagesCount) {
+            return this.searchResultMessages.get(i5 - 1);
         }
         return null;
     }
 
     public boolean isGlobalSearch(int i) {
-        int i2;
         if (this.searchWas && this.searchResultHashtags.isEmpty()) {
             if (isRecentSearchDisplayed()) {
-                int i3 = (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) ? 0 : 1;
-                ArrayList<RecentSearchObject> arrayList = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
-                if (i > i3 && (i - 1) - i3 < arrayList.size()) {
+                int offset = (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) ? 0 : 1;
+                ArrayList<RecentSearchObject> recent = this.searchWas ? this.filteredRecentSearchObjects : this.recentSearchObjects;
+                if (i > offset && (i - 1) - offset < recent.size()) {
                     return false;
                 }
                 i -= getRecentItemsCount();
             }
             ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
             ArrayList<TLObject> localServerSearch = this.searchAdapterHelper.getLocalServerSearch();
-            int size = this.searchResult.size();
-            int size2 = localServerSearch.size();
-            int size3 = this.searchAdapterHelper.getPhoneSearch().size();
-            if (size3 > 3 && this.phoneCollapsed) {
-                size3 = 3;
+            int localCount = this.searchResult.size();
+            int localServerCount = localServerSearch.size();
+            int phoneCount = this.searchAdapterHelper.getPhoneSearch().size();
+            if (phoneCount > 3 && this.phoneCollapsed) {
+                phoneCount = 3;
             }
-            int size4 = globalSearch.isEmpty() ? 0 : globalSearch.size() + 1;
-            if (size4 > 4 && this.globalSearchCollapsed) {
-                size4 = 4;
+            int globalCount = globalSearch.isEmpty() ? 0 : globalSearch.size() + 1;
+            if (globalCount > 4 && this.globalSearchCollapsed) {
+                globalCount = 4;
             }
             if (!this.searchResultMessages.isEmpty()) {
-                this.searchResultMessages.size();
+                int size = this.searchResultMessages.size() + 1;
             }
-            if (i >= 0 && i < size) {
+            if (i >= 0 && i < localCount) {
                 return false;
             }
-            int i4 = i - size;
-            if (i4 >= 0 && i4 < size2) {
+            int i2 = i - localCount;
+            if (i2 >= 0 && i2 < localServerCount) {
                 return false;
             }
-            int i5 = i4 - size2;
-            return (i5 <= 0 || i5 >= size3) && (i2 = i5 - size3) > 0 && i2 < size4;
+            int i3 = i2 - localServerCount;
+            if (i3 > 0 && i3 < phoneCount) {
+                return false;
+            }
+            int i4 = i3 - phoneCount;
+            if (i4 > 0 && i4 < globalCount) {
+                return true;
+            }
+            int i5 = i4 - globalCount;
+            return false;
         }
         return false;
     }
 
-    @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-    public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-        int itemViewType = viewHolder.getItemViewType();
-        return (itemViewType == 1 || itemViewType == 3) ? false : true;
+    @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+    public long getItemId(int i) {
+        return i;
     }
 
-    public /* synthetic */ void lambda$onCreateViewHolder$15(View view, int i) {
+    @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
+    public boolean isEnabled(RecyclerView.ViewHolder holder) {
+        int type = holder.getItemViewType();
+        return (type == 1 || type == 3) ? false : true;
+    }
+
+    @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view;
+        switch (viewType) {
+            case 0:
+                view = new ProfileSearchCell(this.mContext);
+                break;
+            case 1:
+                view = new GraySectionCell(this.mContext);
+                break;
+            case 2:
+                view = new DialogCell(null, this.mContext, false, true);
+                break;
+            case 3:
+                FlickerLoadingView flickerLoadingView = new FlickerLoadingView(this.mContext);
+                flickerLoadingView.setViewType(1);
+                flickerLoadingView.setIsSingleCell(true);
+                view = flickerLoadingView;
+                break;
+            case 4:
+                view = new HashtagSearchCell(this.mContext);
+                break;
+            case 5:
+                RecyclerListView horizontalListView = new RecyclerListView(this.mContext) { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter.2
+                    @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
+                    public boolean onInterceptTouchEvent(MotionEvent e) {
+                        if (getParent() != null && getParent().getParent() != null) {
+                            ViewParent parent2 = getParent().getParent();
+                            boolean z = true;
+                            if (!canScrollHorizontally(-1) && !canScrollHorizontally(1)) {
+                                z = false;
+                            }
+                            parent2.requestDisallowInterceptTouchEvent(z);
+                        }
+                        return super.onInterceptTouchEvent(e);
+                    }
+                };
+                horizontalListView.setSelectorDrawableColor(Theme.getColor(Theme.key_listSelector));
+                horizontalListView.setTag(9);
+                horizontalListView.setItemAnimator(null);
+                horizontalListView.setLayoutAnimation(null);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(this.mContext) { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter.3
+                    @Override // androidx.recyclerview.widget.LinearLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
+                    public boolean supportsPredictiveItemAnimations() {
+                        return false;
+                    }
+                };
+                layoutManager.setOrientation(0);
+                horizontalListView.setLayoutManager(layoutManager);
+                horizontalListView.setAdapter(new CategoryAdapterRecycler(this.mContext, this.currentAccount, false));
+                horizontalListView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda15
+                    @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
+                    public final void onItemClick(View view2, int i) {
+                        DialogsSearchAdapter.this.m1465xc378b56a(view2, i);
+                    }
+                });
+                horizontalListView.setOnItemLongClickListener(new RecyclerListView.OnItemLongClickListener() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda16
+                    @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListener
+                    public final boolean onItemClick(View view2, int i) {
+                        return DialogsSearchAdapter.this.m1466x38f2dbab(view2, i);
+                    }
+                });
+                view = horizontalListView;
+                this.innerListView = horizontalListView;
+                break;
+            default:
+                view = new TextCell(this.mContext, 16, false);
+                break;
+        }
+        if (viewType == 5) {
+            view.setLayoutParams(new RecyclerView.LayoutParams(-1, AndroidUtilities.dp(86.0f)));
+        } else {
+            view.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
+        }
+        return new RecyclerListView.Holder(view);
+    }
+
+    /* renamed from: lambda$onCreateViewHolder$15$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1465xc378b56a(View view1, int position) {
         DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
         if (dialogsSearchAdapterDelegate != null) {
-            dialogsSearchAdapterDelegate.didPressedOnSubDialog(((Long) view.getTag()).longValue());
+            dialogsSearchAdapterDelegate.didPressedOnSubDialog(((Long) view1.getTag()).longValue());
         }
     }
 
-    public /* synthetic */ boolean lambda$onCreateViewHolder$16(View view, int i) {
+    /* renamed from: lambda$onCreateViewHolder$16$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ boolean m1466x38f2dbab(View view12, int position) {
         DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
         if (dialogsSearchAdapterDelegate != null) {
-            dialogsSearchAdapterDelegate.needRemoveHint(((Long) view.getTag()).longValue());
+            dialogsSearchAdapterDelegate.needRemoveHint(((Long) view12.getTag()).longValue());
             return true;
         }
         return true;
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        RecyclerListView recyclerListView;
-        DialogCell dialogCell;
-        if (i == 0) {
-            recyclerListView = new ProfileSearchCell(this.mContext);
-        } else if (i != 1) {
-            if (i == 2) {
-                dialogCell = new DialogCell(null, this.mContext, false, true);
-            } else if (i == 3) {
-                FlickerLoadingView flickerLoadingView = new FlickerLoadingView(this.mContext);
-                flickerLoadingView.setViewType(1);
-                flickerLoadingView.setIsSingleCell(true);
-                dialogCell = flickerLoadingView;
-            } else if (i == 4) {
-                recyclerListView = new HashtagSearchCell(this.mContext);
-            } else if (i == 5) {
-                RecyclerListView recyclerListView2 = new RecyclerListView(this, this.mContext) { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter.2
-                    @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
-                    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-                        if (getParent() != null && getParent().getParent() != null) {
-                            ViewParent parent = getParent().getParent();
-                            boolean z = true;
-                            if (!canScrollHorizontally(-1) && !canScrollHorizontally(1)) {
-                                z = false;
-                            }
-                            parent.requestDisallowInterceptTouchEvent(z);
-                        }
-                        return super.onInterceptTouchEvent(motionEvent);
-                    }
-                };
-                recyclerListView2.setSelectorDrawableColor(Theme.getColor("listSelectorSDK21"));
-                recyclerListView2.setTag(9);
-                recyclerListView2.setItemAnimator(null);
-                recyclerListView2.setLayoutAnimation(null);
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, this.mContext) { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter.3
-                    @Override // androidx.recyclerview.widget.LinearLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
-                    public boolean supportsPredictiveItemAnimations() {
-                        return false;
-                    }
-                };
-                linearLayoutManager.setOrientation(0);
-                recyclerListView2.setLayoutManager(linearLayoutManager);
-                recyclerListView2.setAdapter(new CategoryAdapterRecycler(this.mContext, this.currentAccount, false));
-                recyclerListView2.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda23
-                    @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
-                    public final void onItemClick(View view, int i2) {
-                        DialogsSearchAdapter.this.lambda$onCreateViewHolder$15(view, i2);
-                    }
-                });
-                recyclerListView2.setOnItemLongClickListener(new RecyclerListView.OnItemLongClickListener() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda24
-                    @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListener
-                    public final boolean onItemClick(View view, int i2) {
-                        boolean lambda$onCreateViewHolder$16;
-                        lambda$onCreateViewHolder$16 = DialogsSearchAdapter.this.lambda$onCreateViewHolder$16(view, i2);
-                        return lambda$onCreateViewHolder$16;
-                    }
-                });
-                this.innerListView = recyclerListView2;
-                recyclerListView = recyclerListView2;
-            } else {
-                recyclerListView = new TextCell(this.mContext, 16, false);
-            }
-            recyclerListView = dialogCell;
-        } else {
-            recyclerListView = new GraySectionCell(this.mContext);
-        }
-        if (i == 5) {
-            recyclerListView.setLayoutParams(new RecyclerView.LayoutParams(-1, AndroidUtilities.dp(86.0f)));
-        } else {
-            recyclerListView.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
-        }
-        return new RecyclerListView.Holder(recyclerListView);
-    }
-
-    /* JADX WARN: Code restructure failed: missing block: B:154:0x035d, code lost:
-        if (r6.startsWith("@" + r4.username) != false) goto L157;
-     */
-    /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:159:0x0367  */
-    /* JADX WARN: Removed duplicated region for block: B:209:0x0434  */
-    /* JADX WARN: Removed duplicated region for block: B:210:0x043f  */
-    /* JADX WARN: Removed duplicated region for block: B:217:0x045c  */
-    /* JADX WARN: Removed duplicated region for block: B:218:0x045e  */
-    /* JADX WARN: Removed duplicated region for block: B:221:0x0479  */
-    /* JADX WARN: Removed duplicated region for block: B:222:0x047b  */
-    /* JADX WARN: Type inference failed for: r2v17 */
-    /* JADX WARN: Type inference failed for: r2v19, types: [android.text.SpannableStringBuilder] */
-    /* JADX WARN: Type inference failed for: r2v23, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r2v24 */
-    /* JADX WARN: Type inference failed for: r2v3 */
-    /* JADX WARN: Type inference failed for: r2v50 */
+    /* JADX WARN: Removed duplicated region for block: B:198:0x045f  */
+    /* JADX WARN: Removed duplicated region for block: B:201:0x0477  */
+    /* JADX WARN: Removed duplicated region for block: B:204:0x047e  */
+    /* JADX WARN: Removed duplicated region for block: B:222:0x04df  */
+    /* JADX WARN: Removed duplicated region for block: B:223:0x04e1  */
+    /* JADX WARN: Removed duplicated region for block: B:226:0x0506  */
+    /* JADX WARN: Removed duplicated region for block: B:227:0x0508  */
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r23, int r24) {
+    public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r33, final int r34) {
         /*
-            Method dump skipped, instructions count: 1152
+            Method dump skipped, instructions count: 1314
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Adapters.DialogsSearchAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$17(View view) {
+    /* renamed from: lambda$onBindViewHolder$17$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1458x6020530b(View v) {
         DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
         if (dialogsSearchAdapterDelegate != null) {
             dialogsSearchAdapterDelegate.needClearList();
         }
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$18(View view) {
+    /* renamed from: lambda$onBindViewHolder$18$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1459xd59a794c(View v) {
         DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
         if (dialogsSearchAdapterDelegate != null) {
             dialogsSearchAdapterDelegate.needClearList();
         }
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$19(View view) {
+    /* renamed from: lambda$onBindViewHolder$19$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1460x4b149f8d(View v) {
         DialogsSearchAdapterDelegate dialogsSearchAdapterDelegate = this.delegate;
         if (dialogsSearchAdapterDelegate != null) {
             dialogsSearchAdapterDelegate.needClearList();
         }
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$20(GraySectionCell graySectionCell) {
+    /* renamed from: lambda$onBindViewHolder$20$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1461x6393e923(GraySectionCell cell) {
         String str;
         int i;
         boolean z = !this.phoneCollapsed;
@@ -1307,85 +1326,87 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             i = R.string.ShowLess;
             str = "ShowLess";
         }
-        graySectionCell.setRightText(LocaleController.getString(str, i));
+        cell.setRightText(LocaleController.getString(str, i));
         notifyDataSetChanged();
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$23(ArrayList arrayList, final int i, GraySectionCell graySectionCell) {
+    /* renamed from: lambda$onBindViewHolder$23$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1464xc4025be6(ArrayList globalSearch, final int rawPosition, GraySectionCell cell) {
         String str;
-        int i2;
-        long elapsedRealtime = SystemClock.elapsedRealtime();
-        if (elapsedRealtime - this.lastShowMoreUpdate < 300) {
+        int i;
+        long now = SystemClock.elapsedRealtime();
+        if (now - this.lastShowMoreUpdate < 300) {
             return;
         }
-        this.lastShowMoreUpdate = elapsedRealtime;
-        int size = arrayList.isEmpty() ? 0 : arrayList.size();
-        boolean z = getItemCount() > (Math.min(size, this.globalSearchCollapsed ? 4 : ConnectionsManager.DEFAULT_DATACENTER_ID) + i) + 1;
+        this.lastShowMoreUpdate = now;
+        int totalGlobalCount = globalSearch.isEmpty() ? 0 : globalSearch.size();
+        boolean disableRemoveAnimation = getItemCount() > (Math.min(totalGlobalCount, this.globalSearchCollapsed ? 4 : Integer.MAX_VALUE) + rawPosition) + 1;
         DefaultItemAnimator defaultItemAnimator = this.itemAnimator;
         if (defaultItemAnimator != null) {
             long j = 200;
-            defaultItemAnimator.setAddDuration(z ? 45L : 200L);
+            defaultItemAnimator.setAddDuration(disableRemoveAnimation ? 45L : 200L);
             DefaultItemAnimator defaultItemAnimator2 = this.itemAnimator;
-            if (z) {
+            if (disableRemoveAnimation) {
                 j = 80;
             }
             defaultItemAnimator2.setRemoveDuration(j);
-            this.itemAnimator.setRemoveDelay(z ? 270L : 0L);
+            this.itemAnimator.setRemoveDelay(disableRemoveAnimation ? 270L : 0L);
         }
-        boolean z2 = !this.globalSearchCollapsed;
-        this.globalSearchCollapsed = z2;
-        if (z2) {
-            i2 = R.string.ShowMore;
+        boolean z = !this.globalSearchCollapsed;
+        this.globalSearchCollapsed = z;
+        if (z) {
+            i = R.string.ShowMore;
             str = "ShowMore";
         } else {
-            i2 = R.string.ShowLess;
+            i = R.string.ShowLess;
             str = "ShowLess";
         }
-        graySectionCell.setRightText(LocaleController.getString(str, i2), this.globalSearchCollapsed);
+        cell.setRightText(LocaleController.getString(str, i), this.globalSearchCollapsed);
         this.showMoreHeader = null;
-        final View view = (View) graySectionCell.getParent();
-        if (view instanceof RecyclerView) {
-            RecyclerView recyclerView = (RecyclerView) view;
-            int i3 = !this.globalSearchCollapsed ? i + 4 : i + size + 1;
-            int i4 = 0;
+        final View parent = (View) cell.getParent();
+        if (parent instanceof RecyclerView) {
+            RecyclerView listView = (RecyclerView) parent;
+            int nextGraySectionPosition = !this.globalSearchCollapsed ? rawPosition + 4 : rawPosition + totalGlobalCount + 1;
+            int i2 = 0;
             while (true) {
-                if (i4 >= recyclerView.getChildCount()) {
+                if (i2 >= listView.getChildCount()) {
                     break;
                 }
-                View childAt = recyclerView.getChildAt(i4);
-                if (recyclerView.getChildAdapterPosition(childAt) == i3) {
-                    this.showMoreHeader = childAt;
+                View child = listView.getChildAt(i2);
+                if (listView.getChildAdapterPosition(child) != nextGraySectionPosition) {
+                    i2++;
+                } else {
+                    this.showMoreHeader = child;
                     break;
                 }
-                i4++;
             }
         }
         if (!this.globalSearchCollapsed) {
-            notifyItemChanged(i + 3);
-            notifyItemRangeInserted(i + 4, size - 3);
+            notifyItemChanged(rawPosition + 3);
+            notifyItemRangeInserted(rawPosition + 4, totalGlobalCount - 3);
         } else {
-            notifyItemRangeRemoved(i + 4, size - 3);
-            if (z) {
-                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda7
+            notifyItemRangeRemoved(rawPosition + 4, totalGlobalCount - 3);
+            if (disableRemoveAnimation) {
+                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda22
                     @Override // java.lang.Runnable
                     public final void run() {
-                        DialogsSearchAdapter.this.lambda$onBindViewHolder$21(i);
+                        DialogsSearchAdapter.this.m1462xd90e0f64(rawPosition);
                     }
                 }, 350L);
             } else {
-                notifyItemChanged(i + 3);
+                notifyItemChanged(rawPosition + 3);
             }
         }
         Runnable runnable = this.cancelShowMoreAnimation;
         if (runnable != null) {
             AndroidUtilities.cancelRunOnUIThread(runnable);
         }
-        if (z) {
+        if (disableRemoveAnimation) {
             this.showMoreAnimation = true;
-            Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda13
+            Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsSearchAdapter$$ExternalSyntheticLambda4
                 @Override // java.lang.Runnable
                 public final void run() {
-                    DialogsSearchAdapter.this.lambda$onBindViewHolder$22(view);
+                    DialogsSearchAdapter.this.m1463x4e8835a5(parent);
                 }
             };
             this.cancelShowMoreAnimation = runnable2;
@@ -1395,30 +1416,31 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         this.showMoreAnimation = false;
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$21(int i) {
-        notifyItemChanged(i + 3);
+    /* renamed from: lambda$onBindViewHolder$21$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1462xd90e0f64(int rawPosition) {
+        notifyItemChanged(rawPosition + 3);
     }
 
-    public /* synthetic */ void lambda$onBindViewHolder$22(View view) {
+    /* renamed from: lambda$onBindViewHolder$22$org-telegram-ui-Adapters-DialogsSearchAdapter */
+    public /* synthetic */ void m1463x4e8835a5(View parent) {
         this.showMoreAnimation = false;
         this.showMoreHeader = null;
-        if (view != null) {
-            view.invalidate();
+        if (parent != null) {
+            parent.invalidate();
         }
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
     public int getItemViewType(int i) {
-        int i2 = 4;
         if (!this.searchResultHashtags.isEmpty()) {
             return i == 0 ? 1 : 4;
         }
         if (isRecentSearchDisplayed()) {
-            int i3 = (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) ? 0 : 1;
-            if (i < i3) {
+            int offset = (this.searchWas || MediaDataController.getInstance(this.currentAccount).hints.isEmpty()) ? 0 : 1;
+            if (i < offset) {
                 return 5;
             }
-            if (i == i3) {
+            if (i == offset) {
                 return 1;
             }
             if (i < getRecentItemsCount()) {
@@ -1427,89 +1449,85 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             i -= getRecentItemsCount();
         }
         ArrayList<TLObject> globalSearch = this.searchAdapterHelper.getGlobalSearch();
-        int size = this.searchResult.size();
-        int size2 = this.searchAdapterHelper.getLocalServerSearch().size();
-        if (size + size2 > 0 && getRecentItemsCount() > 0) {
+        int localCount = this.searchResult.size();
+        int localServerCount = this.searchAdapterHelper.getLocalServerSearch().size();
+        if (localCount + localServerCount > 0 && getRecentItemsCount() > 0) {
             if (i == 0) {
                 return 1;
             }
             i--;
         }
-        int size3 = this.searchAdapterHelper.getPhoneSearch().size();
-        if (size3 > 3 && this.phoneCollapsed) {
-            size3 = 3;
+        int phoneCount = this.searchAdapterHelper.getPhoneSearch().size();
+        if (phoneCount > 3 && this.phoneCollapsed) {
+            phoneCount = 3;
         }
-        int size4 = globalSearch.isEmpty() ? 0 : globalSearch.size() + 1;
-        if (size4 <= 4 || !this.globalSearchCollapsed) {
-            i2 = size4;
+        int globalCount = globalSearch.isEmpty() ? 0 : globalSearch.size() + 1;
+        if (globalCount > 4 && this.globalSearchCollapsed) {
+            globalCount = 4;
         }
-        int size5 = this.searchResultMessages.isEmpty() ? 0 : this.searchResultMessages.size() + 1;
-        if (i >= 0 && i < size) {
+        int messagesCount = this.searchResultMessages.isEmpty() ? 0 : this.searchResultMessages.size() + 1;
+        if (i >= 0 && i < localCount) {
             return 0;
         }
-        int i4 = i - size;
-        if (i4 >= 0 && i4 < size2) {
+        int i2 = i - localCount;
+        if (i2 >= 0 && i2 < localServerCount) {
             return 0;
         }
-        int i5 = i4 - size2;
-        if (i5 >= 0 && i5 < size3) {
-            Object item = getItem(i5);
-            if (!(item instanceof String)) {
+        int i3 = i2 - localServerCount;
+        if (i3 >= 0 && i3 < phoneCount) {
+            Object object = getItem(i3);
+            if (!(object instanceof String)) {
                 return 0;
             }
-            return "section".equals((String) item) ? 1 : 6;
+            String str = (String) object;
+            return "section".equals(str) ? 1 : 6;
         }
-        int i6 = i5 - size3;
-        if (i6 >= 0 && i6 < i2) {
-            return i6 == 0 ? 1 : 0;
+        int i4 = i3 - phoneCount;
+        if (i4 >= 0 && i4 < globalCount) {
+            return i4 == 0 ? 1 : 0;
         }
-        int i7 = i6 - i2;
-        if (i7 < 0 || i7 >= size5) {
+        int i5 = i4 - globalCount;
+        if (i5 < 0 || i5 >= messagesCount) {
             return 3;
         }
-        return i7 == 0 ? 1 : 2;
+        return i5 == 0 ? 1 : 2;
     }
 
-    public void setFiltersDelegate(FilteredSearchView.Delegate delegate, boolean z) {
-        this.filtersDelegate = delegate;
-        if (delegate == null || !z) {
-            return;
+    public void setFiltersDelegate(FilteredSearchView.Delegate filtersDelegate, boolean update) {
+        this.filtersDelegate = filtersDelegate;
+        if (filtersDelegate != null && update) {
+            filtersDelegate.updateFiltersView(false, null, this.localTipDates, this.localTipArchive);
         }
-        delegate.updateFiltersView(false, null, this.localTipDates, this.localTipArchive);
     }
 
     public int getCurrentItemCount() {
         return this.currentItemCount;
     }
 
-    public void filterRecent(String str) {
-        TLObject tLObject;
-        String str2;
-        this.filteredRecentQuery = str;
+    public void filterRecent(String query) {
+        this.filteredRecentQuery = query;
         this.filteredRecentSearchObjects.clear();
-        if (TextUtils.isEmpty(str)) {
+        if (TextUtils.isEmpty(query)) {
             return;
         }
-        String lowerCase = str.toLowerCase();
-        int size = this.recentSearchObjects.size();
-        for (int i = 0; i < size; i++) {
-            RecentSearchObject recentSearchObject = this.recentSearchObjects.get(i);
-            if (recentSearchObject != null && (tLObject = recentSearchObject.object) != null) {
-                String str3 = null;
-                if (tLObject instanceof TLRPC$Chat) {
-                    str3 = ((TLRPC$Chat) tLObject).title;
-                    str2 = ((TLRPC$Chat) tLObject).username;
-                } else if (tLObject instanceof TLRPC$User) {
-                    str3 = UserObject.getUserName((TLRPC$User) tLObject);
-                    str2 = ((TLRPC$User) recentSearchObject.object).username;
-                } else if (tLObject instanceof TLRPC$ChatInvite) {
-                    str3 = ((TLRPC$ChatInvite) tLObject).title;
-                    str2 = null;
-                } else {
-                    str2 = null;
+        String lowerCasedQuery = query.toLowerCase();
+        int count = this.recentSearchObjects.size();
+        for (int i = 0; i < count; i++) {
+            RecentSearchObject obj = this.recentSearchObjects.get(i);
+            if (obj != null && obj.object != null) {
+                String title = null;
+                String username = null;
+                if (obj.object instanceof TLRPC.Chat) {
+                    title = ((TLRPC.Chat) obj.object).title;
+                    username = ((TLRPC.Chat) obj.object).username;
+                } else if (obj.object instanceof TLRPC.User) {
+                    title = UserObject.getUserName((TLRPC.User) obj.object);
+                    username = ((TLRPC.User) obj.object).username;
+                } else if (obj.object instanceof TLRPC.ChatInvite) {
+                    title = ((TLRPC.ChatInvite) obj.object).title;
                 }
-                if ((str3 != null && wordStartsWith(str3.toLowerCase(), lowerCase)) || (str2 != null && wordStartsWith(str2.toLowerCase(), lowerCase))) {
-                    this.filteredRecentSearchObjects.add(recentSearchObject);
+                if ((title != null && wordStartsWith(title.toLowerCase(), lowerCasedQuery)) || (username != null && wordStartsWith(username.toLowerCase(), lowerCasedQuery))) {
+                    this.filteredRecentSearchObjects.add(obj);
                 }
                 if (this.filteredRecentSearchObjects.size() >= 5) {
                     return;
@@ -1518,13 +1536,13 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         }
     }
 
-    private boolean wordStartsWith(String str, String str2) {
-        if (str2 == null || str == null) {
+    private boolean wordStartsWith(String loweredTitle, String loweredQuery) {
+        if (loweredQuery == null || loweredTitle == null) {
             return false;
         }
-        String[] split = str.toLowerCase().split(" ");
-        for (int i = 0; i < split.length; i++) {
-            if (split[i] != null && (split[i].startsWith(str2) || str2.startsWith(split[i]))) {
+        String[] words = loweredTitle.toLowerCase().split(" ");
+        for (int j = 0; j < words.length; j++) {
+            if (words[j] != null && (words[j].startsWith(loweredQuery) || loweredQuery.startsWith(words[j]))) {
                 return true;
             }
         }

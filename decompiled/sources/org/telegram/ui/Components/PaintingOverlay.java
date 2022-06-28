@@ -10,6 +10,7 @@ import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import com.google.android.exoplayer2.C;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.telegram.messenger.AndroidUtilities;
@@ -17,37 +18,23 @@ import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.VideoEditedInfo;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.Paint.Views.EditTextOutline;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class PaintingOverlay extends FrameLayout {
     private Drawable backgroundDrawable;
     private boolean ignoreLayout;
     private HashMap<View, VideoEditedInfo.MediaEntity> mediaEntityViews;
     private Bitmap paintBitmap;
 
-    @Override // android.view.ViewGroup, android.view.View
-    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override // android.view.ViewGroup
-    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        return false;
-    }
-
     public PaintingOverlay(Context context) {
         super(context);
     }
 
-    public void setData(String str, ArrayList<VideoEditedInfo.MediaEntity> arrayList, boolean z, boolean z2) {
-        setEntities(arrayList, z, z2);
-        if (str != null) {
-            this.paintBitmap = BitmapFactory.decodeFile(str);
+    public void setData(String paintPath, ArrayList<VideoEditedInfo.MediaEntity> entities, boolean isVideo, boolean startAfterSet) {
+        setEntities(entities, isVideo, startAfterSet);
+        if (paintPath != null) {
+            this.paintBitmap = BitmapFactory.decodeFile(paintPath);
             BitmapDrawable bitmapDrawable = new BitmapDrawable(this.paintBitmap);
             this.backgroundDrawable = bitmapDrawable;
             setBackground(bitmapDrawable);
@@ -59,29 +46,44 @@ public class PaintingOverlay extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         this.ignoreLayout = true;
-        setMeasuredDimension(View.MeasureSpec.getSize(i), View.MeasureSpec.getSize(i2));
+        setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), View.MeasureSpec.getSize(heightMeasureSpec));
         if (this.mediaEntityViews != null) {
-            int measuredWidth = getMeasuredWidth();
-            int measuredHeight = getMeasuredHeight();
-            int childCount = getChildCount();
-            for (int i3 = 0; i3 < childCount; i3++) {
-                View childAt = getChildAt(i3);
-                VideoEditedInfo.MediaEntity mediaEntity = this.mediaEntityViews.get(childAt);
-                if (mediaEntity != null) {
-                    if (childAt instanceof EditTextOutline) {
-                        childAt.measure(View.MeasureSpec.makeMeasureSpec(mediaEntity.viewWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(0, 0));
-                        float f = (mediaEntity.textViewWidth * measuredWidth) / mediaEntity.viewWidth;
-                        childAt.setScaleX(mediaEntity.scale * f);
-                        childAt.setScaleY(mediaEntity.scale * f);
+            int width = getMeasuredWidth();
+            int height = getMeasuredHeight();
+            int N = getChildCount();
+            for (int a = 0; a < N; a++) {
+                View child = getChildAt(a);
+                VideoEditedInfo.MediaEntity entity = this.mediaEntityViews.get(child);
+                if (entity != null) {
+                    if (child instanceof EditTextOutline) {
+                        child.measure(View.MeasureSpec.makeMeasureSpec(entity.viewWidth, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(0, 0));
+                        float sc = (entity.textViewWidth * width) / entity.viewWidth;
+                        child.setScaleX(entity.scale * sc);
+                        child.setScaleY(entity.scale * sc);
                     } else {
-                        childAt.measure(View.MeasureSpec.makeMeasureSpec((int) (measuredWidth * mediaEntity.width), 1073741824), View.MeasureSpec.makeMeasureSpec((int) (measuredHeight * mediaEntity.height), 1073741824));
+                        child.measure(View.MeasureSpec.makeMeasureSpec((int) (width * entity.width), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec((int) (height * entity.height), C.BUFFER_FLAG_ENCRYPTED));
                     }
                 }
             }
         }
         this.ignoreLayout = false;
+    }
+
+    @Override // android.view.ViewGroup, android.view.View
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return false;
+    }
+
+    @Override // android.view.ViewGroup
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return false;
+    }
+
+    @Override // android.view.View
+    public boolean onTouchEvent(MotionEvent event) {
+        return false;
     }
 
     @Override // android.view.View, android.view.ViewParent
@@ -93,25 +95,25 @@ public class PaintingOverlay extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        int i5;
-        int i6;
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int y;
+        int x;
         if (this.mediaEntityViews != null) {
-            int measuredWidth = getMeasuredWidth();
-            int measuredHeight = getMeasuredHeight();
-            int childCount = getChildCount();
-            for (int i7 = 0; i7 < childCount; i7++) {
-                View childAt = getChildAt(i7);
-                VideoEditedInfo.MediaEntity mediaEntity = this.mediaEntityViews.get(childAt);
-                if (mediaEntity != null) {
-                    if (childAt instanceof EditTextOutline) {
-                        i5 = ((int) (measuredWidth * mediaEntity.textViewX)) - (childAt.getMeasuredWidth() / 2);
-                        i6 = ((int) (measuredHeight * mediaEntity.textViewY)) - (childAt.getMeasuredHeight() / 2);
+            int width = getMeasuredWidth();
+            int height = getMeasuredHeight();
+            int N = getChildCount();
+            for (int a = 0; a < N; a++) {
+                View child = getChildAt(a);
+                VideoEditedInfo.MediaEntity entity = this.mediaEntityViews.get(child);
+                if (entity != null) {
+                    if (child instanceof EditTextOutline) {
+                        x = ((int) (width * entity.textViewX)) - (child.getMeasuredWidth() / 2);
+                        y = ((int) (height * entity.textViewY)) - (child.getMeasuredHeight() / 2);
                     } else {
-                        i5 = (int) (measuredWidth * mediaEntity.x);
-                        i6 = (int) (measuredHeight * mediaEntity.y);
+                        x = (int) (width * entity.x);
+                        y = (int) (height * entity.y);
                     }
-                    childAt.layout(i5, i6, childAt.getMeasuredWidth() + i5, childAt.getMeasuredHeight() + i6);
+                    child.layout(x, y, child.getMeasuredWidth() + x, child.getMeasuredHeight() + y);
                 }
             }
         }
@@ -129,17 +131,17 @@ public class PaintingOverlay extends FrameLayout {
     }
 
     public void showAll() {
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            getChildAt(i).setVisibility(0);
+        int count = getChildCount();
+        for (int a = 0; a < count; a++) {
+            getChildAt(a).setVisibility(0);
         }
         setBackground(this.backgroundDrawable);
     }
 
     public void hideEntities() {
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            getChildAt(i).setVisibility(4);
+        int count = getChildCount();
+        for (int a = 0; a < count; a++) {
+            getChildAt(a).setVisibility(4);
         }
     }
 
@@ -148,95 +150,93 @@ public class PaintingOverlay extends FrameLayout {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    public void setEntities(ArrayList<VideoEditedInfo.MediaEntity> arrayList, boolean z, boolean z2) {
+    public void setEntities(ArrayList<VideoEditedInfo.MediaEntity> entities, boolean isVideo, boolean startAfterSet) {
         reset();
         this.mediaEntityViews = new HashMap<>();
-        if (arrayList == null || arrayList.isEmpty()) {
-            return;
-        }
-        int size = arrayList.size();
-        for (int i = 0; i < size; i++) {
-            VideoEditedInfo.MediaEntity mediaEntity = arrayList.get(i);
-            byte b = mediaEntity.type;
-            BackupImageView backupImageView = null;
-            if (b == 0) {
-                backupImageView = new BackupImageView(getContext());
-                backupImageView.setAspectFit(true);
-                ImageReceiver imageReceiver = backupImageView.getImageReceiver();
-                if (z) {
-                    imageReceiver.setAllowDecodeSingleFrame(true);
-                    imageReceiver.setAllowStartLottieAnimation(false);
-                    if (z2) {
-                        imageReceiver.setDelegate(PaintingOverlay$$ExternalSyntheticLambda0.INSTANCE);
+        if (entities != null && !entities.isEmpty()) {
+            int N = entities.size();
+            for (int a = 0; a < N; a++) {
+                VideoEditedInfo.MediaEntity entity = entities.get(a);
+                View child = null;
+                if (entity.type == 0) {
+                    BackupImageView imageView = new BackupImageView(getContext());
+                    imageView.setAspectFit(true);
+                    ImageReceiver imageReceiver = imageView.getImageReceiver();
+                    if (isVideo) {
+                        imageReceiver.setAllowDecodeSingleFrame(true);
+                        imageReceiver.setAllowStartLottieAnimation(false);
+                        if (startAfterSet) {
+                            imageReceiver.setDelegate(PaintingOverlay$$ExternalSyntheticLambda0.INSTANCE);
+                        }
                     }
-                }
-                imageReceiver.setImage(ImageLocation.getForDocument(mediaEntity.document), (String) null, ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(mediaEntity.document.thumbs, 90), mediaEntity.document), (String) null, "webp", mediaEntity.parentObject, 1);
-                if ((mediaEntity.subType & 2) != 0) {
-                    backupImageView.setScaleX(-1.0f);
-                }
-                mediaEntity.view = backupImageView;
-            } else if (b == 1) {
-                EditTextOutline editTextOutline = new EditTextOutline(this, getContext()) { // from class: org.telegram.ui.Components.PaintingOverlay.1
-                    @Override // org.telegram.ui.Components.EditTextEffects, android.view.View
-                    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-                        return false;
+                    TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(entity.document.thumbs, 90);
+                    imageReceiver.setImage(ImageLocation.getForDocument(entity.document), (String) null, ImageLocation.getForDocument(thumb, entity.document), (String) null, "webp", entity.parentObject, 1);
+                    if ((entity.subType & 2) != 0) {
+                        imageView.setScaleX(-1.0f);
                     }
+                    child = imageView;
+                    entity.view = imageView;
+                } else if (entity.type == 1) {
+                    EditTextOutline editText = new EditTextOutline(getContext()) { // from class: org.telegram.ui.Components.PaintingOverlay.1
+                        @Override // org.telegram.ui.Components.EditTextEffects, android.view.View
+                        public boolean dispatchTouchEvent(MotionEvent event) {
+                            return false;
+                        }
 
-                    @Override // org.telegram.ui.Components.EditTextBoldCursor, android.widget.TextView, android.view.View
-                    public boolean onTouchEvent(MotionEvent motionEvent) {
-                        return false;
+                        @Override // org.telegram.ui.Components.EditTextBoldCursor, android.widget.TextView, android.view.View
+                        public boolean onTouchEvent(MotionEvent event) {
+                            return false;
+                        }
+                    };
+                    editText.setBackgroundColor(0);
+                    editText.setPadding(AndroidUtilities.dp(7.0f), AndroidUtilities.dp(7.0f), AndroidUtilities.dp(7.0f), AndroidUtilities.dp(7.0f));
+                    editText.setTextSize(0, entity.fontSize);
+                    editText.setText(entity.text);
+                    editText.setTypeface(null, 1);
+                    editText.setGravity(17);
+                    editText.setHorizontallyScrolling(false);
+                    editText.setImeOptions(268435456);
+                    editText.setFocusableInTouchMode(true);
+                    editText.setEnabled(false);
+                    editText.setInputType(editText.getInputType() | 16384);
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        editText.setBreakStrategy(0);
                     }
-                };
-                editTextOutline.setBackgroundColor(0);
-                editTextOutline.setPadding(AndroidUtilities.dp(7.0f), AndroidUtilities.dp(7.0f), AndroidUtilities.dp(7.0f), AndroidUtilities.dp(7.0f));
-                editTextOutline.setTextSize(0, mediaEntity.fontSize);
-                editTextOutline.setText(mediaEntity.text);
-                editTextOutline.setTypeface(null, 1);
-                editTextOutline.setGravity(17);
-                editTextOutline.setHorizontallyScrolling(false);
-                editTextOutline.setImeOptions(268435456);
-                editTextOutline.setFocusableInTouchMode(true);
-                editTextOutline.setEnabled(false);
-                editTextOutline.setInputType(editTextOutline.getInputType() | 16384);
-                if (Build.VERSION.SDK_INT >= 23) {
-                    editTextOutline.setBreakStrategy(0);
+                    if ((1 & entity.subType) != 0) {
+                        editText.setTextColor(-1);
+                        editText.setStrokeColor(entity.color);
+                        editText.setFrameColor(0);
+                        editText.setShadowLayer(0.0f, 0.0f, 0.0f, 0);
+                    } else if ((entity.subType & 4) != 0) {
+                        editText.setTextColor(-16777216);
+                        editText.setStrokeColor(0);
+                        editText.setFrameColor(entity.color);
+                        editText.setShadowLayer(0.0f, 0.0f, 0.0f, 0);
+                    } else {
+                        editText.setTextColor(entity.color);
+                        editText.setStrokeColor(0);
+                        editText.setFrameColor(0);
+                        editText.setShadowLayer(5.0f, 0.0f, 1.0f, 1711276032);
+                    }
+                    child = editText;
+                    entity.view = editText;
                 }
-                byte b2 = mediaEntity.subType;
-                if ((b2 & 1) != 0) {
-                    editTextOutline.setTextColor(-1);
-                    editTextOutline.setStrokeColor(mediaEntity.color);
-                    editTextOutline.setFrameColor(0);
-                    editTextOutline.setShadowLayer(0.0f, 0.0f, 0.0f, 0);
-                } else if ((b2 & 4) != 0) {
-                    editTextOutline.setTextColor(-16777216);
-                    editTextOutline.setStrokeColor(0);
-                    editTextOutline.setFrameColor(mediaEntity.color);
-                    editTextOutline.setShadowLayer(0.0f, 0.0f, 0.0f, 0);
-                } else {
-                    editTextOutline.setTextColor(mediaEntity.color);
-                    editTextOutline.setStrokeColor(0);
-                    editTextOutline.setFrameColor(0);
-                    editTextOutline.setShadowLayer(5.0f, 0.0f, 1.0f, 1711276032);
+                if (child != null) {
+                    addView(child);
+                    double d = -entity.rotation;
+                    Double.isNaN(d);
+                    child.setRotation((float) ((d / 3.141592653589793d) * 180.0d));
+                    this.mediaEntityViews.put(child, entity);
                 }
-                mediaEntity.view = editTextOutline;
-                backupImageView = editTextOutline;
-            }
-            if (backupImageView != null) {
-                addView(backupImageView);
-                double d = -mediaEntity.rotation;
-                Double.isNaN(d);
-                backupImageView.setRotation((float) ((d / 3.141592653589793d) * 180.0d));
-                this.mediaEntityViews.put(backupImageView, mediaEntity);
             }
         }
     }
 
-    public static /* synthetic */ void lambda$setEntities$0(ImageReceiver imageReceiver, boolean z, boolean z2, boolean z3) {
-        RLottieDrawable lottieAnimation;
-        if (!z || z2 || (lottieAnimation = imageReceiver.getLottieAnimation()) == null) {
-            return;
+    public static /* synthetic */ void lambda$setEntities$0(ImageReceiver imageReceiver1, boolean set, boolean thumb, boolean memCache) {
+        RLottieDrawable drawable;
+        if (set && !thumb && (drawable = imageReceiver1.getLottieAnimation()) != null) {
+            drawable.start();
         }
-        lottieAnimation.start();
     }
 
     public void setBitmap(Bitmap bitmap) {
@@ -251,30 +251,29 @@ public class PaintingOverlay extends FrameLayout {
     }
 
     @Override // android.view.View
-    public void setAlpha(float f) {
-        super.setAlpha(f);
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
         Drawable drawable = this.backgroundDrawable;
         if (drawable != null) {
-            drawable.setAlpha((int) (255.0f * f));
+            drawable.setAlpha((int) (255.0f * alpha));
         }
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View childAt = getChildAt(i);
-            if (childAt != null && childAt.getParent() == this) {
-                childAt.setAlpha(f);
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            View child = getChildAt(i);
+            if (child != null && child.getParent() == this) {
+                child.setAlpha(alpha);
             }
         }
     }
 
     public Bitmap getThumb() {
-        float measuredWidth = getMeasuredWidth();
-        float measuredHeight = getMeasuredHeight();
-        float max = Math.max(measuredWidth / AndroidUtilities.dp(120.0f), measuredHeight / AndroidUtilities.dp(120.0f));
-        Bitmap createBitmap = Bitmap.createBitmap((int) (measuredWidth / max), (int) (measuredHeight / max), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(createBitmap);
-        float f = 1.0f / max;
-        canvas.scale(f, f);
+        float w = getMeasuredWidth();
+        float h = getMeasuredHeight();
+        float scale = Math.max(w / AndroidUtilities.dp(120.0f), h / AndroidUtilities.dp(120.0f));
+        Bitmap bitmap = Bitmap.createBitmap((int) (w / scale), (int) (h / scale), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.scale(1.0f / scale, 1.0f / scale);
         draw(canvas);
-        return createBitmap;
+        return bitmap;
     }
 }

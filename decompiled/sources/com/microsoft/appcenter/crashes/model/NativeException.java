@@ -1,7 +1,9 @@
 package com.microsoft.appcenter.crashes.model;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class NativeException extends RuntimeException {
+    private static final String CRASH_MESSAGE = "Native exception read from a minidump file";
+
     public NativeException() {
-        super("Native exception read from a minidump file");
+        super(CRASH_MESSAGE);
     }
 }

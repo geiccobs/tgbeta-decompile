@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -16,25 +15,24 @@ import android.widget.Button;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import androidx.core.view.GravityCompat;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$PhotoSize;
-import org.telegram.tgnet.TLRPC$StickerSetCovered;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ProgressButton;
 import org.telegram.ui.Components.ViewHelper;
-@SuppressLint({"ViewConstructor"})
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class ArchivedStickerSetCell extends FrameLayout implements Checkable {
     private final ProgressButton addButton;
     private AnimatorSet animatorSet;
@@ -45,51 +43,51 @@ public class ArchivedStickerSetCell extends FrameLayout implements Checkable {
     private final BackupImageView imageView;
     private boolean needDivider;
     private OnCheckedChangeListener onCheckedChangeListener;
-    private TLRPC$StickerSetCovered stickersSet;
+    private TLRPC.StickerSetCovered stickersSet;
     private final TextView textView;
     private final TextView valueTextView;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface OnCheckedChangeListener {
         void onCheckedChanged(ArchivedStickerSetCell archivedStickerSetCell, boolean z);
     }
 
-    public ArchivedStickerSetCell(Context context, boolean z) {
+    public ArchivedStickerSetCell(Context context, boolean checkable) {
         super(context);
-        this.checkable = z;
-        if (z) {
+        this.checkable = checkable;
+        if (checkable) {
             ProgressButton progressButton = new ProgressButton(context);
             this.addButton = progressButton;
             this.currentButton = progressButton;
             progressButton.setText(LocaleController.getString("Add", R.string.Add));
-            progressButton.setTextColor(Theme.getColor("featuredStickers_buttonText"));
-            progressButton.setProgressColor(Theme.getColor("featuredStickers_buttonProgress"));
-            progressButton.setBackgroundRoundRect(Theme.getColor("featuredStickers_addButton"), Theme.getColor("featuredStickers_addButtonPressed"));
+            progressButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+            progressButton.setProgressColor(Theme.getColor(Theme.key_featuredStickers_buttonProgress));
+            progressButton.setBackgroundRoundRect(Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed));
             addView(progressButton, LayoutHelper.createFrameRelatively(-2.0f, 28.0f, 8388661, 0.0f, 18.0f, 14.0f, 0.0f));
-            int dp = AndroidUtilities.dp(60.0f);
+            int minWidth = AndroidUtilities.dp(60.0f);
             ProgressButton progressButton2 = new ProgressButton(context);
             this.deleteButton = progressButton2;
             progressButton2.setAllCaps(false);
-            progressButton2.setMinWidth(dp);
-            progressButton2.setMinimumWidth(dp);
+            progressButton2.setMinWidth(minWidth);
+            progressButton2.setMinimumWidth(minWidth);
             progressButton2.setTextSize(1, 14.0f);
-            progressButton2.setTextColor(Theme.getColor("featuredStickers_removeButtonText"));
+            progressButton2.setTextColor(Theme.getColor(Theme.key_featuredStickers_removeButtonText));
             progressButton2.setText(LocaleController.getString("StickersRemove", R.string.StickersRemove));
-            progressButton2.setBackground(Theme.getRoundRectSelectorDrawable(Theme.getColor("featuredStickers_removeButtonText")));
+            progressButton2.setBackground(Theme.getRoundRectSelectorDrawable(Theme.getColor(Theme.key_featuredStickers_removeButtonText)));
             progressButton2.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
             ViewHelper.setPadding(progressButton2, 8.0f, 0.0f, 8.0f, 0.0f);
             if (Build.VERSION.SDK_INT >= 21) {
                 progressButton2.setOutlineProvider(null);
             }
             addView(progressButton2, LayoutHelper.createFrameRelatively(-2.0f, 28.0f, 8388661, 0.0f, 18.0f, 14.0f, 0.0f));
-            View.OnClickListener onClickListener = new View.OnClickListener() { // from class: org.telegram.ui.Cells.ArchivedStickerSetCell$$ExternalSyntheticLambda0
+            View.OnClickListener toggleListener = new View.OnClickListener() { // from class: org.telegram.ui.Cells.ArchivedStickerSetCell$$ExternalSyntheticLambda0
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    ArchivedStickerSetCell.this.lambda$new$0(view);
+                    ArchivedStickerSetCell.this.m1633lambda$new$0$orgtelegramuiCellsArchivedStickerSetCell(view);
                 }
             };
-            progressButton.setOnClickListener(onClickListener);
-            progressButton2.setOnClickListener(onClickListener);
+            progressButton.setOnClickListener(toggleListener);
+            progressButton2.setOnClickListener(toggleListener);
             syncButtons(false);
         } else {
             this.addButton = null;
@@ -97,23 +95,23 @@ public class ArchivedStickerSetCell extends FrameLayout implements Checkable {
         }
         TextView textView = new TextView(context);
         this.textView = textView;
-        textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         textView.setTextSize(1, 16.0f);
         textView.setLines(1);
         textView.setMaxLines(1);
         textView.setSingleLine(true);
         textView.setEllipsize(TextUtils.TruncateAt.END);
         textView.setGravity(LayoutHelper.getAbsoluteGravityStart());
-        addView(textView, LayoutHelper.createFrameRelatively(-2.0f, -2.0f, 8388611, 71.0f, 10.0f, 21.0f, 0.0f));
+        addView(textView, LayoutHelper.createFrameRelatively(-2.0f, -2.0f, GravityCompat.START, 71.0f, 10.0f, 21.0f, 0.0f));
         TextView textView2 = new TextView(context);
         this.valueTextView = textView2;
-        textView2.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText2"));
+        textView2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
         textView2.setTextSize(1, 13.0f);
         textView2.setLines(1);
         textView2.setMaxLines(1);
         textView2.setSingleLine(true);
         textView2.setGravity(LayoutHelper.getAbsoluteGravityStart());
-        addView(textView2, LayoutHelper.createFrameRelatively(-2.0f, -2.0f, 8388611, 71.0f, 35.0f, 21.0f, 0.0f));
+        addView(textView2, LayoutHelper.createFrameRelatively(-2.0f, -2.0f, GravityCompat.START, 71.0f, 35.0f, 21.0f, 0.0f));
         BackupImageView backupImageView = new BackupImageView(context);
         this.imageView = backupImageView;
         backupImageView.setAspectFit(true);
@@ -121,21 +119,22 @@ public class ArchivedStickerSetCell extends FrameLayout implements Checkable {
         addView(backupImageView, LayoutHelper.createFrameRelatively(48.0f, 48.0f, 8388659, 12.0f, 8.0f, 0.0f, 0.0f));
     }
 
-    public /* synthetic */ void lambda$new$0(View view) {
+    /* renamed from: lambda$new$0$org-telegram-ui-Cells-ArchivedStickerSetCell */
+    public /* synthetic */ void m1633lambda$new$0$orgtelegramuiCellsArchivedStickerSetCell(View v) {
         toggle();
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64.0f) + (this.needDivider ? 1 : 0), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64.0f) + (this.needDivider ? 1 : 0), C.BUFFER_FLAG_ENCRYPTED));
     }
 
     @Override // android.view.ViewGroup
-    protected void measureChildWithMargins(View view, int i, int i2, int i3, int i4) {
-        if (this.checkable && view == this.textView) {
-            i2 += Math.max(this.addButton.getMeasuredWidth(), this.deleteButton.getMeasuredWidth());
+    protected void measureChildWithMargins(View child, int parentWidthMeasureSpec, int widthUsed, int parentHeightMeasureSpec, int heightUsed) {
+        if (this.checkable && child == this.textView) {
+            widthUsed += Math.max(this.addButton.getMeasuredWidth(), this.deleteButton.getMeasuredWidth());
         }
-        super.measureChildWithMargins(view, i, i2, i3, i4);
+        super.measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed, parentHeightMeasureSpec, heightUsed);
     }
 
     @Override // android.view.View
@@ -145,84 +144,91 @@ public class ArchivedStickerSetCell extends FrameLayout implements Checkable {
         }
     }
 
-    public void setDrawProgress(boolean z, boolean z2) {
+    public void setDrawProgress(boolean drawProgress, boolean animated) {
         ProgressButton progressButton = this.addButton;
         if (progressButton != null) {
-            progressButton.setDrawProgress(z, z2);
+            progressButton.setDrawProgress(drawProgress, animated);
         }
     }
 
-    public void setStickersSet(TLRPC$StickerSetCovered tLRPC$StickerSetCovered, boolean z) {
+    public void setStickersSet(TLRPC.StickerSetCovered set, boolean divider) {
+        TLRPC.Document sticker;
+        TLObject object;
         ImageLocation imageLocation;
-        this.needDivider = z;
-        this.stickersSet = tLRPC$StickerSetCovered;
-        setWillNotDraw(!z);
+        this.needDivider = divider;
+        this.stickersSet = set;
+        setWillNotDraw(!divider);
         this.textView.setText(this.stickersSet.set.title);
-        this.valueTextView.setText(LocaleController.formatPluralString("Stickers", tLRPC$StickerSetCovered.set.count, new Object[0]));
-        TLRPC$Document tLRPC$Document = tLRPC$StickerSetCovered.cover;
-        if (tLRPC$Document == null) {
-            tLRPC$Document = !tLRPC$StickerSetCovered.covers.isEmpty() ? tLRPC$StickerSetCovered.covers.get(0) : null;
+        this.valueTextView.setText(LocaleController.formatPluralString("Stickers", set.set.count, new Object[0]));
+        if (set.cover != null) {
+            sticker = set.cover;
+        } else if (!set.covers.isEmpty()) {
+            sticker = set.covers.get(0);
+        } else {
+            sticker = null;
         }
-        if (tLRPC$Document != null) {
-            TLObject closestPhotoSizeWithSize = FileLoader.getClosestPhotoSizeWithSize(tLRPC$StickerSetCovered.set.thumbs, 90);
-            if (closestPhotoSizeWithSize == null) {
-                closestPhotoSizeWithSize = tLRPC$Document;
-            }
-            SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(tLRPC$StickerSetCovered.set.thumbs, "windowBackgroundGray", 1.0f);
-            boolean z2 = closestPhotoSizeWithSize instanceof TLRPC$Document;
-            if (z2) {
-                imageLocation = ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(tLRPC$Document.thumbs, 90), tLRPC$Document);
+        if (sticker != null) {
+            TLObject object2 = FileLoader.getClosestPhotoSizeWithSize(set.set.thumbs, 90);
+            if (object2 != null) {
+                object = object2;
             } else {
-                imageLocation = ImageLocation.getForSticker((TLRPC$PhotoSize) closestPhotoSizeWithSize, tLRPC$Document, tLRPC$StickerSetCovered.set.thumb_version);
+                object = sticker;
             }
-            ImageLocation imageLocation2 = imageLocation;
-            if (z2 && MessageObject.isAnimatedStickerDocument(tLRPC$Document, true)) {
+            SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(set.set.thumbs, Theme.key_windowBackgroundGray, 1.0f);
+            if (object instanceof TLRPC.Document) {
+                TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(sticker.thumbs, 90);
+                imageLocation = ImageLocation.getForDocument(thumb, sticker);
+            } else {
+                TLRPC.PhotoSize thumb2 = (TLRPC.PhotoSize) object;
+                imageLocation = ImageLocation.getForSticker(thumb2, sticker, set.set.thumb_version);
+            }
+            if ((object instanceof TLRPC.Document) && MessageObject.isAnimatedStickerDocument(sticker, true)) {
                 if (svgThumb != null) {
-                    this.imageView.setImage(ImageLocation.getForDocument(tLRPC$Document), "50_50", svgThumb, 0, tLRPC$StickerSetCovered);
+                    this.imageView.setImage(ImageLocation.getForDocument(sticker), "50_50", svgThumb, 0, set);
                     return;
                 } else {
-                    this.imageView.setImage(ImageLocation.getForDocument(tLRPC$Document), "50_50", imageLocation2, (String) null, 0, tLRPC$StickerSetCovered);
+                    this.imageView.setImage(ImageLocation.getForDocument(sticker), "50_50", imageLocation, (String) null, 0, set);
                     return;
                 }
-            } else if (imageLocation2 != null && imageLocation2.imageType == 1) {
-                this.imageView.setImage(imageLocation2, "50_50", "tgs", svgThumb, tLRPC$StickerSetCovered);
+            } else if (imageLocation != null && imageLocation.imageType == 1) {
+                this.imageView.setImage(imageLocation, "50_50", "tgs", svgThumb, set);
                 return;
             } else {
-                this.imageView.setImage(imageLocation2, "50_50", "webp", svgThumb, tLRPC$StickerSetCovered);
+                this.imageView.setImage(imageLocation, "50_50", "webp", svgThumb, set);
                 return;
             }
         }
-        this.imageView.setImage((ImageLocation) null, (String) null, "webp", (Drawable) null, tLRPC$StickerSetCovered);
+        this.imageView.setImage((ImageLocation) null, (String) null, "webp", (Drawable) null, set);
     }
 
-    public TLRPC$StickerSetCovered getStickersSet() {
+    public TLRPC.StickerSetCovered getStickersSet() {
         return this.stickersSet;
     }
 
-    private void syncButtons(boolean z) {
+    private void syncButtons(boolean animated) {
         if (this.checkable) {
             AnimatorSet animatorSet = this.animatorSet;
             if (animatorSet != null) {
                 animatorSet.cancel();
             }
-            boolean z2 = this.checked;
-            float f = 1.0f;
-            float f2 = z2 ? 1.0f : 0.0f;
-            if (z2) {
-                f = 0.0f;
+            boolean z = this.checked;
+            float addButtonValue = 1.0f;
+            float deleteButtonValue = z ? 1.0f : 0.0f;
+            if (z) {
+                addButtonValue = 0.0f;
             }
             int i = 4;
-            if (z) {
-                this.currentButton = z2 ? this.deleteButton : this.addButton;
+            if (animated) {
+                this.currentButton = z ? this.deleteButton : this.addButton;
                 this.addButton.setVisibility(0);
                 this.deleteButton.setVisibility(0);
                 AnimatorSet animatorSet2 = new AnimatorSet();
                 this.animatorSet = animatorSet2;
                 animatorSet2.setDuration(250L);
-                this.animatorSet.playTogether(ObjectAnimator.ofFloat(this.deleteButton, View.ALPHA, f2), ObjectAnimator.ofFloat(this.deleteButton, View.SCALE_X, f2), ObjectAnimator.ofFloat(this.deleteButton, View.SCALE_Y, f2), ObjectAnimator.ofFloat(this.addButton, View.ALPHA, f), ObjectAnimator.ofFloat(this.addButton, View.SCALE_X, f), ObjectAnimator.ofFloat(this.addButton, View.SCALE_Y, f));
+                this.animatorSet.playTogether(ObjectAnimator.ofFloat(this.deleteButton, View.ALPHA, deleteButtonValue), ObjectAnimator.ofFloat(this.deleteButton, View.SCALE_X, deleteButtonValue), ObjectAnimator.ofFloat(this.deleteButton, View.SCALE_Y, deleteButtonValue), ObjectAnimator.ofFloat(this.addButton, View.ALPHA, addButtonValue), ObjectAnimator.ofFloat(this.addButton, View.SCALE_X, addButtonValue), ObjectAnimator.ofFloat(this.addButton, View.SCALE_Y, addButtonValue));
                 this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Cells.ArchivedStickerSetCell.1
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animator) {
+                    public void onAnimationEnd(Animator animation) {
                         if (ArchivedStickerSetCell.this.currentButton == ArchivedStickerSetCell.this.addButton) {
                             ArchivedStickerSetCell.this.deleteButton.setVisibility(4);
                         } else {
@@ -234,45 +240,43 @@ public class ArchivedStickerSetCell extends FrameLayout implements Checkable {
                 this.animatorSet.start();
                 return;
             }
-            this.deleteButton.setVisibility(z2 ? 0 : 4);
-            this.deleteButton.setAlpha(f2);
-            this.deleteButton.setScaleX(f2);
-            this.deleteButton.setScaleY(f2);
+            this.deleteButton.setVisibility(z ? 0 : 4);
+            this.deleteButton.setAlpha(deleteButtonValue);
+            this.deleteButton.setScaleX(deleteButtonValue);
+            this.deleteButton.setScaleY(deleteButtonValue);
             ProgressButton progressButton = this.addButton;
             if (!this.checked) {
                 i = 0;
             }
             progressButton.setVisibility(i);
-            this.addButton.setAlpha(f);
-            this.addButton.setScaleX(f);
-            this.addButton.setScaleY(f);
+            this.addButton.setAlpha(addButtonValue);
+            this.addButton.setScaleX(addButtonValue);
+            this.addButton.setScaleY(addButtonValue);
         }
     }
 
-    public void setOnCheckedChangeListener(OnCheckedChangeListener onCheckedChangeListener) {
-        this.onCheckedChangeListener = onCheckedChangeListener;
+    public void setOnCheckedChangeListener(OnCheckedChangeListener listener) {
+        this.onCheckedChangeListener = listener;
     }
 
     @Override // android.widget.Checkable
-    public void setChecked(boolean z) {
-        setChecked(z, true);
+    public void setChecked(boolean checked) {
+        setChecked(checked, true);
     }
 
-    public void setChecked(boolean z, boolean z2) {
-        setChecked(z, z2, true);
+    public void setChecked(boolean checked, boolean animated) {
+        setChecked(checked, animated, true);
     }
 
-    public void setChecked(boolean z, boolean z2, boolean z3) {
+    public void setChecked(boolean checked, boolean animated, boolean notify) {
         OnCheckedChangeListener onCheckedChangeListener;
-        if (!this.checkable || this.checked == z) {
-            return;
+        if (this.checkable && this.checked != checked) {
+            this.checked = checked;
+            syncButtons(animated);
+            if (notify && (onCheckedChangeListener = this.onCheckedChangeListener) != null) {
+                onCheckedChangeListener.onCheckedChanged(this, checked);
+            }
         }
-        this.checked = z;
-        syncButtons(z2);
-        if (!z3 || (onCheckedChangeListener = this.onCheckedChangeListener) == null) {
-            return;
-        }
-        onCheckedChangeListener.onCheckedChanged(this, z);
     }
 
     @Override // android.widget.Checkable

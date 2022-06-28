@@ -1,15 +1,15 @@
 package androidx.dynamicanimation.animation;
 
+import android.os.Looper;
+import android.util.AndroidRuntimeException;
 import androidx.dynamicanimation.animation.DynamicAnimation;
-/* loaded from: classes.dex */
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+/* loaded from: classes3.dex */
 public final class SpringAnimation extends DynamicAnimation<SpringAnimation> {
+    private static final float UNSET = Float.MAX_VALUE;
     private boolean mEndRequested;
     private float mPendingPosition;
     private SpringForce mSpring;
-
-    @Override // androidx.dynamicanimation.animation.DynamicAnimation
-    void setValueThreshold(float f) {
-    }
 
     public SpringAnimation(FloatValueHolder floatValueHolder) {
         super(floatValueHolder);
@@ -18,27 +18,27 @@ public final class SpringAnimation extends DynamicAnimation<SpringAnimation> {
         this.mEndRequested = false;
     }
 
-    public <K> SpringAnimation(K k, FloatPropertyCompat<K> floatPropertyCompat) {
-        super(k, floatPropertyCompat);
+    public <K> SpringAnimation(K object, FloatPropertyCompat<K> property) {
+        super(object, property);
         this.mSpring = null;
         this.mPendingPosition = Float.MAX_VALUE;
         this.mEndRequested = false;
     }
 
-    public <K> SpringAnimation(K k, FloatPropertyCompat<K> floatPropertyCompat, float f) {
-        super(k, floatPropertyCompat);
+    public <K> SpringAnimation(K object, FloatPropertyCompat<K> property, float finalPosition) {
+        super(object, property);
         this.mSpring = null;
         this.mPendingPosition = Float.MAX_VALUE;
         this.mEndRequested = false;
-        this.mSpring = new SpringForce(f);
+        this.mSpring = new SpringForce(finalPosition);
     }
 
     public SpringForce getSpring() {
         return this.mSpring;
     }
 
-    public SpringAnimation setSpring(SpringForce springForce) {
-        this.mSpring = springForce;
+    public SpringAnimation setSpring(SpringForce force) {
+        this.mSpring = force;
         return this;
     }
 
@@ -47,6 +47,34 @@ public final class SpringAnimation extends DynamicAnimation<SpringAnimation> {
         sanityCheck();
         this.mSpring.setValueThreshold(getValueThreshold());
         super.start();
+    }
+
+    public void animateToFinalPosition(float finalPosition) {
+        if (isRunning()) {
+            this.mPendingPosition = finalPosition;
+            return;
+        }
+        if (this.mSpring == null) {
+            this.mSpring = new SpringForce(finalPosition);
+        }
+        this.mSpring.setFinalPosition(finalPosition);
+        start();
+    }
+
+    public void skipToEnd() {
+        if (!canSkipToEnd()) {
+            throw new UnsupportedOperationException("Spring animations can only come to an end when there is damping");
+        }
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new AndroidRuntimeException("Animations may only be started on the main thread");
+        }
+        if (this.mRunning) {
+            this.mEndRequested = true;
+        }
+    }
+
+    public boolean canSkipToEnd() {
+        return this.mSpring.mDampingRatio > FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE;
     }
 
     private void sanityCheck() {
@@ -64,7 +92,7 @@ public final class SpringAnimation extends DynamicAnimation<SpringAnimation> {
     }
 
     @Override // androidx.dynamicanimation.animation.DynamicAnimation
-    boolean updateValueAndVelocity(long j) {
+    boolean updateValueAndVelocity(long deltaT) {
         if (this.mEndRequested) {
             float f = this.mPendingPosition;
             if (f != Float.MAX_VALUE) {
@@ -76,33 +104,40 @@ public final class SpringAnimation extends DynamicAnimation<SpringAnimation> {
             this.mEndRequested = false;
             return true;
         }
-        if (this.mPendingPosition != Float.MAX_VALUE) {
+        if (this.mPendingPosition == Float.MAX_VALUE) {
+            DynamicAnimation.MassState massState = this.mSpring.updateValues(this.mValue, this.mVelocity, deltaT);
+            this.mValue = massState.mValue;
+            this.mVelocity = massState.mVelocity;
+        } else {
             this.mSpring.getFinalPosition();
-            long j2 = j / 2;
-            DynamicAnimation.MassState updateValues = this.mSpring.updateValues(this.mValue, this.mVelocity, j2);
+            DynamicAnimation.MassState massState2 = this.mSpring.updateValues(this.mValue, this.mVelocity, deltaT / 2);
             this.mSpring.setFinalPosition(this.mPendingPosition);
             this.mPendingPosition = Float.MAX_VALUE;
-            DynamicAnimation.MassState updateValues2 = this.mSpring.updateValues(updateValues.mValue, updateValues.mVelocity, j2);
-            this.mValue = updateValues2.mValue;
-            this.mVelocity = updateValues2.mVelocity;
-        } else {
-            DynamicAnimation.MassState updateValues3 = this.mSpring.updateValues(this.mValue, this.mVelocity, j);
-            this.mValue = updateValues3.mValue;
-            this.mVelocity = updateValues3.mVelocity;
+            DynamicAnimation.MassState massState3 = this.mSpring.updateValues(massState2.mValue, massState2.mVelocity, deltaT / 2);
+            this.mValue = massState3.mValue;
+            this.mVelocity = massState3.mVelocity;
         }
-        float max = Math.max(this.mValue, this.mMinValue);
-        this.mValue = max;
-        float min = Math.min(max, this.mMaxValue);
-        this.mValue = min;
-        if (!isAtEquilibrium(min, this.mVelocity)) {
-            return false;
+        this.mValue = Math.max(this.mValue, this.mMinValue);
+        this.mValue = Math.min(this.mValue, this.mMaxValue);
+        if (isAtEquilibrium(this.mValue, this.mVelocity)) {
+            this.mValue = this.mSpring.getFinalPosition();
+            this.mVelocity = 0.0f;
+            return true;
         }
-        this.mValue = this.mSpring.getFinalPosition();
-        this.mVelocity = 0.0f;
-        return true;
+        return false;
     }
 
-    boolean isAtEquilibrium(float f, float f2) {
-        return this.mSpring.isAtEquilibrium(f, f2);
+    @Override // androidx.dynamicanimation.animation.DynamicAnimation
+    float getAcceleration(float value, float velocity) {
+        return this.mSpring.getAcceleration(value, velocity);
+    }
+
+    @Override // androidx.dynamicanimation.animation.DynamicAnimation
+    boolean isAtEquilibrium(float value, float velocity) {
+        return this.mSpring.isAtEquilibrium(value, velocity);
+    }
+
+    @Override // androidx.dynamicanimation.animation.DynamicAnimation
+    void setValueThreshold(float threshold) {
     }
 }

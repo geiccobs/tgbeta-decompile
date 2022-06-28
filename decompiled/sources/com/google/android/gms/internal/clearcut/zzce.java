@@ -1,16 +1,18 @@
 package com.google.android.gms.internal.clearcut;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
-final class zzce extends zzav<Float> implements zzcn<Float> {
+import java.util.RandomAccess;
+/* loaded from: classes3.dex */
+final class zzce extends zzav<Float> implements zzcn<Float>, RandomAccess {
+    private static final zzce zzjm;
     private int size;
     private float[] zzjn;
 
     static {
-        new zzce().zzv();
+        zzce zzceVar = new zzce();
+        zzjm = zzceVar;
+        zzceVar.zzv();
     }
 
     zzce() {
@@ -39,7 +41,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
         }
         this.zzjn[i] = f;
         this.size++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     private final void zzg(int i) {
@@ -58,7 +60,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zzc(i, ((Float) obj).floatValue());
     }
@@ -76,7 +78,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
             return false;
         }
         int i2 = this.size;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -86,7 +88,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
         }
         System.arraycopy(zzceVar.zzjn, 0, this.zzjn, this.size, zzceVar.size);
         this.size = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -126,7 +128,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
         return i;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzw();
         zzg(i);
@@ -137,7 +139,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
             System.arraycopy(fArr, i + 1, fArr, i, i2 - i);
         }
         this.size--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Float.valueOf(f);
     }
 
@@ -149,7 +151,7 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
                 float[] fArr = this.zzjn;
                 System.arraycopy(fArr, i + 1, fArr, i, this.size - i);
                 this.size--;
-                ((AbstractList) this).modCount++;
+                this.modCount++;
                 return true;
             }
         }
@@ -163,13 +165,13 @@ final class zzce extends zzav<Float> implements zzcn<Float> {
             float[] fArr = this.zzjn;
             System.arraycopy(fArr, i2, fArr, i, this.size - i2);
             this.size -= i2 - i;
-            ((AbstractList) this).modCount++;
+            this.modCount++;
             return;
         }
         throw new IndexOutOfBoundsException("toIndex < fromIndex");
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         float floatValue = ((Float) obj).floatValue();
         zzw();

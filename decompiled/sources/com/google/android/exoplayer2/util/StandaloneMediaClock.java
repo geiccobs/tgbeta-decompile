@@ -2,7 +2,7 @@ package com.google.android.exoplayer2.util;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackParameters;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class StandaloneMediaClock implements MediaClock {
     private long baseElapsedMs;
     private long baseUs;
@@ -28,8 +28,8 @@ public final class StandaloneMediaClock implements MediaClock {
         }
     }
 
-    public void resetPosition(long j) {
-        this.baseUs = j;
+    public void resetPosition(long positionUs) {
+        this.baseUs = positionUs;
         if (this.started) {
             this.baseElapsedMs = this.clock.elapsedRealtime();
         }
@@ -37,19 +37,15 @@ public final class StandaloneMediaClock implements MediaClock {
 
     @Override // com.google.android.exoplayer2.util.MediaClock
     public long getPositionUs() {
-        long j;
-        long j2 = this.baseUs;
+        long positionUs = this.baseUs;
         if (this.started) {
-            long elapsedRealtime = this.clock.elapsedRealtime() - this.baseElapsedMs;
-            PlaybackParameters playbackParameters = this.playbackParameters;
-            if (playbackParameters.speed == 1.0f) {
-                j = C.msToUs(elapsedRealtime);
-            } else {
-                j = playbackParameters.getMediaTimeUsForPlayoutTimeMs(elapsedRealtime);
+            long elapsedSinceBaseMs = this.clock.elapsedRealtime() - this.baseElapsedMs;
+            if (this.playbackParameters.speed == 1.0f) {
+                return positionUs + C.msToUs(elapsedSinceBaseMs);
             }
-            return j2 + j;
+            return positionUs + this.playbackParameters.getMediaTimeUsForPlayoutTimeMs(elapsedSinceBaseMs);
         }
-        return j2;
+        return positionUs;
     }
 
     @Override // com.google.android.exoplayer2.util.MediaClock

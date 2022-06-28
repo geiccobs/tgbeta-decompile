@@ -3,7 +3,7 @@ package androidx.core.content;
 import android.content.LocusId;
 import android.os.Build;
 import androidx.core.util.Preconditions;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class LocusIdCompat {
     private final String mId;
     private final LocusId mWrapped;
@@ -22,23 +22,25 @@ public final class LocusIdCompat {
     }
 
     public int hashCode() {
+        int i = 1 * 31;
         String str = this.mId;
-        return 31 + (str == null ? 0 : str.hashCode());
+        int result = i + (str == null ? 0 : str.hashCode());
+        return result;
     }
 
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null || LocusIdCompat.class != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        LocusIdCompat locusIdCompat = (LocusIdCompat) obj;
+        LocusIdCompat other = (LocusIdCompat) obj;
         String str = this.mId;
         if (str != null) {
-            return str.equals(locusIdCompat.mId);
+            return str.equals(other.mId);
         }
-        return locusIdCompat.mId == null;
+        return other.mId == null;
     }
 
     public String toString() {
@@ -55,13 +57,16 @@ public final class LocusIdCompat {
     }
 
     private String getSanitizedId() {
-        int length = this.mId.length();
-        return length + "_chars";
+        int size = this.mId.length();
+        return size + "_chars";
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class Api29Impl {
+        private Api29Impl() {
+        }
+
         static LocusId create(final String id) {
             return new LocusId(id);
         }

@@ -6,33 +6,10 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class MapPlaceholderDrawable extends Drawable {
     private Paint linePaint;
     private Paint paint = new Paint();
-
-    @Override // android.graphics.drawable.Drawable
-    public int getIntrinsicHeight() {
-        return 0;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getIntrinsicWidth() {
-        return 0;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return 0;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
 
     public MapPlaceholderDrawable() {
         Paint paint = new Paint();
@@ -50,22 +27,39 @@ public class MapPlaceholderDrawable extends Drawable {
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
         canvas.drawRect(getBounds(), this.paint);
-        int dp = AndroidUtilities.dp(9.0f);
-        int width = getBounds().width() / dp;
-        int height = getBounds().height() / dp;
-        int i = getBounds().left;
-        int i2 = getBounds().top;
-        int i3 = 0;
-        int i4 = 0;
-        while (i4 < width) {
-            i4++;
-            float f = (dp * i4) + i;
-            canvas.drawLine(f, i2, f, getBounds().height() + i2, this.linePaint);
+        int gap = AndroidUtilities.dp(9.0f);
+        int xcount = getBounds().width() / gap;
+        int ycount = getBounds().height() / gap;
+        int x = getBounds().left;
+        int y = getBounds().top;
+        for (int a = 0; a < xcount; a++) {
+            canvas.drawLine(((a + 1) * gap) + x, y, ((a + 1) * gap) + x, getBounds().height() + y, this.linePaint);
         }
-        while (i3 < height) {
-            i3++;
-            float f2 = (dp * i3) + i2;
-            canvas.drawLine(i, f2, getBounds().width() + i, f2, this.linePaint);
+        for (int a2 = 0; a2 < ycount; a2++) {
+            canvas.drawLine(x, ((a2 + 1) * gap) + y, getBounds().width() + x, ((a2 + 1) * gap) + y, this.linePaint);
         }
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int alpha) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter cf) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return 0;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getIntrinsicWidth() {
+        return 0;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getIntrinsicHeight() {
+        return 0;
     }
 }

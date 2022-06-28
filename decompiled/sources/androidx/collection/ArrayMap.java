@@ -4,10 +4,13 @@ import j$.util.Map;
 import j$.util.function.BiConsumer;
 import j$.util.function.BiFunction;
 import j$.util.function.Function;
+import j$.wrappers.C$r8$wrapper$java$util$function$BiConsumer$VWRP;
+import j$.wrappers.C$r8$wrapper$java$util$function$BiFunction$VWRP;
+import j$.wrappers.C$r8$wrapper$java$util$function$Function$VWRP;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j$.util.Map {
     MapCollections<K, V> mCollections;
 
@@ -16,9 +19,19 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j
         return Map.CC.$default$compute(this, obj, biFunction);
     }
 
+    @Override // java.util.Map
+    public /* synthetic */ Object compute(Object obj, java.util.function.BiFunction biFunction) {
+        return compute(obj, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
+    }
+
     @Override // j$.util.Map
     public /* synthetic */ Object computeIfAbsent(Object obj, Function function) {
         return Map.CC.$default$computeIfAbsent(this, obj, function);
+    }
+
+    @Override // java.util.Map
+    public /* synthetic */ Object computeIfAbsent(Object obj, java.util.function.Function function) {
+        return computeIfAbsent(obj, C$r8$wrapper$java$util$function$Function$VWRP.convert(function));
     }
 
     @Override // j$.util.Map
@@ -26,9 +39,19 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j
         return Map.CC.$default$computeIfPresent(this, obj, biFunction);
     }
 
+    @Override // java.util.Map
+    public /* synthetic */ Object computeIfPresent(Object obj, java.util.function.BiFunction biFunction) {
+        return computeIfPresent(obj, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
+    }
+
     @Override // j$.util.Map
     public /* synthetic */ void forEach(BiConsumer biConsumer) {
         Map.CC.$default$forEach(this, biConsumer);
+    }
+
+    @Override // java.util.Map
+    public /* synthetic */ void forEach(java.util.function.BiConsumer biConsumer) {
+        forEach(C$r8$wrapper$java$util$function$BiConsumer$VWRP.convert(biConsumer));
     }
 
     @Override // j$.util.Map
@@ -36,16 +59,30 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j
         return Map.CC.$default$merge(this, obj, obj2, biFunction);
     }
 
+    @Override // java.util.Map
+    public /* synthetic */ Object merge(Object obj, Object obj2, java.util.function.BiFunction biFunction) {
+        return merge(obj, obj2, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
+    }
+
     @Override // j$.util.Map
     public /* synthetic */ void replaceAll(BiFunction biFunction) {
         Map.CC.$default$replaceAll(this, biFunction);
     }
 
+    @Override // java.util.Map
+    public /* synthetic */ void replaceAll(java.util.function.BiFunction biFunction) {
+        replaceAll(C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
+    }
+
     public ArrayMap() {
     }
 
-    public ArrayMap(int i) {
-        super(i);
+    public ArrayMap(int capacity) {
+        super(capacity);
+    }
+
+    public ArrayMap(SimpleArrayMap map) {
+        super(map);
     }
 
     private MapCollections<K, V> getCollection() {
@@ -57,18 +94,18 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j
                 }
 
                 @Override // androidx.collection.MapCollections
-                protected Object colGetEntry(int i, int i2) {
-                    return ArrayMap.this.mArray[(i << 1) + i2];
+                protected Object colGetEntry(int index, int offset) {
+                    return ArrayMap.this.mArray[(index << 1) + offset];
                 }
 
                 @Override // androidx.collection.MapCollections
-                protected int colIndexOfKey(Object obj) {
-                    return ArrayMap.this.indexOfKey(obj);
+                protected int colIndexOfKey(Object key) {
+                    return ArrayMap.this.indexOfKey(key);
                 }
 
                 @Override // androidx.collection.MapCollections
-                protected int colIndexOfValue(Object obj) {
-                    return ArrayMap.this.indexOfValue(obj);
+                protected int colIndexOfValue(Object value) {
+                    return ArrayMap.this.indexOfValue(value);
                 }
 
                 @Override // androidx.collection.MapCollections
@@ -77,18 +114,18 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j
                 }
 
                 @Override // androidx.collection.MapCollections
-                protected void colPut(K k, V v) {
-                    ArrayMap.this.put(k, v);
+                protected void colPut(K key, V value) {
+                    ArrayMap.this.put(key, value);
                 }
 
                 @Override // androidx.collection.MapCollections
-                protected V colSetValue(int i, V v) {
-                    return ArrayMap.this.setValueAt(i, v);
+                protected V colSetValue(int index, V value) {
+                    return ArrayMap.this.setValueAt(index, value);
                 }
 
                 @Override // androidx.collection.MapCollections
-                protected void colRemoveAt(int i) {
-                    ArrayMap.this.removeAt(i);
+                protected void colRemoveAt(int index) {
+                    ArrayMap.this.removeAt(index);
                 }
 
                 @Override // androidx.collection.MapCollections
@@ -100,12 +137,20 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V>, j
         return this.mCollections;
     }
 
+    public boolean containsAll(Collection<?> collection) {
+        return MapCollections.containsAllHelper(this, collection);
+    }
+
     @Override // java.util.Map, j$.util.Map
     public void putAll(java.util.Map<? extends K, ? extends V> map) {
         ensureCapacity(this.mSize + map.size());
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
+    }
+
+    public boolean removeAll(Collection<?> collection) {
+        return MapCollections.removeAllHelper(this, collection);
     }
 
     public boolean retainAll(Collection<?> collection) {

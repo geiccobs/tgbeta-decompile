@@ -8,7 +8,7 @@ import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import java.util.List;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzo extends AbstractSafeParcelable implements Result {
     public static final Parcelable.Creator<zzo> CREATOR = new zzp();
     public Status zza;

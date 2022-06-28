@@ -5,12 +5,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzio {
     private static volatile zzio zzc;
     private static volatile zzio zzd;
-    private static final zzio zze = new zzio(true);
     private final Map<zza, zzjb.zze<?, ?>> zzf;
+    private static volatile boolean zza = false;
+    private static boolean zzb = true;
+    private static final zzio zze = new zzio(true);
+
+    public static zzio zza() {
+        return new zzio();
+    }
 
     public static zzio zzb() {
         zzio zzioVar = zzc;
@@ -28,7 +34,7 @@ public class zzio {
 
     /* JADX INFO: Access modifiers changed from: private */
     /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class zza {
         private final Object zza;
         private final int zzb;
@@ -69,6 +75,10 @@ public class zzio {
 
     public final <ContainingType extends zzkk> zzjb.zze<ContainingType, ?> zza(ContainingType containingtype, int i) {
         return (zzjb.zze<ContainingType, ?>) this.zzf.get(new zza(containingtype, i));
+    }
+
+    public final void zza(zzjb.zze<?, ?> zzeVar) {
+        this.zzf.put(new zza(zzeVar.zza, zzeVar.zzd.zzb), zzeVar);
     }
 
     zzio() {

@@ -1,29 +1,29 @@
 package com.google.firebase.components;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class Preconditions {
-    public static void checkArgument(boolean z, String str) {
-        if (z) {
-            return;
+    public static void checkArgument(boolean expression, String errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(errorMessage);
         }
-        throw new IllegalArgumentException(str);
     }
 
-    public static <T> T checkNotNull(T t) {
-        t.getClass();
-        return t;
+    public static <T> T checkNotNull(T reference) {
+        if (reference == null) {
+            throw new NullPointerException();
+        }
+        return reference;
     }
 
-    public static <T> T checkNotNull(T t, String str) {
-        if (t != null) {
-            return t;
+    public static <T> T checkNotNull(T reference, String errorMessage) {
+        if (reference == null) {
+            throw new NullPointerException(errorMessage);
         }
-        throw new NullPointerException(str);
+        return reference;
     }
 
-    public static void checkState(boolean z, String str) {
-        if (z) {
-            return;
+    public static void checkState(boolean expression, String errorMesage) {
+        if (!expression) {
+            throw new IllegalStateException(errorMesage);
         }
-        throw new IllegalStateException(str);
     }
 }

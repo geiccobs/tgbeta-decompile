@@ -1,29 +1,40 @@
 package com.google.android.datatransport.runtime.logging;
 
 import android.util.Log;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class Logging {
-    private static String getTag(String str) {
-        return "TransportRuntime." + str;
+    private Logging() {
     }
 
-    public static void d(String str, String str2, Object obj) {
-        Log.d(getTag(str), String.format(str2, obj));
+    private static String getTag(String tag) {
+        return "TransportRuntime." + tag;
     }
 
-    public static void d(String str, String str2, Object... objArr) {
-        Log.d(getTag(str), String.format(str2, objArr));
+    public static void d(String tag, String message) {
+        Log.d(getTag(tag), message);
     }
 
-    public static void i(String str, String str2) {
-        Log.i(getTag(str), str2);
+    public static void d(String tag, String message, Object arg1) {
+        Log.d(getTag(tag), String.format(message, arg1));
     }
 
-    public static void e(String str, String str2, Throwable th) {
-        Log.e(getTag(str), str2, th);
+    public static void d(String tag, String message, Object arg1, Object arg2) {
+        Log.d(getTag(tag), String.format(message, arg1, arg2));
     }
 
-    public static void w(String str, String str2, Object obj) {
-        Log.w(getTag(str), String.format(str2, obj));
+    public static void d(String tag, String message, Object... args) {
+        Log.d(getTag(tag), String.format(message, args));
+    }
+
+    public static void i(String tag, String message) {
+        Log.i(getTag(tag), message);
+    }
+
+    public static void e(String tag, String message, Throwable e) {
+        Log.e(getTag(tag), message, e);
+    }
+
+    public static void w(String tag, String message, Object arg1) {
+        Log.w(getTag(tag), String.format(message, arg1));
     }
 }

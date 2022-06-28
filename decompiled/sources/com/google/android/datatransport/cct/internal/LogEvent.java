@@ -1,13 +1,10 @@
 package com.google.android.datatransport.cct.internal;
 
 import com.google.android.datatransport.cct.internal.AutoValue_LogEvent;
-import com.google.auto.value.AutoValue;
-@AutoValue
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class LogEvent {
 
-    @AutoValue.Builder
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static abstract class Builder {
         public abstract LogEvent build();
 
@@ -40,12 +37,12 @@ public abstract class LogEvent {
 
     public abstract long getTimezoneOffsetSeconds();
 
-    public static Builder protoBuilder(byte[] bArr) {
-        return builder().setSourceExtension(bArr);
+    public static Builder protoBuilder(byte[] sourceExtension) {
+        return builder().setSourceExtension(sourceExtension);
     }
 
-    public static Builder jsonBuilder(String str) {
-        return builder().setSourceExtensionJsonProto3(str);
+    public static Builder jsonBuilder(String sourceJsonExtension) {
+        return builder().setSourceExtensionJsonProto3(sourceJsonExtension);
     }
 
     private static Builder builder() {

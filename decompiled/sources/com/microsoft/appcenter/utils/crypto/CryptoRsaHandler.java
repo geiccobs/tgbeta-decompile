@@ -1,6 +1,5 @@
 package com.microsoft.appcenter.utils.crypto;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.security.KeyPairGeneratorSpec;
 import com.microsoft.appcenter.utils.crypto.CryptoUtils;
@@ -14,7 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import javax.security.auth.x500.X500Principal;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class CryptoRsaHandler implements CryptoHandler {
     @Override // com.microsoft.appcenter.utils.crypto.CryptoHandler
     public String getAlgorithm() {
@@ -22,37 +21,43 @@ public class CryptoRsaHandler implements CryptoHandler {
     }
 
     @Override // com.microsoft.appcenter.utils.crypto.CryptoHandler
-    @SuppressLint({"InlinedApi", "TrulyRandom"})
-    public void generateKey(CryptoUtils.ICryptoFactory iCryptoFactory, String str, Context context) throws Exception {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(1, 1);
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
-        KeyPairGeneratorSpec.Builder alias = new KeyPairGeneratorSpec.Builder(context).setAlias(str);
-        keyPairGenerator.initialize(alias.setSubject(new X500Principal("CN=" + str)).setStartDate(new Date()).setEndDate(calendar.getTime()).setSerialNumber(BigInteger.TEN).setKeySize(2048).build());
-        keyPairGenerator.generateKeyPair();
+    public void generateKey(CryptoUtils.ICryptoFactory cryptoFactory, String alias, Context context) throws Exception {
+        Calendar writeExpiry = Calendar.getInstance();
+        writeExpiry.add(1, 1);
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+        KeyPairGeneratorSpec.Builder alias2 = new KeyPairGeneratorSpec.Builder(context).setAlias(alias);
+        generator.initialize(alias2.setSubject(new X500Principal("CN=" + alias)).setStartDate(new Date()).setEndDate(writeExpiry.getTime()).setSerialNumber(BigInteger.TEN).setKeySize(2048).build());
+        generator.generateKeyPair();
     }
 
-    private CryptoUtils.ICipher getCipher(CryptoUtils.ICryptoFactory iCryptoFactory, int i) throws Exception {
-        return iCryptoFactory.getCipher("RSA/ECB/PKCS1Padding", i >= 23 ? "AndroidKeyStoreBCWorkaround" : "AndroidOpenSSL");
+    private CryptoUtils.ICipher getCipher(CryptoUtils.ICryptoFactory cipherFactory, int apiLevel) throws Exception {
+        String provider;
+        if (apiLevel >= 23) {
+            provider = "AndroidKeyStoreBCWorkaround";
+        } else {
+            provider = "AndroidOpenSSL";
+        }
+        return cipherFactory.getCipher("RSA/ECB/PKCS1Padding", provider);
     }
 
     @Override // com.microsoft.appcenter.utils.crypto.CryptoHandler
-    public byte[] encrypt(CryptoUtils.ICryptoFactory iCryptoFactory, int i, KeyStore.Entry entry, byte[] bArr) throws Exception {
-        CryptoUtils.ICipher cipher = getCipher(iCryptoFactory, i);
-        X509Certificate x509Certificate = (X509Certificate) ((KeyStore.PrivateKeyEntry) entry).getCertificate();
+    public byte[] encrypt(CryptoUtils.ICryptoFactory cryptoFactory, int apiLevel, KeyStore.Entry keyStoreEntry, byte[] input) throws Exception {
+        CryptoUtils.ICipher cipher = getCipher(cryptoFactory, apiLevel);
+        KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStoreEntry;
+        X509Certificate certificate = (X509Certificate) privateKeyEntry.getCertificate();
         try {
-            x509Certificate.checkValidity();
-            cipher.init(1, x509Certificate.getPublicKey());
-            return cipher.doFinal(bArr);
+            certificate.checkValidity();
+            cipher.init(1, certificate.getPublicKey());
+            return cipher.doFinal(input);
         } catch (CertificateExpiredException e) {
             throw new InvalidKeyException(e);
         }
     }
 
     @Override // com.microsoft.appcenter.utils.crypto.CryptoHandler
-    public byte[] decrypt(CryptoUtils.ICryptoFactory iCryptoFactory, int i, KeyStore.Entry entry, byte[] bArr) throws Exception {
-        CryptoUtils.ICipher cipher = getCipher(iCryptoFactory, i);
-        cipher.init(2, ((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
-        return cipher.doFinal(bArr);
+    public byte[] decrypt(CryptoUtils.ICryptoFactory cryptoFactory, int apiLevel, KeyStore.Entry keyStoreEntry, byte[] data) throws Exception {
+        CryptoUtils.ICipher cipher = getCipher(cryptoFactory, apiLevel);
+        cipher.init(2, ((KeyStore.PrivateKeyEntry) keyStoreEntry).getPrivateKey());
+        return cipher.doFinal(data);
     }
 }

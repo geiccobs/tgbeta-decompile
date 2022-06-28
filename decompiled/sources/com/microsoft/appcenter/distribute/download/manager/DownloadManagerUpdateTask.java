@@ -3,18 +3,19 @@ package com.microsoft.appcenter.distribute.download.manager;
 import android.app.DownloadManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import androidx.core.app.NotificationCompat;
 import java.util.NoSuchElementException;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DownloadManagerUpdateTask extends AsyncTask<Void, Void, Void> {
     private final DownloadManagerReleaseDownloader mDownloader;
 
-    public DownloadManagerUpdateTask(DownloadManagerReleaseDownloader downloadManagerReleaseDownloader) {
-        this.mDownloader = downloadManagerReleaseDownloader;
+    public DownloadManagerUpdateTask(DownloadManagerReleaseDownloader downloader) {
+        this.mDownloader = downloader;
     }
 
-    public Void doInBackground(Void... voidArr) {
-        Cursor query;
+    public Void doInBackground(Void... params) {
+        Cursor cursor;
         DownloadManager downloadManager = this.mDownloader.getDownloadManager();
         long downloadId = this.mDownloader.getDownloadId();
         if (downloadId == -1) {
@@ -22,29 +23,29 @@ public class DownloadManagerUpdateTask extends AsyncTask<Void, Void, Void> {
             return null;
         }
         try {
-            query = downloadManager.query(new DownloadManager.Query().setFilterById(downloadId));
+            cursor = downloadManager.query(new DownloadManager.Query().setFilterById(downloadId));
         } catch (RuntimeException e) {
             this.mDownloader.onDownloadError(e);
         }
-        if (query == null) {
+        if (cursor == null) {
             throw new NoSuchElementException("Cannot find download with id=" + downloadId);
-        } else if (!query.moveToFirst()) {
+        } else if (!cursor.moveToFirst()) {
             throw new NoSuchElementException("Cannot find download with id=" + downloadId);
         } else if (isCancelled()) {
-            query.close();
+            cursor.close();
             return null;
         } else {
-            int i = query.getInt(query.getColumnIndexOrThrow("status"));
-            if (i == 16) {
-                int i2 = query.getInt(query.getColumnIndexOrThrow("reason"));
-                throw new IllegalStateException("The download has failed with reason code: " + i2);
-            } else if (i != 8) {
-                this.mDownloader.onDownloadProgress(query);
-                query.close();
+            int status = cursor.getInt(cursor.getColumnIndexOrThrow(NotificationCompat.CATEGORY_STATUS));
+            if (status == 16) {
+                int reason = cursor.getInt(cursor.getColumnIndexOrThrow("reason"));
+                throw new IllegalStateException("The download has failed with reason code: " + reason);
+            } else if (status != 8) {
+                this.mDownloader.onDownloadProgress(cursor);
+                cursor.close();
                 return null;
             } else {
-                this.mDownloader.onDownloadComplete(query);
-                query.close();
+                this.mDownloader.onDownloadComplete(cursor);
+                cursor.close();
                 return null;
             }
         }

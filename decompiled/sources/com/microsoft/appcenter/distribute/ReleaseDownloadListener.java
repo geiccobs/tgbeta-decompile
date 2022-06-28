@@ -11,7 +11,7 @@ import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.appcenter.utils.HandlerUtils;
 import java.text.NumberFormat;
 import java.util.Locale;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ReleaseDownloadListener implements ReleaseDownloader.Listener {
     private final Context mContext;
     private ProgressDialog mProgressDialog;
@@ -23,20 +23,20 @@ public class ReleaseDownloadListener implements ReleaseDownloader.Listener {
     }
 
     @Override // com.microsoft.appcenter.distribute.download.ReleaseDownloader.Listener
-    public void onStart(long j) {
-        AppCenterLog.debug("AppCenterDistribute", String.format(Locale.ENGLISH, "Start download %s (%d) update.", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion())));
-        Distribute.getInstance().setDownloading(this.mReleaseDetails, j);
+    public void onStart(long enqueueTime) {
+        AppCenterLog.debug(DistributeConstants.LOG_TAG, String.format(Locale.ENGLISH, "Start download %s (%d) update.", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion())));
+        Distribute.getInstance().setDownloading(this.mReleaseDetails, enqueueTime);
     }
 
     @Override // com.microsoft.appcenter.distribute.download.ReleaseDownloader.Listener
-    public synchronized boolean onProgress(final long j, final long j2) {
+    public synchronized boolean onProgress(final long currentSize, final long totalSize) {
         boolean z;
         z = false;
-        AppCenterLog.verbose("AppCenterDistribute", String.format(Locale.ENGLISH, "Downloading %s (%d) update: %d KiB / %d KiB", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion()), Long.valueOf(j / 1024), Long.valueOf(j2 / 1024)));
+        AppCenterLog.verbose(DistributeConstants.LOG_TAG, String.format(Locale.ENGLISH, "Downloading %s (%d) update: %d KiB / %d KiB", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion()), Long.valueOf(currentSize / DistributeConstants.KIBIBYTE_IN_BYTES), Long.valueOf(totalSize / DistributeConstants.KIBIBYTE_IN_BYTES)));
         HandlerUtils.runOnUiThread(new Runnable() { // from class: com.microsoft.appcenter.distribute.ReleaseDownloadListener.1
             @Override // java.lang.Runnable
             public void run() {
-                ReleaseDownloadListener.this.updateProgressDialog(j, j2);
+                ReleaseDownloadListener.this.updateProgressDialog(currentSize, totalSize);
             }
         });
         if (this.mProgressDialog != null) {
@@ -46,40 +46,40 @@ public class ReleaseDownloadListener implements ReleaseDownloader.Listener {
     }
 
     @Override // com.microsoft.appcenter.distribute.download.ReleaseDownloader.Listener
-    public boolean onComplete(Uri uri) {
-        Intent installIntent = InstallerUtils.getInstallIntent(uri);
-        if (installIntent.resolveActivity(this.mContext.getPackageManager()) == null) {
-            AppCenterLog.debug("AppCenterDistribute", "Cannot resolve install intent for " + uri);
+    public boolean onComplete(Uri localUri) {
+        Intent intent = InstallerUtils.getInstallIntent(localUri);
+        if (intent.resolveActivity(this.mContext.getPackageManager()) == null) {
+            AppCenterLog.debug(DistributeConstants.LOG_TAG, "Cannot resolve install intent for " + localUri);
             return false;
         }
-        AppCenterLog.debug("AppCenterDistribute", String.format(Locale.ENGLISH, "Download %s (%d) update completed.", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion())));
-        if (!Distribute.getInstance().notifyDownload(this.mReleaseDetails, installIntent)) {
-            AppCenterLog.info("AppCenterDistribute", "Show install UI for " + uri);
-            this.mContext.startActivity(installIntent);
+        AppCenterLog.debug(DistributeConstants.LOG_TAG, String.format(Locale.ENGLISH, "Download %s (%d) update completed.", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion())));
+        if (!Distribute.getInstance().notifyDownload(this.mReleaseDetails, intent)) {
+            AppCenterLog.info(DistributeConstants.LOG_TAG, "Show install UI for " + localUri);
+            this.mContext.startActivity(intent);
             Distribute.getInstance().setInstalling(this.mReleaseDetails);
         }
         return true;
     }
 
     @Override // com.microsoft.appcenter.distribute.download.ReleaseDownloader.Listener
-    public void onError(String str) {
-        AppCenterLog.error("AppCenterDistribute", String.format(Locale.ENGLISH, "Failed to download %s (%d) update: %s", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion()), str));
+    public void onError(String errorMessage) {
+        AppCenterLog.error(DistributeConstants.LOG_TAG, String.format(Locale.ENGLISH, "Failed to download %s (%d) update: %s", this.mReleaseDetails.getShortVersion(), Integer.valueOf(this.mReleaseDetails.getVersion()), errorMessage));
         HandlerUtils.runOnUiThread(new Runnable() { // from class: com.microsoft.appcenter.distribute.ReleaseDownloadListener.2
             @Override // java.lang.Runnable
             public void run() {
-                Toast.makeText(ReleaseDownloadListener.this.mContext, R$string.appcenter_distribute_downloading_error, 0).show();
+                Toast.makeText(ReleaseDownloadListener.this.mContext, R.string.appcenter_distribute_downloading_error, 0).show();
             }
         });
         Distribute.getInstance().completeWorkflow(this.mReleaseDetails);
     }
 
-    public synchronized ProgressDialog showDownloadProgress(Activity activity) {
+    public synchronized ProgressDialog showDownloadProgress(Activity foregroundActivity) {
         if (!this.mReleaseDetails.isMandatoryUpdate()) {
             return null;
         }
-        ProgressDialog progressDialog = new ProgressDialog(activity);
+        ProgressDialog progressDialog = new ProgressDialog(foregroundActivity);
         this.mProgressDialog = progressDialog;
-        progressDialog.setTitle(R$string.appcenter_distribute_downloading_update);
+        progressDialog.setTitle(R.string.appcenter_distribute_downloading_update);
         this.mProgressDialog.setCancelable(false);
         this.mProgressDialog.setProgressStyle(1);
         this.mProgressDialog.setIndeterminate(true);
@@ -92,26 +92,26 @@ public class ReleaseDownloadListener implements ReleaseDownloader.Listener {
         final ProgressDialog progressDialog = this.mProgressDialog;
         if (progressDialog != null) {
             this.mProgressDialog = null;
-            HandlerUtils.runOnUiThread(new Runnable(this) { // from class: com.microsoft.appcenter.distribute.ReleaseDownloadListener.3
+            HandlerUtils.runOnUiThread(new Runnable() { // from class: com.microsoft.appcenter.distribute.ReleaseDownloadListener.3
                 @Override // java.lang.Runnable
                 public void run() {
                     progressDialog.hide();
                 }
             });
-            HandlerUtils.getMainHandler().removeCallbacksAndMessages("Distribute.handler_token_check_progress");
+            HandlerUtils.getMainHandler().removeCallbacksAndMessages(DistributeConstants.HANDLER_TOKEN_CHECK_PROGRESS);
         }
     }
 
-    public synchronized void updateProgressDialog(long j, long j2) {
+    public synchronized void updateProgressDialog(long currentSize, long totalSize) {
         ProgressDialog progressDialog = this.mProgressDialog;
-        if (progressDialog != null && j2 >= 0) {
+        if (progressDialog != null && totalSize >= 0) {
             if (progressDialog.isIndeterminate()) {
                 this.mProgressDialog.setProgressPercentFormat(NumberFormat.getPercentInstance());
-                this.mProgressDialog.setProgressNumberFormat(this.mContext.getString(R$string.appcenter_distribute_download_progress_number_format));
+                this.mProgressDialog.setProgressNumberFormat(this.mContext.getString(R.string.appcenter_distribute_download_progress_number_format));
                 this.mProgressDialog.setIndeterminate(false);
-                this.mProgressDialog.setMax((int) (j2 / 1048576));
+                this.mProgressDialog.setMax((int) (totalSize / 1048576));
             }
-            this.mProgressDialog.setProgress((int) (j / 1048576));
+            this.mProgressDialog.setProgress((int) (currentSize / 1048576));
         }
     }
 }

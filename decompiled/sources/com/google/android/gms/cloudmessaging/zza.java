@@ -10,7 +10,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import com.google.android.gms.cloudmessaging.IMessengerCompat;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zza implements Parcelable {
     public static final Parcelable.Creator<zza> CREATOR = new zzc();
     private Messenger zza;
@@ -18,8 +18,8 @@ public class zza implements Parcelable {
 
     /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
     /* renamed from: com.google.android.gms.cloudmessaging.zza$zza */
-    /* loaded from: classes.dex */
-    public static final class C0000zza extends ClassLoader {
+    /* loaded from: classes3.dex */
+    public static final class C0003zza extends ClassLoader {
         @Override // java.lang.ClassLoader
         protected final Class<?> loadClass(String str, boolean z) throws ClassNotFoundException {
             if ("com.google.android.gms.iid.MessengerCompat".equals(str)) {
@@ -39,11 +39,6 @@ public class zza implements Parcelable {
         } else {
             this.zzb = new IMessengerCompat.Proxy(iBinder);
         }
-    }
-
-    @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
     }
 
     public final void zza(Message message) throws RemoteException {
@@ -66,13 +61,18 @@ public class zza implements Parcelable {
         }
         try {
             return zza().equals(((zza) obj).zza());
-        } catch (ClassCastException unused) {
+        } catch (ClassCastException e) {
             return false;
         }
     }
 
     public int hashCode() {
         return zza().hashCode();
+    }
+
+    @Override // android.os.Parcelable
+    public int describeContents() {
+        return 0;
     }
 
     @Override // android.os.Parcelable

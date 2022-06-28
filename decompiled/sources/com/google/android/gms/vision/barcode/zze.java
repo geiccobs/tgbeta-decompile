@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.vision.barcode.Barcode;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zze implements Parcelable.Creator<Barcode.ContactInfo> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ Barcode.ContactInfo[] newArray(int i) {

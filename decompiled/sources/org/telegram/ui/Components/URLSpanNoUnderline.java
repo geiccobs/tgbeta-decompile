@@ -7,52 +7,53 @@ import android.view.View;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLObject;
 import org.telegram.ui.Components.TextStyleSpan;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class URLSpanNoUnderline extends URLSpan {
     private boolean forceNoUnderline;
     public String label;
     private TLObject object;
     private TextStyleSpan.TextStyleRun style;
 
-    public URLSpanNoUnderline(String str) {
-        this(str, (TextStyleSpan.TextStyleRun) null);
+    public URLSpanNoUnderline(String url) {
+        this(url, (TextStyleSpan.TextStyleRun) null);
     }
 
-    public URLSpanNoUnderline(String str, boolean z) {
-        this(str, (TextStyleSpan.TextStyleRun) null);
-        this.forceNoUnderline = z;
+    public URLSpanNoUnderline(String url, boolean forceNoUnderline) {
+        this(url, (TextStyleSpan.TextStyleRun) null);
+        this.forceNoUnderline = forceNoUnderline;
     }
 
-    public URLSpanNoUnderline(String str, TextStyleSpan.TextStyleRun textStyleRun) {
-        super(str != null ? str.replace((char) 8238, ' ') : str);
+    public URLSpanNoUnderline(String url, TextStyleSpan.TextStyleRun run) {
+        super(url != null ? url.replace((char) 8238, ' ') : url);
         this.forceNoUnderline = false;
-        this.style = textStyleRun;
+        this.style = run;
     }
 
     @Override // android.text.style.URLSpan, android.text.style.ClickableSpan
-    public void onClick(View view) {
+    public void onClick(View widget) {
         String url = getURL();
         if (url.startsWith("@")) {
-            Browser.openUrl(view.getContext(), Uri.parse("https://t.me/" + url.substring(1)));
+            Uri uri = Uri.parse("https://t.me/" + url.substring(1));
+            Browser.openUrl(widget.getContext(), uri);
             return;
         }
-        Browser.openUrl(view.getContext(), url);
+        Browser.openUrl(widget.getContext(), url);
     }
 
     @Override // android.text.style.ClickableSpan, android.text.style.CharacterStyle
-    public void updateDrawState(TextPaint textPaint) {
-        int i = textPaint.linkColor;
-        int color = textPaint.getColor();
-        super.updateDrawState(textPaint);
+    public void updateDrawState(TextPaint p) {
+        int l = p.linkColor;
+        int c = p.getColor();
+        super.updateDrawState(p);
         TextStyleSpan.TextStyleRun textStyleRun = this.style;
         if (textStyleRun != null) {
-            textStyleRun.applyStyle(textPaint);
+            textStyleRun.applyStyle(p);
         }
-        textPaint.setUnderlineText(i == color && !this.forceNoUnderline);
+        p.setUnderlineText(l == c && !this.forceNoUnderline);
     }
 
-    public void setObject(TLObject tLObject) {
-        this.object = tLObject;
+    public void setObject(TLObject spanObject) {
+        this.object = spanObject;
     }
 
     public TLObject getObject() {

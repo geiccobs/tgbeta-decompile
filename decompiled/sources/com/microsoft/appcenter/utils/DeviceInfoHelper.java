@@ -1,8 +1,8 @@
 package com.microsoft.appcenter.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -11,12 +11,14 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
+import com.google.firebase.messaging.Constants;
 import com.microsoft.appcenter.ingestion.models.Device;
 import com.microsoft.appcenter.ingestion.models.WrapperSdk;
 import java.util.Locale;
 import java.util.TimeZone;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DeviceInfoHelper {
+    private static final String OS_NAME = "Android";
     private static WrapperSdk sWrapperSdk;
 
     public static synchronized Device getDeviceInfo(Context context) throws DeviceInfoException {
@@ -24,7 +26,8 @@ public class DeviceInfoHelper {
         synchronized (DeviceInfoHelper.class) {
             device = new Device();
             try {
-                PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                PackageManager packageManager = context.getPackageManager();
+                PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
                 device.setAppVersion(packageInfo.versionName);
                 device.setAppBuild(String.valueOf(getVersionCode(packageInfo)));
                 device.setAppNamespace(context.getPackageName());
@@ -45,7 +48,7 @@ public class DeviceInfoHelper {
                 device.setModel(Build.MODEL);
                 device.setOemName(Build.MANUFACTURER);
                 device.setOsApiLevel(Integer.valueOf(Build.VERSION.SDK_INT));
-                device.setOsName("Android");
+                device.setOsName(OS_NAME);
                 device.setOsVersion(Build.VERSION.RELEASE);
                 device.setOsBuild(Build.ID);
                 try {
@@ -77,38 +80,46 @@ public class DeviceInfoHelper {
         return packageInfo.versionCode;
     }
 
-    @SuppressLint({"SwitchIntDef"})
     private static String getScreenSize(Context context) {
-        Display display;
-        int i;
-        int i2;
-        Point point = new Point();
+        Display defaultDisplay;
+        int screenWidth;
+        int screenHeight;
+        Point size = new Point();
         if (Build.VERSION.SDK_INT >= 17) {
-            display = ((DisplayManager) context.getSystemService("display")).getDisplay(0);
+            DisplayManager displayManager = (DisplayManager) context.getSystemService(Constants.ScionAnalytics.MessageType.DISPLAY_NOTIFICATION);
+            defaultDisplay = displayManager.getDisplay(0);
             DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-            point.x = displayMetrics.widthPixels;
-            point.y = displayMetrics.heightPixels;
+            size.x = displayMetrics.widthPixels;
+            size.y = displayMetrics.heightPixels;
         } else {
-            display = ((WindowManager) context.getSystemService("window")).getDefaultDisplay();
-            display.getSize(point);
+            defaultDisplay = ((WindowManager) context.getSystemService("window")).getDefaultDisplay();
+            defaultDisplay.getSize(size);
         }
-        int rotation = display.getRotation();
-        if (rotation == 1 || rotation == 3) {
-            int i3 = point.x;
-            int i4 = point.y;
-            i2 = i3;
-            i = i4;
-        } else {
-            i = point.x;
-            i2 = point.y;
+        switch (defaultDisplay.getRotation()) {
+            case 1:
+            case 3:
+                screenHeight = size.x;
+                screenWidth = size.y;
+                break;
+            case 2:
+            default:
+                screenWidth = size.x;
+                screenHeight = size.y;
+                break;
         }
-        return i + "x" + i2;
+        return screenWidth + "x" + screenHeight;
     }
 
-    /* loaded from: classes.dex */
+    public static synchronized void setWrapperSdk(WrapperSdk wrapperSdk) {
+        synchronized (DeviceInfoHelper.class) {
+            sWrapperSdk = wrapperSdk;
+        }
+    }
+
+    /* loaded from: classes3.dex */
     public static class DeviceInfoException extends Exception {
-        public DeviceInfoException(String str, Throwable th) {
-            super(str, th);
+        public DeviceInfoException(String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
         }
     }
 }

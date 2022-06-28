@@ -1,5 +1,5 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public interface Predicate<T> {
     Predicate<T> and(Predicate<? super T> predicate);
 
@@ -10,7 +10,7 @@ public interface Predicate<T> {
     boolean test(T t);
 
     /* renamed from: org.webrtc.Predicate$-CC */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public final /* synthetic */ class CC {
         public static Predicate $default$or(final Predicate _this, final Predicate predicate) {
             return new Predicate<T>() { // from class: org.webrtc.Predicate.1
@@ -30,8 +30,8 @@ public interface Predicate<T> {
                 }
 
                 @Override // org.webrtc.Predicate
-                public boolean test(T t) {
-                    return _this.test(t) || predicate.test(t);
+                public boolean test(T arg) {
+                    return _this.test(arg) || predicate.test(arg);
                 }
             };
         }
@@ -54,8 +54,8 @@ public interface Predicate<T> {
                 }
 
                 @Override // org.webrtc.Predicate
-                public boolean test(T t) {
-                    return _this.test(t) && predicate.test(t);
+                public boolean test(T arg) {
+                    return _this.test(arg) && predicate.test(arg);
                 }
             };
         }
@@ -78,8 +78,8 @@ public interface Predicate<T> {
                 }
 
                 @Override // org.webrtc.Predicate
-                public boolean test(T t) {
-                    return !_this.test(t);
+                public boolean test(T arg) {
+                    return !_this.test(arg);
                 }
             };
         }

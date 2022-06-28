@@ -18,9 +18,9 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class GroupCreateSpan extends View {
     private AvatarDrawable avatarDrawable;
     private int[] colors;
@@ -39,8 +39,8 @@ public class GroupCreateSpan extends View {
     private static TextPaint textPaint = new TextPaint(1);
     private static Paint backPaint = new Paint(1);
 
-    public GroupCreateSpan(Context context, Object obj) {
-        this(context, obj, null);
+    public GroupCreateSpan(Context context, Object object) {
+        this(context, object, null);
     }
 
     public GroupCreateSpan(Context context, ContactsController.Contact contact) {
@@ -48,20 +48,16 @@ public class GroupCreateSpan extends View {
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    /* JADX WARN: Code restructure failed: missing block: B:22:0x0097, code lost:
-        if (r1.equals("non_contacts") != false) goto L30;
+    /* JADX WARN: Code restructure failed: missing block: B:22:0x0098, code lost:
+        if (r10.equals("non_contacts") != false) goto L30;
      */
-    /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:60:0x021b  */
-    /* JADX WARN: Removed duplicated region for block: B:61:0x0223  */
-    /* JADX WARN: Removed duplicated region for block: B:64:0x025f  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public GroupCreateSpan(android.content.Context r26, java.lang.Object r27, org.telegram.messenger.ContactsController.Contact r28) {
+    public GroupCreateSpan(android.content.Context r27, java.lang.Object r28, org.telegram.messenger.ContactsController.Contact r29) {
         /*
-            Method dump skipped, instructions count: 700
+            Method dump skipped, instructions count: 722
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.GroupCreateSpan.<init>(android.content.Context, java.lang.Object, org.telegram.messenger.ContactsController$Contact):void");
@@ -69,18 +65,18 @@ public class GroupCreateSpan extends View {
 
     public void updateColors() {
         int color = this.avatarDrawable.getColor();
-        int color2 = Theme.getColor("groupcreate_spanBackground");
-        int color3 = Theme.getColor("groupcreate_spanDelete");
-        this.colors[0] = Color.red(color2);
+        int back = Theme.getColor(Theme.key_groupcreate_spanBackground);
+        int delete = Theme.getColor(Theme.key_groupcreate_spanDelete);
+        this.colors[0] = Color.red(back);
         this.colors[1] = Color.red(color);
-        this.colors[2] = Color.green(color2);
+        this.colors[2] = Color.green(back);
         this.colors[3] = Color.green(color);
-        this.colors[4] = Color.blue(color2);
+        this.colors[4] = Color.blue(back);
         this.colors[5] = Color.blue(color);
-        this.colors[6] = Color.alpha(color2);
+        this.colors[6] = Color.alpha(back);
         this.colors[7] = Color.alpha(color);
-        this.deleteDrawable.setColorFilter(new PorterDuffColorFilter(color3, PorterDuff.Mode.MULTIPLY));
-        backPaint.setColor(color2);
+        this.deleteDrawable.setColorFilter(new PorterDuffColorFilter(delete, PorterDuff.Mode.MULTIPLY));
+        backPaint.setColor(back);
     }
 
     public boolean isDeleting() {
@@ -118,27 +114,27 @@ public class GroupCreateSpan extends View {
     }
 
     @Override // android.view.View
-    protected void onMeasure(int i, int i2) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(AndroidUtilities.dp(57.0f) + this.textWidth, AndroidUtilities.dp(32.0f));
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        int color;
         boolean z = this.deleting;
         if ((z && this.progress != 1.0f) || (!z && this.progress != 0.0f)) {
-            long currentTimeMillis = System.currentTimeMillis() - this.lastUpdateTime;
-            if (currentTimeMillis < 0 || currentTimeMillis > 17) {
-                currentTimeMillis = 17;
+            long newTime = System.currentTimeMillis();
+            long dt = newTime - this.lastUpdateTime;
+            if (dt < 0 || dt > 17) {
+                dt = 17;
             }
             if (this.deleting) {
-                float f = this.progress + (((float) currentTimeMillis) / 120.0f);
+                float f = this.progress + (((float) dt) / 120.0f);
                 this.progress = f;
                 if (f >= 1.0f) {
                     this.progress = 1.0f;
                 }
             } else {
-                float f2 = this.progress - (((float) currentTimeMillis) / 120.0f);
+                float f2 = this.progress - (((float) dt) / 120.0f);
                 this.progress = f2;
                 if (f2 < 0.0f) {
                     this.progress = 0.0f;
@@ -157,8 +153,10 @@ public class GroupCreateSpan extends View {
         canvas.drawRoundRect(this.rect, AndroidUtilities.dp(16.0f), AndroidUtilities.dp(16.0f), backPaint);
         this.imageReceiver.draw(canvas);
         if (this.progress != 0.0f) {
-            backPaint.setColor(this.avatarDrawable.getColor());
-            backPaint.setAlpha((int) (this.progress * 255.0f * (Color.alpha(color) / 255.0f)));
+            int color = this.avatarDrawable.getColor();
+            float alpha = Color.alpha(color) / 255.0f;
+            backPaint.setColor(color);
+            backPaint.setAlpha((int) (this.progress * 255.0f * alpha));
             canvas.drawCircle(AndroidUtilities.dp(16.0f), AndroidUtilities.dp(16.0f), AndroidUtilities.dp(16.0f), backPaint);
             canvas.save();
             canvas.rotate((1.0f - this.progress) * 45.0f, AndroidUtilities.dp(16.0f), AndroidUtilities.dp(16.0f));
@@ -168,18 +166,19 @@ public class GroupCreateSpan extends View {
             canvas.restore();
         }
         canvas.translate(this.textX + AndroidUtilities.dp(41.0f), AndroidUtilities.dp(8.0f));
-        textPaint.setColor(ColorUtils.blendARGB(Theme.getColor("groupcreate_spanText"), Theme.getColor("avatar_text"), this.progress));
+        int text = Theme.getColor(Theme.key_groupcreate_spanText);
+        int textSelected = Theme.getColor(Theme.key_avatar_text);
+        textPaint.setColor(ColorUtils.blendARGB(text, textSelected, this.progress));
         this.nameLayout.draw(canvas);
         canvas.restore();
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
-        accessibilityNodeInfo.setText(this.nameLayout.getText());
-        if (!isDeleting() || Build.VERSION.SDK_INT < 21) {
-            return;
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setText(this.nameLayout.getText());
+        if (isDeleting() && Build.VERSION.SDK_INT >= 21) {
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.getId(), LocaleController.getString("Delete", R.string.Delete)));
         }
-        accessibilityNodeInfo.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.getId(), LocaleController.getString("Delete", R.string.Delete)));
     }
 }

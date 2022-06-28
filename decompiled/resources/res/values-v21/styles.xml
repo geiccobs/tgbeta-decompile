@@ -11,13 +11,13 @@
     </style>
     <style name="MyTextViewStyle" parent="@android:style/Widget.Material.Light.TextView">
     </style>
-    <style name="TextAppearance_Compat_Notification" parent="@android:style/TextAppearance.Material.Notification">
+    <style name="TextAppearance.Compat.Notification" parent="@android:style/TextAppearance.Material.Notification">
     </style>
-    <style name="TextAppearance_Compat_Notification_Info" parent="@android:style/TextAppearance.Material.Notification.Info">
+    <style name="TextAppearance.Compat.Notification.Info" parent="@android:style/TextAppearance.Material.Notification.Info">
     </style>
-    <style name="TextAppearance_Compat_Notification_Time" parent="@android:style/TextAppearance.Material.Notification.Time">
+    <style name="TextAppearance.Compat.Notification.Time" parent="@android:style/TextAppearance.Material.Notification.Time">
     </style>
-    <style name="TextAppearance_Compat_Notification_Title" parent="@android:style/TextAppearance.Material.Notification.Title">
+    <style name="TextAppearance.Compat.Notification.Title" parent="@android:style/TextAppearance.Material.Notification.Title">
     </style>
     <style name="Theme_TMessages" parent="@android:style/Theme.Material.Light">
         <item name="android:colorBackground">@android:color/white</item>
@@ -106,10 +106,10 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
-    <style name="Widget_Compat_NotificationActionContainer">
+    <style name="Widget.Compat.NotificationActionContainer">
         <item name="android:background">@drawable/notification_action_background</item>
     </style>
-    <style name="Widget_Compat_NotificationActionText">
+    <style name="Widget.Compat.NotificationActionText">
         <item name="android:textAppearance">?android:attr/textAppearanceButton</item>
         <item name="android:textSize">@dimen/notification_action_text_size</item>
         <item name="android:textColor">@color/androidx_core_secondary_text_default_material_light</item>

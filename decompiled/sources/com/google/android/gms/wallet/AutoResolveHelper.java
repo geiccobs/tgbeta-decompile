@@ -8,8 +8,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import androidx.annotation.RecentlyNonNull;
-import androidx.annotation.RecentlyNullable;
+import com.google.android.exoplayer2.C;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
@@ -18,45 +17,48 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import java.util.concurrent.TimeUnit;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class AutoResolveHelper {
+    public static final int RESULT_ERROR = 1;
     private static final long zzb = TimeUnit.MINUTES.toMillis(10);
     static long zza = SystemClock.elapsedRealtime();
 
-    @RecentlyNullable
-    public static Status getStatusFromIntent(Intent intent) {
-        if (intent == null) {
+    private AutoResolveHelper() {
+    }
+
+    public static Status getStatusFromIntent(Intent data) {
+        if (data == null) {
             return null;
         }
-        return (Status) intent.getParcelableExtra("com.google.android.gms.common.api.AutoResolveHelper.status");
+        return (Status) data.getParcelableExtra("com.google.android.gms.common.api.AutoResolveHelper.status");
     }
 
-    public static void putStatusIntoIntent(@RecentlyNonNull Intent intent, Status status) {
+    public static void putStatusIntoIntent(Intent data, Status status) {
         if (status == null) {
-            intent.removeExtra("com.google.android.gms.common.api.AutoResolveHelper.status");
+            data.removeExtra("com.google.android.gms.common.api.AutoResolveHelper.status");
         } else {
-            intent.putExtra("com.google.android.gms.common.api.AutoResolveHelper.status", status);
+            data.putExtra("com.google.android.gms.common.api.AutoResolveHelper.status", status);
         }
     }
 
-    public static <TResult extends AutoResolvableResult> void resolveTask(@RecentlyNonNull Task<TResult> task, @RecentlyNonNull Activity activity, int i) {
+    public static <TResult extends AutoResolvableResult> void resolveTask(Task<TResult> task, Activity activity, int requestCode) {
         zzc zza2 = zzc.zza(task);
         FragmentTransaction beginTransaction = activity.getFragmentManager().beginTransaction();
-        int i2 = zza2.zzc;
+        int i = zza2.zzc;
         Bundle bundle = new Bundle();
-        bundle.putInt("resolveCallId", i2);
-        bundle.putInt("requestCode", i);
+        bundle.putInt("resolveCallId", i);
+        bundle.putInt("requestCode", requestCode);
         bundle.putLong("initializationElapsedRealtime", zza);
         zzd zzdVar = new zzd();
         zzdVar.setArguments(bundle);
-        int i3 = zza2.zzc;
+        int i2 = zza2.zzc;
         StringBuilder sb = new StringBuilder(58);
         sb.append("com.google.android.gms.wallet.AutoResolveHelper");
-        sb.append(i3);
+        sb.append(i2);
         beginTransaction.add(zzdVar, sb.toString()).commit();
     }
 
-    public static <TResult> void zzd(@RecentlyNonNull Status status, TResult tresult, @RecentlyNonNull TaskCompletionSource<TResult> taskCompletionSource) {
+    public static <TResult> void zzd(Status status, TResult tresult, TaskCompletionSource<TResult> taskCompletionSource) {
         if (status.isSuccess()) {
             taskCompletionSource.setResult(tresult);
         } else {
@@ -65,12 +67,12 @@ public class AutoResolveHelper {
     }
 
     public static void zze(Activity activity, int i, int i2, Intent intent) {
-        PendingIntent createPendingResult = activity.createPendingResult(i, intent, 1073741824);
+        PendingIntent createPendingResult = activity.createPendingResult(i, intent, C.BUFFER_FLAG_ENCRYPTED);
         if (createPendingResult == null) {
-            if (!Log.isLoggable("AutoResolveHelper", 5)) {
+            if (Log.isLoggable("AutoResolveHelper", 5)) {
+                Log.w("AutoResolveHelper", "Null pending result returned when trying to deliver task result!");
                 return;
             }
-            Log.w("AutoResolveHelper", "Null pending result returned when trying to deliver task result!");
             return;
         }
         try {
@@ -85,10 +87,10 @@ public class AutoResolveHelper {
 
     public static void zzf(Activity activity, int i, Task<? extends AutoResolvableResult> task) {
         if (activity.isFinishing()) {
-            if (!Log.isLoggable("AutoResolveHelper", 3)) {
+            if (Log.isLoggable("AutoResolveHelper", 3)) {
+                Log.d("AutoResolveHelper", "Ignoring task result for, Activity is finishing.");
                 return;
             }
-            Log.d("AutoResolveHelper", "Ignoring task result for, Activity is finishing.");
             return;
         }
         Exception exception = task.getException();

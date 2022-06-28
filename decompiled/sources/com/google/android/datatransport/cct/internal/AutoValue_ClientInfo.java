@@ -1,7 +1,7 @@
 package com.google.android.datatransport.cct.internal;
 
 import com.google.android.datatransport.cct.internal.ClientInfo;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class AutoValue_ClientInfo extends ClientInfo {
     private final AndroidClientInfo androidClientInfo;
     private final ClientInfo.ClientType clientType;
@@ -25,22 +25,22 @@ final class AutoValue_ClientInfo extends ClientInfo {
         return "ClientInfo{clientType=" + this.clientType + ", androidClientInfo=" + this.androidClientInfo + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof ClientInfo)) {
+        if (!(o instanceof ClientInfo)) {
             return false;
         }
-        ClientInfo clientInfo = (ClientInfo) obj;
+        ClientInfo that = (ClientInfo) o;
         ClientInfo.ClientType clientType = this.clientType;
-        if (clientType != null ? clientType.equals(clientInfo.getClientType()) : clientInfo.getClientType() == null) {
+        if (clientType != null ? clientType.equals(that.getClientType()) : that.getClientType() == null) {
             AndroidClientInfo androidClientInfo = this.androidClientInfo;
             if (androidClientInfo == null) {
-                if (clientInfo.getAndroidClientInfo() == null) {
+                if (that.getAndroidClientInfo() == null) {
                     return true;
                 }
-            } else if (androidClientInfo.equals(clientInfo.getAndroidClientInfo())) {
+            } else if (androidClientInfo.equals(that.getAndroidClientInfo())) {
                 return true;
             }
         }
@@ -48,18 +48,19 @@ final class AutoValue_ClientInfo extends ClientInfo {
     }
 
     public int hashCode() {
+        int h$ = 1 * 1000003;
         ClientInfo.ClientType clientType = this.clientType;
         int i = 0;
-        int hashCode = ((clientType == null ? 0 : clientType.hashCode()) ^ 1000003) * 1000003;
+        int h$2 = (h$ ^ (clientType == null ? 0 : clientType.hashCode())) * 1000003;
         AndroidClientInfo androidClientInfo = this.androidClientInfo;
         if (androidClientInfo != null) {
             i = androidClientInfo.hashCode();
         }
-        return hashCode ^ i;
+        return h$2 ^ i;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class Builder extends ClientInfo.Builder {
         private AndroidClientInfo androidClientInfo;
         private ClientInfo.ClientType clientType;

@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class SenderSelectView$$ExternalSyntheticLambda4 implements SimpleFloatPropertyCompat.Setter {
     public static final /* synthetic */ SenderSelectView$$ExternalSyntheticLambda4 INSTANCE = new SenderSelectView$$ExternalSyntheticLambda4();
 

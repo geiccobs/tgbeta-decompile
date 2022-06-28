@@ -8,18 +8,18 @@ import com.google.android.datatransport.runtime.scheduling.jobscheduling.WorkSch
 import com.google.android.datatransport.runtime.scheduling.persistence.EventStore;
 import com.google.android.datatransport.runtime.time.Clock;
 import javax.inject.Provider;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SchedulingModule_WorkSchedulerFactory implements Factory<WorkScheduler> {
     private final Provider<Clock> clockProvider;
     private final Provider<SchedulerConfig> configProvider;
     private final Provider<Context> contextProvider;
     private final Provider<EventStore> eventStoreProvider;
 
-    public SchedulingModule_WorkSchedulerFactory(Provider<Context> provider, Provider<EventStore> provider2, Provider<SchedulerConfig> provider3, Provider<Clock> provider4) {
-        this.contextProvider = provider;
-        this.eventStoreProvider = provider2;
-        this.configProvider = provider3;
-        this.clockProvider = provider4;
+    public SchedulingModule_WorkSchedulerFactory(Provider<Context> contextProvider, Provider<EventStore> eventStoreProvider, Provider<SchedulerConfig> configProvider, Provider<Clock> clockProvider) {
+        this.contextProvider = contextProvider;
+        this.eventStoreProvider = eventStoreProvider;
+        this.configProvider = configProvider;
+        this.clockProvider = clockProvider;
     }
 
     @Override // javax.inject.Provider
@@ -27,11 +27,11 @@ public final class SchedulingModule_WorkSchedulerFactory implements Factory<Work
         return workScheduler(this.contextProvider.get(), this.eventStoreProvider.get(), this.configProvider.get(), this.clockProvider.get());
     }
 
-    public static SchedulingModule_WorkSchedulerFactory create(Provider<Context> provider, Provider<EventStore> provider2, Provider<SchedulerConfig> provider3, Provider<Clock> provider4) {
-        return new SchedulingModule_WorkSchedulerFactory(provider, provider2, provider3, provider4);
+    public static SchedulingModule_WorkSchedulerFactory create(Provider<Context> contextProvider, Provider<EventStore> eventStoreProvider, Provider<SchedulerConfig> configProvider, Provider<Clock> clockProvider) {
+        return new SchedulingModule_WorkSchedulerFactory(contextProvider, eventStoreProvider, configProvider, clockProvider);
     }
 
-    public static WorkScheduler workScheduler(Context context, EventStore eventStore, SchedulerConfig schedulerConfig, Clock clock) {
-        return (WorkScheduler) Preconditions.checkNotNull(SchedulingModule.workScheduler(context, eventStore, schedulerConfig, clock), "Cannot return null from a non-@Nullable @Provides method");
+    public static WorkScheduler workScheduler(Context context, EventStore eventStore, SchedulerConfig config, Clock clock) {
+        return (WorkScheduler) Preconditions.checkNotNull(SchedulingModule.workScheduler(context, eventStore, config, clock), "Cannot return null from a non-@Nullable @Provides method");
     }
 }

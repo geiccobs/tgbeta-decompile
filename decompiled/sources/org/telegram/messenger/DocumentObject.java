@@ -4,49 +4,41 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import java.util.ArrayList;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$DocumentAttribute;
-import org.telegram.tgnet.TLRPC$PhotoSize;
-import org.telegram.tgnet.TLRPC$TL_document;
-import org.telegram.tgnet.TLRPC$TL_documentAttributeImageSize;
-import org.telegram.tgnet.TLRPC$TL_photoPathSize;
-import org.telegram.tgnet.TLRPC$TL_wallPaper;
-import org.telegram.tgnet.TLRPC$ThemeSettings;
-import org.telegram.tgnet.TLRPC$WallPaper;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class DocumentObject {
 
-    /* loaded from: classes.dex */
-    public static class ThemeDocument extends TLRPC$TL_document {
+    /* loaded from: classes4.dex */
+    public static class ThemeDocument extends TLRPC.TL_document {
         public Theme.ThemeAccent accent;
         public Theme.ThemeInfo baseTheme;
-        public TLRPC$ThemeSettings themeSettings;
-        public TLRPC$Document wallpaper;
+        public TLRPC.ThemeSettings themeSettings;
+        public TLRPC.Document wallpaper;
 
-        public ThemeDocument(TLRPC$ThemeSettings tLRPC$ThemeSettings) {
-            this.themeSettings = tLRPC$ThemeSettings;
-            Theme.ThemeInfo theme = Theme.getTheme(Theme.getBaseThemeKey(tLRPC$ThemeSettings));
+        public ThemeDocument(TLRPC.ThemeSettings settings) {
+            this.themeSettings = settings;
+            Theme.ThemeInfo theme = Theme.getTheme(Theme.getBaseThemeKey(settings));
             this.baseTheme = theme;
-            this.accent = theme.createNewAccent(tLRPC$ThemeSettings);
-            TLRPC$WallPaper tLRPC$WallPaper = this.themeSettings.wallpaper;
-            if (tLRPC$WallPaper instanceof TLRPC$TL_wallPaper) {
-                TLRPC$Document tLRPC$Document = ((TLRPC$TL_wallPaper) tLRPC$WallPaper).document;
-                this.wallpaper = tLRPC$Document;
-                this.id = tLRPC$Document.id;
-                this.access_hash = tLRPC$Document.access_hash;
-                this.file_reference = tLRPC$Document.file_reference;
-                this.user_id = tLRPC$Document.user_id;
-                this.date = tLRPC$Document.date;
-                this.file_name = tLRPC$Document.file_name;
-                this.mime_type = tLRPC$Document.mime_type;
-                this.size = tLRPC$Document.size;
-                this.thumbs = tLRPC$Document.thumbs;
-                this.version = tLRPC$Document.version;
-                this.dc_id = tLRPC$Document.dc_id;
-                this.key = tLRPC$Document.key;
-                this.iv = tLRPC$Document.iv;
-                this.attributes = tLRPC$Document.attributes;
+            this.accent = theme.createNewAccent(settings);
+            if (this.themeSettings.wallpaper instanceof TLRPC.TL_wallPaper) {
+                TLRPC.TL_wallPaper object = (TLRPC.TL_wallPaper) this.themeSettings.wallpaper;
+                TLRPC.Document document = object.document;
+                this.wallpaper = document;
+                this.id = document.id;
+                this.access_hash = this.wallpaper.access_hash;
+                this.file_reference = this.wallpaper.file_reference;
+                this.user_id = this.wallpaper.user_id;
+                this.date = this.wallpaper.date;
+                this.file_name = this.wallpaper.file_name;
+                this.mime_type = this.wallpaper.mime_type;
+                this.size = this.wallpaper.size;
+                this.thumbs = this.wallpaper.thumbs;
+                this.version = this.wallpaper.version;
+                this.dc_id = this.wallpaper.dc_id;
+                this.key = this.wallpaper.key;
+                this.iv = this.wallpaper.iv;
+                this.attributes = this.wallpaper.attributes;
                 return;
             }
             this.id = -2147483648L;
@@ -54,87 +46,84 @@ public class DocumentObject {
         }
     }
 
-    public static SvgHelper.SvgDrawable getSvgThumb(ArrayList<TLRPC$PhotoSize> arrayList, String str, float f) {
-        int size = arrayList.size();
-        TLRPC$TL_photoPathSize tLRPC$TL_photoPathSize = null;
-        int i = 0;
-        int i2 = 0;
-        for (int i3 = 0; i3 < size; i3++) {
-            TLRPC$PhotoSize tLRPC$PhotoSize = arrayList.get(i3);
-            if (tLRPC$PhotoSize instanceof TLRPC$TL_photoPathSize) {
-                tLRPC$TL_photoPathSize = (TLRPC$TL_photoPathSize) tLRPC$PhotoSize;
+    public static SvgHelper.SvgDrawable getSvgThumb(ArrayList<TLRPC.PhotoSize> sizes, String colorKey, float alpha) {
+        int w = 0;
+        int h = 0;
+        TLRPC.TL_photoPathSize photoPathSize = null;
+        int N = sizes.size();
+        for (int a = 0; a < N; a++) {
+            TLRPC.PhotoSize photoSize = sizes.get(a);
+            if (photoSize instanceof TLRPC.TL_photoPathSize) {
+                photoPathSize = (TLRPC.TL_photoPathSize) photoSize;
             } else {
-                i = tLRPC$PhotoSize.w;
-                i2 = tLRPC$PhotoSize.h;
+                w = photoSize.w;
+                h = photoSize.h;
             }
-            if (tLRPC$TL_photoPathSize != null && i != 0 && i2 != 0) {
-                SvgHelper.SvgDrawable drawableByPath = SvgHelper.getDrawableByPath(SvgHelper.decompress(tLRPC$TL_photoPathSize.bytes), i, i2);
-                if (drawableByPath != null) {
-                    drawableByPath.setupGradient(str, f);
+            if (photoPathSize != null && w != 0 && h != 0) {
+                SvgHelper.SvgDrawable pathThumb = SvgHelper.getDrawableByPath(SvgHelper.decompress(photoPathSize.bytes), w, h);
+                if (pathThumb != null) {
+                    pathThumb.setupGradient(colorKey, alpha);
                 }
-                return drawableByPath;
+                return pathThumb;
             }
         }
         return null;
     }
 
-    public static SvgHelper.SvgDrawable getSvgThumb(TLRPC$Document tLRPC$Document, String str, float f) {
-        return getSvgThumb(tLRPC$Document, str, f, 1.0f);
+    public static SvgHelper.SvgDrawable getSvgThumb(TLRPC.Document document, String colorKey, float alpha) {
+        return getSvgThumb(document, colorKey, alpha, 1.0f);
     }
 
-    public static SvgHelper.SvgDrawable getSvgRectThumb(String str, float f) {
+    public static SvgHelper.SvgDrawable getSvgRectThumb(String colorKey, float alpha) {
         Path path = new Path();
         path.addRect(0.0f, 0.0f, 512.0f, 512.0f, Path.Direction.CW);
         path.close();
-        SvgHelper.SvgDrawable svgDrawable = new SvgHelper.SvgDrawable();
-        svgDrawable.commands.add(path);
-        svgDrawable.paints.put(path, new Paint(1));
-        svgDrawable.width = 512;
-        svgDrawable.height = 512;
-        svgDrawable.setupGradient(str, f);
-        return svgDrawable;
+        SvgHelper.SvgDrawable drawable = new SvgHelper.SvgDrawable();
+        drawable.commands.add(path);
+        drawable.paints.put(path, new Paint(1));
+        drawable.width = 512;
+        drawable.height = 512;
+        drawable.setupGradient(colorKey, alpha);
+        return drawable;
     }
 
-    public static SvgHelper.SvgDrawable getSvgThumb(TLRPC$Document tLRPC$Document, String str, float f, float f2) {
-        int i;
-        int i2;
-        SvgHelper.SvgDrawable svgDrawable = null;
-        if (tLRPC$Document == null) {
+    public static SvgHelper.SvgDrawable getSvgThumb(TLRPC.Document document, String colorKey, float alpha, float zoom) {
+        if (document == null) {
             return null;
         }
-        int size = tLRPC$Document.thumbs.size();
-        int i3 = 0;
-        int i4 = 0;
+        SvgHelper.SvgDrawable pathThumb = null;
+        int b = 0;
+        int N2 = document.thumbs.size();
         while (true) {
-            if (i4 >= size) {
+            if (b >= N2) {
                 break;
             }
-            TLRPC$PhotoSize tLRPC$PhotoSize = tLRPC$Document.thumbs.get(i4);
-            if (tLRPC$PhotoSize instanceof TLRPC$TL_photoPathSize) {
-                int size2 = tLRPC$Document.attributes.size();
-                while (true) {
-                    i = 512;
-                    if (i3 >= size2) {
-                        i2 = 512;
-                        break;
-                    }
-                    TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i3);
-                    if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeImageSize) {
-                        int i5 = tLRPC$DocumentAttribute.w;
-                        int i6 = tLRPC$DocumentAttribute.h;
-                        i = i5;
-                        i2 = i6;
-                        break;
-                    }
-                    i3++;
-                }
-                if (i != 0 && i2 != 0 && (svgDrawable = SvgHelper.getDrawableByPath(SvgHelper.decompress(tLRPC$PhotoSize.bytes), (int) (i * f2), (int) (i2 * f2))) != null) {
-                    svgDrawable.setupGradient(str, f);
-                }
+            TLRPC.PhotoSize size = document.thumbs.get(b);
+            if (!(size instanceof TLRPC.TL_photoPathSize)) {
+                b++;
             } else {
-                i4++;
+                int w = 512;
+                int h = 512;
+                int a = 0;
+                int N = document.attributes.size();
+                while (true) {
+                    if (a >= N) {
+                        break;
+                    }
+                    TLRPC.DocumentAttribute attribute = document.attributes.get(a);
+                    if (!(attribute instanceof TLRPC.TL_documentAttributeImageSize)) {
+                        a++;
+                    } else {
+                        w = attribute.w;
+                        h = attribute.h;
+                        break;
+                    }
+                }
+                if (w != 0 && h != 0 && (pathThumb = SvgHelper.getDrawableByPath(SvgHelper.decompress(size.bytes), (int) (w * zoom), (int) (h * zoom))) != null) {
+                    pathThumb.setupGradient(colorKey, alpha);
+                }
             }
         }
-        return svgDrawable;
+        return pathThumb;
     }
 }

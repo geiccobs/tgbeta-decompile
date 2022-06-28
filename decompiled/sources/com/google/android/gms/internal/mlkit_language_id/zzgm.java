@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzgm implements zzfx {
     private final zzfz zza;
     private final String zzb;
@@ -22,13 +22,14 @@ final class zzgm implements zzfx {
         while (true) {
             int i4 = i3 + 1;
             char charAt2 = str.charAt(i3);
-            if (charAt2 < 55296) {
+            if (charAt2 >= 55296) {
+                i |= (charAt2 & 8191) << i2;
+                i2 += 13;
+                i3 = i4;
+            } else {
                 this.zzd = i | (charAt2 << i2);
                 return;
             }
-            i |= (charAt2 & 8191) << i2;
-            i2 += 13;
-            i3 = i4;
         }
     }
 

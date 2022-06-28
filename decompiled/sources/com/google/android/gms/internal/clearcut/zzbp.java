@@ -4,7 +4,7 @@ import com.google.android.gms.internal.clearcut.zzcg;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzbp implements zzfr {
     private final zzbn zzfo;
 
@@ -15,8 +15,7 @@ final class zzbp implements zzfr {
     }
 
     public static zzbp zza(zzbn zzbnVar) {
-        zzbp zzbpVar = zzbnVar.zzfz;
-        return zzbpVar != null ? zzbpVar : new zzbp(zzbnVar);
+        return zzbnVar.zzfz != null ? zzbnVar.zzfz : new zzbp(zzbnVar);
     }
 
     @Override // com.google.android.gms.internal.clearcut.zzfr

@@ -2,20 +2,23 @@ package com.stripe.android.util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class StripeJsonUtils {
-    public static String getString(JSONObject jSONObject, String str) throws JSONException {
-        return nullIfNullOrEmpty(jSONObject.getString(str));
+    static final String EMPTY = "";
+    static final String NULL = "null";
+
+    public static String getString(JSONObject jsonObject, String fieldName) throws JSONException {
+        return nullIfNullOrEmpty(jsonObject.getString(fieldName));
     }
 
-    public static String optString(JSONObject jSONObject, String str) {
-        return nullIfNullOrEmpty(jSONObject.optString(str));
+    public static String optString(JSONObject jsonObject, String fieldName) {
+        return nullIfNullOrEmpty(jsonObject.optString(fieldName));
     }
 
-    static String nullIfNullOrEmpty(String str) {
-        if ("null".equals(str) || "".equals(str)) {
+    static String nullIfNullOrEmpty(String possibleNull) {
+        if (NULL.equals(possibleNull) || "".equals(possibleNull)) {
             return null;
         }
-        return str;
+        return possibleNull;
     }
 }

@@ -1,9 +1,16 @@
 package com.google.firebase.heartbeatinfo;
-/* loaded from: classes.dex */
+
+import com.google.android.gms.tasks.Task;
+import java.util.List;
+/* loaded from: classes3.dex */
 public interface HeartBeatInfo {
+    Task<List<HeartBeatResult>> getAndClearStoredHeartBeatInfo();
+
     HeartBeat getHeartBeatCode(String str);
 
-    /* loaded from: classes.dex */
+    Task<Void> storeHeartBeatInfo(String str);
+
+    /* loaded from: classes3.dex */
     public enum HeartBeat {
         NONE(0),
         SDK(1),
@@ -12,8 +19,8 @@ public interface HeartBeatInfo {
         
         private final int code;
 
-        HeartBeat(int i) {
-            this.code = i;
+        HeartBeat(int code) {
+            this.code = code;
         }
 
         public int getCode() {

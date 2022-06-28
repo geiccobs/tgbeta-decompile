@@ -1,29 +1,50 @@
 package com.coremedia.iso.boxes;
 
+import androidx.recyclerview.widget.ItemTouchHelper;
 import com.coremedia.iso.IsoTypeReader;
 import com.coremedia.iso.IsoTypeWriter;
+import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
 import com.googlecode.mp4parser.AbstractFullBox;
 import com.googlecode.mp4parser.RequiresParseDetailAspect;
 import com.googlecode.mp4parser.util.DateHelper;
 import com.googlecode.mp4parser.util.Matrix;
+import com.microsoft.appcenter.ingestion.models.properties.DoubleTypedProperty;
+import com.microsoft.appcenter.ingestion.models.properties.LongTypedProperty;
 import java.nio.ByteBuffer;
 import java.util.Date;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.runtime.internal.Conversions;
 import org.aspectj.runtime.reflect.Factory;
-/* loaded from: classes.dex */
+import org.telegram.ui.Components.CustomPhoneKeyboardView;
+/* loaded from: classes3.dex */
 public class MovieHeaderBox extends AbstractFullBox {
+    public static final String TYPE = "mvhd";
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_0 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_1 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_10 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_11 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_12 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_13 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_14 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_15 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_16 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_17 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_18 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_19 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_2 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_20 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_21 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_22 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_23 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_24 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_25 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_26 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_27 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_28 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_3 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_4 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_5 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_6 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_7 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_8 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_9 = null;
@@ -48,39 +69,39 @@ public class MovieHeaderBox extends AbstractFullBox {
 
     private static /* synthetic */ void ajc$preClinit() {
         Factory factory = new Factory("MovieHeaderBox.java", MovieHeaderBox.class);
-        ajc$tjp_0 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getCreationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "java.util.Date"), 63);
-        ajc$tjp_1 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getModificationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "java.util.Date"), 67);
-        ajc$tjp_10 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setModificationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "java.util.Date", "modificationTime", "", "void"), 203);
-        ajc$tjp_11 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setTimescale", "com.coremedia.iso.boxes.MovieHeaderBox", "long", "timescale", "", "void"), 211);
-        ajc$tjp_12 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "long", "duration", "", "void"), 215);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setRate", "com.coremedia.iso.boxes.MovieHeaderBox", "double", "rate", "", "void"), 222);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setVolume", "com.coremedia.iso.boxes.MovieHeaderBox", "float", "volume", "", "void"), 226);
-        ajc$tjp_15 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setMatrix", "com.coremedia.iso.boxes.MovieHeaderBox", "com.googlecode.mp4parser.util.Matrix", "matrix", "", "void"), 230);
-        ajc$tjp_16 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setNextTrackId", "com.coremedia.iso.boxes.MovieHeaderBox", "long", "nextTrackId", "", "void"), 234);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getPreviewTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 238);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setPreviewTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "previewTime", "", "void"), 242);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getPreviewDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 246);
-        ajc$tjp_2 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getTimescale", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "long"), 71);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setPreviewDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "previewDuration", "", "void"), 250);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getPosterTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 254);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setPosterTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "posterTime", "", "void"), 258);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getSelectionTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 262);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setSelectionTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "selectionTime", "", "void"), 266);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getSelectionDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 270);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setSelectionDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "selectionDuration", "", "void"), 274);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getCurrentTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 278);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "setCurrentTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "currentTime", "", "void"), 282);
-        ajc$tjp_3 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "long"), 75);
-        ajc$tjp_4 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getRate", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "double"), 79);
-        ajc$tjp_5 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getVolume", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "float"), 83);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getMatrix", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "com.googlecode.mp4parser.util.Matrix"), 87);
-        ajc$tjp_7 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getNextTrackId", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "long"), 91);
-        ajc$tjp_8 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "toString", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "java.lang.String"), 139);
-        ajc$tjp_9 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setCreationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "java.util.Date", "creationTime", "", "void"), 195);
+        ajc$tjp_0 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getCreationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "java.util.Date"), 63);
+        ajc$tjp_1 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getModificationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "java.util.Date"), 67);
+        ajc$tjp_10 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setModificationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "java.util.Date", "modificationTime", "", "void"), 203);
+        ajc$tjp_11 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setTimescale", "com.coremedia.iso.boxes.MovieHeaderBox", LongTypedProperty.TYPE, "timescale", "", "void"), 211);
+        ajc$tjp_12 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setDuration", "com.coremedia.iso.boxes.MovieHeaderBox", LongTypedProperty.TYPE, "duration", "", "void"), 215);
+        ajc$tjp_13 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setRate", "com.coremedia.iso.boxes.MovieHeaderBox", DoubleTypedProperty.TYPE, "rate", "", "void"), 222);
+        ajc$tjp_14 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setVolume", "com.coremedia.iso.boxes.MovieHeaderBox", "float", "volume", "", "void"), 226);
+        ajc$tjp_15 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setMatrix", "com.coremedia.iso.boxes.MovieHeaderBox", "com.googlecode.mp4parser.util.Matrix", "matrix", "", "void"), CustomPhoneKeyboardView.KEYBOARD_HEIGHT_DP);
+        ajc$tjp_16 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setNextTrackId", "com.coremedia.iso.boxes.MovieHeaderBox", LongTypedProperty.TYPE, "nextTrackId", "", "void"), 234);
+        ajc$tjp_17 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getPreviewTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 238);
+        ajc$tjp_18 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setPreviewTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "previewTime", "", "void"), 242);
+        ajc$tjp_19 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getPreviewDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 246);
+        ajc$tjp_2 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getTimescale", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", LongTypedProperty.TYPE), 71);
+        ajc$tjp_20 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setPreviewDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "previewDuration", "", "void"), ItemTouchHelper.Callback.DEFAULT_SWIPE_ANIMATION_DURATION);
+        ajc$tjp_21 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getPosterTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 254);
+        ajc$tjp_22 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setPosterTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "posterTime", "", "void"), 258);
+        ajc$tjp_23 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getSelectionTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 262);
+        ajc$tjp_24 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setSelectionTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "selectionTime", "", "void"), 266);
+        ajc$tjp_25 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getSelectionDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 270);
+        ajc$tjp_26 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setSelectionDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "selectionDuration", "", "void"), 274);
+        ajc$tjp_27 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getCurrentTime", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "int"), 278);
+        ajc$tjp_28 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setCurrentTime", "com.coremedia.iso.boxes.MovieHeaderBox", "int", "currentTime", "", "void"), 282);
+        ajc$tjp_3 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getDuration", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", LongTypedProperty.TYPE), 75);
+        ajc$tjp_4 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getRate", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", DoubleTypedProperty.TYPE), 79);
+        ajc$tjp_5 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getVolume", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "float"), 83);
+        ajc$tjp_6 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getMatrix", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "com.googlecode.mp4parser.util.Matrix"), 87);
+        ajc$tjp_7 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getNextTrackId", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", LongTypedProperty.TYPE), 91);
+        ajc$tjp_8 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "toString", "com.coremedia.iso.boxes.MovieHeaderBox", "", "", "", "java.lang.String"), 139);
+        ajc$tjp_9 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setCreationTime", "com.coremedia.iso.boxes.MovieHeaderBox", "java.util.Date", "creationTime", "", "void"), 195);
     }
 
     public MovieHeaderBox() {
-        super("mvhd");
+        super(TYPE);
     }
 
     public Date getCreationTime() {
@@ -113,6 +134,11 @@ public class MovieHeaderBox extends AbstractFullBox {
         return this.volume;
     }
 
+    public Matrix getMatrix() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_6, this, this));
+        return this.matrix;
+    }
+
     public long getNextTrackId() {
         RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_7, this, this));
         return this.nextTrackId;
@@ -120,36 +146,37 @@ public class MovieHeaderBox extends AbstractFullBox {
 
     @Override // com.googlecode.mp4parser.AbstractBox
     protected long getContentSize() {
-        return (getVersion() == 1 ? 32L : 20L) + 80;
+        long contentSize = getVersion() == 1 ? 4 + 28 : 4 + 16;
+        return contentSize + 80;
     }
 
     @Override // com.googlecode.mp4parser.AbstractBox
-    public void _parseDetails(ByteBuffer byteBuffer) {
-        parseVersionAndFlags(byteBuffer);
+    public void _parseDetails(ByteBuffer content) {
+        parseVersionAndFlags(content);
         if (getVersion() == 1) {
-            this.creationTime = DateHelper.convert(IsoTypeReader.readUInt64(byteBuffer));
-            this.modificationTime = DateHelper.convert(IsoTypeReader.readUInt64(byteBuffer));
-            this.timescale = IsoTypeReader.readUInt32(byteBuffer);
-            this.duration = IsoTypeReader.readUInt64(byteBuffer);
+            this.creationTime = DateHelper.convert(IsoTypeReader.readUInt64(content));
+            this.modificationTime = DateHelper.convert(IsoTypeReader.readUInt64(content));
+            this.timescale = IsoTypeReader.readUInt32(content);
+            this.duration = IsoTypeReader.readUInt64(content);
         } else {
-            this.creationTime = DateHelper.convert(IsoTypeReader.readUInt32(byteBuffer));
-            this.modificationTime = DateHelper.convert(IsoTypeReader.readUInt32(byteBuffer));
-            this.timescale = IsoTypeReader.readUInt32(byteBuffer);
-            this.duration = IsoTypeReader.readUInt32(byteBuffer);
+            this.creationTime = DateHelper.convert(IsoTypeReader.readUInt32(content));
+            this.modificationTime = DateHelper.convert(IsoTypeReader.readUInt32(content));
+            this.timescale = IsoTypeReader.readUInt32(content);
+            this.duration = IsoTypeReader.readUInt32(content);
         }
-        this.rate = IsoTypeReader.readFixedPoint1616(byteBuffer);
-        this.volume = IsoTypeReader.readFixedPoint88(byteBuffer);
-        IsoTypeReader.readUInt16(byteBuffer);
-        IsoTypeReader.readUInt32(byteBuffer);
-        IsoTypeReader.readUInt32(byteBuffer);
-        this.matrix = Matrix.fromByteBuffer(byteBuffer);
-        this.previewTime = byteBuffer.getInt();
-        this.previewDuration = byteBuffer.getInt();
-        this.posterTime = byteBuffer.getInt();
-        this.selectionTime = byteBuffer.getInt();
-        this.selectionDuration = byteBuffer.getInt();
-        this.currentTime = byteBuffer.getInt();
-        this.nextTrackId = IsoTypeReader.readUInt32(byteBuffer);
+        this.rate = IsoTypeReader.readFixedPoint1616(content);
+        this.volume = IsoTypeReader.readFixedPoint88(content);
+        IsoTypeReader.readUInt16(content);
+        IsoTypeReader.readUInt32(content);
+        IsoTypeReader.readUInt32(content);
+        this.matrix = Matrix.fromByteBuffer(content);
+        this.previewTime = content.getInt();
+        this.previewDuration = content.getInt();
+        this.posterTime = content.getInt();
+        this.selectionTime = content.getInt();
+        this.selectionDuration = content.getInt();
+        this.currentTime = content.getInt();
+        this.nextTrackId = IsoTypeReader.readUInt32(content);
     }
 
     public String toString() {
@@ -186,33 +213,43 @@ public class MovieHeaderBox extends AbstractFullBox {
         IsoTypeWriter.writeUInt32(byteBuffer, this.nextTrackId);
     }
 
-    public void setCreationTime(Date date) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_9, this, this, date));
-        this.creationTime = date;
-        if (DateHelper.convert(date) >= 4294967296L) {
+    public void setCreationTime(Date creationTime) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_9, this, this, creationTime));
+        this.creationTime = creationTime;
+        if (DateHelper.convert(creationTime) >= 4294967296L) {
             setVersion(1);
         }
     }
 
-    public void setModificationTime(Date date) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_10, this, this, date));
-        this.modificationTime = date;
-        if (DateHelper.convert(date) >= 4294967296L) {
+    public void setModificationTime(Date modificationTime) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_10, this, this, modificationTime));
+        this.modificationTime = modificationTime;
+        if (DateHelper.convert(modificationTime) >= 4294967296L) {
             setVersion(1);
         }
     }
 
-    public void setTimescale(long j) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_11, this, this, Conversions.longObject(j)));
-        this.timescale = j;
+    public void setTimescale(long timescale) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_11, this, this, Conversions.longObject(timescale)));
+        this.timescale = timescale;
     }
 
-    public void setDuration(long j) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_12, this, this, Conversions.longObject(j)));
-        this.duration = j;
-        if (j >= 4294967296L) {
+    public void setDuration(long duration) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_12, this, this, Conversions.longObject(duration)));
+        this.duration = duration;
+        if (duration >= 4294967296L) {
             setVersion(1);
         }
+    }
+
+    public void setRate(double rate) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_13, this, this, Conversions.doubleObject(rate)));
+        this.rate = rate;
+    }
+
+    public void setVolume(float volume) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_14, this, this, Conversions.floatObject(volume)));
+        this.volume = volume;
     }
 
     public void setMatrix(Matrix matrix) {
@@ -220,8 +257,68 @@ public class MovieHeaderBox extends AbstractFullBox {
         this.matrix = matrix;
     }
 
-    public void setNextTrackId(long j) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_16, this, this, Conversions.longObject(j)));
-        this.nextTrackId = j;
+    public void setNextTrackId(long nextTrackId) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_16, this, this, Conversions.longObject(nextTrackId)));
+        this.nextTrackId = nextTrackId;
+    }
+
+    public int getPreviewTime() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_17, this, this));
+        return this.previewTime;
+    }
+
+    public void setPreviewTime(int previewTime) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_18, this, this, Conversions.intObject(previewTime)));
+        this.previewTime = previewTime;
+    }
+
+    public int getPreviewDuration() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_19, this, this));
+        return this.previewDuration;
+    }
+
+    public void setPreviewDuration(int previewDuration) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_20, this, this, Conversions.intObject(previewDuration)));
+        this.previewDuration = previewDuration;
+    }
+
+    public int getPosterTime() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_21, this, this));
+        return this.posterTime;
+    }
+
+    public void setPosterTime(int posterTime) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_22, this, this, Conversions.intObject(posterTime)));
+        this.posterTime = posterTime;
+    }
+
+    public int getSelectionTime() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_23, this, this));
+        return this.selectionTime;
+    }
+
+    public void setSelectionTime(int selectionTime) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_24, this, this, Conversions.intObject(selectionTime)));
+        this.selectionTime = selectionTime;
+    }
+
+    public int getSelectionDuration() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_25, this, this));
+        return this.selectionDuration;
+    }
+
+    public void setSelectionDuration(int selectionDuration) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_26, this, this, Conversions.intObject(selectionDuration)));
+        this.selectionDuration = selectionDuration;
+    }
+
+    public int getCurrentTime() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_27, this, this));
+        return this.currentTime;
+    }
+
+    public void setCurrentTime(int currentTime) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_28, this, this, Conversions.intObject(currentTime)));
+        this.currentTime = currentTime;
     }
 }

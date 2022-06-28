@@ -5,7 +5,7 @@ import android.media.MediaFormat;
 import com.googlecode.mp4parser.util.Matrix;
 import java.io.File;
 import java.util.ArrayList;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class Mp4Movie {
     private File cacheFile;
     private int height;
@@ -29,22 +29,21 @@ public class Mp4Movie {
         this.cacheFile = file;
     }
 
-    public void setRotation(int i) {
-        if (i == 0) {
+    public void setRotation(int angle) {
+        if (angle == 0) {
             this.matrix = Matrix.ROTATE_0;
-        } else if (i == 90) {
+        } else if (angle == 90) {
             this.matrix = Matrix.ROTATE_90;
-        } else if (i == 180) {
+        } else if (angle == 180) {
             this.matrix = Matrix.ROTATE_180;
-        } else if (i != 270) {
-        } else {
+        } else if (angle == 270) {
             this.matrix = Matrix.ROTATE_270;
         }
     }
 
-    public void setSize(int i, int i2) {
-        this.width = i;
-        this.height = i2;
+    public void setSize(int w, int h) {
+        this.width = w;
+        this.height = h;
     }
 
     public ArrayList<Track> getTracks() {
@@ -55,22 +54,24 @@ public class Mp4Movie {
         return this.cacheFile;
     }
 
-    public void addSample(int i, long j, MediaCodec.BufferInfo bufferInfo) {
-        if (i < 0 || i >= this.tracks.size()) {
+    public void addSample(int trackIndex, long offset, MediaCodec.BufferInfo bufferInfo) {
+        if (trackIndex < 0 || trackIndex >= this.tracks.size()) {
             return;
         }
-        this.tracks.get(i).addSample(j, bufferInfo);
+        Track track = this.tracks.get(trackIndex);
+        track.addSample(offset, bufferInfo);
     }
 
-    public int addTrack(MediaFormat mediaFormat, boolean z) {
-        this.tracks.add(new Track(this.tracks.size(), mediaFormat, z));
+    public int addTrack(MediaFormat mediaFormat, boolean isAudio) {
+        this.tracks.add(new Track(this.tracks.size(), mediaFormat, isAudio));
         return this.tracks.size() - 1;
     }
 
-    public long getLastFrameTimestamp(int i) {
-        if (i < 0 || i >= this.tracks.size()) {
+    public long getLastFrameTimestamp(int trackIndex) {
+        if (trackIndex < 0 || trackIndex >= this.tracks.size()) {
             return 0L;
         }
-        return this.tracks.get(i).getLastFrameTimestamp();
+        Track track = this.tracks.get(trackIndex);
+        return track.getLastFrameTimestamp();
     }
 }

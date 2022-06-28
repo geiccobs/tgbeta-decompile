@@ -20,17 +20,18 @@ public class FileLog {
     private File tonlibFile = null;
 
     public static FileLog getInstance() {
-        FileLog fileLog = Instance;
-        if (fileLog == null) {
+        FileLog localInstance = Instance;
+        if (localInstance == null) {
             synchronized (FileLog.class) {
-                fileLog = Instance;
-                if (fileLog == null) {
-                    fileLog = new FileLog();
+                localInstance = Instance;
+                if (localInstance == null) {
+                    FileLog fileLog = new FileLog();
+                    localInstance = fileLog;
                     Instance = fileLog;
                 }
             }
         }
-        return fileLog;
+        return localInstance;
     }
 
     public FileLog() {
@@ -41,26 +42,27 @@ public class FileLog {
     }
 
     public void init() {
-        File externalFilesDir;
+        File sdCard;
         if (this.initied) {
             return;
         }
         this.dateFormat = FastDateFormat.getInstance("dd_MM_yyyy_HH_mm_ss", Locale.US);
         try {
-            externalFilesDir = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+            sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (externalFilesDir == null) {
+        if (sdCard == null) {
             return;
         }
-        File file = new File(externalFilesDir.getAbsolutePath() + "/logs");
-        file.mkdirs();
-        this.currentFile = new File(file, this.dateFormat.format(System.currentTimeMillis()) + ".txt");
+        File dir = new File(sdCard.getAbsolutePath() + "/logs");
+        dir.mkdirs();
+        this.currentFile = new File(dir, this.dateFormat.format(System.currentTimeMillis()) + ".txt");
         try {
             this.logQueue = new DispatchQueue("logQueue");
             this.currentFile.createNewFile();
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(this.currentFile));
+            FileOutputStream stream = new FileOutputStream(this.currentFile);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(stream);
             this.streamWriter = outputStreamWriter;
             outputStreamWriter.write("-----start log " + this.dateFormat.format(System.currentTimeMillis()) + "-----\n");
             this.streamWriter.flush();
@@ -79,17 +81,17 @@ public class FileLog {
             return "";
         }
         try {
-            File externalFilesDir = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (externalFilesDir == null) {
+            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+            if (sdCard == null) {
                 return "";
             }
-            File file = new File(externalFilesDir.getAbsolutePath() + "/logs");
-            file.mkdirs();
+            File dir = new File(sdCard.getAbsolutePath() + "/logs");
+            dir.mkdirs();
             FileLog fileLog = getInstance();
-            fileLog.networkFile = new File(file, getInstance().dateFormat.format(System.currentTimeMillis()) + "_net.txt");
+            fileLog.networkFile = new File(dir, getInstance().dateFormat.format(System.currentTimeMillis()) + "_net.txt");
             return getInstance().networkFile.getAbsolutePath();
-        } catch (Throwable th) {
-            th.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
             return "";
         }
     }
@@ -99,168 +101,167 @@ public class FileLog {
             return "";
         }
         try {
-            File externalFilesDir = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (externalFilesDir == null) {
+            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+            if (sdCard == null) {
                 return "";
             }
-            File file = new File(externalFilesDir.getAbsolutePath() + "/logs");
-            file.mkdirs();
+            File dir = new File(sdCard.getAbsolutePath() + "/logs");
+            dir.mkdirs();
             FileLog fileLog = getInstance();
-            fileLog.tonlibFile = new File(file, getInstance().dateFormat.format(System.currentTimeMillis()) + "_tonlib.txt");
+            fileLog.tonlibFile = new File(dir, getInstance().dateFormat.format(System.currentTimeMillis()) + "_tonlib.txt");
             return getInstance().tonlibFile.getAbsolutePath();
-        } catch (Throwable th) {
-            th.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
             return "";
         }
     }
 
-    public static void e(final String str, final Throwable th) {
+    public static void e(final String message, final Throwable exception) {
         if (!BuildVars.LOGS_ENABLED) {
             return;
         }
         ensureInitied();
-        Log.e(tag, str, th);
-        if (getInstance().streamWriter == null) {
-            return;
+        Log.e(tag, message, exception);
+        if (getInstance().streamWriter != null) {
+            getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda3
+                @Override // java.lang.Runnable
+                public final void run() {
+                    FileLog.lambda$e$0(message, exception);
+                }
+            });
         }
-        getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda3
-            @Override // java.lang.Runnable
-            public final void run() {
-                FileLog.lambda$e$0(str, th);
-            }
-        });
     }
 
-    public static /* synthetic */ void lambda$e$0(String str, Throwable th) {
+    public static /* synthetic */ void lambda$e$0(String message, Throwable exception) {
         try {
             OutputStreamWriter outputStreamWriter = getInstance().streamWriter;
-            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + str + "\n");
-            getInstance().streamWriter.write(th.toString());
+            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + message + "\n");
+            getInstance().streamWriter.write(exception.toString());
             getInstance().streamWriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void e(final String str) {
+    public static void e(final String message) {
         if (!BuildVars.LOGS_ENABLED) {
             return;
         }
         ensureInitied();
-        Log.e(tag, str);
-        if (getInstance().streamWriter == null) {
-            return;
+        Log.e(tag, message);
+        if (getInstance().streamWriter != null) {
+            getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda1
+                @Override // java.lang.Runnable
+                public final void run() {
+                    FileLog.lambda$e$1(message);
+                }
+            });
         }
-        getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda1
-            @Override // java.lang.Runnable
-            public final void run() {
-                FileLog.lambda$e$1(str);
-            }
-        });
     }
 
-    public static /* synthetic */ void lambda$e$1(String str) {
+    public static /* synthetic */ void lambda$e$1(String message) {
         try {
             OutputStreamWriter outputStreamWriter = getInstance().streamWriter;
-            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + str + "\n");
+            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + message + "\n");
             getInstance().streamWriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void e(Throwable th) {
-        e(th, true);
+    public static void e(Throwable e) {
+        e(e, true);
     }
 
-    public static void e(final Throwable th, boolean z) {
+    public static void e(final Throwable e, boolean logToAppCenter) {
         if (!BuildVars.LOGS_ENABLED) {
             return;
         }
-        if (BuildVars.DEBUG_VERSION && needSent(th) && z) {
-            AndroidUtilities.appCenterLog(th);
+        if (BuildVars.DEBUG_VERSION && needSent(e) && logToAppCenter) {
+            AndroidUtilities.appCenterLog(e);
         }
         ensureInitied();
-        th.printStackTrace();
+        e.printStackTrace();
         if (getInstance().streamWriter != null) {
             getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda4
                 @Override // java.lang.Runnable
                 public final void run() {
-                    FileLog.lambda$e$2(th);
+                    FileLog.lambda$e$2(e);
                 }
             });
         } else {
-            th.printStackTrace();
+            e.printStackTrace();
         }
     }
 
-    public static /* synthetic */ void lambda$e$2(Throwable th) {
+    public static /* synthetic */ void lambda$e$2(Throwable e) {
         try {
             OutputStreamWriter outputStreamWriter = getInstance().streamWriter;
-            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + th + "\n");
-            StackTraceElement[] stackTrace = th.getStackTrace();
-            for (int i = 0; i < stackTrace.length; i++) {
+            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + e + "\n");
+            StackTraceElement[] stack = e.getStackTrace();
+            for (int a = 0; a < stack.length; a++) {
                 OutputStreamWriter outputStreamWriter2 = getInstance().streamWriter;
-                outputStreamWriter2.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + stackTrace[i] + "\n");
+                outputStreamWriter2.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/tmessages: " + stack[a] + "\n");
             }
+            getInstance().streamWriter.flush();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private static boolean needSent(Throwable e) {
+        if ((e instanceof InterruptedException) || (e instanceof MediaCodecVideoConvertor.ConversionCanceledException)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static void d(final String message) {
+        if (!BuildVars.LOGS_ENABLED) {
+            return;
+        }
+        ensureInitied();
+        Log.d(tag, message);
+        if (getInstance().streamWriter != null) {
+            getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda0
+                @Override // java.lang.Runnable
+                public final void run() {
+                    FileLog.lambda$d$3(message);
+                }
+            });
+        }
+    }
+
+    public static /* synthetic */ void lambda$d$3(String message) {
+        try {
+            OutputStreamWriter outputStreamWriter = getInstance().streamWriter;
+            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " D/tmessages: " + message + "\n");
             getInstance().streamWriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static boolean needSent(Throwable th) {
-        return !(th instanceof InterruptedException) && !(th instanceof MediaCodecVideoConvertor.ConversionCanceledException);
-    }
-
-    public static void d(final String str) {
+    public static void w(final String message) {
         if (!BuildVars.LOGS_ENABLED) {
             return;
         }
         ensureInitied();
-        Log.d(tag, str);
-        if (getInstance().streamWriter == null) {
-            return;
+        Log.w(tag, message);
+        if (getInstance().streamWriter != null) {
+            getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda2
+                @Override // java.lang.Runnable
+                public final void run() {
+                    FileLog.lambda$w$4(message);
+                }
+            });
         }
-        getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda0
-            @Override // java.lang.Runnable
-            public final void run() {
-                FileLog.lambda$d$3(str);
-            }
-        });
     }
 
-    public static /* synthetic */ void lambda$d$3(String str) {
+    public static /* synthetic */ void lambda$w$4(String message) {
         try {
             OutputStreamWriter outputStreamWriter = getInstance().streamWriter;
-            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " D/tmessages: " + str + "\n");
-            getInstance().streamWriter.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void w(final String str) {
-        if (!BuildVars.LOGS_ENABLED) {
-            return;
-        }
-        ensureInitied();
-        Log.w(tag, str);
-        if (getInstance().streamWriter == null) {
-            return;
-        }
-        getInstance().logQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FileLog$$ExternalSyntheticLambda2
-            @Override // java.lang.Runnable
-            public final void run() {
-                FileLog.lambda$w$4(str);
-            }
-        });
-    }
-
-    public static /* synthetic */ void lambda$w$4(String str) {
-        try {
-            OutputStreamWriter outputStreamWriter = getInstance().streamWriter;
-            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " W/tmessages: " + str + "\n");
+            outputStreamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " W/tmessages: " + message + "\n");
             getInstance().streamWriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
@@ -268,18 +269,18 @@ public class FileLog {
     }
 
     public static void cleanupLogs() {
-        File externalFilesDir;
         ensureInitied();
-        if (ApplicationLoader.applicationContext.getExternalFilesDir(null) == null) {
+        File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+        if (sdCard == null) {
             return;
         }
-        File[] listFiles = new File(externalFilesDir.getAbsolutePath() + "/logs").listFiles();
-        if (listFiles == null) {
-            return;
-        }
-        for (File file : listFiles) {
-            if ((getInstance().currentFile == null || !file.getAbsolutePath().equals(getInstance().currentFile.getAbsolutePath())) && ((getInstance().networkFile == null || !file.getAbsolutePath().equals(getInstance().networkFile.getAbsolutePath())) && (getInstance().tonlibFile == null || !file.getAbsolutePath().equals(getInstance().tonlibFile.getAbsolutePath())))) {
-                file.delete();
+        File dir = new File(sdCard.getAbsolutePath() + "/logs");
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if ((getInstance().currentFile == null || !file.getAbsolutePath().equals(getInstance().currentFile.getAbsolutePath())) && ((getInstance().networkFile == null || !file.getAbsolutePath().equals(getInstance().networkFile.getAbsolutePath())) && (getInstance().tonlibFile == null || !file.getAbsolutePath().equals(getInstance().tonlibFile.getAbsolutePath())))) {
+                    file.delete();
+                }
             }
         }
     }

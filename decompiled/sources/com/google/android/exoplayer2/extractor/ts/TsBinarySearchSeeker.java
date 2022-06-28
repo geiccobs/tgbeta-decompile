@@ -1,66 +1,88 @@
 package com.google.android.exoplayer2.extractor.ts;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.extractor.BinarySearchSeeker;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.TimestampAdjuster;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class TsBinarySearchSeeker extends BinarySearchSeeker {
-    public TsBinarySearchSeeker(TimestampAdjuster timestampAdjuster, long j, long j2, int i) {
-        super(new BinarySearchSeeker.DefaultSeekTimestampConverter(), new TsPcrSeeker(i, timestampAdjuster), j, 0L, j + 1, 0L, j2, 188L, 940);
+    private static final int MINIMUM_SEARCH_RANGE_BYTES = 940;
+    private static final long SEEK_TOLERANCE_US = 100000;
+    private static final int TIMESTAMP_SEARCH_BYTES = 112800;
+
+    public TsBinarySearchSeeker(TimestampAdjuster pcrTimestampAdjuster, long streamDurationUs, long inputLength, int pcrPid) {
+        super(new BinarySearchSeeker.DefaultSeekTimestampConverter(), new TsPcrSeeker(pcrPid, pcrTimestampAdjuster), streamDurationUs, 0L, streamDurationUs + 1, 0L, inputLength, 188L, MINIMUM_SEARCH_RANGE_BYTES);
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class TsPcrSeeker implements BinarySearchSeeker.TimestampSeeker {
         private final ParsableByteArray packetBuffer = new ParsableByteArray();
         private final int pcrPid;
         private final TimestampAdjuster pcrTimestampAdjuster;
 
-        public TsPcrSeeker(int i, TimestampAdjuster timestampAdjuster) {
-            this.pcrPid = i;
-            this.pcrTimestampAdjuster = timestampAdjuster;
+        public TsPcrSeeker(int pcrPid, TimestampAdjuster pcrTimestampAdjuster) {
+            this.pcrPid = pcrPid;
+            this.pcrTimestampAdjuster = pcrTimestampAdjuster;
         }
 
         @Override // com.google.android.exoplayer2.extractor.BinarySearchSeeker.TimestampSeeker
-        public BinarySearchSeeker.TimestampSearchResult searchForTimestamp(ExtractorInput extractorInput, long j) throws IOException, InterruptedException {
-            long position = extractorInput.getPosition();
-            int min = (int) Math.min(112800L, extractorInput.getLength() - position);
-            this.packetBuffer.reset(min);
-            extractorInput.peekFully(this.packetBuffer.data, 0, min);
-            return searchForPcrValueInBuffer(this.packetBuffer, j, position);
+        public BinarySearchSeeker.TimestampSearchResult searchForTimestamp(ExtractorInput input, long targetTimestamp) throws IOException, InterruptedException {
+            long inputPosition = input.getPosition();
+            int bytesToSearch = (int) Math.min(112800L, input.getLength() - inputPosition);
+            this.packetBuffer.reset(bytesToSearch);
+            input.peekFully(this.packetBuffer.data, 0, bytesToSearch);
+            return searchForPcrValueInBuffer(this.packetBuffer, targetTimestamp, inputPosition);
         }
 
-        private BinarySearchSeeker.TimestampSearchResult searchForPcrValueInBuffer(ParsableByteArray parsableByteArray, long j, long j2) {
-            int findSyncBytePosition;
-            int findSyncBytePosition2;
-            int limit = parsableByteArray.limit();
-            long j3 = -1;
-            long j4 = -1;
-            long j5 = -9223372036854775807L;
-            while (parsableByteArray.bytesLeft() >= 188 && (findSyncBytePosition2 = (findSyncBytePosition = TsUtil.findSyncBytePosition(parsableByteArray.data, parsableByteArray.getPosition(), limit)) + 188) <= limit) {
-                long readPcrFromPacket = TsUtil.readPcrFromPacket(parsableByteArray, findSyncBytePosition, this.pcrPid);
-                if (readPcrFromPacket != -9223372036854775807L) {
-                    long adjustTsTimestamp = this.pcrTimestampAdjuster.adjustTsTimestamp(readPcrFromPacket);
-                    if (adjustTsTimestamp > j) {
-                        if (j5 == -9223372036854775807L) {
-                            return BinarySearchSeeker.TimestampSearchResult.overestimatedResult(adjustTsTimestamp, j2);
+        private BinarySearchSeeker.TimestampSearchResult searchForPcrValueInBuffer(ParsableByteArray packetBuffer, long targetPcrTimeUs, long bufferStartOffset) {
+            long endOfLastPacketPosition;
+            int limit;
+            int limit2 = packetBuffer.limit();
+            long startOfLastPacketPosition = -1;
+            long pcrValue = -1;
+            long lastPcrTimeUsInRange = C.TIME_UNSET;
+            while (true) {
+                if (packetBuffer.bytesLeft() < 188) {
+                    endOfLastPacketPosition = pcrValue;
+                    break;
+                }
+                int startOfPacket = TsUtil.findSyncBytePosition(packetBuffer.data, packetBuffer.getPosition(), limit2);
+                int endOfPacket = startOfPacket + TsExtractor.TS_PACKET_SIZE;
+                if (endOfPacket > limit2) {
+                    endOfLastPacketPosition = pcrValue;
+                    break;
+                }
+                long pcrValue2 = TsUtil.readPcrFromPacket(packetBuffer, startOfPacket, this.pcrPid);
+                if (pcrValue2 == C.TIME_UNSET) {
+                    limit = limit2;
+                } else {
+                    long pcrTimeUs = this.pcrTimestampAdjuster.adjustTsTimestamp(pcrValue2);
+                    if (pcrTimeUs > targetPcrTimeUs) {
+                        if (lastPcrTimeUsInRange == C.TIME_UNSET) {
+                            return BinarySearchSeeker.TimestampSearchResult.overestimatedResult(pcrTimeUs, bufferStartOffset);
                         }
-                        return BinarySearchSeeker.TimestampSearchResult.targetFoundResult(j2 + j4);
-                    } else if (100000 + adjustTsTimestamp > j) {
-                        return BinarySearchSeeker.TimestampSearchResult.targetFoundResult(j2 + findSyncBytePosition);
+                        return BinarySearchSeeker.TimestampSearchResult.targetFoundResult(bufferStartOffset + startOfLastPacketPosition);
+                    } else if (pcrTimeUs + TsBinarySearchSeeker.SEEK_TOLERANCE_US > targetPcrTimeUs) {
+                        long startOfPacketInStream = startOfPacket + bufferStartOffset;
+                        return BinarySearchSeeker.TimestampSearchResult.targetFoundResult(startOfPacketInStream);
                     } else {
-                        j4 = findSyncBytePosition;
-                        j5 = adjustTsTimestamp;
+                        limit = limit2;
+                        long lastPcrTimeUsInRange2 = startOfPacket;
+                        startOfLastPacketPosition = lastPcrTimeUsInRange2;
+                        lastPcrTimeUsInRange = pcrTimeUs;
                     }
                 }
-                parsableByteArray.setPosition(findSyncBytePosition2);
-                j3 = findSyncBytePosition2;
+                packetBuffer.setPosition(endOfPacket);
+                pcrValue = endOfPacket;
+                limit2 = limit;
             }
-            if (j5 != -9223372036854775807L) {
-                return BinarySearchSeeker.TimestampSearchResult.underestimatedResult(j5, j2 + j3);
+            if (lastPcrTimeUsInRange != C.TIME_UNSET) {
+                long endOfLastPacketPositionInStream = bufferStartOffset + endOfLastPacketPosition;
+                return BinarySearchSeeker.TimestampSearchResult.underestimatedResult(lastPcrTimeUsInRange, endOfLastPacketPositionInStream);
             }
             return BinarySearchSeeker.TimestampSearchResult.NO_TIMESTAMP_IN_RANGE_RESULT;
         }

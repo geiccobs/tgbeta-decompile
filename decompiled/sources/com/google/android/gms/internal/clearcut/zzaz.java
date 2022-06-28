@@ -1,16 +1,18 @@
 package com.google.android.gms.internal.clearcut;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
-final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
+import java.util.RandomAccess;
+/* loaded from: classes3.dex */
+final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
+    private static final zzaz zzfg;
     private int size;
     private boolean[] zzfh;
 
     static {
-        new zzaz().zzv();
+        zzaz zzazVar = new zzaz();
+        zzfg = zzazVar;
+        zzazVar.zzv();
     }
 
     zzaz() {
@@ -39,7 +41,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
         }
         this.zzfh[i] = z;
         this.size++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     private final void zzg(int i) {
@@ -58,7 +60,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zza(i, ((Boolean) obj).booleanValue());
     }
@@ -76,7 +78,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
             return false;
         }
         int i2 = this.size;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -86,7 +88,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
         }
         System.arraycopy(zzazVar.zzfh, 0, this.zzfh, this.size, zzazVar.size);
         this.size = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -130,7 +132,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
         return i;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzw();
         zzg(i);
@@ -141,7 +143,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
             System.arraycopy(zArr, i + 1, zArr, i, i2 - i);
         }
         this.size--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Boolean.valueOf(z);
     }
 
@@ -153,7 +155,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
                 boolean[] zArr = this.zzfh;
                 System.arraycopy(zArr, i + 1, zArr, i, this.size - i);
                 this.size--;
-                ((AbstractList) this).modCount++;
+                this.modCount++;
                 return true;
             }
         }
@@ -167,13 +169,13 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
             boolean[] zArr = this.zzfh;
             System.arraycopy(zArr, i2, zArr, i, this.size - i2);
             this.size -= i2 - i;
-            ((AbstractList) this).modCount++;
+            this.modCount++;
             return;
         }
         throw new IndexOutOfBoundsException("toIndex < fromIndex");
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         boolean booleanValue = ((Boolean) obj).booleanValue();
         zzw();

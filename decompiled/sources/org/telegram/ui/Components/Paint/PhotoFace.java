@@ -4,8 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
+import java.util.List;
 import org.telegram.ui.Components.Size;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class PhotoFace {
     private float angle;
     private org.telegram.ui.Components.Point chinPoint;
@@ -15,80 +16,85 @@ public class PhotoFace {
     private org.telegram.ui.Components.Point mouthPoint;
     private float width;
 
-    public PhotoFace(Face face, Bitmap bitmap, Size size, boolean z) {
-        float degrees;
-        org.telegram.ui.Components.Point point = null;
-        org.telegram.ui.Components.Point point2 = null;
-        org.telegram.ui.Components.Point point3 = null;
-        org.telegram.ui.Components.Point point4 = null;
-        for (Landmark landmark : face.getLandmarks()) {
-            PointF position = landmark.getPosition();
-            int type = landmark.getType();
-            if (type == 4) {
-                point = transposePoint(position, bitmap, size, z);
-            } else if (type == 5) {
-                point3 = transposePoint(position, bitmap, size, z);
-            } else if (type == 10) {
-                point2 = transposePoint(position, bitmap, size, z);
-            } else if (type == 11) {
-                point4 = transposePoint(position, bitmap, size, z);
+    public PhotoFace(Face face, Bitmap sourceBitmap, Size targetSize, boolean sideward) {
+        List<Landmark> landmarks = face.getLandmarks();
+        org.telegram.ui.Components.Point leftEyePoint = null;
+        org.telegram.ui.Components.Point rightEyePoint = null;
+        org.telegram.ui.Components.Point leftMouthPoint = null;
+        org.telegram.ui.Components.Point rightMouthPoint = null;
+        for (Landmark landmark : landmarks) {
+            PointF point = landmark.getPosition();
+            switch (landmark.getType()) {
+                case 4:
+                    leftEyePoint = transposePoint(point, sourceBitmap, targetSize, sideward);
+                    break;
+                case 5:
+                    leftMouthPoint = transposePoint(point, sourceBitmap, targetSize, sideward);
+                    break;
+                case 10:
+                    rightEyePoint = transposePoint(point, sourceBitmap, targetSize, sideward);
+                    break;
+                case 11:
+                    rightMouthPoint = transposePoint(point, sourceBitmap, targetSize, sideward);
+                    break;
             }
         }
-        if (point != null && point2 != null) {
-            if (point.x < point2.x) {
-                org.telegram.ui.Components.Point point5 = point2;
-                point2 = point;
-                point = point5;
+        if (leftEyePoint != null && rightEyePoint != null) {
+            if (leftEyePoint.x < rightEyePoint.x) {
+                org.telegram.ui.Components.Point temp = leftEyePoint;
+                leftEyePoint = rightEyePoint;
+                rightEyePoint = temp;
             }
-            this.eyesCenterPoint = new org.telegram.ui.Components.Point((point.x * 0.5f) + (point2.x * 0.5f), (point.y * 0.5f) + (point2.y * 0.5f));
-            this.eyesDistance = (float) Math.hypot(point2.x - point.x, point2.y - point.y);
-            this.angle = (float) Math.toDegrees(Math.atan2(point2.y - point.y, point2.x - point.x) + 3.141592653589793d);
+            this.eyesCenterPoint = new org.telegram.ui.Components.Point((leftEyePoint.x * 0.5f) + (rightEyePoint.x * 0.5f), (leftEyePoint.y * 0.5f) + (rightEyePoint.y * 0.5f));
+            this.eyesDistance = (float) Math.hypot(rightEyePoint.x - leftEyePoint.x, rightEyePoint.y - leftEyePoint.y);
+            float degrees = (float) Math.toDegrees(Math.atan2(rightEyePoint.y - leftEyePoint.y, rightEyePoint.x - leftEyePoint.x) + 3.141592653589793d);
+            this.angle = degrees;
             float f = this.eyesDistance;
             this.width = 2.35f * f;
-            float f2 = f * 0.8f;
-            double radians = (float) Math.toRadians(degrees - 90.0f);
-            this.foreheadPoint = new org.telegram.ui.Components.Point(this.eyesCenterPoint.x + (((float) Math.cos(radians)) * f2), this.eyesCenterPoint.y + (f2 * ((float) Math.sin(radians))));
+            float foreheadHeight = f * 0.8f;
+            float upAngle = (float) Math.toRadians(degrees - 90.0f);
+            this.foreheadPoint = new org.telegram.ui.Components.Point(this.eyesCenterPoint.x + (((float) Math.cos(upAngle)) * foreheadHeight), this.eyesCenterPoint.y + (((float) Math.sin(upAngle)) * foreheadHeight));
         }
-        if (point3 == null || point4 == null) {
-            return;
+        if (leftMouthPoint != null && rightMouthPoint != null) {
+            if (leftMouthPoint.x < rightMouthPoint.x) {
+                org.telegram.ui.Components.Point temp2 = leftMouthPoint;
+                leftMouthPoint = rightMouthPoint;
+                rightMouthPoint = temp2;
+            }
+            this.mouthPoint = new org.telegram.ui.Components.Point((leftMouthPoint.x * 0.5f) + (rightMouthPoint.x * 0.5f), (leftMouthPoint.y * 0.5f) + (rightMouthPoint.y * 0.5f));
+            float chinDepth = this.eyesDistance * 0.7f;
+            float downAngle = (float) Math.toRadians(this.angle + 90.0f);
+            this.chinPoint = new org.telegram.ui.Components.Point(this.mouthPoint.x + (((float) Math.cos(downAngle)) * chinDepth), this.mouthPoint.y + (((float) Math.sin(downAngle)) * chinDepth));
         }
-        if (point3.x < point4.x) {
-            org.telegram.ui.Components.Point point6 = point4;
-            point4 = point3;
-            point3 = point6;
-        }
-        this.mouthPoint = new org.telegram.ui.Components.Point((point3.x * 0.5f) + (point4.x * 0.5f), (point3.y * 0.5f) + (point4.y * 0.5f));
-        float f3 = this.eyesDistance * 0.7f;
-        double radians2 = (float) Math.toRadians(this.angle + 90.0f);
-        this.chinPoint = new org.telegram.ui.Components.Point(this.mouthPoint.x + (((float) Math.cos(radians2)) * f3), this.mouthPoint.y + (f3 * ((float) Math.sin(radians2))));
     }
 
     public boolean isSufficient() {
         return this.eyesCenterPoint != null;
     }
 
-    private org.telegram.ui.Components.Point transposePoint(PointF pointF, Bitmap bitmap, Size size, boolean z) {
-        return new org.telegram.ui.Components.Point((size.width * pointF.x) / (z ? bitmap.getHeight() : bitmap.getWidth()), (size.height * pointF.y) / (z ? bitmap.getWidth() : bitmap.getHeight()));
+    private org.telegram.ui.Components.Point transposePoint(PointF point, Bitmap sourceBitmap, Size targetSize, boolean sideward) {
+        float bitmapW = sideward ? sourceBitmap.getHeight() : sourceBitmap.getWidth();
+        float bitmapH = sideward ? sourceBitmap.getWidth() : sourceBitmap.getHeight();
+        return new org.telegram.ui.Components.Point((targetSize.width * point.x) / bitmapW, (targetSize.height * point.y) / bitmapH);
     }
 
-    public org.telegram.ui.Components.Point getPointForAnchor(int i) {
-        if (i != 0) {
-            if (i == 1) {
+    public org.telegram.ui.Components.Point getPointForAnchor(int anchor) {
+        switch (anchor) {
+            case 0:
+                return this.foreheadPoint;
+            case 1:
                 return this.eyesCenterPoint;
-            }
-            if (i == 2) {
+            case 2:
                 return this.mouthPoint;
-            }
-            if (i == 3) {
+            case 3:
                 return this.chinPoint;
-            }
-            return null;
+            default:
+                return null;
         }
-        return this.foreheadPoint;
     }
 
-    public float getWidthForAnchor(int i) {
-        if (i == 1) {
+    public float getWidthForAnchor(int anchor) {
+        if (anchor == 1) {
             return this.eyesDistance;
         }
         return this.width;

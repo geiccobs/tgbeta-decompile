@@ -3,13 +3,14 @@ package org.telegram.ui.Cells;
 import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class LocationDirectionCell extends FrameLayout {
     private SimpleTextView buttonTextView;
     private FrameLayout frameLayout;
@@ -20,14 +21,14 @@ public class LocationDirectionCell extends FrameLayout {
         this.resourcesProvider = resourcesProvider;
         FrameLayout frameLayout = new FrameLayout(context);
         this.frameLayout = frameLayout;
-        frameLayout.setBackground(Theme.AdaptiveRipple.filledRect(getThemedColor("featuredStickers_addButton"), 4.0f));
+        frameLayout.setBackground(Theme.AdaptiveRipple.filledRect(getThemedColor(Theme.key_featuredStickers_addButton), 4.0f));
         addView(this.frameLayout, LayoutHelper.createFrame(-1, 48.0f, 51, 16.0f, 10.0f, 16.0f, 0.0f));
         SimpleTextView simpleTextView = new SimpleTextView(context);
         this.buttonTextView = simpleTextView;
         simpleTextView.setPadding(AndroidUtilities.dp(34.0f), 0, AndroidUtilities.dp(34.0f), 0);
         this.buttonTextView.setGravity(17);
         this.buttonTextView.setDrawablePadding(AndroidUtilities.dp(8.0f));
-        this.buttonTextView.setTextColor(getThemedColor("featuredStickers_buttonText"));
+        this.buttonTextView.setTextColor(getThemedColor(Theme.key_featuredStickers_buttonText));
         this.buttonTextView.setTextSize(14);
         this.buttonTextView.setText(LocaleController.getString("Directions", R.string.Directions));
         this.buttonTextView.setLeftDrawable(R.drawable.navigate);
@@ -36,17 +37,17 @@ public class LocationDirectionCell extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(73.0f), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(73.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
-    public void setOnButtonClick(View.OnClickListener onClickListener) {
-        this.frameLayout.setOnClickListener(onClickListener);
+    public void setOnButtonClick(View.OnClickListener onButtonClick) {
+        this.frameLayout.setOnClickListener(onButtonClick);
     }
 
-    private int getThemedColor(String str) {
+    private int getThemedColor(String key) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
-        return color != null ? color.intValue() : Theme.getColor(str);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
+        return color != null ? color.intValue() : Theme.getColor(key);
     }
 }

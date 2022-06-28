@@ -3,8 +3,9 @@ package com.google.android.exoplayer2.upstream;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 import java.util.Arrays;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DefaultAllocator implements Allocator {
+    private static final int AVAILABLE_EXTRA_CAPACITY = 100;
     private int allocatedCount;
     private Allocation[] availableAllocations;
     private int availableCount;
@@ -14,21 +15,23 @@ public final class DefaultAllocator implements Allocator {
     private int targetBufferSize;
     private final boolean trimOnReset;
 
-    public DefaultAllocator(boolean z, int i) {
-        this(z, i, 0);
+    public DefaultAllocator(boolean trimOnReset, int individualAllocationSize) {
+        this(trimOnReset, individualAllocationSize, 0);
     }
 
-    public DefaultAllocator(boolean z, int i, int i2) {
-        Assertions.checkArgument(i > 0);
-        Assertions.checkArgument(i2 >= 0);
-        this.trimOnReset = z;
-        this.individualAllocationSize = i;
-        this.availableCount = i2;
-        this.availableAllocations = new Allocation[i2 + 100];
-        if (i2 > 0) {
-            this.initialAllocationBlock = new byte[i2 * i];
-            for (int i3 = 0; i3 < i2; i3++) {
-                this.availableAllocations[i3] = new Allocation(this.initialAllocationBlock, i3 * i);
+    public DefaultAllocator(boolean trimOnReset, int individualAllocationSize, int initialAllocationCount) {
+        boolean z = false;
+        Assertions.checkArgument(individualAllocationSize > 0);
+        Assertions.checkArgument(initialAllocationCount >= 0 ? true : z);
+        this.trimOnReset = trimOnReset;
+        this.individualAllocationSize = individualAllocationSize;
+        this.availableCount = initialAllocationCount;
+        this.availableAllocations = new Allocation[initialAllocationCount + 100];
+        if (initialAllocationCount > 0) {
+            this.initialAllocationBlock = new byte[initialAllocationCount * individualAllocationSize];
+            for (int i = 0; i < initialAllocationCount; i++) {
+                int allocationOffset = i * individualAllocationSize;
+                this.availableAllocations[i] = new Allocation(this.initialAllocationBlock, allocationOffset);
             }
         } else {
             this.initialAllocationBlock = null;
@@ -42,10 +45,10 @@ public final class DefaultAllocator implements Allocator {
         }
     }
 
-    public synchronized void setTargetBufferSize(int i) {
-        boolean z = i < this.targetBufferSize;
-        this.targetBufferSize = i;
-        if (z) {
+    public synchronized void setTargetBufferSize(int targetBufferSize) {
+        boolean targetBufferSizeReduced = targetBufferSize < this.targetBufferSize;
+        this.targetBufferSize = targetBufferSize;
+        if (targetBufferSizeReduced) {
             trim();
         }
     }
@@ -75,61 +78,61 @@ public final class DefaultAllocator implements Allocator {
     }
 
     @Override // com.google.android.exoplayer2.upstream.Allocator
-    public synchronized void release(Allocation[] allocationArr) {
+    public synchronized void release(Allocation[] allocations) {
         int i = this.availableCount;
-        int length = allocationArr.length + i;
-        Allocation[] allocationArr2 = this.availableAllocations;
-        if (length >= allocationArr2.length) {
-            this.availableAllocations = (Allocation[]) Arrays.copyOf(allocationArr2, Math.max(allocationArr2.length * 2, i + allocationArr.length));
+        int length = allocations.length + i;
+        Allocation[] allocationArr = this.availableAllocations;
+        if (length >= allocationArr.length) {
+            this.availableAllocations = (Allocation[]) Arrays.copyOf(allocationArr, Math.max(allocationArr.length * 2, i + allocations.length));
         }
-        for (Allocation allocation : allocationArr) {
-            Allocation[] allocationArr3 = this.availableAllocations;
+        for (Allocation allocation : allocations) {
+            Allocation[] allocationArr2 = this.availableAllocations;
             int i2 = this.availableCount;
             this.availableCount = i2 + 1;
-            allocationArr3[i2] = allocation;
+            allocationArr2[i2] = allocation;
         }
-        this.allocatedCount -= allocationArr.length;
+        this.allocatedCount -= allocations.length;
         notifyAll();
     }
 
     @Override // com.google.android.exoplayer2.upstream.Allocator
     public synchronized void trim() {
-        int i = 0;
-        int max = Math.max(0, Util.ceilDivide(this.targetBufferSize, this.individualAllocationSize) - this.allocatedCount);
-        int i2 = this.availableCount;
-        if (max >= i2) {
+        int targetAllocationCount = Util.ceilDivide(this.targetBufferSize, this.individualAllocationSize);
+        int targetAvailableCount = Math.max(0, targetAllocationCount - this.allocatedCount);
+        int i = this.availableCount;
+        if (targetAvailableCount >= i) {
             return;
         }
         if (this.initialAllocationBlock != null) {
-            int i3 = i2 - 1;
-            while (i <= i3) {
-                Allocation[] allocationArr = this.availableAllocations;
-                Allocation allocation = allocationArr[i];
-                byte[] bArr = allocation.data;
-                byte[] bArr2 = this.initialAllocationBlock;
-                if (bArr == bArr2) {
-                    i++;
+            int lowIndex = 0;
+            int highIndex = i - 1;
+            while (lowIndex <= highIndex) {
+                Allocation lowAllocation = this.availableAllocations[lowIndex];
+                if (lowAllocation.data == this.initialAllocationBlock) {
+                    lowIndex++;
                 } else {
-                    Allocation allocation2 = allocationArr[i3];
-                    if (allocation2.data != bArr2) {
-                        i3--;
+                    Allocation highAllocation = this.availableAllocations[highIndex];
+                    if (highAllocation.data != this.initialAllocationBlock) {
+                        highIndex--;
                     } else {
-                        allocationArr[i] = allocation2;
-                        allocationArr[i3] = allocation;
-                        i3--;
-                        i++;
+                        Allocation[] allocationArr = this.availableAllocations;
+                        allocationArr[lowIndex] = highAllocation;
+                        allocationArr[highIndex] = lowAllocation;
+                        highIndex--;
+                        lowIndex++;
                     }
                 }
             }
-            max = Math.max(max, i);
-            if (max >= this.availableCount) {
+            targetAvailableCount = Math.max(targetAvailableCount, lowIndex);
+            if (targetAvailableCount >= this.availableCount) {
                 return;
             }
         }
-        Arrays.fill(this.availableAllocations, max, this.availableCount, (Object) null);
-        this.availableCount = max;
+        Arrays.fill(this.availableAllocations, targetAvailableCount, this.availableCount, (Object) null);
+        this.availableCount = targetAvailableCount;
     }
 
+    @Override // com.google.android.exoplayer2.upstream.Allocator
     public synchronized int getTotalBytesAllocated() {
         return this.allocatedCount * this.individualAllocationSize;
     }

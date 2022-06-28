@@ -7,18 +7,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzac<E> extends AbstractCollection<E> implements Serializable {
     private static final Object[] zza = new Object[0];
 
-    abstract int zza(Object[] objArr, int i);
-
-    public abstract zzak<E> zza();
-
-    @NullableDecl
-    public Object[] zzb() {
-        return null;
-    }
+    /* renamed from: zza */
+    public abstract zzak<E> iterator();
 
     @Override // java.util.AbstractCollection, java.util.Collection
     public final Object[] toArray() {
@@ -40,6 +34,11 @@ public abstract class zzac<E> extends AbstractCollection<E> implements Serializa
         }
         zza(tArr, 0);
         return tArr;
+    }
+
+    @NullableDecl
+    public Object[] zzb() {
+        return null;
     }
 
     public int zzc() {
@@ -84,5 +83,14 @@ public abstract class zzac<E> extends AbstractCollection<E> implements Serializa
     @Deprecated
     public final void clear() {
         throw new UnsupportedOperationException();
+    }
+
+    int zza(Object[] objArr, int i) {
+        zzak zzakVar = (zzak) iterator();
+        while (zzakVar.hasNext()) {
+            objArr[i] = zzakVar.next();
+            i++;
+        }
+        return i;
     }
 }

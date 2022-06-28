@@ -2,7 +2,7 @@ package org.webrtc;
 
 import java.nio.ByteBuffer;
 import org.webrtc.VideoFrame;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 class WrappedNativeI420Buffer implements VideoFrame.I420Buffer {
     private final ByteBuffer dataU;
     private final ByteBuffer dataV;
@@ -19,17 +19,16 @@ class WrappedNativeI420Buffer implements VideoFrame.I420Buffer {
         return VideoFrame.I420Buffer.CC.$default$getBufferType(this);
     }
 
-    @CalledByNative
-    WrappedNativeI420Buffer(int i, int i2, ByteBuffer byteBuffer, int i3, ByteBuffer byteBuffer2, int i4, ByteBuffer byteBuffer3, int i5, long j) {
-        this.width = i;
-        this.height = i2;
-        this.dataY = byteBuffer;
-        this.strideY = i3;
-        this.dataU = byteBuffer2;
-        this.strideU = i4;
-        this.dataV = byteBuffer3;
-        this.strideV = i5;
-        this.nativeBuffer = j;
+    WrappedNativeI420Buffer(int width, int height, ByteBuffer dataY, int strideY, ByteBuffer dataU, int strideU, ByteBuffer dataV, int strideV, long nativeBuffer) {
+        this.width = width;
+        this.height = height;
+        this.dataY = dataY;
+        this.strideY = strideY;
+        this.dataU = dataU;
+        this.strideU = strideU;
+        this.dataV = dataV;
+        this.strideV = strideV;
+        this.nativeBuffer = nativeBuffer;
         retain();
     }
 
@@ -90,7 +89,7 @@ class WrappedNativeI420Buffer implements VideoFrame.I420Buffer {
     }
 
     @Override // org.webrtc.VideoFrame.Buffer
-    public VideoFrame.Buffer cropAndScale(int i, int i2, int i3, int i4, int i5, int i6) {
-        return JavaI420Buffer.cropAndScaleI420(this, i, i2, i3, i4, i5, i6);
+    public VideoFrame.Buffer cropAndScale(int cropX, int cropY, int cropWidth, int cropHeight, int scaleWidth, int scaleHeight) {
+        return JavaI420Buffer.cropAndScaleI420(this, cropX, cropY, cropWidth, cropHeight, scaleWidth, scaleHeight);
     }
 }

@@ -4,12 +4,12 @@ import android.content.Context;
 import com.google.android.datatransport.runtime.dagger.internal.Factory;
 import com.google.android.datatransport.runtime.dagger.internal.Preconditions;
 import javax.inject.Provider;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class EventStoreModule_PackageNameFactory implements Factory<String> {
     private final Provider<Context> contextProvider;
 
-    public EventStoreModule_PackageNameFactory(Provider<Context> provider) {
-        this.contextProvider = provider;
+    public EventStoreModule_PackageNameFactory(Provider<Context> contextProvider) {
+        this.contextProvider = contextProvider;
     }
 
     @Override // javax.inject.Provider
@@ -17,8 +17,8 @@ public final class EventStoreModule_PackageNameFactory implements Factory<String
         return packageName(this.contextProvider.get());
     }
 
-    public static EventStoreModule_PackageNameFactory create(Provider<Context> provider) {
-        return new EventStoreModule_PackageNameFactory(provider);
+    public static EventStoreModule_PackageNameFactory create(Provider<Context> contextProvider) {
+        return new EventStoreModule_PackageNameFactory(contextProvider);
     }
 
     public static String packageName(Context context) {

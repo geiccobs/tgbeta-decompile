@@ -1,12 +1,11 @@
 package com.microsoft.appcenter.utils.storage;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class SharedPreferencesManager {
-    @SuppressLint({"StaticFieldLeak"})
+    private static final String PREFERENCES_NAME = "AppCenter";
     private static Context sContext;
     private static SharedPreferences sSharedPreferences;
 
@@ -19,75 +18,99 @@ public class SharedPreferencesManager {
         }
     }
 
-    public static boolean getBoolean(String str, boolean z) {
-        return sSharedPreferences.getBoolean(str, z);
+    public static boolean getBoolean(String key) {
+        return getBoolean(key, false);
     }
 
-    public static void putBoolean(String str, boolean z) {
-        SharedPreferences.Editor edit = sSharedPreferences.edit();
-        edit.putBoolean(str, z);
-        edit.apply();
+    public static boolean getBoolean(String key, boolean defValue) {
+        return sSharedPreferences.getBoolean(key, defValue);
     }
 
-    public static int getInt(String str) {
-        return getInt(str, 0);
+    public static void putBoolean(String key, boolean value) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
     }
 
-    public static int getInt(String str, int i) {
-        return sSharedPreferences.getInt(str, i);
+    public static float getFloat(String key) {
+        return getFloat(key, 0.0f);
     }
 
-    public static void putInt(String str, int i) {
-        SharedPreferences.Editor edit = sSharedPreferences.edit();
-        edit.putInt(str, i);
-        edit.apply();
+    public static float getFloat(String key, float defValue) {
+        return sSharedPreferences.getFloat(key, defValue);
     }
 
-    public static long getLong(String str) {
-        return getLong(str, 0L);
+    public static void putFloat(String key, float value) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.putFloat(key, value);
+        editor.apply();
     }
 
-    public static long getLong(String str, long j) {
-        return sSharedPreferences.getLong(str, j);
+    public static int getInt(String key) {
+        return getInt(key, 0);
     }
 
-    public static void putLong(String str, long j) {
-        SharedPreferences.Editor edit = sSharedPreferences.edit();
-        edit.putLong(str, j);
-        edit.apply();
+    public static int getInt(String key, int defValue) {
+        return sSharedPreferences.getInt(key, defValue);
     }
 
-    public static String getString(String str) {
-        return getString(str, null);
+    public static void putInt(String key, int value) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.putInt(key, value);
+        editor.apply();
     }
 
-    public static String getString(String str, String str2) {
-        return sSharedPreferences.getString(str, str2);
+    public static long getLong(String key) {
+        return getLong(key, 0L);
     }
 
-    public static void putString(String str, String str2) {
-        SharedPreferences.Editor edit = sSharedPreferences.edit();
-        edit.putString(str, str2);
-        edit.apply();
+    public static long getLong(String key, long defValue) {
+        return sSharedPreferences.getLong(key, defValue);
     }
 
-    public static Set<String> getStringSet(String str) {
-        return getStringSet(str, null);
+    public static void putLong(String key, long value) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.putLong(key, value);
+        editor.apply();
     }
 
-    public static Set<String> getStringSet(String str, Set<String> set) {
-        return sSharedPreferences.getStringSet(str, set);
+    public static String getString(String key) {
+        return getString(key, null);
     }
 
-    public static void putStringSet(String str, Set<String> set) {
-        SharedPreferences.Editor edit = sSharedPreferences.edit();
-        edit.putStringSet(str, set);
-        edit.apply();
+    public static String getString(String key, String defValue) {
+        return sSharedPreferences.getString(key, defValue);
     }
 
-    public static void remove(String str) {
-        SharedPreferences.Editor edit = sSharedPreferences.edit();
-        edit.remove(str);
-        edit.apply();
+    public static void putString(String key, String value) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    public static Set<String> getStringSet(String key) {
+        return getStringSet(key, null);
+    }
+
+    public static Set<String> getStringSet(String key, Set<String> defValue) {
+        return sSharedPreferences.getStringSet(key, defValue);
+    }
+
+    public static void putStringSet(String key, Set<String> value) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.putStringSet(key, value);
+        editor.apply();
+    }
+
+    public static void remove(String key) {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.remove(key);
+        editor.apply();
+    }
+
+    public static void clear() {
+        SharedPreferences.Editor editor = sSharedPreferences.edit();
+        editor.clear();
+        editor.apply();
     }
 }

@@ -1,6 +1,6 @@
 package com.google.mlkit.common.sdkinternal;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final /* synthetic */ class zzc implements Runnable {
     static final Runnable zza = new zzc();
 

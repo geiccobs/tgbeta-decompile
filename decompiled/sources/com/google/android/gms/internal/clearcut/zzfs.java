@@ -1,12 +1,12 @@
 package com.google.android.gms.internal.clearcut;
 
+import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzfs {
     private final ByteBuffer zzgd;
     private zzbn zzrh;
@@ -80,7 +80,7 @@ public final class zzfs {
 
     private final void zzap(int i) throws IOException {
         while ((i & (-128)) != 0) {
-            zzao((i & 127) | ConnectionsManager.RequestFlagNeedQuickAck);
+            zzao((i & 127) | 128);
             i >>>= 7;
         }
         zzao(i);
@@ -125,10 +125,10 @@ public final class zzfs {
                                 char charAt3 = charSequence.charAt(i5);
                                 if (Character.isSurrogatePair(charAt2, charAt3)) {
                                     int codePoint = Character.toCodePoint(charAt2, charAt3);
-                                    byteBuffer.put((byte) ((codePoint >>> 18) | 240));
-                                    byteBuffer.put((byte) (((codePoint >>> 12) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                                    byteBuffer.put((byte) (((codePoint >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                                    byteBuffer.put((byte) ((codePoint & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                                    byteBuffer.put((byte) ((codePoint >>> 18) | PsExtractor.VIDEO_STREAM_MASK));
+                                    byteBuffer.put((byte) (((codePoint >>> 12) & 63) | 128));
+                                    byteBuffer.put((byte) (((codePoint >>> 6) & 63) | 128));
+                                    byteBuffer.put((byte) ((codePoint & 63) | 128));
                                     i4 = i5;
                                     i4++;
                                 } else {
@@ -141,10 +141,10 @@ public final class zzfs {
                             throw new IllegalArgumentException(sb.toString());
                         } else {
                             byteBuffer.put((byte) ((charAt2 >>> '\f') | 480));
-                            i3 = ((charAt2 >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck;
+                            i3 = ((charAt2 >>> 6) & 63) | 128;
                         }
                         byteBuffer.put((byte) i3);
-                        c = (charAt2 & '?') | ConnectionsManager.RequestFlagNeedQuickAck;
+                        c = (charAt2 & '?') | 128;
                     }
                     byteBuffer.put((byte) c);
                     i4++;
@@ -176,7 +176,7 @@ public final class zzfs {
                                 int i8 = i + 1;
                                 array[i] = (byte) ((charAt4 >>> 6) | 960);
                                 i = i8 + 1;
-                                array[i8] = (byte) ((charAt4 & '?') | ConnectionsManager.RequestFlagNeedQuickAck);
+                                array[i8] = (byte) ((charAt4 & '?') | 128);
                             } else if ((charAt4 >= 55296 && 57343 >= charAt4) || i > i6 - 3) {
                                 if (i > i6 - 4) {
                                     StringBuilder sb2 = new StringBuilder(37);
@@ -192,13 +192,13 @@ public final class zzfs {
                                     if (Character.isSurrogatePair(charAt4, charAt5)) {
                                         int codePoint2 = Character.toCodePoint(charAt4, charAt5);
                                         int i10 = i + 1;
-                                        array[i] = (byte) ((codePoint2 >>> 18) | 240);
+                                        array[i] = (byte) ((codePoint2 >>> 18) | PsExtractor.VIDEO_STREAM_MASK);
                                         int i11 = i10 + 1;
-                                        array[i10] = (byte) (((codePoint2 >>> 12) & 63) | ConnectionsManager.RequestFlagNeedQuickAck);
+                                        array[i10] = (byte) (((codePoint2 >>> 12) & 63) | 128);
                                         int i12 = i11 + 1;
-                                        array[i11] = (byte) (((codePoint2 >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck);
+                                        array[i11] = (byte) (((codePoint2 >>> 6) & 63) | 128);
                                         i = i12 + 1;
-                                        array[i12] = (byte) ((codePoint2 & 63) | ConnectionsManager.RequestFlagNeedQuickAck);
+                                        array[i12] = (byte) ((codePoint2 & 63) | 128);
                                         i4 = i9;
                                     } else {
                                         i4 = i9;
@@ -212,9 +212,9 @@ public final class zzfs {
                                 int i13 = i + 1;
                                 array[i] = (byte) ((charAt4 >>> '\f') | 480);
                                 int i14 = i13 + 1;
-                                array[i13] = (byte) (((charAt4 >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck);
+                                array[i13] = (byte) (((charAt4 >>> 6) & 63) | 128);
                                 i2 = i14 + 1;
-                                array[i14] = (byte) ((charAt4 & '?') | ConnectionsManager.RequestFlagNeedQuickAck);
+                                array[i14] = (byte) ((charAt4 & '?') | 128);
                             }
                             i4++;
                         } else {
@@ -410,7 +410,7 @@ public final class zzfs {
 
     public final void zzn(long j) throws IOException {
         while (((-128) & j) != 0) {
-            zzao((((int) j) & 127) | ConnectionsManager.RequestFlagNeedQuickAck);
+            zzao((((int) j) & 127) | 128);
             j >>>= 7;
         }
         zzao((int) j);

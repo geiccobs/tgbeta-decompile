@@ -9,19 +9,20 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
-import androidx.core.R$id;
+import androidx.core.R;
+import androidx.core.view.accessibility.AccessibilityClickableSpanCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.core.view.accessibility.AccessibilityNodeProviderCompat;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class AccessibilityDelegateCompat {
     private static final View.AccessibilityDelegate DEFAULT_DELEGATE = new View.AccessibilityDelegate();
     private final View.AccessibilityDelegate mBridge;
     private final View.AccessibilityDelegate mOriginalDelegate;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class AccessibilityDelegateAdapter extends View.AccessibilityDelegate {
         final AccessibilityDelegateCompat mCompat;
 
@@ -41,16 +42,16 @@ public class AccessibilityDelegateCompat {
 
         @Override // android.view.View.AccessibilityDelegate
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
-            AccessibilityNodeInfoCompat wrap = AccessibilityNodeInfoCompat.wrap(info);
-            wrap.setScreenReaderFocusable(ViewCompat.isScreenReaderFocusable(host));
-            wrap.setHeading(ViewCompat.isAccessibilityHeading(host));
-            wrap.setPaneTitle(ViewCompat.getAccessibilityPaneTitle(host));
-            wrap.setStateDescription(ViewCompat.getStateDescription(host));
-            this.mCompat.onInitializeAccessibilityNodeInfo(host, wrap);
-            wrap.addSpansToExtras(info.getText(), host);
-            List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> actionList = AccessibilityDelegateCompat.getActionList(host);
-            for (int i = 0; i < actionList.size(); i++) {
-                wrap.addAction(actionList.get(i));
+            AccessibilityNodeInfoCompat nodeInfoCompat = AccessibilityNodeInfoCompat.wrap(info);
+            nodeInfoCompat.setScreenReaderFocusable(ViewCompat.isScreenReaderFocusable(host));
+            nodeInfoCompat.setHeading(ViewCompat.isAccessibilityHeading(host));
+            nodeInfoCompat.setPaneTitle(ViewCompat.getAccessibilityPaneTitle(host));
+            nodeInfoCompat.setStateDescription(ViewCompat.getStateDescription(host));
+            this.mCompat.onInitializeAccessibilityNodeInfo(host, nodeInfoCompat);
+            nodeInfoCompat.addSpansToExtras(info.getText(), host);
+            List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> actions = AccessibilityDelegateCompat.getActionList(host);
+            for (int i = 0; i < actions.size(); i++) {
+                nodeInfoCompat.addAction(actions.get(i));
             }
         }
 
@@ -76,9 +77,9 @@ public class AccessibilityDelegateCompat {
 
         @Override // android.view.View.AccessibilityDelegate
         public AccessibilityNodeProvider getAccessibilityNodeProvider(View host) {
-            AccessibilityNodeProviderCompat accessibilityNodeProvider = this.mCompat.getAccessibilityNodeProvider(host);
-            if (accessibilityNodeProvider != null) {
-                return (AccessibilityNodeProvider) accessibilityNodeProvider.getProvider();
+            AccessibilityNodeProviderCompat provider = this.mCompat.getAccessibilityNodeProvider(host);
+            if (provider != null) {
+                return (AccessibilityNodeProvider) provider.getProvider();
             }
             return null;
         }
@@ -131,62 +132,69 @@ public class AccessibilityDelegateCompat {
     }
 
     public AccessibilityNodeProviderCompat getAccessibilityNodeProvider(View host) {
-        AccessibilityNodeProvider accessibilityNodeProvider;
-        if (Build.VERSION.SDK_INT < 16 || (accessibilityNodeProvider = this.mOriginalDelegate.getAccessibilityNodeProvider(host)) == null) {
-            return null;
+        Object provider;
+        if (Build.VERSION.SDK_INT >= 16 && (provider = this.mOriginalDelegate.getAccessibilityNodeProvider(host)) != null) {
+            return new AccessibilityNodeProviderCompat(provider);
         }
-        return new AccessibilityNodeProviderCompat(accessibilityNodeProvider);
+        return null;
     }
 
     public boolean performAccessibilityAction(View host, int action, Bundle args) {
-        List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> actionList = getActionList(host);
-        boolean z = false;
+        boolean success = false;
+        List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> actions = getActionList(host);
         int i = 0;
         while (true) {
-            if (i >= actionList.size()) {
+            if (i >= actions.size()) {
                 break;
             }
-            AccessibilityNodeInfoCompat.AccessibilityActionCompat accessibilityActionCompat = actionList.get(i);
-            if (accessibilityActionCompat.getId() == action) {
-                z = accessibilityActionCompat.perform(host, args);
+            AccessibilityNodeInfoCompat.AccessibilityActionCompat actionCompat = actions.get(i);
+            if (actionCompat.getId() != action) {
+                i++;
+            } else {
+                success = actionCompat.perform(host, args);
                 break;
             }
-            i++;
         }
-        if (!z && Build.VERSION.SDK_INT >= 16) {
-            z = this.mOriginalDelegate.performAccessibilityAction(host, action, args);
+        if (!success && Build.VERSION.SDK_INT >= 16) {
+            success = this.mOriginalDelegate.performAccessibilityAction(host, action, args);
         }
-        return (z || action != R$id.accessibility_action_clickable_span) ? z : performClickableSpanAction(args.getInt("ACCESSIBILITY_CLICKABLE_SPAN_ID", -1), host);
+        if (!success && action == R.id.accessibility_action_clickable_span) {
+            boolean success2 = performClickableSpanAction(args.getInt(AccessibilityClickableSpanCompat.SPAN_ID, -1), host);
+            return success2;
+        }
+        return success;
     }
 
     private boolean performClickableSpanAction(int clickableSpanId, View host) {
-        WeakReference weakReference;
-        SparseArray sparseArray = (SparseArray) host.getTag(R$id.tag_accessibility_clickable_spans);
-        if (sparseArray == null || (weakReference = (WeakReference) sparseArray.get(clickableSpanId)) == null) {
+        WeakReference<ClickableSpan> reference;
+        SparseArray<WeakReference<ClickableSpan>> spans = (SparseArray) host.getTag(R.id.tag_accessibility_clickable_spans);
+        if (spans != null && (reference = spans.get(clickableSpanId)) != null) {
+            ClickableSpan span = reference.get();
+            if (isSpanStillValid(span, host)) {
+                span.onClick(host);
+                return true;
+            }
             return false;
         }
-        ClickableSpan clickableSpan = (ClickableSpan) weakReference.get();
-        if (!isSpanStillValid(clickableSpan, host)) {
-            return false;
-        }
-        clickableSpan.onClick(host);
-        return true;
+        return false;
     }
 
     private boolean isSpanStillValid(ClickableSpan span, View view) {
         if (span != null) {
-            ClickableSpan[] clickableSpans = AccessibilityNodeInfoCompat.getClickableSpans(view.createAccessibilityNodeInfo().getText());
-            for (int i = 0; clickableSpans != null && i < clickableSpans.length; i++) {
-                if (span.equals(clickableSpans[i])) {
+            AccessibilityNodeInfo info = view.createAccessibilityNodeInfo();
+            ClickableSpan[] spans = AccessibilityNodeInfoCompat.getClickableSpans(info.getText());
+            for (int i = 0; spans != null && i < spans.length; i++) {
+                if (span.equals(spans[i])) {
                     return true;
                 }
             }
+            return false;
         }
         return false;
     }
 
     static List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> getActionList(View view) {
-        List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> list = (List) view.getTag(R$id.tag_accessibility_actions);
-        return list == null ? Collections.emptyList() : list;
+        List<AccessibilityNodeInfoCompat.AccessibilityActionCompat> actions = (List) view.getTag(R.id.tag_accessibility_actions);
+        return actions == null ? Collections.emptyList() : actions;
     }
 }

@@ -1,7 +1,7 @@
 package org.telegram.ui;
 
 import android.content.DialogInterface;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class NotificationsSoundActivity$1$$ExternalSyntheticLambda1 implements DialogInterface.OnClickListener {
     public static final /* synthetic */ NotificationsSoundActivity$1$$ExternalSyntheticLambda1 INSTANCE = new NotificationsSoundActivity$1$$ExternalSyntheticLambda1();
 

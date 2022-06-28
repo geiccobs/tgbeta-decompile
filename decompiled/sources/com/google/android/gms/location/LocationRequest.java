@@ -3,17 +3,18 @@ package com.google.android.gms.location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.ReflectedParcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class LocationRequest extends AbstractSafeParcelable implements ReflectedParcelable {
-    @RecentlyNonNull
     public static final Parcelable.Creator<LocationRequest> CREATOR = new zzbf();
+    public static final int PRIORITY_BALANCED_POWER_ACCURACY = 102;
+    public static final int PRIORITY_HIGH_ACCURACY = 100;
+    public static final int PRIORITY_LOW_POWER = 104;
+    public static final int PRIORITY_NO_POWER = 105;
     int zza;
     long zzb;
     long zzc;
@@ -31,10 +32,16 @@ public final class LocationRequest extends AbstractSafeParcelable implements Ref
         this.zzc = 600000L;
         this.zzd = false;
         this.zze = Long.MAX_VALUE;
-        this.zzf = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        this.zzf = Integer.MAX_VALUE;
         this.zzg = 0.0f;
         this.zzh = 0L;
         this.zzi = false;
+    }
+
+    public static LocationRequest create() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setWaitForAccurateLocation(true);
+        return locationRequest;
     }
 
     private static void zza(long j) {
@@ -57,17 +64,69 @@ public final class LocationRequest extends AbstractSafeParcelable implements Ref
         return false;
     }
 
+    public long getExpirationTime() {
+        return this.zze;
+    }
+
+    public long getFastestInterval() {
+        return this.zzc;
+    }
+
+    public long getInterval() {
+        return this.zzb;
+    }
+
     public long getMaxWaitTime() {
         long j = this.zzh;
         long j2 = this.zzb;
         return j < j2 ? j2 : j;
     }
 
+    public int getNumUpdates() {
+        return this.zzf;
+    }
+
+    public int getPriority() {
+        return this.zza;
+    }
+
+    public float getSmallestDisplacement() {
+        return this.zzg;
+    }
+
     public int hashCode() {
         return Objects.hashCode(Integer.valueOf(this.zza), Long.valueOf(this.zzb), Float.valueOf(this.zzg), Long.valueOf(this.zzh));
     }
 
-    @RecentlyNonNull
+    public boolean isFastestIntervalExplicitlySet() {
+        return this.zzd;
+    }
+
+    public boolean isWaitForAccurateLocation() {
+        return this.zzi;
+    }
+
+    public LocationRequest setExpirationDuration(long j) {
+        long elapsedRealtime = SystemClock.elapsedRealtime();
+        long j2 = Long.MAX_VALUE;
+        if (j <= Long.MAX_VALUE - elapsedRealtime) {
+            j2 = j + elapsedRealtime;
+        }
+        this.zze = j2;
+        if (j2 < 0) {
+            this.zze = 0L;
+        }
+        return this;
+    }
+
+    public LocationRequest setExpirationTime(long j) {
+        this.zze = j;
+        if (j < 0) {
+            this.zze = 0L;
+        }
+        return this;
+    }
+
     public LocationRequest setFastestInterval(long j) {
         zza(j);
         this.zzd = true;
@@ -75,7 +134,6 @@ public final class LocationRequest extends AbstractSafeParcelable implements Ref
         return this;
     }
 
-    @RecentlyNonNull
     public LocationRequest setInterval(long j) {
         zza(j);
         this.zzb = j;
@@ -87,24 +145,81 @@ public final class LocationRequest extends AbstractSafeParcelable implements Ref
         return this;
     }
 
-    @RecentlyNonNull
-    public LocationRequest setPriority(int i) {
-        if (i == 100 || i == 102 || i == 104 || i == 105) {
-            this.zza = i;
+    public LocationRequest setMaxWaitTime(long j) {
+        zza(j);
+        this.zzh = j;
+        return this;
+    }
+
+    public LocationRequest setNumUpdates(int i) {
+        if (i > 0) {
+            this.zzf = i;
             return this;
         }
-        StringBuilder sb = new StringBuilder(28);
-        sb.append("invalid quality: ");
+        StringBuilder sb = new StringBuilder(31);
+        sb.append("invalid numUpdates: ");
         sb.append(i);
         throw new IllegalArgumentException(sb.toString());
     }
 
-    @RecentlyNonNull
+    public LocationRequest setPriority(int i) {
+        switch (i) {
+            case 100:
+            case 102:
+            case PRIORITY_LOW_POWER /* 104 */:
+            case PRIORITY_NO_POWER /* 105 */:
+                this.zza = i;
+                return this;
+            case 101:
+            case 103:
+            default:
+                StringBuilder sb = new StringBuilder(28);
+                sb.append("invalid quality: ");
+                sb.append(i);
+                throw new IllegalArgumentException(sb.toString());
+        }
+    }
+
+    public LocationRequest setSmallestDisplacement(float f) {
+        if (f >= 0.0f) {
+            this.zzg = f;
+            return this;
+        }
+        StringBuilder sb = new StringBuilder(37);
+        sb.append("invalid displacement: ");
+        sb.append(f);
+        throw new IllegalArgumentException(sb.toString());
+    }
+
+    public LocationRequest setWaitForAccurateLocation(boolean z) {
+        this.zzi = z;
+        return this;
+    }
+
     public String toString() {
+        String str;
         StringBuilder sb = new StringBuilder();
         sb.append("Request[");
-        int i = this.zza;
-        sb.append(i != 100 ? i != 102 ? i != 104 ? i != 105 ? "???" : "PRIORITY_NO_POWER" : "PRIORITY_LOW_POWER" : "PRIORITY_BALANCED_POWER_ACCURACY" : "PRIORITY_HIGH_ACCURACY");
+        switch (this.zza) {
+            case 100:
+                str = "PRIORITY_HIGH_ACCURACY";
+                break;
+            case 101:
+            case 103:
+            default:
+                str = "???";
+                break;
+            case 102:
+                str = "PRIORITY_BALANCED_POWER_ACCURACY";
+                break;
+            case PRIORITY_LOW_POWER /* 104 */:
+                str = "PRIORITY_LOW_POWER";
+                break;
+            case PRIORITY_NO_POWER /* 105 */:
+                str = "PRIORITY_NO_POWER";
+                break;
+        }
+        sb.append(str);
         if (this.zza != 105) {
             sb.append(" requested=");
             sb.append(this.zzb);
@@ -139,7 +254,7 @@ public final class LocationRequest extends AbstractSafeParcelable implements Ref
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+    public void writeToParcel(Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zza);
         SafeParcelWriter.writeLong(parcel, 2, this.zzb);

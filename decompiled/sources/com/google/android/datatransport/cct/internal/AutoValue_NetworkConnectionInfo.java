@@ -1,7 +1,7 @@
 package com.google.android.datatransport.cct.internal;
 
 import com.google.android.datatransport.cct.internal.NetworkConnectionInfo;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class AutoValue_NetworkConnectionInfo extends NetworkConnectionInfo {
     private final NetworkConnectionInfo.MobileSubtype mobileSubtype;
     private final NetworkConnectionInfo.NetworkType networkType;
@@ -25,22 +25,22 @@ final class AutoValue_NetworkConnectionInfo extends NetworkConnectionInfo {
         return "NetworkConnectionInfo{networkType=" + this.networkType + ", mobileSubtype=" + this.mobileSubtype + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof NetworkConnectionInfo)) {
+        if (!(o instanceof NetworkConnectionInfo)) {
             return false;
         }
-        NetworkConnectionInfo networkConnectionInfo = (NetworkConnectionInfo) obj;
+        NetworkConnectionInfo that = (NetworkConnectionInfo) o;
         NetworkConnectionInfo.NetworkType networkType = this.networkType;
-        if (networkType != null ? networkType.equals(networkConnectionInfo.getNetworkType()) : networkConnectionInfo.getNetworkType() == null) {
+        if (networkType != null ? networkType.equals(that.getNetworkType()) : that.getNetworkType() == null) {
             NetworkConnectionInfo.MobileSubtype mobileSubtype = this.mobileSubtype;
             if (mobileSubtype == null) {
-                if (networkConnectionInfo.getMobileSubtype() == null) {
+                if (that.getMobileSubtype() == null) {
                     return true;
                 }
-            } else if (mobileSubtype.equals(networkConnectionInfo.getMobileSubtype())) {
+            } else if (mobileSubtype.equals(that.getMobileSubtype())) {
                 return true;
             }
         }
@@ -48,18 +48,19 @@ final class AutoValue_NetworkConnectionInfo extends NetworkConnectionInfo {
     }
 
     public int hashCode() {
+        int h$ = 1 * 1000003;
         NetworkConnectionInfo.NetworkType networkType = this.networkType;
         int i = 0;
-        int hashCode = ((networkType == null ? 0 : networkType.hashCode()) ^ 1000003) * 1000003;
+        int h$2 = (h$ ^ (networkType == null ? 0 : networkType.hashCode())) * 1000003;
         NetworkConnectionInfo.MobileSubtype mobileSubtype = this.mobileSubtype;
         if (mobileSubtype != null) {
             i = mobileSubtype.hashCode();
         }
-        return hashCode ^ i;
+        return h$2 ^ i;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class Builder extends NetworkConnectionInfo.Builder {
         private NetworkConnectionInfo.MobileSubtype mobileSubtype;
         private NetworkConnectionInfo.NetworkType networkType;

@@ -6,15 +6,15 @@ import com.google.android.exoplayer2.source.SampleStream;
 import com.google.android.exoplayer2.util.Assertions;
 import java.io.IOException;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class HlsSampleStream implements SampleStream {
     private int sampleQueueIndex = -1;
     private final HlsSampleStreamWrapper sampleStreamWrapper;
     private final int trackGroupIndex;
 
-    public HlsSampleStream(HlsSampleStreamWrapper hlsSampleStreamWrapper, int i) {
-        this.sampleStreamWrapper = hlsSampleStreamWrapper;
-        this.trackGroupIndex = i;
+    public HlsSampleStream(HlsSampleStreamWrapper sampleStreamWrapper, int trackGroupIndex) {
+        this.sampleStreamWrapper = sampleStreamWrapper;
+        this.trackGroupIndex = trackGroupIndex;
     }
 
     public void bindSampleQueue() {
@@ -37,36 +37,32 @@ public final class HlsSampleStream implements SampleStream {
     @Override // com.google.android.exoplayer2.source.SampleStream
     public void maybeThrowError() throws IOException {
         int i = this.sampleQueueIndex;
-        if (i != -2) {
-            if (i == -1) {
-                this.sampleStreamWrapper.maybeThrowError();
-                return;
-            } else if (i == -3) {
-                return;
-            } else {
-                this.sampleStreamWrapper.maybeThrowError(i);
-                return;
-            }
+        if (i == -2) {
+            throw new SampleQueueMappingException(this.sampleStreamWrapper.getTrackGroups().get(this.trackGroupIndex).getFormat(0).sampleMimeType);
         }
-        throw new SampleQueueMappingException(this.sampleStreamWrapper.getTrackGroups().get(this.trackGroupIndex).getFormat(0).sampleMimeType);
+        if (i == -1) {
+            this.sampleStreamWrapper.maybeThrowError();
+        } else if (i != -3) {
+            this.sampleStreamWrapper.maybeThrowError(i);
+        }
     }
 
     @Override // com.google.android.exoplayer2.source.SampleStream
-    public int readData(FormatHolder formatHolder, DecoderInputBuffer decoderInputBuffer, boolean z) {
+    public int readData(FormatHolder formatHolder, DecoderInputBuffer buffer, boolean requireFormat) {
         if (this.sampleQueueIndex == -3) {
-            decoderInputBuffer.addFlag(4);
+            buffer.addFlag(4);
             return -4;
         } else if (!hasValidSampleQueueIndex()) {
             return -3;
         } else {
-            return this.sampleStreamWrapper.readData(this.sampleQueueIndex, formatHolder, decoderInputBuffer, z);
+            return this.sampleStreamWrapper.readData(this.sampleQueueIndex, formatHolder, buffer, requireFormat);
         }
     }
 
     @Override // com.google.android.exoplayer2.source.SampleStream
-    public int skipData(long j) {
+    public int skipData(long positionUs) {
         if (hasValidSampleQueueIndex()) {
-            return this.sampleStreamWrapper.skipData(this.sampleQueueIndex, j);
+            return this.sampleStreamWrapper.skipData(this.sampleQueueIndex, positionUs);
         }
         return 0;
     }

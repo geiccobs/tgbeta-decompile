@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.upstream;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface LoadErrorHandlingPolicy {
     long getBlacklistDurationMsFor(int i, long j, IOException iOException, int i2);
 

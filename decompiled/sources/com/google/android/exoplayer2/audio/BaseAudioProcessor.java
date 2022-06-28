@@ -3,42 +3,20 @@ package com.google.android.exoplayer2.audio;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseAudioProcessor implements AudioProcessor {
-    private ByteBuffer buffer;
-    protected AudioProcessor.AudioFormat inputAudioFormat;
     private boolean inputEnded;
-    protected AudioProcessor.AudioFormat outputAudioFormat;
-    private ByteBuffer outputBuffer;
-    private AudioProcessor.AudioFormat pendingInputAudioFormat;
-    private AudioProcessor.AudioFormat pendingOutputAudioFormat;
-
-    protected abstract AudioProcessor.AudioFormat onConfigure(AudioProcessor.AudioFormat audioFormat) throws AudioProcessor.UnhandledAudioFormatException;
-
-    protected void onFlush() {
-    }
-
-    protected void onQueueEndOfStream() {
-    }
-
-    protected void onReset() {
-    }
-
-    public BaseAudioProcessor() {
-        ByteBuffer byteBuffer = AudioProcessor.EMPTY_BUFFER;
-        this.buffer = byteBuffer;
-        this.outputBuffer = byteBuffer;
-        AudioProcessor.AudioFormat audioFormat = AudioProcessor.AudioFormat.NOT_SET;
-        this.pendingInputAudioFormat = audioFormat;
-        this.pendingOutputAudioFormat = audioFormat;
-        this.inputAudioFormat = audioFormat;
-        this.outputAudioFormat = audioFormat;
-    }
+    private ByteBuffer buffer = EMPTY_BUFFER;
+    private ByteBuffer outputBuffer = EMPTY_BUFFER;
+    private AudioProcessor.AudioFormat pendingInputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
+    private AudioProcessor.AudioFormat pendingOutputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
+    protected AudioProcessor.AudioFormat inputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
+    protected AudioProcessor.AudioFormat outputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
 
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
-    public final AudioProcessor.AudioFormat configure(AudioProcessor.AudioFormat audioFormat) throws AudioProcessor.UnhandledAudioFormatException {
-        this.pendingInputAudioFormat = audioFormat;
-        this.pendingOutputAudioFormat = onConfigure(audioFormat);
+    public final AudioProcessor.AudioFormat configure(AudioProcessor.AudioFormat inputAudioFormat) throws AudioProcessor.UnhandledAudioFormatException {
+        this.pendingInputAudioFormat = inputAudioFormat;
+        this.pendingOutputAudioFormat = onConfigure(inputAudioFormat);
         return isActive() ? this.pendingOutputAudioFormat : AudioProcessor.AudioFormat.NOT_SET;
     }
 
@@ -55,19 +33,19 @@ public abstract class BaseAudioProcessor implements AudioProcessor {
 
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
     public ByteBuffer getOutput() {
-        ByteBuffer byteBuffer = this.outputBuffer;
-        this.outputBuffer = AudioProcessor.EMPTY_BUFFER;
-        return byteBuffer;
+        ByteBuffer outputBuffer = this.outputBuffer;
+        this.outputBuffer = EMPTY_BUFFER;
+        return outputBuffer;
     }
 
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
     public boolean isEnded() {
-        return this.inputEnded && this.outputBuffer == AudioProcessor.EMPTY_BUFFER;
+        return this.inputEnded && this.outputBuffer == EMPTY_BUFFER;
     }
 
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
     public final void flush() {
-        this.outputBuffer = AudioProcessor.EMPTY_BUFFER;
+        this.outputBuffer = EMPTY_BUFFER;
         this.inputEnded = false;
         this.inputAudioFormat = this.pendingInputAudioFormat;
         this.outputAudioFormat = this.pendingOutputAudioFormat;
@@ -77,18 +55,17 @@ public abstract class BaseAudioProcessor implements AudioProcessor {
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
     public final void reset() {
         flush();
-        this.buffer = AudioProcessor.EMPTY_BUFFER;
-        AudioProcessor.AudioFormat audioFormat = AudioProcessor.AudioFormat.NOT_SET;
-        this.pendingInputAudioFormat = audioFormat;
-        this.pendingOutputAudioFormat = audioFormat;
-        this.inputAudioFormat = audioFormat;
-        this.outputAudioFormat = audioFormat;
+        this.buffer = EMPTY_BUFFER;
+        this.pendingInputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
+        this.pendingOutputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
+        this.inputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
+        this.outputAudioFormat = AudioProcessor.AudioFormat.NOT_SET;
         onReset();
     }
 
-    public final ByteBuffer replaceOutputBuffer(int i) {
-        if (this.buffer.capacity() < i) {
-            this.buffer = ByteBuffer.allocateDirect(i).order(ByteOrder.nativeOrder());
+    public final ByteBuffer replaceOutputBuffer(int count) {
+        if (this.buffer.capacity() < count) {
+            this.buffer = ByteBuffer.allocateDirect(count).order(ByteOrder.nativeOrder());
         } else {
             this.buffer.clear();
         }
@@ -99,5 +76,18 @@ public abstract class BaseAudioProcessor implements AudioProcessor {
 
     public final boolean hasPendingOutput() {
         return this.outputBuffer.hasRemaining();
+    }
+
+    protected AudioProcessor.AudioFormat onConfigure(AudioProcessor.AudioFormat inputAudioFormat) throws AudioProcessor.UnhandledAudioFormatException {
+        return AudioProcessor.AudioFormat.NOT_SET;
+    }
+
+    protected void onQueueEndOfStream() {
+    }
+
+    protected void onFlush() {
+    }
+
+    protected void onReset() {
     }
 }

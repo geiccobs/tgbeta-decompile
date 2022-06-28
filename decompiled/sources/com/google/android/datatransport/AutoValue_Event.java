@@ -1,17 +1,17 @@
 package com.google.android.datatransport;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AutoValue_Event<T> extends Event<T> {
     private final Integer code;
     private final T payload;
     private final Priority priority;
 
-    public AutoValue_Event(Integer num, T t, Priority priority) {
-        this.code = num;
-        if (t == null) {
+    public AutoValue_Event(Integer code, T payload, Priority priority) {
+        this.code = code;
+        if (payload == null) {
             throw new NullPointerException("Null payload");
         }
-        this.payload = t;
+        this.payload = payload;
         if (priority == null) {
             throw new NullPointerException("Null priority");
         }
@@ -37,17 +37,17 @@ public final class AutoValue_Event<T> extends Event<T> {
         return "Event{code=" + this.code + ", payload=" + this.payload + ", priority=" + this.priority + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof Event)) {
+        if (!(o instanceof Event)) {
             return false;
         }
-        Event event = (Event) obj;
+        Event<?> that = (Event) o;
         Integer num = this.code;
-        if (num != null ? num.equals(event.getCode()) : event.getCode() == null) {
-            if (this.payload.equals(event.getPayload()) && this.priority.equals(event.getPriority())) {
+        if (num != null ? num.equals(that.getCode()) : that.getCode() == null) {
+            if (this.payload.equals(that.getPayload()) && this.priority.equals(that.getPriority())) {
                 return true;
             }
         }
@@ -55,7 +55,8 @@ public final class AutoValue_Event<T> extends Event<T> {
     }
 
     public int hashCode() {
+        int h$ = 1 * 1000003;
         Integer num = this.code;
-        return (((((num == null ? 0 : num.hashCode()) ^ 1000003) * 1000003) ^ this.payload.hashCode()) * 1000003) ^ this.priority.hashCode();
+        return ((((h$ ^ (num == null ? 0 : num.hashCode())) * 1000003) ^ this.payload.hashCode()) * 1000003) ^ this.priority.hashCode();
     }
 }

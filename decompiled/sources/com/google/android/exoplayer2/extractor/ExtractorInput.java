@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.extractor;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface ExtractorInput {
     void advancePeekPosition(int i) throws IOException, InterruptedException;
 
@@ -32,4 +32,6 @@ public interface ExtractorInput {
     int skip(int i) throws IOException, InterruptedException;
 
     void skipFully(int i) throws IOException, InterruptedException;
+
+    boolean skipFully(int i, boolean z) throws IOException, InterruptedException;
 }

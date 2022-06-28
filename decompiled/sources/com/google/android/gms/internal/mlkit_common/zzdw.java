@@ -3,7 +3,7 @@ package com.google.android.gms.internal.mlkit_common;
 import com.google.firebase.components.ComponentContainer;
 import com.google.firebase.components.ComponentFactory;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final /* synthetic */ class zzdw implements ComponentFactory {
     static final ComponentFactory zza = new zzdw();
 

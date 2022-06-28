@@ -1,7 +1,6 @@
 package org.telegram.ui.Adapters;
 
 import android.content.Context;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,28 +10,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$TL_contact;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Adapters.SearchAdapterHelper;
 import org.telegram.ui.Cells.GraySectionCell;
 import org.telegram.ui.Cells.ProfileSearchCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.UserCell;
-import org.telegram.ui.Components.ForegroundColorSpanThemable;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class SearchAdapter extends RecyclerListView.SelectionAdapter {
     private boolean allowBots;
     private boolean allowChats;
@@ -41,7 +35,7 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
     private boolean allowUsernameSearch;
     private long channelId;
     private LongSparseArray<?> checkedMap;
-    private LongSparseArray<TLRPC$User> ignoreUsers;
+    private LongSparseArray<TLRPC.User> ignoreUsers;
     private Context mContext;
     private boolean onlyMutual;
     private SearchAdapterHelper searchAdapterHelper;
@@ -53,26 +47,22 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
     private Timer searchTimer;
     private boolean useUserCell;
 
-    protected void onSearchProgressChanged() {
-        throw null;
-    }
-
-    public SearchAdapter(Context context, LongSparseArray<TLRPC$User> longSparseArray, boolean z, boolean z2, boolean z3, boolean z4, boolean z5, boolean z6, int i) {
+    public SearchAdapter(Context context, LongSparseArray<TLRPC.User> arg1, boolean usernameSearch, boolean mutual, boolean chats, boolean bots, boolean self, boolean phones, int searchChannelId) {
         this.mContext = context;
-        this.ignoreUsers = longSparseArray;
-        this.onlyMutual = z2;
-        this.allowUsernameSearch = z;
-        this.allowChats = z3;
-        this.allowBots = z4;
-        this.channelId = i;
-        this.allowSelf = z5;
-        this.allowPhoneNumbers = z6;
+        this.ignoreUsers = arg1;
+        this.onlyMutual = mutual;
+        this.allowUsernameSearch = usernameSearch;
+        this.allowChats = chats;
+        this.allowBots = bots;
+        this.channelId = searchChannelId;
+        this.allowSelf = self;
+        this.allowPhoneNumbers = phones;
         SearchAdapterHelper searchAdapterHelper = new SearchAdapterHelper(true);
         this.searchAdapterHelper = searchAdapterHelper;
         searchAdapterHelper.setDelegate(new SearchAdapterHelper.SearchAdapterHelperDelegate() { // from class: org.telegram.ui.Adapters.SearchAdapter.1
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
-            public /* synthetic */ boolean canApplySearchResults(int i2) {
-                return SearchAdapterHelper.SearchAdapterHelperDelegate.CC.$default$canApplySearchResults(this, i2);
+            public /* synthetic */ boolean canApplySearchResults(int i) {
+                return SearchAdapterHelper.SearchAdapterHelperDelegate.CC.$default$canApplySearchResults(this, i);
             }
 
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
@@ -86,21 +76,29 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
             }
 
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
-            public void onDataSetChanged(int i2) {
+            public void onDataSetChanged(int searchId) {
                 SearchAdapter.this.notifyDataSetChanged();
-                if (i2 != 0) {
+                if (searchId != 0) {
                     SearchAdapter.this.onSearchProgressChanged();
                 }
             }
 
             @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
-            public LongSparseArray<TLRPC$User> getExcludeUsers() {
+            public LongSparseArray<TLRPC.User> getExcludeUsers() {
                 return SearchAdapter.this.ignoreUsers;
             }
         });
     }
 
-    public void searchDialogs(final String str) {
+    public void setCheckedMap(LongSparseArray<?> map) {
+        this.checkedMap = map;
+    }
+
+    public void setUseUserCell(boolean value) {
+        this.useUserCell = value;
+    }
+
+    public void searchDialogs(final String query) {
         try {
             Timer timer = this.searchTimer;
             if (timer != null) {
@@ -115,7 +113,7 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
             this.searchAdapterHelper.queryServerSearch(null, true, this.allowChats, this.allowBots, this.allowSelf, false, this.channelId, this.allowPhoneNumbers, 0, 0);
         }
         notifyDataSetChanged();
-        if (!TextUtils.isEmpty(str)) {
+        if (!TextUtils.isEmpty(query)) {
             Timer timer2 = new Timer();
             this.searchTimer = timer2;
             timer2.schedule(new TimerTask() { // from class: org.telegram.ui.Adapters.SearchAdapter.2
@@ -127,162 +125,184 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
                     } catch (Exception e2) {
                         FileLog.e(e2);
                     }
-                    SearchAdapter.this.processSearch(str);
+                    SearchAdapter.this.processSearch(query);
                 }
             }, 200L, 300L);
         }
     }
 
-    public void processSearch(final String str) {
+    public void processSearch(final String query) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.SearchAdapter$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                SearchAdapter.this.lambda$processSearch$1(str);
+                SearchAdapter.this.m1493lambda$processSearch$1$orgtelegramuiAdaptersSearchAdapter(query);
             }
         });
     }
 
-    public /* synthetic */ void lambda$processSearch$1(final String str) {
+    /* renamed from: lambda$processSearch$1$org-telegram-ui-Adapters-SearchAdapter */
+    public /* synthetic */ void m1493lambda$processSearch$1$orgtelegramuiAdaptersSearchAdapter(final String query) {
         if (this.allowUsernameSearch) {
-            this.searchAdapterHelper.queryServerSearch(str, true, this.allowChats, this.allowBots, this.allowSelf, false, this.channelId, this.allowPhoneNumbers, -1, 1);
+            this.searchAdapterHelper.queryServerSearch(query, true, this.allowChats, this.allowBots, this.allowSelf, false, this.channelId, this.allowPhoneNumbers, -1, 1);
         }
-        final int i = UserConfig.selectedAccount;
-        final ArrayList arrayList = new ArrayList(ContactsController.getInstance(i).contacts);
+        final int currentAccount = UserConfig.selectedAccount;
+        final ArrayList<TLRPC.TL_contact> contactsCopy = new ArrayList<>(ContactsController.getInstance(currentAccount).contacts);
         this.searchInProgress = true;
-        final int i2 = this.searchPointer;
-        this.searchPointer = i2 + 1;
-        this.searchReqId = i2;
+        int i = this.searchPointer;
+        this.searchPointer = i + 1;
+        this.searchReqId = i;
+        final int searchReqIdFinal = this.searchReqId;
         Utilities.searchQueue.postRunnable(new Runnable() { // from class: org.telegram.ui.Adapters.SearchAdapter$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                SearchAdapter.this.lambda$processSearch$0(str, i2, arrayList, i);
+                SearchAdapter.this.m1492lambda$processSearch$0$orgtelegramuiAdaptersSearchAdapter(query, searchReqIdFinal, contactsCopy, currentAccount);
             }
         });
     }
 
-    public /* synthetic */ void lambda$processSearch$0(String str, int i, ArrayList arrayList, int i2) {
-        int i3;
-        String str2;
-        LongSparseArray<TLRPC$User> longSparseArray;
-        String str3;
-        String lowerCase = str.trim().toLowerCase();
-        if (lowerCase.length() == 0) {
-            updateSearchResults(i, new ArrayList<>(), new ArrayList<>());
+    /* renamed from: lambda$processSearch$0$org-telegram-ui-Adapters-SearchAdapter */
+    public /* synthetic */ void m1492lambda$processSearch$0$orgtelegramuiAdaptersSearchAdapter(String query, int searchReqIdFinal, ArrayList contactsCopy, int currentAccount) {
+        String[] search;
+        String search1;
+        String search2;
+        boolean z;
+        String search12 = query.trim().toLowerCase();
+        if (search12.length() == 0) {
+            updateSearchResults(searchReqIdFinal, new ArrayList<>(), new ArrayList<>());
             return;
         }
-        String translitString = LocaleController.getInstance().getTranslitString(lowerCase);
-        String str4 = null;
-        if (lowerCase.equals(translitString) || translitString.length() == 0) {
-            translitString = null;
+        String search22 = LocaleController.getInstance().getTranslitString(search12);
+        if (search12.equals(search22) || search22.length() == 0) {
+            search22 = null;
         }
         char c = 0;
         char c2 = 1;
-        int i4 = (translitString != null ? 1 : 0) + 1;
-        String[] strArr = new String[i4];
-        strArr[0] = lowerCase;
-        if (translitString != null) {
-            strArr[1] = translitString;
+        String[] search3 = new String[(search22 != null ? 1 : 0) + 1];
+        search3[0] = search12;
+        if (search22 != null) {
+            search3[1] = search22;
         }
-        ArrayList<Object> arrayList2 = new ArrayList<>();
-        ArrayList<CharSequence> arrayList3 = new ArrayList<>();
-        int i5 = 0;
-        while (i5 < arrayList.size()) {
-            TLRPC$TL_contact tLRPC$TL_contact = (TLRPC$TL_contact) arrayList.get(i5);
-            TLRPC$User user = MessagesController.getInstance(i2).getUser(Long.valueOf(tLRPC$TL_contact.user_id));
-            if ((this.allowSelf || !user.self) && ((!this.onlyMutual || user.mutual_contact) && ((longSparseArray = this.ignoreUsers) == null || longSparseArray.indexOfKey(tLRPC$TL_contact.user_id) < 0))) {
-                int i6 = 3;
-                String[] strArr2 = new String[3];
-                strArr2[c] = ContactsController.formatName(user.first_name, user.last_name).toLowerCase();
-                strArr2[c2] = LocaleController.getInstance().getTranslitString(strArr2[c]);
-                if (strArr2[c].equals(strArr2[c2])) {
-                    strArr2[c2] = str4;
-                }
-                if (UserObject.isReplyUser(user)) {
-                    strArr2[2] = LocaleController.getString("RepliesTitle", R.string.RepliesTitle).toLowerCase();
-                } else if (user.self) {
-                    strArr2[2] = LocaleController.getString("SavedMessages", R.string.SavedMessages).toLowerCase();
-                }
-                int i7 = 0;
-                char c3 = 0;
-                while (i7 < i4) {
-                    String str5 = strArr[i7];
-                    int i8 = 0;
-                    while (i8 < i6) {
-                        String str6 = strArr2[i8];
-                        if (str6 != null) {
-                            if (!str6.startsWith(str5)) {
-                                StringBuilder sb = new StringBuilder();
-                                i3 = i4;
-                                sb.append(" ");
-                                sb.append(str5);
-                                if (str6.contains(sb.toString())) {
-                                }
-                            } else {
-                                i3 = i4;
-                            }
-                            c3 = 1;
+        ArrayList<Object> resultArray = new ArrayList<>();
+        ArrayList<CharSequence> resultArrayNames = new ArrayList<>();
+        int a = 0;
+        while (a < contactsCopy.size()) {
+            TLRPC.TL_contact contact = (TLRPC.TL_contact) contactsCopy.get(a);
+            TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(Long.valueOf(contact.user_id));
+            if ((this.allowSelf || !user.self) && (!this.onlyMutual || user.mutual_contact)) {
+                LongSparseArray<TLRPC.User> longSparseArray = this.ignoreUsers;
+                if (longSparseArray != null && longSparseArray.indexOfKey(contact.user_id) >= 0) {
+                    search1 = search12;
+                    search2 = search22;
+                    search = search3;
+                } else {
+                    String[] names = new String[3];
+                    names[c] = ContactsController.formatName(user.first_name, user.last_name).toLowerCase();
+                    names[c2] = LocaleController.getInstance().getTranslitString(names[c]);
+                    if (names[c].equals(names[c2])) {
+                        names[c2] = null;
+                    }
+                    if (UserObject.isReplyUser(user)) {
+                        names[2] = LocaleController.getString("RepliesTitle", R.string.RepliesTitle).toLowerCase();
+                    } else if (user.self) {
+                        names[2] = LocaleController.getString("SavedMessages", R.string.SavedMessages).toLowerCase();
+                    }
+                    boolean z2 = false;
+                    int length = search3.length;
+                    int i = 0;
+                    while (true) {
+                        if (i >= length) {
+                            search1 = search12;
+                            search2 = search22;
+                            search = search3;
                             break;
                         }
-                        i3 = i4;
-                        i8++;
-                        i4 = i3;
-                        i6 = 3;
-                    }
-                    i3 = i4;
-                    if (c3 == 0 && (str3 = user.username) != null && str3.startsWith(str5)) {
-                        c3 = 2;
-                    }
-                    if (c3 != 0) {
-                        if (c3 == 1) {
-                            arrayList3.add(AndroidUtilities.generateSearchName(user.first_name, user.last_name, str5));
-                            str2 = null;
-                        } else {
-                            str2 = null;
-                            arrayList3.add(AndroidUtilities.generateSearchName("@" + user.username, null, "@" + str5));
+                        String q = search3[i];
+                        search1 = search12;
+                        int i2 = 0;
+                        while (true) {
+                            search2 = search22;
+                            if (i2 >= names.length) {
+                                search = search3;
+                                break;
+                            }
+                            String name = names[i2];
+                            if (name == null) {
+                                z = z2;
+                                search = search3;
+                            } else if (name.startsWith(q)) {
+                                search = search3;
+                                break;
+                            } else {
+                                z = z2;
+                                StringBuilder sb = new StringBuilder();
+                                search = search3;
+                                sb.append(" ");
+                                sb.append(q);
+                                if (name.contains(sb.toString())) {
+                                    break;
+                                }
+                            }
+                            i2++;
+                            search22 = search2;
+                            z2 = z;
+                            search3 = search;
                         }
-                        arrayList2.add(user);
-                        i5++;
-                        str4 = str2;
-                        i4 = i3;
-                        c = 0;
-                        c2 = 1;
-                    } else {
-                        i7++;
-                        str4 = null;
-                        i4 = i3;
-                        i6 = 3;
+                        z2 = true;
+                        if (!z2 && user.username != null && user.username.startsWith(q)) {
+                            z2 = true;
+                        }
+                        if (!z2) {
+                            i++;
+                            search22 = search2;
+                            search12 = search1;
+                            search3 = search;
+                        } else {
+                            if (z2) {
+                                resultArrayNames.add(AndroidUtilities.generateSearchName(user.first_name, user.last_name, q));
+                            } else {
+                                resultArrayNames.add(AndroidUtilities.generateSearchName("@" + user.username, null, "@" + q));
+                            }
+                            resultArray.add(user);
+                        }
                     }
                 }
+            } else {
+                search1 = search12;
+                search2 = search22;
+                search = search3;
             }
-            i3 = i4;
-            str2 = str4;
-            i5++;
-            str4 = str2;
-            i4 = i3;
+            a++;
+            search22 = search2;
+            search12 = search1;
+            search3 = search;
             c = 0;
             c2 = 1;
         }
-        updateSearchResults(i, arrayList2, arrayList3);
+        updateSearchResults(searchReqIdFinal, resultArray, resultArrayNames);
     }
 
-    private void updateSearchResults(final int i, final ArrayList<Object> arrayList, final ArrayList<CharSequence> arrayList2) {
+    private void updateSearchResults(final int searchReqIdFinal, final ArrayList<Object> users, final ArrayList<CharSequence> names) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.SearchAdapter$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                SearchAdapter.this.lambda$updateSearchResults$2(i, arrayList, arrayList2);
+                SearchAdapter.this.m1494x2c9031e2(searchReqIdFinal, users, names);
             }
         });
     }
 
-    public /* synthetic */ void lambda$updateSearchResults$2(int i, ArrayList arrayList, ArrayList arrayList2) {
-        if (i == this.searchReqId) {
-            this.searchResult = arrayList;
-            this.searchResultNames = arrayList2;
-            this.searchAdapterHelper.mergeResults(arrayList);
+    /* renamed from: lambda$updateSearchResults$2$org-telegram-ui-Adapters-SearchAdapter */
+    public /* synthetic */ void m1494x2c9031e2(int searchReqIdFinal, ArrayList users, ArrayList names) {
+        if (searchReqIdFinal == this.searchReqId) {
+            this.searchResult = users;
+            this.searchResultNames = names;
+            this.searchAdapterHelper.mergeResults(users);
             this.searchInProgress = false;
             notifyDataSetChanged();
             onSearchProgressChanged();
         }
+    }
+
+    protected void onSearchProgressChanged() {
     }
 
     public boolean searchInProgress() {
@@ -290,174 +310,96 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-    public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-        int itemViewType = viewHolder.getItemViewType();
-        return itemViewType == 0 || itemViewType == 2;
+    public boolean isEnabled(RecyclerView.ViewHolder holder) {
+        int type = holder.getItemViewType();
+        return type == 0 || type == 2;
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
     public int getItemCount() {
-        int size = this.searchResult.size();
-        int size2 = this.searchAdapterHelper.getGlobalSearch().size();
-        if (size2 != 0) {
-            size += size2 + 1;
+        int count = this.searchResult.size();
+        int globalCount = this.searchAdapterHelper.getGlobalSearch().size();
+        if (globalCount != 0) {
+            count += globalCount + 1;
         }
-        int size3 = this.searchAdapterHelper.getPhoneSearch().size();
-        return size3 != 0 ? size + size3 : size;
+        int phoneCount = this.searchAdapterHelper.getPhoneSearch().size();
+        if (phoneCount != 0) {
+            return count + phoneCount;
+        }
+        return count;
     }
 
     public boolean isGlobalSearch(int i) {
-        int size = this.searchResult.size();
-        int size2 = this.searchAdapterHelper.getGlobalSearch().size();
-        int size3 = this.searchAdapterHelper.getPhoneSearch().size();
-        if (i < 0 || i >= size) {
-            return (i <= size || i >= size + size3) && i > size + size3 && i <= (size2 + size3) + size;
+        int localCount = this.searchResult.size();
+        int globalCount = this.searchAdapterHelper.getGlobalSearch().size();
+        int phoneCount = this.searchAdapterHelper.getPhoneSearch().size();
+        if (i >= 0 && i < localCount) {
+            return false;
         }
-        return false;
+        if ((i > localCount && i < localCount + phoneCount) || i <= localCount + phoneCount || i > globalCount + phoneCount + localCount) {
+            return false;
+        }
+        return true;
     }
 
     public Object getItem(int i) {
-        int size = this.searchResult.size();
-        int size2 = this.searchAdapterHelper.getGlobalSearch().size();
-        int size3 = this.searchAdapterHelper.getPhoneSearch().size();
-        if (i < 0 || i >= size) {
-            int i2 = i - size;
-            if (i2 >= 0 && i2 < size3) {
-                return this.searchAdapterHelper.getPhoneSearch().get(i2);
-            }
-            int i3 = i2 - size3;
-            if (i3 > 0 && i3 <= size2) {
-                return this.searchAdapterHelper.getGlobalSearch().get(i3 - 1);
-            }
-            return null;
+        int localCount = this.searchResult.size();
+        int globalCount = this.searchAdapterHelper.getGlobalSearch().size();
+        int phoneCount = this.searchAdapterHelper.getPhoneSearch().size();
+        if (i >= 0 && i < localCount) {
+            return this.searchResult.get(i);
         }
-        return this.searchResult.get(i);
+        int i2 = i - localCount;
+        if (i2 >= 0 && i2 < phoneCount) {
+            return this.searchAdapterHelper.getPhoneSearch().get(i2);
+        }
+        int i3 = i2 - phoneCount;
+        if (i3 > 0 && i3 <= globalCount) {
+            return this.searchAdapterHelper.getGlobalSearch().get(i3 - 1);
+        }
+        return null;
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
-        if (i != 0) {
-            if (i == 1) {
+        switch (viewType) {
+            case 0:
+                if (this.useUserCell) {
+                    View view2 = new UserCell(this.mContext, 1, 1, false);
+                    if (this.checkedMap != null) {
+                        ((UserCell) view2).setChecked(false, false);
+                    }
+                    view = view2;
+                    break;
+                } else {
+                    view = new ProfileSearchCell(this.mContext);
+                    break;
+                }
+            case 1:
                 view = new GraySectionCell(this.mContext);
-            } else {
+                break;
+            default:
                 view = new TextCell(this.mContext, 16, false);
-            }
-        } else if (this.useUserCell) {
-            UserCell userCell = new UserCell(this.mContext, 1, 1, false);
-            if (this.checkedMap != null) {
-                userCell.setChecked(false, false);
-            }
-            view = userCell;
-        } else {
-            view = new ProfileSearchCell(this.mContext);
+                break;
         }
         return new RecyclerListView.Holder(view);
     }
 
+    /* JADX WARN: Multi-variable type inference failed */
+    /* JADX WARN: Removed duplicated region for block: B:52:0x0144  */
+    /* JADX WARN: Removed duplicated region for block: B:59:0x015e  */
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        boolean z;
-        String str;
-        SpannableStringBuilder spannableStringBuilder;
-        int indexOfIgnoreCase;
-        int itemViewType = viewHolder.getItemViewType();
-        String str2 = null;
-        boolean z2 = false;
-        boolean z3 = true;
-        if (itemViewType != 0) {
-            if (itemViewType == 1) {
-                GraySectionCell graySectionCell = (GraySectionCell) viewHolder.itemView;
-                if (getItem(i) == null) {
-                    graySectionCell.setText(LocaleController.getString("GlobalSearch", R.string.GlobalSearch));
-                    return;
-                } else {
-                    graySectionCell.setText(LocaleController.getString("PhoneNumberSearch", R.string.PhoneNumberSearch));
-                    return;
-                }
-            } else if (itemViewType != 2) {
-                return;
-            } else {
-                TextCell textCell = (TextCell) viewHolder.itemView;
-                textCell.setColors(null, "windowBackgroundWhiteBlueText2");
-                textCell.setText(LocaleController.formatString("AddContactByPhone", R.string.AddContactByPhone, PhoneFormat.getInstance().format("+" + ((String) getItem(i)))), false);
-                return;
-            }
-        }
-        TLObject tLObject = (TLObject) getItem(i);
-        if (tLObject == null) {
-            return;
-        }
-        long j = 0;
-        if (tLObject instanceof TLRPC$User) {
-            TLRPC$User tLRPC$User = (TLRPC$User) tLObject;
-            str = tLRPC$User.username;
-            j = tLRPC$User.id;
-            z = tLRPC$User.self;
-        } else {
-            if (tLObject instanceof TLRPC$Chat) {
-                TLRPC$Chat tLRPC$Chat = (TLRPC$Chat) tLObject;
-                str = tLRPC$Chat.username;
-                j = tLRPC$Chat.id;
-            } else {
-                str = null;
-            }
-            z = false;
-        }
-        if (i < this.searchResult.size()) {
-            CharSequence charSequence = this.searchResultNames.get(i);
-            if (charSequence != null && str != null && str.length() > 0) {
-                if (charSequence.toString().startsWith("@" + str)) {
-                    spannableStringBuilder = charSequence;
-                }
-            }
-            spannableStringBuilder = null;
-            str2 = charSequence;
-        } else if (i <= this.searchResult.size() || str == null) {
-            spannableStringBuilder = null;
-        } else {
-            String lastFoundUsername = this.searchAdapterHelper.getLastFoundUsername();
-            if (lastFoundUsername != null && lastFoundUsername.startsWith("@")) {
-                lastFoundUsername = lastFoundUsername.substring(1);
-            }
-            try {
-                SpannableStringBuilder spannableStringBuilder2 = new SpannableStringBuilder();
-                spannableStringBuilder2.append((CharSequence) "@");
-                spannableStringBuilder2.append((CharSequence) str);
-                if (lastFoundUsername != null && (indexOfIgnoreCase = AndroidUtilities.indexOfIgnoreCase(str, lastFoundUsername)) != -1) {
-                    int length = lastFoundUsername.length();
-                    if (indexOfIgnoreCase == 0) {
-                        length++;
-                    } else {
-                        indexOfIgnoreCase++;
-                    }
-                    spannableStringBuilder2.setSpan(new ForegroundColorSpanThemable("windowBackgroundWhiteBlueText4"), indexOfIgnoreCase, length + indexOfIgnoreCase, 33);
-                }
-                spannableStringBuilder = spannableStringBuilder2;
-            } catch (Exception e) {
-                FileLog.e(e);
-                spannableStringBuilder = str;
-            }
-        }
-        if (this.useUserCell) {
-            UserCell userCell = (UserCell) viewHolder.itemView;
-            userCell.setData(tLObject, str2, spannableStringBuilder, 0);
-            LongSparseArray<?> longSparseArray = this.checkedMap;
-            if (longSparseArray == null) {
-                return;
-            }
-            if (longSparseArray.indexOfKey(j) < 0) {
-                z3 = false;
-            }
-            userCell.setChecked(z3, false);
-            return;
-        }
-        ProfileSearchCell profileSearchCell = (ProfileSearchCell) viewHolder.itemView;
-        profileSearchCell.setData(tLObject, null, z ? LocaleController.getString("SavedMessages", R.string.SavedMessages) : str2, spannableStringBuilder, false, z);
-        if (i != getItemCount() - 1 && i != this.searchResult.size() - 1) {
-            z2 = true;
-        }
-        profileSearchCell.useSeparator = z2;
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r21, int r22) {
+        /*
+            Method dump skipped, instructions count: 418
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Adapters.SearchAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -466,9 +408,13 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
         if (item == null) {
             return 1;
         }
-        if (!(item instanceof String)) {
-            return 0;
+        if (item instanceof String) {
+            String str = (String) item;
+            if ("section".equals(str)) {
+                return 1;
+            }
+            return 2;
         }
-        return "section".equals((String) item) ? 1 : 2;
+        return 0;
     }
 }

@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import libcore.io.Memory;
 import sun.misc.Unsafe;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzfd {
     private static final Logger logger = Logger.getLogger(zzfd.class.getName());
     private static final Class<?> zzfb = zzaw.zzy();
@@ -19,10 +19,23 @@ public final class zzfd {
     private static final zzd zzpi;
     private static final boolean zzpj;
     private static final long zzpk;
+    private static final long zzpl;
+    private static final long zzpm;
+    private static final long zzpn;
+    private static final long zzpo;
+    private static final long zzpp;
+    private static final long zzpq;
+    private static final long zzpr;
+    private static final long zzps;
+    private static final long zzpt;
+    private static final long zzpu;
+    private static final long zzpv;
+    private static final long zzpw;
     private static final long zzpx;
+    private static final long zzpy;
     private static final boolean zzpz;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     static final class zza extends zzd {
         zza(Unsafe unsafe) {
             super(unsafe);
@@ -87,7 +100,7 @@ public final class zzfd {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     static final class zzb extends zzd {
         zzb(Unsafe unsafe) {
             super(unsafe);
@@ -152,7 +165,7 @@ public final class zzfd {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     static final class zzc extends zzd {
         zzc(Unsafe unsafe) {
             super(unsafe);
@@ -209,7 +222,7 @@ public final class zzfd {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static abstract class zzd {
         Unsafe zzqa;
 
@@ -258,95 +271,12 @@ public final class zzfd {
         public abstract byte zzx(Object obj, long j);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:19:0x00b7  */
-    /* JADX WARN: Removed duplicated region for block: B:20:0x00b9  */
+    /* JADX WARN: Removed duplicated region for block: B:19:0x00ec  */
+    /* JADX WARN: Removed duplicated region for block: B:20:0x00ee  */
     static {
         /*
-            java.lang.Class<java.lang.Object[]> r0 = java.lang.Object[].class
-            java.lang.Class<double[]> r1 = double[].class
-            java.lang.Class<float[]> r2 = float[].class
-            java.lang.Class<long[]> r3 = long[].class
-            java.lang.Class<int[]> r4 = int[].class
-            java.lang.Class<boolean[]> r5 = boolean[].class
-            java.lang.Class<com.google.android.gms.internal.clearcut.zzfd> r6 = com.google.android.gms.internal.clearcut.zzfd.class
-            java.lang.String r6 = r6.getName()
-            java.util.logging.Logger r6 = java.util.logging.Logger.getLogger(r6)
-            com.google.android.gms.internal.clearcut.zzfd.logger = r6
-            sun.misc.Unsafe r6 = zzef()
-            com.google.android.gms.internal.clearcut.zzfd.zzmh = r6
-            java.lang.Class r7 = com.google.android.gms.internal.clearcut.zzaw.zzy()
-            com.google.android.gms.internal.clearcut.zzfd.zzfb = r7
-            java.lang.Class r7 = java.lang.Long.TYPE
-            boolean r7 = zzi(r7)
-            com.google.android.gms.internal.clearcut.zzfd.zzpg = r7
-            java.lang.Class r8 = java.lang.Integer.TYPE
-            boolean r8 = zzi(r8)
-            com.google.android.gms.internal.clearcut.zzfd.zzph = r8
-            r9 = 0
-            if (r6 != 0) goto L39
-        L37:
-            r7 = r9
-            goto L54
-        L39:
-            boolean r10 = com.google.android.gms.internal.clearcut.zzaw.zzx()
-            if (r10 == 0) goto L4f
-            if (r7 == 0) goto L47
-            com.google.android.gms.internal.clearcut.zzfd$zzb r7 = new com.google.android.gms.internal.clearcut.zzfd$zzb
-            r7.<init>(r6)
-            goto L54
-        L47:
-            if (r8 == 0) goto L37
-            com.google.android.gms.internal.clearcut.zzfd$zza r7 = new com.google.android.gms.internal.clearcut.zzfd$zza
-            r7.<init>(r6)
-            goto L54
-        L4f:
-            com.google.android.gms.internal.clearcut.zzfd$zzc r7 = new com.google.android.gms.internal.clearcut.zzfd$zzc
-            r7.<init>(r6)
-        L54:
-            com.google.android.gms.internal.clearcut.zzfd.zzpi = r7
-            boolean r6 = zzeh()
-            com.google.android.gms.internal.clearcut.zzfd.zzpj = r6
-            boolean r6 = zzeg()
-            com.google.android.gms.internal.clearcut.zzfd.zzfy = r6
-            java.lang.Class<byte[]> r6 = byte[].class
-            int r6 = zzg(r6)
-            long r6 = (long) r6
-            com.google.android.gms.internal.clearcut.zzfd.zzpk = r6
-            zzg(r5)
-            zzh(r5)
-            zzg(r4)
-            zzh(r4)
-            zzg(r3)
-            zzh(r3)
-            zzg(r2)
-            zzh(r2)
-            zzg(r1)
-            zzh(r1)
-            zzg(r0)
-            zzh(r0)
-            java.lang.reflect.Field r0 = zzei()
-            long r0 = zzb(r0)
-            com.google.android.gms.internal.clearcut.zzfd.zzpx = r0
-            java.lang.Class<java.lang.String> r0 = java.lang.String.class
-            java.lang.String r1 = "value"
-            java.lang.reflect.Field r0 = zzb(r0, r1)
-            if (r0 == 0) goto Lac
-            java.lang.Class r1 = r0.getType()
-            java.lang.Class<char[]> r2 = char[].class
-            if (r1 != r2) goto Lac
-            r9 = r0
-        Lac:
-            zzb(r9)
-            java.nio.ByteOrder r0 = java.nio.ByteOrder.nativeOrder()
-            java.nio.ByteOrder r1 = java.nio.ByteOrder.BIG_ENDIAN
-            if (r0 != r1) goto Lb9
-            r0 = 1
-            goto Lba
-        Lb9:
-            r0 = 0
-        Lba:
-            com.google.android.gms.internal.clearcut.zzfd.zzpz = r0
-            return
+            Method dump skipped, instructions count: 242
+            To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.clearcut.zzfd.<clinit>():void");
     }
@@ -421,7 +351,7 @@ public final class zzfd {
             Field declaredField = cls.getDeclaredField(str);
             declaredField.setAccessible(true);
             return declaredField;
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
             return null;
         }
     }
@@ -451,7 +381,7 @@ public final class zzfd {
     public static Unsafe zzef() {
         try {
             return (Unsafe) AccessController.doPrivileged(new zzfe());
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
             return null;
         }
     }
@@ -466,30 +396,29 @@ public final class zzfd {
             cls.getMethod("objectFieldOffset", Field.class);
             cls.getMethod("arrayBaseOffset", Class.class);
             cls.getMethod("arrayIndexScale", Class.class);
-            Class<?> cls2 = Long.TYPE;
-            cls.getMethod("getInt", Object.class, cls2);
-            cls.getMethod("putInt", Object.class, cls2, Integer.TYPE);
-            cls.getMethod("getLong", Object.class, cls2);
-            cls.getMethod("putLong", Object.class, cls2, cls2);
-            cls.getMethod("getObject", Object.class, cls2);
-            cls.getMethod("putObject", Object.class, cls2, Object.class);
+            cls.getMethod("getInt", Object.class, Long.TYPE);
+            cls.getMethod("putInt", Object.class, Long.TYPE, Integer.TYPE);
+            cls.getMethod("getLong", Object.class, Long.TYPE);
+            cls.getMethod("putLong", Object.class, Long.TYPE, Long.TYPE);
+            cls.getMethod("getObject", Object.class, Long.TYPE);
+            cls.getMethod("putObject", Object.class, Long.TYPE, Object.class);
             if (zzaw.zzx()) {
                 return true;
             }
-            cls.getMethod("getByte", Object.class, cls2);
-            cls.getMethod("putByte", Object.class, cls2, Byte.TYPE);
-            cls.getMethod("getBoolean", Object.class, cls2);
-            cls.getMethod("putBoolean", Object.class, cls2, Boolean.TYPE);
-            cls.getMethod("getFloat", Object.class, cls2);
-            cls.getMethod("putFloat", Object.class, cls2, Float.TYPE);
-            cls.getMethod("getDouble", Object.class, cls2);
-            cls.getMethod("putDouble", Object.class, cls2, Double.TYPE);
+            cls.getMethod("getByte", Object.class, Long.TYPE);
+            cls.getMethod("putByte", Object.class, Long.TYPE, Byte.TYPE);
+            cls.getMethod("getBoolean", Object.class, Long.TYPE);
+            cls.getMethod("putBoolean", Object.class, Long.TYPE, Boolean.TYPE);
+            cls.getMethod("getFloat", Object.class, Long.TYPE);
+            cls.getMethod("putFloat", Object.class, Long.TYPE, Float.TYPE);
+            cls.getMethod("getDouble", Object.class, Long.TYPE);
+            cls.getMethod("putDouble", Object.class, Long.TYPE, Double.TYPE);
             return true;
         } catch (Throwable th) {
             Logger logger2 = logger;
             Level level = Level.WARNING;
             String valueOf = String.valueOf(th);
-            StringBuilder sb = new StringBuilder(valueOf.length() + 71);
+            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 71);
             sb.append("platform method missing - proto runtime falling back to safer methods: ");
             sb.append(valueOf);
             logger2.logp(level, "com.google.protobuf.UnsafeUtil", "supportsUnsafeArrayOperations", sb.toString());
@@ -505,28 +434,27 @@ public final class zzfd {
         try {
             Class<?> cls = unsafe.getClass();
             cls.getMethod("objectFieldOffset", Field.class);
-            Class<?> cls2 = Long.TYPE;
-            cls.getMethod("getLong", Object.class, cls2);
+            cls.getMethod("getLong", Object.class, Long.TYPE);
             if (zzei() == null) {
                 return false;
             }
             if (zzaw.zzx()) {
                 return true;
             }
-            cls.getMethod("getByte", cls2);
-            cls.getMethod("putByte", cls2, Byte.TYPE);
-            cls.getMethod("getInt", cls2);
-            cls.getMethod("putInt", cls2, Integer.TYPE);
-            cls.getMethod("getLong", cls2);
-            cls.getMethod("putLong", cls2, cls2);
-            cls.getMethod("copyMemory", cls2, cls2, cls2);
-            cls.getMethod("copyMemory", Object.class, cls2, Object.class, cls2, cls2);
+            cls.getMethod("getByte", Long.TYPE);
+            cls.getMethod("putByte", Long.TYPE, Byte.TYPE);
+            cls.getMethod("getInt", Long.TYPE);
+            cls.getMethod("putInt", Long.TYPE, Integer.TYPE);
+            cls.getMethod("getLong", Long.TYPE);
+            cls.getMethod("putLong", Long.TYPE, Long.TYPE);
+            cls.getMethod("copyMemory", Long.TYPE, Long.TYPE, Long.TYPE);
+            cls.getMethod("copyMemory", Object.class, Long.TYPE, Object.class, Long.TYPE, Long.TYPE);
             return true;
         } catch (Throwable th) {
             Logger logger2 = logger;
             Level level = Level.WARNING;
             String valueOf = String.valueOf(th);
-            StringBuilder sb = new StringBuilder(valueOf.length() + 71);
+            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 71);
             sb.append("platform method missing - proto runtime falling back to safer methods: ");
             sb.append(valueOf);
             logger2.logp(level, "com.google.protobuf.UnsafeUtil", "supportsUnsafeByteBufferOperations", sb.toString());
@@ -566,18 +494,16 @@ public final class zzfd {
         }
         try {
             Class<?> cls2 = zzfb;
-            Class<?> cls3 = Boolean.TYPE;
-            cls2.getMethod("peekLong", cls, cls3);
-            cls2.getMethod("pokeLong", cls, Long.TYPE, cls3);
-            Class<?> cls4 = Integer.TYPE;
-            cls2.getMethod("pokeInt", cls, cls4, cls3);
-            cls2.getMethod("peekInt", cls, cls3);
+            cls2.getMethod("peekLong", cls, Boolean.TYPE);
+            cls2.getMethod("pokeLong", cls, Long.TYPE, Boolean.TYPE);
+            cls2.getMethod("pokeInt", cls, Integer.TYPE, Boolean.TYPE);
+            cls2.getMethod("peekInt", cls, Boolean.TYPE);
             cls2.getMethod("pokeByte", cls, Byte.TYPE);
             cls2.getMethod("peekByte", cls);
-            cls2.getMethod("pokeByteArray", cls, byte[].class, cls4, cls4);
-            cls2.getMethod("peekByteArray", cls, byte[].class, cls4, cls4);
+            cls2.getMethod("pokeByteArray", cls, byte[].class, Integer.TYPE, Integer.TYPE);
+            cls2.getMethod("peekByteArray", cls, byte[].class, Integer.TYPE, Integer.TYPE);
             return true;
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
             return false;
         }
     }

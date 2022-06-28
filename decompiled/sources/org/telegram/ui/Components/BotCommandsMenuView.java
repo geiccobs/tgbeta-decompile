@@ -14,16 +14,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.C;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
-import org.telegram.tgnet.TLRPC$BotInfo;
-import org.telegram.tgnet.TLRPC$TL_botCommand;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.MenuDrawable;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class BotCommandsMenuView extends View {
     final MenuDrawable backDrawable;
     Drawable backgroundDrawable;
@@ -54,9 +54,6 @@ public class BotCommandsMenuView extends View {
     private String menuText = LocaleController.getString((int) R.string.BotsMenuTitle);
     boolean drawBackgroundDrawable = true;
 
-    protected void onTranslationChanged(float f) {
-    }
-
     public BotCommandsMenuView(Context context) {
         super(context);
         TextPaint textPaint = new TextPaint(1);
@@ -76,14 +73,14 @@ public class BotCommandsMenuView extends View {
         menuDrawable.setCallback(this);
         textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         menuDrawable.setRoundCap();
-        Drawable createSimpleSelectorRoundRectDrawable = Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(16.0f), 0, Theme.getColor("featuredStickers_addButtonPressed"));
+        Drawable createSimpleSelectorRoundRectDrawable = Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(16.0f), 0, Theme.getColor(Theme.key_featuredStickers_addButtonPressed));
         this.backgroundDrawable = createSimpleSelectorRoundRectDrawable;
         createSimpleSelectorRoundRectDrawable.setCallback(this);
         setContentDescription(LocaleController.getString("AccDescrBotMenu", R.string.AccDescrBotMenu));
     }
 
-    public void setDrawBackgroundDrawable(boolean z) {
-        this.drawBackgroundDrawable = z;
+    public void setDrawBackgroundDrawable(boolean drawBackgroundDrawable) {
+        this.drawBackgroundDrawable = drawBackgroundDrawable;
         invalidate();
     }
 
@@ -100,73 +97,75 @@ public class BotCommandsMenuView extends View {
         this.webViewAnimation.removeParentView(this);
     }
 
-    public void setWebView(boolean z) {
-        this.isWebView = z;
+    public void setWebView(boolean webView) {
+        this.isWebView = webView;
         invalidate();
     }
 
     private void updateColors() {
-        this.paint.setColor(Theme.getColor("chat_messagePanelVoiceBackground"));
-        int color = Theme.getColor("chat_messagePanelVoicePressed");
-        this.backDrawable.setBackColor(color);
-        this.backDrawable.setIconColor(color);
-        this.textPaint.setColor(color);
+        this.paint.setColor(Theme.getColor(Theme.key_chat_messagePanelVoiceBackground));
+        int textColor = Theme.getColor(Theme.key_chat_messagePanelVoicePressed);
+        this.backDrawable.setBackColor(textColor);
+        this.backDrawable.setIconColor(textColor);
+        this.textPaint.setColor(textColor);
     }
 
     @Override // android.view.View
-    protected void onMeasure(int i, int i2) {
-        int size = (View.MeasureSpec.getSize(i) + View.MeasureSpec.getSize(i2)) << 16;
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int size = (View.MeasureSpec.getSize(widthMeasureSpec) + View.MeasureSpec.getSize(heightMeasureSpec)) << 16;
         if (this.lastSize != size || this.menuTextLayout == null) {
             this.backDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
             this.textPaint.setTextSize(AndroidUtilities.dp(15.0f));
             this.lastSize = size;
-            int measureText = (int) this.textPaint.measureText(this.menuText);
-            this.menuTextLayout = StaticLayoutEx.createStaticLayout(this.menuText, this.textPaint, measureText, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false, TextUtils.TruncateAt.END, measureText, 1);
+            int w = (int) this.textPaint.measureText(this.menuText);
+            this.menuTextLayout = StaticLayoutEx.createStaticLayout(this.menuText, this.textPaint, w, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false, TextUtils.TruncateAt.END, w, 1);
         }
         onTranslationChanged((this.menuTextLayout.getWidth() + AndroidUtilities.dp(4.0f)) * this.expandProgress);
-        int dp = AndroidUtilities.dp(40.0f);
+        int width = AndroidUtilities.dp(40.0f);
         if (this.expanded) {
-            dp += this.menuTextLayout.getWidth() + AndroidUtilities.dp(4.0f);
+            width += this.menuTextLayout.getWidth() + AndroidUtilities.dp(4.0f);
         }
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(dp, 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32.0f), 1073741824));
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:22:0x0045  */
-    /* JADX WARN: Removed duplicated region for block: B:27:0x0059  */
-    /* JADX WARN: Removed duplicated region for block: B:30:0x00a8  */
-    /* JADX WARN: Removed duplicated region for block: B:33:0x00d5  */
-    /* JADX WARN: Removed duplicated region for block: B:36:0x00f3  */
-    /* JADX WARN: Removed duplicated region for block: B:38:0x0119  */
+    /* JADX WARN: Removed duplicated region for block: B:28:0x0058  */
+    /* JADX WARN: Removed duplicated region for block: B:31:0x00ad  */
+    /* JADX WARN: Removed duplicated region for block: B:34:0x00db  */
+    /* JADX WARN: Removed duplicated region for block: B:37:0x00f9  */
+    /* JADX WARN: Removed duplicated region for block: B:39:0x011f  */
     @Override // android.view.View
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    protected void dispatchDraw(android.graphics.Canvas r11) {
+    protected void dispatchDraw(android.graphics.Canvas r10) {
         /*
-            Method dump skipped, instructions count: 302
+            Method dump skipped, instructions count: 308
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.BotCommandsMenuView.dispatchDraw(android.graphics.Canvas):void");
     }
 
-    public boolean setMenuText(String str) {
-        if (str == null) {
-            str = LocaleController.getString((int) R.string.BotsMenuTitle);
-        }
-        String str2 = this.menuText;
-        boolean z = str2 == null || !str2.equals(str);
-        this.menuText = str;
-        this.menuTextLayout = null;
-        requestLayout();
-        return z;
+    protected void onTranslationChanged(float translationX) {
     }
 
-    public void setExpanded(boolean z, boolean z2) {
-        if (this.expanded != z) {
-            this.expanded = z;
-            if (!z2) {
-                this.expandProgress = z ? 1.0f : 0.0f;
+    public boolean setMenuText(String menuText) {
+        if (menuText == null) {
+            menuText = LocaleController.getString((int) R.string.BotsMenuTitle);
+        }
+        String str = this.menuText;
+        boolean changed = str == null || !str.equals(menuText);
+        this.menuText = menuText;
+        this.menuTextLayout = null;
+        requestLayout();
+        return changed;
+    }
+
+    public void setExpanded(boolean expanded, boolean animated) {
+        if (this.expanded != expanded) {
+            this.expanded = expanded;
+            if (!animated) {
+                this.expandProgress = expanded ? 1.0f : 0.0f;
             }
             requestLayout();
             invalidate();
@@ -177,29 +176,29 @@ public class BotCommandsMenuView extends View {
         return this.isOpened;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class BotCommandsAdapter extends RecyclerListView.SelectionAdapter {
         ArrayList<String> newResult = new ArrayList<>();
         ArrayList<String> newResultHelp = new ArrayList<>();
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
             return true;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            BotCommandView botCommandView = new BotCommandView(viewGroup.getContext());
-            botCommandView.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
-            return new RecyclerListView.Holder(botCommandView);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            BotCommandView view = new BotCommandView(parent.getContext());
+            view.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
+            return new RecyclerListView.Holder(view);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            BotCommandView botCommandView = (BotCommandView) viewHolder.itemView;
-            botCommandView.command.setText(this.newResult.get(i));
-            botCommandView.description.setText(this.newResultHelp.get(i));
-            botCommandView.commandStr = this.newResult.get(i);
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            BotCommandView view = (BotCommandView) holder.itemView;
+            view.command.setText(this.newResult.get(position));
+            view.description.setText(this.newResultHelp.get(position));
+            view.commandStr = this.newResult.get(position);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -207,22 +206,21 @@ public class BotCommandsMenuView extends View {
             return this.newResult.size();
         }
 
-        public void setBotInfo(LongSparseArray<TLRPC$BotInfo> longSparseArray) {
+        public void setBotInfo(LongSparseArray<TLRPC.BotInfo> botInfo) {
             this.newResult.clear();
             this.newResultHelp.clear();
-            for (int i = 0; i < longSparseArray.size(); i++) {
-                TLRPC$BotInfo valueAt = longSparseArray.valueAt(i);
-                for (int i2 = 0; i2 < valueAt.commands.size(); i2++) {
-                    TLRPC$TL_botCommand tLRPC$TL_botCommand = valueAt.commands.get(i2);
-                    if (tLRPC$TL_botCommand != null && tLRPC$TL_botCommand.command != null) {
+            for (int b = 0; b < botInfo.size(); b++) {
+                TLRPC.BotInfo info = botInfo.valueAt(b);
+                for (int a = 0; a < info.commands.size(); a++) {
+                    TLRPC.TL_botCommand botCommand = info.commands.get(a);
+                    if (botCommand != null && botCommand.command != null) {
                         ArrayList<String> arrayList = this.newResult;
-                        arrayList.add("/" + tLRPC$TL_botCommand.command);
-                        String str = tLRPC$TL_botCommand.description;
-                        if (str != null && str.length() > 1) {
+                        arrayList.add("/" + botCommand.command);
+                        if (botCommand.description != null && botCommand.description.length() > 1) {
                             ArrayList<String> arrayList2 = this.newResultHelp;
-                            arrayList2.add(tLRPC$TL_botCommand.description.substring(0, 1).toUpperCase() + tLRPC$TL_botCommand.description.substring(1).toLowerCase());
+                            arrayList2.add(botCommand.description.substring(0, 1).toUpperCase() + botCommand.description.substring(1).toLowerCase());
                         } else {
-                            this.newResultHelp.add(tLRPC$TL_botCommand.description);
+                            this.newResultHelp.add(botCommand.description);
                         }
                     }
                 }
@@ -231,33 +229,33 @@ public class BotCommandsMenuView extends View {
         }
     }
 
-    public void setOpened(boolean z) {
-        if (this.isOpened != z) {
-            this.isOpened = z;
+    public void setOpened(boolean opened) {
+        if (this.isOpened != opened) {
+            this.isOpened = opened;
         }
         int i = 1;
         if (this.isWebView) {
-            if (this.isWebViewOpened == z) {
+            if (this.isWebViewOpened != opened) {
+                RLottieDrawable drawable = this.webViewAnimation;
+                if (!drawable.hasParentView()) {
+                    drawable.addParentView(this);
+                }
+                drawable.stop();
+                drawable.setPlayInDirectionOfCustomEndFrame(true);
+                if (opened) {
+                    i = drawable.getFramesCount();
+                }
+                drawable.setCustomEndFrame(i);
+                drawable.start();
+                this.isWebViewOpened = opened;
                 return;
             }
-            RLottieDrawable rLottieDrawable = this.webViewAnimation;
-            if (!rLottieDrawable.hasParentView()) {
-                rLottieDrawable.addParentView(this);
-            }
-            rLottieDrawable.stop();
-            rLottieDrawable.setPlayInDirectionOfCustomEndFrame(true);
-            if (z) {
-                i = rLottieDrawable.getFramesCount();
-            }
-            rLottieDrawable.setCustomEndFrame(i);
-            rLottieDrawable.start();
-            this.isWebViewOpened = z;
             return;
         }
-        this.backDrawable.setRotation(z ? 1.0f : 0.0f, true);
+        this.backDrawable.setRotation(opened ? 1.0f : 0.0f, true);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class BotCommandView extends LinearLayout {
         TextView command;
         String commandStr;
@@ -270,22 +268,22 @@ public class BotCommandsMenuView extends View {
             TextView textView = new TextView(context);
             this.description = textView;
             textView.setTextSize(1, 16.0f);
-            this.description.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
-            this.description.setTag("windowBackgroundWhiteBlackText");
+            this.description.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+            this.description.setTag(Theme.key_windowBackgroundWhiteBlackText);
             this.description.setLines(1);
             this.description.setEllipsize(TextUtils.TruncateAt.END);
             addView(this.description, LayoutHelper.createLinear(-1, -2, 1.0f, 16, 0, 0, AndroidUtilities.dp(8.0f), 0));
             TextView textView2 = new TextView(context);
             this.command = textView2;
             textView2.setTextSize(1, 14.0f);
-            this.command.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
-            this.command.setTag("windowBackgroundWhiteGrayText");
+            this.command.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+            this.command.setTag(Theme.key_windowBackgroundWhiteGrayText);
             addView(this.command, LayoutHelper.createLinear(-2, -2, 0.0f, 16));
         }
 
         @Override // android.widget.LinearLayout, android.view.View
-        protected void onMeasure(int i, int i2) {
-            super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(36.0f), 1073741824));
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(36.0f), C.BUFFER_FLAG_ENCRYPTED));
         }
 
         public String getCommand() {
@@ -294,8 +292,8 @@ public class BotCommandsMenuView extends View {
     }
 
     @Override // android.view.View
-    protected boolean verifyDrawable(Drawable drawable) {
-        return super.verifyDrawable(drawable) || this.backgroundDrawable == drawable;
+    protected boolean verifyDrawable(Drawable who) {
+        return super.verifyDrawable(who) || this.backgroundDrawable == who;
     }
 
     @Override // android.view.View

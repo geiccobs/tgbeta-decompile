@@ -1,23 +1,27 @@
 package com.microsoft.appcenter.utils;
 
 import android.os.Bundle;
-/* loaded from: classes.dex */
+import java.lang.reflect.Method;
+/* loaded from: classes3.dex */
 public class InstrumentationRegistryHelper {
     private static final String[] LOCATIONS = {"androidx.test.platform.app.InstrumentationRegistry", "androidx.test.InstrumentationRegistry", "androidx.test.InstrumentationRegistry"};
 
     public static Bundle getArguments() throws IllegalStateException {
-        Exception e = null;
-        for (String str : LOCATIONS) {
+        String[] strArr;
+        Exception exception = null;
+        for (String location : LOCATIONS) {
             try {
-                return (Bundle) getClass(str).getMethod("getArguments", new Class[0]).invoke(null, new Object[0]);
-            } catch (Exception e2) {
-                e = e2;
+                Class<?> aClass = getClass(location);
+                Method getArguments = aClass.getMethod("getArguments", new Class[0]);
+                return (Bundle) getArguments.invoke(null, new Object[0]);
+            } catch (Exception e) {
+                exception = e;
             }
         }
-        throw new IllegalStateException(e);
+        throw new IllegalStateException(exception);
     }
 
-    private static Class<?> getClass(String str) throws ClassNotFoundException {
-        return Class.forName(str);
+    private static Class<?> getClass(String className) throws ClassNotFoundException {
+        return Class.forName(className);
     }
 }

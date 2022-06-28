@@ -4,17 +4,14 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.util.Base64;
-import android.util.SparseArray;
-import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
+import androidx.exifinterface.media.ExifInterface;
 import java.util.Calendar;
 import java.util.HashMap;
-/* loaded from: classes.dex */
+import org.telegram.ui.Components.UndoView;
+/* loaded from: classes4.dex */
 public class MrzRecognizer {
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class Result {
         public static final int GENDER_FEMALE = 2;
         public static final int GENDER_MALE = 1;
@@ -46,6 +43,163 @@ public class MrzRecognizer {
 
     private static native int[] findCornerPoints(Bitmap bitmap);
 
+    private static native String performRecognition(Bitmap bitmap, int i, int i2, AssetManager assetManager);
+
+    private static native void setYuvBitmapPixels(Bitmap bitmap, byte[] bArr);
+
+    public static Result recognize(Bitmap bitmap, boolean tryDriverLicenseFirst) {
+        Result res;
+        Result res2;
+        if (tryDriverLicenseFirst && (res2 = recognizeBarcode(bitmap)) != null) {
+            return res2;
+        }
+        try {
+            Result res3 = recognizeMRZ(bitmap);
+            if (res3 != null) {
+                return res3;
+            }
+        } catch (Exception e) {
+        }
+        if (!tryDriverLicenseFirst && (res = recognizeBarcode(bitmap)) != null) {
+            return res;
+        }
+        return null;
+    }
+
+    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
+    /* JADX WARN: Code restructure failed: missing block: B:37:0x00fe, code lost:
+        if (r6.equals(com.google.android.exoplayer2.metadata.icy.IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE) != false) goto L39;
+     */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private static org.telegram.messenger.MrzRecognizer.Result recognizeBarcode(android.graphics.Bitmap r13) {
+        /*
+            Method dump skipped, instructions count: 632
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MrzRecognizer.recognizeBarcode(android.graphics.Bitmap):org.telegram.messenger.MrzRecognizer$Result");
+    }
+
+    /* JADX WARN: Code restructure failed: missing block: B:138:0x0654, code lost:
+        if (r1[1].charAt(14) != '<') goto L141;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:99:0x04c5, code lost:
+        if (r1[1].charAt(27) != '<') goto L102;
+     */
+    /* JADX WARN: Removed duplicated region for block: B:66:0x02e5  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x034e A[RETURN] */
+    /* JADX WARN: Removed duplicated region for block: B:73:0x0350  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private static org.telegram.messenger.MrzRecognizer.Result recognizeMRZ(android.graphics.Bitmap r45) {
+        /*
+            Method dump skipped, instructions count: 2260
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MrzRecognizer.recognizeMRZ(android.graphics.Bitmap):org.telegram.messenger.MrzRecognizer$Result");
+    }
+
+    public static Result recognize(byte[] yuvData, int width, int height, int rotation) {
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        setYuvBitmapPixels(bmp, yuvData);
+        Matrix m = new Matrix();
+        m.setRotate(rotation);
+        int minSize = Math.min(width, height);
+        int dh = Math.round(minSize * 0.704f);
+        boolean swap = rotation == 90 || rotation == 270;
+        return recognize(Bitmap.createBitmap(bmp, swap ? (width / 2) - (dh / 2) : 0, swap ? 0 : (height / 2) - (dh / 2), swap ? dh : minSize, swap ? minSize : dh, m, false), false);
+    }
+
+    private static String capitalize(String s) {
+        if (s == null) {
+            return null;
+        }
+        char[] chars = s.toCharArray();
+        boolean prevIsSpace = true;
+        for (int i = 0; i < chars.length; i++) {
+            if (!prevIsSpace && Character.isLetter(chars[i])) {
+                chars[i] = Character.toLowerCase(chars[i]);
+            } else {
+                prevIsSpace = chars[i] == ' ';
+            }
+        }
+        return new String(chars);
+    }
+
+    private static int checksum(String s) {
+        int val = 0;
+        char[] chars = s.toCharArray();
+        int[] weights = {7, 3, 1};
+        for (int i = 0; i < chars.length; i++) {
+            int charVal = 0;
+            if (chars[i] >= '0' && chars[i] <= '9') {
+                charVal = chars[i] - '0';
+            } else if (chars[i] >= 'A' && chars[i] <= 'Z') {
+                charVal = (chars[i] - 'A') + 10;
+            }
+            val += weights[i % weights.length] * charVal;
+        }
+        int i2 = val % 10;
+        return i2;
+    }
+
+    private static void parseBirthDate(String birthDate, Result result) {
+        try {
+            result.birthYear = Integer.parseInt(birthDate.substring(0, 2));
+            result.birthYear = result.birthYear < (Calendar.getInstance().get(1) % 100) + (-5) ? result.birthYear + 2000 : result.birthYear + 1900;
+            result.birthMonth = Integer.parseInt(birthDate.substring(2, 4));
+            result.birthDay = Integer.parseInt(birthDate.substring(4));
+        } catch (NumberFormatException e) {
+        }
+    }
+
+    private static void parseExpiryDate(String expiryDate, Result result) {
+        try {
+            if ("<<<<<<".equals(expiryDate)) {
+                result.doesNotExpire = true;
+            } else {
+                result.expiryYear = Integer.parseInt(expiryDate.substring(0, 2)) + 2000;
+                result.expiryMonth = Integer.parseInt(expiryDate.substring(2, 4));
+                result.expiryDay = Integer.parseInt(expiryDate.substring(4));
+            }
+        } catch (NumberFormatException e) {
+        }
+    }
+
+    private static int parseGender(char gender) {
+        switch (gender) {
+            case UndoView.ACTION_AUTO_DELETE_ON /* 70 */:
+                return 2;
+            case UndoView.ACTION_PAYMENT_SUCCESS /* 77 */:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+    private static String russianPassportTranslit(String s) {
+        char[] chars = s.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            int idx = "ABVGDE2JZIQKLMNOPRSTUFHC34WXY9678".indexOf(chars[i]);
+            if (idx != -1) {
+                chars[i] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".charAt(idx);
+            }
+        }
+        return new String(chars);
+    }
+
+    private static String cyrillicToLatin(String s) {
+        String[] replacements = {ExifInterface.GPS_MEASUREMENT_IN_PROGRESS, "B", ExifInterface.GPS_MEASUREMENT_INTERRUPTED, "G", "D", ExifInterface.LONGITUDE_EAST, ExifInterface.LONGITUDE_EAST, "ZH", "Z", "I", "I", "K", "L", "M", "N", "O", "P", "R", ExifInterface.LATITUDE_SOUTH, ExifInterface.GPS_DIRECTION_TRUE, "U", "F", "KH", "TS", "CH", "SH", "SHCH", "IE", "Y", "", ExifInterface.LONGITUDE_EAST, "IU", "IA"};
+        for (int i = 0; i < replacements.length; i++) {
+            s = s.replace("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".substring(i, i + 1), replacements[i]);
+        }
+        return s;
+    }
+
     private static int getNumber(char c) {
         if (c == 'O') {
             return 0;
@@ -53,492 +207,263 @@ public class MrzRecognizer {
         if (c == 'I') {
             return 1;
         }
-        if (c != 'B') {
-            return c - '0';
+        if (c == 'B') {
+            return 8;
         }
-        return 8;
-    }
-
-    private static int parseGender(char c) {
-        if (c != 'F') {
-            return c != 'M' ? 0 : 1;
-        }
-        return 2;
-    }
-
-    private static native String performRecognition(Bitmap bitmap, int i, int i2, AssetManager assetManager);
-
-    private static native void setYuvBitmapPixels(Bitmap bitmap, byte[] bArr);
-
-    public static Result recognize(Bitmap bitmap, boolean z) {
-        Result recognizeBarcode;
-        Result recognizeBarcode2;
-        if (!z || (recognizeBarcode2 = recognizeBarcode(bitmap)) == null) {
-            try {
-                Result recognizeMRZ = recognizeMRZ(bitmap);
-                if (recognizeMRZ != null) {
-                    return recognizeMRZ;
-                }
-            } catch (Exception unused) {
-            }
-            if (!z && (recognizeBarcode = recognizeBarcode(bitmap)) != null) {
-                return recognizeBarcode;
-            }
-            return null;
-        }
-        return recognizeBarcode2;
-    }
-
-    private static Result recognizeBarcode(Bitmap bitmap) {
-        BarcodeDetector build = new BarcodeDetector.Builder(ApplicationLoader.applicationContext).build();
-        if (bitmap.getWidth() > 1500 || bitmap.getHeight() > 1500) {
-            float max = 1500.0f / Math.max(bitmap.getWidth(), bitmap.getHeight());
-            bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(bitmap.getWidth() * max), Math.round(bitmap.getHeight() * max), true);
-        }
-        SparseArray<Barcode> detect = build.detect(new Frame.Builder().setBitmap(bitmap).build());
-        int i = 0;
-        for (int i2 = 0; i2 < detect.size(); i2++) {
-            Barcode valueAt = detect.valueAt(i2);
-            int i3 = valueAt.valueFormat;
-            int i4 = 6;
-            int i5 = 4;
-            if (i3 == 12 && valueAt.driverLicense != null) {
-                Result result = new Result();
-                result.type = "ID".equals(valueAt.driverLicense.documentType) ? 2 : 4;
-                String str = valueAt.driverLicense.issuingCountry;
-                str.hashCode();
-                if (str.equals("CAN")) {
-                    result.issuingCountry = "CA";
-                    result.nationality = "CA";
-                } else if (str.equals("USA")) {
-                    result.issuingCountry = "US";
-                    result.nationality = "US";
-                }
-                result.firstName = capitalize(valueAt.driverLicense.firstName);
-                result.lastName = capitalize(valueAt.driverLicense.lastName);
-                result.middleName = capitalize(valueAt.driverLicense.middleName);
-                Barcode.DriverLicense driverLicense = valueAt.driverLicense;
-                result.number = driverLicense.licenseNumber;
-                String str2 = driverLicense.gender;
-                if (str2 != null) {
-                    str2.hashCode();
-                    if (str2.equals("1")) {
-                        result.gender = 1;
-                    } else if (str2.equals("2")) {
-                        result.gender = 2;
-                    }
-                }
-                if ("USA".equals(result.issuingCountry)) {
-                    i = 4;
-                    i4 = 2;
-                    i5 = 0;
-                }
-                try {
-                    String str3 = valueAt.driverLicense.birthDate;
-                    if (str3 != null && str3.length() == 8) {
-                        result.birthYear = Integer.parseInt(valueAt.driverLicense.birthDate.substring(i, i + 4));
-                        result.birthMonth = Integer.parseInt(valueAt.driverLicense.birthDate.substring(i5, i5 + 2));
-                        result.birthDay = Integer.parseInt(valueAt.driverLicense.birthDate.substring(i4, i4 + 2));
-                    }
-                    String str4 = valueAt.driverLicense.expiryDate;
-                    if (str4 != null && str4.length() == 8) {
-                        result.expiryYear = Integer.parseInt(valueAt.driverLicense.expiryDate.substring(i, i + 4));
-                        result.expiryMonth = Integer.parseInt(valueAt.driverLicense.expiryDate.substring(i5, i5 + 2));
-                        result.expiryDay = Integer.parseInt(valueAt.driverLicense.expiryDate.substring(i4, i4 + 2));
-                    }
-                } catch (NumberFormatException unused) {
-                }
-                return result;
-            }
-            if (i3 == 7 && valueAt.format == 2048 && valueAt.rawValue.matches("^[A-Za-z0-9=]+$")) {
-                try {
-                    String[] split = new String(Base64.decode(valueAt.rawValue, 0), "windows-1251").split("\\|");
-                    if (split.length >= 10) {
-                        Result result2 = new Result();
-                        result2.type = 4;
-                        result2.issuingCountry = "RU";
-                        result2.nationality = "RU";
-                        result2.number = split[0];
-                        result2.expiryYear = Integer.parseInt(split[2].substring(0, 4));
-                        result2.expiryMonth = Integer.parseInt(split[2].substring(4, 6));
-                        result2.expiryDay = Integer.parseInt(split[2].substring(6));
-                        result2.lastName = capitalize(cyrillicToLatin(split[3]));
-                        result2.firstName = capitalize(cyrillicToLatin(split[4]));
-                        result2.middleName = capitalize(cyrillicToLatin(split[5]));
-                        result2.birthYear = Integer.parseInt(split[6].substring(0, 4));
-                        result2.birthMonth = Integer.parseInt(split[6].substring(4, 6));
-                        result2.birthDay = Integer.parseInt(split[6].substring(6));
-                        return result2;
-                    }
-                    continue;
-                } catch (Exception unused2) {
-                    continue;
-                }
-            }
-        }
-        return null;
-    }
-
-    /* JADX WARN: Removed duplicated region for block: B:181:0x0252 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:182:0x0271 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:39:0x01f4  */
-    /* JADX WARN: Removed duplicated region for block: B:47:0x022c  */
-    /* JADX WARN: Removed duplicated region for block: B:48:0x023d  */
-    /* JADX WARN: Removed duplicated region for block: B:52:0x0253  */
-    /* JADX WARN: Removed duplicated region for block: B:92:0x03c6  */
-    /* JADX WARN: Removed duplicated region for block: B:95:0x03f4  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    private static org.telegram.messenger.MrzRecognizer.Result recognizeMRZ(android.graphics.Bitmap r25) {
-        /*
-            Method dump skipped, instructions count: 1921
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MrzRecognizer.recognizeMRZ(android.graphics.Bitmap):org.telegram.messenger.MrzRecognizer$Result");
-    }
-
-    public static Result recognize(byte[] bArr, int i, int i2, int i3) {
-        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
-        setYuvBitmapPixels(createBitmap, bArr);
-        Matrix matrix = new Matrix();
-        matrix.setRotate(i3);
-        int min = Math.min(i, i2);
-        int round = Math.round(min * 0.704f);
-        boolean z = i3 == 90 || i3 == 270;
-        return recognize(Bitmap.createBitmap(createBitmap, z ? (i / 2) - (round / 2) : 0, z ? 0 : (i2 / 2) - (round / 2), z ? round : min, z ? min : round, matrix, false), false);
-    }
-
-    private static String capitalize(String str) {
-        if (str == null) {
-            return null;
-        }
-        char[] charArray = str.toCharArray();
-        boolean z = true;
-        for (int i = 0; i < charArray.length; i++) {
-            if (!z && Character.isLetter(charArray[i])) {
-                charArray[i] = Character.toLowerCase(charArray[i]);
-            } else {
-                z = charArray[i] == ' ';
-            }
-        }
-        return new String(charArray);
-    }
-
-    private static int checksum(String str) {
-        int i;
-        char[] charArray = str.toCharArray();
-        int[] iArr = {7, 3, 1};
-        int i2 = 0;
-        for (int i3 = 0; i3 < charArray.length; i3++) {
-            if (charArray[i3] >= '0' && charArray[i3] <= '9') {
-                i = charArray[i3] - '0';
-            } else {
-                i = (charArray[i3] < 'A' || charArray[i3] > 'Z') ? 0 : (charArray[i3] - 'A') + 10;
-            }
-            i2 += i * iArr[i3 % 3];
-        }
-        return i2 % 10;
-    }
-
-    private static void parseBirthDate(String str, Result result) {
-        try {
-            int parseInt = Integer.parseInt(str.substring(0, 2));
-            result.birthYear = parseInt;
-            result.birthYear = parseInt < (Calendar.getInstance().get(1) % 100) + (-5) ? result.birthYear + 2000 : result.birthYear + 1900;
-            result.birthMonth = Integer.parseInt(str.substring(2, 4));
-            result.birthDay = Integer.parseInt(str.substring(4));
-        } catch (NumberFormatException unused) {
-        }
-    }
-
-    private static void parseExpiryDate(String str, Result result) {
-        try {
-            if ("<<<<<<".equals(str)) {
-                result.doesNotExpire = true;
-            } else {
-                result.expiryYear = Integer.parseInt(str.substring(0, 2)) + 2000;
-                result.expiryMonth = Integer.parseInt(str.substring(2, 4));
-                result.expiryDay = Integer.parseInt(str.substring(4));
-            }
-        } catch (NumberFormatException unused) {
-        }
-    }
-
-    private static String russianPassportTranslit(String str) {
-        char[] charArray = str.toCharArray();
-        for (int i = 0; i < charArray.length; i++) {
-            int indexOf = "ABVGDE2JZIQKLMNOPRSTUFHC34WXY9678".indexOf(charArray[i]);
-            if (indexOf != -1) {
-                charArray[i] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".charAt(indexOf);
-            }
-        }
-        return new String(charArray);
-    }
-
-    private static String cyrillicToLatin(String str) {
-        int i = 0;
-        String[] strArr = {"A", "B", "V", "G", "D", "E", "E", "ZH", "Z", "I", "I", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "F", "KH", "TS", "CH", "SH", "SHCH", "IE", "Y", "", "E", "IU", "IA"};
-        while (i < 33) {
-            int i2 = i + 1;
-            str = str.replace("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".substring(i, i2), strArr[i]);
-            i = i2;
-        }
-        return str;
+        return c - '0';
     }
 
     private static HashMap<String, String> getCountriesMap() {
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("AFG", "AF");
-        hashMap.put("ALA", "AX");
-        hashMap.put("ALB", "AL");
-        hashMap.put("DZA", "DZ");
-        hashMap.put("ASM", "AS");
-        hashMap.put("AND", "AD");
-        hashMap.put("AGO", "AO");
-        hashMap.put("AIA", "AI");
-        hashMap.put("ATA", "AQ");
-        hashMap.put("ATG", "AG");
-        hashMap.put("ARG", "AR");
-        hashMap.put("ARM", "AM");
-        hashMap.put("ABW", "AW");
-        hashMap.put("AUS", "AU");
-        hashMap.put("AUT", "AT");
-        hashMap.put("AZE", "AZ");
-        hashMap.put("BHS", "BS");
-        hashMap.put("BHR", "BH");
-        hashMap.put("BGD", "BD");
-        hashMap.put("BRB", "BB");
-        hashMap.put("BLR", "BY");
-        hashMap.put("BEL", "BE");
-        hashMap.put("BLZ", "BZ");
-        hashMap.put("BEN", "BJ");
-        hashMap.put("BMU", "BM");
-        hashMap.put("BTN", "BT");
-        hashMap.put("BOL", "BO");
-        hashMap.put("BES", "BQ");
-        hashMap.put("BIH", "BA");
-        hashMap.put("BWA", "BW");
-        hashMap.put("BVT", "BV");
-        hashMap.put("BRA", "BR");
-        hashMap.put("IOT", "IO");
-        hashMap.put("BRN", "BN");
-        hashMap.put("BGR", "BG");
-        hashMap.put("BFA", "BF");
-        hashMap.put("BDI", "BI");
-        hashMap.put("CPV", "CV");
-        hashMap.put("KHM", "KH");
-        hashMap.put("CMR", "CM");
-        hashMap.put("CAN", "CA");
-        hashMap.put("CYM", "KY");
-        hashMap.put("CAF", "CF");
-        hashMap.put("TCD", "TD");
-        hashMap.put("CHL", "CL");
-        hashMap.put("CHN", "CN");
-        hashMap.put("CXR", "CX");
-        hashMap.put("CCK", "CC");
-        hashMap.put("COL", "CO");
-        hashMap.put("COM", "KM");
-        hashMap.put("COG", "CG");
-        hashMap.put("COD", "CD");
-        hashMap.put("COK", "CK");
-        hashMap.put("CRI", "CR");
-        hashMap.put("CIV", "CI");
-        hashMap.put("HRV", "HR");
-        hashMap.put("CUB", "CU");
-        hashMap.put("CUW", "CW");
-        hashMap.put("CYP", "CY");
-        hashMap.put("CZE", "CZ");
-        hashMap.put("DNK", "DK");
-        hashMap.put("DJI", "DJ");
-        hashMap.put("DMA", "DM");
-        hashMap.put("DOM", "DO");
-        hashMap.put("ECU", "EC");
-        hashMap.put("EGY", "EG");
-        hashMap.put("SLV", "SV");
-        hashMap.put("GNQ", "GQ");
-        hashMap.put("ERI", "ER");
-        hashMap.put("EST", "EE");
-        hashMap.put("ETH", "ET");
-        hashMap.put("FLK", "FK");
-        hashMap.put("FRO", "FO");
-        hashMap.put("FJI", "FJ");
-        hashMap.put("FIN", "FI");
-        hashMap.put("FRA", "FR");
-        hashMap.put("GUF", "GF");
-        hashMap.put("PYF", "PF");
-        hashMap.put("ATF", "TF");
-        hashMap.put("GAB", "GA");
-        hashMap.put("GMB", "GM");
-        hashMap.put("GEO", "GE");
-        hashMap.put("D<<", "DE");
-        hashMap.put("GHA", "GH");
-        hashMap.put("GIB", "GI");
-        hashMap.put("GRC", "GR");
-        hashMap.put("GRL", "GL");
-        hashMap.put("GRD", "GD");
-        hashMap.put("GLP", "GP");
-        hashMap.put("GUM", "GU");
-        hashMap.put("GTM", "GT");
-        hashMap.put("GGY", "GG");
-        hashMap.put("GIN", "GN");
-        hashMap.put("GNB", "GW");
-        hashMap.put("GUY", "GY");
-        hashMap.put("HTI", "HT");
-        hashMap.put("HMD", "HM");
-        hashMap.put("VAT", "VA");
-        hashMap.put("HND", "HN");
-        hashMap.put("HKG", "HK");
-        hashMap.put("HUN", "HU");
-        hashMap.put("ISL", "IS");
-        hashMap.put("IND", "IN");
-        hashMap.put("IDN", "ID");
-        hashMap.put("IRN", "IR");
-        hashMap.put("IRQ", "IQ");
-        hashMap.put("IRL", "IE");
-        hashMap.put("IMN", "IM");
-        hashMap.put("ISR", "IL");
-        hashMap.put("ITA", "IT");
-        hashMap.put("JAM", "JM");
-        hashMap.put("JPN", "JP");
-        hashMap.put("JEY", "JE");
-        hashMap.put("JOR", "JO");
-        hashMap.put("KAZ", "KZ");
-        hashMap.put("KEN", "KE");
-        hashMap.put("KIR", "KI");
-        hashMap.put("PRK", "KP");
-        hashMap.put("KOR", "KR");
-        hashMap.put("KWT", "KW");
-        hashMap.put("KGZ", "KG");
-        hashMap.put("LAO", "LA");
-        hashMap.put("LVA", "LV");
-        hashMap.put("LBN", "LB");
-        hashMap.put("LSO", "LS");
-        hashMap.put("LBR", "LR");
-        hashMap.put("LBY", "LY");
-        hashMap.put("LIE", "LI");
-        hashMap.put("LTU", "LT");
-        hashMap.put("LUX", "LU");
-        hashMap.put("MAC", "MO");
-        hashMap.put("MKD", "MK");
-        hashMap.put("MDG", "MG");
-        hashMap.put("MWI", "MW");
-        hashMap.put("MYS", "MY");
-        hashMap.put("MDV", "MV");
-        hashMap.put("MLI", "ML");
-        hashMap.put("MLT", "MT");
-        hashMap.put("MHL", "MH");
-        hashMap.put("MTQ", "MQ");
-        hashMap.put("MRT", "MR");
-        hashMap.put("MUS", "MU");
-        hashMap.put("MYT", "YT");
-        hashMap.put("MEX", "MX");
-        hashMap.put("FSM", "FM");
-        hashMap.put("MDA", "MD");
-        hashMap.put("MCO", "MC");
-        hashMap.put("MNG", "MN");
-        hashMap.put("MNE", "ME");
-        hashMap.put("MSR", "MS");
-        hashMap.put("MAR", "MA");
-        hashMap.put("MOZ", "MZ");
-        hashMap.put("MMR", "MM");
-        hashMap.put("NAM", "NA");
-        hashMap.put("NRU", "NR");
-        hashMap.put("NPL", "NP");
-        hashMap.put("NLD", "NL");
-        hashMap.put("NCL", "NC");
-        hashMap.put("NZL", "NZ");
-        hashMap.put("NIC", "NI");
-        hashMap.put("NER", "NE");
-        hashMap.put("NGA", "NG");
-        hashMap.put("NIU", "NU");
-        hashMap.put("NFK", "NF");
-        hashMap.put("MNP", "MP");
-        hashMap.put("NOR", "NO");
-        hashMap.put("OMN", "OM");
-        hashMap.put("PAK", "PK");
-        hashMap.put("PLW", "PW");
-        hashMap.put("PSE", "PS");
-        hashMap.put("PAN", "PA");
-        hashMap.put("PNG", "PG");
-        hashMap.put("PRY", "PY");
-        hashMap.put("PER", "PE");
-        hashMap.put("PHL", "PH");
-        hashMap.put("PCN", "PN");
-        hashMap.put("POL", "PL");
-        hashMap.put("PRT", "PT");
-        hashMap.put("PRI", "PR");
-        hashMap.put("QAT", "QA");
-        hashMap.put("REU", "RE");
-        hashMap.put("ROU", "RO");
-        hashMap.put("RUS", "RU");
-        hashMap.put("RWA", "RW");
-        hashMap.put("BLM", "BL");
-        hashMap.put("SHN", "SH");
-        hashMap.put("KNA", "KN");
-        hashMap.put("LCA", "LC");
-        hashMap.put("MAF", "MF");
-        hashMap.put("SPM", "PM");
-        hashMap.put("VCT", "VC");
-        hashMap.put("WSM", "WS");
-        hashMap.put("SMR", "SM");
-        hashMap.put("STP", "ST");
-        hashMap.put("SAU", "SA");
-        hashMap.put("SEN", "SN");
-        hashMap.put("SRB", "RS");
-        hashMap.put("SYC", "SC");
-        hashMap.put("SLE", "SL");
-        hashMap.put("SGP", "SG");
-        hashMap.put("SXM", "SX");
-        hashMap.put("SVK", "SK");
-        hashMap.put("SVN", "SI");
-        hashMap.put("SLB", "SB");
-        hashMap.put("SOM", "SO");
-        hashMap.put("ZAF", "ZA");
-        hashMap.put("SGS", "GS");
-        hashMap.put("SSD", "SS");
-        hashMap.put("ESP", "ES");
-        hashMap.put("LKA", "LK");
-        hashMap.put("SDN", "SD");
-        hashMap.put("SUR", "SR");
-        hashMap.put("SJM", "SJ");
-        hashMap.put("SWZ", "SZ");
-        hashMap.put("SWE", "SE");
-        hashMap.put("CHE", "CH");
-        hashMap.put("SYR", "SY");
-        hashMap.put("TWN", "TW");
-        hashMap.put("TJK", "TJ");
-        hashMap.put("TZA", "TZ");
-        hashMap.put("THA", "TH");
-        hashMap.put("TLS", "TL");
-        hashMap.put("TGO", "TG");
-        hashMap.put("TKL", "TK");
-        hashMap.put("TON", "TO");
-        hashMap.put("TTO", "TT");
-        hashMap.put("TUN", "TN");
-        hashMap.put("TUR", "TR");
-        hashMap.put("TKM", "TM");
-        hashMap.put("TCA", "TC");
-        hashMap.put("TUV", "TV");
-        hashMap.put("UGA", "UG");
-        hashMap.put("UKR", "UA");
-        hashMap.put("ARE", "AE");
-        hashMap.put("GBR", "GB");
-        hashMap.put("USA", "US");
-        hashMap.put("UMI", "UM");
-        hashMap.put("URY", "UY");
-        hashMap.put("UZB", "UZ");
-        hashMap.put("VUT", "VU");
-        hashMap.put("VEN", "VE");
-        hashMap.put("VNM", "VN");
-        hashMap.put("VGB", "VG");
-        hashMap.put("VIR", "VI");
-        hashMap.put("WLF", "WF");
-        hashMap.put("ESH", "EH");
-        hashMap.put("YEM", "YE");
-        hashMap.put("ZMB", "ZM");
-        hashMap.put("ZWE", "ZW");
-        return hashMap;
+        HashMap<String, String> countries = new HashMap<>();
+        countries.put("AFG", "AF");
+        countries.put("ALA", "AX");
+        countries.put("ALB", "AL");
+        countries.put("DZA", "DZ");
+        countries.put("ASM", "AS");
+        countries.put("AND", "AD");
+        countries.put("AGO", "AO");
+        countries.put("AIA", "AI");
+        countries.put("ATA", "AQ");
+        countries.put("ATG", "AG");
+        countries.put("ARG", "AR");
+        countries.put("ARM", "AM");
+        countries.put("ABW", "AW");
+        countries.put("AUS", "AU");
+        countries.put("AUT", "AT");
+        countries.put("AZE", "AZ");
+        countries.put("BHS", "BS");
+        countries.put("BHR", "BH");
+        countries.put("BGD", "BD");
+        countries.put("BRB", "BB");
+        countries.put("BLR", "BY");
+        countries.put("BEL", "BE");
+        countries.put("BLZ", "BZ");
+        countries.put("BEN", "BJ");
+        countries.put("BMU", "BM");
+        countries.put("BTN", "BT");
+        countries.put("BOL", "BO");
+        countries.put("BES", "BQ");
+        countries.put("BIH", "BA");
+        countries.put("BWA", "BW");
+        countries.put("BVT", "BV");
+        countries.put("BRA", "BR");
+        countries.put("IOT", "IO");
+        countries.put("BRN", "BN");
+        countries.put("BGR", "BG");
+        countries.put("BFA", "BF");
+        countries.put("BDI", "BI");
+        countries.put("CPV", "CV");
+        countries.put("KHM", "KH");
+        countries.put("CMR", "CM");
+        countries.put("CAN", "CA");
+        countries.put("CYM", "KY");
+        countries.put("CAF", "CF");
+        countries.put("TCD", "TD");
+        countries.put("CHL", "CL");
+        countries.put("CHN", "CN");
+        countries.put("CXR", "CX");
+        countries.put("CCK", "CC");
+        countries.put("COL", "CO");
+        countries.put("COM", "KM");
+        countries.put("COG", "CG");
+        countries.put("COD", "CD");
+        countries.put("COK", "CK");
+        countries.put("CRI", "CR");
+        countries.put("CIV", "CI");
+        countries.put("HRV", "HR");
+        countries.put("CUB", "CU");
+        countries.put("CUW", "CW");
+        countries.put("CYP", "CY");
+        countries.put("CZE", "CZ");
+        countries.put("DNK", "DK");
+        countries.put("DJI", "DJ");
+        countries.put("DMA", "DM");
+        countries.put("DOM", "DO");
+        countries.put("ECU", "EC");
+        countries.put("EGY", "EG");
+        countries.put("SLV", "SV");
+        countries.put("GNQ", "GQ");
+        countries.put("ERI", "ER");
+        countries.put("EST", "EE");
+        countries.put("ETH", "ET");
+        countries.put("FLK", "FK");
+        countries.put("FRO", "FO");
+        countries.put("FJI", "FJ");
+        countries.put("FIN", "FI");
+        countries.put("FRA", "FR");
+        countries.put("GUF", "GF");
+        countries.put("PYF", "PF");
+        countries.put("ATF", "TF");
+        countries.put("GAB", "GA");
+        countries.put("GMB", "GM");
+        countries.put("GEO", "GE");
+        countries.put("D<<", "DE");
+        countries.put("GHA", "GH");
+        countries.put("GIB", "GI");
+        countries.put("GRC", "GR");
+        countries.put("GRL", "GL");
+        countries.put("GRD", "GD");
+        countries.put("GLP", "GP");
+        countries.put("GUM", "GU");
+        countries.put("GTM", "GT");
+        countries.put("GGY", "GG");
+        countries.put("GIN", "GN");
+        countries.put("GNB", "GW");
+        countries.put("GUY", "GY");
+        countries.put("HTI", "HT");
+        countries.put("HMD", "HM");
+        countries.put("VAT", "VA");
+        countries.put("HND", "HN");
+        countries.put("HKG", "HK");
+        countries.put("HUN", "HU");
+        countries.put("ISL", "IS");
+        countries.put("IND", "IN");
+        countries.put("IDN", "ID");
+        countries.put("IRN", "IR");
+        countries.put("IRQ", "IQ");
+        countries.put("IRL", "IE");
+        countries.put("IMN", "IM");
+        countries.put("ISR", "IL");
+        countries.put("ITA", "IT");
+        countries.put("JAM", "JM");
+        countries.put("JPN", "JP");
+        countries.put("JEY", "JE");
+        countries.put("JOR", "JO");
+        countries.put("KAZ", "KZ");
+        countries.put("KEN", "KE");
+        countries.put("KIR", "KI");
+        countries.put("PRK", "KP");
+        countries.put("KOR", "KR");
+        countries.put("KWT", "KW");
+        countries.put("KGZ", "KG");
+        countries.put("LAO", "LA");
+        countries.put("LVA", "LV");
+        countries.put("LBN", "LB");
+        countries.put("LSO", "LS");
+        countries.put("LBR", "LR");
+        countries.put("LBY", "LY");
+        countries.put("LIE", "LI");
+        countries.put("LTU", "LT");
+        countries.put("LUX", "LU");
+        countries.put("MAC", "MO");
+        countries.put("MKD", "MK");
+        countries.put("MDG", "MG");
+        countries.put("MWI", "MW");
+        countries.put("MYS", "MY");
+        countries.put("MDV", "MV");
+        countries.put("MLI", "ML");
+        countries.put("MLT", "MT");
+        countries.put("MHL", "MH");
+        countries.put("MTQ", "MQ");
+        countries.put("MRT", "MR");
+        countries.put("MUS", "MU");
+        countries.put("MYT", "YT");
+        countries.put("MEX", "MX");
+        countries.put("FSM", "FM");
+        countries.put("MDA", "MD");
+        countries.put("MCO", "MC");
+        countries.put("MNG", "MN");
+        countries.put("MNE", "ME");
+        countries.put("MSR", "MS");
+        countries.put("MAR", "MA");
+        countries.put("MOZ", "MZ");
+        countries.put("MMR", "MM");
+        countries.put("NAM", "NA");
+        countries.put("NRU", "NR");
+        countries.put("NPL", "NP");
+        countries.put("NLD", "NL");
+        countries.put("NCL", "NC");
+        countries.put("NZL", "NZ");
+        countries.put("NIC", "NI");
+        countries.put("NER", "NE");
+        countries.put("NGA", "NG");
+        countries.put("NIU", "NU");
+        countries.put("NFK", "NF");
+        countries.put("MNP", "MP");
+        countries.put("NOR", "NO");
+        countries.put("OMN", "OM");
+        countries.put("PAK", "PK");
+        countries.put("PLW", "PW");
+        countries.put("PSE", "PS");
+        countries.put("PAN", "PA");
+        countries.put("PNG", "PG");
+        countries.put("PRY", "PY");
+        countries.put("PER", "PE");
+        countries.put("PHL", "PH");
+        countries.put("PCN", "PN");
+        countries.put("POL", "PL");
+        countries.put("PRT", "PT");
+        countries.put("PRI", "PR");
+        countries.put("QAT", "QA");
+        countries.put("REU", "RE");
+        countries.put("ROU", "RO");
+        countries.put("RUS", "RU");
+        countries.put("RWA", "RW");
+        countries.put("BLM", "BL");
+        countries.put("SHN", "SH");
+        countries.put("KNA", "KN");
+        countries.put("LCA", "LC");
+        countries.put("MAF", "MF");
+        countries.put("SPM", "PM");
+        countries.put("VCT", "VC");
+        countries.put("WSM", "WS");
+        countries.put("SMR", "SM");
+        countries.put("STP", "ST");
+        countries.put("SAU", "SA");
+        countries.put("SEN", "SN");
+        countries.put("SRB", "RS");
+        countries.put("SYC", "SC");
+        countries.put("SLE", "SL");
+        countries.put("SGP", "SG");
+        countries.put("SXM", "SX");
+        countries.put("SVK", "SK");
+        countries.put("SVN", "SI");
+        countries.put("SLB", "SB");
+        countries.put("SOM", "SO");
+        countries.put("ZAF", "ZA");
+        countries.put("SGS", "GS");
+        countries.put("SSD", "SS");
+        countries.put("ESP", "ES");
+        countries.put("LKA", "LK");
+        countries.put("SDN", "SD");
+        countries.put("SUR", "SR");
+        countries.put("SJM", "SJ");
+        countries.put("SWZ", "SZ");
+        countries.put("SWE", "SE");
+        countries.put("CHE", "CH");
+        countries.put("SYR", "SY");
+        countries.put("TWN", "TW");
+        countries.put("TJK", "TJ");
+        countries.put("TZA", "TZ");
+        countries.put("THA", "TH");
+        countries.put("TLS", "TL");
+        countries.put("TGO", "TG");
+        countries.put("TKL", "TK");
+        countries.put("TON", "TO");
+        countries.put("TTO", "TT");
+        countries.put("TUN", "TN");
+        countries.put("TUR", "TR");
+        countries.put("TKM", "TM");
+        countries.put("TCA", "TC");
+        countries.put("TUV", "TV");
+        countries.put("UGA", "UG");
+        countries.put("UKR", "UA");
+        countries.put("ARE", "AE");
+        countries.put("GBR", "GB");
+        countries.put("USA", "US");
+        countries.put("UMI", "UM");
+        countries.put("URY", "UY");
+        countries.put("UZB", "UZ");
+        countries.put("VUT", "VU");
+        countries.put("VEN", "VE");
+        countries.put("VNM", "VN");
+        countries.put("VGB", "VG");
+        countries.put("VIR", "VI");
+        countries.put("WLF", "WF");
+        countries.put("ESH", "EH");
+        countries.put("YEM", "YE");
+        countries.put("ZMB", "ZM");
+        countries.put("ZWE", "ZW");
+        return countries;
     }
 }

@@ -7221,11 +7221,11 @@
     <public type="style" name="PopupContextAnimation2" id="0x7f0f0009" />
     <public type="style" name="TMessages_AppWidget_Background" id="0x7f0f000a" />
     <public type="style" name="TMessages_AppWidget_Badge" id="0x7f0f000b" />
-    <public type="style" name="TextAppearance_Compat_Notification" id="0x7f0f000c" />
-    <public type="style" name="TextAppearance_Compat_Notification_Info" id="0x7f0f000d" />
-    <public type="style" name="TextAppearance_Compat_Notification_Line2" id="0x7f0f000e" />
-    <public type="style" name="TextAppearance_Compat_Notification_Time" id="0x7f0f000f" />
-    <public type="style" name="TextAppearance_Compat_Notification_Title" id="0x7f0f0010" />
+    <public type="style" name="TextAppearance.Compat.Notification" id="0x7f0f000c" />
+    <public type="style" name="TextAppearance.Compat.Notification.Info" id="0x7f0f000d" />
+    <public type="style" name="TextAppearance.Compat.Notification.Line2" id="0x7f0f000e" />
+    <public type="style" name="TextAppearance.Compat.Notification.Time" id="0x7f0f000f" />
+    <public type="style" name="TextAppearance.Compat.Notification.Title" id="0x7f0f0010" />
     <public type="style" name="Theme_TMessages" id="0x7f0f0011" />
     <public type="style" name="Theme_TMessages_AppWidget" id="0x7f0f0012" />
     <public type="style" name="Theme_TMessages_AppWidget_Preview" id="0x7f0f0013" />
@@ -7253,9 +7253,9 @@
     <public type="style" name="WalletFragmentDefaultDetailsHeaderTextAppearance" id="0x7f0f0029" />
     <public type="style" name="WalletFragmentDefaultDetailsTextAppearance" id="0x7f0f002a" />
     <public type="style" name="WalletFragmentDefaultStyle" id="0x7f0f002b" />
-    <public type="style" name="Widget_Compat_NotificationActionContainer" id="0x7f0f002c" />
-    <public type="style" name="Widget_Compat_NotificationActionText" id="0x7f0f002d" />
-    <public type="style" name="Widget_Support_CoordinatorLayout" id="0x7f0f002e" />
+    <public type="style" name="Widget.Compat.NotificationActionContainer" id="0x7f0f002c" />
+    <public type="style" name="Widget.Compat.NotificationActionText" id="0x7f0f002d" />
+    <public type="style" name="Widget.Support.CoordinatorLayout" id="0x7f0f002e" />
     <public type="style" name="scrollbarShapeStyle" id="0x7f0f002f" />
     <public type="xml" name="actions" id="0x7f110000" />
     <public type="xml" name="auth" id="0x7f110001" />

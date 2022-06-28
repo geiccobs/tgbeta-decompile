@@ -1,6 +1,7 @@
 package com.google.android.exoplayer2.source.hls;
 
 import android.net.Uri;
+import android.os.Handler;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
@@ -10,6 +11,8 @@ import com.google.android.exoplayer2.source.CompositeSequenceableLoaderFactory;
 import com.google.android.exoplayer2.source.DefaultCompositeSequenceableLoaderFactory;
 import com.google.android.exoplayer2.source.MediaPeriod;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSourceEventListener;
+import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.SinglePeriodTimeline;
 import com.google.android.exoplayer2.source.hls.playlist.DefaultHlsPlaylistParserFactory;
 import com.google.android.exoplayer2.source.hls.playlist.DefaultHlsPlaylistTracker;
@@ -25,9 +28,14 @@ import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Assertions;
 import java.io.IOException;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class HlsMediaSource extends BaseMediaSource implements HlsPlaylistTracker.PrimaryPlaylistListener {
+    public static final int METADATA_TYPE_EMSG = 3;
+    public static final int METADATA_TYPE_ID3 = 1;
     private final boolean allowChunklessPreparation;
     private final CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory;
     private final HlsDataSourceFactory dataSourceFactory;
@@ -41,17 +49,24 @@ public final class HlsMediaSource extends BaseMediaSource implements HlsPlaylist
     private final Object tag;
     private final boolean useSessionKeys;
 
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface MetadataType {
+    }
+
     static {
         ExoPlayerLibraryInfo.registerModule("goog.exo.hls");
     }
 
-    /* loaded from: classes.dex */
-    public static final class Factory {
+    /* loaded from: classes3.dex */
+    public static final class Factory implements MediaSourceFactory {
         private boolean allowChunklessPreparation;
         private CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory;
         private DrmSessionManager<?> drmSessionManager;
         private HlsExtractorFactory extractorFactory;
         private final HlsDataSourceFactory hlsDataSourceFactory;
+        private boolean isCreateCalled;
         private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
         private int metadataType;
         private HlsPlaylistParserFactory playlistParserFactory;
@@ -60,8 +75,8 @@ public final class HlsMediaSource extends BaseMediaSource implements HlsPlaylist
         private Object tag;
         private boolean useSessionKeys;
 
-        public Factory(DataSource.Factory factory) {
-            this(new DefaultHlsDataSourceFactory(factory));
+        public Factory(DataSource.Factory dataSourceFactory) {
+            this(new DefaultHlsDataSourceFactory(dataSourceFactory));
         }
 
         public Factory(HlsDataSourceFactory hlsDataSourceFactory) {
@@ -75,39 +90,140 @@ public final class HlsMediaSource extends BaseMediaSource implements HlsPlaylist
             this.metadataType = 1;
         }
 
-        public HlsMediaSource createMediaSource(Uri uri) {
-            List<StreamKey> list = this.streamKeys;
-            if (list != null) {
-                this.playlistParserFactory = new FilteringHlsPlaylistParserFactory(this.playlistParserFactory, list);
+        public Factory setTag(Object tag) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.tag = tag;
+            return this;
+        }
+
+        public Factory setExtractorFactory(HlsExtractorFactory extractorFactory) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.extractorFactory = (HlsExtractorFactory) Assertions.checkNotNull(extractorFactory);
+            return this;
+        }
+
+        public Factory setLoadErrorHandlingPolicy(LoadErrorHandlingPolicy loadErrorHandlingPolicy) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
+            return this;
+        }
+
+        @Deprecated
+        public Factory setMinLoadableRetryCount(int minLoadableRetryCount) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.loadErrorHandlingPolicy = new DefaultLoadErrorHandlingPolicy(minLoadableRetryCount);
+            return this;
+        }
+
+        public Factory setPlaylistParserFactory(HlsPlaylistParserFactory playlistParserFactory) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.playlistParserFactory = (HlsPlaylistParserFactory) Assertions.checkNotNull(playlistParserFactory);
+            return this;
+        }
+
+        public Factory setPlaylistTrackerFactory(HlsPlaylistTracker.Factory playlistTrackerFactory) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.playlistTrackerFactory = (HlsPlaylistTracker.Factory) Assertions.checkNotNull(playlistTrackerFactory);
+            return this;
+        }
+
+        public Factory setCompositeSequenceableLoaderFactory(CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.compositeSequenceableLoaderFactory = (CompositeSequenceableLoaderFactory) Assertions.checkNotNull(compositeSequenceableLoaderFactory);
+            return this;
+        }
+
+        public Factory setAllowChunklessPreparation(boolean allowChunklessPreparation) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.allowChunklessPreparation = allowChunklessPreparation;
+            return this;
+        }
+
+        public Factory setMetadataType(int metadataType) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.metadataType = metadataType;
+            return this;
+        }
+
+        public Factory setUseSessionKeys(boolean useSessionKeys) {
+            this.useSessionKeys = useSessionKeys;
+            return this;
+        }
+
+        @Deprecated
+        public HlsMediaSource createMediaSource(Uri playlistUri, Handler eventHandler, MediaSourceEventListener eventListener) {
+            HlsMediaSource mediaSource = createMediaSource(playlistUri);
+            if (eventHandler != null && eventListener != null) {
+                mediaSource.addEventListener(eventHandler, eventListener);
+            }
+            return mediaSource;
+        }
+
+        @Override // com.google.android.exoplayer2.source.MediaSourceFactory
+        public Factory setDrmSessionManager(DrmSessionManager<?> drmSessionManager) {
+            DrmSessionManager<?> drmSessionManager2;
+            Assertions.checkState(!this.isCreateCalled);
+            if (drmSessionManager != null) {
+                drmSessionManager2 = drmSessionManager;
+            } else {
+                drmSessionManager2 = DrmSessionManager.CC.getDummyDrmSessionManager();
+            }
+            this.drmSessionManager = drmSessionManager2;
+            return this;
+        }
+
+        @Override // com.google.android.exoplayer2.source.MediaSourceFactory
+        public HlsMediaSource createMediaSource(Uri playlistUri) {
+            this.isCreateCalled = true;
+            if (this.streamKeys != null) {
+                this.playlistParserFactory = new FilteringHlsPlaylistParserFactory(this.playlistParserFactory, this.streamKeys);
             }
             HlsDataSourceFactory hlsDataSourceFactory = this.hlsDataSourceFactory;
             HlsExtractorFactory hlsExtractorFactory = this.extractorFactory;
             CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory = this.compositeSequenceableLoaderFactory;
             DrmSessionManager<?> drmSessionManager = this.drmSessionManager;
             LoadErrorHandlingPolicy loadErrorHandlingPolicy = this.loadErrorHandlingPolicy;
-            return new HlsMediaSource(uri, hlsDataSourceFactory, hlsExtractorFactory, compositeSequenceableLoaderFactory, drmSessionManager, loadErrorHandlingPolicy, this.playlistTrackerFactory.createTracker(hlsDataSourceFactory, loadErrorHandlingPolicy, this.playlistParserFactory), this.allowChunklessPreparation, this.metadataType, this.useSessionKeys, this.tag);
+            return new HlsMediaSource(playlistUri, hlsDataSourceFactory, hlsExtractorFactory, compositeSequenceableLoaderFactory, drmSessionManager, loadErrorHandlingPolicy, this.playlistTrackerFactory.createTracker(hlsDataSourceFactory, loadErrorHandlingPolicy, this.playlistParserFactory), this.allowChunklessPreparation, this.metadataType, this.useSessionKeys, this.tag);
+        }
+
+        @Override // com.google.android.exoplayer2.source.MediaSourceFactory
+        public Factory setStreamKeys(List<StreamKey> streamKeys) {
+            Assertions.checkState(!this.isCreateCalled);
+            this.streamKeys = streamKeys;
+            return this;
+        }
+
+        @Override // com.google.android.exoplayer2.source.MediaSourceFactory
+        public int[] getSupportedTypes() {
+            return new int[]{2};
         }
     }
 
-    private HlsMediaSource(Uri uri, HlsDataSourceFactory hlsDataSourceFactory, HlsExtractorFactory hlsExtractorFactory, CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory, DrmSessionManager<?> drmSessionManager, LoadErrorHandlingPolicy loadErrorHandlingPolicy, HlsPlaylistTracker hlsPlaylistTracker, boolean z, int i, boolean z2, Object obj) {
-        this.manifestUri = uri;
-        this.dataSourceFactory = hlsDataSourceFactory;
-        this.extractorFactory = hlsExtractorFactory;
+    private HlsMediaSource(Uri manifestUri, HlsDataSourceFactory dataSourceFactory, HlsExtractorFactory extractorFactory, CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory, DrmSessionManager<?> drmSessionManager, LoadErrorHandlingPolicy loadErrorHandlingPolicy, HlsPlaylistTracker playlistTracker, boolean allowChunklessPreparation, int metadataType, boolean useSessionKeys, Object tag) {
+        this.manifestUri = manifestUri;
+        this.dataSourceFactory = dataSourceFactory;
+        this.extractorFactory = extractorFactory;
         this.compositeSequenceableLoaderFactory = compositeSequenceableLoaderFactory;
         this.drmSessionManager = drmSessionManager;
         this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
-        this.playlistTracker = hlsPlaylistTracker;
-        this.allowChunklessPreparation = z;
-        this.metadataType = i;
-        this.useSessionKeys = z2;
-        this.tag = obj;
+        this.playlistTracker = playlistTracker;
+        this.allowChunklessPreparation = allowChunklessPreparation;
+        this.metadataType = metadataType;
+        this.useSessionKeys = useSessionKeys;
+        this.tag = tag;
+    }
+
+    @Override // com.google.android.exoplayer2.source.BaseMediaSource, com.google.android.exoplayer2.source.MediaSource
+    public Object getTag() {
+        return this.tag;
     }
 
     @Override // com.google.android.exoplayer2.source.BaseMediaSource
-    protected void prepareSourceInternal(TransferListener transferListener) {
-        this.mediaTransferListener = transferListener;
+    protected void prepareSourceInternal(TransferListener mediaTransferListener) {
+        this.mediaTransferListener = mediaTransferListener;
         this.drmSessionManager.prepare();
-        this.playlistTracker.start(this.manifestUri, createEventDispatcher(null), this);
+        MediaSourceEventListener.EventDispatcher eventDispatcher = createEventDispatcher(null);
+        this.playlistTracker.start(this.manifestUri, eventDispatcher, this);
     }
 
     @Override // com.google.android.exoplayer2.source.MediaSource
@@ -116,8 +232,9 @@ public final class HlsMediaSource extends BaseMediaSource implements HlsPlaylist
     }
 
     @Override // com.google.android.exoplayer2.source.MediaSource
-    public MediaPeriod createPeriod(MediaSource.MediaPeriodId mediaPeriodId, Allocator allocator, long j) {
-        return new HlsMediaPeriod(this.extractorFactory, this.playlistTracker, this.dataSourceFactory, this.mediaTransferListener, this.drmSessionManager, this.loadErrorHandlingPolicy, createEventDispatcher(mediaPeriodId), allocator, this.compositeSequenceableLoaderFactory, this.allowChunklessPreparation, this.metadataType, this.useSessionKeys);
+    public MediaPeriod createPeriod(MediaSource.MediaPeriodId id, Allocator allocator, long startPositionUs) {
+        MediaSourceEventListener.EventDispatcher eventDispatcher = createEventDispatcher(id);
+        return new HlsMediaPeriod(this.extractorFactory, this.playlistTracker, this.dataSourceFactory, this.mediaTransferListener, this.drmSessionManager, this.loadErrorHandlingPolicy, eventDispatcher, allocator, this.compositeSequenceableLoaderFactory, this.allowChunklessPreparation, this.metadataType, this.useSessionKeys);
     }
 
     @Override // com.google.android.exoplayer2.source.MediaSource
@@ -132,36 +249,41 @@ public final class HlsMediaSource extends BaseMediaSource implements HlsPlaylist
     }
 
     @Override // com.google.android.exoplayer2.source.hls.playlist.HlsPlaylistTracker.PrimaryPlaylistListener
-    public void onPrimaryPlaylistRefreshed(HlsMediaPlaylist hlsMediaPlaylist) {
-        SinglePeriodTimeline singlePeriodTimeline;
-        long j;
-        long usToMs = hlsMediaPlaylist.hasProgramDateTime ? C.usToMs(hlsMediaPlaylist.startTimeUs) : -9223372036854775807L;
-        int i = hlsMediaPlaylist.playlistType;
-        long j2 = (i == 2 || i == 1) ? usToMs : -9223372036854775807L;
-        long j3 = hlsMediaPlaylist.startOffsetUs;
-        HlsManifest hlsManifest = new HlsManifest((HlsMasterPlaylist) Assertions.checkNotNull(this.playlistTracker.getMasterPlaylist()), hlsMediaPlaylist);
-        if (this.playlistTracker.isLive()) {
-            long initialStartTimeUs = hlsMediaPlaylist.startTimeUs - this.playlistTracker.getInitialStartTimeUs();
-            long j4 = hlsMediaPlaylist.hasEndTag ? initialStartTimeUs + hlsMediaPlaylist.durationUs : -9223372036854775807L;
-            List<HlsMediaPlaylist.Segment> list = hlsMediaPlaylist.segments;
-            if (j3 != -9223372036854775807L) {
-                j = j3;
-            } else if (!list.isEmpty()) {
-                int max = Math.max(0, list.size() - 3);
-                long j5 = hlsMediaPlaylist.durationUs - (hlsMediaPlaylist.targetDurationUs * 2);
-                while (max > 0 && list.get(max).relativeStartTimeUs > j5) {
-                    max--;
-                }
-                j = list.get(max).relativeStartTimeUs;
-            } else {
-                j = 0;
-            }
-            singlePeriodTimeline = new SinglePeriodTimeline(j2, usToMs, j4, hlsMediaPlaylist.durationUs, initialStartTimeUs, j, true, !hlsMediaPlaylist.hasEndTag, true, hlsManifest, this.tag);
+    public void onPrimaryPlaylistRefreshed(HlsMediaPlaylist playlist) {
+        long presentationStartTimeMs;
+        SinglePeriodTimeline timeline;
+        long windowDefaultStartPositionUs;
+        long windowStartTimeMs = playlist.hasProgramDateTime ? C.usToMs(playlist.startTimeUs) : -9223372036854775807L;
+        if (playlist.playlistType == 2 || playlist.playlistType == 1) {
+            presentationStartTimeMs = windowStartTimeMs;
         } else {
-            long j6 = j3 == -9223372036854775807L ? 0L : j3;
-            long j7 = hlsMediaPlaylist.durationUs;
-            singlePeriodTimeline = new SinglePeriodTimeline(j2, usToMs, j7, j7, 0L, j6, true, false, false, hlsManifest, this.tag);
+            presentationStartTimeMs = -9223372036854775807L;
         }
-        refreshSourceInfo(singlePeriodTimeline);
+        long windowDefaultStartPositionUs2 = playlist.startOffsetUs;
+        HlsManifest manifest = new HlsManifest((HlsMasterPlaylist) Assertions.checkNotNull(this.playlistTracker.getMasterPlaylist()), playlist);
+        if (this.playlistTracker.isLive()) {
+            long offsetFromInitialStartTimeUs = playlist.startTimeUs - this.playlistTracker.getInitialStartTimeUs();
+            long periodDurationUs = playlist.hasEndTag ? offsetFromInitialStartTimeUs + playlist.durationUs : -9223372036854775807L;
+            List<HlsMediaPlaylist.Segment> segments = playlist.segments;
+            if (windowDefaultStartPositionUs2 != C.TIME_UNSET) {
+                windowDefaultStartPositionUs = windowDefaultStartPositionUs2;
+            } else if (segments.isEmpty()) {
+                windowDefaultStartPositionUs = 0;
+            } else {
+                int defaultStartSegmentIndex = Math.max(0, segments.size() - 3);
+                long minStartPositionUs = playlist.durationUs - (playlist.targetDurationUs * 2);
+                while (defaultStartSegmentIndex > 0 && segments.get(defaultStartSegmentIndex).relativeStartTimeUs > minStartPositionUs) {
+                    defaultStartSegmentIndex--;
+                }
+                windowDefaultStartPositionUs = segments.get(defaultStartSegmentIndex).relativeStartTimeUs;
+            }
+            timeline = new SinglePeriodTimeline(presentationStartTimeMs, windowStartTimeMs, periodDurationUs, playlist.durationUs, offsetFromInitialStartTimeUs, windowDefaultStartPositionUs, true, !playlist.hasEndTag, true, manifest, this.tag);
+        } else {
+            if (windowDefaultStartPositionUs2 == C.TIME_UNSET) {
+                windowDefaultStartPositionUs2 = 0;
+            }
+            timeline = new SinglePeriodTimeline(presentationStartTimeMs, windowStartTimeMs, playlist.durationUs, playlist.durationUs, 0L, windowDefaultStartPositionUs2, true, false, false, manifest, this.tag);
+        }
+        refreshSourceInfo(timeline);
     }
 }

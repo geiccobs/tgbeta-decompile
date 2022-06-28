@@ -5,9 +5,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import java.util.ArrayList;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class DispatchQueueMainThreadSync extends Thread {
-    private static int indexPointer;
+    private static int indexPointer = 0;
     private volatile Handler handler;
     public final int index;
     private boolean isRecycled;
@@ -15,44 +15,40 @@ public class DispatchQueueMainThreadSync extends Thread {
     private long lastTaskTime;
     private ArrayList<PostponedTask> postponedTasks;
 
-    public void handleMessage(Message message) {
+    public DispatchQueueMainThreadSync(String threadName) {
+        this(threadName, true);
     }
 
-    public DispatchQueueMainThreadSync(String str) {
-        this(str, true);
-    }
-
-    public DispatchQueueMainThreadSync(String str, boolean z) {
+    public DispatchQueueMainThreadSync(String threadName, boolean start) {
         this.handler = null;
         int i = indexPointer;
         indexPointer = i + 1;
         this.index = i;
         this.postponedTasks = new ArrayList<>();
-        setName(str);
-        if (z) {
+        setName(threadName);
+        if (start) {
             start();
         }
     }
 
-    public void sendMessage(Message message, int i) {
+    public void sendMessage(Message msg, int delay) {
         checkThread();
         if (this.isRecycled) {
             return;
         }
         if (!this.isRunning) {
-            this.postponedTasks.add(new PostponedTask(message, i));
-        } else if (i <= 0) {
-            this.handler.sendMessage(message);
+            this.postponedTasks.add(new PostponedTask(msg, delay));
+        } else if (delay <= 0) {
+            this.handler.sendMessage(msg);
         } else {
-            this.handler.sendMessageDelayed(message, i);
+            this.handler.sendMessageDelayed(msg, delay);
         }
     }
 
     private void checkThread() {
-        if (!BuildVars.DEBUG_PRIVATE_VERSION || Thread.currentThread() == ApplicationLoader.applicationHandler.getLooper().getThread()) {
-            return;
+        if (BuildVars.DEBUG_PRIVATE_VERSION && Thread.currentThread() != ApplicationLoader.applicationHandler.getLooper().getThread()) {
+            throw new IllegalStateException("Disaptch thread");
         }
-        throw new IllegalStateException("Disaptch thread");
     }
 
     public void cancelRunnable(Runnable runnable) {
@@ -71,9 +67,9 @@ public class DispatchQueueMainThreadSync extends Thread {
         }
     }
 
-    public void cancelRunnables(Runnable[] runnableArr) {
+    public void cancelRunnables(Runnable[] runnables) {
         checkThread();
-        for (Runnable runnable : runnableArr) {
+        for (Runnable runnable : runnables) {
             cancelRunnable(runnable);
         }
     }
@@ -84,18 +80,18 @@ public class DispatchQueueMainThreadSync extends Thread {
         return postRunnable(runnable, 0L);
     }
 
-    public boolean postRunnable(Runnable runnable, long j) {
+    public boolean postRunnable(Runnable runnable, long delay) {
         checkThread();
         if (this.isRecycled) {
             return false;
         }
         if (!this.isRunning) {
-            this.postponedTasks.add(new PostponedTask(runnable, j));
+            this.postponedTasks.add(new PostponedTask(runnable, delay));
             return true;
-        } else if (j <= 0) {
+        } else if (delay <= 0) {
             return this.handler.post(runnable);
         } else {
-            return this.handler.postDelayed(runnable, j);
+            return this.handler.postDelayed(runnable, delay);
         }
     }
 
@@ -103,6 +99,9 @@ public class DispatchQueueMainThreadSync extends Thread {
         checkThread();
         this.postponedTasks.clear();
         this.handler.removeCallbacksAndMessages(null);
+    }
+
+    public void handleMessage(Message inputMessage) {
     }
 
     public long getLastTaskTime() {
@@ -114,13 +113,14 @@ public class DispatchQueueMainThreadSync extends Thread {
         postRunnable(new Runnable() { // from class: org.telegram.messenger.DispatchQueueMainThreadSync$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                DispatchQueueMainThreadSync.this.lambda$recycle$0();
+                DispatchQueueMainThreadSync.this.m185x30a1b77a();
             }
         });
         this.isRecycled = true;
     }
 
-    public /* synthetic */ void lambda$recycle$0() {
+    /* renamed from: lambda$recycle$0$org-telegram-messenger-DispatchQueueMainThreadSync */
+    public /* synthetic */ void m185x30a1b77a() {
         this.handler.getLooper().quit();
     }
 
@@ -130,9 +130,7 @@ public class DispatchQueueMainThreadSync extends Thread {
         this.handler = new Handler(Looper.myLooper(), new Handler.Callback() { // from class: org.telegram.messenger.DispatchQueueMainThreadSync$$ExternalSyntheticLambda0
             @Override // android.os.Handler.Callback
             public final boolean handleMessage(Message message) {
-                boolean lambda$run$1;
-                lambda$run$1 = DispatchQueueMainThreadSync.this.lambda$run$1(message);
-                return lambda$run$1;
+                return DispatchQueueMainThreadSync.this.m186lambda$run$1$orgtelegrammessengerDispatchQueueMainThreadSync(message);
             }
         });
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.DispatchQueueMainThreadSync.1
@@ -148,8 +146,9 @@ public class DispatchQueueMainThreadSync extends Thread {
         Looper.loop();
     }
 
-    public /* synthetic */ boolean lambda$run$1(Message message) {
-        handleMessage(message);
+    /* renamed from: lambda$run$1$org-telegram-messenger-DispatchQueueMainThreadSync */
+    public /* synthetic */ boolean m186lambda$run$1$orgtelegrammessengerDispatchQueueMainThreadSync(Message msg) {
+        handleMessage(msg);
         return true;
     }
 
@@ -161,22 +160,22 @@ public class DispatchQueueMainThreadSync extends Thread {
         return this.handler;
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public class PostponedTask {
         long delay;
         Message message;
         Runnable runnable;
 
-        public PostponedTask(Message message, int i) {
-            DispatchQueueMainThreadSync.this = r1;
-            this.message = message;
-            this.delay = i;
+        public PostponedTask(Message msg, int delay) {
+            DispatchQueueMainThreadSync.this = r3;
+            this.message = msg;
+            this.delay = delay;
         }
 
-        public PostponedTask(Runnable runnable, long j) {
+        public PostponedTask(Runnable runnable, long delay) {
             DispatchQueueMainThreadSync.this = r1;
             this.runnable = runnable;
-            this.delay = j;
+            this.delay = delay;
         }
 
         public void run() {

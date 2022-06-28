@@ -1,7 +1,7 @@
 package androidx.core.view;
 
 import android.view.View;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface NestedScrollingParent2 extends NestedScrollingParent {
     void onNestedPreScroll(View target, int dx, int dy, int[] consumed, int type);
 

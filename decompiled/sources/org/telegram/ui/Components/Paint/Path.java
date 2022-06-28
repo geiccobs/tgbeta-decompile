@@ -2,7 +2,7 @@ package org.telegram.ui.Components.Paint;
 
 import java.util.Arrays;
 import java.util.Vector;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class Path {
     private float baseWeight;
     private Brush brush;
@@ -16,10 +16,10 @@ public class Path {
         vector.add(point);
     }
 
-    public Path(Point[] pointArr) {
+    public Path(Point[] points) {
         Vector<Point> vector = new Vector<>();
         this.points = vector;
-        vector.addAll(Arrays.asList(pointArr));
+        vector.addAll(Arrays.asList(points));
     }
 
     public int getLength() {
@@ -31,9 +31,9 @@ public class Path {
     }
 
     public Point[] getPoints() {
-        Point[] pointArr = new Point[this.points.size()];
-        this.points.toArray(pointArr);
-        return pointArr;
+        Point[] points = new Point[this.points.size()];
+        this.points.toArray(points);
+        return points;
     }
 
     public int getColor() {
@@ -48,9 +48,9 @@ public class Path {
         return this.brush;
     }
 
-    public void setup(int i, float f, Brush brush) {
-        this.color = i;
-        this.baseWeight = f;
+    public void setup(int color, float baseWeight, Brush brush) {
+        this.color = color;
+        this.baseWeight = baseWeight;
         this.brush = brush;
     }
 }

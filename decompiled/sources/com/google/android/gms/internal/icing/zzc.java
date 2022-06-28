@@ -4,11 +4,9 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzc {
-    static {
-        zzc.class.getClassLoader();
-    }
+    private static final ClassLoader zza = zzc.class.getClassLoader();
 
     private zzc() {
     }
@@ -18,6 +16,11 @@ public final class zzc {
             return null;
         }
         return creator.createFromParcel(parcel);
+    }
+
+    public static void zzb(Parcel parcel, Parcelable parcelable) {
+        parcel.writeInt(1);
+        parcelable.writeToParcel(parcel, 0);
     }
 
     public static void zzc(Parcel parcel, IInterface iInterface) {

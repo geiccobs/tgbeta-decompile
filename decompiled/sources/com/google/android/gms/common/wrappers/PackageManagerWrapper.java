@@ -1,35 +1,31 @@
 package com.google.android.gms.common.wrappers;
 
-import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import androidx.annotation.RecentlyNonNull;
+import android.os.Binder;
+import android.os.Process;
 import com.google.android.gms.common.util.PlatformVersion;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class PackageManagerWrapper {
     private final Context zza;
 
-    public PackageManagerWrapper(@RecentlyNonNull Context context) {
+    public PackageManagerWrapper(Context context) {
         this.zza = context;
     }
 
-    @RecentlyNonNull
-    public ApplicationInfo getApplicationInfo(@RecentlyNonNull String str, int i) throws PackageManager.NameNotFoundException {
+    public ApplicationInfo getApplicationInfo(String str, int i) throws PackageManager.NameNotFoundException {
         return this.zza.getPackageManager().getApplicationInfo(str, i);
     }
 
-    @RecentlyNonNull
-    public PackageInfo getPackageInfo(@RecentlyNonNull String str, int i) throws PackageManager.NameNotFoundException {
+    public PackageInfo getPackageInfo(String str, int i) throws PackageManager.NameNotFoundException {
         return this.zza.getPackageManager().getPackageInfo(str, i);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
-    public final boolean zza(int i, @RecentlyNonNull String str) {
+    public final boolean zza(int i, String str) {
         if (PlatformVersion.isAtLeastKitKat()) {
             try {
                 AppOpsManager appOpsManager = (AppOpsManager) this.zza.getSystemService("appops");
@@ -38,7 +34,7 @@ public class PackageManagerWrapper {
                 }
                 appOpsManager.checkPackage(i, str);
                 return true;
-            } catch (SecurityException unused) {
+            } catch (SecurityException e) {
                 return false;
             }
         }
@@ -53,16 +49,26 @@ public class PackageManagerWrapper {
         return false;
     }
 
-    public int checkCallingOrSelfPermission(@RecentlyNonNull String str) {
+    public int checkCallingOrSelfPermission(String str) {
         return this.zza.checkCallingOrSelfPermission(str);
     }
 
-    public int checkPermission(@RecentlyNonNull String str, @RecentlyNonNull String str2) {
+    public int checkPermission(String str, String str2) {
         return this.zza.getPackageManager().checkPermission(str, str2);
     }
 
-    @RecentlyNonNull
-    public CharSequence getApplicationLabel(@RecentlyNonNull String str) throws PackageManager.NameNotFoundException {
+    public CharSequence getApplicationLabel(String str) throws PackageManager.NameNotFoundException {
         return this.zza.getPackageManager().getApplicationLabel(this.zza.getPackageManager().getApplicationInfo(str, 0));
+    }
+
+    public boolean isCallerInstantApp() {
+        String nameForUid;
+        if (Binder.getCallingUid() == Process.myUid()) {
+            return InstantApps.isInstantApp(this.zza);
+        }
+        if (PlatformVersion.isAtLeastO() && (nameForUid = this.zza.getPackageManager().getNameForUid(Binder.getCallingUid())) != null) {
+            return this.zza.getPackageManager().isInstantApp(nameForUid);
+        }
+        return false;
     }
 }

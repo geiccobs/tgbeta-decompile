@@ -5,58 +5,59 @@ import com.google.android.exoplayer2.metadata.emsg.EventMessageDecoder;
 import com.google.android.exoplayer2.metadata.icy.IcyDecoder;
 import com.google.android.exoplayer2.metadata.id3.Id3Decoder;
 import com.google.android.exoplayer2.metadata.scte35.SpliceInfoDecoder;
-/* loaded from: classes.dex */
+import com.google.android.exoplayer2.util.MimeTypes;
+/* loaded from: classes3.dex */
 public interface MetadataDecoderFactory {
     public static final MetadataDecoderFactory DEFAULT = new MetadataDecoderFactory() { // from class: com.google.android.exoplayer2.metadata.MetadataDecoderFactory.1
         @Override // com.google.android.exoplayer2.metadata.MetadataDecoderFactory
         public boolean supportsFormat(Format format) {
-            String str = format.sampleMimeType;
-            return "application/id3".equals(str) || "application/x-emsg".equals(str) || "application/x-scte35".equals(str) || "application/x-icy".equals(str);
+            String mimeType = format.sampleMimeType;
+            return MimeTypes.APPLICATION_ID3.equals(mimeType) || MimeTypes.APPLICATION_EMSG.equals(mimeType) || MimeTypes.APPLICATION_SCTE35.equals(mimeType) || MimeTypes.APPLICATION_ICY.equals(mimeType);
         }
 
         @Override // com.google.android.exoplayer2.metadata.MetadataDecoderFactory
         public MetadataDecoder createDecoder(Format format) {
-            String str = format.sampleMimeType;
-            if (str != null) {
+            String mimeType = format.sampleMimeType;
+            if (mimeType != null) {
                 char c = 65535;
-                switch (str.hashCode()) {
+                switch (mimeType.hashCode()) {
                     case -1348231605:
-                        if (str.equals("application/x-icy")) {
-                            c = 0;
+                        if (mimeType.equals(MimeTypes.APPLICATION_ICY)) {
+                            c = 3;
                             break;
                         }
                         break;
                     case -1248341703:
-                        if (str.equals("application/id3")) {
-                            c = 1;
+                        if (mimeType.equals(MimeTypes.APPLICATION_ID3)) {
+                            c = 0;
                             break;
                         }
                         break;
                     case 1154383568:
-                        if (str.equals("application/x-emsg")) {
-                            c = 2;
+                        if (mimeType.equals(MimeTypes.APPLICATION_EMSG)) {
+                            c = 1;
                             break;
                         }
                         break;
                     case 1652648887:
-                        if (str.equals("application/x-scte35")) {
-                            c = 3;
+                        if (mimeType.equals(MimeTypes.APPLICATION_SCTE35)) {
+                            c = 2;
                             break;
                         }
                         break;
                 }
                 switch (c) {
                     case 0:
-                        return new IcyDecoder();
-                    case 1:
                         return new Id3Decoder();
-                    case 2:
+                    case 1:
                         return new EventMessageDecoder();
-                    case 3:
+                    case 2:
                         return new SpliceInfoDecoder();
+                    case 3:
+                        return new IcyDecoder();
                 }
             }
-            throw new IllegalArgumentException("Attempted to create decoder for unsupported MIME type: " + str);
+            throw new IllegalArgumentException("Attempted to create decoder for unsupported MIME type: " + mimeType);
         }
     };
 

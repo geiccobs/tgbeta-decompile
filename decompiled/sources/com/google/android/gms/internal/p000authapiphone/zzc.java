@@ -4,11 +4,9 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 /* renamed from: com.google.android.gms.internal.auth-api-phone.zzc */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzc {
-    static {
-        zzc.class.getClassLoader();
-    }
+    private static final ClassLoader zzd = zzc.class.getClassLoader();
 
     private zzc() {
     }

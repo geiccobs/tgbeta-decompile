@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import java.util.ArrayList;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzg implements Parcelable.Creator<CardRequirements> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ CardRequirements createFromParcel(Parcel parcel) {
@@ -16,17 +16,22 @@ public final class zzg implements Parcelable.Creator<CardRequirements> {
         boolean z2 = true;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            int fieldId = SafeParcelReader.getFieldId(readHeader);
-            if (fieldId == 1) {
-                arrayList = SafeParcelReader.createIntegerList(parcel, readHeader);
-            } else if (fieldId == 2) {
-                z2 = SafeParcelReader.readBoolean(parcel, readHeader);
-            } else if (fieldId == 3) {
-                z = SafeParcelReader.readBoolean(parcel, readHeader);
-            } else if (fieldId == 4) {
-                i = SafeParcelReader.readInt(parcel, readHeader);
-            } else {
-                SafeParcelReader.skipUnknownField(parcel, readHeader);
+            switch (SafeParcelReader.getFieldId(readHeader)) {
+                case 1:
+                    arrayList = SafeParcelReader.createIntegerList(parcel, readHeader);
+                    break;
+                case 2:
+                    z2 = SafeParcelReader.readBoolean(parcel, readHeader);
+                    break;
+                case 3:
+                    z = SafeParcelReader.readBoolean(parcel, readHeader);
+                    break;
+                case 4:
+                    i = SafeParcelReader.readInt(parcel, readHeader);
+                    break;
+                default:
+                    SafeParcelReader.skipUnknownField(parcel, readHeader);
+                    break;
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

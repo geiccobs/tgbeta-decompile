@@ -1,34 +1,56 @@
 package com.android.billingclient.api;
 
 import android.text.TextUtils;
+import com.google.firebase.remoteconfig.RemoteConfigConstants;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class ProductDetails {
     private final String zza;
     private final JSONObject zzb;
     private final String zzc;
     private final String zzd;
     private final String zze;
+    private final String zzf;
+    private final String zzg;
     private final String zzh;
     private final List zzi;
 
     /* compiled from: com.android.billingclient:billing@@5.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class OneTimePurchaseOfferDetails {
+        private final String zza;
+        private final long zzb;
+        private final String zzc;
         private final String zzd;
+        private final String zze;
 
         OneTimePurchaseOfferDetails(JSONObject jSONObject) {
-            jSONObject.optString("formattedPrice");
-            jSONObject.optLong("priceAmountMicros");
-            jSONObject.optString("priceCurrencyCode");
+            this.zza = jSONObject.optString("formattedPrice");
+            this.zzb = jSONObject.optLong("priceAmountMicros");
+            this.zzc = jSONObject.optString("priceCurrencyCode");
             this.zzd = jSONObject.optString("offerIdToken");
-            jSONObject.optString("offerId");
+            this.zze = jSONObject.optString("offerId");
             jSONObject.optInt("offerType");
+        }
+
+        public String getFormattedPrice() {
+            return this.zza;
+        }
+
+        public long getPriceAmountMicros() {
+            return this.zzb;
+        }
+
+        public String getPriceCurrencyCode() {
+            return this.zzc;
         }
 
         public final String zza() {
@@ -37,18 +59,26 @@ public final class ProductDetails {
     }
 
     /* compiled from: com.android.billingclient:billing@@5.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class PricingPhase {
+        private final int billingCycleCount;
         private final String billingPeriod;
         private final String formattedPrice;
+        private final long priceAmountMicros;
+        private final String priceCurrencyCode;
+        private final int recurrenceMode;
 
-        PricingPhase(JSONObject jSONObject) {
-            this.billingPeriod = jSONObject.optString("billingPeriod");
-            jSONObject.optString("priceCurrencyCode");
-            this.formattedPrice = jSONObject.optString("formattedPrice");
-            jSONObject.optLong("priceAmountMicros");
-            jSONObject.optInt("recurrenceMode");
-            jSONObject.optInt("billingCycleCount");
+        PricingPhase(JSONObject pricingPhaseJson) {
+            this.billingPeriod = pricingPhaseJson.optString("billingPeriod");
+            this.priceCurrencyCode = pricingPhaseJson.optString("priceCurrencyCode");
+            this.formattedPrice = pricingPhaseJson.optString("formattedPrice");
+            this.priceAmountMicros = pricingPhaseJson.optLong("priceAmountMicros");
+            this.recurrenceMode = pricingPhaseJson.optInt("recurrenceMode");
+            this.billingCycleCount = pricingPhaseJson.optInt("billingCycleCount");
+        }
+
+        public int getBillingCycleCount() {
+            return this.billingCycleCount;
         }
 
         public String getBillingPeriod() {
@@ -58,18 +88,30 @@ public final class ProductDetails {
         public String getFormattedPrice() {
             return this.formattedPrice;
         }
+
+        public long getPriceAmountMicros() {
+            return this.priceAmountMicros;
+        }
+
+        public String getPriceCurrencyCode() {
+            return this.priceCurrencyCode;
+        }
+
+        public int getRecurrenceMode() {
+            return this.recurrenceMode;
+        }
     }
 
     /* compiled from: com.android.billingclient:billing@@5.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class PricingPhases {
         private final List<PricingPhase> pricingPhaseList;
 
-        PricingPhases(JSONArray jSONArray) {
+        PricingPhases(JSONArray pricingPhaseJsonArray) {
             ArrayList arrayList = new ArrayList();
-            if (jSONArray != null) {
-                for (int i = 0; i < jSONArray.length(); i++) {
-                    JSONObject optJSONObject = jSONArray.optJSONObject(i);
+            if (pricingPhaseJsonArray != null) {
+                for (int i = 0; i < pricingPhaseJsonArray.length(); i++) {
+                    JSONObject optJSONObject = pricingPhaseJsonArray.optJSONObject(i);
                     if (optJSONObject != null) {
                         arrayList.add(new PricingPhase(optJSONObject));
                     }
@@ -84,25 +126,43 @@ public final class ProductDetails {
     }
 
     /* compiled from: com.android.billingclient:billing@@5.0.0 */
+    @Retention(RetentionPolicy.SOURCE)
     /* loaded from: classes.dex */
+    public @interface RecurrenceMode {
+        public static final int FINITE_RECURRING = 2;
+        public static final int INFINITE_RECURRING = 1;
+        public static final int NON_RECURRING = 3;
+    }
+
+    /* compiled from: com.android.billingclient:billing@@5.0.0 */
+    /* loaded from: classes3.dex */
     public static final class SubscriptionOfferDetails {
+        private final zzbg installmentPlanDetails;
+        private final List<String> offerTags;
         private final String offerToken;
         private final PricingPhases pricingPhases;
 
-        SubscriptionOfferDetails(JSONObject jSONObject) throws JSONException {
-            this.offerToken = jSONObject.getString("offerIdToken");
-            this.pricingPhases = new PricingPhases(jSONObject.getJSONArray("pricingPhases"));
-            JSONObject optJSONObject = jSONObject.optJSONObject("installmentPlanDetails");
-            if (optJSONObject != null) {
-                new zzbg(optJSONObject);
-            }
+        SubscriptionOfferDetails(JSONObject offerDetailsJson) throws JSONException {
+            this.offerToken = offerDetailsJson.getString("offerIdToken");
+            this.pricingPhases = new PricingPhases(offerDetailsJson.getJSONArray("pricingPhases"));
+            JSONObject optJSONObject = offerDetailsJson.optJSONObject("installmentPlanDetails");
+            this.installmentPlanDetails = optJSONObject == null ? null : new zzbg(optJSONObject);
             ArrayList arrayList = new ArrayList();
-            JSONArray optJSONArray = jSONObject.optJSONArray("offerTags");
+            JSONArray optJSONArray = offerDetailsJson.optJSONArray("offerTags");
             if (optJSONArray != null) {
                 for (int i = 0; i < optJSONArray.length(); i++) {
                     arrayList.add(optJSONArray.getString(i));
                 }
             }
+            this.offerTags = arrayList;
+        }
+
+        public zzbg getInstallmentPlanDetails() {
+            return this.installmentPlanDetails;
+        }
+
+        public List<String> getOfferTags() {
+            return this.offerTags;
         }
 
         public String getOfferToken() {
@@ -115,12 +175,13 @@ public final class ProductDetails {
     }
 
     public ProductDetails(String str) throws JSONException {
+        ArrayList arrayList;
         this.zza = str;
         JSONObject jSONObject = new JSONObject(str);
         this.zzb = jSONObject;
         String optString = jSONObject.optString("productId");
         this.zzc = optString;
-        String optString2 = jSONObject.optString("type");
+        String optString2 = jSONObject.optString(CommonProperties.TYPE);
         this.zzd = optString2;
         if (TextUtils.isEmpty(optString)) {
             throw new IllegalArgumentException("Product id cannot be empty.");
@@ -129,19 +190,19 @@ public final class ProductDetails {
             throw new IllegalArgumentException("Product type cannot be empty.");
         }
         this.zze = jSONObject.optString("title");
-        jSONObject.optString("name");
-        jSONObject.optString("description");
+        this.zzf = jSONObject.optString(CommonProperties.NAME);
+        this.zzg = jSONObject.optString("description");
         this.zzh = jSONObject.optString("skuDetailsToken");
-        if (optString2.equals("inapp")) {
-            this.zzi = null;
-            return;
-        }
-        ArrayList arrayList = new ArrayList();
-        JSONArray optJSONArray = jSONObject.optJSONArray("subscriptionOfferDetails");
-        if (optJSONArray != null) {
-            for (int i = 0; i < optJSONArray.length(); i++) {
-                arrayList.add(new SubscriptionOfferDetails(optJSONArray.getJSONObject(i)));
+        if (!optString2.equals("inapp")) {
+            arrayList = new ArrayList();
+            JSONArray optJSONArray = jSONObject.optJSONArray("subscriptionOfferDetails");
+            if (optJSONArray != null) {
+                for (int i = 0; i < optJSONArray.length(); i++) {
+                    arrayList.add(new SubscriptionOfferDetails(optJSONArray.getJSONObject(i)));
+                }
             }
+        } else {
+            arrayList = null;
         }
         this.zzi = arrayList;
     }
@@ -154,6 +215,14 @@ public final class ProductDetails {
             return TextUtils.equals(this.zza, ((ProductDetails) obj).zza);
         }
         return false;
+    }
+
+    public String getDescription() {
+        return this.zzg;
+    }
+
+    public String getName() {
+        return this.zzf;
     }
 
     public OneTimePurchaseOfferDetails getOneTimePurchaseOfferDetails() {
@@ -176,6 +245,10 @@ public final class ProductDetails {
         return this.zzi;
     }
 
+    public String getTitle() {
+        return this.zze;
+    }
+
     public final int hashCode() {
         return this.zza.hashCode();
     }
@@ -192,7 +265,7 @@ public final class ProductDetails {
     }
 
     public final String zza() {
-        return this.zzb.optString("packageName");
+        return this.zzb.optString(RemoteConfigConstants.RequestFieldKey.PACKAGE_NAME);
     }
 
     public final String zzb() {

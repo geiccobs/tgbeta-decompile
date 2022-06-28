@@ -1,7 +1,7 @@
 package org.telegram.ui;
 
 import android.content.DialogInterface;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class PhotoViewer$12$$ExternalSyntheticLambda3 implements DialogInterface.OnClickListener {
     public static final /* synthetic */ PhotoViewer$12$$ExternalSyntheticLambda3 INSTANCE = new PhotoViewer$12$$ExternalSyntheticLambda3();
 

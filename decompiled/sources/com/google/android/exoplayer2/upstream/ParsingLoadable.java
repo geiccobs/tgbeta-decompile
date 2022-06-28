@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class ParsingLoadable<T> implements Loader.Loadable {
     private final StatsDataSource dataSource;
     public final DataSpec dataSpec;
@@ -16,23 +16,31 @@ public final class ParsingLoadable<T> implements Loader.Loadable {
     private volatile T result;
     public final int type;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Parser<T> {
         T parse(Uri uri, InputStream inputStream) throws IOException;
     }
 
-    @Override // com.google.android.exoplayer2.upstream.Loader.Loadable
-    public final void cancelLoad() {
+    public static <T> T load(DataSource dataSource, Parser<? extends T> parser, Uri uri, int type) throws IOException {
+        ParsingLoadable<T> loadable = new ParsingLoadable<>(dataSource, uri, type, parser);
+        loadable.load();
+        return (T) Assertions.checkNotNull(loadable.getResult());
     }
 
-    public ParsingLoadable(DataSource dataSource, Uri uri, int i, Parser<? extends T> parser) {
-        this(dataSource, new DataSpec(uri, 1), i, parser);
+    public static <T> T load(DataSource dataSource, Parser<? extends T> parser, DataSpec dataSpec, int type) throws IOException {
+        ParsingLoadable<T> loadable = new ParsingLoadable<>(dataSource, dataSpec, type, parser);
+        loadable.load();
+        return (T) Assertions.checkNotNull(loadable.getResult());
     }
 
-    public ParsingLoadable(DataSource dataSource, DataSpec dataSpec, int i, Parser<? extends T> parser) {
+    public ParsingLoadable(DataSource dataSource, Uri uri, int type, Parser<? extends T> parser) {
+        this(dataSource, new DataSpec(uri, 1), type, parser);
+    }
+
+    public ParsingLoadable(DataSource dataSource, DataSpec dataSpec, int type, Parser<? extends T> parser) {
         this.dataSource = new StatsDataSource(dataSource);
         this.dataSpec = dataSpec;
-        this.type = i;
+        this.type = type;
         this.parser = parser;
     }
 
@@ -53,14 +61,19 @@ public final class ParsingLoadable<T> implements Loader.Loadable {
     }
 
     @Override // com.google.android.exoplayer2.upstream.Loader.Loadable
+    public final void cancelLoad() {
+    }
+
+    @Override // com.google.android.exoplayer2.upstream.Loader.Loadable
     public final void load() throws IOException {
         this.dataSource.resetBytesRead();
-        DataSourceInputStream dataSourceInputStream = new DataSourceInputStream(this.dataSource, this.dataSpec);
+        DataSourceInputStream inputStream = new DataSourceInputStream(this.dataSource, this.dataSpec);
         try {
-            dataSourceInputStream.open();
-            this.result = this.parser.parse((Uri) Assertions.checkNotNull(this.dataSource.getUri()), dataSourceInputStream);
+            inputStream.open();
+            Uri dataSourceUri = (Uri) Assertions.checkNotNull(this.dataSource.getUri());
+            this.result = this.parser.parse(dataSourceUri, inputStream);
         } finally {
-            Util.closeQuietly(dataSourceInputStream);
+            Util.closeQuietly(inputStream);
         }
     }
 }

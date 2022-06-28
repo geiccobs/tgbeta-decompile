@@ -3,10 +3,12 @@ package com.google.android.exoplayer2.source.dash;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.drm.DrmInitData;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.source.CompositeSequenceableLoaderFactory;
 import com.google.android.exoplayer2.source.EmptySampleStream;
 import com.google.android.exoplayer2.source.MediaPeriod;
@@ -29,8 +31,13 @@ import com.google.android.exoplayer2.upstream.Allocator;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.upstream.LoaderErrorThrower;
 import com.google.android.exoplayer2.upstream.TransferListener;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.microsoft.appcenter.Constants;
 import java.io.IOException;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
@@ -38,7 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Callback<ChunkSampleStream<DashChunkSource>>, ChunkSampleStream.ReleaseCallback<DashChunkSource> {
     private static final Pattern CEA608_SERVICE_DESCRIPTOR_REGEX = Pattern.compile("CC([1-4])=(.+)");
     private final Allocator allocator;
@@ -64,55 +71,54 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
     private EventSampleStream[] eventSampleStreams = new EventSampleStream[0];
     private final IdentityHashMap<ChunkSampleStream<DashChunkSource>, PlayerEmsgHandler.PlayerTrackEmsgHandler> trackEmsgHandlerBySampleStream = new IdentityHashMap<>();
 
-    public DashMediaPeriod(int i, DashManifest dashManifest, int i2, DashChunkSource.Factory factory, TransferListener transferListener, DrmSessionManager<?> drmSessionManager, LoadErrorHandlingPolicy loadErrorHandlingPolicy, MediaSourceEventListener.EventDispatcher eventDispatcher, long j, LoaderErrorThrower loaderErrorThrower, Allocator allocator, CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory, PlayerEmsgHandler.PlayerEmsgCallback playerEmsgCallback) {
-        this.id = i;
-        this.manifest = dashManifest;
-        this.periodIndex = i2;
-        this.chunkSourceFactory = factory;
+    public DashMediaPeriod(int id, DashManifest manifest, int periodIndex, DashChunkSource.Factory chunkSourceFactory, TransferListener transferListener, DrmSessionManager<?> drmSessionManager, LoadErrorHandlingPolicy loadErrorHandlingPolicy, MediaSourceEventListener.EventDispatcher eventDispatcher, long elapsedRealtimeOffsetMs, LoaderErrorThrower manifestLoaderErrorThrower, Allocator allocator, CompositeSequenceableLoaderFactory compositeSequenceableLoaderFactory, PlayerEmsgHandler.PlayerEmsgCallback playerEmsgCallback) {
+        this.id = id;
+        this.manifest = manifest;
+        this.periodIndex = periodIndex;
+        this.chunkSourceFactory = chunkSourceFactory;
         this.transferListener = transferListener;
         this.drmSessionManager = drmSessionManager;
         this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
         this.eventDispatcher = eventDispatcher;
-        this.elapsedRealtimeOffsetMs = j;
-        this.manifestLoaderErrorThrower = loaderErrorThrower;
+        this.elapsedRealtimeOffsetMs = elapsedRealtimeOffsetMs;
+        this.manifestLoaderErrorThrower = manifestLoaderErrorThrower;
         this.allocator = allocator;
         this.compositeSequenceableLoaderFactory = compositeSequenceableLoaderFactory;
-        this.playerEmsgHandler = new PlayerEmsgHandler(dashManifest, playerEmsgCallback, allocator);
+        this.playerEmsgHandler = new PlayerEmsgHandler(manifest, playerEmsgCallback, allocator);
         this.compositeSequenceableLoader = compositeSequenceableLoaderFactory.createCompositeSequenceableLoader(this.sampleStreams);
-        Period period = dashManifest.getPeriod(i2);
-        List<EventStream> list = period.eventStreams;
-        this.eventStreams = list;
-        Pair<TrackGroupArray, TrackGroupInfo[]> buildTrackGroups = buildTrackGroups(drmSessionManager, period.adaptationSets, list);
-        this.trackGroups = (TrackGroupArray) buildTrackGroups.first;
-        this.trackGroupInfos = (TrackGroupInfo[]) buildTrackGroups.second;
+        Period period = manifest.getPeriod(periodIndex);
+        this.eventStreams = period.eventStreams;
+        Pair<TrackGroupArray, TrackGroupInfo[]> result = buildTrackGroups(drmSessionManager, period.adaptationSets, this.eventStreams);
+        this.trackGroups = (TrackGroupArray) result.first;
+        this.trackGroupInfos = (TrackGroupInfo[]) result.second;
         eventDispatcher.mediaPeriodCreated();
     }
 
-    public void updateManifest(DashManifest dashManifest, int i) {
+    public void updateManifest(DashManifest manifest, int periodIndex) {
         EventSampleStream[] eventSampleStreamArr;
-        this.manifest = dashManifest;
-        this.periodIndex = i;
-        this.playerEmsgHandler.updateManifest(dashManifest);
+        this.manifest = manifest;
+        this.periodIndex = periodIndex;
+        this.playerEmsgHandler.updateManifest(manifest);
         ChunkSampleStream<DashChunkSource>[] chunkSampleStreamArr = this.sampleStreams;
         if (chunkSampleStreamArr != null) {
-            for (ChunkSampleStream<DashChunkSource> chunkSampleStream : chunkSampleStreamArr) {
-                chunkSampleStream.getChunkSource().updateManifest(dashManifest, i);
+            for (ChunkSampleStream<DashChunkSource> sampleStream : chunkSampleStreamArr) {
+                sampleStream.getChunkSource().updateManifest(manifest, periodIndex);
             }
             this.callback.onContinueLoadingRequested(this);
         }
-        this.eventStreams = dashManifest.getPeriod(i).eventStreams;
+        this.eventStreams = manifest.getPeriod(periodIndex).eventStreams;
         for (EventSampleStream eventSampleStream : this.eventSampleStreams) {
             Iterator<EventStream> it = this.eventStreams.iterator();
             while (true) {
                 if (it.hasNext()) {
-                    EventStream next = it.next();
-                    if (next.id().equals(eventSampleStream.eventStreamId())) {
+                    EventStream eventStream = it.next();
+                    if (eventStream.id().equals(eventSampleStream.eventStreamId())) {
                         boolean z = true;
-                        int periodCount = dashManifest.getPeriodCount() - 1;
-                        if (!dashManifest.dynamic || i != periodCount) {
+                        int lastPeriodIndex = manifest.getPeriodCount() - 1;
+                        if (!manifest.dynamic || periodIndex != lastPeriodIndex) {
                             z = false;
                         }
-                        eventSampleStream.updateEventStream(next, z);
+                        eventSampleStream.updateEventStream(eventStream, z);
                     }
                 }
             }
@@ -120,24 +126,25 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
     }
 
     public void release() {
+        ChunkSampleStream<DashChunkSource>[] chunkSampleStreamArr;
         this.playerEmsgHandler.release();
-        for (ChunkSampleStream<DashChunkSource> chunkSampleStream : this.sampleStreams) {
-            chunkSampleStream.release(this);
+        for (ChunkSampleStream<DashChunkSource> sampleStream : this.sampleStreams) {
+            sampleStream.release(this);
         }
         this.callback = null;
         this.eventDispatcher.mediaPeriodReleased();
     }
 
     @Override // com.google.android.exoplayer2.source.chunk.ChunkSampleStream.ReleaseCallback
-    public synchronized void onSampleStreamReleased(ChunkSampleStream<DashChunkSource> chunkSampleStream) {
-        PlayerEmsgHandler.PlayerTrackEmsgHandler remove = this.trackEmsgHandlerBySampleStream.remove(chunkSampleStream);
-        if (remove != null) {
-            remove.release();
+    public synchronized void onSampleStreamReleased(ChunkSampleStream<DashChunkSource> stream) {
+        PlayerEmsgHandler.PlayerTrackEmsgHandler trackEmsgHandler = this.trackEmsgHandlerBySampleStream.remove(stream);
+        if (trackEmsgHandler != null) {
+            trackEmsgHandler.release();
         }
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod
-    public void prepare(MediaPeriod.Callback callback, long j) {
+    public void prepare(MediaPeriod.Callback callback, long positionUs) {
         this.callback = callback;
         callback.onPrepared(this);
     }
@@ -153,45 +160,88 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod
-    public long selectTracks(TrackSelection[] trackSelectionArr, boolean[] zArr, SampleStream[] sampleStreamArr, boolean[] zArr2, long j) {
-        int[] streamIndexToTrackGroupIndex = getStreamIndexToTrackGroupIndex(trackSelectionArr);
-        releaseDisabledStreams(trackSelectionArr, zArr, sampleStreamArr);
-        releaseOrphanEmbeddedStreams(trackSelectionArr, sampleStreamArr, streamIndexToTrackGroupIndex);
-        selectNewStreams(trackSelectionArr, sampleStreamArr, zArr2, j, streamIndexToTrackGroupIndex);
-        ArrayList arrayList = new ArrayList();
-        ArrayList arrayList2 = new ArrayList();
-        for (SampleStream sampleStream : sampleStreamArr) {
-            if (sampleStream instanceof ChunkSampleStream) {
-                arrayList.add((ChunkSampleStream) sampleStream);
-            } else if (sampleStream instanceof EventSampleStream) {
-                arrayList2.add((EventSampleStream) sampleStream);
+    public List<StreamKey> getStreamKeys(List<TrackSelection> trackSelections) {
+        DashMediaPeriod dashMediaPeriod = this;
+        List<AdaptationSet> manifestAdaptationSets = dashMediaPeriod.manifest.getPeriod(dashMediaPeriod.periodIndex).adaptationSets;
+        List<StreamKey> streamKeys = new ArrayList<>();
+        Iterator<TrackSelection> it = trackSelections.iterator();
+        while (it.hasNext()) {
+            TrackSelection trackSelection = it.next();
+            int trackGroupIndex = dashMediaPeriod.trackGroups.indexOf(trackSelection.getTrackGroup());
+            TrackGroupInfo trackGroupInfo = dashMediaPeriod.trackGroupInfos[trackGroupIndex];
+            if (trackGroupInfo.trackGroupCategory == 0) {
+                int[] adaptationSetIndices = trackGroupInfo.adaptationSetIndices;
+                int[] trackIndices = new int[trackSelection.length()];
+                for (int i = 0; i < trackSelection.length(); i++) {
+                    trackIndices[i] = trackSelection.getIndexInTrackGroup(i);
+                }
+                Arrays.sort(trackIndices);
+                int currentAdaptationSetIndex = 0;
+                int totalTracksInPreviousAdaptationSets = 0;
+                int i2 = 0;
+                int tracksInCurrentAdaptationSet = manifestAdaptationSets.get(adaptationSetIndices[0]).representations.size();
+                int length = trackIndices.length;
+                while (i2 < length) {
+                    int trackIndex = trackIndices[i2];
+                    while (trackIndex >= totalTracksInPreviousAdaptationSets + tracksInCurrentAdaptationSet) {
+                        currentAdaptationSetIndex++;
+                        totalTracksInPreviousAdaptationSets += tracksInCurrentAdaptationSet;
+                        tracksInCurrentAdaptationSet = manifestAdaptationSets.get(adaptationSetIndices[currentAdaptationSetIndex]).representations.size();
+                    }
+                    streamKeys.add(new StreamKey(dashMediaPeriod.periodIndex, adaptationSetIndices[currentAdaptationSetIndex], trackIndex - totalTracksInPreviousAdaptationSets));
+                    i2++;
+                    dashMediaPeriod = this;
+                    manifestAdaptationSets = manifestAdaptationSets;
+                    it = it;
+                }
+                dashMediaPeriod = this;
             }
         }
-        ChunkSampleStream<DashChunkSource>[] newSampleStreamArray = newSampleStreamArray(arrayList.size());
-        this.sampleStreams = newSampleStreamArray;
-        arrayList.toArray(newSampleStreamArray);
-        EventSampleStream[] eventSampleStreamArr = new EventSampleStream[arrayList2.size()];
-        this.eventSampleStreams = eventSampleStreamArr;
-        arrayList2.toArray(eventSampleStreamArr);
-        this.compositeSequenceableLoader = this.compositeSequenceableLoaderFactory.createCompositeSequenceableLoader(this.sampleStreams);
-        return j;
+        return streamKeys;
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod
-    public void discardBuffer(long j, boolean z) {
-        for (ChunkSampleStream<DashChunkSource> chunkSampleStream : this.sampleStreams) {
-            chunkSampleStream.discardBuffer(j, z);
+    public long selectTracks(TrackSelection[] selections, boolean[] mayRetainStreamFlags, SampleStream[] streams, boolean[] streamResetFlags, long positionUs) {
+        int[] streamIndexToTrackGroupIndex = getStreamIndexToTrackGroupIndex(selections);
+        releaseDisabledStreams(selections, mayRetainStreamFlags, streams);
+        releaseOrphanEmbeddedStreams(selections, streams, streamIndexToTrackGroupIndex);
+        selectNewStreams(selections, streams, streamResetFlags, positionUs, streamIndexToTrackGroupIndex);
+        ArrayList<ChunkSampleStream<DashChunkSource>> sampleStreamList = new ArrayList<>();
+        ArrayList<EventSampleStream> eventSampleStreamList = new ArrayList<>();
+        for (SampleStream sampleStream : streams) {
+            if (sampleStream instanceof ChunkSampleStream) {
+                ChunkSampleStream<DashChunkSource> stream = (ChunkSampleStream) sampleStream;
+                sampleStreamList.add(stream);
+            } else if (sampleStream instanceof EventSampleStream) {
+                eventSampleStreamList.add((EventSampleStream) sampleStream);
+            }
+        }
+        ChunkSampleStream<DashChunkSource>[] newSampleStreamArray = newSampleStreamArray(sampleStreamList.size());
+        this.sampleStreams = newSampleStreamArray;
+        sampleStreamList.toArray(newSampleStreamArray);
+        EventSampleStream[] eventSampleStreamArr = new EventSampleStream[eventSampleStreamList.size()];
+        this.eventSampleStreams = eventSampleStreamArr;
+        eventSampleStreamList.toArray(eventSampleStreamArr);
+        this.compositeSequenceableLoader = this.compositeSequenceableLoaderFactory.createCompositeSequenceableLoader(this.sampleStreams);
+        return positionUs;
+    }
+
+    @Override // com.google.android.exoplayer2.source.MediaPeriod
+    public void discardBuffer(long positionUs, boolean toKeyframe) {
+        ChunkSampleStream<DashChunkSource>[] chunkSampleStreamArr;
+        for (ChunkSampleStream<DashChunkSource> sampleStream : this.sampleStreams) {
+            sampleStream.discardBuffer(positionUs, toKeyframe);
         }
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod, com.google.android.exoplayer2.source.SequenceableLoader
-    public void reevaluateBuffer(long j) {
-        this.compositeSequenceableLoader.reevaluateBuffer(j);
+    public void reevaluateBuffer(long positionUs) {
+        this.compositeSequenceableLoader.reevaluateBuffer(positionUs);
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod, com.google.android.exoplayer2.source.SequenceableLoader
-    public boolean continueLoading(long j) {
-        return this.compositeSequenceableLoader.continueLoading(j);
+    public boolean continueLoading(long positionUs) {
+        return this.compositeSequenceableLoader.continueLoading(positionUs);
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod, com.google.android.exoplayer2.source.SequenceableLoader
@@ -209,9 +259,9 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
         if (!this.notifiedReadingStarted) {
             this.eventDispatcher.readingStarted();
             this.notifiedReadingStarted = true;
-            return -9223372036854775807L;
+            return C.TIME_UNSET;
         }
-        return -9223372036854775807L;
+        return C.TIME_UNSET;
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod, com.google.android.exoplayer2.source.SequenceableLoader
@@ -220,335 +270,356 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod
-    public long seekToUs(long j) {
-        for (ChunkSampleStream<DashChunkSource> chunkSampleStream : this.sampleStreams) {
-            chunkSampleStream.seekToUs(j);
+    public long seekToUs(long positionUs) {
+        ChunkSampleStream<DashChunkSource>[] chunkSampleStreamArr;
+        EventSampleStream[] eventSampleStreamArr;
+        for (ChunkSampleStream<DashChunkSource> sampleStream : this.sampleStreams) {
+            sampleStream.seekToUs(positionUs);
         }
-        for (EventSampleStream eventSampleStream : this.eventSampleStreams) {
-            eventSampleStream.seekToUs(j);
+        for (EventSampleStream sampleStream2 : this.eventSampleStreams) {
+            sampleStream2.seekToUs(positionUs);
         }
-        return j;
+        return positionUs;
     }
 
     @Override // com.google.android.exoplayer2.source.MediaPeriod
-    public long getAdjustedSeekPositionUs(long j, SeekParameters seekParameters) {
+    public long getAdjustedSeekPositionUs(long positionUs, SeekParameters seekParameters) {
         ChunkSampleStream<DashChunkSource>[] chunkSampleStreamArr;
-        for (ChunkSampleStream<DashChunkSource> chunkSampleStream : this.sampleStreams) {
-            if (chunkSampleStream.primaryTrackType == 2) {
-                return chunkSampleStream.getAdjustedSeekPositionUs(j, seekParameters);
+        for (ChunkSampleStream<DashChunkSource> sampleStream : this.sampleStreams) {
+            if (sampleStream.primaryTrackType == 2) {
+                return sampleStream.getAdjustedSeekPositionUs(positionUs, seekParameters);
             }
         }
-        return j;
+        return positionUs;
     }
 
-    public void onContinueLoadingRequested(ChunkSampleStream<DashChunkSource> chunkSampleStream) {
+    public void onContinueLoadingRequested(ChunkSampleStream<DashChunkSource> sampleStream) {
         this.callback.onContinueLoadingRequested(this);
     }
 
-    private int[] getStreamIndexToTrackGroupIndex(TrackSelection[] trackSelectionArr) {
-        int[] iArr = new int[trackSelectionArr.length];
-        for (int i = 0; i < trackSelectionArr.length; i++) {
-            if (trackSelectionArr[i] != null) {
-                iArr[i] = this.trackGroups.indexOf(trackSelectionArr[i].getTrackGroup());
+    private int[] getStreamIndexToTrackGroupIndex(TrackSelection[] selections) {
+        int[] streamIndexToTrackGroupIndex = new int[selections.length];
+        for (int i = 0; i < selections.length; i++) {
+            if (selections[i] != null) {
+                streamIndexToTrackGroupIndex[i] = this.trackGroups.indexOf(selections[i].getTrackGroup());
             } else {
-                iArr[i] = -1;
+                streamIndexToTrackGroupIndex[i] = -1;
             }
         }
-        return iArr;
+        return streamIndexToTrackGroupIndex;
     }
 
-    private void releaseDisabledStreams(TrackSelection[] trackSelectionArr, boolean[] zArr, SampleStream[] sampleStreamArr) {
-        for (int i = 0; i < trackSelectionArr.length; i++) {
-            if (trackSelectionArr[i] == null || !zArr[i]) {
-                if (sampleStreamArr[i] instanceof ChunkSampleStream) {
-                    ((ChunkSampleStream) sampleStreamArr[i]).release(this);
-                } else if (sampleStreamArr[i] instanceof ChunkSampleStream.EmbeddedSampleStream) {
-                    ((ChunkSampleStream.EmbeddedSampleStream) sampleStreamArr[i]).release();
+    private void releaseDisabledStreams(TrackSelection[] selections, boolean[] mayRetainStreamFlags, SampleStream[] streams) {
+        for (int i = 0; i < selections.length; i++) {
+            if (selections[i] == null || !mayRetainStreamFlags[i]) {
+                if (streams[i] instanceof ChunkSampleStream) {
+                    ChunkSampleStream<DashChunkSource> stream = (ChunkSampleStream) streams[i];
+                    stream.release(this);
+                } else if (streams[i] instanceof ChunkSampleStream.EmbeddedSampleStream) {
+                    ((ChunkSampleStream.EmbeddedSampleStream) streams[i]).release();
                 }
-                sampleStreamArr[i] = null;
+                streams[i] = null;
             }
         }
     }
 
-    private void releaseOrphanEmbeddedStreams(TrackSelection[] trackSelectionArr, SampleStream[] sampleStreamArr, int[] iArr) {
-        boolean z;
-        for (int i = 0; i < trackSelectionArr.length; i++) {
-            if ((sampleStreamArr[i] instanceof EmptySampleStream) || (sampleStreamArr[i] instanceof ChunkSampleStream.EmbeddedSampleStream)) {
-                int primaryStreamIndex = getPrimaryStreamIndex(i, iArr);
+    private void releaseOrphanEmbeddedStreams(TrackSelection[] selections, SampleStream[] streams, int[] streamIndexToTrackGroupIndex) {
+        boolean mayRetainStream;
+        for (int i = 0; i < selections.length; i++) {
+            if ((streams[i] instanceof EmptySampleStream) || (streams[i] instanceof ChunkSampleStream.EmbeddedSampleStream)) {
+                int primaryStreamIndex = getPrimaryStreamIndex(i, streamIndexToTrackGroupIndex);
                 if (primaryStreamIndex == -1) {
-                    z = sampleStreamArr[i] instanceof EmptySampleStream;
+                    mayRetainStream = streams[i] instanceof EmptySampleStream;
                 } else {
-                    z = (sampleStreamArr[i] instanceof ChunkSampleStream.EmbeddedSampleStream) && ((ChunkSampleStream.EmbeddedSampleStream) sampleStreamArr[i]).parent == sampleStreamArr[primaryStreamIndex];
+                    mayRetainStream = (streams[i] instanceof ChunkSampleStream.EmbeddedSampleStream) && ((ChunkSampleStream.EmbeddedSampleStream) streams[i]).parent == streams[primaryStreamIndex];
                 }
-                if (!z) {
-                    if (sampleStreamArr[i] instanceof ChunkSampleStream.EmbeddedSampleStream) {
-                        ((ChunkSampleStream.EmbeddedSampleStream) sampleStreamArr[i]).release();
+                if (!mayRetainStream) {
+                    if (streams[i] instanceof ChunkSampleStream.EmbeddedSampleStream) {
+                        ((ChunkSampleStream.EmbeddedSampleStream) streams[i]).release();
                     }
-                    sampleStreamArr[i] = null;
+                    streams[i] = null;
                 }
             }
         }
     }
 
-    private void selectNewStreams(TrackSelection[] trackSelectionArr, SampleStream[] sampleStreamArr, boolean[] zArr, long j, int[] iArr) {
-        for (int i = 0; i < trackSelectionArr.length; i++) {
-            TrackSelection trackSelection = trackSelectionArr[i];
-            if (trackSelection != null) {
-                if (sampleStreamArr[i] == null) {
-                    zArr[i] = true;
-                    TrackGroupInfo trackGroupInfo = this.trackGroupInfos[iArr[i]];
-                    int i2 = trackGroupInfo.trackGroupCategory;
-                    if (i2 == 0) {
-                        sampleStreamArr[i] = buildSampleStream(trackGroupInfo, trackSelection, j);
-                    } else if (i2 == 2) {
-                        sampleStreamArr[i] = new EventSampleStream(this.eventStreams.get(trackGroupInfo.eventStreamGroupIndex), trackSelection.getTrackGroup().getFormat(0), this.manifest.dynamic);
+    private void selectNewStreams(TrackSelection[] selections, SampleStream[] streams, boolean[] streamResetFlags, long positionUs, int[] streamIndexToTrackGroupIndex) {
+        for (int i = 0; i < selections.length; i++) {
+            TrackSelection selection = selections[i];
+            if (selection != null) {
+                if (streams[i] == null) {
+                    streamResetFlags[i] = true;
+                    int trackGroupIndex = streamIndexToTrackGroupIndex[i];
+                    TrackGroupInfo trackGroupInfo = this.trackGroupInfos[trackGroupIndex];
+                    if (trackGroupInfo.trackGroupCategory == 0) {
+                        streams[i] = buildSampleStream(trackGroupInfo, selection, positionUs);
+                    } else if (trackGroupInfo.trackGroupCategory == 2) {
+                        EventStream eventStream = this.eventStreams.get(trackGroupInfo.eventStreamGroupIndex);
+                        Format format = selection.getTrackGroup().getFormat(0);
+                        streams[i] = new EventSampleStream(eventStream, format, this.manifest.dynamic);
                     }
-                } else if (sampleStreamArr[i] instanceof ChunkSampleStream) {
-                    ((DashChunkSource) ((ChunkSampleStream) sampleStreamArr[i]).getChunkSource()).updateTrackSelection(trackSelection);
+                } else if (streams[i] instanceof ChunkSampleStream) {
+                    ChunkSampleStream<DashChunkSource> stream = (ChunkSampleStream) streams[i];
+                    stream.getChunkSource().updateTrackSelection(selection);
                 }
             }
         }
-        for (int i3 = 0; i3 < trackSelectionArr.length; i3++) {
-            if (sampleStreamArr[i3] == null && trackSelectionArr[i3] != null) {
-                TrackGroupInfo trackGroupInfo2 = this.trackGroupInfos[iArr[i3]];
+        for (int i2 = 0; i2 < selections.length; i2++) {
+            if (streams[i2] == null && selections[i2] != null) {
+                int trackGroupIndex2 = streamIndexToTrackGroupIndex[i2];
+                TrackGroupInfo trackGroupInfo2 = this.trackGroupInfos[trackGroupIndex2];
                 if (trackGroupInfo2.trackGroupCategory == 1) {
-                    int primaryStreamIndex = getPrimaryStreamIndex(i3, iArr);
+                    int primaryStreamIndex = getPrimaryStreamIndex(i2, streamIndexToTrackGroupIndex);
                     if (primaryStreamIndex == -1) {
-                        sampleStreamArr[i3] = new EmptySampleStream();
+                        streams[i2] = new EmptySampleStream();
                     } else {
-                        sampleStreamArr[i3] = ((ChunkSampleStream) sampleStreamArr[primaryStreamIndex]).selectEmbeddedTrack(j, trackGroupInfo2.trackType);
+                        streams[i2] = ((ChunkSampleStream) streams[primaryStreamIndex]).selectEmbeddedTrack(positionUs, trackGroupInfo2.trackType);
                     }
                 }
             }
         }
     }
 
-    private int getPrimaryStreamIndex(int i, int[] iArr) {
-        int i2 = iArr[i];
-        if (i2 == -1) {
+    private int getPrimaryStreamIndex(int embeddedStreamIndex, int[] streamIndexToTrackGroupIndex) {
+        int embeddedTrackGroupIndex = streamIndexToTrackGroupIndex[embeddedStreamIndex];
+        if (embeddedTrackGroupIndex == -1) {
             return -1;
         }
-        int i3 = this.trackGroupInfos[i2].primaryTrackGroupIndex;
-        for (int i4 = 0; i4 < iArr.length; i4++) {
-            int i5 = iArr[i4];
-            if (i5 == i3 && this.trackGroupInfos[i5].trackGroupCategory == 0) {
-                return i4;
+        int primaryTrackGroupIndex = this.trackGroupInfos[embeddedTrackGroupIndex].primaryTrackGroupIndex;
+        for (int i = 0; i < streamIndexToTrackGroupIndex.length; i++) {
+            int trackGroupIndex = streamIndexToTrackGroupIndex[i];
+            if (trackGroupIndex == primaryTrackGroupIndex && this.trackGroupInfos[trackGroupIndex].trackGroupCategory == 0) {
+                return i;
             }
         }
         return -1;
     }
 
-    private static Pair<TrackGroupArray, TrackGroupInfo[]> buildTrackGroups(DrmSessionManager<?> drmSessionManager, List<AdaptationSet> list, List<EventStream> list2) {
-        int[][] groupedAdaptationSetIndices = getGroupedAdaptationSetIndices(list);
-        int length = groupedAdaptationSetIndices.length;
-        boolean[] zArr = new boolean[length];
-        Format[][] formatArr = new Format[length];
-        int identifyEmbeddedTracks = identifyEmbeddedTracks(length, list, groupedAdaptationSetIndices, zArr, formatArr) + length + list2.size();
-        TrackGroup[] trackGroupArr = new TrackGroup[identifyEmbeddedTracks];
-        TrackGroupInfo[] trackGroupInfoArr = new TrackGroupInfo[identifyEmbeddedTracks];
-        buildManifestEventTrackGroupInfos(list2, trackGroupArr, trackGroupInfoArr, buildPrimaryAndEmbeddedTrackGroupInfos(drmSessionManager, list, groupedAdaptationSetIndices, length, zArr, formatArr, trackGroupArr, trackGroupInfoArr));
-        return Pair.create(new TrackGroupArray(trackGroupArr), trackGroupInfoArr);
+    private static Pair<TrackGroupArray, TrackGroupInfo[]> buildTrackGroups(DrmSessionManager<?> drmSessionManager, List<AdaptationSet> adaptationSets, List<EventStream> eventStreams) {
+        int[][] groupedAdaptationSetIndices = getGroupedAdaptationSetIndices(adaptationSets);
+        int primaryGroupCount = groupedAdaptationSetIndices.length;
+        boolean[] primaryGroupHasEventMessageTrackFlags = new boolean[primaryGroupCount];
+        Format[][] primaryGroupCea608TrackFormats = new Format[primaryGroupCount];
+        int totalEmbeddedTrackGroupCount = identifyEmbeddedTracks(primaryGroupCount, adaptationSets, groupedAdaptationSetIndices, primaryGroupHasEventMessageTrackFlags, primaryGroupCea608TrackFormats);
+        int totalGroupCount = primaryGroupCount + totalEmbeddedTrackGroupCount + eventStreams.size();
+        TrackGroup[] trackGroups = new TrackGroup[totalGroupCount];
+        TrackGroupInfo[] trackGroupInfos = new TrackGroupInfo[totalGroupCount];
+        int trackGroupCount = buildPrimaryAndEmbeddedTrackGroupInfos(drmSessionManager, adaptationSets, groupedAdaptationSetIndices, primaryGroupCount, primaryGroupHasEventMessageTrackFlags, primaryGroupCea608TrackFormats, trackGroups, trackGroupInfos);
+        buildManifestEventTrackGroupInfos(eventStreams, trackGroups, trackGroupInfos, trackGroupCount);
+        return Pair.create(new TrackGroupArray(trackGroups), trackGroupInfos);
     }
 
-    private static int[][] getGroupedAdaptationSetIndices(List<AdaptationSet> list) {
-        int i;
-        Descriptor findAdaptationSetSwitchingProperty;
-        int size = list.size();
-        SparseIntArray sparseIntArray = new SparseIntArray(size);
-        ArrayList arrayList = new ArrayList(size);
-        SparseArray sparseArray = new SparseArray(size);
-        for (int i2 = 0; i2 < size; i2++) {
-            sparseIntArray.put(list.get(i2).id, i2);
-            ArrayList arrayList2 = new ArrayList();
-            arrayList2.add(Integer.valueOf(i2));
-            arrayList.add(arrayList2);
-            sparseArray.put(i2, arrayList2);
+    private static int[][] getGroupedAdaptationSetIndices(List<AdaptationSet> adaptationSets) {
+        Descriptor adaptationSetSwitchingProperty;
+        int adaptationSetCount = adaptationSets.size();
+        SparseIntArray adaptationSetIdToIndex = new SparseIntArray(adaptationSetCount);
+        List<List<Integer>> adaptationSetGroupedIndices = new ArrayList<>(adaptationSetCount);
+        SparseArray<List<Integer>> adaptationSetIndexToGroupedIndices = new SparseArray<>(adaptationSetCount);
+        for (int i = 0; i < adaptationSetCount; i++) {
+            adaptationSetIdToIndex.put(adaptationSets.get(i).id, i);
+            List<Integer> initialGroup = new ArrayList<>();
+            initialGroup.add(Integer.valueOf(i));
+            adaptationSetGroupedIndices.add(initialGroup);
+            adaptationSetIndexToGroupedIndices.put(i, initialGroup);
         }
-        for (int i3 = 0; i3 < size; i3++) {
-            AdaptationSet adaptationSet = list.get(i3);
-            Descriptor findTrickPlayProperty = findTrickPlayProperty(adaptationSet.essentialProperties);
-            if (findTrickPlayProperty == null) {
-                findTrickPlayProperty = findTrickPlayProperty(adaptationSet.supplementalProperties);
+        for (int i2 = 0; i2 < adaptationSetCount; i2++) {
+            int mergedGroupIndex = i2;
+            AdaptationSet adaptationSet = adaptationSets.get(i2);
+            Descriptor trickPlayProperty = findTrickPlayProperty(adaptationSet.essentialProperties);
+            if (trickPlayProperty == null) {
+                trickPlayProperty = findTrickPlayProperty(adaptationSet.supplementalProperties);
             }
-            if (findTrickPlayProperty == null || (i = sparseIntArray.get(Integer.parseInt(findTrickPlayProperty.value), -1)) == -1) {
-                i = i3;
+            if (trickPlayProperty != null) {
+                int mainAdaptationSetId = Integer.parseInt(trickPlayProperty.value);
+                int mainAdaptationSetIndex = adaptationSetIdToIndex.get(mainAdaptationSetId, -1);
+                if (mainAdaptationSetIndex != -1) {
+                    mergedGroupIndex = mainAdaptationSetIndex;
+                }
             }
-            if (i == i3 && (findAdaptationSetSwitchingProperty = findAdaptationSetSwitchingProperty(adaptationSet.supplementalProperties)) != null) {
-                for (String str : Util.split(findAdaptationSetSwitchingProperty.value, ",")) {
-                    int i4 = sparseIntArray.get(Integer.parseInt(str), -1);
-                    if (i4 != -1) {
-                        i = Math.min(i, i4);
+            if (mergedGroupIndex == i2 && (adaptationSetSwitchingProperty = findAdaptationSetSwitchingProperty(adaptationSet.supplementalProperties)) != null) {
+                String[] otherAdaptationSetIds = Util.split(adaptationSetSwitchingProperty.value, ",");
+                for (String adaptationSetId : otherAdaptationSetIds) {
+                    int otherAdaptationSetId = adaptationSetIdToIndex.get(Integer.parseInt(adaptationSetId), -1);
+                    if (otherAdaptationSetId != -1) {
+                        mergedGroupIndex = Math.min(mergedGroupIndex, otherAdaptationSetId);
                     }
                 }
             }
-            if (i != i3) {
-                List list2 = (List) sparseArray.get(i3);
-                List list3 = (List) sparseArray.get(i);
-                list3.addAll(list2);
-                sparseArray.put(i3, list3);
-                arrayList.remove(list2);
+            if (mergedGroupIndex != i2) {
+                List<Integer> thisGroup = adaptationSetIndexToGroupedIndices.get(i2);
+                List<Integer> mergedGroup = adaptationSetIndexToGroupedIndices.get(mergedGroupIndex);
+                mergedGroup.addAll(thisGroup);
+                adaptationSetIndexToGroupedIndices.put(i2, mergedGroup);
+                adaptationSetGroupedIndices.remove(thisGroup);
             }
         }
-        int size2 = arrayList.size();
-        int[][] iArr = new int[size2];
-        for (int i5 = 0; i5 < size2; i5++) {
-            iArr[i5] = Util.toArray((List) arrayList.get(i5));
-            Arrays.sort(iArr[i5]);
+        int i3 = adaptationSetGroupedIndices.size();
+        int[][] groupedAdaptationSetIndices = new int[i3];
+        for (int i4 = 0; i4 < groupedAdaptationSetIndices.length; i4++) {
+            groupedAdaptationSetIndices[i4] = Util.toArray(adaptationSetGroupedIndices.get(i4));
+            Arrays.sort(groupedAdaptationSetIndices[i4]);
         }
-        return iArr;
+        return groupedAdaptationSetIndices;
     }
 
-    private static int identifyEmbeddedTracks(int i, List<AdaptationSet> list, int[][] iArr, boolean[] zArr, Format[][] formatArr) {
-        int i2 = 0;
-        for (int i3 = 0; i3 < i; i3++) {
-            if (hasEventMessageTrack(list, iArr[i3])) {
-                zArr[i3] = true;
-                i2++;
+    private static int identifyEmbeddedTracks(int primaryGroupCount, List<AdaptationSet> adaptationSets, int[][] groupedAdaptationSetIndices, boolean[] primaryGroupHasEventMessageTrackFlags, Format[][] primaryGroupCea608TrackFormats) {
+        int numEmbeddedTrackGroups = 0;
+        for (int i = 0; i < primaryGroupCount; i++) {
+            if (hasEventMessageTrack(adaptationSets, groupedAdaptationSetIndices[i])) {
+                primaryGroupHasEventMessageTrackFlags[i] = true;
+                numEmbeddedTrackGroups++;
             }
-            formatArr[i3] = getCea608TrackFormats(list, iArr[i3]);
-            if (formatArr[i3].length != 0) {
-                i2++;
+            primaryGroupCea608TrackFormats[i] = getCea608TrackFormats(adaptationSets, groupedAdaptationSetIndices[i]);
+            if (primaryGroupCea608TrackFormats[i].length != 0) {
+                numEmbeddedTrackGroups++;
             }
         }
-        return i2;
+        return numEmbeddedTrackGroups;
     }
 
-    private static int buildPrimaryAndEmbeddedTrackGroupInfos(DrmSessionManager<?> drmSessionManager, List<AdaptationSet> list, int[][] iArr, int i, boolean[] zArr, Format[][] formatArr, TrackGroup[] trackGroupArr, TrackGroupInfo[] trackGroupInfoArr) {
-        int i2;
-        int i3;
-        int i4 = 0;
-        int i5 = 0;
-        while (i4 < i) {
-            int[] iArr2 = iArr[i4];
-            ArrayList arrayList = new ArrayList();
-            for (int i6 : iArr2) {
-                arrayList.addAll(list.get(i6).representations);
+    private static int buildPrimaryAndEmbeddedTrackGroupInfos(DrmSessionManager<?> drmSessionManager, List<AdaptationSet> adaptationSets, int[][] groupedAdaptationSetIndices, int primaryGroupCount, boolean[] primaryGroupHasEventMessageTrackFlags, Format[][] primaryGroupCea608TrackFormats, TrackGroup[] trackGroups, TrackGroupInfo[] trackGroupInfos) {
+        int trackGroupCount;
+        int cea608TrackGroupIndex;
+        int trackGroupCount2 = 0;
+        int i = 0;
+        while (i < primaryGroupCount) {
+            int[] adaptationSetIndices = groupedAdaptationSetIndices[i];
+            List<Representation> representations = new ArrayList<>();
+            for (int adaptationSetIndex : adaptationSetIndices) {
+                representations.addAll(adaptationSets.get(adaptationSetIndex).representations);
             }
-            int size = arrayList.size();
-            Format[] formatArr2 = new Format[size];
-            for (int i7 = 0; i7 < size; i7++) {
-                Format format = ((Representation) arrayList.get(i7)).format;
+            Format[] formats = new Format[representations.size()];
+            for (int j = 0; j < formats.length; j++) {
+                Format format = representations.get(j).format;
                 DrmInitData drmInitData = format.drmInitData;
                 if (drmInitData != null) {
                     format = format.copyWithExoMediaCryptoType(drmSessionManager.getExoMediaCryptoType(drmInitData));
                 }
-                formatArr2[i7] = format;
+                formats[j] = format;
             }
-            AdaptationSet adaptationSet = list.get(iArr2[0]);
-            int i8 = i5 + 1;
-            if (zArr[i4]) {
-                i2 = i8 + 1;
+            int j2 = adaptationSetIndices[0];
+            AdaptationSet firstAdaptationSet = adaptationSets.get(j2);
+            int trackGroupCount3 = trackGroupCount2 + 1;
+            if (primaryGroupHasEventMessageTrackFlags[i]) {
+                trackGroupCount = trackGroupCount3 + 1;
             } else {
-                i2 = i8;
-                i8 = -1;
+                trackGroupCount = trackGroupCount3;
+                trackGroupCount3 = -1;
             }
-            if (formatArr[i4].length != 0) {
-                i3 = i2 + 1;
+            if (primaryGroupCea608TrackFormats[i].length != 0) {
+                cea608TrackGroupIndex = trackGroupCount;
+                trackGroupCount++;
             } else {
-                i3 = i2;
-                i2 = -1;
+                cea608TrackGroupIndex = -1;
             }
-            trackGroupArr[i5] = new TrackGroup(formatArr2);
-            trackGroupInfoArr[i5] = TrackGroupInfo.primaryTrack(adaptationSet.type, iArr2, i5, i8, i2);
-            if (i8 != -1) {
-                trackGroupArr[i8] = new TrackGroup(Format.createSampleFormat(adaptationSet.id + ":emsg", "application/x-emsg", null, -1, null));
-                trackGroupInfoArr[i8] = TrackGroupInfo.embeddedEmsgTrack(iArr2, i5);
+            trackGroups[trackGroupCount2] = new TrackGroup(formats);
+            trackGroupInfos[trackGroupCount2] = TrackGroupInfo.primaryTrack(firstAdaptationSet.type, adaptationSetIndices, trackGroupCount2, trackGroupCount3, cea608TrackGroupIndex);
+            if (trackGroupCount3 != -1) {
+                trackGroups[trackGroupCount3] = new TrackGroup(Format.createSampleFormat(firstAdaptationSet.id + ":emsg", MimeTypes.APPLICATION_EMSG, null, -1, null));
+                trackGroupInfos[trackGroupCount3] = TrackGroupInfo.embeddedEmsgTrack(adaptationSetIndices, trackGroupCount2);
             }
-            if (i2 != -1) {
-                trackGroupArr[i2] = new TrackGroup(formatArr[i4]);
-                trackGroupInfoArr[i2] = TrackGroupInfo.embeddedCea608Track(iArr2, i5);
+            if (cea608TrackGroupIndex != -1) {
+                trackGroups[cea608TrackGroupIndex] = new TrackGroup(primaryGroupCea608TrackFormats[i]);
+                trackGroupInfos[cea608TrackGroupIndex] = TrackGroupInfo.embeddedCea608Track(adaptationSetIndices, trackGroupCount2);
             }
-            i4++;
-            i5 = i3;
-        }
-        return i5;
-    }
-
-    private static void buildManifestEventTrackGroupInfos(List<EventStream> list, TrackGroup[] trackGroupArr, TrackGroupInfo[] trackGroupInfoArr, int i) {
-        int i2 = 0;
-        while (i2 < list.size()) {
-            trackGroupArr[i] = new TrackGroup(Format.createSampleFormat(list.get(i2).id(), "application/x-emsg", null, -1, null));
-            trackGroupInfoArr[i] = TrackGroupInfo.mpdEventTrack(i2);
-            i2++;
             i++;
+            trackGroupCount2 = trackGroupCount;
+        }
+        return trackGroupCount2;
+    }
+
+    private static void buildManifestEventTrackGroupInfos(List<EventStream> eventStreams, TrackGroup[] trackGroups, TrackGroupInfo[] trackGroupInfos, int existingTrackGroupCount) {
+        int i = 0;
+        while (i < eventStreams.size()) {
+            EventStream eventStream = eventStreams.get(i);
+            Format format = Format.createSampleFormat(eventStream.id(), MimeTypes.APPLICATION_EMSG, null, -1, null);
+            trackGroups[existingTrackGroupCount] = new TrackGroup(format);
+            trackGroupInfos[existingTrackGroupCount] = TrackGroupInfo.mpdEventTrack(i);
+            i++;
+            existingTrackGroupCount++;
         }
     }
 
-    private ChunkSampleStream<DashChunkSource> buildSampleStream(TrackGroupInfo trackGroupInfo, TrackSelection trackSelection, long j) {
-        int i;
-        TrackGroup trackGroup;
-        TrackGroup trackGroup2;
-        int i2;
-        int i3 = trackGroupInfo.embeddedEventMessageTrackGroupIndex;
-        boolean z = i3 != -1;
-        PlayerEmsgHandler.PlayerTrackEmsgHandler playerTrackEmsgHandler = null;
-        if (z) {
-            trackGroup = this.trackGroups.get(i3);
-            i = 1;
+    private ChunkSampleStream<DashChunkSource> buildSampleStream(TrackGroupInfo trackGroupInfo, TrackSelection selection, long positionUs) {
+        TrackGroup embeddedEventMessageTrackGroup;
+        TrackGroup embeddedCea608TrackGroup;
+        PlayerEmsgHandler.PlayerTrackEmsgHandler playerTrackEmsgHandler;
+        int embeddedTrackCount = 0;
+        boolean z = true;
+        boolean enableEventMessageTrack = trackGroupInfo.embeddedEventMessageTrackGroupIndex != -1;
+        if (!enableEventMessageTrack) {
+            embeddedEventMessageTrackGroup = null;
         } else {
-            trackGroup = null;
-            i = 0;
+            TrackGroup embeddedEventMessageTrackGroup2 = this.trackGroups.get(trackGroupInfo.embeddedEventMessageTrackGroupIndex);
+            embeddedTrackCount = 0 + 1;
+            embeddedEventMessageTrackGroup = embeddedEventMessageTrackGroup2;
         }
-        int i4 = trackGroupInfo.embeddedCea608TrackGroupIndex;
-        boolean z2 = i4 != -1;
-        if (z2) {
-            trackGroup2 = this.trackGroups.get(i4);
-            i += trackGroup2.length;
+        if (trackGroupInfo.embeddedCea608TrackGroupIndex == -1) {
+            z = false;
+        }
+        boolean enableCea608Tracks = z;
+        if (!enableCea608Tracks) {
+            embeddedCea608TrackGroup = null;
         } else {
-            trackGroup2 = null;
+            TrackGroup embeddedCea608TrackGroup2 = this.trackGroups.get(trackGroupInfo.embeddedCea608TrackGroupIndex);
+            embeddedTrackCount += embeddedCea608TrackGroup2.length;
+            embeddedCea608TrackGroup = embeddedCea608TrackGroup2;
         }
-        Format[] formatArr = new Format[i];
-        int[] iArr = new int[i];
-        if (z) {
-            formatArr[0] = trackGroup.getFormat(0);
-            iArr[0] = 4;
-            i2 = 1;
-        } else {
-            i2 = 0;
+        Format[] embeddedTrackFormats = new Format[embeddedTrackCount];
+        int[] embeddedTrackTypes = new int[embeddedTrackCount];
+        int embeddedTrackCount2 = 0;
+        if (enableEventMessageTrack) {
+            embeddedTrackFormats[0] = embeddedEventMessageTrackGroup.getFormat(0);
+            embeddedTrackTypes[0] = 4;
+            embeddedTrackCount2 = 0 + 1;
         }
-        ArrayList arrayList = new ArrayList();
-        if (z2) {
-            for (int i5 = 0; i5 < trackGroup2.length; i5++) {
-                formatArr[i2] = trackGroup2.getFormat(i5);
-                iArr[i2] = 3;
-                arrayList.add(formatArr[i2]);
-                i2++;
+        List<Format> embeddedCea608TrackFormats = new ArrayList<>();
+        if (enableCea608Tracks) {
+            for (int i = 0; i < embeddedCea608TrackGroup.length; i++) {
+                embeddedTrackFormats[embeddedTrackCount2] = embeddedCea608TrackGroup.getFormat(i);
+                embeddedTrackTypes[embeddedTrackCount2] = 3;
+                embeddedCea608TrackFormats.add(embeddedTrackFormats[embeddedTrackCount2]);
+                embeddedTrackCount2++;
             }
         }
-        if (this.manifest.dynamic && z) {
+        if (this.manifest.dynamic && enableEventMessageTrack) {
             playerTrackEmsgHandler = this.playerEmsgHandler.newPlayerTrackEmsgHandler();
+        } else {
+            playerTrackEmsgHandler = null;
         }
-        PlayerEmsgHandler.PlayerTrackEmsgHandler playerTrackEmsgHandler2 = playerTrackEmsgHandler;
-        ChunkSampleStream<DashChunkSource> chunkSampleStream = new ChunkSampleStream<>(trackGroupInfo.trackType, iArr, formatArr, this.chunkSourceFactory.createDashChunkSource(this.manifestLoaderErrorThrower, this.manifest, this.periodIndex, trackGroupInfo.adaptationSetIndices, trackSelection, trackGroupInfo.trackType, this.elapsedRealtimeOffsetMs, z, arrayList, playerTrackEmsgHandler2, this.transferListener), this, this.allocator, j, this.drmSessionManager, this.loadErrorHandlingPolicy, this.eventDispatcher);
+        PlayerEmsgHandler.PlayerTrackEmsgHandler trackPlayerEmsgHandler = playerTrackEmsgHandler;
+        DashChunkSource chunkSource = this.chunkSourceFactory.createDashChunkSource(this.manifestLoaderErrorThrower, this.manifest, this.periodIndex, trackGroupInfo.adaptationSetIndices, selection, trackGroupInfo.trackType, this.elapsedRealtimeOffsetMs, enableEventMessageTrack, embeddedCea608TrackFormats, trackPlayerEmsgHandler, this.transferListener);
+        ChunkSampleStream<DashChunkSource> stream = new ChunkSampleStream<>(trackGroupInfo.trackType, embeddedTrackTypes, embeddedTrackFormats, chunkSource, this, this.allocator, positionUs, this.drmSessionManager, this.loadErrorHandlingPolicy, this.eventDispatcher);
         synchronized (this) {
-            this.trackEmsgHandlerBySampleStream.put(chunkSampleStream, playerTrackEmsgHandler2);
+            this.trackEmsgHandlerBySampleStream.put(stream, trackPlayerEmsgHandler);
         }
-        return chunkSampleStream;
+        return stream;
     }
 
-    private static Descriptor findAdaptationSetSwitchingProperty(List<Descriptor> list) {
-        return findDescriptor(list, "urn:mpeg:dash:adaptation-set-switching:2016");
+    private static Descriptor findAdaptationSetSwitchingProperty(List<Descriptor> descriptors) {
+        return findDescriptor(descriptors, "urn:mpeg:dash:adaptation-set-switching:2016");
     }
 
-    private static Descriptor findTrickPlayProperty(List<Descriptor> list) {
-        return findDescriptor(list, "http://dashif.org/guidelines/trickmode");
+    private static Descriptor findTrickPlayProperty(List<Descriptor> descriptors) {
+        return findDescriptor(descriptors, "http://dashif.org/guidelines/trickmode");
     }
 
-    private static Descriptor findDescriptor(List<Descriptor> list, String str) {
-        for (int i = 0; i < list.size(); i++) {
-            Descriptor descriptor = list.get(i);
-            if (str.equals(descriptor.schemeIdUri)) {
+    private static Descriptor findDescriptor(List<Descriptor> descriptors, String schemeIdUri) {
+        for (int i = 0; i < descriptors.size(); i++) {
+            Descriptor descriptor = descriptors.get(i);
+            if (schemeIdUri.equals(descriptor.schemeIdUri)) {
                 return descriptor;
             }
         }
         return null;
     }
 
-    private static boolean hasEventMessageTrack(List<AdaptationSet> list, int[] iArr) {
-        for (int i : iArr) {
-            List<Representation> list2 = list.get(i).representations;
-            for (int i2 = 0; i2 < list2.size(); i2++) {
-                if (!list2.get(i2).inbandEventStreams.isEmpty()) {
+    private static boolean hasEventMessageTrack(List<AdaptationSet> adaptationSets, int[] adaptationSetIndices) {
+        for (int i : adaptationSetIndices) {
+            List<Representation> representations = adaptationSets.get(i).representations;
+            for (int j = 0; j < representations.size(); j++) {
+                Representation representation = representations.get(j);
+                if (!representation.inbandEventStreams.isEmpty()) {
                     return true;
                 }
             }
@@ -556,57 +627,66 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
         return false;
     }
 
-    private static Format[] getCea608TrackFormats(List<AdaptationSet> list, int[] iArr) {
-        for (int i : iArr) {
-            AdaptationSet adaptationSet = list.get(i);
-            List<Descriptor> list2 = list.get(i).accessibilityDescriptors;
-            for (int i2 = 0; i2 < list2.size(); i2++) {
-                Descriptor descriptor = list2.get(i2);
+    private static Format[] getCea608TrackFormats(List<AdaptationSet> adaptationSets, int[] adaptationSetIndices) {
+        for (int i : adaptationSetIndices) {
+            AdaptationSet adaptationSet = adaptationSets.get(i);
+            List<Descriptor> descriptors = adaptationSets.get(i).accessibilityDescriptors;
+            for (int j = 0; j < descriptors.size(); j++) {
+                Descriptor descriptor = descriptors.get(j);
                 if ("urn:scte:dash:cc:cea-608:2015".equals(descriptor.schemeIdUri)) {
-                    String str = descriptor.value;
-                    if (str == null) {
+                    String value = descriptor.value;
+                    int i2 = 1;
+                    if (value == null) {
                         return new Format[]{buildCea608TrackFormat(adaptationSet.id)};
                     }
-                    String[] split = Util.split(str, ";");
-                    Format[] formatArr = new Format[split.length];
-                    for (int i3 = 0; i3 < split.length; i3++) {
-                        Matcher matcher = CEA608_SERVICE_DESCRIPTOR_REGEX.matcher(split[i3]);
+                    String[] services = Util.split(value, ";");
+                    Format[] formats = new Format[services.length];
+                    int k = 0;
+                    while (k < services.length) {
+                        Matcher matcher = CEA608_SERVICE_DESCRIPTOR_REGEX.matcher(services[k]);
                         if (!matcher.matches()) {
-                            return new Format[]{buildCea608TrackFormat(adaptationSet.id)};
+                            Format[] formatArr = new Format[i2];
+                            formatArr[0] = buildCea608TrackFormat(adaptationSet.id);
+                            return formatArr;
                         }
-                        formatArr[i3] = buildCea608TrackFormat(adaptationSet.id, matcher.group(2), Integer.parseInt(matcher.group(1)));
+                        formats[k] = buildCea608TrackFormat(adaptationSet.id, matcher.group(2), Integer.parseInt(matcher.group(i2)));
+                        k++;
+                        i2 = 1;
                     }
-                    return formatArr;
+                    return formats;
                 }
             }
         }
         return new Format[0];
     }
 
-    private static Format buildCea608TrackFormat(int i) {
-        return buildCea608TrackFormat(i, null, -1);
+    private static Format buildCea608TrackFormat(int adaptationSetId) {
+        return buildCea608TrackFormat(adaptationSetId, null, -1);
     }
 
-    private static Format buildCea608TrackFormat(int i, String str, int i2) {
-        String str2;
+    private static Format buildCea608TrackFormat(int adaptationSetId, String language, int accessibilityChannel) {
+        String str;
         StringBuilder sb = new StringBuilder();
-        sb.append(i);
+        sb.append(adaptationSetId);
         sb.append(":cea608");
-        if (i2 != -1) {
-            str2 = ":" + i2;
+        if (accessibilityChannel != -1) {
+            str = Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + accessibilityChannel;
         } else {
-            str2 = "";
+            str = "";
         }
-        sb.append(str2);
-        return Format.createTextSampleFormat(sb.toString(), "application/cea-608", null, -1, 0, str, i2, null, Long.MAX_VALUE, null);
+        sb.append(str);
+        return Format.createTextSampleFormat(sb.toString(), MimeTypes.APPLICATION_CEA608, null, -1, 0, language, accessibilityChannel, null, Long.MAX_VALUE, null);
     }
 
-    private static ChunkSampleStream<DashChunkSource>[] newSampleStreamArray(int i) {
-        return new ChunkSampleStream[i];
+    private static ChunkSampleStream<DashChunkSource>[] newSampleStreamArray(int length) {
+        return new ChunkSampleStream[length];
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class TrackGroupInfo {
+        private static final int CATEGORY_EMBEDDED = 1;
+        private static final int CATEGORY_MANIFEST_EVENTS = 2;
+        private static final int CATEGORY_PRIMARY = 0;
         public final int[] adaptationSetIndices;
         public final int embeddedCea608TrackGroupIndex;
         public final int embeddedEventMessageTrackGroupIndex;
@@ -615,30 +695,36 @@ public final class DashMediaPeriod implements MediaPeriod, SequenceableLoader.Ca
         public final int trackGroupCategory;
         public final int trackType;
 
-        public static TrackGroupInfo primaryTrack(int i, int[] iArr, int i2, int i3, int i4) {
-            return new TrackGroupInfo(i, 0, iArr, i2, i3, i4, -1);
+        @Documented
+        @Retention(RetentionPolicy.SOURCE)
+        /* loaded from: classes.dex */
+        public @interface TrackGroupCategory {
         }
 
-        public static TrackGroupInfo embeddedEmsgTrack(int[] iArr, int i) {
-            return new TrackGroupInfo(4, 1, iArr, i, -1, -1, -1);
+        public static TrackGroupInfo primaryTrack(int trackType, int[] adaptationSetIndices, int primaryTrackGroupIndex, int embeddedEventMessageTrackGroupIndex, int embeddedCea608TrackGroupIndex) {
+            return new TrackGroupInfo(trackType, 0, adaptationSetIndices, primaryTrackGroupIndex, embeddedEventMessageTrackGroupIndex, embeddedCea608TrackGroupIndex, -1);
         }
 
-        public static TrackGroupInfo embeddedCea608Track(int[] iArr, int i) {
-            return new TrackGroupInfo(3, 1, iArr, i, -1, -1, -1);
+        public static TrackGroupInfo embeddedEmsgTrack(int[] adaptationSetIndices, int primaryTrackGroupIndex) {
+            return new TrackGroupInfo(4, 1, adaptationSetIndices, primaryTrackGroupIndex, -1, -1, -1);
         }
 
-        public static TrackGroupInfo mpdEventTrack(int i) {
-            return new TrackGroupInfo(4, 2, new int[0], -1, -1, -1, i);
+        public static TrackGroupInfo embeddedCea608Track(int[] adaptationSetIndices, int primaryTrackGroupIndex) {
+            return new TrackGroupInfo(3, 1, adaptationSetIndices, primaryTrackGroupIndex, -1, -1, -1);
         }
 
-        private TrackGroupInfo(int i, int i2, int[] iArr, int i3, int i4, int i5, int i6) {
-            this.trackType = i;
-            this.adaptationSetIndices = iArr;
-            this.trackGroupCategory = i2;
-            this.primaryTrackGroupIndex = i3;
-            this.embeddedEventMessageTrackGroupIndex = i4;
-            this.embeddedCea608TrackGroupIndex = i5;
-            this.eventStreamGroupIndex = i6;
+        public static TrackGroupInfo mpdEventTrack(int eventStreamIndex) {
+            return new TrackGroupInfo(4, 2, new int[0], -1, -1, -1, eventStreamIndex);
+        }
+
+        private TrackGroupInfo(int trackType, int trackGroupCategory, int[] adaptationSetIndices, int primaryTrackGroupIndex, int embeddedEventMessageTrackGroupIndex, int embeddedCea608TrackGroupIndex, int eventStreamGroupIndex) {
+            this.trackType = trackType;
+            this.adaptationSetIndices = adaptationSetIndices;
+            this.trackGroupCategory = trackGroupCategory;
+            this.primaryTrackGroupIndex = primaryTrackGroupIndex;
+            this.embeddedEventMessageTrackGroupIndex = embeddedEventMessageTrackGroupIndex;
+            this.embeddedCea608TrackGroupIndex = embeddedCea608TrackGroupIndex;
+            this.eventStreamGroupIndex = eventStreamGroupIndex;
         }
     }
 }

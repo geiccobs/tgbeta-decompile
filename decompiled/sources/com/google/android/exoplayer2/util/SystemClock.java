@@ -2,8 +2,13 @@ package com.google.android.exoplayer2.util;
 
 import android.os.Handler;
 import android.os.Looper;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class SystemClock implements Clock {
+    @Override // com.google.android.exoplayer2.util.Clock
+    public long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
     @Override // com.google.android.exoplayer2.util.Clock
     public long elapsedRealtime() {
         return android.os.SystemClock.elapsedRealtime();
@@ -12,6 +17,11 @@ public class SystemClock implements Clock {
     @Override // com.google.android.exoplayer2.util.Clock
     public long uptimeMillis() {
         return android.os.SystemClock.uptimeMillis();
+    }
+
+    @Override // com.google.android.exoplayer2.util.Clock
+    public void sleep(long sleepTimeMs) {
+        android.os.SystemClock.sleep(sleepTimeMs);
     }
 
     @Override // com.google.android.exoplayer2.util.Clock

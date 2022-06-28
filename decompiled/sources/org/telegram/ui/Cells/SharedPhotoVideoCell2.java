@@ -9,18 +9,25 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.View;
 import androidx.core.content.ContextCompat;
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DownloadController;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
+import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CheckBoxBase;
 import org.telegram.ui.Components.FlickerLoadingView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class SharedPhotoVideoCell2 extends View {
     static boolean lastAutoDownload;
     static long lastUpdateDownloadSettingsTime;
@@ -44,47 +51,151 @@ public class SharedPhotoVideoCell2 extends View {
     float imageAlpha = 1.0f;
     float imageScale = 1.0f;
 
-    public SharedPhotoVideoCell2(Context context, SharedResources sharedResources, int i) {
+    public SharedPhotoVideoCell2(Context context, SharedResources sharedResources, int currentAccount) {
         super(context);
         this.sharedResources = sharedResources;
-        this.currentAccount = i;
+        this.currentAccount = currentAccount;
         setChecked(false, false);
         this.imageReceiver.setParentView(this);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:87:0x0230  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public void setMessageObject(org.telegram.messenger.MessageObject r17, int r18) {
-        /*
-            Method dump skipped, instructions count: 580
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.SharedPhotoVideoCell2.setMessageObject(org.telegram.messenger.MessageObject, int):void");
+    public void setMessageObject(MessageObject messageObject, int parentColumnsCount) {
+        int stride;
+        TLRPC.PhotoSize currentPhotoObjectThumb;
+        TLRPC.PhotoSize qualityThumb;
+        int stride2;
+        String imageFilter;
+        int oldParentColumsCount = this.currentParentColumnsCount;
+        this.currentParentColumnsCount = parentColumnsCount;
+        MessageObject messageObject2 = this.currentMessageObject;
+        if (messageObject2 == null && messageObject == null) {
+            return;
+        }
+        if (messageObject2 != null && messageObject != null && messageObject2.getId() == messageObject.getId() && oldParentColumsCount == parentColumnsCount) {
+            return;
+        }
+        this.currentMessageObject = messageObject;
+        if (messageObject == null) {
+            this.imageReceiver.onDetachedFromWindow();
+            this.videoText = null;
+            this.videoInfoLayot = null;
+            this.showVideoLayout = false;
+            return;
+        }
+        if (this.attached) {
+            this.imageReceiver.onAttachedToWindow();
+        }
+        String restrictionReason = MessagesController.getRestrictionReason(messageObject.messageOwner.restriction_reason);
+        int width = (int) ((AndroidUtilities.displaySize.x / parentColumnsCount) / AndroidUtilities.density);
+        String imageFilter2 = this.sharedResources.getFilterString(width);
+        boolean showImageStub = false;
+        if (parentColumnsCount <= 2) {
+            stride = AndroidUtilities.getPhotoSize();
+        } else if (parentColumnsCount == 3) {
+            stride = 320;
+        } else if (parentColumnsCount == 5) {
+            stride = 320;
+        } else {
+            stride = 320;
+        }
+        this.videoText = null;
+        this.videoInfoLayot = null;
+        this.showVideoLayout = false;
+        if (!TextUtils.isEmpty(restrictionReason)) {
+            showImageStub = true;
+        } else if (messageObject.isVideo()) {
+            this.showVideoLayout = true;
+            if (parentColumnsCount != 9) {
+                this.videoText = AndroidUtilities.formatShortDuration(messageObject.getDuration());
+            }
+            if (messageObject.mediaThumb != null) {
+                if (messageObject.strippedThumb != null) {
+                    this.imageReceiver.setImage(messageObject.mediaThumb, imageFilter2, messageObject.strippedThumb, null, messageObject, 0);
+                } else {
+                    this.imageReceiver.setImage(messageObject.mediaThumb, imageFilter2, messageObject.mediaSmallThumb, imageFilter2 + "_b", null, 0L, null, messageObject, 0);
+                }
+            } else {
+                TLRPC.Document document = messageObject.getDocument();
+                TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 50);
+                TLRPC.PhotoSize qualityThumb2 = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, stride);
+                if (thumb != qualityThumb2) {
+                    qualityThumb = qualityThumb2;
+                } else {
+                    qualityThumb = null;
+                }
+                if (thumb == null) {
+                    stride2 = stride;
+                    imageFilter = imageFilter2;
+                    showImageStub = true;
+                } else if (messageObject.strippedThumb != null) {
+                    this.imageReceiver.setImage(ImageLocation.getForDocument(qualityThumb, document), imageFilter2, messageObject.strippedThumb, null, messageObject, 0);
+                    stride2 = stride;
+                    imageFilter = imageFilter2;
+                } else {
+                    imageFilter = imageFilter2;
+                    stride2 = stride;
+                    this.imageReceiver.setImage(ImageLocation.getForDocument(qualityThumb, document), imageFilter2, ImageLocation.getForDocument(thumb, document), imageFilter2 + "_b", null, 0L, null, messageObject, 0);
+                }
+            }
+        } else {
+            int stride3 = stride;
+            if ((messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaPhoto) && messageObject.messageOwner.media.photo != null && !messageObject.photoThumbs.isEmpty()) {
+                if (messageObject.mediaExists || canAutoDownload(messageObject)) {
+                    if (messageObject.mediaThumb != null) {
+                        if (messageObject.strippedThumb != null) {
+                            this.imageReceiver.setImage(messageObject.mediaThumb, imageFilter2, messageObject.strippedThumb, null, messageObject, 0);
+                        } else {
+                            this.imageReceiver.setImage(messageObject.mediaThumb, imageFilter2, messageObject.mediaSmallThumb, imageFilter2 + "_b", null, 0L, null, messageObject, 0);
+                        }
+                    } else {
+                        TLRPC.PhotoSize currentPhotoObjectThumb2 = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, 50);
+                        TLRPC.PhotoSize currentPhotoObject = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, stride3, false, currentPhotoObjectThumb2, false);
+                        if (currentPhotoObject != currentPhotoObjectThumb2) {
+                            currentPhotoObjectThumb = currentPhotoObjectThumb2;
+                        } else {
+                            currentPhotoObjectThumb = null;
+                        }
+                        if (messageObject.strippedThumb == null) {
+                            this.imageReceiver.setImage(ImageLocation.getForObject(currentPhotoObject, messageObject.photoThumbsObject), imageFilter2, ImageLocation.getForObject(currentPhotoObjectThumb, messageObject.photoThumbsObject), imageFilter2 + "_b", currentPhotoObject != null ? currentPhotoObject.size : 0L, null, messageObject, messageObject.shouldEncryptPhotoOrVideo() ? 2 : 1);
+                        } else {
+                            this.imageReceiver.setImage(ImageLocation.getForObject(currentPhotoObject, messageObject.photoThumbsObject), imageFilter2, null, null, messageObject.strippedThumb, currentPhotoObject != null ? currentPhotoObject.size : 0L, null, messageObject, messageObject.shouldEncryptPhotoOrVideo() ? 2 : 1);
+                        }
+                    }
+                } else if (messageObject.strippedThumb != null) {
+                    this.imageReceiver.setImage(null, null, null, null, messageObject.strippedThumb, 0L, null, messageObject, 0);
+                } else {
+                    this.imageReceiver.setImage(null, null, ImageLocation.getForObject(FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, 50), messageObject.photoThumbsObject), "b", null, 0L, null, messageObject, 0);
+                }
+            } else {
+                showImageStub = true;
+            }
+        }
+        if (showImageStub) {
+            this.imageReceiver.setImageBitmap(ContextCompat.getDrawable(getContext(), R.drawable.photo_placeholder_in));
+        }
+        invalidate();
     }
 
     private boolean canAutoDownload(MessageObject messageObject) {
-        if (System.currentTimeMillis() - lastUpdateDownloadSettingsTime > 5000) {
+        if (System.currentTimeMillis() - lastUpdateDownloadSettingsTime > DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS) {
             lastUpdateDownloadSettingsTime = System.currentTimeMillis();
             lastAutoDownload = DownloadController.getInstance(this.currentAccount).canDownloadMedia(messageObject);
         }
         return lastAutoDownload;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:35:0x00a9  */
-    /* JADX WARN: Removed duplicated region for block: B:44:0x00f7  */
-    /* JADX WARN: Removed duplicated region for block: B:48:0x0100 A[RETURN] */
-    /* JADX WARN: Removed duplicated region for block: B:49:0x0101  */
+    /* JADX WARN: Removed duplicated region for block: B:36:0x00b4  */
+    /* JADX WARN: Removed duplicated region for block: B:45:0x0104  */
+    /* JADX WARN: Removed duplicated region for block: B:49:0x010c A[RETURN] */
+    /* JADX WARN: Removed duplicated region for block: B:50:0x010d  */
     @Override // android.view.View
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    protected void onDraw(android.graphics.Canvas r27) {
+    protected void onDraw(android.graphics.Canvas r26) {
         /*
-            Method dump skipped, instructions count: 723
+            Method dump skipped, instructions count: 757
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.SharedPhotoVideoCell2.onDraw(android.graphics.Canvas):void");
@@ -116,13 +227,13 @@ public class SharedPhotoVideoCell2 extends View {
         }
     }
 
-    public void setGradientView(FlickerLoadingView flickerLoadingView) {
-        this.globalGradientView = flickerLoadingView;
+    public void setGradientView(FlickerLoadingView globalGradientView) {
+        this.globalGradientView = globalGradientView;
     }
 
     @Override // android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED));
     }
 
     public int getMessageId() {
@@ -137,37 +248,36 @@ public class SharedPhotoVideoCell2 extends View {
         return this.currentMessageObject;
     }
 
-    public void setImageAlpha(float f, boolean z) {
-        if (this.imageAlpha != f) {
-            this.imageAlpha = f;
-            if (!z) {
-                return;
+    public void setImageAlpha(float alpha, boolean invalidate) {
+        if (this.imageAlpha != alpha) {
+            this.imageAlpha = alpha;
+            if (invalidate) {
+                invalidate();
             }
-            invalidate();
         }
     }
 
-    public void setImageScale(float f, boolean z) {
-        if (this.imageScale != f) {
-            this.imageScale = f;
-            if (!z) {
-                return;
+    public void setImageScale(float scale, boolean invalidate) {
+        if (this.imageScale != scale) {
+            this.imageScale = scale;
+            if (invalidate) {
+                invalidate();
             }
-            invalidate();
         }
     }
 
-    public void setCrossfadeView(SharedPhotoVideoCell2 sharedPhotoVideoCell2, float f, int i) {
-        this.crossfadeView = sharedPhotoVideoCell2;
-        this.crossfadeProgress = f;
-        this.crossfadeToColumnsCount = i;
+    public void setCrossfadeView(SharedPhotoVideoCell2 cell, float crossfadeProgress, int crossfadeToColumnsCount) {
+        this.crossfadeView = cell;
+        this.crossfadeProgress = crossfadeProgress;
+        this.crossfadeToColumnsCount = crossfadeToColumnsCount;
     }
 
     public void drawCrossafadeImage(Canvas canvas) {
         if (this.crossfadeView != null) {
             canvas.save();
             canvas.translate(getX(), getY());
-            this.crossfadeView.setImageScale(((getMeasuredWidth() - AndroidUtilities.dp(2.0f)) * this.imageScale) / (this.crossfadeView.getMeasuredWidth() - AndroidUtilities.dp(2.0f)), false);
+            float scale = ((getMeasuredWidth() - AndroidUtilities.dp(2.0f)) * this.imageScale) / (this.crossfadeView.getMeasuredWidth() - AndroidUtilities.dp(2.0f));
+            this.crossfadeView.setImageScale(scale, false);
             this.crossfadeView.draw(canvas);
             canvas.restore();
         }
@@ -177,15 +287,16 @@ public class SharedPhotoVideoCell2 extends View {
         return this.crossfadeView;
     }
 
-    public void setChecked(final boolean z, boolean z2) {
+    public void setChecked(final boolean checked, boolean animated) {
         CheckBoxBase checkBoxBase = this.checkBoxBase;
-        if ((checkBoxBase != null && checkBoxBase.isChecked()) == z) {
+        boolean currentIsChecked = checkBoxBase != null && checkBoxBase.isChecked();
+        if (currentIsChecked == checked) {
             return;
         }
         if (this.checkBoxBase == null) {
             CheckBoxBase checkBoxBase2 = new CheckBoxBase(this, 21, null);
             this.checkBoxBase = checkBoxBase2;
-            checkBoxBase2.setColor(null, "sharedMedia_photoPlaceholder", "checkboxCheck");
+            checkBoxBase2.setColor(null, Theme.key_sharedMedia_photoPlaceholder, Theme.key_checkboxCheck);
             this.checkBoxBase.setDrawUnchecked(false);
             this.checkBoxBase.setBackgroundType(1);
             this.checkBoxBase.setBounds(0, 0, AndroidUtilities.dp(24.0f), AndroidUtilities.dp(24.0f));
@@ -193,17 +304,17 @@ public class SharedPhotoVideoCell2 extends View {
                 this.checkBoxBase.onAttachedToWindow();
             }
         }
-        this.checkBoxBase.setChecked(z, z2);
-        ValueAnimator valueAnimator = this.animator;
-        if (valueAnimator != null) {
+        this.checkBoxBase.setChecked(checked, animated);
+        if (this.animator != null) {
+            ValueAnimator animatorFinal = this.animator;
             this.animator = null;
-            valueAnimator.cancel();
+            animatorFinal.cancel();
         }
         float f = 1.0f;
-        if (z2) {
+        if (animated) {
             float[] fArr = new float[2];
             fArr[0] = this.checkBoxProgress;
-            if (!z) {
+            if (!checked) {
                 f = 0.0f;
             }
             fArr[1] = f;
@@ -211,27 +322,24 @@ public class SharedPhotoVideoCell2 extends View {
             this.animator = ofFloat;
             ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Cells.SharedPhotoVideoCell2.1
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                public void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                    SharedPhotoVideoCell2.this.checkBoxProgress = ((Float) valueAnimator2.getAnimatedValue()).floatValue();
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    SharedPhotoVideoCell2.this.checkBoxProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                     SharedPhotoVideoCell2.this.invalidate();
                 }
             });
             this.animator.setDuration(200L);
             this.animator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Cells.SharedPhotoVideoCell2.2
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animator) {
-                    ValueAnimator valueAnimator2 = SharedPhotoVideoCell2.this.animator;
-                    if (valueAnimator2 == null || !valueAnimator2.equals(animator)) {
-                        return;
+                public void onAnimationEnd(Animator animation) {
+                    if (SharedPhotoVideoCell2.this.animator != null && SharedPhotoVideoCell2.this.animator.equals(animation)) {
+                        SharedPhotoVideoCell2.this.checkBoxProgress = checked ? 1.0f : 0.0f;
+                        SharedPhotoVideoCell2.this.animator = null;
                     }
-                    SharedPhotoVideoCell2 sharedPhotoVideoCell2 = SharedPhotoVideoCell2.this;
-                    sharedPhotoVideoCell2.checkBoxProgress = z ? 1.0f : 0.0f;
-                    sharedPhotoVideoCell2.animator = null;
                 }
             });
             this.animator.start();
         } else {
-            if (!z) {
+            if (!checked) {
                 f = 0.0f;
             }
             this.checkBoxProgress = f;
@@ -239,14 +347,21 @@ public class SharedPhotoVideoCell2 extends View {
         invalidate();
     }
 
-    public void setHighlightProgress(float f) {
-        if (this.highlightProgress != f) {
-            this.highlightProgress = f;
+    public void startHighlight() {
+    }
+
+    public void setHighlightProgress(float p) {
+        if (this.highlightProgress != p) {
+            this.highlightProgress = p;
             invalidate();
         }
     }
 
-    /* loaded from: classes3.dex */
+    public void moveImageToFront() {
+        this.imageReceiver.moveImageToFront();
+    }
+
+    /* loaded from: classes4.dex */
     public static class SharedResources {
         Drawable playDrawable;
         TextPaint textPaint = new TextPaint(1);
@@ -261,14 +376,14 @@ public class SharedPhotoVideoCell2 extends View {
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.play_mini_video);
             this.playDrawable = drawable;
             drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), this.playDrawable.getIntrinsicHeight());
-            this.backgroundPaint.setColor(Theme.getColor("sharedMedia_photoPlaceholder", resourcesProvider));
+            this.backgroundPaint.setColor(Theme.getColor(Theme.key_sharedMedia_photoPlaceholder, resourcesProvider));
         }
 
-        public String getFilterString(int i) {
-            String str = this.imageFilters.get(i);
+        public String getFilterString(int width) {
+            String str = this.imageFilters.get(width);
             if (str == null) {
-                String str2 = i + "_" + i + "_isc";
-                this.imageFilters.put(i, str2);
+                String str2 = width + "_" + width + "_isc";
+                this.imageFilters.put(width, str2);
                 return str2;
             }
             return str;

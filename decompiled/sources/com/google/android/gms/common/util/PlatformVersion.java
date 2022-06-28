@@ -3,16 +3,35 @@ package com.google.android.gms.common.util;
 import android.os.Build;
 import android.util.Log;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class PlatformVersion {
     private static Boolean zza;
+
+    private PlatformVersion() {
+    }
+
+    public static boolean isAtLeastHoneycomb() {
+        return true;
+    }
+
+    public static boolean isAtLeastHoneycombMR1() {
+        return true;
+    }
 
     public static boolean isAtLeastIceCreamSandwich() {
         return true;
     }
 
+    public static boolean isAtLeastIceCreamSandwichMR1() {
+        return Build.VERSION.SDK_INT >= 15;
+    }
+
     public static boolean isAtLeastJellyBean() {
         return Build.VERSION.SDK_INT >= 16;
+    }
+
+    public static boolean isAtLeastJellyBeanMR1() {
+        return Build.VERSION.SDK_INT >= 17;
     }
 
     public static boolean isAtLeastJellyBeanMR2() {
@@ -29,6 +48,14 @@ public final class PlatformVersion {
 
     public static boolean isAtLeastLollipop() {
         return Build.VERSION.SDK_INT >= 21;
+    }
+
+    public static boolean isAtLeastLollipopMR1() {
+        return Build.VERSION.SDK_INT >= 22;
+    }
+
+    public static boolean isAtLeastM() {
+        return Build.VERSION.SDK_INT >= 23;
     }
 
     public static boolean isAtLeastN() {
@@ -55,8 +82,7 @@ public final class PlatformVersion {
         if (Build.VERSION.SDK_INT >= 30 && Build.VERSION.CODENAME.equals("REL")) {
             return true;
         }
-        String str = Build.VERSION.CODENAME;
-        if (!(str.length() == 1 && str.charAt(0) >= 'R' && str.charAt(0) <= 'Z')) {
+        if (!(Build.VERSION.CODENAME.length() == 1 && Build.VERSION.CODENAME.charAt(0) >= 'R' && Build.VERSION.CODENAME.charAt(0) <= 'Z')) {
             return false;
         }
         Boolean bool = zza;
@@ -68,8 +94,8 @@ public final class PlatformVersion {
                 z = true;
             }
             zza = Boolean.valueOf(z);
-        } catch (NumberFormatException unused) {
-            zza = Boolean.TRUE;
+        } catch (NumberFormatException e) {
+            zza = true;
         }
         if (!zza.booleanValue()) {
             Log.w("PlatformVersion", "Build version must be at least 6301457 to support R in gmscore");

@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzeg {
     private static final zzee<?> zza = new zzeh();
     private static final zzee<?> zzb = zzc();
@@ -8,7 +8,7 @@ final class zzeg {
     private static zzee<?> zzc() {
         try {
             return (zzee) Class.forName("com.google.protobuf.ExtensionSchemaFull").getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-        } catch (Exception unused) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -19,9 +19,9 @@ final class zzeg {
 
     public static zzee<?> zzb() {
         zzee<?> zzeeVar = zzb;
-        if (zzeeVar != null) {
-            return zzeeVar;
+        if (zzeeVar == null) {
+            throw new IllegalStateException("Protobuf runtime is not correctly loaded.");
         }
-        throw new IllegalStateException("Protobuf runtime is not correctly loaded.");
+        return zzeeVar;
     }
 }

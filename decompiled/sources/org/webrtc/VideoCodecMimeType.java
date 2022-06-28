@@ -1,19 +1,19 @@
 package org.webrtc;
 
-import org.telegram.messenger.MediaController;
+import com.google.android.exoplayer2.util.MimeTypes;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public enum VideoCodecMimeType {
-    VP8("video/x-vnd.on2.vp8"),
-    VP9("video/x-vnd.on2.vp9"),
-    H264(MediaController.VIDEO_MIME_TYPE),
-    H265("video/hevc"),
-    AV1("video/av01");
+    VP8(MimeTypes.VIDEO_VP8),
+    VP9(MimeTypes.VIDEO_VP9),
+    H264("video/avc"),
+    H265(MimeTypes.VIDEO_H265),
+    AV1(MimeTypes.VIDEO_AV1);
     
     private final String mimeType;
 
-    VideoCodecMimeType(String str) {
-        this.mimeType = str;
+    VideoCodecMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
     public String mimeType() {

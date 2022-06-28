@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzjw extends zzju {
     private static final Class<?> zza = Collections.unmodifiableList(Collections.emptyList()).getClass();
 
     /* JADX INFO: Access modifiers changed from: private */
     public zzjw() {
         super();
+    }
+
+    @Override // com.google.android.gms.internal.vision.zzju
+    public final <L> List<L> zza(Object obj, long j) {
+        return zza(obj, j, 10);
     }
 
     @Override // com.google.android.gms.internal.vision.zzju
@@ -24,10 +29,10 @@ final class zzjw extends zzju {
         } else {
             if ((list instanceof zzkw) && (list instanceof zzjl)) {
                 zzjl zzjlVar = (zzjl) list;
-                if (!zzjlVar.zza()) {
+                if (zzjlVar.zza()) {
+                    zzjlVar.zzb();
                     return;
                 }
-                zzjlVar.zzb();
                 return;
             }
             obj2 = Collections.unmodifiableList(list);
@@ -35,9 +40,7 @@ final class zzjw extends zzju {
         zzma.zza(obj, j, obj2);
     }
 
-    /* JADX WARN: Multi-variable type inference failed */
     private static <L> List<L> zza(Object obj, long j, int i) {
-        zzjs zzjsVar;
         List<L> list;
         List<L> zzc = zzc(obj, j);
         if (zzc.isEmpty()) {
@@ -50,29 +53,27 @@ final class zzjw extends zzju {
             }
             zzma.zza(obj, j, list);
             return list;
-        }
-        if (zza.isAssignableFrom(zzc.getClass())) {
+        } else if (zza.isAssignableFrom(zzc.getClass())) {
             ArrayList arrayList = new ArrayList(zzc.size() + i);
             arrayList.addAll(zzc);
             zzma.zza(obj, j, arrayList);
-            zzjsVar = arrayList;
+            return arrayList;
         } else if (zzc instanceof zzlz) {
-            zzjs zzjsVar2 = new zzjs(zzc.size() + i);
-            zzjsVar2.addAll((zzlz) zzc);
-            zzma.zza(obj, j, zzjsVar2);
-            zzjsVar = zzjsVar2;
-        } else if (!(zzc instanceof zzkw) || !(zzc instanceof zzjl)) {
+            zzjs zzjsVar = new zzjs(zzc.size() + i);
+            zzjsVar.addAll((zzlz) zzc);
+            zzma.zza(obj, j, zzjsVar);
+            return zzjsVar;
+        } else if ((zzc instanceof zzkw) && (zzc instanceof zzjl)) {
+            zzjl zzjlVar = (zzjl) zzc;
+            if (!zzjlVar.zza()) {
+                zzjl zza2 = zzjlVar.zza(zzc.size() + i);
+                zzma.zza(obj, j, zza2);
+                return zza2;
+            }
             return zzc;
         } else {
-            zzjl zzjlVar = (zzjl) zzc;
-            if (zzjlVar.zza()) {
-                return zzc;
-            }
-            zzjl zza2 = zzjlVar.zza(zzc.size() + i);
-            zzma.zza(obj, j, zza2);
-            return zza2;
+            return zzc;
         }
-        return zzjsVar;
     }
 
     @Override // com.google.android.gms.internal.vision.zzju

@@ -1,14 +1,16 @@
 package com.carrotsearch.randomizedtesting;
 
 import java.util.Random;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class Xoroshiro128PlusRandom extends Random {
+    private static final double DOUBLE_UNIT = 1.1102230246251565E-16d;
+    private static final float FLOAT_UNIT = 5.9604645E-8f;
     private long s0;
     private long s1;
 
-    public Xoroshiro128PlusRandom(long j) {
+    public Xoroshiro128PlusRandom(long seed) {
         super(0L);
-        long hash = MurmurHash3.hash(j);
+        long hash = MurmurHash3.hash(seed);
         this.s0 = hash;
         long hash2 = MurmurHash3.hash(hash);
         this.s1 = hash2;
@@ -20,7 +22,7 @@ public class Xoroshiro128PlusRandom extends Random {
     }
 
     @Override // java.util.Random
-    public void setSeed(long j) {
+    public void setSeed(long seed) {
         if (this.s0 == 0 && this.s1 == 0) {
             return;
         }
@@ -33,19 +35,19 @@ public class Xoroshiro128PlusRandom extends Random {
     }
 
     @Override // java.util.Random
-    public void nextBytes(byte[] bArr) {
-        int length = bArr.length;
+    public void nextBytes(byte[] bytes) {
         int i = 0;
-        while (i < length) {
-            long nextInt = nextInt();
-            int min = Math.min(length - i, 8);
+        int len = bytes.length;
+        while (i < len) {
+            long rnd = nextInt();
+            int i2 = Math.min(len - i, 8);
             while (true) {
-                int i2 = min - 1;
-                if (min > 0) {
-                    bArr[i] = (byte) nextInt;
-                    nextInt >>>= 8;
+                int n = i2 - 1;
+                if (i2 > 0) {
+                    bytes[i] = (byte) rnd;
+                    rnd >>>= 8;
                     i++;
-                    min = i2;
+                    i2 = n;
                 }
             }
         }
@@ -55,12 +57,12 @@ public class Xoroshiro128PlusRandom extends Random {
     public double nextDouble() {
         double nextLong = nextLong() >>> 11;
         Double.isNaN(nextLong);
-        return nextLong * 1.1102230246251565E-16d;
+        return nextLong * DOUBLE_UNIT;
     }
 
     @Override // java.util.Random
     public float nextFloat() {
-        return (nextInt() >>> 8) * 5.9604645E-8f;
+        return (nextInt() >>> 8) * FLOAT_UNIT;
     }
 
     @Override // java.util.Random
@@ -69,8 +71,8 @@ public class Xoroshiro128PlusRandom extends Random {
     }
 
     @Override // java.util.Random
-    public int nextInt(int i) {
-        return super.nextInt(i);
+    public int nextInt(int n) {
+        return super.nextInt(n);
     }
 
     @Override // java.util.Random
@@ -80,17 +82,17 @@ public class Xoroshiro128PlusRandom extends Random {
 
     @Override // java.util.Random
     public long nextLong() {
-        long j = this.s0;
-        long j2 = this.s1;
-        long j3 = j + j2;
-        long j4 = j2 ^ j;
-        this.s0 = (Long.rotateLeft(j, 55) ^ j4) ^ (j4 << 14);
-        this.s1 = Long.rotateLeft(j4, 36);
-        return j3;
+        long s0 = this.s0;
+        long s1 = this.s1;
+        long result = s0 + s1;
+        long s12 = s1 ^ s0;
+        this.s0 = (Long.rotateLeft(s0, 55) ^ s12) ^ (s12 << 14);
+        this.s1 = Long.rotateLeft(s12, 36);
+        return result;
     }
 
     @Override // java.util.Random
-    protected int next(int i) {
-        return ((int) nextLong()) >>> (32 - i);
+    protected int next(int bits) {
+        return ((int) nextLong()) >>> (32 - bits);
     }
 }

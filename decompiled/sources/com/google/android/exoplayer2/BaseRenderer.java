@@ -13,7 +13,7 @@ import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.MediaClock;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     private RendererConfiguration configuration;
     private int index;
@@ -28,50 +28,12 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     private long readingPositionUs = Long.MIN_VALUE;
 
     @Override // com.google.android.exoplayer2.Renderer
-    public final RendererCapabilities getCapabilities() {
-        return this;
-    }
-
-    @Override // com.google.android.exoplayer2.Renderer
-    public MediaClock getMediaClock() {
-        return null;
-    }
-
-    @Override // com.google.android.exoplayer2.PlayerMessage.Target
-    public void handleMessage(int i, Object obj) throws ExoPlaybackException {
-    }
-
-    protected abstract void onDisabled();
-
-    protected void onEnabled(boolean z) throws ExoPlaybackException {
-    }
-
-    protected abstract void onPositionReset(long j, boolean z) throws ExoPlaybackException;
-
-    protected void onReset() {
-    }
-
-    protected void onStarted() throws ExoPlaybackException {
-    }
-
-    protected void onStopped() throws ExoPlaybackException {
-    }
-
-    public void onStreamChanged(Format[] formatArr, long j) throws ExoPlaybackException {
-    }
-
-    @Override // com.google.android.exoplayer2.Renderer
     public /* synthetic */ void setOperatingRate(float f) {
         Renderer.CC.$default$setOperatingRate(this, f);
     }
 
-    @Override // com.google.android.exoplayer2.RendererCapabilities
-    public int supportsMixedMimeTypeAdaptation() throws ExoPlaybackException {
-        return 0;
-    }
-
-    public BaseRenderer(int i) {
-        this.trackType = i;
+    public BaseRenderer(int trackType) {
+        this.trackType = trackType;
     }
 
     @Override // com.google.android.exoplayer2.Renderer, com.google.android.exoplayer2.RendererCapabilities
@@ -80,8 +42,18 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     }
 
     @Override // com.google.android.exoplayer2.Renderer
-    public final void setIndex(int i) {
-        this.index = i;
+    public final RendererCapabilities getCapabilities() {
+        return this;
+    }
+
+    @Override // com.google.android.exoplayer2.Renderer
+    public final void setIndex(int index) {
+        this.index = index;
+    }
+
+    @Override // com.google.android.exoplayer2.Renderer
+    public MediaClock getMediaClock() {
+        return null;
     }
 
     @Override // com.google.android.exoplayer2.Renderer
@@ -90,13 +62,13 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     }
 
     @Override // com.google.android.exoplayer2.Renderer
-    public final void enable(RendererConfiguration rendererConfiguration, Format[] formatArr, SampleStream sampleStream, long j, boolean z, long j2) throws ExoPlaybackException {
+    public final void enable(RendererConfiguration configuration, Format[] formats, SampleStream stream, long positionUs, boolean joining, long offsetUs) throws ExoPlaybackException {
         Assertions.checkState(this.state == 0);
-        this.configuration = rendererConfiguration;
+        this.configuration = configuration;
         this.state = 1;
-        onEnabled(z);
-        replaceStream(formatArr, sampleStream, j2);
-        onPositionReset(j, z);
+        onEnabled(joining);
+        replaceStream(formats, stream, offsetUs);
+        onPositionReset(positionUs, joining);
     }
 
     @Override // com.google.android.exoplayer2.Renderer
@@ -111,13 +83,13 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     }
 
     @Override // com.google.android.exoplayer2.Renderer
-    public final void replaceStream(Format[] formatArr, SampleStream sampleStream, long j) throws ExoPlaybackException {
+    public final void replaceStream(Format[] formats, SampleStream stream, long offsetUs) throws ExoPlaybackException {
         Assertions.checkState(!this.streamIsFinal);
-        this.stream = sampleStream;
-        this.readingPositionUs = j;
-        this.streamFormats = formatArr;
-        this.streamOffsetUs = j;
-        onStreamChanged(formatArr, j);
+        this.stream = stream;
+        this.readingPositionUs = offsetUs;
+        this.streamFormats = formats;
+        this.streamOffsetUs = offsetUs;
+        onStreamChanged(formats, offsetUs);
     }
 
     @Override // com.google.android.exoplayer2.Renderer
@@ -151,10 +123,10 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     }
 
     @Override // com.google.android.exoplayer2.Renderer
-    public final void resetPosition(long j) throws ExoPlaybackException {
+    public final void resetPosition(long positionUs) throws ExoPlaybackException {
         this.streamIsFinal = false;
-        this.readingPositionUs = j;
-        onPositionReset(j, false);
+        this.readingPositionUs = positionUs;
+        onPositionReset(positionUs, false);
     }
 
     @Override // com.google.android.exoplayer2.Renderer
@@ -186,6 +158,36 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
         onReset();
     }
 
+    @Override // com.google.android.exoplayer2.RendererCapabilities
+    public int supportsMixedMimeTypeAdaptation() throws ExoPlaybackException {
+        return 0;
+    }
+
+    @Override // com.google.android.exoplayer2.PlayerMessage.Target
+    public void handleMessage(int what, Object object) throws ExoPlaybackException {
+    }
+
+    protected void onEnabled(boolean joining) throws ExoPlaybackException {
+    }
+
+    public void onStreamChanged(Format[] formats, long offsetUs) throws ExoPlaybackException {
+    }
+
+    protected void onPositionReset(long positionUs, boolean joining) throws ExoPlaybackException {
+    }
+
+    protected void onStarted() throws ExoPlaybackException {
+    }
+
+    protected void onStopped() throws ExoPlaybackException {
+    }
+
+    protected void onDisabled() {
+    }
+
+    protected void onReset() {
+    }
+
     public final FormatHolder getFormatHolder() {
         this.formatHolder.clear();
         return this.formatHolder;
@@ -199,65 +201,64 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
         return this.configuration;
     }
 
-    public final <T extends ExoMediaCrypto> DrmSession<T> getUpdatedSourceDrmSession(Format format, Format format2, DrmSessionManager<T> drmSessionManager, DrmSession<T> drmSession) throws ExoPlaybackException {
-        DrmSession<T> drmSession2 = null;
-        if (!(!Util.areEqual(format2.drmInitData, format == null ? null : format.drmInitData))) {
-            return drmSession;
+    public final <T extends ExoMediaCrypto> DrmSession<T> getUpdatedSourceDrmSession(Format oldFormat, Format newFormat, DrmSessionManager<T> drmSessionManager, DrmSession<T> existingSourceSession) throws ExoPlaybackException {
+        boolean drmInitDataChanged = !Util.areEqual(newFormat.drmInitData, oldFormat == null ? null : oldFormat.drmInitData);
+        if (!drmInitDataChanged) {
+            return existingSourceSession;
         }
-        if (format2.drmInitData != null) {
+        DrmSession<T> newSourceDrmSession = null;
+        if (newFormat.drmInitData != null) {
             if (drmSessionManager == null) {
-                throw createRendererException(new IllegalStateException("Media requires a DrmSessionManager"), format2);
+                throw createRendererException(new IllegalStateException("Media requires a DrmSessionManager"), newFormat);
             }
-            drmSession2 = drmSessionManager.acquireSession((Looper) Assertions.checkNotNull(Looper.myLooper()), format2.drmInitData);
+            newSourceDrmSession = drmSessionManager.acquireSession((Looper) Assertions.checkNotNull(Looper.myLooper()), newFormat.drmInitData);
         }
-        if (drmSession != null) {
-            drmSession.release();
+        if (existingSourceSession != null) {
+            existingSourceSession.release();
         }
-        return drmSession2;
+        return newSourceDrmSession;
     }
 
     protected final int getIndex() {
         return this.index;
     }
 
-    public final ExoPlaybackException createRendererException(Exception exc, Format format) {
-        int i;
+    public final ExoPlaybackException createRendererException(Exception cause, Format format) {
+        int formatSupport = 4;
         if (format != null && !this.throwRendererExceptionIsExecuting) {
             this.throwRendererExceptionIsExecuting = true;
             try {
-                i = RendererCapabilities.CC.getFormatSupport(supportsFormat(format));
-            } catch (ExoPlaybackException unused) {
-            } finally {
+                formatSupport = RendererCapabilities.CC.getFormatSupport(supportsFormat(format));
+            } catch (ExoPlaybackException e) {
+            } catch (Throwable th) {
                 this.throwRendererExceptionIsExecuting = false;
+                throw th;
             }
-            return ExoPlaybackException.createForRenderer(exc, getIndex(), format, i);
+            this.throwRendererExceptionIsExecuting = false;
         }
-        i = 4;
-        return ExoPlaybackException.createForRenderer(exc, getIndex(), format, i);
+        return ExoPlaybackException.createForRenderer(cause, getIndex(), format, formatSupport);
     }
 
-    public final int readSource(FormatHolder formatHolder, DecoderInputBuffer decoderInputBuffer, boolean z) {
-        int readData = this.stream.readData(formatHolder, decoderInputBuffer, z);
-        if (readData == -4) {
-            if (decoderInputBuffer.isEndOfStream()) {
+    public final int readSource(FormatHolder formatHolder, DecoderInputBuffer buffer, boolean formatRequired) {
+        int result = this.stream.readData(formatHolder, buffer, formatRequired);
+        if (result == -4) {
+            if (buffer.isEndOfStream()) {
                 this.readingPositionUs = Long.MIN_VALUE;
                 return this.streamIsFinal ? -4 : -3;
             }
-            long j = decoderInputBuffer.timeUs + this.streamOffsetUs;
-            decoderInputBuffer.timeUs = j;
-            this.readingPositionUs = Math.max(this.readingPositionUs, j);
-        } else if (readData == -5) {
+            buffer.timeUs += this.streamOffsetUs;
+            this.readingPositionUs = Math.max(this.readingPositionUs, buffer.timeUs);
+        } else if (result == -5) {
             Format format = formatHolder.format;
-            long j2 = format.subsampleOffsetUs;
-            if (j2 != Long.MAX_VALUE) {
-                formatHolder.format = format.copyWithSubsampleOffsetUs(j2 + this.streamOffsetUs);
+            if (format.subsampleOffsetUs != Long.MAX_VALUE) {
+                formatHolder.format = format.copyWithSubsampleOffsetUs(format.subsampleOffsetUs + this.streamOffsetUs);
             }
         }
-        return readData;
+        return result;
     }
 
-    public int skipSource(long j) {
-        return this.stream.skipData(j - this.streamOffsetUs);
+    public int skipSource(long positionUs) {
+        return this.stream.skipData(positionUs - this.streamOffsetUs);
     }
 
     public final boolean isSourceReady() {
@@ -268,9 +269,9 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
         if (drmInitData == null) {
             return true;
         }
-        if (drmSessionManager != null) {
-            return drmSessionManager.canAcquireSession(drmInitData);
+        if (drmSessionManager == null) {
+            return false;
         }
-        return false;
+        return drmSessionManager.canAcquireSession(drmInitData);
     }
 }

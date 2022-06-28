@@ -1,13 +1,13 @@
 package com.google.android.exoplayer2.extractor;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SeekPoint {
     public static final SeekPoint START = new SeekPoint(0, 0);
     public final long position;
     public final long timeUs;
 
-    public SeekPoint(long j, long j2) {
-        this.timeUs = j;
-        this.position = j2;
+    public SeekPoint(long timeUs, long position) {
+        this.timeUs = timeUs;
+        this.position = position;
     }
 
     public String toString() {
@@ -18,14 +18,15 @@ public final class SeekPoint {
         if (this == obj) {
             return true;
         }
-        if (obj == null || SeekPoint.class != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        SeekPoint seekPoint = (SeekPoint) obj;
-        return this.timeUs == seekPoint.timeUs && this.position == seekPoint.position;
+        SeekPoint other = (SeekPoint) obj;
+        return this.timeUs == other.timeUs && this.position == other.position;
     }
 
     public int hashCode() {
-        return (((int) this.timeUs) * 31) + ((int) this.position);
+        int result = (int) this.timeUs;
+        return (result * 31) + ((int) this.position);
     }
 }

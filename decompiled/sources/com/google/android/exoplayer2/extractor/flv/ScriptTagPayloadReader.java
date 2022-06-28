@@ -1,19 +1,27 @@
 package com.google.android.exoplayer2.extractor.flv;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.extractor.DummyTrackOutput;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-/* loaded from: classes.dex */
+import java.util.Map;
+/* loaded from: classes3.dex */
 final class ScriptTagPayloadReader extends TagPayloadReader {
-    private long durationUs = -9223372036854775807L;
-
-    @Override // com.google.android.exoplayer2.extractor.flv.TagPayloadReader
-    protected boolean parseHeader(ParsableByteArray parsableByteArray) {
-        return true;
-    }
+    private static final int AMF_TYPE_BOOLEAN = 1;
+    private static final int AMF_TYPE_DATE = 11;
+    private static final int AMF_TYPE_ECMA_ARRAY = 8;
+    private static final int AMF_TYPE_END_MARKER = 9;
+    private static final int AMF_TYPE_NUMBER = 0;
+    private static final int AMF_TYPE_OBJECT = 3;
+    private static final int AMF_TYPE_STRICT_ARRAY = 10;
+    private static final int AMF_TYPE_STRING = 2;
+    private static final String KEY_DURATION = "duration";
+    private static final String NAME_METADATA = "onMetaData";
+    private long durationUs = C.TIME_UNSET;
 
     public ScriptTagPayloadReader() {
         super(new DummyTrackOutput());
@@ -24,114 +32,133 @@ final class ScriptTagPayloadReader extends TagPayloadReader {
     }
 
     @Override // com.google.android.exoplayer2.extractor.flv.TagPayloadReader
-    protected boolean parsePayload(ParsableByteArray parsableByteArray, long j) throws ParserException {
-        if (readAmfType(parsableByteArray) != 2) {
+    public void seek() {
+    }
+
+    @Override // com.google.android.exoplayer2.extractor.flv.TagPayloadReader
+    protected boolean parseHeader(ParsableByteArray data) {
+        return true;
+    }
+
+    @Override // com.google.android.exoplayer2.extractor.flv.TagPayloadReader
+    protected boolean parsePayload(ParsableByteArray data, long timeUs) throws ParserException {
+        int nameType = readAmfType(data);
+        if (nameType != 2) {
             throw new ParserException();
         }
-        if (!"onMetaData".equals(readAmfString(parsableByteArray)) || readAmfType(parsableByteArray) != 8) {
+        String name = readAmfString(data);
+        if (!NAME_METADATA.equals(name)) {
             return false;
         }
-        HashMap<String, Object> readAmfEcmaArray = readAmfEcmaArray(parsableByteArray);
-        if (readAmfEcmaArray.containsKey("duration")) {
-            double doubleValue = ((Double) readAmfEcmaArray.get("duration")).doubleValue();
-            if (doubleValue > 0.0d) {
-                this.durationUs = (long) (doubleValue * 1000000.0d);
+        int type = readAmfType(data);
+        if (type != 8) {
+            return false;
+        }
+        Map<String, Object> metadata = readAmfEcmaArray(data);
+        if (metadata.containsKey(KEY_DURATION)) {
+            double durationSeconds = ((Double) metadata.get(KEY_DURATION)).doubleValue();
+            if (durationSeconds > FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE) {
+                this.durationUs = (long) (1000000.0d * durationSeconds);
             }
         }
         return false;
     }
 
-    private static int readAmfType(ParsableByteArray parsableByteArray) {
-        return parsableByteArray.readUnsignedByte();
+    private static int readAmfType(ParsableByteArray data) {
+        return data.readUnsignedByte();
     }
 
-    private static Boolean readAmfBoolean(ParsableByteArray parsableByteArray) {
+    private static Boolean readAmfBoolean(ParsableByteArray data) {
         boolean z = true;
-        if (parsableByteArray.readUnsignedByte() != 1) {
+        if (data.readUnsignedByte() != 1) {
             z = false;
         }
         return Boolean.valueOf(z);
     }
 
-    private static Double readAmfDouble(ParsableByteArray parsableByteArray) {
-        return Double.valueOf(Double.longBitsToDouble(parsableByteArray.readLong()));
+    private static Double readAmfDouble(ParsableByteArray data) {
+        return Double.valueOf(Double.longBitsToDouble(data.readLong()));
     }
 
-    private static String readAmfString(ParsableByteArray parsableByteArray) {
-        int readUnsignedShort = parsableByteArray.readUnsignedShort();
-        int position = parsableByteArray.getPosition();
-        parsableByteArray.skipBytes(readUnsignedShort);
-        return new String(parsableByteArray.data, position, readUnsignedShort);
+    private static String readAmfString(ParsableByteArray data) {
+        int size = data.readUnsignedShort();
+        int position = data.getPosition();
+        data.skipBytes(size);
+        return new String(data.data, position, size);
     }
 
-    private static ArrayList<Object> readAmfStrictArray(ParsableByteArray parsableByteArray) {
-        int readUnsignedIntToInt = parsableByteArray.readUnsignedIntToInt();
-        ArrayList<Object> arrayList = new ArrayList<>(readUnsignedIntToInt);
-        for (int i = 0; i < readUnsignedIntToInt; i++) {
-            Object readAmfData = readAmfData(parsableByteArray, readAmfType(parsableByteArray));
-            if (readAmfData != null) {
-                arrayList.add(readAmfData);
+    private static ArrayList<Object> readAmfStrictArray(ParsableByteArray data) {
+        int count = data.readUnsignedIntToInt();
+        ArrayList<Object> list = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            int type = readAmfType(data);
+            Object value = readAmfData(data, type);
+            if (value != null) {
+                list.add(value);
             }
         }
-        return arrayList;
+        return list;
     }
 
-    private static HashMap<String, Object> readAmfObject(ParsableByteArray parsableByteArray) {
-        HashMap<String, Object> hashMap = new HashMap<>();
+    private static HashMap<String, Object> readAmfObject(ParsableByteArray data) {
+        HashMap<String, Object> array = new HashMap<>();
         while (true) {
-            String readAmfString = readAmfString(parsableByteArray);
-            int readAmfType = readAmfType(parsableByteArray);
-            if (readAmfType == 9) {
-                return hashMap;
-            }
-            Object readAmfData = readAmfData(parsableByteArray, readAmfType);
-            if (readAmfData != null) {
-                hashMap.put(readAmfString, readAmfData);
+            String key = readAmfString(data);
+            int type = readAmfType(data);
+            if (type != 9) {
+                Object value = readAmfData(data, type);
+                if (value != null) {
+                    array.put(key, value);
+                }
+            } else {
+                return array;
             }
         }
     }
 
-    private static HashMap<String, Object> readAmfEcmaArray(ParsableByteArray parsableByteArray) {
-        int readUnsignedIntToInt = parsableByteArray.readUnsignedIntToInt();
-        HashMap<String, Object> hashMap = new HashMap<>(readUnsignedIntToInt);
-        for (int i = 0; i < readUnsignedIntToInt; i++) {
-            String readAmfString = readAmfString(parsableByteArray);
-            Object readAmfData = readAmfData(parsableByteArray, readAmfType(parsableByteArray));
-            if (readAmfData != null) {
-                hashMap.put(readAmfString, readAmfData);
+    private static HashMap<String, Object> readAmfEcmaArray(ParsableByteArray data) {
+        int count = data.readUnsignedIntToInt();
+        HashMap<String, Object> array = new HashMap<>(count);
+        for (int i = 0; i < count; i++) {
+            String key = readAmfString(data);
+            int type = readAmfType(data);
+            Object value = readAmfData(data, type);
+            if (value != null) {
+                array.put(key, value);
             }
         }
-        return hashMap;
+        return array;
     }
 
-    private static Date readAmfDate(ParsableByteArray parsableByteArray) {
-        Date date = new Date((long) readAmfDouble(parsableByteArray).doubleValue());
-        parsableByteArray.skipBytes(2);
+    private static Date readAmfDate(ParsableByteArray data) {
+        Date date = new Date((long) readAmfDouble(data).doubleValue());
+        data.skipBytes(2);
         return date;
     }
 
-    private static Object readAmfData(ParsableByteArray parsableByteArray, int i) {
-        if (i != 0) {
-            if (i == 1) {
-                return readAmfBoolean(parsableByteArray);
-            }
-            if (i == 2) {
-                return readAmfString(parsableByteArray);
-            }
-            if (i == 3) {
-                return readAmfObject(parsableByteArray);
-            }
-            if (i == 8) {
-                return readAmfEcmaArray(parsableByteArray);
-            }
-            if (i == 10) {
-                return readAmfStrictArray(parsableByteArray);
-            }
-            if (i == 11) {
-                return readAmfDate(parsableByteArray);
-            }
-            return null;
+    private static Object readAmfData(ParsableByteArray data, int type) {
+        switch (type) {
+            case 0:
+                return readAmfDouble(data);
+            case 1:
+                return readAmfBoolean(data);
+            case 2:
+                return readAmfString(data);
+            case 3:
+                return readAmfObject(data);
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 9:
+            default:
+                return null;
+            case 8:
+                return readAmfEcmaArray(data);
+            case 10:
+                return readAmfStrictArray(data);
+            case 11:
+                return readAmfDate(data);
         }
-        return readAmfDouble(parsableByteArray);
     }
 }

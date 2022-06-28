@@ -1,6 +1,5 @@
 package com.microsoft.appcenter.utils;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +14,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class NetworkStateHelper implements Closeable {
-    @SuppressLint({"StaticFieldLeak"})
     private static NetworkStateHelper sSharedInstance;
     private final ConnectivityManager mConnectivityManager;
     private ConnectivityReceiver mConnectivityReceiver;
@@ -26,7 +24,7 @@ public class NetworkStateHelper implements Closeable {
     private final Set<Listener> mListeners = new CopyOnWriteArraySet();
     private final AtomicBoolean mConnected = new AtomicBoolean();
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Listener {
         void onNetworkStateUpdated(boolean z);
     }
@@ -35,6 +33,12 @@ public class NetworkStateHelper implements Closeable {
         this.mContext = context.getApplicationContext();
         this.mConnectivityManager = (ConnectivityManager) context.getSystemService("connectivity");
         reopen();
+    }
+
+    public static synchronized void unsetInstance() {
+        synchronized (NetworkStateHelper.class) {
+            sSharedInstance = null;
+        }
     }
 
     public static synchronized NetworkStateHelper getSharedInstance(Context context) {
@@ -51,8 +55,8 @@ public class NetworkStateHelper implements Closeable {
     public void reopen() {
         try {
             if (Build.VERSION.SDK_INT >= 21) {
-                NetworkRequest.Builder builder = new NetworkRequest.Builder();
-                builder.addCapability(12);
+                NetworkRequest.Builder request = new NetworkRequest.Builder();
+                request.addCapability(12);
                 this.mNetworkCallback = new ConnectivityManager.NetworkCallback() { // from class: com.microsoft.appcenter.utils.NetworkStateHelper.1
                     @Override // android.net.ConnectivityManager.NetworkCallback
                     public void onAvailable(Network network) {
@@ -64,7 +68,7 @@ public class NetworkStateHelper implements Closeable {
                         NetworkStateHelper.this.onNetworkLost(network);
                     }
                 };
-                this.mConnectivityManager.registerNetworkCallback(builder.build(), this.mNetworkCallback);
+                this.mConnectivityManager.registerNetworkCallback(request.build(), this.mNetworkCallback);
             } else {
                 ConnectivityReceiver connectivityReceiver = new ConnectivityReceiver();
                 this.mConnectivityReceiver = connectivityReceiver;
@@ -87,23 +91,23 @@ public class NetworkStateHelper implements Closeable {
 
     private boolean isAnyNetworkConnected() {
         if (Build.VERSION.SDK_INT >= 21) {
-            Network[] allNetworks = this.mConnectivityManager.getAllNetworks();
-            if (allNetworks == null) {
+            Network[] networks = this.mConnectivityManager.getAllNetworks();
+            if (networks == null) {
                 return false;
             }
-            for (Network network : allNetworks) {
-                NetworkInfo networkInfo = this.mConnectivityManager.getNetworkInfo(network);
-                if (networkInfo != null && networkInfo.isConnected()) {
+            for (Network network : networks) {
+                NetworkInfo info = this.mConnectivityManager.getNetworkInfo(network);
+                if (info != null && info.isConnected()) {
                     return true;
                 }
             }
         } else {
-            NetworkInfo[] allNetworkInfo = this.mConnectivityManager.getAllNetworkInfo();
-            if (allNetworkInfo == null) {
+            NetworkInfo[] networks2 = this.mConnectivityManager.getAllNetworkInfo();
+            if (networks2 == null) {
                 return false;
             }
-            for (NetworkInfo networkInfo2 : allNetworkInfo) {
-                if (networkInfo2 != null && networkInfo2.isConnected()) {
+            for (NetworkInfo info2 : networks2) {
+                if (info2 != null && info2.isConnected()) {
                     return true;
                 }
             }
@@ -120,27 +124,27 @@ public class NetworkStateHelper implements Closeable {
 
     public void onNetworkLost(Network network) {
         AppCenterLog.debug("AppCenter", "Network " + network + " is lost.");
-        Network[] allNetworks = this.mConnectivityManager.getAllNetworks();
-        if (!(allNetworks == null || allNetworks.length == 0 || Arrays.equals(allNetworks, new Network[]{network})) || !this.mConnected.compareAndSet(true, false)) {
-            return;
+        Network[] networks = this.mConnectivityManager.getAllNetworks();
+        boolean noNetwork = networks == null || networks.length == 0 || Arrays.equals(networks, new Network[]{network});
+        if (noNetwork && this.mConnected.compareAndSet(true, false)) {
+            notifyNetworkStateUpdated(false);
         }
-        notifyNetworkStateUpdated(false);
     }
 
     public void handleNetworkStateUpdate() {
-        boolean isAnyNetworkConnected = isAnyNetworkConnected();
-        if (this.mConnected.compareAndSet(!isAnyNetworkConnected, isAnyNetworkConnected)) {
-            notifyNetworkStateUpdated(isAnyNetworkConnected);
+        boolean connected = isAnyNetworkConnected();
+        if (this.mConnected.compareAndSet(!connected, connected)) {
+            notifyNetworkStateUpdated(connected);
         }
     }
 
-    private void notifyNetworkStateUpdated(boolean z) {
+    private void notifyNetworkStateUpdated(boolean connected) {
         StringBuilder sb = new StringBuilder();
         sb.append("Network has been ");
-        sb.append(z ? "connected." : "disconnected.");
+        sb.append(connected ? "connected." : "disconnected.");
         AppCenterLog.debug("AppCenter", sb.toString());
         for (Listener listener : this.mListeners) {
-            listener.onNetworkStateUpdated(z);
+            listener.onNetworkStateUpdated(connected);
         }
     }
 
@@ -162,7 +166,7 @@ public class NetworkStateHelper implements Closeable {
         this.mListeners.remove(listener);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public class ConnectivityReceiver extends BroadcastReceiver {
         private ConnectivityReceiver() {
             NetworkStateHelper.this = r1;

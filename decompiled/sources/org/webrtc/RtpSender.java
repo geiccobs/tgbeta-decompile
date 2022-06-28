@@ -1,7 +1,7 @@
 package org.webrtc;
 
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class RtpSender {
     private MediaStreamTrack cachedTrack;
     private final DtmfSender dtmfSender;
@@ -26,25 +26,25 @@ public class RtpSender {
 
     private static native boolean nativeSetTrack(long j, long j2);
 
-    @CalledByNative
-    public RtpSender(long j) {
-        this.nativeRtpSender = j;
-        this.cachedTrack = MediaStreamTrack.createMediaStreamTrack(nativeGetTrack(j));
-        long nativeGetDtmfSender = nativeGetDtmfSender(j);
-        this.dtmfSender = nativeGetDtmfSender != 0 ? new DtmfSender(nativeGetDtmfSender) : null;
+    public RtpSender(long nativeRtpSender) {
+        this.nativeRtpSender = nativeRtpSender;
+        long nativeTrack = nativeGetTrack(nativeRtpSender);
+        this.cachedTrack = MediaStreamTrack.createMediaStreamTrack(nativeTrack);
+        long nativeDtmfSender = nativeGetDtmfSender(nativeRtpSender);
+        this.dtmfSender = nativeDtmfSender != 0 ? new DtmfSender(nativeDtmfSender) : null;
     }
 
-    public boolean setTrack(MediaStreamTrack mediaStreamTrack, boolean z) {
+    public boolean setTrack(MediaStreamTrack track, boolean takeOwnership) {
         checkRtpSenderExists();
-        if (!nativeSetTrack(this.nativeRtpSender, mediaStreamTrack == null ? 0L : mediaStreamTrack.getNativeMediaStreamTrack())) {
+        if (!nativeSetTrack(this.nativeRtpSender, track == null ? 0L : track.getNativeMediaStreamTrack())) {
             return false;
         }
-        MediaStreamTrack mediaStreamTrack2 = this.cachedTrack;
-        if (mediaStreamTrack2 != null && this.ownsTrack) {
-            mediaStreamTrack2.dispose();
+        MediaStreamTrack mediaStreamTrack = this.cachedTrack;
+        if (mediaStreamTrack != null && this.ownsTrack) {
+            mediaStreamTrack.dispose();
         }
-        this.cachedTrack = mediaStreamTrack;
-        this.ownsTrack = z;
+        this.cachedTrack = track;
+        this.ownsTrack = takeOwnership;
         return true;
     }
 
@@ -52,9 +52,9 @@ public class RtpSender {
         return this.cachedTrack;
     }
 
-    public void setStreams(List<String> list) {
+    public void setStreams(List<String> streamIds) {
         checkRtpSenderExists();
-        nativeSetStreams(this.nativeRtpSender, list);
+        nativeSetStreams(this.nativeRtpSender, streamIds);
     }
 
     public List<String> getStreams() {
@@ -62,9 +62,9 @@ public class RtpSender {
         return nativeGetStreams(this.nativeRtpSender);
     }
 
-    public boolean setParameters(RtpParameters rtpParameters) {
+    public boolean setParameters(RtpParameters parameters) {
         checkRtpSenderExists();
-        return nativeSetParameters(this.nativeRtpSender, rtpParameters);
+        return nativeSetParameters(this.nativeRtpSender, parameters);
     }
 
     public RtpParameters getParameters() {
@@ -106,9 +106,8 @@ public class RtpSender {
     }
 
     private void checkRtpSenderExists() {
-        if (this.nativeRtpSender != 0) {
-            return;
+        if (this.nativeRtpSender == 0) {
+            throw new IllegalStateException("RtpSender has been disposed.");
         }
-        throw new IllegalStateException("RtpSender has been disposed.");
     }
 }

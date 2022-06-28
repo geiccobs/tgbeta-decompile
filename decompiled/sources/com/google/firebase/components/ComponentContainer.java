@@ -1,10 +1,13 @@
 package com.google.firebase.components;
 
+import com.google.firebase.inject.Deferred;
 import com.google.firebase.inject.Provider;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface ComponentContainer {
     <T> T get(Class<T> cls);
+
+    <T> Deferred<T> getDeferred(Class<T> cls);
 
     <T> Provider<T> getProvider(Class<T> cls);
 

@@ -1,9 +1,6 @@
 package com.google.android.gms.common;
-
-import com.google.android.gms.common.annotation.KeepName;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-@KeepName
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class GooglePlayServicesIncorrectManifestValueException extends GooglePlayServicesManifestException {
     /* JADX WARN: Illegal instructions before constructor call */
     /*

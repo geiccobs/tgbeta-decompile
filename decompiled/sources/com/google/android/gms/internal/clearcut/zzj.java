@@ -7,7 +7,7 @@ import android.os.Looper;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzj extends GmsClient<zzn> {
     public zzj(Context context, Looper looper, ClientSettings clientSettings, GoogleApiClient.ConnectionCallbacks connectionCallbacks, GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         super(context, looper, 40, clientSettings, connectionCallbacks, onConnectionFailedListener);

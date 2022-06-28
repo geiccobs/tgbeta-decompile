@@ -5,14 +5,34 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 import com.google.android.gms.dynamic.IObjectWrapper;
-import com.google.android.gms.internal.maps.zzh;
-import com.google.android.gms.internal.maps.zzi;
 import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.StreetViewPanoramaOptions;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zze extends com.google.android.gms.internal.maps.zza implements zzf {
     public zze(IBinder iBinder) {
         super(iBinder, "com.google.android.gms.maps.internal.ICreator");
+    }
+
+    @Override // com.google.android.gms.maps.internal.zzf
+    public final IMapFragmentDelegate zzd(IObjectWrapper iObjectWrapper) throws RemoteException {
+        IMapFragmentDelegate iMapFragmentDelegate;
+        Parcel zza = zza();
+        com.google.android.gms.internal.maps.zzc.zzf(zza, iObjectWrapper);
+        Parcel zzH = zzH(2, zza);
+        IBinder readStrongBinder = zzH.readStrongBinder();
+        if (readStrongBinder == null) {
+            iMapFragmentDelegate = null;
+        } else {
+            IInterface queryLocalInterface = readStrongBinder.queryLocalInterface("com.google.android.gms.maps.internal.IMapFragmentDelegate");
+            if (queryLocalInterface instanceof IMapFragmentDelegate) {
+                iMapFragmentDelegate = (IMapFragmentDelegate) queryLocalInterface;
+            } else {
+                iMapFragmentDelegate = new zzk(readStrongBinder);
+            }
+        }
+        zzH.recycle();
+        return iMapFragmentDelegate;
     }
 
     @Override // com.google.android.gms.maps.internal.zzf
@@ -57,9 +77,9 @@ public final class zze extends com.google.android.gms.internal.maps.zza implemen
     }
 
     @Override // com.google.android.gms.maps.internal.zzf
-    public final zzi zzg() throws RemoteException {
+    public final com.google.android.gms.internal.maps.zzi zzg() throws RemoteException {
         Parcel zzH = zzH(5, zza());
-        zzi zzb = zzh.zzb(zzH.readStrongBinder());
+        com.google.android.gms.internal.maps.zzi zzb = com.google.android.gms.internal.maps.zzh.zzb(zzH.readStrongBinder());
         zzH.recycle();
         return zzb;
     }
@@ -70,5 +90,48 @@ public final class zze extends com.google.android.gms.internal.maps.zza implemen
         com.google.android.gms.internal.maps.zzc.zzf(zza, iObjectWrapper);
         zza.writeInt(i);
         zzc(6, zza);
+    }
+
+    @Override // com.google.android.gms.maps.internal.zzf
+    public final IStreetViewPanoramaViewDelegate zzi(IObjectWrapper iObjectWrapper, StreetViewPanoramaOptions streetViewPanoramaOptions) throws RemoteException {
+        IStreetViewPanoramaViewDelegate iStreetViewPanoramaViewDelegate;
+        Parcel zza = zza();
+        com.google.android.gms.internal.maps.zzc.zzf(zza, iObjectWrapper);
+        com.google.android.gms.internal.maps.zzc.zzd(zza, streetViewPanoramaOptions);
+        Parcel zzH = zzH(7, zza);
+        IBinder readStrongBinder = zzH.readStrongBinder();
+        if (readStrongBinder == null) {
+            iStreetViewPanoramaViewDelegate = null;
+        } else {
+            IInterface queryLocalInterface = readStrongBinder.queryLocalInterface("com.google.android.gms.maps.internal.IStreetViewPanoramaViewDelegate");
+            if (queryLocalInterface instanceof IStreetViewPanoramaViewDelegate) {
+                iStreetViewPanoramaViewDelegate = (IStreetViewPanoramaViewDelegate) queryLocalInterface;
+            } else {
+                iStreetViewPanoramaViewDelegate = new zzbx(readStrongBinder);
+            }
+        }
+        zzH.recycle();
+        return iStreetViewPanoramaViewDelegate;
+    }
+
+    @Override // com.google.android.gms.maps.internal.zzf
+    public final IStreetViewPanoramaFragmentDelegate zzj(IObjectWrapper iObjectWrapper) throws RemoteException {
+        IStreetViewPanoramaFragmentDelegate iStreetViewPanoramaFragmentDelegate;
+        Parcel zza = zza();
+        com.google.android.gms.internal.maps.zzc.zzf(zza, iObjectWrapper);
+        Parcel zzH = zzH(8, zza);
+        IBinder readStrongBinder = zzH.readStrongBinder();
+        if (readStrongBinder == null) {
+            iStreetViewPanoramaFragmentDelegate = null;
+        } else {
+            IInterface queryLocalInterface = readStrongBinder.queryLocalInterface("com.google.android.gms.maps.internal.IStreetViewPanoramaFragmentDelegate");
+            if (queryLocalInterface instanceof IStreetViewPanoramaFragmentDelegate) {
+                iStreetViewPanoramaFragmentDelegate = (IStreetViewPanoramaFragmentDelegate) queryLocalInterface;
+            } else {
+                iStreetViewPanoramaFragmentDelegate = new zzbw(readStrongBinder);
+            }
+        }
+        zzH.recycle();
+        return iStreetViewPanoramaFragmentDelegate;
     }
 }

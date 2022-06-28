@@ -6,7 +6,7 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class PhotoEditorSeekBar extends View {
     private PhotoEditorSeekBarDelegate delegate;
     private int maxValue;
@@ -18,7 +18,7 @@ public class PhotoEditorSeekBar extends View {
     private float progress = 0.0f;
     private boolean pressed = false;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface PhotoEditorSeekBarDelegate {
         void onProgressChanged(int i, int i2);
     }
@@ -29,42 +29,43 @@ public class PhotoEditorSeekBar extends View {
         this.outerPaint.setColor(-1);
     }
 
-    public void setDelegate(PhotoEditorSeekBarDelegate photoEditorSeekBarDelegate) {
-        this.delegate = photoEditorSeekBarDelegate;
+    public void setDelegate(PhotoEditorSeekBarDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        if (motionEvent == null) {
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event == null) {
             return false;
         }
-        float x = motionEvent.getX();
-        float y = motionEvent.getY();
-        float measuredWidth = (int) ((getMeasuredWidth() - this.thumbSize) * this.progress);
-        float f = 0.0f;
-        if (motionEvent.getAction() == 0) {
+        float x = event.getX();
+        float y = event.getY();
+        float thumbX = (int) ((getMeasuredWidth() - this.thumbSize) * this.progress);
+        if (event.getAction() == 0) {
             int measuredHeight = getMeasuredHeight();
             int i = this.thumbSize;
-            float f2 = (measuredHeight - i) / 2;
-            if (measuredWidth - f2 <= x && x <= i + measuredWidth + f2 && y >= 0.0f && y <= getMeasuredHeight()) {
+            int additionWidth = (measuredHeight - i) / 2;
+            if (thumbX - additionWidth <= x && x <= i + thumbX + additionWidth && y >= 0.0f && y <= getMeasuredHeight()) {
                 this.pressed = true;
-                this.thumbDX = (int) (x - measuredWidth);
+                this.thumbDX = (int) (x - thumbX);
                 getParent().requestDisallowInterceptTouchEvent(true);
                 invalidate();
                 return true;
             }
-        } else if (motionEvent.getAction() == 1 || motionEvent.getAction() == 3) {
+        } else if (event.getAction() == 1 || event.getAction() == 3) {
             if (this.pressed) {
                 this.pressed = false;
                 invalidate();
                 return true;
             }
-        } else if (motionEvent.getAction() == 2 && this.pressed) {
-            float f3 = (int) (x - this.thumbDX);
-            if (f3 >= 0.0f) {
-                f = f3 > ((float) (getMeasuredWidth() - this.thumbSize)) ? getMeasuredWidth() - this.thumbSize : f3;
+        } else if (event.getAction() == 2 && this.pressed) {
+            float thumbX2 = (int) (x - this.thumbDX);
+            if (thumbX2 < 0.0f) {
+                thumbX2 = 0.0f;
+            } else if (thumbX2 > getMeasuredWidth() - this.thumbSize) {
+                thumbX2 = getMeasuredWidth() - this.thumbSize;
             }
-            this.progress = f / (getMeasuredWidth() - this.thumbSize);
+            this.progress = thumbX2 / (getMeasuredWidth() - this.thumbSize);
             PhotoEditorSeekBarDelegate photoEditorSeekBarDelegate = this.delegate;
             if (photoEditorSeekBarDelegate != null) {
                 photoEditorSeekBarDelegate.onProgressChanged(((Integer) getTag()).intValue(), getProgress());
@@ -75,27 +76,23 @@ public class PhotoEditorSeekBar extends View {
         return false;
     }
 
-    public void setProgress(int i) {
-        setProgress(i, true);
+    public void setProgress(int progress) {
+        setProgress(progress, true);
     }
 
-    public void setProgress(int i, boolean z) {
+    public void setProgress(int progress, boolean notify) {
         PhotoEditorSeekBarDelegate photoEditorSeekBarDelegate;
-        int i2 = this.minValue;
-        if (i < i2) {
-            i = i2;
-        } else {
-            int i3 = this.maxValue;
-            if (i > i3) {
-                i = i3;
-            }
+        int i = this.minValue;
+        if (progress < i) {
+            progress = this.minValue;
+        } else if (progress > this.maxValue) {
+            progress = this.maxValue;
         }
-        this.progress = (i - i2) / (this.maxValue - i2);
+        this.progress = (progress - i) / (this.maxValue - i);
         invalidate();
-        if (!z || (photoEditorSeekBarDelegate = this.delegate) == null) {
-            return;
+        if (notify && (photoEditorSeekBarDelegate = this.delegate) != null) {
+            photoEditorSeekBarDelegate.onProgressChanged(((Integer) getTag()).intValue(), getProgress());
         }
-        photoEditorSeekBarDelegate.onProgressChanged(((Integer) getTag()).intValue(), getProgress());
     }
 
     public int getProgress() {
@@ -103,28 +100,28 @@ public class PhotoEditorSeekBar extends View {
         return (int) (i + (this.progress * (this.maxValue - i)));
     }
 
-    public void setMinMax(int i, int i2) {
-        this.minValue = i;
-        this.maxValue = i2;
+    public void setMinMax(int min, int max) {
+        this.minValue = min;
+        this.maxValue = max;
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        int measuredHeight = (getMeasuredHeight() - this.thumbSize) / 2;
+        int y = (getMeasuredHeight() - this.thumbSize) / 2;
         int measuredWidth = getMeasuredWidth();
         int i = this.thumbSize;
-        int i2 = (int) ((measuredWidth - i) * this.progress);
+        int thumbX = (int) ((measuredWidth - i) * this.progress);
         canvas.drawRect(i / 2, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), getMeasuredWidth() - (this.thumbSize / 2), (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.innerPaint);
         if (this.minValue == 0) {
-            canvas.drawRect(this.thumbSize / 2, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), i2, (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.outerPaint);
+            canvas.drawRect(this.thumbSize / 2, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), thumbX, (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.outerPaint);
         } else if (this.progress > 0.5f) {
             canvas.drawRect((getMeasuredWidth() / 2) - AndroidUtilities.dp(1.0f), (getMeasuredHeight() - this.thumbSize) / 2, getMeasuredWidth() / 2, (getMeasuredHeight() + this.thumbSize) / 2, this.outerPaint);
-            canvas.drawRect(getMeasuredWidth() / 2, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), i2, (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.outerPaint);
+            canvas.drawRect(getMeasuredWidth() / 2, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), thumbX, (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.outerPaint);
         } else {
             canvas.drawRect(getMeasuredWidth() / 2, (getMeasuredHeight() - this.thumbSize) / 2, (getMeasuredWidth() / 2) + AndroidUtilities.dp(1.0f), (getMeasuredHeight() + this.thumbSize) / 2, this.outerPaint);
-            canvas.drawRect(i2, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), getMeasuredWidth() / 2, (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.outerPaint);
+            canvas.drawRect(thumbX, (getMeasuredHeight() / 2) - AndroidUtilities.dp(1.0f), getMeasuredWidth() / 2, (getMeasuredHeight() / 2) + AndroidUtilities.dp(1.0f), this.outerPaint);
         }
-        int i3 = this.thumbSize;
-        canvas.drawCircle(i2 + (i3 / 2), measuredHeight + (i3 / 2), i3 / 2, this.outerPaint);
+        int i2 = this.thumbSize;
+        canvas.drawCircle((i2 / 2) + thumbX, (i2 / 2) + y, i2 / 2, this.outerPaint);
     }
 }

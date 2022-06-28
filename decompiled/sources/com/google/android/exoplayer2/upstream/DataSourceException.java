@@ -1,8 +1,12 @@
 package com.google.android.exoplayer2.upstream;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DataSourceException extends IOException {
-    public DataSourceException(int i) {
+    public static final int POSITION_OUT_OF_RANGE = 0;
+    public final int reason;
+
+    public DataSourceException(int reason) {
+        this.reason = reason;
     }
 }

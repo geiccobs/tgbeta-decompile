@@ -1,312 +1,210 @@
 package com.google.zxing.qrcode.decoder;
 
+import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.common.BitSource;
 import com.google.zxing.common.CharacterSetECI;
-import com.google.zxing.common.DecoderResult;
 import com.google.zxing.common.StringUtils;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class DecodedBitStreamParser {
     private static final char[] ALPHANUMERIC_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:".toCharArray();
+    private static final int GB2312_SUBSET = 1;
 
+    private DecodedBitStreamParser() {
+    }
+
+    /*  JADX ERROR: JadxRuntimeException in pass: RegionMakerVisitor
+        jadx.core.utils.exceptions.JadxRuntimeException: Failed to find switch 'out' block
+        	at jadx.core.dex.visitors.regions.RegionMaker.processSwitch(RegionMaker.java:817)
+        	at jadx.core.dex.visitors.regions.RegionMaker.traverse(RegionMaker.java:160)
+        	at jadx.core.dex.visitors.regions.RegionMaker.makeRegion(RegionMaker.java:94)
+        	at jadx.core.dex.visitors.regions.RegionMaker.processSwitch(RegionMaker.java:856)
+        	at jadx.core.dex.visitors.regions.RegionMaker.traverse(RegionMaker.java:160)
+        	at jadx.core.dex.visitors.regions.RegionMaker.makeRegion(RegionMaker.java:94)
+        	at jadx.core.dex.visitors.regions.RegionMaker.makeEndlessLoop(RegionMaker.java:406)
+        	at jadx.core.dex.visitors.regions.RegionMaker.processLoop(RegionMaker.java:204)
+        	at jadx.core.dex.visitors.regions.RegionMaker.traverse(RegionMaker.java:138)
+        	at jadx.core.dex.visitors.regions.RegionMaker.makeRegion(RegionMaker.java:94)
+        	at jadx.core.dex.visitors.regions.RegionMakerVisitor.visit(RegionMakerVisitor.java:52)
+        */
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    public static DecoderResult decode(byte[] bArr, Version version, ErrorCorrectionLevel errorCorrectionLevel, Map<DecodeHintType, ?> map) throws FormatException {
-        Mode forBits;
-        Mode mode;
-        BitSource bitSource = new BitSource(bArr);
-        StringBuilder sb = new StringBuilder(50);
-        int i = 1;
-        ArrayList arrayList = new ArrayList(1);
-        CharacterSetECI characterSetECI = null;
-        boolean z = false;
-        int i2 = -1;
-        int i3 = -1;
-        while (true) {
-            try {
-                if (bitSource.available() < 4) {
-                    forBits = Mode.TERMINATOR;
-                } else {
-                    forBits = Mode.forBits(bitSource.readBits(4));
-                }
-                Mode mode2 = forBits;
-                int[] iArr = AnonymousClass1.$SwitchMap$com$google$zxing$qrcode$decoder$Mode;
-                switch (iArr[mode2.ordinal()]) {
-                    case 5:
-                        mode = mode2;
-                        break;
-                    case 6:
-                    case 7:
-                        mode = mode2;
-                        z = true;
-                        break;
-                    case 8:
-                        if (bitSource.available() < 16) {
-                            throw FormatException.getFormatInstance();
-                        }
-                        int readBits = bitSource.readBits(8);
-                        i3 = bitSource.readBits(8);
-                        i2 = readBits;
-                        mode = mode2;
-                        break;
-                    case 9:
-                        characterSetECI = CharacterSetECI.getCharacterSetECIByValue(parseECIValue(bitSource));
-                        if (characterSetECI == null) {
-                            throw FormatException.getFormatInstance();
-                        }
-                        mode = mode2;
-                        break;
-                    case 10:
-                        int readBits2 = bitSource.readBits(4);
-                        int readBits3 = bitSource.readBits(mode2.getCharacterCountBits(version));
-                        if (readBits2 == i) {
-                            decodeHanziSegment(bitSource, sb, readBits3);
-                        }
-                        mode = mode2;
-                        break;
-                    default:
-                        int readBits4 = bitSource.readBits(mode2.getCharacterCountBits(version));
-                        int i4 = iArr[mode2.ordinal()];
-                        if (i4 == i) {
-                            mode = mode2;
-                            decodeNumericSegment(bitSource, sb, readBits4);
-                            break;
-                        } else if (i4 == 2) {
-                            mode = mode2;
-                            decodeAlphanumericSegment(bitSource, sb, readBits4, z);
-                            break;
-                        } else if (i4 == 3) {
-                            mode = mode2;
-                            decodeByteSegment(bitSource, sb, readBits4, characterSetECI, arrayList, map);
-                            break;
-                        } else if (i4 == 4) {
-                            decodeKanjiSegment(bitSource, sb, readBits4);
-                            mode = mode2;
-                            break;
-                        } else {
-                            throw FormatException.getFormatInstance();
-                        }
-                }
-                if (mode == Mode.TERMINATOR) {
-                    return new DecoderResult(bArr, sb.toString(), arrayList.isEmpty() ? null : arrayList, errorCorrectionLevel == null ? null : errorCorrectionLevel.toString(), i2, i3);
-                }
-                i = 1;
-            } catch (IllegalArgumentException unused) {
-                throw FormatException.getFormatInstance();
-            }
-        }
+    static com.google.zxing.common.DecoderResult decode(byte[] r16, com.google.zxing.qrcode.decoder.Version r17, com.google.zxing.qrcode.decoder.ErrorCorrectionLevel r18, java.util.Map<com.google.zxing.DecodeHintType, ?> r19) throws com.google.zxing.FormatException {
+        /*
+            Method dump skipped, instructions count: 286
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.google.zxing.qrcode.decoder.DecodedBitStreamParser.decode(byte[], com.google.zxing.qrcode.decoder.Version, com.google.zxing.qrcode.decoder.ErrorCorrectionLevel, java.util.Map):com.google.zxing.common.DecoderResult");
     }
 
-    /* JADX INFO: Access modifiers changed from: package-private */
-    /* renamed from: com.google.zxing.qrcode.decoder.DecodedBitStreamParser$1 */
-    /* loaded from: classes.dex */
-    public static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$com$google$zxing$qrcode$decoder$Mode;
-
-        static {
-            int[] iArr = new int[Mode.values().length];
-            $SwitchMap$com$google$zxing$qrcode$decoder$Mode = iArr;
-            try {
-                iArr[Mode.NUMERIC.ordinal()] = 1;
-            } catch (NoSuchFieldError unused) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.ALPHANUMERIC.ordinal()] = 2;
-            } catch (NoSuchFieldError unused2) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.BYTE.ordinal()] = 3;
-            } catch (NoSuchFieldError unused3) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.KANJI.ordinal()] = 4;
-            } catch (NoSuchFieldError unused4) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.TERMINATOR.ordinal()] = 5;
-            } catch (NoSuchFieldError unused5) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.FNC1_FIRST_POSITION.ordinal()] = 6;
-            } catch (NoSuchFieldError unused6) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.FNC1_SECOND_POSITION.ordinal()] = 7;
-            } catch (NoSuchFieldError unused7) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.STRUCTURED_APPEND.ordinal()] = 8;
-            } catch (NoSuchFieldError unused8) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.ECI.ordinal()] = 9;
-            } catch (NoSuchFieldError unused9) {
-            }
-            try {
-                $SwitchMap$com$google$zxing$qrcode$decoder$Mode[Mode.HANZI.ordinal()] = 10;
-            } catch (NoSuchFieldError unused10) {
-            }
-        }
-    }
-
-    private static void decodeHanziSegment(BitSource bitSource, StringBuilder sb, int i) throws FormatException {
-        if (i * 13 > bitSource.available()) {
+    private static void decodeHanziSegment(BitSource bits, StringBuilder result, int count) throws FormatException {
+        int i;
+        if (count * 13 > bits.available()) {
             throw FormatException.getFormatInstance();
         }
-        byte[] bArr = new byte[i * 2];
-        int i2 = 0;
-        while (i > 0) {
-            int readBits = bitSource.readBits(13);
-            int i3 = (readBits % 96) | ((readBits / 96) << 8);
-            int i4 = i3 + (i3 < 2560 ? 41377 : 42657);
-            bArr[i2] = (byte) ((i4 >> 8) & 255);
-            bArr[i2 + 1] = (byte) (i4 & 255);
-            i2 += 2;
-            i--;
+        byte[] buffer = new byte[count * 2];
+        int offset = 0;
+        while (count > 0) {
+            int twoBytes = bits.readBits(13);
+            int assembledTwoBytes = ((twoBytes / 96) << 8) | (twoBytes % 96);
+            if (assembledTwoBytes < 2560) {
+                i = 41377;
+            } else {
+                i = 42657;
+            }
+            int assembledTwoBytes2 = assembledTwoBytes + i;
+            buffer[offset] = (byte) ((assembledTwoBytes2 >> 8) & 255);
+            buffer[offset + 1] = (byte) (assembledTwoBytes2 & 255);
+            offset += 2;
+            count--;
         }
         try {
-            sb.append(new String(bArr, "GB2312"));
-        } catch (UnsupportedEncodingException unused) {
+            result.append(new String(buffer, StringUtils.GB2312));
+        } catch (UnsupportedEncodingException e) {
             throw FormatException.getFormatInstance();
         }
     }
 
-    private static void decodeKanjiSegment(BitSource bitSource, StringBuilder sb, int i) throws FormatException {
-        if (i * 13 > bitSource.available()) {
+    private static void decodeKanjiSegment(BitSource bits, StringBuilder result, int count) throws FormatException {
+        int i;
+        if (count * 13 > bits.available()) {
             throw FormatException.getFormatInstance();
         }
-        byte[] bArr = new byte[i * 2];
-        int i2 = 0;
-        while (i > 0) {
-            int readBits = bitSource.readBits(13);
-            int i3 = (readBits % 192) | ((readBits / 192) << 8);
-            int i4 = i3 + (i3 < 7936 ? 33088 : 49472);
-            bArr[i2] = (byte) (i4 >> 8);
-            bArr[i2 + 1] = (byte) i4;
-            i2 += 2;
-            i--;
+        byte[] buffer = new byte[count * 2];
+        int offset = 0;
+        while (count > 0) {
+            int twoBytes = bits.readBits(13);
+            int assembledTwoBytes = ((twoBytes / PsExtractor.AUDIO_STREAM) << 8) | (twoBytes % PsExtractor.AUDIO_STREAM);
+            if (assembledTwoBytes < 7936) {
+                i = 33088;
+            } else {
+                i = 49472;
+            }
+            int assembledTwoBytes2 = assembledTwoBytes + i;
+            buffer[offset] = (byte) (assembledTwoBytes2 >> 8);
+            buffer[offset + 1] = (byte) assembledTwoBytes2;
+            offset += 2;
+            count--;
         }
         try {
-            sb.append(new String(bArr, "SJIS"));
-        } catch (UnsupportedEncodingException unused) {
+            result.append(new String(buffer, StringUtils.SHIFT_JIS));
+        } catch (UnsupportedEncodingException e) {
             throw FormatException.getFormatInstance();
         }
     }
 
-    private static void decodeByteSegment(BitSource bitSource, StringBuilder sb, int i, CharacterSetECI characterSetECI, Collection<byte[]> collection, Map<DecodeHintType, ?> map) throws FormatException {
-        String str;
-        if (i * 8 > bitSource.available()) {
+    private static void decodeByteSegment(BitSource bits, StringBuilder result, int count, CharacterSetECI currentCharacterSetECI, Collection<byte[]> byteSegments, Map<DecodeHintType, ?> hints) throws FormatException {
+        String encoding;
+        if (count * 8 > bits.available()) {
             throw FormatException.getFormatInstance();
         }
-        byte[] bArr = new byte[i];
-        for (int i2 = 0; i2 < i; i2++) {
-            bArr[i2] = (byte) bitSource.readBits(8);
+        byte[] readBytes = new byte[count];
+        for (int i = 0; i < count; i++) {
+            readBytes[i] = (byte) bits.readBits(8);
         }
-        if (characterSetECI == null) {
-            str = StringUtils.guessEncoding(bArr, map);
+        if (currentCharacterSetECI == null) {
+            encoding = StringUtils.guessEncoding(readBytes, hints);
         } else {
-            str = characterSetECI.name();
+            encoding = currentCharacterSetECI.name();
         }
         try {
-            sb.append(new String(bArr, str));
-            collection.add(bArr);
-        } catch (UnsupportedEncodingException unused) {
+            result.append(new String(readBytes, encoding));
+            byteSegments.add(readBytes);
+        } catch (UnsupportedEncodingException e) {
             throw FormatException.getFormatInstance();
         }
     }
 
-    private static char toAlphaNumericChar(int i) throws FormatException {
+    private static char toAlphaNumericChar(int value) throws FormatException {
         char[] cArr = ALPHANUMERIC_CHARS;
-        if (i >= cArr.length) {
+        if (value >= cArr.length) {
             throw FormatException.getFormatInstance();
         }
-        return cArr[i];
+        return cArr[value];
     }
 
-    private static void decodeAlphanumericSegment(BitSource bitSource, StringBuilder sb, int i, boolean z) throws FormatException {
-        while (i > 1) {
-            if (bitSource.available() < 11) {
+    private static void decodeAlphanumericSegment(BitSource bits, StringBuilder result, int count, boolean fc1InEffect) throws FormatException {
+        int start = result.length();
+        while (count > 1) {
+            if (bits.available() < 11) {
                 throw FormatException.getFormatInstance();
             }
-            int readBits = bitSource.readBits(11);
-            sb.append(toAlphaNumericChar(readBits / 45));
-            sb.append(toAlphaNumericChar(readBits % 45));
-            i -= 2;
+            int nextTwoCharsBits = bits.readBits(11);
+            result.append(toAlphaNumericChar(nextTwoCharsBits / 45));
+            result.append(toAlphaNumericChar(nextTwoCharsBits % 45));
+            count -= 2;
         }
-        if (i == 1) {
-            if (bitSource.available() < 6) {
+        if (count == 1) {
+            if (bits.available() < 6) {
                 throw FormatException.getFormatInstance();
             }
-            sb.append(toAlphaNumericChar(bitSource.readBits(6)));
+            result.append(toAlphaNumericChar(bits.readBits(6)));
         }
-        if (z) {
-            for (int length = sb.length(); length < sb.length(); length++) {
-                if (sb.charAt(length) == '%') {
-                    if (length < sb.length() - 1) {
-                        int i2 = length + 1;
-                        if (sb.charAt(i2) == '%') {
-                            sb.deleteCharAt(i2);
-                        }
+        if (fc1InEffect) {
+            for (int i = start; i < result.length(); i++) {
+                if (result.charAt(i) == '%') {
+                    if (i < result.length() - 1 && result.charAt(i + 1) == '%') {
+                        result.deleteCharAt(i + 1);
+                    } else {
+                        result.setCharAt(i, (char) 29);
                     }
-                    sb.setCharAt(length, (char) 29);
                 }
             }
         }
     }
 
-    private static void decodeNumericSegment(BitSource bitSource, StringBuilder sb, int i) throws FormatException {
-        while (i >= 3) {
-            if (bitSource.available() < 10) {
+    private static void decodeNumericSegment(BitSource bits, StringBuilder result, int count) throws FormatException {
+        while (count >= 3) {
+            if (bits.available() < 10) {
                 throw FormatException.getFormatInstance();
             }
-            int readBits = bitSource.readBits(10);
-            if (readBits >= 1000) {
+            int threeDigitsBits = bits.readBits(10);
+            if (threeDigitsBits >= 1000) {
                 throw FormatException.getFormatInstance();
             }
-            sb.append(toAlphaNumericChar(readBits / 100));
-            sb.append(toAlphaNumericChar((readBits / 10) % 10));
-            sb.append(toAlphaNumericChar(readBits % 10));
-            i -= 3;
+            result.append(toAlphaNumericChar(threeDigitsBits / 100));
+            result.append(toAlphaNumericChar((threeDigitsBits / 10) % 10));
+            result.append(toAlphaNumericChar(threeDigitsBits % 10));
+            count -= 3;
         }
-        if (i == 2) {
-            if (bitSource.available() < 7) {
+        if (count == 2) {
+            if (bits.available() < 7) {
                 throw FormatException.getFormatInstance();
             }
-            int readBits2 = bitSource.readBits(7);
-            if (readBits2 >= 100) {
+            int twoDigitsBits = bits.readBits(7);
+            if (twoDigitsBits >= 100) {
                 throw FormatException.getFormatInstance();
             }
-            sb.append(toAlphaNumericChar(readBits2 / 10));
-            sb.append(toAlphaNumericChar(readBits2 % 10));
-        } else if (i != 1) {
-        } else {
-            if (bitSource.available() < 4) {
+            result.append(toAlphaNumericChar(twoDigitsBits / 10));
+            result.append(toAlphaNumericChar(twoDigitsBits % 10));
+        } else if (count == 1) {
+            if (bits.available() < 4) {
                 throw FormatException.getFormatInstance();
             }
-            int readBits3 = bitSource.readBits(4);
-            if (readBits3 >= 10) {
+            int digitBits = bits.readBits(4);
+            if (digitBits >= 10) {
                 throw FormatException.getFormatInstance();
             }
-            sb.append(toAlphaNumericChar(readBits3));
+            result.append(toAlphaNumericChar(digitBits));
         }
     }
 
-    private static int parseECIValue(BitSource bitSource) throws FormatException {
-        int readBits = bitSource.readBits(8);
-        if ((readBits & ConnectionsManager.RequestFlagNeedQuickAck) == 0) {
-            return readBits & 127;
+    private static int parseECIValue(BitSource bits) throws FormatException {
+        int firstByte = bits.readBits(8);
+        if ((firstByte & 128) == 0) {
+            return firstByte & 127;
         }
-        if ((readBits & 192) == 128) {
-            return bitSource.readBits(8) | ((readBits & 63) << 8);
+        if ((firstByte & PsExtractor.AUDIO_STREAM) == 128) {
+            int secondByte = bits.readBits(8);
+            return ((firstByte & 63) << 8) | secondByte;
+        } else if ((firstByte & 224) == 192) {
+            int secondThirdBytes = bits.readBits(16);
+            return ((firstByte & 31) << 16) | secondThirdBytes;
+        } else {
+            throw FormatException.getFormatInstance();
         }
-        if ((readBits & 224) == 192) {
-            return bitSource.readBits(16) | ((readBits & 31) << 16);
-        }
-        throw FormatException.getFormatInstance();
     }
 }

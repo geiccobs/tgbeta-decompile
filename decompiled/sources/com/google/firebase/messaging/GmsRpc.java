@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
 import com.google.android.gms.cloudmessaging.Rpc;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
@@ -20,7 +21,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class GmsRpc {
     private final FirebaseApp app;
     private final FirebaseInstallationsApi firebaseInstallations;
@@ -65,9 +66,36 @@ public class GmsRpc {
     private String getHashedFirebaseAppName() {
         try {
             return base64UrlSafe(MessageDigest.getInstance("SHA-1").digest(this.app.getName().getBytes()));
-        } catch (NoSuchAlgorithmException unused) {
+        } catch (NoSuchAlgorithmException e) {
             return "[HASH-ERROR]";
         }
+    }
+
+    private String handleResponse(Bundle bundle) throws IOException {
+        if (bundle == null) {
+            throw new IOException("SERVICE_NOT_AVAILABLE");
+        }
+        String string = bundle.getString("registration_id");
+        if (string != null) {
+            return string;
+        }
+        String string2 = bundle.getString("unregistered");
+        if (string2 != null) {
+            return string2;
+        }
+        String string3 = bundle.getString(Constants.IPC_BUNDLE_KEY_SEND_ERROR);
+        if ("RST".equals(string3)) {
+            throw new IOException("INSTANCE_ID_RESET");
+        }
+        if (string3 != null) {
+            throw new IOException(string3);
+        }
+        String valueOf = String.valueOf(bundle);
+        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 21);
+        sb.append("Unexpected response: ");
+        sb.append(valueOf);
+        Log.w(Constants.TAG, sb.toString(), new Throwable());
+        throw new IOException("SERVICE_NOT_AVAILABLE");
     }
 
     public static boolean isErrorMessageForRetryableError(String str) {
@@ -91,10 +119,10 @@ public class GmsRpc {
             if (!TextUtils.isEmpty(token)) {
                 bundle.putString("Goog-Firebase-Installations-Auth", token);
             } else {
-                Log.w("FirebaseMessaging", "FIS auth token is empty");
+                Log.w(Constants.TAG, "FIS auth token is empty");
             }
         } catch (InterruptedException | ExecutionException e) {
-            Log.e("FirebaseMessaging", "Failed to get FIS auth token", e);
+            Log.e(Constants.TAG, "Failed to get FIS auth token", e);
         }
         bundle.putString("cliv", "fcm-22.0.0");
         HeartBeatInfo heartBeatInfo = this.heartbeatInfo.get();
@@ -109,6 +137,12 @@ public class GmsRpc {
     private Task<Bundle> startRpc(String str, String str2, String str3, Bundle bundle) {
         setDefaultAttributesToBundle(str, str2, str3, bundle);
         return this.rpc.send(bundle);
+    }
+
+    public Task<?> deleteToken(String str) {
+        Bundle bundle = new Bundle();
+        bundle.putString("delete", IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE);
+        return extractResponseWhenComplete(startRpc(str, Metadata.getDefaultSenderId(this.app), "*", bundle));
     }
 
     public Task<String> getToken(String str) {
@@ -131,35 +165,8 @@ public class GmsRpc {
         Bundle bundle = new Bundle();
         String valueOf = String.valueOf(str3);
         bundle.putString("gcm.topic", valueOf.length() != 0 ? "/topics/".concat(valueOf) : new String("/topics/"));
-        bundle.putString("delete", "1");
+        bundle.putString("delete", IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE);
         String valueOf2 = String.valueOf(str3);
         return extractResponseWhenComplete(startRpc(str, str2, valueOf2.length() != 0 ? "/topics/".concat(valueOf2) : new String("/topics/"), bundle));
-    }
-
-    private String handleResponse(Bundle bundle) throws IOException {
-        if (bundle == null) {
-            throw new IOException("SERVICE_NOT_AVAILABLE");
-        }
-        String string = bundle.getString("registration_id");
-        if (string != null) {
-            return string;
-        }
-        String string2 = bundle.getString("unregistered");
-        if (string2 != null) {
-            return string2;
-        }
-        String string3 = bundle.getString("error");
-        if ("RST".equals(string3)) {
-            throw new IOException("INSTANCE_ID_RESET");
-        }
-        if (string3 != null) {
-            throw new IOException(string3);
-        }
-        String valueOf = String.valueOf(bundle);
-        StringBuilder sb = new StringBuilder(valueOf.length() + 21);
-        sb.append("Unexpected response: ");
-        sb.append(valueOf);
-        Log.w("FirebaseMessaging", sb.toString(), new Throwable());
-        throw new IOException("SERVICE_NOT_AVAILABLE");
     }
 }

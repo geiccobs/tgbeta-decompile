@@ -1,7 +1,8 @@
 package com.google.zxing;
 
+import com.google.zxing.common.BitArray;
 import com.google.zxing.common.BitMatrix;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class BinaryBitmap {
     private final Binarizer binarizer;
     private BitMatrix matrix;
@@ -13,6 +14,18 @@ public final class BinaryBitmap {
         this.binarizer = binarizer;
     }
 
+    public int getWidth() {
+        return this.binarizer.getWidth();
+    }
+
+    public int getHeight() {
+        return this.binarizer.getHeight();
+    }
+
+    public BitArray getBlackRow(int y, BitArray row) throws NotFoundException {
+        return this.binarizer.getBlackRow(y, row);
+    }
+
     public BitMatrix getBlackMatrix() throws NotFoundException {
         if (this.matrix == null) {
             this.matrix = this.binarizer.getBlackMatrix();
@@ -20,10 +33,33 @@ public final class BinaryBitmap {
         return this.matrix;
     }
 
+    public boolean isCropSupported() {
+        return this.binarizer.getLuminanceSource().isCropSupported();
+    }
+
+    public BinaryBitmap crop(int left, int top, int width, int height) {
+        LuminanceSource newSource = this.binarizer.getLuminanceSource().crop(left, top, width, height);
+        return new BinaryBitmap(this.binarizer.createBinarizer(newSource));
+    }
+
+    public boolean isRotateSupported() {
+        return this.binarizer.getLuminanceSource().isRotateSupported();
+    }
+
+    public BinaryBitmap rotateCounterClockwise() {
+        LuminanceSource newSource = this.binarizer.getLuminanceSource().rotateCounterClockwise();
+        return new BinaryBitmap(this.binarizer.createBinarizer(newSource));
+    }
+
+    public BinaryBitmap rotateCounterClockwise45() {
+        LuminanceSource newSource = this.binarizer.getLuminanceSource().rotateCounterClockwise45();
+        return new BinaryBitmap(this.binarizer.createBinarizer(newSource));
+    }
+
     public String toString() {
         try {
             return getBlackMatrix().toString();
-        } catch (NotFoundException unused) {
+        } catch (NotFoundException e) {
             return "";
         }
     }

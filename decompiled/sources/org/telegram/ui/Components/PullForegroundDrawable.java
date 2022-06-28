@@ -18,8 +18,13 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class PullForegroundDrawable {
+    public static final float SNAP_HEIGHT = 0.85f;
+    public static final float endPullParallax = 0.25f;
+    public static final long minPullingTime = 200;
+    public static final float startPullOverScroll = 0.2f;
+    public static final float startPullParallax = 0.45f;
     private ValueAnimator accentRevalAnimatorIn;
     private ValueAnimator accentRevalAnimatorOut;
     private boolean animateOut;
@@ -37,6 +42,7 @@ public class PullForegroundDrawable {
     public float outCx;
     public float outCy;
     public float outImageSize;
+    public float outOverScroll;
     public float outProgress;
     public float outRadius;
     public float pullProgress;
@@ -47,32 +53,33 @@ public class PullForegroundDrawable {
     private ValueAnimator textIntAnimator;
     private ValueAnimator textSwipingAnimator;
     private final Paint tooltipTextPaint;
+    private float touchSlop;
     private boolean willDraw;
-    private String backgroundColorKey = "chats_archivePullDownBackground";
-    private String backgroundActiveColorKey = "chats_archivePullDownBackgroundActive";
-    private String avatarBackgroundColorKey = "avatar_backgroundArchivedHidden";
+    private String backgroundColorKey = Theme.key_chats_archivePullDownBackground;
+    private String backgroundActiveColorKey = Theme.key_chats_archivePullDownBackgroundActive;
+    private String avatarBackgroundColorKey = Theme.key_avatar_backgroundArchivedHidden;
     private boolean changeAvatarColor = true;
     private final Paint paintSecondary = new Paint(1);
     private final Paint paintWhite = new Paint(1);
     private final Paint paintBackgroundAccent = new Paint(1);
     private final Paint backgroundPaint = new Paint();
     private final RectF rectF = new RectF();
-    private final ArrowDrawable arrowDrawable = new ArrowDrawable(this);
+    private final ArrowDrawable arrowDrawable = new ArrowDrawable();
     private final Path circleClipPath = new Path();
     private float textSwappingProgress = 1.0f;
     private float arrowRotateProgress = 1.0f;
     private float accentRevalProgress = 1.0f;
     private float accentRevalProgressOut = 1.0f;
-    private ValueAnimator.AnimatorUpdateListener textSwappingUpdateListener = new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda0
+    private ValueAnimator.AnimatorUpdateListener textSwappingUpdateListener = new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda2
         @Override // android.animation.ValueAnimator.AnimatorUpdateListener
         public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-            PullForegroundDrawable.this.lambda$new$0(valueAnimator);
+            PullForegroundDrawable.this.m2918lambda$new$0$orgtelegramuiComponentsPullForegroundDrawable(valueAnimator);
         }
     };
-    private ValueAnimator.AnimatorUpdateListener textInUpdateListener = new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda5
+    private ValueAnimator.AnimatorUpdateListener textInUpdateListener = new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda3
         @Override // android.animation.ValueAnimator.AnimatorUpdateListener
         public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-            PullForegroundDrawable.this.lambda$new$1(valueAnimator);
+            PullForegroundDrawable.this.m2919lambda$new$1$orgtelegramuiComponentsPullForegroundDrawable(valueAnimator);
         }
     };
     Runnable textInRunnable = new Runnable() { // from class: org.telegram.ui.Components.PullForegroundDrawable.1
@@ -91,40 +98,46 @@ public class PullForegroundDrawable {
         }
     };
     boolean wasSendCallback = false;
-    private float touchSlop = ViewConfiguration.get(ApplicationLoader.applicationContext).getScaledTouchSlop();
 
-    protected float getViewOffset() {
-        throw null;
-    }
-
-    public /* synthetic */ void lambda$new$0(ValueAnimator valueAnimator) {
-        this.textSwappingProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$new$0$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2918lambda$new$0$orgtelegramuiComponentsPullForegroundDrawable(ValueAnimator animation) {
+        this.textSwappingProgress = ((Float) animation.getAnimatedValue()).floatValue();
         View view = this.cell;
         if (view != null) {
             view.invalidate();
         }
     }
 
-    public /* synthetic */ void lambda$new$1(ValueAnimator valueAnimator) {
-        this.textInProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$new$1$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2919lambda$new$1$orgtelegramuiComponentsPullForegroundDrawable(ValueAnimator animation) {
+        this.textInProgress = ((Float) animation.getAnimatedValue()).floatValue();
         View view = this.cell;
         if (view != null) {
             view.invalidate();
         }
     }
 
-    public PullForegroundDrawable(String str, String str2) {
+    public PullForegroundDrawable(String pullText, String releaseText) {
         TextPaint textPaint = new TextPaint(1);
         this.tooltipTextPaint = textPaint;
         textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTextSize(AndroidUtilities.dp(16.0f));
-        this.pullTooltip = str;
-        this.releaseTooltip = str2;
+        ViewConfiguration vc = ViewConfiguration.get(ApplicationLoader.applicationContext);
+        this.touchSlop = vc.getScaledTouchSlop();
+        this.pullTooltip = pullText;
+        this.releaseTooltip = releaseText;
     }
 
     public static int getMaxOverscroll() {
         return AndroidUtilities.dp(72.0f);
+    }
+
+    public void setColors(String background, String active) {
+        this.backgroundColorKey = background;
+        this.backgroundActiveColorKey = active;
+        this.changeAvatarColor = false;
+        updateColors();
     }
 
     public void setCell(View view) {
@@ -133,17 +146,17 @@ public class PullForegroundDrawable {
     }
 
     public void updateColors() {
-        int color = Theme.getColor(this.backgroundColorKey);
+        int backgroundColor = Theme.getColor(this.backgroundColorKey);
         this.tooltipTextPaint.setColor(-1);
         this.paintWhite.setColor(-1);
         this.paintSecondary.setColor(ColorUtils.setAlphaComponent(-1, 100));
-        this.backgroundPaint.setColor(color);
-        this.arrowDrawable.setColor(color);
+        this.backgroundPaint.setColor(backgroundColor);
+        this.arrowDrawable.setColor(backgroundColor);
         this.paintBackgroundAccent.setColor(Theme.getColor(this.avatarBackgroundColorKey));
     }
 
-    public void setListView(RecyclerListView recyclerListView) {
-        this.listView = recyclerListView;
+    public void setListView(RecyclerListView listView) {
+        this.listView = listView;
     }
 
     public void drawOverScroll(Canvas canvas) {
@@ -154,234 +167,215 @@ public class PullForegroundDrawable {
         draw(canvas, false);
     }
 
-    public void draw(Canvas canvas, boolean z) {
-        int i;
-        float f;
-        int i2;
-        int i3;
-        float f2;
-        int i4;
-        int i5;
-        int i6;
-        float f3;
-        float f4;
+    protected float getViewOffset() {
+        return 0.0f;
+    }
+
+    public void draw(Canvas canvas, boolean header) {
+        int overscroll;
+        int radius;
+        float startPullProgress;
+        float bounceP;
+        int startPadding;
+        int startPadding2;
+        int radius2;
         if (!this.willDraw || this.isOut || this.cell == null || this.listView == null) {
             return;
         }
-        int dp = AndroidUtilities.dp(28.0f);
-        int dp2 = AndroidUtilities.dp(8.0f);
-        int dp3 = AndroidUtilities.dp(9.0f);
-        int dp4 = AndroidUtilities.dp(18.0f);
-        int viewOffset = (int) getViewOffset();
-        float f5 = this.pullProgress;
-        int height = (int) (this.cell.getHeight() * f5);
-        float f6 = this.bounceIn ? (this.bounceProgress * 0.07f) - 0.05f : this.bounceProgress * 0.02f;
-        updateTextProgress(f5);
-        float f7 = this.outProgress * 2.0f;
-        if (f7 > 1.0f) {
-            f7 = 1.0f;
+        int startPadding3 = AndroidUtilities.dp(28.0f);
+        int smallMargin = AndroidUtilities.dp(8.0f);
+        int radius3 = AndroidUtilities.dp(9.0f);
+        int diameter = AndroidUtilities.dp(18.0f);
+        int overscroll2 = (int) getViewOffset();
+        float f = this.pullProgress;
+        int visibleHeight = (int) (this.cell.getHeight() * f);
+        float bounceP2 = this.bounceIn ? (this.bounceProgress * 0.07f) - 0.05f : this.bounceProgress * 0.02f;
+        updateTextProgress(f);
+        float outProgressHalf = this.outProgress * 2.0f;
+        if (outProgressHalf > 1.0f) {
+            outProgressHalf = 1.0f;
         }
-        float f8 = this.outCx;
-        float f9 = this.outCy;
-        if (z) {
-            f9 += viewOffset;
+        float cX = this.outCx;
+        float cY = this.outCy;
+        if (header) {
+            cY += overscroll2;
         }
-        int i7 = dp + dp3;
-        int measuredHeight = (this.cell.getMeasuredHeight() - dp2) - dp3;
-        if (z) {
-            measuredHeight += viewOffset;
+        int smallCircleX = startPadding3 + radius3;
+        int smallCircleY = (this.cell.getMeasuredHeight() - smallMargin) - radius3;
+        if (header) {
+            smallCircleY += overscroll2;
         }
-        int i8 = dp4 + (dp2 * 2);
-        if (height > i8) {
-            i = dp3;
-            f = 1.0f;
-        } else {
-            i = dp3;
-            f = height / i8;
-        }
+        float startPullProgress2 = visibleHeight > diameter + (smallMargin * 2) ? 1.0f : visibleHeight / (diameter + (smallMargin * 2));
         canvas.save();
-        if (z) {
-            i3 = dp4;
-            i2 = viewOffset;
-            canvas.clipRect(0, 0, this.listView.getMeasuredWidth(), viewOffset + 1);
+        if (!header) {
+            radius = radius3;
+            overscroll = overscroll2;
         } else {
-            i3 = dp4;
-            i2 = viewOffset;
+            radius = radius3;
+            overscroll = overscroll2;
+            canvas.clipRect(0, 0, this.listView.getMeasuredWidth(), overscroll2 + 1);
         }
         if (this.outProgress == 0.0f) {
-            if (this.accentRevalProgress != 1.0f && this.accentRevalProgressOut != 1.0f) {
+            if (this.accentRevalProgress == 1.0f || this.accentRevalProgressOut == 1.0f) {
+                startPadding = startPadding3;
+                bounceP = bounceP2;
+                startPullProgress = startPullProgress2;
+            } else {
                 canvas.drawPaint(this.backgroundPaint);
+                startPadding = startPadding3;
+                bounceP = bounceP2;
+                startPullProgress = startPullProgress2;
             }
-            i4 = dp2;
-            f2 = f6;
         } else {
-            float f10 = this.outRadius;
-            float f11 = this.outRadius;
-            i4 = dp2;
-            float width = f10 + ((this.cell.getWidth() - f11) * (1.0f - this.outProgress)) + (f11 * f6);
+            float f2 = this.outRadius;
+            float f3 = this.outRadius;
+            startPadding = startPadding3;
+            float outBackgroundRadius = f2 + ((this.cell.getWidth() - f3) * (1.0f - this.outProgress)) + (f3 * bounceP2);
             if (this.accentRevalProgress != 1.0f && this.accentRevalProgressOut != 1.0f) {
-                canvas.drawCircle(f8, f9, width, this.backgroundPaint);
+                canvas.drawCircle(cX, cY, outBackgroundRadius, this.backgroundPaint);
             }
             this.circleClipPath.reset();
-            f2 = f6;
-            this.rectF.set(f8 - width, f9 - width, f8 + width, width + f9);
+            bounceP = bounceP2;
+            startPullProgress = startPullProgress2;
+            this.rectF.set(cX - outBackgroundRadius, cY - outBackgroundRadius, cX + outBackgroundRadius, cY + outBackgroundRadius);
             this.circleClipPath.addOval(this.rectF, Path.Direction.CW);
             canvas.clipPath(this.circleClipPath);
         }
         if (this.animateToColorize) {
             if (this.accentRevalProgressOut > this.accentRevalProgress) {
                 canvas.save();
-                float f12 = i7;
-                float f13 = this.outProgress;
-                float f14 = measuredHeight;
-                canvas.translate((f8 - f12) * f13, (f9 - f14) * f13);
-                canvas.drawCircle(f12, f14, this.cell.getWidth() * this.accentRevalProgressOut, this.backgroundPaint);
+                float f4 = this.outProgress;
+                canvas.translate((cX - smallCircleX) * f4, (cY - smallCircleY) * f4);
+                canvas.drawCircle(smallCircleX, smallCircleY, this.cell.getWidth() * this.accentRevalProgressOut, this.backgroundPaint);
                 canvas.restore();
             }
             if (this.accentRevalProgress > 0.0f) {
                 canvas.save();
-                float f15 = i7;
-                float f16 = this.outProgress;
-                float f17 = measuredHeight;
-                canvas.translate((f8 - f15) * f16, (f9 - f17) * f16);
-                canvas.drawCircle(f15, f17, this.cell.getWidth() * this.accentRevalProgress, this.paintBackgroundAccent);
+                float f5 = this.outProgress;
+                canvas.translate((cX - smallCircleX) * f5, (cY - smallCircleY) * f5);
+                canvas.drawCircle(smallCircleX, smallCircleY, this.cell.getWidth() * this.accentRevalProgress, this.paintBackgroundAccent);
                 canvas.restore();
             }
         } else {
             if (this.accentRevalProgress > this.accentRevalProgressOut) {
                 canvas.save();
-                float f18 = i7;
-                float f19 = this.outProgress;
-                float f20 = measuredHeight;
-                canvas.translate((f8 - f18) * f19, (f9 - f20) * f19);
-                canvas.drawCircle(f18, f20, this.cell.getWidth() * this.accentRevalProgress, this.paintBackgroundAccent);
+                float f6 = this.outProgress;
+                canvas.translate((cX - smallCircleX) * f6, (cY - smallCircleY) * f6);
+                canvas.drawCircle(smallCircleX, smallCircleY, this.cell.getWidth() * this.accentRevalProgress, this.paintBackgroundAccent);
                 canvas.restore();
             }
             if (this.accentRevalProgressOut > 0.0f) {
                 canvas.save();
-                float f21 = i7;
-                float f22 = this.outProgress;
-                float f23 = measuredHeight;
-                canvas.translate((f8 - f21) * f22, (f9 - f23) * f22);
-                canvas.drawCircle(f21, f23, this.cell.getWidth() * this.accentRevalProgressOut, this.backgroundPaint);
+                float f7 = this.outProgress;
+                canvas.translate((cX - smallCircleX) * f7, (cY - smallCircleY) * f7);
+                canvas.drawCircle(smallCircleX, smallCircleY, this.cell.getWidth() * this.accentRevalProgressOut, this.backgroundPaint);
                 canvas.restore();
             }
         }
-        if (height > i8) {
-            this.paintSecondary.setAlpha((int) ((1.0f - f7) * 0.4f * f * 255.0f));
-            if (z) {
-                i5 = i4;
-                this.rectF.set(dp, i5, dp + i3, i5 + i2 + i);
-            } else {
-                i5 = i4;
-                this.rectF.set(dp, ((this.cell.getHeight() - height) + i5) - i2, dp + i3, this.cell.getHeight() - i5);
-            }
-            i6 = i;
-            float f24 = i6;
-            canvas.drawRoundRect(this.rectF, f24, f24, this.paintSecondary);
+        if (visibleHeight <= (smallMargin * 2) + diameter) {
+            radius2 = radius;
+            startPadding2 = startPadding;
         } else {
-            i6 = i;
-            i5 = i4;
+            this.paintSecondary.setAlpha((int) ((1.0f - outProgressHalf) * 0.4f * startPullProgress * 255.0f));
+            if (header) {
+                startPadding2 = startPadding;
+                this.rectF.set(startPadding2, smallMargin, startPadding2 + diameter, smallMargin + overscroll + radius);
+            } else {
+                startPadding2 = startPadding;
+                this.rectF.set(startPadding2, ((this.cell.getHeight() - visibleHeight) + smallMargin) - overscroll, startPadding2 + diameter, this.cell.getHeight() - smallMargin);
+            }
+            radius2 = radius;
+            canvas.drawRoundRect(this.rectF, radius2, radius2, this.paintSecondary);
         }
-        if (z) {
+        if (header) {
             canvas.restore();
             return;
         }
         if (this.outProgress == 0.0f) {
-            this.paintWhite.setAlpha((int) (f * 255.0f));
-            float f25 = i7;
-            float f26 = measuredHeight;
-            canvas.drawCircle(f25, f26, i6, this.paintWhite);
-            int intrinsicHeight = this.arrowDrawable.getIntrinsicHeight();
-            int intrinsicWidth = this.arrowDrawable.getIntrinsicWidth() >> 1;
-            f3 = f9;
-            int i9 = intrinsicHeight >> 1;
-            this.arrowDrawable.setBounds(i7 - intrinsicWidth, measuredHeight - i9, intrinsicWidth + i7, measuredHeight + i9);
-            float f27 = 1.0f - this.arrowRotateProgress;
-            if (f27 < 0.0f) {
-                f27 = 0.0f;
+            this.paintWhite.setAlpha((int) (startPullProgress * 255.0f));
+            canvas.drawCircle(smallCircleX, smallCircleY, radius2, this.paintWhite);
+            int ih = this.arrowDrawable.getIntrinsicHeight();
+            int iw = this.arrowDrawable.getIntrinsicWidth();
+            this.arrowDrawable.setBounds(smallCircleX - (iw >> 1), smallCircleY - (ih >> 1), smallCircleX + (iw >> 1), smallCircleY + (ih >> 1));
+            float rotateProgress = 1.0f - this.arrowRotateProgress;
+            if (rotateProgress < 0.0f) {
+                rotateProgress = 0.0f;
             }
-            float f28 = 1.0f - f27;
+            float rotateProgress2 = 1.0f - rotateProgress;
             canvas.save();
-            canvas.rotate(180.0f * f28, f25, f26);
-            canvas.translate(0.0f, (AndroidUtilities.dpf2(1.0f) * 1.0f) - f28);
+            canvas.rotate(180.0f * rotateProgress2, smallCircleX, smallCircleY);
+            canvas.translate(0.0f, (AndroidUtilities.dpf2(1.0f) * 1.0f) - rotateProgress2);
             this.arrowDrawable.setColor(this.animateToColorize ? this.paintBackgroundAccent.getColor() : Theme.getColor(this.backgroundColorKey));
             this.arrowDrawable.draw(canvas);
             canvas.restore();
-        } else {
-            f3 = f9;
         }
         if (this.pullProgress > 0.0f) {
             textIn();
         }
-        float height2 = (this.cell.getHeight() - (i8 / 2.0f)) + AndroidUtilities.dp(6.0f);
-        this.tooltipTextPaint.setAlpha((int) (this.textSwappingProgress * 255.0f * f * this.textInProgress));
-        float width2 = (this.cell.getWidth() / 2.0f) - AndroidUtilities.dp(2.0f);
-        float f29 = this.textSwappingProgress;
-        if (f29 <= 0.0f || f29 >= 1.0f) {
-            f4 = 1.0f;
-        } else {
+        float textY = (this.cell.getHeight() - (((smallMargin * 2) + diameter) / 2.0f)) + AndroidUtilities.dp(6.0f);
+        this.tooltipTextPaint.setAlpha((int) (this.textSwappingProgress * 255.0f * startPullProgress * this.textInProgress));
+        float textCx = (this.cell.getWidth() / 2.0f) - AndroidUtilities.dp(2.0f);
+        float f8 = this.textSwappingProgress;
+        if (f8 > 0.0f && f8 < 1.0f) {
             canvas.save();
-            float f30 = (this.textSwappingProgress * 0.2f) + 0.8f;
-            f4 = 1.0f;
-            canvas.scale(f30, f30, width2, (AndroidUtilities.dp(16.0f) * (1.0f - this.textSwappingProgress)) + height2);
+            float scale = (this.textSwappingProgress * 0.2f) + 0.8f;
+            canvas.scale(scale, scale, textCx, (AndroidUtilities.dp(16.0f) * (1.0f - this.textSwappingProgress)) + textY);
         }
-        canvas.drawText(this.pullTooltip, width2, (AndroidUtilities.dp(8.0f) * (f4 - this.textSwappingProgress)) + height2, this.tooltipTextPaint);
-        float f31 = this.textSwappingProgress;
-        if (f31 > 0.0f && f31 < f4) {
+        canvas.drawText(this.pullTooltip, textCx, (AndroidUtilities.dp(8.0f) * (1.0f - this.textSwappingProgress)) + textY, this.tooltipTextPaint);
+        float f9 = this.textSwappingProgress;
+        if (f9 > 0.0f && f9 < 1.0f) {
             canvas.restore();
         }
-        float f32 = this.textSwappingProgress;
-        if (f32 > 0.0f && f32 < f4) {
+        float f10 = this.textSwappingProgress;
+        if (f10 > 0.0f && f10 < 1.0f) {
             canvas.save();
-            float f33 = ((f4 - this.textSwappingProgress) * 0.1f) + 0.9f;
-            canvas.scale(f33, f33, width2, height2 - (AndroidUtilities.dp(8.0f) * this.textSwappingProgress));
+            float scale2 = ((1.0f - this.textSwappingProgress) * 0.1f) + 0.9f;
+            canvas.scale(scale2, scale2, textCx, textY - (AndroidUtilities.dp(8.0f) * this.textSwappingProgress));
         }
-        this.tooltipTextPaint.setAlpha((int) ((1.0f - this.textSwappingProgress) * 255.0f * f * this.textInProgress));
-        canvas.drawText(this.releaseTooltip, width2, height2 - (AndroidUtilities.dp(8.0f) * this.textSwappingProgress), this.tooltipTextPaint);
-        float f34 = this.textSwappingProgress;
-        if (f34 > 0.0f && f34 < 1.0f) {
+        this.tooltipTextPaint.setAlpha((int) ((1.0f - this.textSwappingProgress) * 255.0f * startPullProgress * this.textInProgress));
+        canvas.drawText(this.releaseTooltip, textCx, textY - (AndroidUtilities.dp(8.0f) * this.textSwappingProgress), this.tooltipTextPaint);
+        float f11 = this.textSwappingProgress;
+        if (f11 > 0.0f && f11 < 1.0f) {
             canvas.restore();
         }
         canvas.restore();
-        if (!this.changeAvatarColor || this.outProgress <= 0.0f) {
-            return;
+        if (this.changeAvatarColor && this.outProgress > 0.0f) {
+            canvas.save();
+            int iw2 = Theme.dialogs_archiveAvatarDrawable.getIntrinsicWidth();
+            int startCx = startPadding2 + radius2;
+            int startCy = (this.cell.getHeight() - smallMargin) - radius2;
+            float scaleStart = AndroidUtilities.dp(24.0f) / iw2;
+            float f12 = this.outProgress;
+            float scale3 = scaleStart + ((1.0f - scaleStart) * f12) + bounceP;
+            int smallMargin2 = (int) cX;
+            int x = (int) cY;
+            canvas.translate((startCx - cX) * (1.0f - f12), (startCy - cY) * (1.0f - f12));
+            canvas.scale(scale3, scale3, cX, cY);
+            Theme.dialogs_archiveAvatarDrawable.setProgress(0.0f);
+            if (!Theme.dialogs_archiveAvatarDrawableRecolored) {
+                Theme.dialogs_archiveAvatarDrawable.beginApplyLayerColors();
+                Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow1.**", Theme.getNonAnimatedColor(this.avatarBackgroundColorKey));
+                Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow2.**", Theme.getNonAnimatedColor(this.avatarBackgroundColorKey));
+                Theme.dialogs_archiveAvatarDrawable.commitApplyLayerColors();
+                Theme.dialogs_archiveAvatarDrawableRecolored = true;
+            }
+            Theme.dialogs_archiveAvatarDrawable.setBounds((int) (cX - (iw2 / 2.0f)), (int) (cY - (iw2 / 2.0f)), (int) ((iw2 / 2.0f) + cX), (int) ((iw2 / 2.0f) + cY));
+            Theme.dialogs_archiveAvatarDrawable.draw(canvas);
+            canvas.restore();
         }
-        canvas.save();
-        int intrinsicWidth2 = Theme.dialogs_archiveAvatarDrawable.getIntrinsicWidth();
-        int height3 = (this.cell.getHeight() - i5) - i6;
-        float f35 = intrinsicWidth2;
-        float dp5 = AndroidUtilities.dp(24.0f) / f35;
-        float f36 = this.outProgress;
-        float f37 = dp5 + ((1.0f - dp5) * f36) + f2;
-        canvas.translate((i7 - f8) * (1.0f - f36), (height3 - f3) * (1.0f - f36));
-        float f38 = f3;
-        canvas.scale(f37, f37, f8, f38);
-        Theme.dialogs_archiveAvatarDrawable.setProgress(0.0f);
-        if (!Theme.dialogs_archiveAvatarDrawableRecolored) {
-            Theme.dialogs_archiveAvatarDrawable.beginApplyLayerColors();
-            Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow1.**", Theme.getNonAnimatedColor(this.avatarBackgroundColorKey));
-            Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow2.**", Theme.getNonAnimatedColor(this.avatarBackgroundColorKey));
-            Theme.dialogs_archiveAvatarDrawable.commitApplyLayerColors();
-            Theme.dialogs_archiveAvatarDrawableRecolored = true;
-        }
-        float f39 = f35 / 2.0f;
-        Theme.dialogs_archiveAvatarDrawable.setBounds((int) (f8 - f39), (int) (f38 - f39), (int) (f8 + f39), (int) (f38 + f39));
-        Theme.dialogs_archiveAvatarDrawable.draw(canvas);
-        canvas.restore();
     }
 
-    private void updateTextProgress(float f) {
-        boolean z = f > 0.85f;
-        float f2 = 1.0f;
-        if (this.animateToEndText != z) {
-            this.animateToEndText = z;
+    private void updateTextProgress(float pullProgress) {
+        boolean endText = pullProgress > 0.85f;
+        float f = 1.0f;
+        if (this.animateToEndText != endText) {
+            this.animateToEndText = endText;
             if (this.textInProgress == 0.0f) {
                 ValueAnimator valueAnimator = this.textSwipingAnimator;
                 if (valueAnimator != null) {
                     valueAnimator.cancel();
                 }
-                this.textSwappingProgress = z ? 0.0f : 1.0f;
+                this.textSwappingProgress = endText ? 0.0f : 1.0f;
             } else {
                 ValueAnimator valueAnimator2 = this.textSwipingAnimator;
                 if (valueAnimator2 != null) {
@@ -389,7 +383,7 @@ public class PullForegroundDrawable {
                 }
                 float[] fArr = new float[2];
                 fArr[0] = this.textSwappingProgress;
-                fArr[1] = z ? 0.0f : 1.0f;
+                fArr[1] = endText ? 0.0f : 1.0f;
                 ValueAnimator ofFloat = ValueAnimator.ofFloat(fArr);
                 this.textSwipingAnimator = ofFloat;
                 ofFloat.addUpdateListener(this.textSwappingUpdateListener);
@@ -398,8 +392,8 @@ public class PullForegroundDrawable {
                 this.textSwipingAnimator.start();
             }
         }
-        if (z != this.arrowAnimateTo) {
-            this.arrowAnimateTo = z;
+        if (endText != this.arrowAnimateTo) {
+            this.arrowAnimateTo = endText;
             ValueAnimator valueAnimator3 = this.arrowRotateAnimator;
             if (valueAnimator3 != null) {
                 valueAnimator3.cancel();
@@ -407,15 +401,15 @@ public class PullForegroundDrawable {
             float[] fArr2 = new float[2];
             fArr2[0] = this.arrowRotateProgress;
             if (this.arrowAnimateTo) {
-                f2 = 0.0f;
+                f = 0.0f;
             }
-            fArr2[1] = f2;
+            fArr2[1] = f;
             ValueAnimator ofFloat2 = ValueAnimator.ofFloat(fArr2);
             this.arrowRotateAnimator = ofFloat2;
-            ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda2
+            ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda7
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator4) {
-                    PullForegroundDrawable.this.lambda$updateTextProgress$2(valueAnimator4);
+                    PullForegroundDrawable.this.m2923xbc2e1f31(valueAnimator4);
                 }
             });
             this.arrowRotateAnimator.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
@@ -424,18 +418,19 @@ public class PullForegroundDrawable {
         }
     }
 
-    public /* synthetic */ void lambda$updateTextProgress$2(ValueAnimator valueAnimator) {
-        this.arrowRotateProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$updateTextProgress$2$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2923xbc2e1f31(ValueAnimator animation) {
+        this.arrowRotateProgress = ((Float) animation.getAnimatedValue()).floatValue();
         View view = this.cell;
         if (view != null) {
             view.invalidate();
         }
     }
 
-    public void colorize(boolean z) {
-        if (this.animateToColorize != z) {
-            this.animateToColorize = z;
-            if (z) {
+    public void colorize(boolean colorize) {
+        if (this.animateToColorize != colorize) {
+            this.animateToColorize = colorize;
+            if (colorize) {
                 ValueAnimator valueAnimator = this.accentRevalAnimatorIn;
                 if (valueAnimator != null) {
                     valueAnimator.cancel();
@@ -444,10 +439,10 @@ public class PullForegroundDrawable {
                 this.accentRevalProgress = 0.0f;
                 ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.accentRevalAnimatorIn = ofFloat;
-                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda1
+                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                        PullForegroundDrawable.this.lambda$colorize$3(valueAnimator2);
+                        PullForegroundDrawable.this.m2916x8521df60(valueAnimator2);
                     }
                 });
                 this.accentRevalAnimatorIn.setInterpolator(AndroidUtilities.accelerateInterpolator);
@@ -463,10 +458,10 @@ public class PullForegroundDrawable {
             this.accentRevalProgressOut = 0.0f;
             ValueAnimator ofFloat2 = ValueAnimator.ofFloat(0.0f, 1.0f);
             this.accentRevalAnimatorOut = ofFloat2;
-            ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda3
+            ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda1
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator3) {
-                    PullForegroundDrawable.this.lambda$colorize$4(valueAnimator3);
+                    PullForegroundDrawable.this.m2917xc8acfd21(valueAnimator3);
                 }
             });
             this.accentRevalAnimatorOut.setInterpolator(AndroidUtilities.accelerateInterpolator);
@@ -475,8 +470,9 @@ public class PullForegroundDrawable {
         }
     }
 
-    public /* synthetic */ void lambda$colorize$3(ValueAnimator valueAnimator) {
-        this.accentRevalProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$colorize$3$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2916x8521df60(ValueAnimator animation) {
+        this.accentRevalProgress = ((Float) animation.getAnimatedValue()).floatValue();
         View view = this.cell;
         if (view != null) {
             view.invalidate();
@@ -487,8 +483,9 @@ public class PullForegroundDrawable {
         }
     }
 
-    public /* synthetic */ void lambda$colorize$4(ValueAnimator valueAnimator) {
-        this.accentRevalProgressOut = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$colorize$4$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2917xc8acfd21(ValueAnimator animation) {
+        this.accentRevalProgressOut = ((Float) animation.getAnimatedValue()).floatValue();
         View view = this.cell;
         if (view != null) {
             view.invalidate();
@@ -502,11 +499,11 @@ public class PullForegroundDrawable {
     private void textIn() {
         if (!this.animateToTextIn) {
             if (Math.abs(this.scrollDy) < this.touchSlop * 0.5f) {
-                if (this.wasSendCallback) {
+                if (!this.wasSendCallback) {
+                    this.textInProgress = 1.0f;
+                    this.animateToTextIn = true;
                     return;
                 }
-                this.textInProgress = 1.0f;
-                this.animateToTextIn = true;
                 return;
             }
             this.wasSendCallback = true;
@@ -527,61 +524,61 @@ public class PullForegroundDrawable {
         this.animateOut = true;
         this.bounceIn = true;
         this.bounceProgress = 0.0f;
-        this.listView.getTranslationY();
-        AndroidUtilities.dp(100.0f);
-        ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
-        ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda6
+        this.outOverScroll = this.listView.getTranslationY() / AndroidUtilities.dp(100.0f);
+        ValueAnimator out = ValueAnimator.ofFloat(0.0f, 1.0f);
+        out.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda4
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                PullForegroundDrawable.this.lambda$startOutAnimation$5(valueAnimator);
+                PullForegroundDrawable.this.m2920x17d2e0cf(valueAnimator);
             }
         });
-        ofFloat.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-        ofFloat.setDuration(250L);
-        ValueAnimator ofFloat2 = ValueAnimator.ofFloat(0.0f, 1.0f);
-        ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda4
+        out.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+        out.setDuration(250L);
+        ValueAnimator bounceIn = ValueAnimator.ofFloat(0.0f, 1.0f);
+        bounceIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda5
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                PullForegroundDrawable.this.lambda$startOutAnimation$6(valueAnimator);
+                PullForegroundDrawable.this.m2921x5b5dfe90(valueAnimator);
             }
         });
-        CubicBezierInterpolator cubicBezierInterpolator = CubicBezierInterpolator.EASE_BOTH;
-        ofFloat2.setInterpolator(cubicBezierInterpolator);
-        ofFloat2.setDuration(150L);
-        ValueAnimator ofFloat3 = ValueAnimator.ofFloat(1.0f, 0.0f);
-        ofFloat3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda7
+        bounceIn.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
+        bounceIn.setDuration(150L);
+        ValueAnimator bounceOut = ValueAnimator.ofFloat(1.0f, 0.0f);
+        bounceOut.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.PullForegroundDrawable$$ExternalSyntheticLambda6
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                PullForegroundDrawable.this.lambda$startOutAnimation$7(valueAnimator);
+                PullForegroundDrawable.this.m2922x9ee91c51(valueAnimator);
             }
         });
-        ofFloat3.setInterpolator(cubicBezierInterpolator);
-        ofFloat3.setDuration(135L);
+        bounceOut.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
+        bounceOut.setDuration(135L);
         AnimatorSet animatorSet2 = new AnimatorSet();
         this.outAnimator = animatorSet2;
         animatorSet2.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.PullForegroundDrawable.2
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
+            public void onAnimationEnd(Animator animation) {
                 PullForegroundDrawable.this.doNotShow();
             }
         });
-        AnimatorSet animatorSet3 = new AnimatorSet();
-        animatorSet3.playSequentially(ofFloat2, ofFloat3);
-        animatorSet3.setStartDelay(180L);
-        this.outAnimator.playTogether(ofFloat, animatorSet3);
+        AnimatorSet bounce = new AnimatorSet();
+        bounce.playSequentially(bounceIn, bounceOut);
+        bounce.setStartDelay(180L);
+        this.outAnimator.playTogether(out, bounce);
         this.outAnimator.start();
     }
 
-    public /* synthetic */ void lambda$startOutAnimation$5(ValueAnimator valueAnimator) {
-        setOutProgress(((Float) valueAnimator.getAnimatedValue()).floatValue());
+    /* renamed from: lambda$startOutAnimation$5$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2920x17d2e0cf(ValueAnimator animation) {
+        setOutProgress(((Float) animation.getAnimatedValue()).floatValue());
         View view = this.cell;
         if (view != null) {
             view.invalidate();
         }
     }
 
-    public /* synthetic */ void lambda$startOutAnimation$6(ValueAnimator valueAnimator) {
-        this.bounceProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$startOutAnimation$6$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2921x5b5dfe90(ValueAnimator animation) {
+        this.bounceProgress = ((Float) animation.getAnimatedValue()).floatValue();
         this.bounceIn = true;
         View view = this.cell;
         if (view != null) {
@@ -589,8 +586,9 @@ public class PullForegroundDrawable {
         }
     }
 
-    public /* synthetic */ void lambda$startOutAnimation$7(ValueAnimator valueAnimator) {
-        this.bounceProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$startOutAnimation$7$org-telegram-ui-Components-PullForegroundDrawable */
+    public /* synthetic */ void m2922x9ee91c51(ValueAnimator animation) {
+        this.bounceProgress = ((Float) animation.getAnimatedValue()).floatValue();
         this.bounceIn = false;
         View view = this.cell;
         if (view != null) {
@@ -598,17 +596,16 @@ public class PullForegroundDrawable {
         }
     }
 
-    private void setOutProgress(float f) {
-        this.outProgress = f;
-        int blendARGB = ColorUtils.blendARGB(Theme.getNonAnimatedColor(this.avatarBackgroundColorKey), Theme.getNonAnimatedColor(this.backgroundActiveColorKey), 1.0f - this.outProgress);
-        this.paintBackgroundAccent.setColor(blendARGB);
-        if (!this.changeAvatarColor || !isDraw()) {
-            return;
+    private void setOutProgress(float value) {
+        this.outProgress = value;
+        int color = ColorUtils.blendARGB(Theme.getNonAnimatedColor(this.avatarBackgroundColorKey), Theme.getNonAnimatedColor(this.backgroundActiveColorKey), 1.0f - this.outProgress);
+        this.paintBackgroundAccent.setColor(color);
+        if (this.changeAvatarColor && isDraw()) {
+            Theme.dialogs_archiveAvatarDrawable.beginApplyLayerColors();
+            Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow1.**", color);
+            Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow2.**", color);
+            Theme.dialogs_archiveAvatarDrawable.commitApplyLayerColors();
         }
-        Theme.dialogs_archiveAvatarDrawable.beginApplyLayerColors();
-        Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow1.**", blendARGB);
-        Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow2.**", blendARGB);
-        Theme.dialogs_archiveAvatarDrawable.commitApplyLayerColors();
     }
 
     public void doNotShow() {
@@ -652,12 +649,25 @@ public class PullForegroundDrawable {
         this.animateOut = false;
     }
 
+    public void destroyView() {
+        this.cell = null;
+        ValueAnimator valueAnimator = this.textSwipingAnimator;
+        if (valueAnimator != null) {
+            valueAnimator.cancel();
+        }
+        AnimatorSet animatorSet = this.outAnimator;
+        if (animatorSet != null) {
+            animatorSet.removeAllListeners();
+            this.outAnimator.cancel();
+        }
+    }
+
     public boolean isDraw() {
         return this.willDraw && !this.isOut;
     }
 
-    public void setWillDraw(boolean z) {
-        this.willDraw = z;
+    public void setWillDraw(boolean b) {
+        this.willDraw = b;
     }
 
     public void resetText() {
@@ -674,45 +684,36 @@ public class PullForegroundDrawable {
         this.wasSendCallback = false;
     }
 
-    /* loaded from: classes3.dex */
+    public Paint getBackgroundPaint() {
+        return this.backgroundPaint;
+    }
+
+    /* loaded from: classes5.dex */
     public class ArrowDrawable extends Drawable {
         private float lastDensity;
         private Path path = new Path();
         private Paint paint = new Paint(1);
 
-        @Override // android.graphics.drawable.Drawable
-        public int getOpacity() {
-            return 0;
-        }
-
-        @Override // android.graphics.drawable.Drawable
-        public void setAlpha(int i) {
-        }
-
-        @Override // android.graphics.drawable.Drawable
-        public void setColorFilter(ColorFilter colorFilter) {
-        }
-
-        public ArrowDrawable(PullForegroundDrawable pullForegroundDrawable) {
+        public ArrowDrawable() {
+            PullForegroundDrawable.this = r2;
             updatePath();
         }
 
         private void updatePath() {
-            int dp = AndroidUtilities.dp(18.0f);
+            int h = AndroidUtilities.dp(18.0f);
             this.path.reset();
-            float f = dp >> 1;
-            this.path.moveTo(f, AndroidUtilities.dpf2(4.98f));
+            this.path.moveTo(h >> 1, AndroidUtilities.dpf2(4.98f));
             this.path.lineTo(AndroidUtilities.dpf2(4.95f), AndroidUtilities.dpf2(9.0f));
-            this.path.lineTo(dp - AndroidUtilities.dpf2(4.95f), AndroidUtilities.dpf2(9.0f));
-            this.path.lineTo(f, AndroidUtilities.dpf2(4.98f));
+            this.path.lineTo(h - AndroidUtilities.dpf2(4.95f), AndroidUtilities.dpf2(9.0f));
+            this.path.lineTo(h >> 1, AndroidUtilities.dpf2(4.98f));
             this.paint.setStyle(Paint.Style.FILL_AND_STROKE);
             this.paint.setStrokeJoin(Paint.Join.ROUND);
             this.paint.setStrokeWidth(AndroidUtilities.dpf2(1.0f));
             this.lastDensity = AndroidUtilities.density;
         }
 
-        public void setColor(int i) {
-            this.paint.setColor(i);
+        public void setColor(int color) {
+            this.paint.setColor(color);
         }
 
         @Override // android.graphics.drawable.Drawable
@@ -733,8 +734,22 @@ public class PullForegroundDrawable {
             canvas.save();
             canvas.translate(getBounds().left, getBounds().top);
             canvas.drawPath(this.path, this.paint);
-            canvas.drawRect(AndroidUtilities.dpf2(7.56f), AndroidUtilities.dpf2(8.0f), AndroidUtilities.dp(18.0f) - AndroidUtilities.dpf2(7.56f), AndroidUtilities.dpf2(11.1f), this.paint);
+            int h = AndroidUtilities.dp(18.0f);
+            canvas.drawRect(AndroidUtilities.dpf2(7.56f), AndroidUtilities.dpf2(8.0f), h - AndroidUtilities.dpf2(7.56f), AndroidUtilities.dpf2(11.1f), this.paint);
             canvas.restore();
+        }
+
+        @Override // android.graphics.drawable.Drawable
+        public void setAlpha(int alpha) {
+        }
+
+        @Override // android.graphics.drawable.Drawable
+        public void setColorFilter(ColorFilter colorFilter) {
+        }
+
+        @Override // android.graphics.drawable.Drawable
+        public int getOpacity() {
+            return 0;
         }
     }
 }

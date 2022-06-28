@@ -1,28 +1,25 @@
 package com.google.android.exoplayer2.source.chunk;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.DefaultExtractorInput;
+import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SingleSampleMediaChunk extends BaseMediaChunk {
     private boolean loadCompleted;
     private long nextLoadPosition;
     private final Format sampleFormat;
     private final int trackType;
 
-    @Override // com.google.android.exoplayer2.upstream.Loader.Loadable
-    public void cancelLoad() {
-    }
-
-    public SingleSampleMediaChunk(DataSource dataSource, DataSpec dataSpec, Format format, int i, Object obj, long j, long j2, long j3, int i2, Format format2) {
-        super(dataSource, dataSpec, format, i, obj, j, j2, -9223372036854775807L, -9223372036854775807L, j3);
-        this.trackType = i2;
-        this.sampleFormat = format2;
+    public SingleSampleMediaChunk(DataSource dataSource, DataSpec dataSpec, Format trackFormat, int trackSelectionReason, Object trackSelectionData, long startTimeUs, long endTimeUs, long chunkIndex, int trackType, Format sampleFormat) {
+        super(dataSource, dataSpec, trackFormat, trackSelectionReason, trackSelectionData, startTimeUs, endTimeUs, C.TIME_UNSET, C.TIME_UNSET, chunkIndex);
+        this.trackType = trackType;
+        this.sampleFormat = sampleFormat;
     }
 
     @Override // com.google.android.exoplayer2.source.chunk.MediaChunk
@@ -31,21 +28,30 @@ public final class SingleSampleMediaChunk extends BaseMediaChunk {
     }
 
     @Override // com.google.android.exoplayer2.upstream.Loader.Loadable
+    public void cancelLoad() {
+    }
+
+    @Override // com.google.android.exoplayer2.upstream.Loader.Loadable
     public void load() throws IOException, InterruptedException {
+        long length;
         BaseMediaChunkOutput output = getOutput();
         output.setSampleOffsetUs(0L);
-        TrackOutput track = output.track(0, this.trackType);
-        track.format(this.sampleFormat);
+        TrackOutput trackOutput = output.track(0, this.trackType);
+        trackOutput.format(this.sampleFormat);
         try {
-            long open = this.dataSource.open(this.dataSpec.subrange(this.nextLoadPosition));
-            if (open != -1) {
-                open += this.nextLoadPosition;
+            DataSpec loadDataSpec = this.dataSpec.subrange(this.nextLoadPosition);
+            long length2 = this.dataSource.open(loadDataSpec);
+            if (length2 == -1) {
+                length = length2;
+            } else {
+                length = length2 + this.nextLoadPosition;
             }
-            DefaultExtractorInput defaultExtractorInput = new DefaultExtractorInput(this.dataSource, this.nextLoadPosition, open);
-            for (int i = 0; i != -1; i = track.sampleData(defaultExtractorInput, ConnectionsManager.DEFAULT_DATACENTER_ID, true)) {
-                this.nextLoadPosition += i;
+            ExtractorInput extractorInput = new DefaultExtractorInput(this.dataSource, this.nextLoadPosition, length);
+            for (int result = 0; result != -1; result = trackOutput.sampleData(extractorInput, Integer.MAX_VALUE, true)) {
+                this.nextLoadPosition += result;
             }
-            track.sampleMetadata(this.startTimeUs, 1, (int) this.nextLoadPosition, 0, null);
+            int sampleSize = (int) this.nextLoadPosition;
+            trackOutput.sampleMetadata(this.startTimeUs, 1, sampleSize, 0, null);
             Util.closeQuietly(this.dataSource);
             this.loadCompleted = true;
         } catch (Throwable th) {

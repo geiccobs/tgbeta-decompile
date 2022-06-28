@@ -1,6 +1,5 @@
 package org.telegram.ui.ActionBar;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -14,12 +13,13 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import java.util.Arrays;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
-@TargetApi(R.styleable.MapAttrs_zOrderOnTop)
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public final class FloatingActionMode extends ActionMode {
+    private static final int MAX_HIDE_DURATION = 3000;
+    private static final int MOVING_HIDE_DELAY = 50;
     private final ActionMode.Callback2 mCallback;
     private final Context mContext;
     private FloatingToolbar mFloatingToolbar;
@@ -56,83 +56,65 @@ public final class FloatingActionMode extends ActionMode {
     private final int mBottomAllowance = AndroidUtilities.dp(20.0f);
     private final Point mDisplaySize = new Point();
 
-    @Override // android.view.ActionMode
-    public View getCustomView() {
-        return null;
-    }
-
-    @Override // android.view.ActionMode
-    public CharSequence getSubtitle() {
-        return null;
-    }
-
-    @Override // android.view.ActionMode
-    public CharSequence getTitle() {
-        return null;
-    }
-
-    @Override // android.view.ActionMode
-    public void setCustomView(View view) {
-    }
-
-    @Override // android.view.ActionMode
-    public void setSubtitle(int i) {
-    }
-
-    @Override // android.view.ActionMode
-    public void setSubtitle(CharSequence charSequence) {
-    }
-
-    @Override // android.view.ActionMode
-    public void setTitle(int i) {
-    }
-
-    @Override // android.view.ActionMode
-    public void setTitle(CharSequence charSequence) {
-    }
-
-    public FloatingActionMode(Context context, ActionMode.Callback2 callback2, View view, FloatingToolbar floatingToolbar) {
+    public FloatingActionMode(Context context, ActionMode.Callback2 callback, View originatingView, FloatingToolbar floatingToolbar) {
         this.mContext = context;
-        this.mCallback = callback2;
-        PopupMenu popupMenu = new PopupMenu(context, null);
-        this.mMenu = popupMenu.getMenu();
+        this.mCallback = callback;
+        PopupMenu p = new PopupMenu(context, null);
+        this.mMenu = p.getMenu();
         setType(1);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() { // from class: org.telegram.ui.ActionBar.FloatingActionMode$$ExternalSyntheticLambda1
+        p.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() { // from class: org.telegram.ui.ActionBar.FloatingActionMode$$ExternalSyntheticLambda1
             @Override // android.widget.PopupMenu.OnMenuItemClickListener
             public final boolean onMenuItemClick(MenuItem menuItem) {
-                boolean lambda$new$0;
-                lambda$new$0 = FloatingActionMode.this.lambda$new$0(menuItem);
-                return lambda$new$0;
+                return FloatingActionMode.this.m1423lambda$new$0$orgtelegramuiActionBarFloatingActionMode(menuItem);
             }
         });
         int[] iArr = new int[2];
         this.mViewPositionOnScreen = iArr;
-        this.mOriginatingView = view;
-        view.getLocationOnScreen(iArr);
+        this.mOriginatingView = originatingView;
+        originatingView.getLocationOnScreen(iArr);
         setFloatingToolbar(floatingToolbar);
     }
 
-    public /* synthetic */ boolean lambda$new$0(MenuItem menuItem) {
-        return this.mCallback.onActionItemClicked(this, menuItem);
-    }
-
-    public /* synthetic */ boolean lambda$setFloatingToolbar$1(MenuItem menuItem) {
+    /* renamed from: lambda$new$0$org-telegram-ui-ActionBar-FloatingActionMode */
+    public /* synthetic */ boolean m1423lambda$new$0$orgtelegramuiActionBarFloatingActionMode(MenuItem menuItem) {
         return this.mCallback.onActionItemClicked(this, menuItem);
     }
 
     private void setFloatingToolbar(FloatingToolbar floatingToolbar) {
-        FloatingToolbar onMenuItemClickListener = floatingToolbar.setMenu(this.mMenu).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() { // from class: org.telegram.ui.ActionBar.FloatingActionMode$$ExternalSyntheticLambda0
+        this.mFloatingToolbar = floatingToolbar.setMenu(this.mMenu).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() { // from class: org.telegram.ui.ActionBar.FloatingActionMode$$ExternalSyntheticLambda0
             @Override // android.view.MenuItem.OnMenuItemClickListener
             public final boolean onMenuItemClick(MenuItem menuItem) {
-                boolean lambda$setFloatingToolbar$1;
-                lambda$setFloatingToolbar$1 = FloatingActionMode.this.lambda$setFloatingToolbar$1(menuItem);
-                return lambda$setFloatingToolbar$1;
+                return FloatingActionMode.this.m1424x15cc3d2c(menuItem);
             }
         });
-        this.mFloatingToolbar = onMenuItemClickListener;
-        FloatingToolbarVisibilityHelper floatingToolbarVisibilityHelper = new FloatingToolbarVisibilityHelper(onMenuItemClickListener);
+        FloatingToolbarVisibilityHelper floatingToolbarVisibilityHelper = new FloatingToolbarVisibilityHelper(this.mFloatingToolbar);
         this.mFloatingToolbarVisibilityHelper = floatingToolbarVisibilityHelper;
         floatingToolbarVisibilityHelper.activate();
+    }
+
+    /* renamed from: lambda$setFloatingToolbar$1$org-telegram-ui-ActionBar-FloatingActionMode */
+    public /* synthetic */ boolean m1424x15cc3d2c(MenuItem item) {
+        return this.mCallback.onActionItemClicked(this, item);
+    }
+
+    @Override // android.view.ActionMode
+    public void setTitle(CharSequence title) {
+    }
+
+    @Override // android.view.ActionMode
+    public void setTitle(int resId) {
+    }
+
+    @Override // android.view.ActionMode
+    public void setSubtitle(CharSequence subtitle) {
+    }
+
+    @Override // android.view.ActionMode
+    public void setSubtitle(int resId) {
+    }
+
+    @Override // android.view.ActionMode
+    public void setCustomView(View view) {
     }
 
     @Override // android.view.ActionMode
@@ -144,10 +126,9 @@ public final class FloatingActionMode extends ActionMode {
     @Override // android.view.ActionMode
     public void invalidateContentRect() {
         this.mCallback.onGetContentRect(this, this.mOriginatingView, this.mContentRect);
-        Rect rect = this.mContentRect;
-        if (rect.left == 0 && rect.right == 0) {
-            rect.left = 1;
-            rect.right = 1;
+        if (this.mContentRect.left == 0 && this.mContentRect.right == 0) {
+            this.mContentRect.left = 1;
+            this.mContentRect.right = 1;
         }
         repositionToolbar();
     }
@@ -203,35 +184,37 @@ public final class FloatingActionMode extends ActionMode {
 
     private boolean isContentRectWithinBounds() {
         ((WindowManager) this.mContext.getSystemService(WindowManager.class)).getDefaultDisplay().getRealSize(this.mDisplaySize);
-        Rect rect = this.mScreenRect;
-        Point point = this.mDisplaySize;
-        rect.set(0, 0, point.x, point.y);
+        this.mScreenRect.set(0, 0, this.mDisplaySize.x, this.mDisplaySize.y);
         return intersectsClosed(this.mContentRectOnScreen, this.mScreenRect) && intersectsClosed(this.mContentRectOnScreen, this.mViewRectOnScreen);
     }
 
-    private static boolean intersectsClosed(Rect rect, Rect rect2) {
-        return rect.left <= rect2.right && rect2.left <= rect.right && rect.top <= rect2.bottom && rect2.top <= rect.bottom;
+    private static boolean intersectsClosed(Rect a, Rect b) {
+        return a.left <= b.right && b.left <= a.right && a.top <= b.bottom && b.top <= a.bottom;
     }
 
     @Override // android.view.ActionMode
-    public void hide(long j) {
-        if (j == -1) {
-            j = ViewConfiguration.getDefaultActionModeHideDuration();
+    public void hide(long duration) {
+        if (duration == -1) {
+            duration = ViewConfiguration.getDefaultActionModeHideDuration();
         }
-        long min = Math.min(3000L, j);
+        long duration2 = Math.min(3000L, duration);
         this.mOriginatingView.removeCallbacks(this.mHideOff);
-        if (min <= 0) {
+        if (duration2 <= 0) {
             this.mHideOff.run();
             return;
         }
         this.mFloatingToolbarVisibilityHelper.setHideRequested(true);
         this.mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
-        this.mOriginatingView.postDelayed(this.mHideOff, min);
+        this.mOriginatingView.postDelayed(this.mHideOff, duration2);
+    }
+
+    public void setOutsideTouchable(boolean outsideTouchable, PopupWindow.OnDismissListener onDismiss) {
+        this.mFloatingToolbar.setOutsideTouchable(outsideTouchable, onDismiss);
     }
 
     @Override // android.view.ActionMode
-    public void onWindowFocusChanged(boolean z) {
-        this.mFloatingToolbarVisibilityHelper.setWindowFocused(z);
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        this.mFloatingToolbarVisibilityHelper.setWindowFocused(hasWindowFocus);
         this.mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
     }
 
@@ -244,6 +227,21 @@ public final class FloatingActionMode extends ActionMode {
     @Override // android.view.ActionMode
     public Menu getMenu() {
         return this.mMenu;
+    }
+
+    @Override // android.view.ActionMode
+    public CharSequence getTitle() {
+        return null;
+    }
+
+    @Override // android.view.ActionMode
+    public CharSequence getSubtitle() {
+        return null;
+    }
+
+    @Override // android.view.ActionMode
+    public View getCustomView() {
+        return null;
     }
 
     @Override // android.view.ActionMode
@@ -262,8 +260,9 @@ public final class FloatingActionMode extends ActionMode {
         return this.mOriginatingView.getWindowVisibility() == 0 && this.mOriginatingView.isShown();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static final class FloatingToolbarVisibilityHelper {
+        private static final long MIN_SHOW_DURATION_FOR_MOVE_HIDE = 500;
         private boolean mActive;
         private boolean mHideRequested;
         private long mLastShowTime;
@@ -272,8 +271,8 @@ public final class FloatingActionMode extends ActionMode {
         private final FloatingToolbar mToolbar;
         private boolean mWindowFocused = true;
 
-        public FloatingToolbarVisibilityHelper(FloatingToolbar floatingToolbar) {
-            this.mToolbar = floatingToolbar;
+        public FloatingToolbarVisibilityHelper(FloatingToolbar toolbar) {
+            this.mToolbar = toolbar;
         }
 
         public void activate() {
@@ -289,23 +288,23 @@ public final class FloatingActionMode extends ActionMode {
             this.mToolbar.dismiss();
         }
 
-        public void setHideRequested(boolean z) {
-            this.mHideRequested = z;
+        public void setHideRequested(boolean hide) {
+            this.mHideRequested = hide;
         }
 
-        public void setMoving(boolean z) {
-            boolean z2 = System.currentTimeMillis() - this.mLastShowTime > 500;
-            if (!z || z2) {
-                this.mMoving = z;
+        public void setMoving(boolean moving) {
+            boolean showingLongEnough = System.currentTimeMillis() - this.mLastShowTime > 500;
+            if (!moving || showingLongEnough) {
+                this.mMoving = moving;
             }
         }
 
-        public void setOutOfBounds(boolean z) {
-            this.mOutOfBounds = z;
+        public void setOutOfBounds(boolean outOfBounds) {
+            this.mOutOfBounds = outOfBounds;
         }
 
-        public void setWindowFocused(boolean z) {
-            this.mWindowFocused = z;
+        public void setWindowFocused(boolean windowFocused) {
+            this.mWindowFocused = windowFocused;
         }
 
         public void updateToolbarVisibility() {

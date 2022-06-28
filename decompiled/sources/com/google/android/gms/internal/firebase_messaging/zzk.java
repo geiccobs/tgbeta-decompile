@@ -4,24 +4,28 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzk extends FilterInputStream {
+    private long zza;
     private long zzb = -1;
-    private long zza = 1048577;
 
     public zzk(InputStream inputStream, long j) {
         super(inputStream);
-        inputStream.getClass();
+        if (inputStream != null) {
+            this.zza = 1048577L;
+            return;
+        }
+        throw null;
     }
 
     @Override // java.io.FilterInputStream, java.io.InputStream
     public final int available() throws IOException {
-        return (int) Math.min(((FilterInputStream) this).in.available(), this.zza);
+        return (int) Math.min(this.in.available(), this.zza);
     }
 
     @Override // java.io.FilterInputStream, java.io.InputStream
     public final synchronized void mark(int i) {
-        ((FilterInputStream) this).in.mark(i);
+        this.in.mark(i);
         this.zzb = this.zza;
     }
 
@@ -30,7 +34,7 @@ final class zzk extends FilterInputStream {
         if (this.zza == 0) {
             return -1;
         }
-        int read = ((FilterInputStream) this).in.read();
+        int read = this.in.read();
         if (read != -1) {
             this.zza--;
         }
@@ -39,11 +43,11 @@ final class zzk extends FilterInputStream {
 
     @Override // java.io.FilterInputStream, java.io.InputStream
     public final synchronized void reset() throws IOException {
-        if (((FilterInputStream) this).in.markSupported()) {
+        if (this.in.markSupported()) {
             if (this.zzb == -1) {
                 throw new IOException("Mark not set");
             }
-            ((FilterInputStream) this).in.reset();
+            this.in.reset();
             this.zza = this.zzb;
         } else {
             throw new IOException("Mark not supported");
@@ -52,7 +56,7 @@ final class zzk extends FilterInputStream {
 
     @Override // java.io.FilterInputStream, java.io.InputStream
     public final long skip(long j) throws IOException {
-        long skip = ((FilterInputStream) this).in.skip(Math.min(j, this.zza));
+        long skip = this.in.skip(Math.min(j, this.zza));
         this.zza -= skip;
         return skip;
     }
@@ -63,7 +67,7 @@ final class zzk extends FilterInputStream {
         if (j == 0) {
             return -1;
         }
-        int read = ((FilterInputStream) this).in.read(bArr, i, (int) Math.min(i2, j));
+        int read = this.in.read(bArr, i, (int) Math.min(i2, j));
         if (read != -1) {
             this.zza -= read;
         }

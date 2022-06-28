@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzfk extends zzfj {
     /* JADX INFO: Access modifiers changed from: private */
     public zzfk() {
@@ -13,7 +13,7 @@ final class zzfk extends zzfj {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r0v2, types: [java.util.List] */
+    /* JADX WARN: Type inference failed for: r0v2, types: [com.google.android.gms.internal.mlkit_language_id.zzew] */
     @Override // com.google.android.gms.internal.mlkit_language_id.zzfj
     public final <E> void zza(Object obj, Object obj2, long j) {
         zzew<E> zzb = zzb(obj, j);

@@ -9,8 +9,15 @@ import com.google.android.exoplayer2.text.webvtt.WebvttCue;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class WebvttDecoder extends SimpleSubtitleDecoder {
+    private static final String COMMENT_START = "NOTE";
+    private static final int EVENT_COMMENT = 1;
+    private static final int EVENT_CUE = 3;
+    private static final int EVENT_END_OF_FILE = 0;
+    private static final int EVENT_NONE = -1;
+    private static final int EVENT_STYLE_BLOCK = 2;
+    private static final String STYLE_START = "STYLE";
     private final WebvttCueParser cueParser = new WebvttCueParser();
     private final ParsableByteArray parsableWebvttData = new ParsableByteArray();
     private final WebvttCue.Builder webvttCueBuilder = new WebvttCue.Builder();
@@ -22,31 +29,32 @@ public final class WebvttDecoder extends SimpleSubtitleDecoder {
     }
 
     @Override // com.google.android.exoplayer2.text.SimpleSubtitleDecoder
-    protected Subtitle decode(byte[] bArr, int i, boolean z) throws SubtitleDecoderException {
-        this.parsableWebvttData.reset(bArr, i);
+    protected Subtitle decode(byte[] bytes, int length, boolean reset) throws SubtitleDecoderException {
+        this.parsableWebvttData.reset(bytes, length);
         this.webvttCueBuilder.reset();
         this.definedStyles.clear();
         try {
             WebvttParserUtil.validateWebvttHeaderLine(this.parsableWebvttData);
             do {
             } while (!TextUtils.isEmpty(this.parsableWebvttData.readLine()));
-            ArrayList arrayList = new ArrayList();
+            ArrayList<WebvttCue> subtitles = new ArrayList<>();
             while (true) {
-                int nextEvent = getNextEvent(this.parsableWebvttData);
-                if (nextEvent == 0) {
-                    return new WebvttSubtitle(arrayList);
-                }
-                if (nextEvent == 1) {
-                    skipComment(this.parsableWebvttData);
-                } else if (nextEvent == 2) {
-                    if (!arrayList.isEmpty()) {
-                        throw new SubtitleDecoderException("A style block was found after the first cue.");
+                int event = getNextEvent(this.parsableWebvttData);
+                if (event != 0) {
+                    if (event == 1) {
+                        skipComment(this.parsableWebvttData);
+                    } else if (event == 2) {
+                        if (!subtitles.isEmpty()) {
+                            throw new SubtitleDecoderException("A style block was found after the first cue.");
+                        }
+                        this.parsableWebvttData.readLine();
+                        this.definedStyles.addAll(this.cssParser.parseBlock(this.parsableWebvttData));
+                    } else if (event == 3 && this.cueParser.parseCue(this.parsableWebvttData, this.webvttCueBuilder, this.definedStyles)) {
+                        subtitles.add(this.webvttCueBuilder.build());
+                        this.webvttCueBuilder.reset();
                     }
-                    this.parsableWebvttData.readLine();
-                    this.definedStyles.addAll(this.cssParser.parseBlock(this.parsableWebvttData));
-                } else if (nextEvent == 3 && this.cueParser.parseCue(this.parsableWebvttData, this.webvttCueBuilder, this.definedStyles)) {
-                    arrayList.add(this.webvttCueBuilder.build());
-                    this.webvttCueBuilder.reset();
+                } else {
+                    return new WebvttSubtitle(subtitles);
                 }
             }
         } catch (ParserException e) {
@@ -54,26 +62,28 @@ public final class WebvttDecoder extends SimpleSubtitleDecoder {
         }
     }
 
-    private static int getNextEvent(ParsableByteArray parsableByteArray) {
-        int i = -1;
-        int i2 = 0;
-        while (i == -1) {
-            i2 = parsableByteArray.getPosition();
-            String readLine = parsableByteArray.readLine();
-            if (readLine == null) {
-                i = 0;
-            } else if ("STYLE".equals(readLine)) {
-                i = 2;
+    private static int getNextEvent(ParsableByteArray parsableWebvttData) {
+        int foundEvent = -1;
+        int currentInputPosition = 0;
+        while (foundEvent == -1) {
+            currentInputPosition = parsableWebvttData.getPosition();
+            String line = parsableWebvttData.readLine();
+            if (line == null) {
+                foundEvent = 0;
+            } else if (STYLE_START.equals(line)) {
+                foundEvent = 2;
+            } else if (line.startsWith(COMMENT_START)) {
+                foundEvent = 1;
             } else {
-                i = readLine.startsWith("NOTE") ? 1 : 3;
+                foundEvent = 3;
             }
         }
-        parsableByteArray.setPosition(i2);
-        return i;
+        parsableWebvttData.setPosition(currentInputPosition);
+        return foundEvent;
     }
 
-    private static void skipComment(ParsableByteArray parsableByteArray) {
+    private static void skipComment(ParsableByteArray parsableWebvttData) {
         do {
-        } while (!TextUtils.isEmpty(parsableByteArray.readLine()));
+        } while (!TextUtils.isEmpty(parsableWebvttData.readLine()));
     }
 }

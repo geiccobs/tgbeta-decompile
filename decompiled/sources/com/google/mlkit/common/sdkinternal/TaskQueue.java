@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class TaskQueue {
     private boolean zzb;
     private final Object zza = new Object();
@@ -18,7 +18,7 @@ public class TaskQueue {
     private final AtomicReference<Thread> zzd = new AtomicReference<>();
 
     /* compiled from: com.google.mlkit:common@@17.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class zzb {
         final Executor zza;
         final Runnable zzb;
@@ -30,7 +30,7 @@ public class TaskQueue {
     }
 
     /* compiled from: com.google.mlkit:common@@17.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public class zza implements Closeable {
         /* JADX INFO: Access modifiers changed from: private */
         public zza() {
@@ -86,7 +86,7 @@ public class TaskQueue {
                     }
                 }
             });
-        } catch (RejectedExecutionException unused) {
+        } catch (RejectedExecutionException e) {
             zza();
         }
     }

@@ -6,7 +6,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import java.util.ArrayList;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class CameraInfo {
     protected Camera camera;
     public CameraCaptureSession cameraCaptureSession;
@@ -18,9 +18,9 @@ public class CameraInfo {
     protected ArrayList<Size> pictureSizes = new ArrayList<>();
     protected ArrayList<Size> previewSizes = new ArrayList<>();
 
-    public CameraInfo(int i, int i2) {
-        this.cameraId = i;
-        this.frontCamera = i2;
+    public CameraInfo(int id, int frontFace) {
+        this.cameraId = id;
+        this.frontCamera = frontFace;
     }
 
     public int getCameraId() {

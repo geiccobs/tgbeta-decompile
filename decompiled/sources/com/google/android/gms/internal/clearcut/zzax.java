@@ -1,40 +1,40 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzax {
     public static int zza(int i, byte[] bArr, int i2, int i3, zzay zzayVar) throws zzco {
         if ((i >>> 3) != 0) {
-            int i4 = i & 7;
-            if (i4 == 0) {
-                return zzb(bArr, i2, zzayVar);
-            }
-            if (i4 == 1) {
-                return i2 + 8;
-            }
-            if (i4 == 2) {
-                return zza(bArr, i2, zzayVar) + zzayVar.zzfd;
-            }
-            if (i4 != 3) {
-                if (i4 != 5) {
+            switch (i & 7) {
+                case 0:
+                    return zzb(bArr, i2, zzayVar);
+                case 1:
+                    return i2 + 8;
+                case 2:
+                    return zza(bArr, i2, zzayVar) + zzayVar.zzfd;
+                case 3:
+                    int i4 = (i & (-8)) | 4;
+                    int i5 = 0;
+                    while (i2 < i3) {
+                        i2 = zza(bArr, i2, zzayVar);
+                        i5 = zzayVar.zzfd;
+                        if (i5 == i4) {
+                            if (i2 > i3 && i5 == i4) {
+                                return i2;
+                            }
+                            throw zzco.zzbo();
+                        }
+                        i2 = zza(i5, bArr, i2, i3, zzayVar);
+                    }
+                    if (i2 > i3) {
+                    }
+                    throw zzco.zzbo();
+                case 4:
+                default:
                     throw zzco.zzbm();
-                }
-                return i2 + 4;
+                case 5:
+                    return i2 + 4;
             }
-            int i5 = (i & (-8)) | 4;
-            int i6 = 0;
-            while (i2 < i3) {
-                i2 = zza(bArr, i2, zzayVar);
-                i6 = zzayVar.zzfd;
-                if (i6 == i5) {
-                    break;
-                }
-                i2 = zza(i6, bArr, i2, i3, zzayVar);
-            }
-            if (i2 <= i3 && i6 == i5) {
-                return i2;
-            }
-            throw zzco.zzbo();
         }
         throw zzco.zzbm();
     }
@@ -58,49 +58,48 @@ final class zzax {
 
     public static int zza(int i, byte[] bArr, int i2, int i3, zzey zzeyVar, zzay zzayVar) throws IOException {
         if ((i >>> 3) != 0) {
-            int i4 = i & 7;
-            if (i4 == 0) {
-                int zzb = zzb(bArr, i2, zzayVar);
-                zzeyVar.zzb(i, Long.valueOf(zzayVar.zzfe));
-                return zzb;
-            } else if (i4 == 1) {
-                zzeyVar.zzb(i, Long.valueOf(zzd(bArr, i2)));
-                return i2 + 8;
-            } else if (i4 == 2) {
-                int zza = zza(bArr, i2, zzayVar);
-                int i5 = zzayVar.zzfd;
-                zzeyVar.zzb(i, i5 == 0 ? zzbb.zzfi : zzbb.zzb(bArr, zza, i5));
-                return zza + i5;
-            } else if (i4 != 3) {
-                if (i4 != 5) {
+            switch (i & 7) {
+                case 0:
+                    int zzb = zzb(bArr, i2, zzayVar);
+                    zzeyVar.zzb(i, Long.valueOf(zzayVar.zzfe));
+                    return zzb;
+                case 1:
+                    zzeyVar.zzb(i, Long.valueOf(zzd(bArr, i2)));
+                    return i2 + 8;
+                case 2:
+                    int zza = zza(bArr, i2, zzayVar);
+                    int i4 = zzayVar.zzfd;
+                    zzeyVar.zzb(i, i4 == 0 ? zzbb.zzfi : zzbb.zzb(bArr, zza, i4));
+                    return zza + i4;
+                case 3:
+                    zzey zzeb = zzey.zzeb();
+                    int i5 = (i & (-8)) | 4;
+                    int i6 = 0;
+                    while (true) {
+                        if (i2 < i3) {
+                            int zza2 = zza(bArr, i2, zzayVar);
+                            int i7 = zzayVar.zzfd;
+                            i6 = i7;
+                            if (i7 != i5) {
+                                int zza3 = zza(i6, bArr, zza2, i3, zzeb, zzayVar);
+                                i6 = i7;
+                                i2 = zza3;
+                            } else {
+                                i2 = zza2;
+                            }
+                        }
+                    }
+                    if (i2 > i3 || i6 != i5) {
+                        throw zzco.zzbo();
+                    }
+                    zzeyVar.zzb(i, zzeb);
+                    return i2;
+                case 4:
+                default:
                     throw zzco.zzbm();
-                }
-                zzeyVar.zzb(i, Integer.valueOf(zzc(bArr, i2)));
-                return i2 + 4;
-            } else {
-                zzey zzeb = zzey.zzeb();
-                int i6 = (i & (-8)) | 4;
-                int i7 = 0;
-                while (true) {
-                    if (i2 >= i3) {
-                        break;
-                    }
-                    int zza2 = zza(bArr, i2, zzayVar);
-                    int i8 = zzayVar.zzfd;
-                    i7 = i8;
-                    if (i8 == i6) {
-                        i2 = zza2;
-                        break;
-                    }
-                    int zza3 = zza(i7, bArr, zza2, i3, zzeb, zzayVar);
-                    i7 = i8;
-                    i2 = zza3;
-                }
-                if (i2 > i3 || i7 != i6) {
-                    throw zzco.zzbo();
-                }
-                zzeyVar.zzb(i, zzeb);
-                return i2;
+                case 5:
+                    zzeyVar.zzb(i, Integer.valueOf(zzc(bArr, i2)));
+                    return i2 + 4;
             }
         }
         throw zzco.zzbm();

@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,9 +16,9 @@ import android.widget.FrameLayout;
 import androidx.core.view.NestedScrollingParent;
 import androidx.core.view.NestedScrollingParentHelper;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class BotCommandsMenuContainer extends FrameLayout implements NestedScrollingParent {
     private boolean entering;
     public RecyclerListView listView;
@@ -31,19 +30,6 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     boolean dismissed = true;
     private NestedScrollingParentHelper nestedScrollingParentHelper = new NestedScrollingParentHelper(this);
 
-    public void onDismiss() {
-    }
-
-    @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public boolean onNestedFling(View view, float f, float f2, boolean z) {
-        return false;
-    }
-
-    @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public boolean onNestedPreFling(View view, float f, float f2) {
-        return false;
-    }
-
     public BotCommandsMenuContainer(Context context) {
         super(context);
         this.shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
@@ -54,22 +40,23 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
                     super.dispatchDraw(canvas);
                     return;
                 }
-                View findViewByPosition = BotCommandsMenuContainer.this.listView.getLayoutManager().findViewByPosition(0);
-                float y = findViewByPosition != null ? findViewByPosition.getY() : 0.0f;
+                View firstView = BotCommandsMenuContainer.this.listView.getLayoutManager().findViewByPosition(0);
+                float y = 0.0f;
+                if (firstView != null) {
+                    y = firstView.getY();
+                }
                 if (y < 0.0f) {
                     y = 0.0f;
                 }
                 BotCommandsMenuContainer.this.scrollYOffset = y;
-                float dp = y - AndroidUtilities.dp(8.0f);
-                if (dp > 0.0f) {
-                    int i = (int) dp;
-                    BotCommandsMenuContainer.this.shadowDrawable.setBounds(-AndroidUtilities.dp(8.0f), i - AndroidUtilities.dp(24.0f), getMeasuredWidth() + AndroidUtilities.dp(8.0f), i);
+                float y2 = y - AndroidUtilities.dp(8.0f);
+                if (y2 > 0.0f) {
+                    BotCommandsMenuContainer.this.shadowDrawable.setBounds(-AndroidUtilities.dp(8.0f), ((int) y2) - AndroidUtilities.dp(24.0f), getMeasuredWidth() + AndroidUtilities.dp(8.0f), (int) y2);
                     BotCommandsMenuContainer.this.shadowDrawable.draw(canvas);
                 }
-                canvas.drawRect(0.0f, dp, getMeasuredWidth(), getMeasuredHeight() + AndroidUtilities.dp(16.0f), BotCommandsMenuContainer.this.backgroundPaint);
-                RectF rectF = AndroidUtilities.rectTmp;
-                rectF.set((getMeasuredWidth() / 2.0f) - AndroidUtilities.dp(12.0f), dp - AndroidUtilities.dp(4.0f), (getMeasuredWidth() / 2.0f) + AndroidUtilities.dp(12.0f), dp);
-                canvas.drawRoundRect(rectF, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), BotCommandsMenuContainer.this.topBackground);
+                canvas.drawRect(0.0f, y2, getMeasuredWidth(), getMeasuredHeight() + AndroidUtilities.dp(16.0f), BotCommandsMenuContainer.this.backgroundPaint);
+                AndroidUtilities.rectTmp.set((getMeasuredWidth() / 2.0f) - AndroidUtilities.dp(12.0f), y2 - AndroidUtilities.dp(4.0f), (getMeasuredWidth() / 2.0f) + AndroidUtilities.dp(12.0f), y2);
+                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), BotCommandsMenuContainer.this.topBackground);
                 super.dispatchDraw(canvas);
             }
         };
@@ -81,13 +68,13 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     }
 
     @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public boolean onStartNestedScroll(View view, View view2, int i) {
-        return !this.dismissed && i == 2;
+    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
+        return !this.dismissed && nestedScrollAxes == 2;
     }
 
     @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public void onNestedScrollAccepted(View view, View view2, int i) {
-        this.nestedScrollingParentHelper.onNestedScrollAccepted(view, view2, i);
+    public void onNestedScrollAccepted(View child, View target, int nestedScrollAxes) {
+        this.nestedScrollingParentHelper.onNestedScrollAccepted(child, target, nestedScrollAxes);
         if (this.dismissed) {
             return;
         }
@@ -95,8 +82,8 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     }
 
     @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public void onStopNestedScroll(View view) {
-        this.nestedScrollingParentHelper.onStopNestedScroll(view);
+    public void onStopNestedScroll(View target) {
+        this.nestedScrollingParentHelper.onStopNestedScroll(target);
         if (this.dismissed) {
             return;
         }
@@ -115,43 +102,50 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     }
 
     @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public void onNestedScroll(View view, int i, int i2, int i3, int i4) {
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
         if (this.dismissed) {
             return;
         }
         cancelCurrentAnimation();
-        if (i4 == 0) {
-            return;
+        if (dyUnconsumed != 0) {
+            float currentTranslation = this.listView.getTranslationY() - dyUnconsumed;
+            if (currentTranslation < 0.0f) {
+                currentTranslation = 0.0f;
+            }
+            this.listView.setTranslationY(currentTranslation);
+            invalidate();
         }
-        float translationY = this.listView.getTranslationY() - i4;
-        if (translationY < 0.0f) {
-            translationY = 0.0f;
-        }
-        this.listView.setTranslationY(translationY);
-        invalidate();
     }
 
     @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public void onNestedPreScroll(View view, int i, int i2, int[] iArr) {
+    public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
         if (this.dismissed) {
             return;
         }
         cancelCurrentAnimation();
-        float translationY = this.listView.getTranslationY();
-        float f = 0.0f;
-        if (translationY <= 0.0f || i2 <= 0) {
-            return;
+        float currentTranslation = this.listView.getTranslationY();
+        if (currentTranslation > 0.0f && dy > 0) {
+            float currentTranslation2 = currentTranslation - dy;
+            consumed[1] = dy;
+            if (currentTranslation2 < 0.0f) {
+                currentTranslation2 = 0.0f;
+            }
+            this.listView.setTranslationY(currentTranslation2);
+            invalidate();
         }
-        float f2 = translationY - i2;
-        iArr[1] = i2;
-        if (f2 >= 0.0f) {
-            f = f2;
-        }
-        this.listView.setTranslationY(f);
-        invalidate();
     }
 
-    @Override // android.view.ViewGroup
+    @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+        return false;
+    }
+
+    @Override // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
+    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+        return false;
+    }
+
+    @Override // android.view.ViewGroup, androidx.core.view.NestedScrollingParent
     public int getNestedScrollAxes() {
         return this.nestedScrollingParentHelper.getNestedScrollAxes();
     }
@@ -171,8 +165,7 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
             this.listView.scrollToPosition(0);
             this.entering = true;
             this.dismissed = false;
-        } else if (!this.dismissed) {
-        } else {
+        } else if (this.dismissed) {
             this.dismissed = false;
             cancelCurrentAnimation();
             playEnterAnim(false);
@@ -180,25 +173,23 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(i, i2);
-        if (!this.entering || this.dismissed) {
-            return;
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (this.entering && !this.dismissed) {
+            RecyclerListView recyclerListView = this.listView;
+            recyclerListView.setTranslationY((recyclerListView.getMeasuredHeight() - this.listView.getPaddingTop()) + AndroidUtilities.dp(16.0f));
+            playEnterAnim(true);
+            this.entering = false;
         }
-        RecyclerListView recyclerListView = this.listView;
-        recyclerListView.setTranslationY((recyclerListView.getMeasuredHeight() - this.listView.getPaddingTop()) + AndroidUtilities.dp(16.0f));
-        playEnterAnim(true);
-        this.entering = false;
     }
 
-    private void playEnterAnim(boolean z) {
+    private void playEnterAnim(boolean firstTime) {
         if (this.dismissed) {
             return;
         }
-        RecyclerListView recyclerListView = this.listView;
-        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(recyclerListView, FrameLayout.TRANSLATION_Y, recyclerListView.getTranslationY(), 0.0f);
+        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this.listView, TRANSLATION_Y, this.listView.getTranslationY(), 0.0f);
         this.currentAnimation = ofFloat;
-        if (z) {
+        if (firstTime) {
             ofFloat.setDuration(320L);
             this.currentAnimation.setInterpolator(new OvershootInterpolator(0.8f));
         } else {
@@ -212,12 +203,11 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
         if (!this.dismissed) {
             this.dismissed = true;
             cancelCurrentAnimation();
-            RecyclerListView recyclerListView = this.listView;
-            ObjectAnimator ofFloat = ObjectAnimator.ofFloat(recyclerListView, FrameLayout.TRANSLATION_Y, recyclerListView.getTranslationY(), (getMeasuredHeight() - this.scrollYOffset) + AndroidUtilities.dp(40.0f));
+            ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this.listView, TRANSLATION_Y, this.listView.getTranslationY(), (getMeasuredHeight() - this.scrollYOffset) + AndroidUtilities.dp(40.0f));
             this.currentAnimation = ofFloat;
             ofFloat.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.BotCommandsMenuContainer.2
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animator) {
+                public void onAnimationEnd(Animator animation) {
                     BotCommandsMenuContainer.this.setVisibility(8);
                     BotCommandsMenuContainer.this.currentAnimation = null;
                 }
@@ -229,18 +219,21 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
         }
     }
 
+    public void onDismiss() {
+    }
+
     @Override // android.view.ViewGroup, android.view.View
-    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-        if (motionEvent.getAction() != 0 || motionEvent.getY() >= this.scrollYOffset - AndroidUtilities.dp(24.0f)) {
-            return super.dispatchTouchEvent(motionEvent);
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == 0 && ev.getY() < this.scrollYOffset - AndroidUtilities.dp(24.0f)) {
+            return false;
         }
-        return false;
+        return super.dispatchTouchEvent(ev);
     }
 
     public void updateColors() {
-        this.topBackground.setColor(Theme.getColor("dialogGrayLine"));
-        this.backgroundPaint.setColor(Theme.getColor("windowBackgroundWhite"));
-        this.shadowDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor("windowBackgroundWhite"), PorterDuff.Mode.MULTIPLY));
+        this.topBackground.setColor(Theme.getColor(Theme.key_dialogGrayLine));
+        this.backgroundPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        this.shadowDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhite), PorterDuff.Mode.MULTIPLY));
         invalidate();
     }
 }

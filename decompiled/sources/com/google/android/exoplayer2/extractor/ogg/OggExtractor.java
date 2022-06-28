@@ -4,79 +4,88 @@ import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.extractor.ExtractorOutput;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.extractor.PositionHolder;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class OggExtractor implements Extractor {
+    public static final ExtractorsFactory FACTORY = OggExtractor$$ExternalSyntheticLambda0.INSTANCE;
+    private static final int MAX_VERIFICATION_BYTES = 8;
     private ExtractorOutput output;
     private StreamReader streamReader;
     private boolean streamReaderInitialized;
+
+    public static /* synthetic */ Extractor[] lambda$static$0() {
+        return new Extractor[]{new OggExtractor()};
+    }
+
+    @Override // com.google.android.exoplayer2.extractor.Extractor
+    public boolean sniff(ExtractorInput input) throws IOException, InterruptedException {
+        try {
+            return sniffInternal(input);
+        } catch (ParserException e) {
+            return false;
+        }
+    }
+
+    @Override // com.google.android.exoplayer2.extractor.Extractor
+    public void init(ExtractorOutput output) {
+        this.output = output;
+    }
+
+    @Override // com.google.android.exoplayer2.extractor.Extractor
+    public void seek(long position, long timeUs) {
+        StreamReader streamReader = this.streamReader;
+        if (streamReader != null) {
+            streamReader.seek(position, timeUs);
+        }
+    }
 
     @Override // com.google.android.exoplayer2.extractor.Extractor
     public void release() {
     }
 
     @Override // com.google.android.exoplayer2.extractor.Extractor
-    public boolean sniff(ExtractorInput extractorInput) throws IOException, InterruptedException {
-        try {
-            return sniffInternal(extractorInput);
-        } catch (ParserException unused) {
-            return false;
-        }
-    }
-
-    @Override // com.google.android.exoplayer2.extractor.Extractor
-    public void init(ExtractorOutput extractorOutput) {
-        this.output = extractorOutput;
-    }
-
-    @Override // com.google.android.exoplayer2.extractor.Extractor
-    public void seek(long j, long j2) {
-        StreamReader streamReader = this.streamReader;
-        if (streamReader != null) {
-            streamReader.seek(j, j2);
-        }
-    }
-
-    @Override // com.google.android.exoplayer2.extractor.Extractor
-    public int read(ExtractorInput extractorInput, PositionHolder positionHolder) throws IOException, InterruptedException {
+    public int read(ExtractorInput input, PositionHolder seekPosition) throws IOException, InterruptedException {
         if (this.streamReader == null) {
-            if (!sniffInternal(extractorInput)) {
+            if (!sniffInternal(input)) {
                 throw new ParserException("Failed to determine bitstream type");
             }
-            extractorInput.resetPeekPosition();
+            input.resetPeekPosition();
         }
         if (!this.streamReaderInitialized) {
-            TrackOutput track = this.output.track(0, 1);
+            TrackOutput trackOutput = this.output.track(0, 1);
             this.output.endTracks();
-            this.streamReader.init(this.output, track);
+            this.streamReader.init(this.output, trackOutput);
             this.streamReaderInitialized = true;
         }
-        return this.streamReader.read(extractorInput, positionHolder);
+        return this.streamReader.read(input, seekPosition);
     }
 
-    private boolean sniffInternal(ExtractorInput extractorInput) throws IOException, InterruptedException {
-        OggPageHeader oggPageHeader = new OggPageHeader();
-        if (oggPageHeader.populate(extractorInput, true) && (oggPageHeader.type & 2) == 2) {
-            int min = Math.min(oggPageHeader.bodySize, 8);
-            ParsableByteArray parsableByteArray = new ParsableByteArray(min);
-            extractorInput.peekFully(parsableByteArray.data, 0, min);
-            if (FlacReader.verifyBitstreamType(resetPosition(parsableByteArray))) {
-                this.streamReader = new FlacReader();
-            } else if (VorbisReader.verifyBitstreamType(resetPosition(parsableByteArray))) {
-                this.streamReader = new VorbisReader();
-            } else if (OpusReader.verifyBitstreamType(resetPosition(parsableByteArray))) {
-                this.streamReader = new OpusReader();
-            }
-            return true;
+    private boolean sniffInternal(ExtractorInput input) throws IOException, InterruptedException {
+        OggPageHeader header = new OggPageHeader();
+        if (!header.populate(input, true) || (header.type & 2) != 2) {
+            return false;
         }
-        return false;
+        int length = Math.min(header.bodySize, 8);
+        ParsableByteArray scratch = new ParsableByteArray(length);
+        input.peekFully(scratch.data, 0, length);
+        if (FlacReader.verifyBitstreamType(resetPosition(scratch))) {
+            this.streamReader = new FlacReader();
+        } else if (VorbisReader.verifyBitstreamType(resetPosition(scratch))) {
+            this.streamReader = new VorbisReader();
+        } else if (!OpusReader.verifyBitstreamType(resetPosition(scratch))) {
+            return false;
+        } else {
+            this.streamReader = new OpusReader();
+        }
+        return true;
     }
 
-    private static ParsableByteArray resetPosition(ParsableByteArray parsableByteArray) {
-        parsableByteArray.setPosition(0);
-        return parsableByteArray;
+    private static ParsableByteArray resetPosition(ParsableByteArray scratch) {
+        scratch.setPosition(0);
+        return scratch;
     }
 }

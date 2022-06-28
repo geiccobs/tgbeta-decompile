@@ -1,23 +1,22 @@
 package org.telegram.messenger;
 
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$TL_inputFile;
-import org.telegram.tgnet.TLRPC$TL_secureFile;
-/* loaded from: classes.dex */
+import org.telegram.tgnet.TLRPC;
+/* loaded from: classes4.dex */
 public class SecureDocument extends TLObject {
     public byte[] fileHash;
     public byte[] fileSecret;
-    public TLRPC$TL_inputFile inputFile;
+    public TLRPC.TL_inputFile inputFile;
     public String path;
     public SecureDocumentKey secureDocumentKey;
-    public TLRPC$TL_secureFile secureFile;
+    public TLRPC.TL_secureFile secureFile;
     public int type;
 
-    public SecureDocument(SecureDocumentKey secureDocumentKey, TLRPC$TL_secureFile tLRPC$TL_secureFile, String str, byte[] bArr, byte[] bArr2) {
-        this.secureDocumentKey = secureDocumentKey;
-        this.secureFile = tLRPC$TL_secureFile;
-        this.path = str;
-        this.fileHash = bArr;
-        this.fileSecret = bArr2;
+    public SecureDocument(SecureDocumentKey key, TLRPC.TL_secureFile file, String p, byte[] fh, byte[] secret) {
+        this.secureDocumentKey = key;
+        this.secureFile = file;
+        this.path = p;
+        this.fileHash = fh;
+        this.fileSecret = secret;
     }
 }

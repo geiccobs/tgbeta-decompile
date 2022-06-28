@@ -1,6 +1,7 @@
 package com.google.android.gms.internal.vision;
 
 import com.google.android.gms.internal.vision.zzio;
+import com.googlecode.mp4parser.boxes.apple.TrackLoadSettingsAtom;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +11,7 @@ import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zziz<T extends zzio> {
     private static final Logger zza = Logger.getLogger(zzii.class.getName());
     private static String zzb = "com.google.protobuf.BlazeGeneratedExtensionRegistryLiteLoader";
@@ -34,29 +35,31 @@ public abstract class zziz<T extends zzio> {
             try {
                 try {
                     try {
-                        return cls.cast(((zziz) Class.forName(str, true, classLoader).getConstructor(new Class[0]).newInstance(new Object[0])).zza());
-                    } catch (IllegalAccessException e) {
-                        throw new IllegalStateException(e);
+                        try {
+                            return cls.cast(((zziz) Class.forName(str, true, classLoader).getConstructor(new Class[0]).newInstance(new Object[0])).zza());
+                        } catch (NoSuchMethodException e) {
+                            throw new IllegalStateException(e);
+                        }
+                    } catch (IllegalAccessException e2) {
+                        throw new IllegalStateException(e2);
                     }
-                } catch (InvocationTargetException e2) {
-                    throw new IllegalStateException(e2);
+                } catch (InstantiationException e3) {
+                    throw new IllegalStateException(e3);
                 }
-            } catch (InstantiationException e3) {
-                throw new IllegalStateException(e3);
-            } catch (NoSuchMethodException e4) {
+            } catch (InvocationTargetException e4) {
                 throw new IllegalStateException(e4);
             }
-        } catch (ClassNotFoundException unused) {
+        } catch (ClassNotFoundException e5) {
             Iterator it = ServiceLoader.load(zziz.class, classLoader).iterator();
             ArrayList arrayList = new ArrayList();
             while (it.hasNext()) {
                 try {
                     arrayList.add(cls.cast(((zziz) it.next()).zza()));
-                } catch (ServiceConfigurationError e5) {
+                } catch (ServiceConfigurationError e6) {
                     Logger logger = zza;
                     Level level = Level.SEVERE;
-                    String simpleName = cls.getSimpleName();
-                    logger.logp(level, "com.google.protobuf.GeneratedExtensionRegistryLoader", "load", simpleName.length() != 0 ? "Unable to load ".concat(simpleName) : new String("Unable to load "), (Throwable) e5);
+                    String valueOf = String.valueOf(cls.getSimpleName());
+                    logger.logp(level, "com.google.protobuf.GeneratedExtensionRegistryLoader", TrackLoadSettingsAtom.TYPE, valueOf.length() != 0 ? "Unable to load ".concat(valueOf) : new String("Unable to load "), (Throwable) e6);
                 }
             }
             if (arrayList.size() == 1) {
@@ -67,12 +70,12 @@ public abstract class zziz<T extends zzio> {
             }
             try {
                 return (T) cls.getMethod("combine", Collection.class).invoke(null, arrayList);
-            } catch (IllegalAccessException e6) {
-                throw new IllegalStateException(e6);
-            } catch (NoSuchMethodException e7) {
+            } catch (IllegalAccessException e7) {
                 throw new IllegalStateException(e7);
-            } catch (InvocationTargetException e8) {
+            } catch (NoSuchMethodException e8) {
                 throw new IllegalStateException(e8);
+            } catch (InvocationTargetException e9) {
+                throw new IllegalStateException(e9);
             }
         }
     }

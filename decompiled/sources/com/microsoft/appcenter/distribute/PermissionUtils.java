@@ -1,22 +1,22 @@
 package com.microsoft.appcenter.distribute;
 
 import android.content.Context;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class PermissionUtils {
-    public static int[] permissionsState(Context context, String... strArr) {
-        if (strArr == null) {
+    public static int[] permissionsState(Context context, String... permissions) {
+        if (permissions == null) {
             return null;
         }
-        int[] iArr = new int[strArr.length];
-        for (int i = 0; i < strArr.length; i++) {
-            iArr[i] = context.checkCallingOrSelfPermission(strArr[i]);
+        int[] state = new int[permissions.length];
+        for (int i = 0; i < permissions.length; i++) {
+            state[i] = context.checkCallingOrSelfPermission(permissions[i]);
         }
-        return iArr;
+        return state;
     }
 
-    public static boolean permissionsAreGranted(int[] iArr) {
-        for (int i : iArr) {
-            if (i != 0) {
+    public static boolean permissionsAreGranted(int[] permissionsState) {
+        for (int permissionState : permissionsState) {
+            if (permissionState != 0) {
                 return false;
             }
         }

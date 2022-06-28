@@ -17,10 +17,9 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.annotation.Keep;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
     private String activeTextColorKey;
     private int allTextWidth;
@@ -33,6 +32,7 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
     private boolean animatingIndicator;
     private float animationIdicatorProgress;
     private Runnable animationRunnable;
+    private boolean animationRunning;
     private float animationTime;
     private int currentPosition;
     private ScrollSlidingTabStripDelegate delegate;
@@ -58,27 +58,26 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
     private String unactiveTextColorKey;
     private boolean useSameWidth;
 
-    /* loaded from: classes3.dex */
+    static /* synthetic */ float access$216(ScrollSlidingTextTabStrip x0, float x1) {
+        float f = x0.animationTime + x1;
+        x0.animationTime = f;
+        return f;
+    }
+
+    /* loaded from: classes5.dex */
     public interface ScrollSlidingTabStripDelegate {
-
-        /* renamed from: org.telegram.ui.Components.ScrollSlidingTextTabStrip$ScrollSlidingTabStripDelegate$-CC */
-        /* loaded from: classes3.dex */
-        public final /* synthetic */ class CC {
-            public static void $default$onSamePageSelected(ScrollSlidingTabStripDelegate scrollSlidingTabStripDelegate) {
-            }
-        }
-
         void onPageScrolled(float f);
 
         void onPageSelected(int i, boolean z);
 
         void onSamePageSelected();
-    }
 
-    static /* synthetic */ float access$216(ScrollSlidingTextTabStrip scrollSlidingTextTabStrip, float f) {
-        float f2 = scrollSlidingTextTabStrip.animationTime + f;
-        scrollSlidingTextTabStrip.animationTime = f2;
-        return f2;
+        /* renamed from: org.telegram.ui.Components.ScrollSlidingTextTabStrip$ScrollSlidingTabStripDelegate$-CC */
+        /* loaded from: classes5.dex */
+        public final /* synthetic */ class CC {
+            public static void $default$onSamePageSelected(ScrollSlidingTabStripDelegate _this) {
+            }
+        }
     }
 
     public ScrollSlidingTextTabStrip(Context context) {
@@ -89,10 +88,10 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         super(context);
         this.selectedTabId = -1;
         this.scrollingToChild = -1;
-        this.tabLineColorKey = "actionBarTabLine";
-        this.activeTextColorKey = "actionBarTabActiveText";
-        this.unactiveTextColorKey = "actionBarTabUnactiveText";
-        this.selectorColorKey = "actionBarTabSelector";
+        this.tabLineColorKey = Theme.key_actionBarTabLine;
+        this.activeTextColorKey = Theme.key_actionBarTabActiveText;
+        this.unactiveTextColorKey = Theme.key_actionBarTabUnactiveText;
+        this.selectorColorKey = Theme.key_actionBarTabSelector;
         this.interpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
         this.positionToId = new SparseIntArray(5);
         this.idToPosition = new SparseIntArray(5);
@@ -107,11 +106,12 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
                 if (!ScrollSlidingTextTabStrip.this.animatingIndicator) {
                     return;
                 }
-                long elapsedRealtime = SystemClock.elapsedRealtime() - ScrollSlidingTextTabStrip.this.lastAnimationTime;
-                if (elapsedRealtime > 17) {
-                    elapsedRealtime = 17;
+                long newTime = SystemClock.elapsedRealtime();
+                long dt = newTime - ScrollSlidingTextTabStrip.this.lastAnimationTime;
+                if (dt > 17) {
+                    dt = 17;
                 }
-                ScrollSlidingTextTabStrip.access$216(ScrollSlidingTextTabStrip.this, ((float) elapsedRealtime) / 200.0f);
+                ScrollSlidingTextTabStrip.access$216(ScrollSlidingTextTabStrip.this, ((float) dt) / 200.0f);
                 ScrollSlidingTextTabStrip scrollSlidingTextTabStrip = ScrollSlidingTextTabStrip.this;
                 scrollSlidingTextTabStrip.setAnimationIdicatorProgress(scrollSlidingTextTabStrip.interpolator.getInterpolation(ScrollSlidingTextTabStrip.this.animationTime));
                 if (ScrollSlidingTextTabStrip.this.animationTime > 1.0f) {
@@ -123,16 +123,15 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
                 }
                 ScrollSlidingTextTabStrip.this.animatingIndicator = false;
                 ScrollSlidingTextTabStrip.this.setEnabled(true);
-                if (ScrollSlidingTextTabStrip.this.delegate == null) {
-                    return;
+                if (ScrollSlidingTextTabStrip.this.delegate != null) {
+                    ScrollSlidingTextTabStrip.this.delegate.onPageScrolled(1.0f);
                 }
-                ScrollSlidingTextTabStrip.this.delegate.onPageScrolled(1.0f);
             }
         };
         this.resourcesProvider = resourcesProvider;
         this.selectorDrawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, null);
-        float dpf2 = AndroidUtilities.dpf2(3.0f);
-        this.selectorDrawable.setCornerRadii(new float[]{dpf2, dpf2, dpf2, dpf2, 0.0f, 0.0f, 0.0f, 0.0f});
+        float rad = AndroidUtilities.dpf2(3.0f);
+        this.selectorDrawable.setCornerRadii(new float[]{rad, rad, rad, rad, 0.0f, 0.0f, 0.0f, 0.0f});
         this.selectorDrawable.setColor(Theme.getColor(this.tabLineColorKey, resourcesProvider));
         setFillViewport(true);
         setWillNotDraw(false);
@@ -143,8 +142,8 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
             }
 
             @Override // android.view.View
-            public void setAlpha(float f) {
-                super.setAlpha(f);
+            public void setAlpha(float alpha) {
+                super.setAlpha(alpha);
                 ScrollSlidingTextTabStrip.this.invalidate();
             }
         };
@@ -163,51 +162,48 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         return this.animatingIndicator;
     }
 
-    private void setAnimationProgressInernal(TextView textView, TextView textView2, float f) {
-        if (textView == null || textView2 == null) {
-            return;
+    private void setAnimationProgressInernal(TextView newTab, TextView prevTab, float value) {
+        if (newTab != null && prevTab != null) {
+            int newColor = Theme.getColor(this.activeTextColorKey, this.resourcesProvider);
+            int prevColor = Theme.getColor(this.unactiveTextColorKey, this.resourcesProvider);
+            int r1 = Color.red(newColor);
+            int g1 = Color.green(newColor);
+            int b1 = Color.blue(newColor);
+            int a1 = Color.alpha(newColor);
+            int r2 = Color.red(prevColor);
+            int g2 = Color.green(prevColor);
+            int b2 = Color.blue(prevColor);
+            int a2 = Color.alpha(prevColor);
+            prevTab.setTextColor(Color.argb((int) (a1 + ((a2 - a1) * value)), (int) (r1 + ((r2 - r1) * value)), (int) (g1 + ((g2 - g1) * value)), (int) (b1 + ((b2 - b1) * value))));
+            newTab.setTextColor(Color.argb((int) (a2 + ((a1 - a2) * value)), (int) (r2 + ((r1 - r2) * value)), (int) (g2 + ((g1 - g2) * value)), (int) (b2 + ((b1 - b2) * value))));
+            int i = this.animateIndicatorStartX;
+            this.indicatorX = (int) (i + ((this.animateIndicatorToX - i) * value));
+            int i2 = this.animateIndicatorStartWidth;
+            this.indicatorWidth = (int) (i2 + ((this.animateIndicatorToWidth - i2) * value));
+            invalidate();
         }
-        int color = Theme.getColor(this.activeTextColorKey, this.resourcesProvider);
-        int color2 = Theme.getColor(this.unactiveTextColorKey, this.resourcesProvider);
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        int alpha = Color.alpha(color);
-        int red2 = Color.red(color2);
-        int green2 = Color.green(color2);
-        int blue2 = Color.blue(color2);
-        int alpha2 = Color.alpha(color2);
-        textView2.setTextColor(Color.argb((int) (alpha + ((alpha2 - alpha) * f)), (int) (red + ((red2 - red) * f)), (int) (green + ((green2 - green) * f)), (int) (blue + ((blue2 - blue) * f))));
-        textView.setTextColor(Color.argb((int) (alpha2 + ((alpha - alpha2) * f)), (int) (red2 + ((red - red2) * f)), (int) (green2 + ((green - green2) * f)), (int) (blue2 + ((blue - blue2) * f))));
-        int i = this.animateIndicatorStartX;
-        this.indicatorX = (int) (i + ((this.animateIndicatorToX - i) * f));
-        int i2 = this.animateIndicatorStartWidth;
-        this.indicatorWidth = (int) (i2 + ((this.animateIndicatorToWidth - i2) * f));
-        invalidate();
     }
 
-    @Keep
-    public void setAnimationIdicatorProgress(float f) {
-        this.animationIdicatorProgress = f;
-        TextView textView = (TextView) this.tabsContainer.getChildAt(this.currentPosition);
-        TextView textView2 = (TextView) this.tabsContainer.getChildAt(this.previousPosition);
-        if (textView2 == null || textView == null) {
+    public void setAnimationIdicatorProgress(float value) {
+        this.animationIdicatorProgress = value;
+        TextView newTab = (TextView) this.tabsContainer.getChildAt(this.currentPosition);
+        TextView prevTab = (TextView) this.tabsContainer.getChildAt(this.previousPosition);
+        if (prevTab == null || newTab == null) {
             return;
         }
-        setAnimationProgressInernal(textView, textView2, f);
-        if (f >= 1.0f) {
-            textView2.setTag(this.unactiveTextColorKey);
-            textView.setTag(this.activeTextColorKey);
+        setAnimationProgressInernal(newTab, prevTab, value);
+        if (value >= 1.0f) {
+            prevTab.setTag(this.unactiveTextColorKey);
+            newTab.setTag(this.activeTextColorKey);
         }
         ScrollSlidingTabStripDelegate scrollSlidingTabStripDelegate = this.delegate;
-        if (scrollSlidingTabStripDelegate == null) {
-            return;
+        if (scrollSlidingTabStripDelegate != null) {
+            scrollSlidingTabStripDelegate.onPageScrolled(value);
         }
-        scrollSlidingTabStripDelegate.onPageScrolled(f);
     }
 
-    public void setUseSameWidth(boolean z) {
-        this.useSameWidth = z;
+    public void setUseSameWidth(boolean value) {
+        this.useSameWidth = value;
     }
 
     public Drawable getSelectorDrawable() {
@@ -218,19 +214,19 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         return this.tabsContainer;
     }
 
-    @Keep
     public float getAnimationIdicatorProgress() {
         return this.animationIdicatorProgress;
     }
 
-    public int getNextPageId(boolean z) {
-        return this.positionToId.get(this.currentPosition + (z ? 1 : -1), -1);
+    public int getNextPageId(boolean forward) {
+        return this.positionToId.get(this.currentPosition + (forward ? 1 : -1), -1);
     }
 
     public SparseArray<View> removeTabs() {
-        SparseArray<View> sparseArray = new SparseArray<>();
+        SparseArray<View> views = new SparseArray<>();
         for (int i = 0; i < getChildCount(); i++) {
-            sparseArray.get(this.positionToId.get(i), getChildAt(i));
+            View child = getChildAt(i);
+            views.get(this.positionToId.get(i), child);
         }
         this.positionToId.clear();
         this.idToPosition.clear();
@@ -238,88 +234,89 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         this.tabsContainer.removeAllViews();
         this.allTextWidth = 0;
         this.tabCount = 0;
-        return sparseArray;
+        return views;
     }
 
     public int getTabsCount() {
         return this.tabCount;
     }
 
-    public boolean hasTab(int i) {
-        return this.idToPosition.get(i, -1) != -1;
+    public boolean hasTab(int id) {
+        return this.idToPosition.get(id, -1) != -1;
     }
 
-    public void addTextTab(int i, CharSequence charSequence) {
-        addTextTab(i, charSequence, null);
+    public void addTextTab(int id, CharSequence text) {
+        addTextTab(id, text, null);
     }
 
-    public void addTextTab(final int i, CharSequence charSequence, SparseArray<View> sparseArray) {
-        int i2 = this.tabCount;
-        this.tabCount = i2 + 1;
-        if (i2 == 0 && this.selectedTabId == -1) {
-            this.selectedTabId = i;
+    public void addTextTab(final int id, CharSequence text, SparseArray<View> viewsCache) {
+        int position = this.tabCount;
+        this.tabCount = position + 1;
+        if (position == 0 && this.selectedTabId == -1) {
+            this.selectedTabId = id;
         }
-        this.positionToId.put(i2, i);
-        this.idToPosition.put(i, i2);
-        int i3 = this.selectedTabId;
-        if (i3 != -1 && i3 == i) {
-            this.currentPosition = i2;
+        this.positionToId.put(position, id);
+        this.idToPosition.put(id, position);
+        int i = this.selectedTabId;
+        if (i != -1 && i == id) {
+            this.currentPosition = position;
             this.prevLayoutWidth = 0;
         }
-        TextView textView = null;
-        if (sparseArray != null) {
-            textView = (TextView) sparseArray.get(i);
-            sparseArray.delete(i);
+        TextView tab = null;
+        if (viewsCache != null) {
+            tab = (TextView) viewsCache.get(id);
+            viewsCache.delete(id);
         }
-        if (textView == null) {
-            textView = new TextView(getContext()) { // from class: org.telegram.ui.Components.ScrollSlidingTextTabStrip.3
+        if (tab == null) {
+            tab = new TextView(getContext()) { // from class: org.telegram.ui.Components.ScrollSlidingTextTabStrip.3
                 {
                     ScrollSlidingTextTabStrip.this = this;
                 }
 
                 @Override // android.view.View
-                public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-                    super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
-                    accessibilityNodeInfo.setSelected(ScrollSlidingTextTabStrip.this.selectedTabId == i);
+                public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+                    super.onInitializeAccessibilityNodeInfo(info);
+                    info.setSelected(ScrollSlidingTextTabStrip.this.selectedTabId == id);
                 }
             };
-            textView.setWillNotDraw(false);
-            textView.setGravity(17);
-            textView.setBackgroundDrawable(Theme.createSelectorDrawable(Theme.getColor(this.selectorColorKey, this.resourcesProvider), 3));
-            textView.setTextSize(1, 15.0f);
-            textView.setSingleLine(true);
-            textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-            textView.setPadding(AndroidUtilities.dp(16.0f), 0, AndroidUtilities.dp(16.0f), 0);
-            textView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ScrollSlidingTextTabStrip$$ExternalSyntheticLambda1
+            tab.setWillNotDraw(false);
+            tab.setGravity(17);
+            tab.setBackgroundDrawable(Theme.createSelectorDrawable(Theme.getColor(this.selectorColorKey, this.resourcesProvider), 3));
+            tab.setTextSize(1, 15.0f);
+            tab.setSingleLine(true);
+            tab.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            tab.setPadding(AndroidUtilities.dp(16.0f), 0, AndroidUtilities.dp(16.0f), 0);
+            tab.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ScrollSlidingTextTabStrip$$ExternalSyntheticLambda1
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    ScrollSlidingTextTabStrip.this.lambda$addTextTab$0(i, view);
+                    ScrollSlidingTextTabStrip.this.m2970x28370d04(id, view);
                 }
             });
         }
-        textView.setText(charSequence);
-        int ceil = ((int) Math.ceil(textView.getPaint().measureText(charSequence, 0, charSequence.length()))) + textView.getPaddingLeft() + textView.getPaddingRight();
-        this.tabsContainer.addView(textView, LayoutHelper.createLinear(0, -1));
-        this.allTextWidth += ceil;
-        this.positionToWidth.put(i2, ceil);
+        tab.setText(text);
+        int tabWidth = ((int) Math.ceil(tab.getPaint().measureText(text, 0, text.length()))) + tab.getPaddingLeft() + tab.getPaddingRight();
+        this.tabsContainer.addView(tab, LayoutHelper.createLinear(0, -1));
+        this.allTextWidth += tabWidth;
+        this.positionToWidth.put(position, tabWidth);
     }
 
-    public /* synthetic */ void lambda$addTextTab$0(int i, View view) {
+    /* renamed from: lambda$addTextTab$0$org-telegram-ui-Components-ScrollSlidingTextTabStrip */
+    public /* synthetic */ void m2970x28370d04(int id, View v) {
         ScrollSlidingTabStripDelegate scrollSlidingTabStripDelegate;
-        int indexOfChild = this.tabsContainer.indexOfChild(view);
-        if (indexOfChild < 0) {
+        int position1 = this.tabsContainer.indexOfChild(v);
+        if (position1 < 0) {
             return;
         }
-        int i2 = this.currentPosition;
-        if (indexOfChild == i2 && (scrollSlidingTabStripDelegate = this.delegate) != null) {
+        int i = this.currentPosition;
+        if (position1 == i && (scrollSlidingTabStripDelegate = this.delegate) != null) {
             scrollSlidingTabStripDelegate.onSamePageSelected();
             return;
         }
-        boolean z = i2 < indexOfChild;
+        boolean scrollingForward = i < position1;
         this.scrollingToChild = -1;
-        this.previousPosition = i2;
-        this.currentPosition = indexOfChild;
-        this.selectedTabId = i;
+        this.previousPosition = i;
+        this.currentPosition = position1;
+        this.selectedTabId = id;
         if (this.animatingIndicator) {
             AndroidUtilities.cancelRunOnUIThread(this.animationRunnable);
             this.animatingIndicator = false;
@@ -328,49 +325,50 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         this.animatingIndicator = true;
         this.animateIndicatorStartX = this.indicatorX;
         this.animateIndicatorStartWidth = this.indicatorWidth;
-        TextView textView = (TextView) view;
-        this.animateIndicatorToWidth = getChildWidth(textView);
-        this.animateIndicatorToX = textView.getLeft() + ((textView.getMeasuredWidth() - this.animateIndicatorToWidth) / 2);
+        TextView nextChild = (TextView) v;
+        this.animateIndicatorToWidth = getChildWidth(nextChild);
+        this.animateIndicatorToX = nextChild.getLeft() + ((nextChild.getMeasuredWidth() - this.animateIndicatorToWidth) / 2);
         setEnabled(false);
         AndroidUtilities.runOnUIThread(this.animationRunnable, 16L);
         ScrollSlidingTabStripDelegate scrollSlidingTabStripDelegate2 = this.delegate;
         if (scrollSlidingTabStripDelegate2 != null) {
-            scrollSlidingTabStripDelegate2.onPageSelected(i, z);
+            scrollSlidingTabStripDelegate2.onPageSelected(id, scrollingForward);
         }
-        scrollToChild(indexOfChild);
+        scrollToChild(position1);
     }
 
     public void finishAddingTabs() {
-        int childCount = this.tabsContainer.getChildCount();
-        int i = 0;
-        while (i < childCount) {
-            TextView textView = (TextView) this.tabsContainer.getChildAt(i);
-            textView.setTag(this.currentPosition == i ? this.activeTextColorKey : this.unactiveTextColorKey);
-            textView.setTextColor(Theme.getColor(this.currentPosition == i ? this.activeTextColorKey : this.unactiveTextColorKey, this.resourcesProvider));
-            if (i == 0) {
-                textView.getLayoutParams().width = childCount == 1 ? -2 : 0;
+        int count = this.tabsContainer.getChildCount();
+        int a = 0;
+        while (a < count) {
+            TextView tab = (TextView) this.tabsContainer.getChildAt(a);
+            tab.setTag(this.currentPosition == a ? this.activeTextColorKey : this.unactiveTextColorKey);
+            tab.setTextColor(Theme.getColor(this.currentPosition == a ? this.activeTextColorKey : this.unactiveTextColorKey, this.resourcesProvider));
+            if (a == 0) {
+                tab.getLayoutParams().width = count == 1 ? -2 : 0;
             }
-            i++;
+            a++;
         }
     }
 
-    public void setColors(String str, String str2, String str3, String str4) {
-        this.tabLineColorKey = str;
-        this.activeTextColorKey = str2;
-        this.unactiveTextColorKey = str3;
-        this.selectorColorKey = str4;
-        this.selectorDrawable.setColor(Theme.getColor(str, this.resourcesProvider));
+    public void setColors(String line, String active, String unactive, String selector) {
+        this.tabLineColorKey = line;
+        this.activeTextColorKey = active;
+        this.unactiveTextColorKey = unactive;
+        this.selectorColorKey = selector;
+        this.selectorDrawable.setColor(Theme.getColor(line, this.resourcesProvider));
     }
 
     public int getCurrentTabId() {
         return this.selectedTabId;
     }
 
-    public void setInitialTabId(int i) {
-        this.selectedTabId = i;
-        int i2 = this.idToPosition.get(i);
-        if (((TextView) this.tabsContainer.getChildAt(i2)) != null) {
-            this.currentPosition = i2;
+    public void setInitialTabId(int id) {
+        this.selectedTabId = id;
+        int pos = this.idToPosition.get(id);
+        TextView child = (TextView) this.tabsContainer.getChildAt(pos);
+        if (child != null) {
+            this.currentPosition = pos;
             this.prevLayoutWidth = 0;
             finishAddingTabs();
             requestLayout();
@@ -386,77 +384,74 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
     }
 
     @Override // android.view.ViewGroup
-    protected boolean drawChild(Canvas canvas, View view, long j) {
-        boolean drawChild = super.drawChild(canvas, view, j);
-        if (view == this.tabsContainer) {
-            int measuredHeight = getMeasuredHeight();
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        boolean result = super.drawChild(canvas, child, drawingTime);
+        if (child == this.tabsContainer) {
+            int height = getMeasuredHeight();
             this.selectorDrawable.setAlpha((int) (this.tabsContainer.getAlpha() * 255.0f));
-            float f = this.indicatorX + this.indicatorXAnimationDx;
-            this.selectorDrawable.setBounds((int) f, measuredHeight - AndroidUtilities.dpr(4.0f), (int) (this.indicatorWidth + f + this.indicatorWidthAnimationDx), measuredHeight);
+            float x = this.indicatorX + this.indicatorXAnimationDx;
+            float w = this.indicatorWidth + x + this.indicatorWidthAnimationDx;
+            this.selectorDrawable.setBounds((int) x, height - AndroidUtilities.dpr(4.0f), (int) w, height);
             this.selectorDrawable.draw(canvas);
         }
-        return drawChild;
+        return result;
     }
 
     @Override // android.widget.HorizontalScrollView, android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        int size = View.MeasureSpec.getSize(i) - AndroidUtilities.dp(22.0f);
-        int childCount = this.tabsContainer.getChildCount();
-        for (int i3 = 0; i3 < childCount; i3++) {
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) this.tabsContainer.getChildAt(i3).getLayoutParams();
-            int i4 = this.allTextWidth;
-            if (i4 > size) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = View.MeasureSpec.getSize(widthMeasureSpec) - AndroidUtilities.dp(22.0f);
+        int count = this.tabsContainer.getChildCount();
+        for (int a = 0; a < count; a++) {
+            View child = this.tabsContainer.getChildAt(a);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) child.getLayoutParams();
+            int i = this.allTextWidth;
+            if (i > width) {
                 layoutParams.weight = 0.0f;
                 layoutParams.width = -2;
             } else if (this.useSameWidth) {
-                layoutParams.weight = 1.0f / childCount;
+                layoutParams.weight = 1.0f / count;
                 layoutParams.width = 0;
-            } else if (i3 == 0 && childCount == 1) {
+            } else if (a == 0 && count == 1) {
                 layoutParams.weight = 0.0f;
                 layoutParams.width = -2;
             } else {
-                layoutParams.weight = (1.0f / i4) * this.positionToWidth.get(i3);
+                layoutParams.weight = (1.0f / i) * this.positionToWidth.get(a);
                 layoutParams.width = 0;
             }
         }
-        if (childCount == 1 || this.allTextWidth > size) {
+        if (count == 1 || this.allTextWidth > width) {
             this.tabsContainer.setWeightSum(0.0f);
         } else {
             this.tabsContainer.setWeightSum(1.0f);
         }
-        super.onMeasure(i, i2);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    private void scrollToChild(int i) {
-        if (this.tabCount == 0 || this.scrollingToChild == i) {
+    private void scrollToChild(int position) {
+        if (this.tabCount == 0 || this.scrollingToChild == position) {
             return;
         }
-        this.scrollingToChild = i;
-        TextView textView = (TextView) this.tabsContainer.getChildAt(i);
-        if (textView == null) {
+        this.scrollingToChild = position;
+        TextView child = (TextView) this.tabsContainer.getChildAt(position);
+        if (child == null) {
             return;
         }
-        int scrollX = getScrollX();
-        int left = textView.getLeft();
-        int measuredWidth = textView.getMeasuredWidth();
-        if (left - AndroidUtilities.dp(50.0f) < scrollX) {
+        int currentScrollX = getScrollX();
+        int left = child.getLeft();
+        int width = child.getMeasuredWidth();
+        if (left - AndroidUtilities.dp(50.0f) < currentScrollX) {
             smoothScrollTo(left - AndroidUtilities.dp(50.0f), 0);
-            return;
+        } else if (left + width + AndroidUtilities.dp(21.0f) > getWidth() + currentScrollX) {
+            smoothScrollTo(left + width, 0);
         }
-        int i2 = left + measuredWidth;
-        if (AndroidUtilities.dp(21.0f) + i2 <= scrollX + getWidth()) {
-            return;
-        }
-        smoothScrollTo(i2, 0);
     }
 
     @Override // android.widget.HorizontalScrollView, android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        int i5;
-        super.onLayout(z, i, i2, i3, i4);
-        int i6 = i3 - i;
-        if (this.prevLayoutWidth != i6) {
-            this.prevLayoutWidth = i6;
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        int i;
+        super.onLayout(changed, l, t, r, b);
+        if (this.prevLayoutWidth != r - l) {
+            this.prevLayoutWidth = r - l;
             this.scrollingToChild = -1;
             if (this.animatingIndicator) {
                 AndroidUtilities.cancelRunOnUIThread(this.animationRunnable);
@@ -467,43 +462,42 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
                     scrollSlidingTabStripDelegate.onPageScrolled(1.0f);
                 }
             }
-            TextView textView = (TextView) this.tabsContainer.getChildAt(this.currentPosition);
-            if (textView == null) {
-                return;
-            }
-            this.indicatorWidth = getChildWidth(textView);
-            int left = textView.getLeft();
-            int measuredWidth = textView.getMeasuredWidth();
-            int i7 = this.indicatorWidth;
-            int i8 = left + ((measuredWidth - i7) / 2);
-            this.indicatorX = i8;
-            int i9 = this.animateFromIndicaxtorX;
-            if (i9 <= 0 || (i5 = this.animateFromIndicatorWidth) <= 0) {
-                return;
-            }
-            if (i9 != i8 || i5 != i7) {
-                final int i10 = i9 - i8;
-                final int i11 = i5 - i7;
-                ValueAnimator ofFloat = ValueAnimator.ofFloat(1.0f, 0.0f);
-                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ScrollSlidingTextTabStrip$$ExternalSyntheticLambda0
-                    @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                    public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        ScrollSlidingTextTabStrip.this.lambda$onLayout$1(i10, i11, valueAnimator);
+            TextView child = (TextView) this.tabsContainer.getChildAt(this.currentPosition);
+            if (child != null) {
+                this.indicatorWidth = getChildWidth(child);
+                int left = child.getLeft();
+                int measuredWidth = child.getMeasuredWidth();
+                int i2 = this.indicatorWidth;
+                int i3 = left + ((measuredWidth - i2) / 2);
+                this.indicatorX = i3;
+                int i4 = this.animateFromIndicaxtorX;
+                if (i4 > 0 && (i = this.animateFromIndicatorWidth) > 0) {
+                    if (i4 != i3 || i != i2) {
+                        final int dX = i4 - i3;
+                        final int dW = i - i2;
+                        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1.0f, 0.0f);
+                        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ScrollSlidingTextTabStrip$$ExternalSyntheticLambda0
+                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                            public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
+                                ScrollSlidingTextTabStrip.this.m2971x57ecd781(dX, dW, valueAnimator2);
+                            }
+                        });
+                        valueAnimator.setDuration(200L);
+                        valueAnimator.setInterpolator(CubicBezierInterpolator.DEFAULT);
+                        valueAnimator.start();
                     }
-                });
-                ofFloat.setDuration(200L);
-                ofFloat.setInterpolator(CubicBezierInterpolator.DEFAULT);
-                ofFloat.start();
+                    this.animateFromIndicaxtorX = 0;
+                    this.animateFromIndicatorWidth = 0;
+                }
             }
-            this.animateFromIndicaxtorX = 0;
-            this.animateFromIndicatorWidth = 0;
         }
     }
 
-    public /* synthetic */ void lambda$onLayout$1(int i, int i2, ValueAnimator valueAnimator) {
-        float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-        this.indicatorXAnimationDx = i * floatValue;
-        this.indicatorWidthAnimationDx = i2 * floatValue;
+    /* renamed from: lambda$onLayout$1$org-telegram-ui-Components-ScrollSlidingTextTabStrip */
+    public /* synthetic */ void m2971x57ecd781(int dX, int dW, ValueAnimator valueAnimator1) {
+        float v = ((Float) valueAnimator1.getAnimatedValue()).floatValue();
+        this.indicatorXAnimationDx = dX * v;
+        this.indicatorWidthAnimationDx = dW * v;
         this.tabsContainer.invalidate();
         invalidate();
     }
@@ -513,51 +507,80 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
     }
 
     @Override // android.view.View
-    public void setEnabled(boolean z) {
-        super.setEnabled(z);
-        int childCount = this.tabsContainer.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            this.tabsContainer.getChildAt(i).setEnabled(z);
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        int count = this.tabsContainer.getChildCount();
+        for (int a = 0; a < count; a++) {
+            View child = this.tabsContainer.getChildAt(a);
+            child.setEnabled(enabled);
         }
     }
 
-    public void selectTabWithId(int i, float f) {
-        int i2 = this.idToPosition.get(i, -1);
-        if (i2 < 0) {
+    public void selectTabWithId(int id, float progress) {
+        int position = this.idToPosition.get(id, -1);
+        if (position < 0) {
             return;
         }
-        if (f < 0.0f) {
-            f = 0.0f;
-        } else if (f > 1.0f) {
-            f = 1.0f;
+        if (progress < 0.0f) {
+            progress = 0.0f;
+        } else if (progress > 1.0f) {
+            progress = 1.0f;
         }
-        TextView textView = (TextView) this.tabsContainer.getChildAt(this.currentPosition);
-        TextView textView2 = (TextView) this.tabsContainer.getChildAt(i2);
-        if (textView != null && textView2 != null) {
-            this.animateIndicatorStartWidth = getChildWidth(textView);
-            this.animateIndicatorStartX = textView.getLeft() + ((textView.getMeasuredWidth() - this.animateIndicatorStartWidth) / 2);
-            this.animateIndicatorToWidth = getChildWidth(textView2);
-            this.animateIndicatorToX = textView2.getLeft() + ((textView2.getMeasuredWidth() - this.animateIndicatorToWidth) / 2);
-            setAnimationProgressInernal(textView2, textView, f);
-            if (f >= 1.0f) {
-                textView.setTag(this.unactiveTextColorKey);
-                textView2.setTag(this.activeTextColorKey);
+        TextView child = (TextView) this.tabsContainer.getChildAt(this.currentPosition);
+        TextView nextChild = (TextView) this.tabsContainer.getChildAt(position);
+        if (child != null && nextChild != null) {
+            this.animateIndicatorStartWidth = getChildWidth(child);
+            this.animateIndicatorStartX = child.getLeft() + ((child.getMeasuredWidth() - this.animateIndicatorStartWidth) / 2);
+            this.animateIndicatorToWidth = getChildWidth(nextChild);
+            this.animateIndicatorToX = nextChild.getLeft() + ((nextChild.getMeasuredWidth() - this.animateIndicatorToWidth) / 2);
+            setAnimationProgressInernal(nextChild, child, progress);
+            if (progress >= 1.0f) {
+                child.setTag(this.unactiveTextColorKey);
+                nextChild.setTag(this.activeTextColorKey);
             }
-            scrollToChild(this.tabsContainer.indexOfChild(textView2));
+            scrollToChild(this.tabsContainer.indexOfChild(nextChild));
         }
-        if (f < 1.0f) {
-            return;
+        if (progress >= 1.0f) {
+            this.currentPosition = position;
+            this.selectedTabId = id;
         }
-        this.currentPosition = i2;
-        this.selectedTabId = i;
     }
 
-    private int getChildWidth(TextView textView) {
-        Layout layout = textView.getLayout();
+    private int getChildWidth(TextView child) {
+        Layout layout = child.getLayout();
         if (layout != null) {
             return ((int) Math.ceil(layout.getLineWidth(0))) + AndroidUtilities.dp(2.0f);
         }
-        return textView.getMeasuredWidth();
+        return child.getMeasuredWidth();
+    }
+
+    public void onPageScrolled(int position, int first) {
+        if (this.currentPosition == position) {
+            return;
+        }
+        this.currentPosition = position;
+        if (position >= this.tabsContainer.getChildCount()) {
+            return;
+        }
+        int a = 0;
+        while (true) {
+            boolean z = true;
+            if (a >= this.tabsContainer.getChildCount()) {
+                break;
+            }
+            View childAt = this.tabsContainer.getChildAt(a);
+            if (a != position) {
+                z = false;
+            }
+            childAt.setSelected(z);
+            a++;
+        }
+        if (first == position && position > 1) {
+            scrollToChild(position - 1);
+        } else {
+            scrollToChild(position);
+        }
+        invalidate();
     }
 
     public void recordIndicatorParams() {

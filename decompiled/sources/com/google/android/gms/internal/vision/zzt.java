@@ -6,16 +6,14 @@ import android.os.RemoteException;
 import android.util.Log;
 import com.google.android.gms.dynamite.DynamiteModule;
 import com.google.android.gms.vision.L;
-import javax.annotation.concurrent.GuardedBy;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzt<T> {
     private final Context zza;
     private final String zzc;
     private final String zzd;
     private final String zze;
-    @GuardedBy("lock")
     private T zzh;
     private final Object zzb = new Object();
     private boolean zzf = false;
@@ -24,8 +22,9 @@ public abstract class zzt<T> {
     public zzt(Context context, String str, String str2) {
         this.zza = context;
         this.zzc = str;
-        String valueOf = String.valueOf(str2);
-        this.zzd = valueOf.length() != 0 ? "com.google.android.gms.vision.dynamite.".concat(valueOf) : new String("com.google.android.gms.vision.dynamite.");
+        String valueOf = String.valueOf("com.google.android.gms.vision.dynamite.");
+        String valueOf2 = String.valueOf(str2);
+        this.zzd = valueOf2.length() != 0 ? valueOf.concat(valueOf2) : new String(valueOf);
         this.zze = str2;
     }
 
@@ -60,13 +59,13 @@ public abstract class zzt<T> {
             DynamiteModule dynamiteModule = null;
             try {
                 dynamiteModule = DynamiteModule.load(this.zza, DynamiteModule.PREFER_HIGHEST_OR_REMOTE_VERSION, this.zzd);
-            } catch (DynamiteModule.LoadingException unused) {
+            } catch (DynamiteModule.LoadingException e) {
                 String format = String.format("%s.%s", "com.google.android.gms.vision", this.zze);
                 L.d("Cannot load thick client module, fall back to load optional module %s", format);
                 try {
                     dynamiteModule = DynamiteModule.load(this.zza, DynamiteModule.PREFER_REMOTE, format);
-                } catch (DynamiteModule.LoadingException e) {
-                    L.e(e, "Error loading optional module %s", format);
+                } catch (DynamiteModule.LoadingException e2) {
+                    L.e(e2, "Error loading optional module %s", format);
                     if (!this.zzf) {
                         L.d("Broadcasting download intent for dependency %s", this.zze);
                         String str = this.zze;
@@ -82,8 +81,8 @@ public abstract class zzt<T> {
             if (dynamiteModule != null) {
                 try {
                     this.zzh = zza(dynamiteModule, this.zza);
-                } catch (RemoteException | DynamiteModule.LoadingException e2) {
-                    Log.e(this.zzc, "Error creating remote native handle", e2);
+                } catch (RemoteException | DynamiteModule.LoadingException e3) {
+                    Log.e(this.zzc, "Error creating remote native handle", e3);
                 }
             }
             boolean z = this.zzg;

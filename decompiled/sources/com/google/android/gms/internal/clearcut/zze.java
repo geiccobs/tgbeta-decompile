@@ -7,7 +7,7 @@ import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.api.internal.ApiExceptionMapper;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zze extends GoogleApi<Api.ApiOptions.NoOptions> implements com.google.android.gms.clearcut.zzb {
     private zze(Context context) {
         super(context, ClearcutLogger.API, (Api.ApiOptions) null, new ApiExceptionMapper());

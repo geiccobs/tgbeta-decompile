@@ -6,16 +6,14 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class RequestDeduplicator {
     private final Executor executor;
-    @GuardedBy("this")
     private final Map<String, Task<String>> getTokenRequests = new ArrayMap();
 
     /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface GetTokenRequest {
         Task<String> start();
     }
@@ -28,15 +26,15 @@ public class RequestDeduplicator {
     public synchronized Task<String> getOrStartGetTokenRequest(String str, GetTokenRequest getTokenRequest) {
         Task<String> task = this.getTokenRequests.get(str);
         if (task != null) {
-            if (Log.isLoggable("FirebaseMessaging", 3)) {
+            if (Log.isLoggable(Constants.TAG, 3)) {
                 String valueOf = String.valueOf(str);
-                Log.d("FirebaseMessaging", valueOf.length() != 0 ? "Joining ongoing request for: ".concat(valueOf) : new String("Joining ongoing request for: "));
+                Log.d(Constants.TAG, valueOf.length() != 0 ? "Joining ongoing request for: ".concat(valueOf) : new String("Joining ongoing request for: "));
             }
             return task;
         }
-        if (Log.isLoggable("FirebaseMessaging", 3)) {
+        if (Log.isLoggable(Constants.TAG, 3)) {
             String valueOf2 = String.valueOf(str);
-            Log.d("FirebaseMessaging", valueOf2.length() != 0 ? "Making new request for: ".concat(valueOf2) : new String("Making new request for: "));
+            Log.d(Constants.TAG, valueOf2.length() != 0 ? "Making new request for: ".concat(valueOf2) : new String("Making new request for: "));
         }
         Task continueWithTask = getTokenRequest.start().continueWithTask(this.executor, new Continuation(this, str) { // from class: com.google.firebase.messaging.RequestDeduplicator$$Lambda$0
             private final RequestDeduplicator arg$1;

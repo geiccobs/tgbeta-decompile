@@ -4,7 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzal extends zzae<T> {
     private final Object lock = new Object();
     private String zzec;
@@ -28,7 +28,7 @@ public final class zzal extends zzae<T> {
         }
     }
 
-    /* JADX WARN: Type inference failed for: r1v6, types: [T, java.lang.Object] */
+    /* JADX WARN: Type inference failed for: r1v7, types: [T, java.lang.Object] */
     @Override // com.google.android.gms.internal.clearcut.zzae
     public final T zzb(String str) {
         T t;
@@ -42,7 +42,7 @@ public final class zzal extends zzae<T> {
                 t = this.zzed;
             }
             return t;
-        } catch (IOException | IllegalArgumentException unused) {
+        } catch (IOException | IllegalArgumentException e) {
             String str2 = this.zzds;
             StringBuilder sb = new StringBuilder(String.valueOf(str2).length() + 27 + String.valueOf(str).length());
             sb.append("Invalid byte[] value for ");

@@ -10,27 +10,23 @@ import android.content.IntentSender;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import androidx.annotation.RecentlyNonNull;
+import com.google.android.gms.cloudmessaging.CloudMessagingReceiver;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.annotation.KeepName;
 import com.google.android.gms.common.api.internal.GoogleApiManager;
 import com.google.android.gms.common.internal.Preconditions;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-@KeepName
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class GoogleApiActivity extends Activity implements DialogInterface.OnCancelListener {
     private int zaa = 0;
 
-    @RecentlyNonNull
-    public static PendingIntent zaa(@RecentlyNonNull Context context, @RecentlyNonNull PendingIntent pendingIntent, int i) {
+    public static PendingIntent zaa(Context context, PendingIntent pendingIntent, int i) {
         return PendingIntent.getActivity(context, 0, zaa(context, pendingIntent, i, true), 134217728);
     }
 
-    @RecentlyNonNull
-    public static Intent zaa(@RecentlyNonNull Context context, @RecentlyNonNull PendingIntent pendingIntent, int i, boolean z) {
+    public static Intent zaa(Context context, PendingIntent pendingIntent, int i, boolean z) {
         Intent intent = new Intent(context, GoogleApiActivity.class);
-        intent.putExtra("pending_intent", pendingIntent);
+        intent.putExtra(CloudMessagingReceiver.IntentKeys.PENDING_INTENT, pendingIntent);
         intent.putExtra("failing_client_id", i);
         intent.putExtra("notify_manager", z);
         return intent;
@@ -49,7 +45,7 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
                 finish();
                 return;
             }
-            PendingIntent pendingIntent = (PendingIntent) extras.get("pending_intent");
+            PendingIntent pendingIntent = (PendingIntent) extras.get(CloudMessagingReceiver.IntentKeys.PENDING_INTENT);
             Integer num = (Integer) extras.get("error_code");
             if (pendingIntent == null && num == null) {
                 Log.e("GoogleApiActivity", "Activity started without resolution");
@@ -63,7 +59,7 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
                         GoogleApiManager.zaa(this).zab(new ConnectionResult(22, null), getIntent().getIntExtra("failing_client_id", -1));
                     } else {
                         String valueOf = String.valueOf(pendingIntent);
-                        StringBuilder sb = new StringBuilder(valueOf.length() + 36);
+                        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 36);
                         sb.append("Activity not found while launching ");
                         sb.append(valueOf);
                         sb.append(".");
@@ -87,7 +83,7 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
     }
 
     @Override // android.app.Activity
-    protected void onActivityResult(int i, int i2, @RecentlyNonNull Intent intent) {
+    protected void onActivityResult(int i, int i2, Intent intent) {
         super.onActivityResult(i, i2, intent);
         if (i == 1) {
             boolean booleanExtra = getIntent().getBooleanExtra("notify_manager", true);
@@ -95,10 +91,13 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
             setResult(i2, intent);
             if (booleanExtra) {
                 GoogleApiManager zaa = GoogleApiManager.zaa(this);
-                if (i2 == -1) {
-                    zaa.zac();
-                } else if (i2 == 0) {
-                    zaa.zab(new ConnectionResult(13, null), getIntent().getIntExtra("failing_client_id", -1));
+                switch (i2) {
+                    case -1:
+                        zaa.zac();
+                        break;
+                    case 0:
+                        zaa.zab(new ConnectionResult(13, null), getIntent().getIntExtra("failing_client_id", -1));
+                        break;
                 }
             }
         } else if (i == 2) {
@@ -109,13 +108,13 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
     }
 
     @Override // android.app.Activity
-    protected void onSaveInstanceState(@RecentlyNonNull Bundle bundle) {
+    protected void onSaveInstanceState(Bundle bundle) {
         bundle.putInt("resolution", this.zaa);
         super.onSaveInstanceState(bundle);
     }
 
     @Override // android.content.DialogInterface.OnCancelListener
-    public void onCancel(@RecentlyNonNull DialogInterface dialogInterface) {
+    public void onCancel(DialogInterface dialogInterface) {
         this.zaa = 0;
         setResult(0);
         finish();

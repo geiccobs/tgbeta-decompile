@@ -13,12 +13,9 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
-import androidx.annotation.RecentlyNonNull;
-import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Feature;
 import com.google.android.gms.common.GoogleApiAvailabilityLight;
@@ -26,6 +23,7 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.internal.GmsClientSupervisor;
 import com.google.android.gms.common.internal.IGmsCallbacks;
+import com.google.android.gms.common.internal.IGmsServiceBroker;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -35,74 +33,78 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseGmsClient<T extends IInterface> {
-    private static final Feature[] zzd = new Feature[0];
+    public static final int CONNECT_STATE_CONNECTED = 4;
+    public static final int CONNECT_STATE_DISCONNECTED = 1;
+    public static final int CONNECT_STATE_DISCONNECTING = 5;
+    public static final String DEFAULT_ACCOUNT = "<<default account>>";
+    public static final String KEY_PENDING_INTENT = "pendingIntent";
     final Handler zza;
     private volatile String zzaa;
-    @RecentlyNonNull
+    private ConnectionResult zzab;
+    private boolean zzac;
+    private volatile com.google.android.gms.common.internal.zzc zzad;
     protected ConnectionProgressReportCallbacks zzb;
+    protected AtomicInteger zzc;
     private int zze;
     private long zzf;
     private long zzg;
     private int zzh;
     private long zzi;
+    private volatile String zzj;
     private zzl zzk;
     private final Context zzl;
+    private final Looper zzm;
     private final GmsClientSupervisor zzn;
-    @GuardedBy("mServiceBrokerLock")
+    private final GoogleApiAvailabilityLight zzo;
+    private final Object zzp;
+    private final Object zzq;
     private IGmsServiceBroker zzr;
-    @GuardedBy("mLock")
     private T zzs;
-    @GuardedBy("mLock")
+    private final ArrayList<zzc<?>> zzt;
     private zzd zzu;
+    private int zzv;
     private final BaseConnectionCallbacks zzw;
     private final BaseOnConnectionFailedListener zzx;
     private final int zzy;
     private final String zzz;
-    private volatile String zzj = null;
-    private final Object zzp = new Object();
-    private final Object zzq = new Object();
-    private final ArrayList<zzc<?>> zzt = new ArrayList<>();
-    @GuardedBy("mLock")
-    private int zzv = 1;
-    private ConnectionResult zzab = null;
-    private boolean zzac = false;
-    private volatile com.google.android.gms.common.internal.zzc zzad = null;
-    @RecentlyNonNull
-    protected AtomicInteger zzc = new AtomicInteger(0);
+    private static final Feature[] zzd = new Feature[0];
+    public static final String[] GOOGLE_PLUS_REQUIRED_FEATURES = {"service_esmobile", "service_googleme"};
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface BaseConnectionCallbacks {
+        public static final int CAUSE_DEAD_OBJECT_EXCEPTION = 3;
+        public static final int CAUSE_SERVICE_DISCONNECTED = 1;
+
         void onConnected(Bundle bundle);
 
         void onConnectionSuspended(int i);
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface BaseOnConnectionFailedListener {
-        void onConnectionFailed(@RecentlyNonNull ConnectionResult connectionResult);
+        void onConnectionFailed(ConnectionResult connectionResult);
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface ConnectionProgressReportCallbacks {
-        void onReportServiceBinding(@RecentlyNonNull ConnectionResult connectionResult);
+        void onReportServiceBinding(ConnectionResult connectionResult);
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     protected class LegacyClientCallbackAdapter implements ConnectionProgressReportCallbacks {
         public LegacyClientCallbackAdapter() {
             BaseGmsClient.this = r1;
         }
 
         @Override // com.google.android.gms.common.internal.BaseGmsClient.ConnectionProgressReportCallbacks
-        public void onReportServiceBinding(@RecentlyNonNull ConnectionResult connectionResult) {
+        public void onReportServiceBinding(ConnectionResult connectionResult) {
             if (connectionResult.isSuccess()) {
                 BaseGmsClient baseGmsClient = BaseGmsClient.this;
                 baseGmsClient.getRemoteService(null, baseGmsClient.getScopes());
@@ -114,69 +116,24 @@ public abstract class BaseGmsClient<T extends IInterface> {
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface SignOutCallbacks {
         void onSignOutComplete();
     }
 
-    @RecentlyNullable
-    protected abstract T createServiceInterface(@RecentlyNonNull IBinder iBinder);
-
-    protected boolean enableLocalFallback() {
-        return false;
+    protected BaseGmsClient(Context context, Looper looper, int i, BaseConnectionCallbacks baseConnectionCallbacks, BaseOnConnectionFailedListener baseOnConnectionFailedListener, String str) {
+        this(context, looper, GmsClientSupervisor.getInstance(context), GoogleApiAvailabilityLight.getInstance(), i, (BaseConnectionCallbacks) Preconditions.checkNotNull(baseConnectionCallbacks), (BaseOnConnectionFailedListener) Preconditions.checkNotNull(baseOnConnectionFailedListener), str);
     }
 
-    @RecentlyNullable
-    public Account getAccount() {
-        return null;
-    }
-
-    @RecentlyNullable
-    public Bundle getConnectionHint() {
-        return null;
-    }
-
-    @RecentlyNullable
-    protected String getLocalStartServiceAction() {
-        return null;
-    }
+    protected abstract T createServiceInterface(IBinder iBinder);
 
     protected abstract String getServiceDescriptor();
 
     protected abstract String getStartServiceAction();
 
-    @RecentlyNonNull
-    protected String getStartServicePackage() {
-        return "com.google.android.gms";
-    }
-
-    protected boolean getUseDynamicLookup() {
-        return false;
-    }
-
-    public boolean providesSignIn() {
-        return false;
-    }
-
-    public boolean requiresAccount() {
-        return false;
-    }
-
-    public boolean requiresGooglePlayServices() {
-        return true;
-    }
-
-    public boolean requiresSignIn() {
-        return false;
-    }
-
-    public boolean usesClientTelemetry() {
-        return false;
-    }
-
     /* JADX INFO: Access modifiers changed from: package-private */
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public final class zzb extends com.google.android.gms.internal.common.zzi {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public zzb(Looper looper) {
@@ -189,67 +146,63 @@ public abstract class BaseGmsClient<T extends IInterface> {
             ConnectionResult connectionResult;
             ConnectionResult connectionResult2;
             if (BaseGmsClient.this.zzc.get() != message.arg1) {
-                if (!zzb(message)) {
-                    return;
-                }
-                zza(message);
-                return;
-            }
-            int i = message.what;
-            if ((i == 1 || i == 7 || ((i == 4 && !BaseGmsClient.this.enableLocalFallback()) || message.what == 5)) && !BaseGmsClient.this.isConnecting()) {
-                zza(message);
-                return;
-            }
-            int i2 = message.what;
-            PendingIntent pendingIntent = null;
-            if (i2 == 4) {
-                BaseGmsClient.this.zzab = new ConnectionResult(message.arg2);
-                if (BaseGmsClient.this.zzc() && !BaseGmsClient.this.zzac) {
-                    BaseGmsClient.this.zza(3, (int) null);
-                    return;
-                }
-                if (BaseGmsClient.this.zzab == null) {
-                    connectionResult2 = new ConnectionResult(8);
-                } else {
-                    connectionResult2 = BaseGmsClient.this.zzab;
-                }
-                BaseGmsClient.this.zzb.onReportServiceBinding(connectionResult2);
-                BaseGmsClient.this.onConnectionFailed(connectionResult2);
-            } else if (i2 == 5) {
-                if (BaseGmsClient.this.zzab == null) {
-                    connectionResult = new ConnectionResult(8);
-                } else {
-                    connectionResult = BaseGmsClient.this.zzab;
-                }
-                BaseGmsClient.this.zzb.onReportServiceBinding(connectionResult);
-                BaseGmsClient.this.onConnectionFailed(connectionResult);
-            } else if (i2 == 3) {
-                Object obj = message.obj;
-                if (obj instanceof PendingIntent) {
-                    pendingIntent = (PendingIntent) obj;
-                }
-                ConnectionResult connectionResult3 = new ConnectionResult(message.arg2, pendingIntent);
-                BaseGmsClient.this.zzb.onReportServiceBinding(connectionResult3);
-                BaseGmsClient.this.onConnectionFailed(connectionResult3);
-            } else if (i2 != 6) {
-                if (i2 == 2 && !BaseGmsClient.this.isConnected()) {
+                if (zzb(message)) {
                     zza(message);
-                } else if (zzb(message)) {
-                    ((zzc) message.obj).zzc();
-                } else {
-                    int i3 = message.what;
-                    StringBuilder sb = new StringBuilder(45);
-                    sb.append("Don't know how to handle message: ");
-                    sb.append(i3);
-                    Log.wtf("GmsClient", sb.toString(), new Exception());
                 }
+            } else if ((message.what == 1 || message.what == 7 || ((message.what == 4 && !BaseGmsClient.this.enableLocalFallback()) || message.what == 5)) && !BaseGmsClient.this.isConnecting()) {
+                zza(message);
             } else {
-                BaseGmsClient.this.zza(5, (int) null);
-                if (BaseGmsClient.this.zzw != null) {
-                    BaseGmsClient.this.zzw.onConnectionSuspended(message.arg2);
+                PendingIntent pendingIntent = null;
+                if (message.what == 4) {
+                    BaseGmsClient.this.zzab = new ConnectionResult(message.arg2);
+                    if (BaseGmsClient.this.zzc() && !BaseGmsClient.this.zzac) {
+                        BaseGmsClient.this.zza(3, (int) null);
+                        return;
+                    }
+                    if (BaseGmsClient.this.zzab == null) {
+                        connectionResult2 = new ConnectionResult(8);
+                    } else {
+                        connectionResult2 = BaseGmsClient.this.zzab;
+                    }
+                    BaseGmsClient.this.zzb.onReportServiceBinding(connectionResult2);
+                    BaseGmsClient.this.onConnectionFailed(connectionResult2);
+                } else if (message.what != 5) {
+                    if (message.what == 3) {
+                        if (message.obj instanceof PendingIntent) {
+                            pendingIntent = (PendingIntent) message.obj;
+                        }
+                        ConnectionResult connectionResult3 = new ConnectionResult(message.arg2, pendingIntent);
+                        BaseGmsClient.this.zzb.onReportServiceBinding(connectionResult3);
+                        BaseGmsClient.this.onConnectionFailed(connectionResult3);
+                    } else if (message.what != 6) {
+                        if (message.what == 2 && !BaseGmsClient.this.isConnected()) {
+                            zza(message);
+                        } else if (zzb(message)) {
+                            ((zzc) message.obj).zzc();
+                        } else {
+                            int i = message.what;
+                            StringBuilder sb = new StringBuilder(45);
+                            sb.append("Don't know how to handle message: ");
+                            sb.append(i);
+                            Log.wtf("GmsClient", sb.toString(), new Exception());
+                        }
+                    } else {
+                        BaseGmsClient.this.zza(5, (int) null);
+                        if (BaseGmsClient.this.zzw != null) {
+                            BaseGmsClient.this.zzw.onConnectionSuspended(message.arg2);
+                        }
+                        BaseGmsClient.this.onConnectionSuspended(message.arg2);
+                        BaseGmsClient.this.zza(5, 1, (int) null);
+                    }
+                } else {
+                    if (BaseGmsClient.this.zzab == null) {
+                        connectionResult = new ConnectionResult(8);
+                    } else {
+                        connectionResult = BaseGmsClient.this.zzab;
+                    }
+                    BaseGmsClient.this.zzb.onReportServiceBinding(connectionResult);
+                    BaseGmsClient.this.onConnectionFailed(connectionResult);
                 }
-                BaseGmsClient.this.onConnectionSuspended(message.arg2);
-                BaseGmsClient.this.zza(5, 1, (int) null);
             }
         }
 
@@ -260,13 +213,51 @@ public abstract class BaseGmsClient<T extends IInterface> {
         }
 
         private static boolean zzb(Message message) {
-            int i = message.what;
-            return i == 2 || i == 1 || i == 7;
+            return message.what == 2 || message.what == 1 || message.what == 7;
         }
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
+    public final class zzd implements ServiceConnection {
+        private final int zza;
+
+        public zzd(int i) {
+            BaseGmsClient.this = r1;
+            this.zza = i;
+        }
+
+        @Override // android.content.ServiceConnection
+        public final void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            IGmsServiceBroker iGmsServiceBroker;
+            if (iBinder == null) {
+                BaseGmsClient.this.zza(16);
+                return;
+            }
+            synchronized (BaseGmsClient.this.zzq) {
+                BaseGmsClient baseGmsClient = BaseGmsClient.this;
+                IInterface queryLocalInterface = iBinder.queryLocalInterface("com.google.android.gms.common.internal.IGmsServiceBroker");
+                if (queryLocalInterface != null && (queryLocalInterface instanceof IGmsServiceBroker)) {
+                    iGmsServiceBroker = (IGmsServiceBroker) queryLocalInterface;
+                } else {
+                    iGmsServiceBroker = new IGmsServiceBroker.Stub.zza(iBinder);
+                }
+                baseGmsClient.zzr = iGmsServiceBroker;
+            }
+            BaseGmsClient.this.zza(0, (Bundle) null, this.zza);
+        }
+
+        @Override // android.content.ServiceConnection
+        public final void onServiceDisconnected(ComponentName componentName) {
+            synchronized (BaseGmsClient.this.zzq) {
+                BaseGmsClient.this.zzr = null;
+            }
+            BaseGmsClient.this.zza.sendMessage(BaseGmsClient.this.zza.obtainMessage(6, this.zza, 1));
+        }
+    }
+
+    /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
+    /* loaded from: classes3.dex */
     public final class zzg extends zza {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public zzg(int i, Bundle bundle) {
@@ -292,7 +283,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public abstract class zzc<TListener> {
         private TListener zza;
         private boolean zzb = false;
@@ -312,7 +303,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
                 tlistener = this.zza;
                 if (this.zzb) {
                     String valueOf = String.valueOf(this);
-                    StringBuilder sb = new StringBuilder(valueOf.length() + 47);
+                    StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 47);
                     sb.append("Callback proxy ");
                     sb.append(valueOf);
                     sb.append(" being reused. This is not safe.");
@@ -350,80 +341,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
-    public final class zzd implements ServiceConnection {
-        private final int zza;
-
-        public zzd(int i) {
-            BaseGmsClient.this = r1;
-            this.zza = i;
-        }
-
-        @Override // android.content.ServiceConnection
-        public final void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            IGmsServiceBroker iGmsServiceBroker;
-            if (iBinder == null) {
-                BaseGmsClient.this.zza(16);
-                return;
-            }
-            synchronized (BaseGmsClient.this.zzq) {
-                BaseGmsClient baseGmsClient = BaseGmsClient.this;
-                IInterface queryLocalInterface = iBinder.queryLocalInterface("com.google.android.gms.common.internal.IGmsServiceBroker");
-                if (queryLocalInterface != null && (queryLocalInterface instanceof IGmsServiceBroker)) {
-                    iGmsServiceBroker = (IGmsServiceBroker) queryLocalInterface;
-                } else {
-                    iGmsServiceBroker = new IGmsServiceBroker(iBinder) { // from class: com.google.android.gms.common.internal.IGmsServiceBroker$Stub$zza
-                        private final IBinder zza;
-
-                        /* JADX INFO: Access modifiers changed from: package-private */
-                        {
-                            this.zza = iBinder;
-                        }
-
-                        @Override // android.os.IInterface
-                        public final IBinder asBinder() {
-                            return this.zza;
-                        }
-
-                        @Override // com.google.android.gms.common.internal.IGmsServiceBroker
-                        public final void getService(IGmsCallbacks iGmsCallbacks, GetServiceRequest getServiceRequest) throws RemoteException {
-                            Parcel obtain = Parcel.obtain();
-                            Parcel obtain2 = Parcel.obtain();
-                            try {
-                                obtain.writeInterfaceToken("com.google.android.gms.common.internal.IGmsServiceBroker");
-                                obtain.writeStrongBinder(iGmsCallbacks != null ? iGmsCallbacks.asBinder() : null);
-                                if (getServiceRequest != null) {
-                                    obtain.writeInt(1);
-                                    getServiceRequest.writeToParcel(obtain, 0);
-                                } else {
-                                    obtain.writeInt(0);
-                                }
-                                this.zza.transact(46, obtain, obtain2, 0);
-                                obtain2.readException();
-                            } finally {
-                                obtain2.recycle();
-                                obtain.recycle();
-                            }
-                        }
-                    };
-                }
-                baseGmsClient.zzr = iGmsServiceBroker;
-            }
-            BaseGmsClient.this.zza(0, (Bundle) null, this.zza);
-        }
-
-        @Override // android.content.ServiceConnection
-        public final void onServiceDisconnected(ComponentName componentName) {
-            synchronized (BaseGmsClient.this.zzq) {
-                BaseGmsClient.this.zzr = null;
-            }
-            Handler handler = BaseGmsClient.this.zza;
-            handler.sendMessage(handler.obtainMessage(6, this.zza, 1));
-        }
-    }
-
-    /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class zze extends IGmsCallbacks.zza {
         private BaseGmsClient zza;
         private final int zzb;
@@ -456,7 +374,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public final class zzf extends zza {
         private final IBinder zza;
 
@@ -500,7 +418,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
                 }
                 BaseGmsClient.this.zzw.onConnected(connectionHint);
                 return true;
-            } catch (RemoteException unused) {
+            } catch (RemoteException e) {
                 Log.w("GmsClient", "service probably died");
                 return false;
             }
@@ -509,14 +427,14 @@ public abstract class BaseGmsClient<T extends IInterface> {
 
     /* JADX INFO: Access modifiers changed from: private */
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public abstract class zza extends zzc<Boolean> {
         private final int zza;
         private final Bundle zzb;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         protected zza(int i, Bundle bundle) {
-            super(Boolean.TRUE);
+            super(true);
             BaseGmsClient.this = r2;
             this.zza = i;
             this.zzb = bundle;
@@ -545,7 +463,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
                 BaseGmsClient.this.zza(1, (int) null);
                 Bundle bundle = this.zzb;
                 if (bundle != null) {
-                    pendingIntent = (PendingIntent) bundle.getParcelable("pendingIntent");
+                    pendingIntent = (PendingIntent) bundle.getParcelable(BaseGmsClient.KEY_PENDING_INTENT);
                 }
                 zza(new ConnectionResult(this.zza, pendingIntent));
                 return;
@@ -554,11 +472,20 @@ public abstract class BaseGmsClient<T extends IInterface> {
         }
     }
 
-    public BaseGmsClient(@RecentlyNonNull Context context, @RecentlyNonNull Looper looper, @RecentlyNonNull GmsClientSupervisor gmsClientSupervisor, @RecentlyNonNull GoogleApiAvailabilityLight googleApiAvailabilityLight, int i, BaseConnectionCallbacks baseConnectionCallbacks, BaseOnConnectionFailedListener baseOnConnectionFailedListener, String str) {
+    public BaseGmsClient(Context context, Looper looper, GmsClientSupervisor gmsClientSupervisor, GoogleApiAvailabilityLight googleApiAvailabilityLight, int i, BaseConnectionCallbacks baseConnectionCallbacks, BaseOnConnectionFailedListener baseOnConnectionFailedListener, String str) {
+        this.zzj = null;
+        this.zzp = new Object();
+        this.zzq = new Object();
+        this.zzt = new ArrayList<>();
+        this.zzv = 1;
+        this.zzab = null;
+        this.zzac = false;
+        this.zzad = null;
+        this.zzc = new AtomicInteger(0);
         this.zzl = (Context) Preconditions.checkNotNull(context, "Context must not be null");
-        Looper looper2 = (Looper) Preconditions.checkNotNull(looper, "Looper must not be null");
+        this.zzm = (Looper) Preconditions.checkNotNull(looper, "Looper must not be null");
         this.zzn = (GmsClientSupervisor) Preconditions.checkNotNull(gmsClientSupervisor, "Supervisor must not be null");
-        GoogleApiAvailabilityLight googleApiAvailabilityLight2 = (GoogleApiAvailabilityLight) Preconditions.checkNotNull(googleApiAvailabilityLight, "API availability must not be null");
+        this.zzo = (GoogleApiAvailabilityLight) Preconditions.checkNotNull(googleApiAvailabilityLight, "API availability must not be null");
         this.zza = new zzb(looper);
         this.zzy = i;
         this.zzw = baseConnectionCallbacks;
@@ -566,24 +493,59 @@ public abstract class BaseGmsClient<T extends IInterface> {
         this.zzz = str;
     }
 
+    public BaseGmsClient(Context context, Handler handler, GmsClientSupervisor gmsClientSupervisor, GoogleApiAvailabilityLight googleApiAvailabilityLight, int i, BaseConnectionCallbacks baseConnectionCallbacks, BaseOnConnectionFailedListener baseOnConnectionFailedListener) {
+        this.zzj = null;
+        this.zzp = new Object();
+        this.zzq = new Object();
+        this.zzt = new ArrayList<>();
+        this.zzv = 1;
+        this.zzab = null;
+        this.zzac = false;
+        this.zzad = null;
+        this.zzc = new AtomicInteger(0);
+        this.zzl = (Context) Preconditions.checkNotNull(context, "Context must not be null");
+        this.zza = (Handler) Preconditions.checkNotNull(handler, "Handler must not be null");
+        this.zzm = handler.getLooper();
+        this.zzn = (GmsClientSupervisor) Preconditions.checkNotNull(gmsClientSupervisor, "Supervisor must not be null");
+        this.zzo = (GoogleApiAvailabilityLight) Preconditions.checkNotNull(googleApiAvailabilityLight, "API availability must not be null");
+        this.zzy = i;
+        this.zzw = baseConnectionCallbacks;
+        this.zzx = baseOnConnectionFailedListener;
+        this.zzz = null;
+    }
+
+    protected String getStartServicePackage() {
+        return "com.google.android.gms";
+    }
+
     private final String zza() {
         String str = this.zzz;
         return str == null ? this.zzl.getClass().getName() : str;
     }
 
-    public void setAttributionTag(@RecentlyNonNull String str) {
+    public void setAttributionTag(String str) {
         this.zzaa = str;
     }
 
+    protected String getLocalStartServiceAction() {
+        return null;
+    }
+
     public final void zza(com.google.android.gms.common.internal.zzc zzcVar) {
+        RootTelemetryConfiguration rootTelemetryConfiguration;
         this.zzad = zzcVar;
         if (usesClientTelemetry()) {
             ConnectionTelemetryConfiguration connectionTelemetryConfiguration = zzcVar.zzc;
-            RootTelemetryConfigManager.getInstance().zza(connectionTelemetryConfiguration == null ? null : connectionTelemetryConfiguration.getRootTelemetryConfiguration());
+            RootTelemetryConfigManager rootTelemetryConfigManager = RootTelemetryConfigManager.getInstance();
+            if (connectionTelemetryConfiguration == null) {
+                rootTelemetryConfiguration = null;
+            } else {
+                rootTelemetryConfiguration = connectionTelemetryConfiguration.getRootTelemetryConfiguration();
+            }
+            rootTelemetryConfigManager.zza(rootTelemetryConfiguration);
         }
     }
 
-    @RecentlyNullable
     public final Feature[] getAvailableFeatures() {
         com.google.android.gms.common.internal.zzc zzcVar = this.zzad;
         if (zzcVar == null) {
@@ -592,7 +554,6 @@ public abstract class BaseGmsClient<T extends IInterface> {
         return zzcVar.zzb;
     }
 
-    @RecentlyNullable
     public ConnectionTelemetryConfiguration getTelemetryConfiguration() {
         com.google.android.gms.common.internal.zzc zzcVar = this.zzad;
         if (zzcVar == null) {
@@ -601,7 +562,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
         return zzcVar.zzc;
     }
 
-    protected void onConnectedLocked(@RecentlyNonNull T t) {
+    protected void onConnectedLocked(T t) {
         this.zzg = System.currentTimeMillis();
     }
 
@@ -610,7 +571,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
         this.zzf = System.currentTimeMillis();
     }
 
-    protected void onConnectionFailed(@RecentlyNonNull ConnectionResult connectionResult) {
+    protected void onConnectionFailed(ConnectionResult connectionResult) {
         this.zzh = connectionResult.getErrorCode();
         this.zzi = System.currentTimeMillis();
     }
@@ -619,59 +580,66 @@ public abstract class BaseGmsClient<T extends IInterface> {
     public final void zza(int i, T t) {
         zzl zzlVar;
         zzl zzlVar2;
-        boolean z = false;
-        if ((i == 4) == (t != null)) {
-            z = true;
+        boolean z = true;
+        if ((i == 4) != (t != null)) {
+            z = false;
         }
         Preconditions.checkArgument(z);
         synchronized (this.zzp) {
             this.zzv = i;
             this.zzs = t;
-            if (i == 1) {
-                zzd zzdVar = this.zzu;
-                if (zzdVar != null) {
-                    this.zzn.zza((String) Preconditions.checkNotNull(this.zzk.zza()), this.zzk.zzb(), this.zzk.zzc(), zzdVar, zza(), this.zzk.zzd());
-                    this.zzu = null;
-                }
-            } else if (i == 2 || i == 3) {
-                zzd zzdVar2 = this.zzu;
-                if (zzdVar2 != null && (zzlVar2 = this.zzk) != null) {
-                    String zza2 = zzlVar2.zza();
-                    String zzb2 = this.zzk.zzb();
-                    StringBuilder sb = new StringBuilder(String.valueOf(zza2).length() + 70 + String.valueOf(zzb2).length());
-                    sb.append("Calling connect() while still connected, missing disconnect() for ");
-                    sb.append(zza2);
-                    sb.append(" on ");
-                    sb.append(zzb2);
-                    Log.e("GmsClient", sb.toString());
-                    this.zzn.zza((String) Preconditions.checkNotNull(this.zzk.zza()), this.zzk.zzb(), this.zzk.zzc(), zzdVar2, zza(), this.zzk.zzd());
-                    this.zzc.incrementAndGet();
-                }
-                zzd zzdVar3 = new zzd(this.zzc.get());
-                this.zzu = zzdVar3;
-                if (this.zzv == 3 && getLocalStartServiceAction() != null) {
-                    zzlVar = new zzl(getContext().getPackageName(), getLocalStartServiceAction(), true, GmsClientSupervisor.getDefaultBindFlags(), false);
-                } else {
-                    zzlVar = new zzl(getStartServicePackage(), getStartServiceAction(), false, GmsClientSupervisor.getDefaultBindFlags(), getUseDynamicLookup());
-                }
-                this.zzk = zzlVar;
-                if (zzlVar.zzd() && getMinApkVersion() < 17895000) {
-                    String valueOf = String.valueOf(this.zzk.zza());
-                    throw new IllegalStateException(valueOf.length() != 0 ? "Internal Error, the minimum apk version of this BaseGmsClient is too low to support dynamic lookup. Start service action: ".concat(valueOf) : new String("Internal Error, the minimum apk version of this BaseGmsClient is too low to support dynamic lookup. Start service action: "));
-                }
-                if (!this.zzn.zza(new GmsClientSupervisor.zza((String) Preconditions.checkNotNull(this.zzk.zza()), this.zzk.zzb(), this.zzk.zzc(), this.zzk.zzd()), zzdVar3, zza())) {
-                    String zza3 = this.zzk.zza();
-                    String zzb3 = this.zzk.zzb();
-                    StringBuilder sb2 = new StringBuilder(String.valueOf(zza3).length() + 34 + String.valueOf(zzb3).length());
-                    sb2.append("unable to connect to service: ");
-                    sb2.append(zza3);
-                    sb2.append(" on ");
-                    sb2.append(zzb3);
-                    Log.e("GmsClient", sb2.toString());
-                    zza(16, (Bundle) null, this.zzc.get());
-                }
-            } else if (i == 4) {
-                onConnectedLocked((IInterface) Preconditions.checkNotNull(t));
+            switch (i) {
+                case 1:
+                    zzd zzdVar = this.zzu;
+                    if (zzdVar != null) {
+                        this.zzn.zza((String) Preconditions.checkNotNull(this.zzk.zza()), this.zzk.zzb(), this.zzk.zzc(), zzdVar, zza(), this.zzk.zzd());
+                        this.zzu = null;
+                        break;
+                    }
+                    break;
+                case 2:
+                case 3:
+                    zzd zzdVar2 = this.zzu;
+                    if (zzdVar2 != null && (zzlVar2 = this.zzk) != null) {
+                        String zza2 = zzlVar2.zza();
+                        String zzb2 = this.zzk.zzb();
+                        StringBuilder sb = new StringBuilder(String.valueOf(zza2).length() + 70 + String.valueOf(zzb2).length());
+                        sb.append("Calling connect() while still connected, missing disconnect() for ");
+                        sb.append(zza2);
+                        sb.append(" on ");
+                        sb.append(zzb2);
+                        Log.e("GmsClient", sb.toString());
+                        this.zzn.zza((String) Preconditions.checkNotNull(this.zzk.zza()), this.zzk.zzb(), this.zzk.zzc(), zzdVar2, zza(), this.zzk.zzd());
+                        this.zzc.incrementAndGet();
+                    }
+                    zzd zzdVar3 = new zzd(this.zzc.get());
+                    this.zzu = zzdVar3;
+                    if (this.zzv == 3 && getLocalStartServiceAction() != null) {
+                        zzlVar = new zzl(getContext().getPackageName(), getLocalStartServiceAction(), true, GmsClientSupervisor.getDefaultBindFlags(), false);
+                    } else {
+                        zzlVar = new zzl(getStartServicePackage(), getStartServiceAction(), false, GmsClientSupervisor.getDefaultBindFlags(), getUseDynamicLookup());
+                    }
+                    this.zzk = zzlVar;
+                    if (zzlVar.zzd() && getMinApkVersion() < 17895000) {
+                        String valueOf = String.valueOf(this.zzk.zza());
+                        throw new IllegalStateException(valueOf.length() != 0 ? "Internal Error, the minimum apk version of this BaseGmsClient is too low to support dynamic lookup. Start service action: ".concat(valueOf) : new String("Internal Error, the minimum apk version of this BaseGmsClient is too low to support dynamic lookup. Start service action: "));
+                    }
+                    if (!this.zzn.zza(new GmsClientSupervisor.zza((String) Preconditions.checkNotNull(this.zzk.zza()), this.zzk.zzb(), this.zzk.zzc(), this.zzk.zzd()), zzdVar3, zza())) {
+                        String zza3 = this.zzk.zza();
+                        String zzb3 = this.zzk.zzb();
+                        StringBuilder sb2 = new StringBuilder(String.valueOf(zza3).length() + 34 + String.valueOf(zzb3).length());
+                        sb2.append("unable to connect to service: ");
+                        sb2.append(zza3);
+                        sb2.append(" on ");
+                        sb2.append(zzb3);
+                        Log.e("GmsClient", sb2.toString());
+                        zza(16, (Bundle) null, this.zzc.get());
+                    }
+                    break;
+                    break;
+                case 4:
+                    onConnectedLocked((IInterface) Preconditions.checkNotNull(t));
+                    break;
             }
         }
     }
@@ -686,7 +654,17 @@ public abstract class BaseGmsClient<T extends IInterface> {
         }
     }
 
-    public void connect(@RecentlyNonNull ConnectionProgressReportCallbacks connectionProgressReportCallbacks) {
+    public void checkAvailabilityAndConnect() {
+        int isGooglePlayServicesAvailable = this.zzo.isGooglePlayServicesAvailable(this.zzl, getMinApkVersion());
+        if (isGooglePlayServicesAvailable != 0) {
+            zza(1, (int) null);
+            triggerNotAvailable(new LegacyClientCallbackAdapter(), isGooglePlayServicesAvailable, null);
+            return;
+        }
+        connect(new LegacyClientCallbackAdapter());
+    }
+
+    public void connect(ConnectionProgressReportCallbacks connectionProgressReportCallbacks) {
         this.zzb = (ConnectionProgressReportCallbacks) Preconditions.checkNotNull(connectionProgressReportCallbacks, "Connection progress callbacks cannot be null.");
         zza(2, (int) null);
     }
@@ -719,7 +697,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
         return z;
     }
 
-    public void disconnect(@RecentlyNonNull String str) {
+    public void disconnect(String str) {
         this.zzj = str;
         disconnect();
     }
@@ -739,7 +717,6 @@ public abstract class BaseGmsClient<T extends IInterface> {
         zza(1, (int) null);
     }
 
-    @RecentlyNullable
     public String getLastDisconnectMessage() {
         return this.zzj;
     }
@@ -761,22 +738,33 @@ public abstract class BaseGmsClient<T extends IInterface> {
         handler.sendMessage(handler.obtainMessage(i2, this.zzc.get(), 16));
     }
 
-    @RecentlyNonNull
+    public void triggerNotAvailable(ConnectionProgressReportCallbacks connectionProgressReportCallbacks, int i, PendingIntent pendingIntent) {
+        this.zzb = (ConnectionProgressReportCallbacks) Preconditions.checkNotNull(connectionProgressReportCallbacks, "Connection progress callbacks cannot be null.");
+        Handler handler = this.zza;
+        handler.sendMessage(handler.obtainMessage(3, this.zzc.get(), i, pendingIntent));
+    }
+
     public final Context getContext() {
         return this.zzl;
     }
 
-    @RecentlyNonNull
+    public final Looper getLooper() {
+        return this.zzm;
+    }
+
+    public Account getAccount() {
+        return null;
+    }
+
     public Feature[] getApiFeatures() {
         return zzd;
     }
 
-    @RecentlyNonNull
     protected Bundle getGetServiceRequestExtraArgs() {
         return new Bundle();
     }
 
-    protected void onPostInitHandler(int i, IBinder iBinder, Bundle bundle, int i2) {
+    public void onPostInitHandler(int i, IBinder iBinder, Bundle bundle, int i2) {
         Handler handler = this.zza;
         handler.sendMessage(handler.obtainMessage(1, i2, -1, new zzf(i, iBinder, bundle)));
     }
@@ -787,13 +775,15 @@ public abstract class BaseGmsClient<T extends IInterface> {
     }
 
     public final void checkConnected() {
-        if (isConnected()) {
-            return;
+        if (!isConnected()) {
+            throw new IllegalStateException("Not connected. Call connect() and wait for onConnected() to be called.");
         }
-        throw new IllegalStateException("Not connected. Call connect() and wait for onConnected() to be called.");
     }
 
-    @RecentlyNonNull
+    public Bundle getConnectionHint() {
+        return null;
+    }
+
     public final T getService() throws DeadObjectException {
         T t;
         synchronized (this.zzp) {
@@ -806,7 +796,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
         return t;
     }
 
-    public void getRemoteService(IAccountAccessor iAccountAccessor, @RecentlyNonNull Set<Scope> set) {
+    public void getRemoteService(IAccountAccessor iAccountAccessor, Set<Scope> set) {
         Throwable e;
         Bundle getServiceRequestExtraArgs = getGetServiceRequestExtraArgs();
         GetServiceRequest getServiceRequest = new GetServiceRequest(this.zzy, this.zzaa);
@@ -857,21 +847,39 @@ public abstract class BaseGmsClient<T extends IInterface> {
         }
     }
 
-    public void onUserSignOut(@RecentlyNonNull SignOutCallbacks signOutCallbacks) {
+    protected boolean enableLocalFallback() {
+        return false;
+    }
+
+    public boolean requiresSignIn() {
+        return false;
+    }
+
+    public void onUserSignOut(SignOutCallbacks signOutCallbacks) {
         signOutCallbacks.onSignOutComplete();
     }
 
-    @RecentlyNonNull
+    public boolean requiresAccount() {
+        return false;
+    }
+
+    public boolean requiresGooglePlayServices() {
+        return true;
+    }
+
+    public boolean providesSignIn() {
+        return false;
+    }
+
     public Intent getSignInIntent() {
         throw new UnsupportedOperationException("Not a sign in API");
     }
 
-    @RecentlyNonNull
     protected Set<Scope> getScopes() {
         return Collections.emptySet();
     }
 
-    public void dump(@RecentlyNonNull String str, @RecentlyNonNull FileDescriptor fileDescriptor, @RecentlyNonNull PrintWriter printWriter, @RecentlyNonNull String[] strArr) {
+    public void dump(String str, FileDescriptor fileDescriptor, PrintWriter printWriter, String[] strArr) {
         int i;
         T t;
         IGmsServiceBroker iGmsServiceBroker;
@@ -883,18 +891,25 @@ public abstract class BaseGmsClient<T extends IInterface> {
             iGmsServiceBroker = this.zzr;
         }
         printWriter.append((CharSequence) str).append("mConnectState=");
-        if (i == 1) {
-            printWriter.print("DISCONNECTED");
-        } else if (i == 2) {
-            printWriter.print("REMOTE_CONNECTING");
-        } else if (i == 3) {
-            printWriter.print("LOCAL_CONNECTING");
-        } else if (i == 4) {
-            printWriter.print("CONNECTED");
-        } else if (i == 5) {
-            printWriter.print("DISCONNECTING");
-        } else {
-            printWriter.print("UNKNOWN");
+        switch (i) {
+            case 1:
+                printWriter.print("DISCONNECTED");
+                break;
+            case 2:
+                printWriter.print("REMOTE_CONNECTING");
+                break;
+            case 3:
+                printWriter.print("LOCAL_CONNECTING");
+                break;
+            case 4:
+                printWriter.print("CONNECTED");
+                break;
+            case 5:
+                printWriter.print("DISCONNECTING");
+                break;
+            default:
+                printWriter.print("UNKNOWN");
+                break;
         }
         printWriter.append(" mService=");
         if (t == null) {
@@ -922,14 +937,19 @@ public abstract class BaseGmsClient<T extends IInterface> {
         if (this.zzf > 0) {
             printWriter.append((CharSequence) str).append("lastSuspendedCause=");
             int i2 = this.zze;
-            if (i2 == 1) {
-                printWriter.append("CAUSE_SERVICE_DISCONNECTED");
-            } else if (i2 == 2) {
-                printWriter.append("CAUSE_NETWORK_LOST");
-            } else if (i2 == 3) {
-                printWriter.append("CAUSE_DEAD_OBJECT_EXCEPTION");
-            } else {
-                printWriter.append((CharSequence) String.valueOf(i2));
+            switch (i2) {
+                case 1:
+                    printWriter.append("CAUSE_SERVICE_DISCONNECTED");
+                    break;
+                case 2:
+                    printWriter.append("CAUSE_NETWORK_LOST");
+                    break;
+                case 3:
+                    printWriter.append("CAUSE_DEAD_OBJECT_EXCEPTION");
+                    break;
+                default:
+                    printWriter.append((CharSequence) String.valueOf(i2));
+                    break;
             }
             PrintWriter append2 = printWriter.append(" lastSuspendedTime=");
             long j2 = this.zzf;
@@ -953,19 +973,28 @@ public abstract class BaseGmsClient<T extends IInterface> {
         }
     }
 
+    public IBinder getServiceBrokerBinder() {
+        synchronized (this.zzq) {
+            IGmsServiceBroker iGmsServiceBroker = this.zzr;
+            if (iGmsServiceBroker == null) {
+                return null;
+            }
+            return iGmsServiceBroker.asBinder();
+        }
+    }
+
     public final boolean zzc() {
         if (!this.zzac && !TextUtils.isEmpty(getServiceDescriptor()) && !TextUtils.isEmpty(getLocalStartServiceAction())) {
             try {
                 Class.forName(getServiceDescriptor());
                 return true;
-            } catch (ClassNotFoundException unused) {
+            } catch (ClassNotFoundException e) {
                 return false;
             }
         }
         return false;
     }
 
-    @RecentlyNonNull
     public String getEndpointPackageName() {
         zzl zzlVar;
         if (isConnected() && (zzlVar = this.zzk) != null) {
@@ -976,5 +1005,13 @@ public abstract class BaseGmsClient<T extends IInterface> {
 
     public int getMinApkVersion() {
         return GoogleApiAvailabilityLight.GOOGLE_PLAY_SERVICES_VERSION_CODE;
+    }
+
+    protected boolean getUseDynamicLookup() {
+        return false;
+    }
+
+    public boolean usesClientTelemetry() {
+        return false;
     }
 }

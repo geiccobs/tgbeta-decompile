@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.Feature;
 import com.google.android.gms.common.GoogleApiAvailabilityLight;
 import com.google.android.gms.common.api.Scope;
@@ -13,9 +12,8 @@ import com.google.android.gms.common.internal.IAccountAccessor;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class GetServiceRequest extends AbstractSafeParcelable {
-    @RecentlyNonNull
     public static final Parcelable.Creator<GetServiceRequest> CREATOR = new zze();
     String zza;
     IBinder zzb;
@@ -65,8 +63,12 @@ public class GetServiceRequest extends AbstractSafeParcelable {
         this.zzn = str2;
     }
 
+    public Bundle getExtraArgs() {
+        return this.zzd;
+    }
+
     @Override // android.os.Parcelable
-    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+    public void writeToParcel(Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zzi);
         SafeParcelWriter.writeInt(parcel, 2, this.zzj);

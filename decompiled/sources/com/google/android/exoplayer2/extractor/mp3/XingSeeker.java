@@ -7,8 +7,11 @@ import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes.dex */
-final class XingSeeker implements Seeker {
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+/* JADX INFO: Access modifiers changed from: package-private */
+/* loaded from: classes3.dex */
+public final class XingSeeker implements Seeker {
+    private static final String TAG = "XingSeeker";
     private final long dataEndPosition;
     private final long dataSize;
     private final long dataStartPosition;
@@ -16,43 +19,40 @@ final class XingSeeker implements Seeker {
     private final long[] tableOfContents;
     private final int xingFrameSize;
 
-    public static XingSeeker create(long j, long j2, MpegAudioHeader mpegAudioHeader, ParsableByteArray parsableByteArray) {
-        int readUnsignedIntToInt;
-        int i = mpegAudioHeader.samplesPerFrame;
-        int i2 = mpegAudioHeader.sampleRate;
-        int readInt = parsableByteArray.readInt();
-        if ((readInt & 1) != 1 || (readUnsignedIntToInt = parsableByteArray.readUnsignedIntToInt()) == 0) {
+    public static XingSeeker create(long inputLength, long position, MpegAudioHeader mpegAudioHeader, ParsableByteArray frame) {
+        int frameCount;
+        int samplesPerFrame = mpegAudioHeader.samplesPerFrame;
+        int sampleRate = mpegAudioHeader.sampleRate;
+        int flags = frame.readInt();
+        if ((flags & 1) != 1 || (frameCount = frame.readUnsignedIntToInt()) == 0) {
             return null;
         }
-        long scaleLargeTimestamp = Util.scaleLargeTimestamp(readUnsignedIntToInt, i * 1000000, i2);
-        if ((readInt & 6) != 6) {
-            return new XingSeeker(j2, mpegAudioHeader.frameSize, scaleLargeTimestamp);
+        long durationUs = Util.scaleLargeTimestamp(frameCount, samplesPerFrame * 1000000, sampleRate);
+        if ((flags & 6) != 6) {
+            return new XingSeeker(position, mpegAudioHeader.frameSize, durationUs);
         }
-        long readUnsignedInt = parsableByteArray.readUnsignedInt();
-        long[] jArr = new long[100];
-        for (int i3 = 0; i3 < 100; i3++) {
-            jArr[i3] = parsableByteArray.readUnsignedByte();
+        long dataSize = frame.readUnsignedInt();
+        long[] tableOfContents = new long[100];
+        for (int i = 0; i < 100; i++) {
+            tableOfContents[i] = frame.readUnsignedByte();
         }
-        if (j != -1) {
-            long j3 = j2 + readUnsignedInt;
-            if (j != j3) {
-                Log.w("XingSeeker", "XING data size mismatch: " + j + ", " + j3);
-            }
+        if (inputLength != -1 && inputLength != position + dataSize) {
+            Log.w(TAG, "XING data size mismatch: " + inputLength + ", " + (position + dataSize));
         }
-        return new XingSeeker(j2, mpegAudioHeader.frameSize, scaleLargeTimestamp, readUnsignedInt, jArr);
+        return new XingSeeker(position, mpegAudioHeader.frameSize, durationUs, dataSize, tableOfContents);
     }
 
-    private XingSeeker(long j, int i, long j2) {
-        this(j, i, j2, -1L, null);
+    private XingSeeker(long dataStartPosition, int xingFrameSize, long durationUs) {
+        this(dataStartPosition, xingFrameSize, durationUs, -1L, null);
     }
 
-    private XingSeeker(long j, int i, long j2, long j3, long[] jArr) {
-        this.dataStartPosition = j;
-        this.xingFrameSize = i;
-        this.durationUs = j2;
-        this.tableOfContents = jArr;
-        this.dataSize = j3;
-        this.dataEndPosition = j3 != -1 ? j + j3 : -1L;
+    private XingSeeker(long dataStartPosition, int xingFrameSize, long durationUs, long dataSize, long[] tableOfContents) {
+        this.dataStartPosition = dataStartPosition;
+        this.xingFrameSize = xingFrameSize;
+        this.durationUs = durationUs;
+        this.tableOfContents = tableOfContents;
+        this.dataSize = dataSize;
+        this.dataEndPosition = dataSize != -1 ? dataStartPosition + dataSize : -1L;
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
@@ -61,68 +61,69 @@ final class XingSeeker implements Seeker {
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
-    public SeekMap.SeekPoints getSeekPoints(long j) {
-        long[] jArr;
+    public SeekMap.SeekPoints getSeekPoints(long timeUs) {
+        double scaledPosition;
         if (!isSeekable()) {
             return new SeekMap.SeekPoints(new SeekPoint(0L, this.dataStartPosition + this.xingFrameSize));
         }
-        long constrainValue = Util.constrainValue(j, 0L, this.durationUs);
-        double d = constrainValue;
+        long timeUs2 = Util.constrainValue(timeUs, 0L, this.durationUs);
+        double d = timeUs2;
         Double.isNaN(d);
         double d2 = this.durationUs;
         Double.isNaN(d2);
-        double d3 = (d * 100.0d) / d2;
-        double d4 = 0.0d;
-        if (d3 > 0.0d) {
-            if (d3 >= 100.0d) {
-                d4 = 256.0d;
-            } else {
-                int i = (int) d3;
-                double d5 = ((long[]) Assertions.checkNotNull(this.tableOfContents))[i];
-                double d6 = i == 99 ? 256.0d : jArr[i + 1];
-                double d7 = i;
-                Double.isNaN(d7);
-                Double.isNaN(d5);
-                Double.isNaN(d5);
-                d4 = d5 + ((d3 - d7) * (d6 - d5));
-            }
+        double percent = (d * 100.0d) / d2;
+        if (percent <= FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE) {
+            scaledPosition = FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE;
+        } else if (percent >= 100.0d) {
+            scaledPosition = 256.0d;
+        } else {
+            int prevTableIndex = (int) percent;
+            long[] tableOfContents = (long[]) Assertions.checkNotNull(this.tableOfContents);
+            double prevScaledPosition = tableOfContents[prevTableIndex];
+            double nextScaledPosition = prevTableIndex == 99 ? 256.0d : tableOfContents[prevTableIndex + 1];
+            double d3 = prevTableIndex;
+            Double.isNaN(d3);
+            double interpolateFraction = percent - d3;
+            Double.isNaN(prevScaledPosition);
+            Double.isNaN(prevScaledPosition);
+            scaledPosition = ((nextScaledPosition - prevScaledPosition) * interpolateFraction) + prevScaledPosition;
         }
-        double d8 = this.dataSize;
-        Double.isNaN(d8);
-        return new SeekMap.SeekPoints(new SeekPoint(constrainValue, this.dataStartPosition + Util.constrainValue(Math.round((d4 / 256.0d) * d8), this.xingFrameSize, this.dataSize - 1)));
+        double d4 = this.dataSize;
+        Double.isNaN(d4);
+        long positionOffset = Math.round((scaledPosition / 256.0d) * d4);
+        return new SeekMap.SeekPoints(new SeekPoint(timeUs2, this.dataStartPosition + Util.constrainValue(positionOffset, this.xingFrameSize, this.dataSize - 1)));
     }
 
     @Override // com.google.android.exoplayer2.extractor.mp3.Seeker
-    public long getTimeUs(long j) {
-        double d;
-        long j2 = j - this.dataStartPosition;
-        if (!isSeekable() || j2 <= this.xingFrameSize) {
-            return 0L;
-        }
-        long[] jArr = (long[]) Assertions.checkNotNull(this.tableOfContents);
-        double d2 = j2;
-        Double.isNaN(d2);
-        double d3 = this.dataSize;
-        Double.isNaN(d3);
-        double d4 = (d2 * 256.0d) / d3;
-        int binarySearchFloor = Util.binarySearchFloor(jArr, (long) d4, true, true);
-        long timeUsForTableIndex = getTimeUsForTableIndex(binarySearchFloor);
-        long j3 = jArr[binarySearchFloor];
-        int i = binarySearchFloor + 1;
-        long timeUsForTableIndex2 = getTimeUsForTableIndex(i);
-        long j4 = binarySearchFloor == 99 ? 256L : jArr[i];
-        if (j3 == j4) {
-            d = 0.0d;
-        } else {
-            double d5 = j3;
+    public long getTimeUs(long position) {
+        double interpolateFraction;
+        long positionOffset = position - this.dataStartPosition;
+        if (isSeekable() && positionOffset > this.xingFrameSize) {
+            long[] tableOfContents = (long[]) Assertions.checkNotNull(this.tableOfContents);
+            double d = positionOffset;
+            Double.isNaN(d);
+            double d2 = this.dataSize;
+            Double.isNaN(d2);
+            double scaledPosition = (d * 256.0d) / d2;
+            int prevTableIndex = Util.binarySearchFloor(tableOfContents, (long) scaledPosition, true, true);
+            long prevTimeUs = getTimeUsForTableIndex(prevTableIndex);
+            long prevScaledPosition = tableOfContents[prevTableIndex];
+            long nextTimeUs = getTimeUsForTableIndex(prevTableIndex + 1);
+            long nextScaledPosition = prevTableIndex == 99 ? 256L : tableOfContents[prevTableIndex + 1];
+            if (prevScaledPosition == nextScaledPosition) {
+                interpolateFraction = 0.0d;
+            } else {
+                double d3 = prevScaledPosition;
+                Double.isNaN(d3);
+                double d4 = nextScaledPosition - prevScaledPosition;
+                Double.isNaN(d4);
+                interpolateFraction = (scaledPosition - d3) / d4;
+            }
+            double d5 = nextTimeUs - prevTimeUs;
             Double.isNaN(d5);
-            double d6 = j4 - j3;
-            Double.isNaN(d6);
-            d = (d4 - d5) / d6;
+            return Math.round(d5 * interpolateFraction) + prevTimeUs;
         }
-        double d7 = timeUsForTableIndex2 - timeUsForTableIndex;
-        Double.isNaN(d7);
-        return timeUsForTableIndex + Math.round(d * d7);
+        return 0L;
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
@@ -135,7 +136,7 @@ final class XingSeeker implements Seeker {
         return this.dataEndPosition;
     }
 
-    private long getTimeUsForTableIndex(int i) {
-        return (this.durationUs * i) / 100;
+    private long getTimeUsForTableIndex(int tableIndex) {
+        return (this.durationUs * tableIndex) / 100;
     }
 }

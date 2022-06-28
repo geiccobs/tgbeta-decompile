@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzj implements Parcelable.Creator<LoyaltyPoints> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ LoyaltyPoints createFromParcel(Parcel parcel) {
@@ -14,15 +14,20 @@ public final class zzj implements Parcelable.Creator<LoyaltyPoints> {
         TimeInterval timeInterval = null;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            int fieldId = SafeParcelReader.getFieldId(readHeader);
-            if (fieldId == 2) {
-                str = SafeParcelReader.createString(parcel, readHeader);
-            } else if (fieldId == 3) {
-                loyaltyPointsBalance = (LoyaltyPointsBalance) SafeParcelReader.createParcelable(parcel, readHeader, LoyaltyPointsBalance.CREATOR);
-            } else if (fieldId == 5) {
-                timeInterval = (TimeInterval) SafeParcelReader.createParcelable(parcel, readHeader, TimeInterval.CREATOR);
-            } else {
-                SafeParcelReader.skipUnknownField(parcel, readHeader);
+            switch (SafeParcelReader.getFieldId(readHeader)) {
+                case 2:
+                    str = SafeParcelReader.createString(parcel, readHeader);
+                    break;
+                case 3:
+                    loyaltyPointsBalance = (LoyaltyPointsBalance) SafeParcelReader.createParcelable(parcel, readHeader, LoyaltyPointsBalance.CREATOR);
+                    break;
+                case 4:
+                default:
+                    SafeParcelReader.skipUnknownField(parcel, readHeader);
+                    break;
+                case 5:
+                    timeInterval = (TimeInterval) SafeParcelReader.createParcelable(parcel, readHeader, TimeInterval.CREATOR);
+                    break;
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

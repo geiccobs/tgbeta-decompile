@@ -1,13 +1,12 @@
 package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.internal.clearcut.zzca;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.telegram.messenger.R;
-/* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
     private static final zzby zzgw = new zzby(true);
     private boolean zzgu;
@@ -21,7 +20,7 @@ public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
         zzv();
     }
 
-    static int zza(zzfl zzflVar, int i, Object obj) {
+    public static int zza(zzfl zzflVar, int i, Object obj) {
         int zzr = zzbn.zzr(i);
         if (zzflVar == zzfl.GROUP) {
             zzci.zzf((zzdo) obj);
@@ -35,6 +34,91 @@ public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
         return obj instanceof zzcr ? zzcr.zzbr() : obj;
     }
 
+    public static void zza(zzbn zzbnVar, zzfl zzflVar, int i, Object obj) throws IOException {
+        if (zzflVar == zzfl.GROUP) {
+            zzdo zzdoVar = (zzdo) obj;
+            zzci.zzf(zzdoVar);
+            zzbnVar.zzb(i, 3);
+            zzdoVar.zzb(zzbnVar);
+            zzbnVar.zzb(i, 4);
+            return;
+        }
+        zzbnVar.zzb(i, zzflVar.zzel());
+        switch (zzbz.zzgq[zzflVar.ordinal()]) {
+            case 1:
+                zzbnVar.zza(((Double) obj).doubleValue());
+                return;
+            case 2:
+                zzbnVar.zza(((Float) obj).floatValue());
+                return;
+            case 3:
+                zzbnVar.zzb(((Long) obj).longValue());
+                return;
+            case 4:
+                zzbnVar.zzb(((Long) obj).longValue());
+                return;
+            case 5:
+                zzbnVar.zzn(((Integer) obj).intValue());
+                return;
+            case 6:
+                zzbnVar.zzd(((Long) obj).longValue());
+                return;
+            case 7:
+                zzbnVar.zzq(((Integer) obj).intValue());
+                return;
+            case 8:
+                zzbnVar.zza(((Boolean) obj).booleanValue());
+                return;
+            case 9:
+                ((zzdo) obj).zzb(zzbnVar);
+                return;
+            case 10:
+                zzbnVar.zzb((zzdo) obj);
+                return;
+            case 11:
+                if (obj instanceof zzbb) {
+                    zzbnVar.zza((zzbb) obj);
+                    return;
+                } else {
+                    zzbnVar.zzg((String) obj);
+                    return;
+                }
+            case 12:
+                if (obj instanceof zzbb) {
+                    zzbnVar.zza((zzbb) obj);
+                    return;
+                }
+                byte[] bArr = (byte[]) obj;
+                zzbnVar.zzd(bArr, 0, bArr.length);
+                return;
+            case 13:
+                zzbnVar.zzo(((Integer) obj).intValue());
+                return;
+            case 14:
+                zzbnVar.zzq(((Integer) obj).intValue());
+                return;
+            case 15:
+                zzbnVar.zzd(((Long) obj).longValue());
+                return;
+            case 16:
+                zzbnVar.zzp(((Integer) obj).intValue());
+                return;
+            case 17:
+                zzbnVar.zzc(((Long) obj).longValue());
+                return;
+            case 18:
+                if (obj instanceof zzcj) {
+                    zzbnVar.zzn(((zzcj) obj).zzc());
+                    return;
+                } else {
+                    zzbnVar.zzn(((Integer) obj).intValue());
+                    return;
+                }
+            default:
+                return;
+        }
+    }
+
     private final void zza(FieldDescriptorType fielddescriptortype, Object obj) {
         if (!fielddescriptortype.zzaw()) {
             zza(fielddescriptortype.zzau(), obj);
@@ -43,10 +127,11 @@ public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
         } else {
             ArrayList arrayList = new ArrayList();
             arrayList.addAll((List) obj);
-            int size = arrayList.size();
+            ArrayList arrayList2 = arrayList;
+            int size = arrayList2.size();
             int i = 0;
             while (i < size) {
-                Object obj2 = arrayList.get(i);
+                Object obj2 = arrayList2.get(i);
                 i++;
                 zza(fielddescriptortype.zzau(), obj2);
             }
@@ -215,7 +300,7 @@ public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
                 return zzbn.zzu(((Integer) obj).intValue());
             case 17:
                 return zzbn.zzg(((Long) obj).longValue());
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return obj instanceof zzcj ? zzbn.zzx(((zzcj) obj).zzc()) : zzbn.zzx(((Integer) obj).intValue());
             default:
                 throw new RuntimeException("There is no way to get here, but the compiler thinks otherwise.");

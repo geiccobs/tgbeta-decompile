@@ -3,13 +3,15 @@ package org.telegram.ui.Components.voip;
 import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.ui.GroupCallActivity;
 import org.telegram.ui.GroupCallTabletGridAdapter;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class GroupCallGridCell extends FrameLayout {
+    public static final int CELL_HEIGHT = 165;
     public boolean attached;
     public GroupCallTabletGridAdapter gridAdapter;
     private final boolean isTabletGrid;
@@ -18,39 +20,44 @@ public class GroupCallGridCell extends FrameLayout {
     GroupCallMiniTextureView renderer;
     public int spanCount;
 
-    public GroupCallGridCell(Context context, boolean z) {
+    public GroupCallGridCell(Context context, boolean isTabletGrid) {
         super(context);
-        this.isTabletGrid = z;
+        this.isTabletGrid = isTabletGrid;
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        int i3;
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        float parentWidth;
+        float h;
         if (this.isTabletGrid) {
-            ((View) getParent()).getMeasuredWidth();
-            super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(this.gridAdapter.getItemHeight(this.position), 1073741824));
+            float measuredWidth = (((View) getParent()).getMeasuredWidth() / 6.0f) * this.spanCount;
+            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(this.gridAdapter.getItemHeight(this.position), C.BUFFER_FLAG_ENCRYPTED));
             return;
         }
-        float f = GroupCallActivity.isLandscapeMode ? 3.0f : 2.0f;
+        float spanCount = GroupCallActivity.isLandscapeMode ? 3.0f : 2.0f;
         if (getParent() != null) {
-            i3 = ((View) getParent()).getMeasuredWidth();
+            parentWidth = ((View) getParent()).getMeasuredWidth();
         } else {
-            i3 = View.MeasureSpec.getSize(i);
+            parentWidth = View.MeasureSpec.getSize(widthMeasureSpec);
         }
-        float f2 = i3;
-        super.onMeasure(i, View.MeasureSpec.makeMeasureSpec((int) ((GroupCallActivity.isTabletMode ? f2 / 2.0f : f2 / f) + AndroidUtilities.dp(4.0f)), 1073741824));
+        if (GroupCallActivity.isTabletMode) {
+            h = parentWidth / 2.0f;
+        } else {
+            h = parentWidth / spanCount;
+        }
+        super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec((int) (AndroidUtilities.dp(4.0f) + h), C.BUFFER_FLAG_ENCRYPTED));
     }
 
-    public void setData(AccountInstance accountInstance, ChatObject.VideoParticipant videoParticipant, ChatObject.Call call, long j) {
-        this.participant = videoParticipant;
+    public void setData(AccountInstance accountInstance, ChatObject.VideoParticipant participant, ChatObject.Call call, long selfPeerId) {
+        this.participant = participant;
     }
 
     public ChatObject.VideoParticipant getParticipant() {
         return this.participant;
     }
 
-    public void setRenderer(GroupCallMiniTextureView groupCallMiniTextureView) {
-        this.renderer = groupCallMiniTextureView;
+    public void setRenderer(GroupCallMiniTextureView renderer) {
+        this.renderer = renderer;
     }
 
     public GroupCallMiniTextureView getRenderer() {
@@ -70,13 +77,10 @@ public class GroupCallGridCell extends FrameLayout {
     }
 
     public float getItemHeight() {
-        int measuredHeight;
         GroupCallTabletGridAdapter groupCallTabletGridAdapter = this.gridAdapter;
         if (groupCallTabletGridAdapter != null) {
-            measuredHeight = groupCallTabletGridAdapter.getItemHeight(this.position);
-        } else {
-            measuredHeight = getMeasuredHeight();
+            return groupCallTabletGridAdapter.getItemHeight(this.position);
         }
-        return measuredHeight;
+        return getMeasuredHeight();
     }
 }

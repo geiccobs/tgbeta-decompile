@@ -1,14 +1,16 @@
 package com.stripe.android.net;
-/* loaded from: classes.dex */
+
+import com.stripe.android.util.StripeTextUtils;
+/* loaded from: classes3.dex */
 public class RequestOptions {
     private final String mApiVersion;
     private final String mIdempotencyKey;
     private final String mPublishableApiKey;
 
-    private RequestOptions(String str, String str2, String str3) {
-        this.mApiVersion = str;
-        this.mIdempotencyKey = str2;
-        this.mPublishableApiKey = str3;
+    private RequestOptions(String apiVersion, String idempotencyKey, String publishableApiKey) {
+        this.mApiVersion = apiVersion;
+        this.mIdempotencyKey = idempotencyKey;
+        this.mPublishableApiKey = publishableApiKey;
     }
 
     public String getApiVersion() {
@@ -23,18 +25,33 @@ public class RequestOptions {
         return this.mPublishableApiKey;
     }
 
-    public static RequestOptionsBuilder builder(String str) {
-        return new RequestOptionsBuilder(str);
+    public static RequestOptionsBuilder builder(String publishableApiKey) {
+        return new RequestOptionsBuilder(publishableApiKey);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class RequestOptionsBuilder {
         private String apiVersion;
         private String idempotencyKey;
         private String publishableApiKey;
 
-        public RequestOptionsBuilder(String str) {
-            this.publishableApiKey = str;
+        public RequestOptionsBuilder(String publishableApiKey) {
+            this.publishableApiKey = publishableApiKey;
+        }
+
+        public RequestOptionsBuilder setPublishableApiKey(String publishableApiKey) {
+            this.publishableApiKey = publishableApiKey;
+            return this;
+        }
+
+        public RequestOptionsBuilder setIdempotencyKey(String idempotencyKey) {
+            this.idempotencyKey = idempotencyKey;
+            return this;
+        }
+
+        public RequestOptionsBuilder setApiVersion(String apiVersion) {
+            this.apiVersion = StripeTextUtils.isBlank(apiVersion) ? null : apiVersion;
+            return this;
         }
 
         public RequestOptions build() {

@@ -1,12 +1,12 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzbe extends zzbi {
     private final int zzfm;
     private final int zzfn;
 
     public zzbe(byte[] bArr, int i, int i2) {
         super(bArr);
-        zzbb.zzb(i, i + i2, bArr.length);
+        zzb(i, i + i2, bArr.length);
         this.zzfm = i;
         this.zzfn = i2;
     }

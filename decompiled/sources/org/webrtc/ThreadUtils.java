@@ -6,15 +6,15 @@ import android.os.SystemClock;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class ThreadUtils {
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface BlockingOperation {
         void run() throws InterruptedException;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class ThreadChecker {
         private Thread thread = Thread.currentThread();
 
@@ -22,10 +22,9 @@ public class ThreadUtils {
             if (this.thread == null) {
                 this.thread = Thread.currentThread();
             }
-            if (Thread.currentThread() == this.thread) {
-                return;
+            if (Thread.currentThread() != this.thread) {
+                throw new IllegalStateException("Wrong thread");
             }
-            throw new IllegalStateException("Wrong thread");
         }
 
         public void detachThread() {
@@ -34,41 +33,41 @@ public class ThreadUtils {
     }
 
     public static void checkIsOnMainThread() {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            return;
+        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            throw new IllegalStateException("Not on main thread!");
         }
-        throw new IllegalStateException("Not on main thread!");
     }
 
-    public static void executeUninterruptibly(BlockingOperation blockingOperation) {
-        boolean z = false;
+    public static void executeUninterruptibly(BlockingOperation operation) {
+        boolean wasInterrupted = false;
         while (true) {
             try {
-                blockingOperation.run();
+                operation.run();
                 break;
-            } catch (InterruptedException unused) {
-                z = true;
+            } catch (InterruptedException e) {
+                wasInterrupted = true;
             }
         }
-        if (z) {
+        if (wasInterrupted) {
             Thread.currentThread().interrupt();
         }
     }
 
-    public static boolean joinUninterruptibly(Thread thread, long j) {
-        long elapsedRealtime = SystemClock.elapsedRealtime();
-        boolean z = false;
-        long j2 = j;
-        while (j2 > 0) {
+    public static boolean joinUninterruptibly(Thread thread, long timeoutMs) {
+        long startTimeMs = SystemClock.elapsedRealtime();
+        long timeRemainingMs = timeoutMs;
+        boolean wasInterrupted = false;
+        while (timeRemainingMs > 0) {
             try {
-                thread.join(j2);
+                thread.join(timeRemainingMs);
                 break;
-            } catch (InterruptedException unused) {
-                j2 = j - (SystemClock.elapsedRealtime() - elapsedRealtime);
-                z = true;
+            } catch (InterruptedException e) {
+                wasInterrupted = true;
+                long elapsedTimeMs = SystemClock.elapsedRealtime() - startTimeMs;
+                timeRemainingMs = timeoutMs - elapsedTimeMs;
             }
         }
-        if (z) {
+        if (wasInterrupted) {
             Thread.currentThread().interrupt();
         }
         return !thread.isAlive();
@@ -83,35 +82,37 @@ public class ThreadUtils {
         });
     }
 
-    public static void awaitUninterruptibly(final CountDownLatch countDownLatch) {
+    public static void awaitUninterruptibly(final CountDownLatch latch) {
         executeUninterruptibly(new BlockingOperation() { // from class: org.webrtc.ThreadUtils.2
             @Override // org.webrtc.ThreadUtils.BlockingOperation
             public void run() throws InterruptedException {
-                countDownLatch.await();
+                latch.await();
             }
         });
     }
 
-    public static boolean awaitUninterruptibly(CountDownLatch countDownLatch, long j) {
-        long elapsedRealtime = SystemClock.elapsedRealtime();
-        boolean z = false;
-        long j2 = j;
-        boolean z2 = false;
-        do {
+    public static boolean awaitUninterruptibly(CountDownLatch barrier, long timeoutMs) {
+        long startTimeMs = SystemClock.elapsedRealtime();
+        long timeRemainingMs = timeoutMs;
+        boolean wasInterrupted = false;
+        boolean result = false;
+        while (true) {
             try {
-                z = countDownLatch.await(j2, TimeUnit.MILLISECONDS);
+                result = barrier.await(timeRemainingMs, TimeUnit.MILLISECONDS);
                 break;
-            } catch (InterruptedException unused) {
-                z2 = true;
-                j2 = j - (SystemClock.elapsedRealtime() - elapsedRealtime);
-                if (j2 <= 0) {
+            } catch (InterruptedException e) {
+                wasInterrupted = true;
+                long elapsedTimeMs = SystemClock.elapsedRealtime() - startTimeMs;
+                timeRemainingMs = timeoutMs - elapsedTimeMs;
+                if (timeRemainingMs <= 0) {
+                    break;
                 }
             }
-        } while (j2 <= 0);
-        if (z2) {
+        }
+        if (wasInterrupted) {
             Thread.currentThread().interrupt();
         }
-        return z;
+        return result;
     }
 
     public static <V> V invokeAtFrontUninterruptibly(Handler handler, final Callable<V> callable) {
@@ -122,32 +123,32 @@ public class ThreadUtils {
                 throw new RuntimeException(e);
             }
         }
-        final C1Result c1Result = new C1Result();
-        final C1CaughtException c1CaughtException = new C1CaughtException();
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final C1Result result = new C1Result();
+        final C1CaughtException caughtException = new C1CaughtException();
+        final CountDownLatch barrier = new CountDownLatch(1);
         handler.post(new Runnable() { // from class: org.webrtc.ThreadUtils.3
             /* JADX WARN: Type inference failed for: r1v2, types: [V, java.lang.Object] */
             @Override // java.lang.Runnable
             public void run() {
                 try {
-                    c1Result.value = callable.call();
+                    result.value = callable.call();
                 } catch (Exception e2) {
-                    c1CaughtException.e = e2;
+                    caughtException.e = e2;
                 }
-                countDownLatch.countDown();
+                barrier.countDown();
             }
         });
-        awaitUninterruptibly(countDownLatch);
-        if (c1CaughtException.e != null) {
-            RuntimeException runtimeException = new RuntimeException(c1CaughtException.e);
-            runtimeException.setStackTrace(concatStackTraces(c1CaughtException.e.getStackTrace(), runtimeException.getStackTrace()));
+        awaitUninterruptibly(barrier);
+        if (caughtException.e != null) {
+            RuntimeException runtimeException = new RuntimeException(caughtException.e);
+            runtimeException.setStackTrace(concatStackTraces(caughtException.e.getStackTrace(), runtimeException.getStackTrace()));
             throw runtimeException;
         }
-        return c1Result.value;
+        return result.value;
     }
 
     /* renamed from: org.webrtc.ThreadUtils$1CaughtException */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class C1CaughtException {
         Exception e;
 
@@ -156,7 +157,7 @@ public class ThreadUtils {
     }
 
     /* renamed from: org.webrtc.ThreadUtils$1Result */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class C1Result {
         public V value;
 
@@ -164,20 +165,20 @@ public class ThreadUtils {
         }
     }
 
-    public static void invokeAtFrontUninterruptibly(Handler handler, final Runnable runnable) {
+    public static void invokeAtFrontUninterruptibly(Handler handler, final Runnable runner) {
         invokeAtFrontUninterruptibly(handler, new Callable<Void>() { // from class: org.webrtc.ThreadUtils.4
             @Override // java.util.concurrent.Callable
             public Void call() {
-                runnable.run();
+                runner.run();
                 return null;
             }
         });
     }
 
-    static StackTraceElement[] concatStackTraces(StackTraceElement[] stackTraceElementArr, StackTraceElement[] stackTraceElementArr2) {
-        StackTraceElement[] stackTraceElementArr3 = new StackTraceElement[stackTraceElementArr.length + stackTraceElementArr2.length];
-        System.arraycopy(stackTraceElementArr, 0, stackTraceElementArr3, 0, stackTraceElementArr.length);
-        System.arraycopy(stackTraceElementArr2, 0, stackTraceElementArr3, stackTraceElementArr.length, stackTraceElementArr2.length);
-        return stackTraceElementArr3;
+    static StackTraceElement[] concatStackTraces(StackTraceElement[] inner, StackTraceElement[] outer) {
+        StackTraceElement[] combined = new StackTraceElement[inner.length + outer.length];
+        System.arraycopy(inner, 0, combined, 0, inner.length);
+        System.arraycopy(outer, 0, combined, inner.length, outer.length);
+        return combined;
     }
 }

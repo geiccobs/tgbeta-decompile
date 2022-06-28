@@ -7,7 +7,7 @@ import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseAppIndexingInvalidArgumentException;
 import com.google.firebase.appindexing.FirebaseUserActions;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzt extends FirebaseUserActions {
     private final zzr zza;
 
@@ -31,5 +31,10 @@ public final class zzt extends FirebaseUserActions {
     @Override // com.google.firebase.appindexing.FirebaseUserActions
     public final Task<Void> end(Action action) {
         return zza(2, action);
+    }
+
+    @Override // com.google.firebase.appindexing.FirebaseUserActions
+    public final Task<Void> start(Action action) {
+        return zza(1, action);
     }
 }

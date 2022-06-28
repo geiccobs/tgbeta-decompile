@@ -1,5 +1,5 @@
 package com.google.android.datatransport.runtime.scheduling.jobscheduling;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class AlarmManagerSchedulerBroadcastReceiver$$ExternalSyntheticLambda0 implements Runnable {
     public static final /* synthetic */ AlarmManagerSchedulerBroadcastReceiver$$ExternalSyntheticLambda0 INSTANCE = new AlarmManagerSchedulerBroadcastReceiver$$ExternalSyntheticLambda0();
 

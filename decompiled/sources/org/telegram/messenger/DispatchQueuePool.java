@@ -3,7 +3,7 @@ package org.telegram.messenger;
 import android.os.SystemClock;
 import android.util.SparseIntArray;
 import java.util.LinkedList;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class DispatchQueuePool {
     private boolean cleanupScheduled;
     private int createdCount;
@@ -16,19 +16,19 @@ public class DispatchQueuePool {
         @Override // java.lang.Runnable
         public void run() {
             if (!DispatchQueuePool.this.queues.isEmpty()) {
-                long elapsedRealtime = SystemClock.elapsedRealtime();
-                int size = DispatchQueuePool.this.queues.size();
-                int i = 0;
-                while (i < size) {
-                    DispatchQueue dispatchQueue = (DispatchQueue) DispatchQueuePool.this.queues.get(i);
-                    if (dispatchQueue.getLastTaskTime() < elapsedRealtime - 30000) {
-                        dispatchQueue.recycle();
-                        DispatchQueuePool.this.queues.remove(i);
+                long currentTime = SystemClock.elapsedRealtime();
+                int a = 0;
+                int N = DispatchQueuePool.this.queues.size();
+                while (a < N) {
+                    DispatchQueue queue = (DispatchQueue) DispatchQueuePool.this.queues.get(a);
+                    if (queue.getLastTaskTime() < currentTime - 30000) {
+                        queue.recycle();
+                        DispatchQueuePool.this.queues.remove(a);
                         DispatchQueuePool.access$110(DispatchQueuePool.this);
-                        i--;
-                        size--;
+                        a--;
+                        N--;
                     }
-                    i++;
+                    a++;
                 }
             }
             if (DispatchQueuePool.this.queues.isEmpty() && DispatchQueuePool.this.busyQueues.isEmpty()) {
@@ -41,61 +41,64 @@ public class DispatchQueuePool {
     };
     private int guid = Utilities.random.nextInt();
 
-    static /* synthetic */ int access$110(DispatchQueuePool dispatchQueuePool) {
-        int i = dispatchQueuePool.createdCount;
-        dispatchQueuePool.createdCount = i - 1;
+    static /* synthetic */ int access$110(DispatchQueuePool x0) {
+        int i = x0.createdCount;
+        x0.createdCount = i - 1;
         return i;
     }
 
-    public DispatchQueuePool(int i) {
-        this.maxCount = i;
+    public DispatchQueuePool(int count) {
+        this.maxCount = count;
     }
 
     public void execute(final Runnable runnable) {
-        final DispatchQueue dispatchQueue;
+        final DispatchQueue queue;
         if (!this.busyQueues.isEmpty() && (this.totalTasksCount / 2 <= this.busyQueues.size() || (this.queues.isEmpty() && this.createdCount >= this.maxCount))) {
-            dispatchQueue = this.busyQueues.remove(0);
+            queue = this.busyQueues.remove(0);
         } else if (this.queues.isEmpty()) {
-            dispatchQueue = new DispatchQueue("DispatchQueuePool" + this.guid + "_" + Utilities.random.nextInt());
-            dispatchQueue.setPriority(10);
+            queue = new DispatchQueue("DispatchQueuePool" + this.guid + "_" + Utilities.random.nextInt());
+            queue.setPriority(10);
             this.createdCount = this.createdCount + 1;
         } else {
-            dispatchQueue = this.queues.remove(0);
+            queue = this.queues.remove(0);
         }
         if (!this.cleanupScheduled) {
             AndroidUtilities.runOnUIThread(this.cleanupRunnable, 30000L);
             this.cleanupScheduled = true;
         }
         this.totalTasksCount++;
-        this.busyQueues.add(dispatchQueue);
-        this.busyQueuesMap.put(dispatchQueue.index, this.busyQueuesMap.get(dispatchQueue.index, 0) + 1);
-        dispatchQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.DispatchQueuePool$$ExternalSyntheticLambda0
+        this.busyQueues.add(queue);
+        int count = this.busyQueuesMap.get(queue.index, 0);
+        this.busyQueuesMap.put(queue.index, count + 1);
+        queue.postRunnable(new Runnable() { // from class: org.telegram.messenger.DispatchQueuePool$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                DispatchQueuePool.this.lambda$execute$1(runnable, dispatchQueue);
+                DispatchQueuePool.this.m188lambda$execute$1$orgtelegrammessengerDispatchQueuePool(runnable, queue);
             }
         });
     }
 
-    public /* synthetic */ void lambda$execute$1(Runnable runnable, final DispatchQueue dispatchQueue) {
+    /* renamed from: lambda$execute$1$org-telegram-messenger-DispatchQueuePool */
+    public /* synthetic */ void m188lambda$execute$1$orgtelegrammessengerDispatchQueuePool(Runnable runnable, final DispatchQueue queue) {
         runnable.run();
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.DispatchQueuePool$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                DispatchQueuePool.this.lambda$execute$0(dispatchQueue);
+                DispatchQueuePool.this.m187lambda$execute$0$orgtelegrammessengerDispatchQueuePool(queue);
             }
         });
     }
 
-    public /* synthetic */ void lambda$execute$0(DispatchQueue dispatchQueue) {
+    /* renamed from: lambda$execute$0$org-telegram-messenger-DispatchQueuePool */
+    public /* synthetic */ void m187lambda$execute$0$orgtelegrammessengerDispatchQueuePool(DispatchQueue queue) {
         this.totalTasksCount--;
-        int i = this.busyQueuesMap.get(dispatchQueue.index) - 1;
-        if (i == 0) {
-            this.busyQueuesMap.delete(dispatchQueue.index);
-            this.busyQueues.remove(dispatchQueue);
-            this.queues.add(dispatchQueue);
+        int remainingTasksCount = this.busyQueuesMap.get(queue.index) - 1;
+        if (remainingTasksCount == 0) {
+            this.busyQueuesMap.delete(queue.index);
+            this.busyQueues.remove(queue);
+            this.queues.add(queue);
             return;
         }
-        this.busyQueuesMap.put(dispatchQueue.index, i);
+        this.busyQueuesMap.put(queue.index, remainingTasksCount);
     }
 }

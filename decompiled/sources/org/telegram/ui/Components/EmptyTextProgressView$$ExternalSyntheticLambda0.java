@@ -2,7 +2,7 @@ package org.telegram.ui.Components;
 
 import android.view.MotionEvent;
 import android.view.View;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class EmptyTextProgressView$$ExternalSyntheticLambda0 implements View.OnTouchListener {
     public static final /* synthetic */ EmptyTextProgressView$$ExternalSyntheticLambda0 INSTANCE = new EmptyTextProgressView$$ExternalSyntheticLambda0();
 
@@ -11,8 +11,6 @@ public final /* synthetic */ class EmptyTextProgressView$$ExternalSyntheticLambd
 
     @Override // android.view.View.OnTouchListener
     public final boolean onTouch(View view, MotionEvent motionEvent) {
-        boolean lambda$new$0;
-        lambda$new$0 = EmptyTextProgressView.lambda$new$0(view, motionEvent);
-        return lambda$new$0;
+        return EmptyTextProgressView.lambda$new$0(view, motionEvent);
     }
 }

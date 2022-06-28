@@ -3,7 +3,7 @@ package com.google.firebase.appindexing.builders;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.firebase.appindexing.Action;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AssistActionBuilder extends Action.Builder {
     private String zza;
 
@@ -26,9 +26,9 @@ public final class AssistActionBuilder extends Action.Builder {
         return super.build();
     }
 
-    public AssistActionBuilder setActionToken(String str) {
-        Preconditions.checkNotNull(str);
-        this.zza = str;
+    public AssistActionBuilder setActionToken(String actionToken) {
+        Preconditions.checkNotNull(actionToken);
+        this.zza = actionToken;
         return this;
     }
 }

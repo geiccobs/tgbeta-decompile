@@ -5,13 +5,15 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ChildHelper {
+    private static final boolean DEBUG = false;
+    private static final String TAG = "ChildrenHelper";
     final Callback mCallback;
     final Bucket mBucket = new Bucket();
     final List<View> mHiddenViews = new ArrayList();
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Callback {
         void addView(View view, int i);
 
@@ -40,14 +42,14 @@ public class ChildHelper {
         this.mCallback = callback;
     }
 
-    public void hideViewInternal(View view) {
-        this.mHiddenViews.add(view);
-        this.mCallback.onEnteredHiddenState(view);
+    public void hideViewInternal(View child) {
+        this.mHiddenViews.add(child);
+        this.mCallback.onEnteredHiddenState(child);
     }
 
-    public boolean unhideViewInternal(View view) {
-        if (this.mHiddenViews.remove(view)) {
-            this.mCallback.onLeftHiddenState(view);
+    public boolean unhideViewInternal(View child) {
+        if (this.mHiddenViews.remove(child)) {
+            this.mCallback.onLeftHiddenState(child);
             return true;
         }
         return false;
@@ -57,33 +59,33 @@ public class ChildHelper {
         return this.mHiddenViews.size();
     }
 
-    public View getHiddenChildAt(int i) {
-        if (i < 0 || i >= this.mHiddenViews.size()) {
+    public View getHiddenChildAt(int index) {
+        if (index < 0 || index >= this.mHiddenViews.size()) {
             return null;
         }
-        return this.mHiddenViews.get(i);
+        return this.mHiddenViews.get(index);
     }
 
-    public void addView(View view, boolean z) {
-        addView(view, -1, z);
+    public void addView(View child, boolean hidden) {
+        addView(child, -1, hidden);
     }
 
-    public void addView(View view, int i, boolean z) {
-        int i2;
-        if (i < 0) {
-            i2 = this.mCallback.getChildCount();
+    public void addView(View child, int index, boolean hidden) {
+        int offset;
+        if (index < 0) {
+            offset = this.mCallback.getChildCount();
         } else {
-            i2 = getOffset(i);
+            offset = getOffset(index);
         }
-        this.mBucket.insert(i2, z);
-        if (z) {
-            hideViewInternal(view);
+        this.mBucket.insert(offset, hidden);
+        if (hidden) {
+            hideViewInternal(child);
         }
-        this.mCallback.addView(view, i2);
+        this.mCallback.addView(child, offset);
     }
 
     /* JADX WARN: Code restructure failed: missing block: B:10:0x001f, code lost:
-        if (r4.mBucket.get(r2) == false) goto L17;
+        if (r5.mBucket.get(r2) == false) goto L17;
      */
     /* JADX WARN: Code restructure failed: missing block: B:11:0x0021, code lost:
         r2 = r2 + 1;
@@ -95,33 +97,33 @@ public class ChildHelper {
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    private int getOffset(int r5) {
+    private int getOffset(int r6) {
         /*
-            r4 = this;
+            r5 = this;
             r0 = -1
-            if (r5 >= 0) goto L4
+            if (r6 >= 0) goto L4
             return r0
         L4:
-            androidx.recyclerview.widget.ChildHelper$Callback r1 = r4.mCallback
+            androidx.recyclerview.widget.ChildHelper$Callback r1 = r5.mCallback
             int r1 = r1.getChildCount()
-            r2 = r5
+            r2 = r6
         Lb:
             if (r2 >= r1) goto L27
-            androidx.recyclerview.widget.ChildHelper$Bucket r3 = r4.mBucket
+            androidx.recyclerview.widget.ChildHelper$Bucket r3 = r5.mBucket
             int r3 = r3.countOnesBefore(r2)
-            int r3 = r2 - r3
-            int r3 = r5 - r3
-            if (r3 != 0) goto L25
+            int r4 = r2 - r3
+            int r4 = r6 - r4
+            if (r4 != 0) goto L25
         L19:
-            androidx.recyclerview.widget.ChildHelper$Bucket r5 = r4.mBucket
-            boolean r5 = r5.get(r2)
-            if (r5 == 0) goto L24
+            androidx.recyclerview.widget.ChildHelper$Bucket r0 = r5.mBucket
+            boolean r0 = r0.get(r2)
+            if (r0 == 0) goto L24
             int r2 = r2 + 1
             goto L19
         L24:
             return r2
         L25:
-            int r2 = r2 + r3
+            int r2 = r2 + r4
             goto Lb
         L27:
             return r0
@@ -130,65 +132,66 @@ public class ChildHelper {
     }
 
     public void removeView(View view) {
-        int indexOfChild = this.mCallback.indexOfChild(view);
-        if (indexOfChild < 0) {
+        int index = this.mCallback.indexOfChild(view);
+        if (index < 0) {
             return;
         }
-        if (this.mBucket.remove(indexOfChild)) {
+        if (this.mBucket.remove(index)) {
             unhideViewInternal(view);
         }
-        this.mCallback.removeViewAt(indexOfChild);
+        this.mCallback.removeViewAt(index);
     }
 
-    public void removeViewAt(int i) {
-        int offset = getOffset(i);
-        View childAt = this.mCallback.getChildAt(offset);
-        if (childAt == null) {
+    public void removeViewAt(int index) {
+        int offset = getOffset(index);
+        View view = this.mCallback.getChildAt(offset);
+        if (view == null) {
             return;
         }
         if (this.mBucket.remove(offset)) {
-            unhideViewInternal(childAt);
+            unhideViewInternal(view);
         }
         this.mCallback.removeViewAt(offset);
     }
 
-    public View getChildAt(int i) {
-        return this.mCallback.getChildAt(getOffset(i));
+    public View getChildAt(int index) {
+        int offset = getOffset(index);
+        return this.mCallback.getChildAt(offset);
     }
 
     public void removeAllViewsUnfiltered() {
         this.mBucket.reset();
-        for (int size = this.mHiddenViews.size() - 1; size >= 0; size--) {
-            this.mCallback.onLeftHiddenState(this.mHiddenViews.get(size));
-            this.mHiddenViews.remove(size);
+        for (int i = this.mHiddenViews.size() - 1; i >= 0; i--) {
+            this.mCallback.onLeftHiddenState(this.mHiddenViews.get(i));
+            this.mHiddenViews.remove(i);
         }
         this.mCallback.removeAllViews();
     }
 
-    public View findHiddenNonRemovedView(int i) {
-        int size = this.mHiddenViews.size();
-        for (int i2 = 0; i2 < size; i2++) {
-            View view = this.mHiddenViews.get(i2);
-            RecyclerView.ViewHolder childViewHolder = this.mCallback.getChildViewHolder(view);
-            if (childViewHolder.getLayoutPosition() == i && !childViewHolder.isInvalid() && !childViewHolder.isRemoved()) {
+    public View findHiddenNonRemovedView(int position) {
+        int count = this.mHiddenViews.size();
+        for (int i = 0; i < count; i++) {
+            View view = this.mHiddenViews.get(i);
+            RecyclerView.ViewHolder holder = this.mCallback.getChildViewHolder(view);
+            if (holder.getLayoutPosition() == position && !holder.isInvalid() && !holder.isRemoved()) {
                 return view;
             }
         }
         return null;
     }
 
-    public void attachViewToParent(View view, int i, ViewGroup.LayoutParams layoutParams, boolean z) {
-        int i2;
-        if (i < 0) {
-            i2 = this.mCallback.getChildCount();
+    public void attachViewToParent(View child, int index, ViewGroup.LayoutParams layoutParams, boolean hidden) {
+        int offset;
+        if (index < 0) {
+            offset = this.mCallback.getChildCount();
         } else {
-            i2 = getOffset(i);
+            offset = getOffset(index);
         }
-        this.mBucket.insert(i2, z);
-        if (z) {
-            hideViewInternal(view);
+        this.mBucket.insert(offset, hidden);
+        if (hidden) {
+            hideViewInternal(child);
         }
-        this.mCallback.attachViewToParent(view, i2, layoutParams);
+        this.mCallback.attachViewToParent(child, offset, layoutParams);
     }
 
     public int getChildCount() {
@@ -199,22 +202,22 @@ public class ChildHelper {
         return this.mCallback.getChildCount();
     }
 
-    public View getUnfilteredChildAt(int i) {
-        return this.mCallback.getChildAt(i);
+    public View getUnfilteredChildAt(int index) {
+        return this.mCallback.getChildAt(index);
     }
 
-    public void detachViewFromParent(int i) {
-        int offset = getOffset(i);
+    public void detachViewFromParent(int index) {
+        int offset = getOffset(index);
         this.mBucket.remove(offset);
         this.mCallback.detachViewFromParent(offset);
     }
 
-    public int indexOfChild(View view) {
-        int indexOfChild = this.mCallback.indexOfChild(view);
-        if (indexOfChild != -1 && !this.mBucket.get(indexOfChild)) {
-            return indexOfChild - this.mBucket.countOnesBefore(indexOfChild);
+    public int indexOfChild(View child) {
+        int index = this.mCallback.indexOfChild(child);
+        if (index == -1 || this.mBucket.get(index)) {
+            return -1;
         }
-        return -1;
+        return index - this.mBucket.countOnesBefore(index);
     }
 
     public boolean isHidden(View view) {
@@ -222,22 +225,22 @@ public class ChildHelper {
     }
 
     public void hide(View view) {
-        int indexOfChild = this.mCallback.indexOfChild(view);
-        if (indexOfChild < 0) {
+        int offset = this.mCallback.indexOfChild(view);
+        if (offset < 0) {
             throw new IllegalArgumentException("view is not a child, cannot hide " + view);
         }
-        this.mBucket.set(indexOfChild);
+        this.mBucket.set(offset);
         hideViewInternal(view);
     }
 
     public void unhide(View view) {
-        int indexOfChild = this.mCallback.indexOfChild(view);
-        if (indexOfChild < 0) {
+        int offset = this.mCallback.indexOfChild(view);
+        if (offset < 0) {
             throw new IllegalArgumentException("view is not a child, cannot hide " + view);
-        } else if (!this.mBucket.get(indexOfChild)) {
+        } else if (!this.mBucket.get(offset)) {
             throw new RuntimeException("trying to unhide a view that was not hidden" + view);
         } else {
-            this.mBucket.clear(indexOfChild);
+            this.mBucket.clear(offset);
             unhideViewInternal(view);
         }
     }
@@ -247,35 +250,37 @@ public class ChildHelper {
     }
 
     public boolean removeViewIfHidden(View view) {
-        int indexOfChild = this.mCallback.indexOfChild(view);
-        if (indexOfChild == -1) {
+        int index = this.mCallback.indexOfChild(view);
+        if (index == -1) {
             unhideViewInternal(view);
             return true;
-        } else if (!this.mBucket.get(indexOfChild)) {
-            return false;
+        } else if (this.mBucket.get(index)) {
+            this.mBucket.remove(index);
+            unhideViewInternal(view);
+            this.mCallback.removeViewAt(index);
+            return true;
         } else {
-            this.mBucket.remove(indexOfChild);
-            unhideViewInternal(view);
-            this.mCallback.removeViewAt(indexOfChild);
-            return true;
+            return false;
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class Bucket {
+        static final int BITS_PER_WORD = 64;
+        static final long LAST_BIT = Long.MIN_VALUE;
         long mData = 0;
         Bucket mNext;
 
         Bucket() {
         }
 
-        void set(int i) {
-            if (i >= 64) {
+        void set(int index) {
+            if (index >= 64) {
                 ensureNext();
-                this.mNext.set(i - 64);
+                this.mNext.set(index - 64);
                 return;
             }
-            this.mData |= 1 << i;
+            this.mData |= 1 << index;
         }
 
         private void ensureNext() {
@@ -284,24 +289,24 @@ public class ChildHelper {
             }
         }
 
-        void clear(int i) {
-            if (i >= 64) {
+        void clear(int index) {
+            if (index >= 64) {
                 Bucket bucket = this.mNext;
-                if (bucket == null) {
+                if (bucket != null) {
+                    bucket.clear(index - 64);
                     return;
                 }
-                bucket.clear(i - 64);
                 return;
             }
-            this.mData &= (1 << i) ^ (-1);
+            this.mData &= (1 << index) ^ (-1);
         }
 
-        boolean get(int i) {
-            if (i < 64) {
-                return (this.mData & (1 << i)) != 0;
+        boolean get(int index) {
+            if (index < 64) {
+                return (this.mData & (1 << index)) != 0;
             }
             ensureNext();
-            return this.mNext.get(i - 64);
+            return this.mNext.get(index - 64);
         }
 
         void reset() {
@@ -312,40 +317,43 @@ public class ChildHelper {
             }
         }
 
-        void insert(int i, boolean z) {
-            if (i >= 64) {
+        void insert(int index, boolean value) {
+            if (index >= 64) {
                 ensureNext();
-                this.mNext.insert(i - 64, z);
+                this.mNext.insert(index - 64, value);
                 return;
             }
             long j = this.mData;
-            boolean z2 = (Long.MIN_VALUE & j) != 0;
-            long j2 = (1 << i) - 1;
-            this.mData = ((j & (j2 ^ (-1))) << 1) | (j & j2);
-            if (z) {
-                set(i);
+            boolean lastBit = (Long.MIN_VALUE & j) != 0;
+            long mask = (1 << index) - 1;
+            long before = j & mask;
+            long after = (j & ((-1) ^ mask)) << 1;
+            this.mData = before | after;
+            if (value) {
+                set(index);
             } else {
-                clear(i);
+                clear(index);
             }
-            if (!z2 && this.mNext == null) {
-                return;
+            if (lastBit || this.mNext != null) {
+                ensureNext();
+                this.mNext.insert(0, lastBit);
             }
-            ensureNext();
-            this.mNext.insert(0, z2);
         }
 
-        boolean remove(int i) {
-            if (i >= 64) {
+        boolean remove(int index) {
+            if (index >= 64) {
                 ensureNext();
-                return this.mNext.remove(i - 64);
+                return this.mNext.remove(index - 64);
             }
-            long j = 1 << i;
-            long j2 = this.mData;
-            boolean z = (j2 & j) != 0;
-            long j3 = j2 & (j ^ (-1));
-            this.mData = j3;
-            long j4 = j - 1;
-            this.mData = (j3 & j4) | Long.rotateRight((j4 ^ (-1)) & j3, 1);
+            long mask = 1 << index;
+            long j = this.mData;
+            boolean value = (j & mask) != 0;
+            long j2 = j & (mask ^ (-1));
+            this.mData = j2;
+            long mask2 = mask - 1;
+            long before = j2 & mask2;
+            long after = Long.rotateRight(j2 & ((-1) ^ mask2), 1);
+            this.mData = before | after;
             Bucket bucket = this.mNext;
             if (bucket != null) {
                 if (bucket.get(0)) {
@@ -353,20 +361,20 @@ public class ChildHelper {
                 }
                 this.mNext.remove(0);
             }
-            return z;
+            return value;
         }
 
-        int countOnesBefore(int i) {
+        int countOnesBefore(int index) {
             Bucket bucket = this.mNext;
             if (bucket == null) {
-                if (i >= 64) {
+                if (index >= 64) {
                     return Long.bitCount(this.mData);
                 }
-                return Long.bitCount(this.mData & ((1 << i) - 1));
-            } else if (i < 64) {
-                return Long.bitCount(this.mData & ((1 << i) - 1));
+                return Long.bitCount(this.mData & ((1 << index) - 1));
+            } else if (index < 64) {
+                return Long.bitCount(this.mData & ((1 << index) - 1));
             } else {
-                return bucket.countOnesBefore(i - 64) + Long.bitCount(this.mData);
+                return bucket.countOnesBefore(index - 64) + Long.bitCount(this.mData);
             }
         }
 

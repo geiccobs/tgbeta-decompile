@@ -2,7 +2,7 @@ package com.google.android.datatransport.runtime.time;
 
 import com.google.android.datatransport.runtime.dagger.internal.Factory;
 import com.google.android.datatransport.runtime.dagger.internal.Preconditions;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class TimeModule_UptimeClockFactory implements Factory<Clock> {
     @Override // javax.inject.Provider
     public Clock get() {
@@ -18,8 +18,11 @@ public final class TimeModule_UptimeClockFactory implements Factory<Clock> {
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class InstanceHolder {
         private static final TimeModule_UptimeClockFactory INSTANCE = new TimeModule_UptimeClockFactory();
+
+        private InstanceHolder() {
+        }
     }
 }

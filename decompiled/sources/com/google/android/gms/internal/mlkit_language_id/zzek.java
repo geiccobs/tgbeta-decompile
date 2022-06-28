@@ -1,123 +1,97 @@
 package com.google.android.gms.internal.mlkit_language_id;
-/* JADX WARN: Init of enum zza can be incorrect */
-/* JADX WARN: Init of enum zzaa can be incorrect */
-/* JADX WARN: Init of enum zzab can be incorrect */
-/* JADX WARN: Init of enum zzac can be incorrect */
-/* JADX WARN: Init of enum zzad can be incorrect */
-/* JADX WARN: Init of enum zzae can be incorrect */
-/* JADX WARN: Init of enum zzaf can be incorrect */
-/* JADX WARN: Init of enum zzag can be incorrect */
-/* JADX WARN: Init of enum zzah can be incorrect */
-/* JADX WARN: Init of enum zzai can be incorrect */
-/* JADX WARN: Init of enum zzaj can be incorrect */
-/* JADX WARN: Init of enum zzak can be incorrect */
-/* JADX WARN: Init of enum zzal can be incorrect */
-/* JADX WARN: Init of enum zzam can be incorrect */
-/* JADX WARN: Init of enum zzan can be incorrect */
-/* JADX WARN: Init of enum zzao can be incorrect */
-/* JADX WARN: Init of enum zzap can be incorrect */
-/* JADX WARN: Init of enum zzaq can be incorrect */
-/* JADX WARN: Init of enum zzar can be incorrect */
-/* JADX WARN: Init of enum zzas can be incorrect */
-/* JADX WARN: Init of enum zzat can be incorrect */
-/* JADX WARN: Init of enum zzau can be incorrect */
-/* JADX WARN: Init of enum zzav can be incorrect */
-/* JADX WARN: Init of enum zzaw can be incorrect */
-/* JADX WARN: Init of enum zzax can be incorrect */
-/* JADX WARN: Init of enum zzb can be incorrect */
-/* JADX WARN: Init of enum zzc can be incorrect */
-/* JADX WARN: Init of enum zzd can be incorrect */
-/* JADX WARN: Init of enum zze can be incorrect */
-/* JADX WARN: Init of enum zzf can be incorrect */
-/* JADX WARN: Init of enum zzg can be incorrect */
-/* JADX WARN: Init of enum zzh can be incorrect */
-/* JADX WARN: Init of enum zzi can be incorrect */
-/* JADX WARN: Init of enum zzj can be incorrect */
-/* JADX WARN: Init of enum zzk can be incorrect */
-/* JADX WARN: Init of enum zzl can be incorrect */
-/* JADX WARN: Init of enum zzm can be incorrect */
-/* JADX WARN: Init of enum zzn can be incorrect */
-/* JADX WARN: Init of enum zzo can be incorrect */
-/* JADX WARN: Init of enum zzp can be incorrect */
-/* JADX WARN: Init of enum zzq can be incorrect */
-/* JADX WARN: Init of enum zzr can be incorrect */
-/* JADX WARN: Init of enum zzs can be incorrect */
-/* JADX WARN: Init of enum zzt can be incorrect */
-/* JADX WARN: Init of enum zzu can be incorrect */
-/* JADX WARN: Init of enum zzv can be incorrect */
-/* JADX WARN: Init of enum zzw can be incorrect */
-/* JADX WARN: Init of enum zzx can be incorrect */
-/* JADX WARN: Init of enum zzy can be incorrect */
-/* JADX WARN: Init of enum zzz can be incorrect */
+
+import java.lang.reflect.Type;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public enum zzek {
-    DOUBLE(0, r7, r8),
-    FLOAT(1, r7, r10),
-    INT64(2, r7, r12),
-    UINT64(3, r7, r12),
-    INT32(4, r7, r15),
-    FIXED64(5, r7, r12),
-    FIXED32(6, r7, r15),
-    BOOL(7, r7, r19),
-    STRING(8, r7, r21),
-    MESSAGE(9, r7, r23),
-    BYTES(10, r7, r25),
-    UINT32(11, r7, r15),
-    ENUM(12, r7, r28),
-    SFIXED32(13, r7, r15),
-    SFIXED64(14, r7, r12),
-    SINT32(15, r7, r15),
-    SINT64(16, r7, r12),
-    GROUP(17, r7, r23),
-    DOUBLE_LIST(18, r34, r8),
-    FLOAT_LIST(19, r34, r10),
-    INT64_LIST(20, r34, r12),
-    UINT64_LIST(21, r34, r12),
-    INT32_LIST(22, r34, r15),
-    FIXED64_LIST(23, r34, r12),
-    FIXED32_LIST(24, r34, r15),
-    BOOL_LIST(25, r34, r19),
-    STRING_LIST(26, r34, r21),
-    MESSAGE_LIST(27, r34, r23),
-    BYTES_LIST(28, r34, r25),
-    UINT32_LIST(29, r34, r15),
-    ENUM_LIST(30, r34, r28),
-    SFIXED32_LIST(31, r34, r15),
-    SFIXED64_LIST(32, r34, r12),
-    SINT32_LIST(33, r34, r15),
-    SINT64_LIST(34, r34, r12),
-    DOUBLE_LIST_PACKED(35, r50, r8),
-    FLOAT_LIST_PACKED(36, r50, r10),
-    INT64_LIST_PACKED(37, r50, r12),
-    UINT64_LIST_PACKED(38, r50, r12),
-    INT32_LIST_PACKED(39, r50, r15),
-    FIXED64_LIST_PACKED(40, r50, r12),
-    FIXED32_LIST_PACKED(41, r50, r15),
-    BOOL_LIST_PACKED(42, r50, r19),
-    UINT32_LIST_PACKED(43, r50, r15),
-    ENUM_LIST_PACKED(44, r50, r28),
-    SFIXED32_LIST_PACKED(45, r50, r15),
-    SFIXED64_LIST_PACKED(46, r50, r12),
-    SINT32_LIST_PACKED(47, r50, r15),
-    SINT64_LIST_PACKED(48, r50, r12),
-    GROUP_LIST(49, r34, r23),
+    DOUBLE(0, zzem.SCALAR, zzfb.DOUBLE),
+    FLOAT(1, zzem.SCALAR, zzfb.FLOAT),
+    INT64(2, zzem.SCALAR, zzfb.LONG),
+    UINT64(3, zzem.SCALAR, zzfb.LONG),
+    INT32(4, zzem.SCALAR, zzfb.INT),
+    FIXED64(5, zzem.SCALAR, zzfb.LONG),
+    FIXED32(6, zzem.SCALAR, zzfb.INT),
+    BOOL(7, zzem.SCALAR, zzfb.BOOLEAN),
+    STRING(8, zzem.SCALAR, zzfb.STRING),
+    MESSAGE(9, zzem.SCALAR, zzfb.MESSAGE),
+    BYTES(10, zzem.SCALAR, zzfb.BYTE_STRING),
+    UINT32(11, zzem.SCALAR, zzfb.INT),
+    ENUM(12, zzem.SCALAR, zzfb.ENUM),
+    SFIXED32(13, zzem.SCALAR, zzfb.INT),
+    SFIXED64(14, zzem.SCALAR, zzfb.LONG),
+    SINT32(15, zzem.SCALAR, zzfb.INT),
+    SINT64(16, zzem.SCALAR, zzfb.LONG),
+    GROUP(17, zzem.SCALAR, zzfb.MESSAGE),
+    DOUBLE_LIST(18, zzem.VECTOR, zzfb.DOUBLE),
+    FLOAT_LIST(19, zzem.VECTOR, zzfb.FLOAT),
+    INT64_LIST(20, zzem.VECTOR, zzfb.LONG),
+    UINT64_LIST(21, zzem.VECTOR, zzfb.LONG),
+    INT32_LIST(22, zzem.VECTOR, zzfb.INT),
+    FIXED64_LIST(23, zzem.VECTOR, zzfb.LONG),
+    FIXED32_LIST(24, zzem.VECTOR, zzfb.INT),
+    BOOL_LIST(25, zzem.VECTOR, zzfb.BOOLEAN),
+    STRING_LIST(26, zzem.VECTOR, zzfb.STRING),
+    MESSAGE_LIST(27, zzem.VECTOR, zzfb.MESSAGE),
+    BYTES_LIST(28, zzem.VECTOR, zzfb.BYTE_STRING),
+    UINT32_LIST(29, zzem.VECTOR, zzfb.INT),
+    ENUM_LIST(30, zzem.VECTOR, zzfb.ENUM),
+    SFIXED32_LIST(31, zzem.VECTOR, zzfb.INT),
+    SFIXED64_LIST(32, zzem.VECTOR, zzfb.LONG),
+    SINT32_LIST(33, zzem.VECTOR, zzfb.INT),
+    SINT64_LIST(34, zzem.VECTOR, zzfb.LONG),
+    DOUBLE_LIST_PACKED(35, zzem.PACKED_VECTOR, zzfb.DOUBLE),
+    FLOAT_LIST_PACKED(36, zzem.PACKED_VECTOR, zzfb.FLOAT),
+    INT64_LIST_PACKED(37, zzem.PACKED_VECTOR, zzfb.LONG),
+    UINT64_LIST_PACKED(38, zzem.PACKED_VECTOR, zzfb.LONG),
+    INT32_LIST_PACKED(39, zzem.PACKED_VECTOR, zzfb.INT),
+    FIXED64_LIST_PACKED(40, zzem.PACKED_VECTOR, zzfb.LONG),
+    FIXED32_LIST_PACKED(41, zzem.PACKED_VECTOR, zzfb.INT),
+    BOOL_LIST_PACKED(42, zzem.PACKED_VECTOR, zzfb.BOOLEAN),
+    UINT32_LIST_PACKED(43, zzem.PACKED_VECTOR, zzfb.INT),
+    ENUM_LIST_PACKED(44, zzem.PACKED_VECTOR, zzfb.ENUM),
+    SFIXED32_LIST_PACKED(45, zzem.PACKED_VECTOR, zzfb.INT),
+    SFIXED64_LIST_PACKED(46, zzem.PACKED_VECTOR, zzfb.LONG),
+    SINT32_LIST_PACKED(47, zzem.PACKED_VECTOR, zzfb.INT),
+    SINT64_LIST_PACKED(48, zzem.PACKED_VECTOR, zzfb.LONG),
+    GROUP_LIST(49, zzem.VECTOR, zzfb.MESSAGE),
     MAP(50, zzem.MAP, zzfb.VOID);
     
     private static final zzek[] zzbe;
+    private static final Type[] zzbf = new Type[0];
+    private final zzfb zzaz;
     private final int zzba;
+    private final zzem zzbb;
+    private final Class<?> zzbc;
+    private final boolean zzbd;
 
     zzek(int i, zzem zzemVar, zzfb zzfbVar) {
         this.zzba = i;
-        int i2 = zzen.zza[zzemVar.ordinal()];
-        if (i2 == 1) {
-            zzfbVar.zza();
-        } else if (i2 == 2) {
-            zzfbVar.zza();
+        this.zzbb = zzemVar;
+        this.zzaz = zzfbVar;
+        switch (zzen.zza[zzemVar.ordinal()]) {
+            case 1:
+                this.zzbc = zzfbVar.zza();
+                break;
+            case 2:
+                this.zzbc = zzfbVar.zza();
+                break;
+            default:
+                this.zzbc = null;
+                break;
         }
+        boolean z = false;
         if (zzemVar == zzem.SCALAR) {
-            int i3 = zzen.zzb[zzfbVar.ordinal()];
+            switch (zzen.zzb[zzfbVar.ordinal()]) {
+                case 1:
+                case 2:
+                case 3:
+                    break;
+                default:
+                    z = true;
+                    break;
+            }
         }
+        this.zzbd = z;
     }
 
     public final int zza() {
@@ -125,18 +99,6 @@ public enum zzek {
     }
 
     static {
-        zzem zzemVar = zzem.SCALAR;
-        zzfb zzfbVar = zzfb.DOUBLE;
-        zzfb zzfbVar2 = zzfb.FLOAT;
-        zzfb zzfbVar3 = zzfb.LONG;
-        zzfb zzfbVar4 = zzfb.INT;
-        zzfb zzfbVar5 = zzfb.BOOLEAN;
-        zzfb zzfbVar6 = zzfb.STRING;
-        zzfb zzfbVar7 = zzfb.MESSAGE;
-        zzfb zzfbVar8 = zzfb.BYTE_STRING;
-        zzfb zzfbVar9 = zzfb.ENUM;
-        zzem zzemVar2 = zzem.VECTOR;
-        zzem zzemVar3 = zzem.PACKED_VECTOR;
         zzek[] values = values();
         zzbe = new zzek[values.length];
         for (zzek zzekVar : values) {

@@ -1,6 +1,6 @@
 package com.google.android.gms.common;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzk extends zzf {
     public zzk(byte[] bArr) {
         super(bArr);

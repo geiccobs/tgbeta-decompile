@@ -2,14 +2,11 @@ package com.google.android.gms.common.internal;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.RecentlyNonNull;
-import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ConnectionTelemetryConfiguration extends AbstractSafeParcelable {
-    @RecentlyNonNull
     public static final Parcelable.Creator<ConnectionTelemetryConfiguration> CREATOR = new zzd();
     private final RootTelemetryConfiguration zza;
     private final boolean zzb;
@@ -17,7 +14,7 @@ public class ConnectionTelemetryConfiguration extends AbstractSafeParcelable {
     private final int[] zzd;
     private final int zze;
 
-    public ConnectionTelemetryConfiguration(@RecentlyNonNull RootTelemetryConfiguration rootTelemetryConfiguration, boolean z, boolean z2, int[] iArr, int i) {
+    public ConnectionTelemetryConfiguration(RootTelemetryConfiguration rootTelemetryConfiguration, boolean z, boolean z2, int[] iArr, int i) {
         this.zza = rootTelemetryConfiguration;
         this.zzb = z;
         this.zzc = z2;
@@ -25,7 +22,6 @@ public class ConnectionTelemetryConfiguration extends AbstractSafeParcelable {
         this.zze = i;
     }
 
-    @RecentlyNonNull
     public RootTelemetryConfiguration getRootTelemetryConfiguration() {
         return this.zza;
     }
@@ -38,7 +34,6 @@ public class ConnectionTelemetryConfiguration extends AbstractSafeParcelable {
         return this.zzc;
     }
 
-    @RecentlyNullable
     public int[] getMethodInvocationMethodKeyAllowlist() {
         return this.zzd;
     }
@@ -48,7 +43,7 @@ public class ConnectionTelemetryConfiguration extends AbstractSafeParcelable {
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+    public void writeToParcel(Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeParcelable(parcel, 1, getRootTelemetryConfiguration(), i, false);
         SafeParcelWriter.writeBoolean(parcel, 2, getMethodInvocationTelemetryEnabled());

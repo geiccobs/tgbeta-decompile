@@ -1,11 +1,12 @@
 package org.telegram.messenger;
 
-import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.content.Intent;
 import android.os.Process;
 import android.text.TextUtils;
-/* loaded from: classes.dex */
+import androidx.exifinterface.media.ExifInterface;
+import java.lang.reflect.Method;
+/* loaded from: classes4.dex */
 public class XiaomiUtilities {
     public static final int OP_ACCESS_XIAOMI_ACCOUNT = 10015;
     public static final int OP_AUTO_START = 10008;
@@ -35,23 +36,24 @@ public class XiaomiUtilities {
         return !TextUtils.isEmpty(AndroidUtilities.getSystemProperty("ro.miui.ui.version.name"));
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
-    public static boolean isCustomPermissionGranted(int i) {
+    public static boolean isCustomPermissionGranted(int permission) {
         try {
-            Class cls = Integer.TYPE;
-            return ((Integer) AppOpsManager.class.getMethod("checkOpNoThrow", cls, cls, String.class).invoke((AppOpsManager) ApplicationLoader.applicationContext.getSystemService("appops"), Integer.valueOf(i), Integer.valueOf(Process.myUid()), ApplicationLoader.applicationContext.getPackageName())).intValue() == 0;
-        } catch (Exception e) {
-            FileLog.e(e);
+            AppOpsManager mgr = (AppOpsManager) ApplicationLoader.applicationContext.getSystemService("appops");
+            Method m = AppOpsManager.class.getMethod("checkOpNoThrow", Integer.TYPE, Integer.TYPE, String.class);
+            int result = ((Integer) m.invoke(mgr, Integer.valueOf(permission), Integer.valueOf(Process.myUid()), ApplicationLoader.applicationContext.getPackageName())).intValue();
+            return result == 0;
+        } catch (Exception x) {
+            FileLog.e(x);
             return true;
         }
     }
 
     public static int getMIUIMajorVersion() {
-        String systemProperty = AndroidUtilities.getSystemProperty("ro.miui.ui.version.name");
-        if (systemProperty != null) {
+        String prop = AndroidUtilities.getSystemProperty("ro.miui.ui.version.name");
+        if (prop != null) {
             try {
-                return Integer.parseInt(systemProperty.replace("V", ""));
-            } catch (NumberFormatException unused) {
+                return Integer.parseInt(prop.replace(ExifInterface.GPS_MEASUREMENT_INTERRUPTED, ""));
+            } catch (NumberFormatException e) {
                 return -1;
             }
         }

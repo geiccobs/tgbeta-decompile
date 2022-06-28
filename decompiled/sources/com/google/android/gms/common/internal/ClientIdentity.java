@@ -2,13 +2,11 @@ package com.google.android.gms.common.internal;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ClientIdentity extends AbstractSafeParcelable {
-    @RecentlyNonNull
     public static final Parcelable.Creator<ClientIdentity> CREATOR = new zaa();
     private final int zaa;
     private final String zab;
@@ -33,19 +31,18 @@ public class ClientIdentity extends AbstractSafeParcelable {
         return clientIdentity.zaa == this.zaa && Objects.equal(clientIdentity.zab, this.zab);
     }
 
-    @RecentlyNonNull
     public String toString() {
         int i = this.zaa;
         String str = this.zab;
         StringBuilder sb = new StringBuilder(String.valueOf(str).length() + 12);
         sb.append(i);
-        sb.append(":");
+        sb.append(com.microsoft.appcenter.Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
         sb.append(str);
         return sb.toString();
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+    public void writeToParcel(Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zaa);
         SafeParcelWriter.writeString(parcel, 2, this.zab, false);

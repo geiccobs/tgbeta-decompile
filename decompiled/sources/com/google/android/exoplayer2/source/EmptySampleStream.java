@@ -3,7 +3,7 @@ package com.google.android.exoplayer2.source;
 import com.google.android.exoplayer2.FormatHolder;
 import com.google.android.exoplayer2.decoder.DecoderInputBuffer;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class EmptySampleStream implements SampleStream {
     @Override // com.google.android.exoplayer2.source.SampleStream
     public boolean isReady() {
@@ -15,13 +15,13 @@ public final class EmptySampleStream implements SampleStream {
     }
 
     @Override // com.google.android.exoplayer2.source.SampleStream
-    public int skipData(long j) {
-        return 0;
+    public int readData(FormatHolder formatHolder, DecoderInputBuffer buffer, boolean formatRequired) {
+        buffer.setFlags(4);
+        return -4;
     }
 
     @Override // com.google.android.exoplayer2.source.SampleStream
-    public int readData(FormatHolder formatHolder, DecoderInputBuffer decoderInputBuffer, boolean z) {
-        decoderInputBuffer.setFlags(4);
-        return -4;
+    public int skipData(long positionUs) {
+        return 0;
     }
 }

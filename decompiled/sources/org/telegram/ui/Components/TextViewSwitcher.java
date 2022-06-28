@@ -6,33 +6,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class TextViewSwitcher extends ViewSwitcher {
     public TextViewSwitcher(Context context) {
         super(context);
     }
 
-    public void setText(CharSequence charSequence) {
-        setText(charSequence, true);
+    public void setText(CharSequence text) {
+        setText(text, true);
     }
 
-    public void setText(CharSequence charSequence, boolean z) {
-        if (!TextUtils.equals(charSequence, getCurrentView().getText())) {
-            if (z) {
-                getNextView().setText(charSequence);
+    public void setText(CharSequence text, boolean animated) {
+        if (!TextUtils.equals(text, getCurrentView().getText())) {
+            if (animated) {
+                getNextView().setText(text);
                 showNext();
                 return;
             }
-            getCurrentView().setText(charSequence);
+            getCurrentView().setText(text);
         }
     }
 
     @Override // android.widget.ViewSwitcher, android.widget.ViewAnimator, android.view.ViewGroup
-    public void addView(View view, int i, ViewGroup.LayoutParams layoutParams) {
-        if (!(view instanceof TextView)) {
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        if (!(child instanceof TextView)) {
             throw new IllegalArgumentException();
         }
-        super.addView(view, i, layoutParams);
+        super.addView(child, index, params);
     }
 
     @Override // android.widget.ViewAnimator

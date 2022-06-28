@@ -1,19 +1,22 @@
 package com.google.android.datatransport.runtime.retries;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class Retries {
-    public static <TInput, TResult, TException extends Throwable> TResult retry(int i, TInput tinput, Function<TInput, TResult, TException> function, RetryStrategy<TInput, TResult> retryStrategy) throws Throwable {
-        TResult apply;
-        if (i < 1) {
-            return function.apply(tinput);
+    private Retries() {
+    }
+
+    public static <TInput, TResult, TException extends Throwable> TResult retry(int maxAttempts, TInput input, Function<TInput, TResult, TException> function, RetryStrategy<TInput, TResult> retryStrategy) throws Throwable {
+        TResult result;
+        if (maxAttempts >= 1) {
+            do {
+                result = function.apply(input);
+                input = retryStrategy.shouldRetry(input, result);
+                if (input == null) {
+                    break;
+                }
+                maxAttempts--;
+            } while (maxAttempts >= 1);
+            return result;
         }
-        do {
-            apply = function.apply(tinput);
-            tinput = retryStrategy.shouldRetry(tinput, apply);
-            if (tinput == null) {
-                break;
-            }
-            i--;
-        } while (i >= 1);
-        return apply;
+        return function.apply(input);
     }
 }

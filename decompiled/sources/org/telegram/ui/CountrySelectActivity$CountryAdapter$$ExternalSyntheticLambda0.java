@@ -1,7 +1,7 @@
 package org.telegram.ui;
 
 import java.util.Comparator;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class CountrySelectActivity$CountryAdapter$$ExternalSyntheticLambda0 implements Comparator {
     public static final /* synthetic */ CountrySelectActivity$CountryAdapter$$ExternalSyntheticLambda0 INSTANCE = new CountrySelectActivity$CountryAdapter$$ExternalSyntheticLambda0();
 

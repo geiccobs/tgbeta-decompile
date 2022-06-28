@@ -1,8 +1,8 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
-interface zzef<T> {
+/* loaded from: classes3.dex */
+public interface zzef<T> {
     boolean equals(T t, T t2);
 
     int hashCode(T t);

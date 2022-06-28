@@ -6,7 +6,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzb extends Binder implements IInterface {
     public zzb(String str) {
         attachInterface(this, "com.google.android.gms.wallet.internal.IWalletServiceCallbacks");

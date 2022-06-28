@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.webrtc.MediaStreamTrack;
 import org.webrtc.RtpParameters;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class RtpTransceiver {
     private RtpReceiver cachedReceiver;
     private RtpSender cachedSender;
@@ -31,7 +31,7 @@ public class RtpTransceiver {
 
     private static native boolean nativeStopped(long j);
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public enum RtpTransceiverDirection {
         SEND_RECV(0),
         SEND_ONLY(1),
@@ -40,28 +40,26 @@ public class RtpTransceiver {
         
         private final int nativeIndex;
 
-        RtpTransceiverDirection(int i) {
-            this.nativeIndex = i;
+        RtpTransceiverDirection(int nativeIndex) {
+            this.nativeIndex = nativeIndex;
         }
 
-        @CalledByNative("RtpTransceiverDirection")
         int getNativeIndex() {
             return this.nativeIndex;
         }
 
-        @CalledByNative("RtpTransceiverDirection")
-        static RtpTransceiverDirection fromNativeIndex(int i) {
+        static RtpTransceiverDirection fromNativeIndex(int nativeIndex) {
             RtpTransceiverDirection[] values;
-            for (RtpTransceiverDirection rtpTransceiverDirection : values()) {
-                if (rtpTransceiverDirection.getNativeIndex() == i) {
-                    return rtpTransceiverDirection;
+            for (RtpTransceiverDirection type : values()) {
+                if (type.getNativeIndex() == nativeIndex) {
+                    return type;
                 }
             }
-            throw new IllegalArgumentException("Uknown native RtpTransceiverDirection type" + i);
+            throw new IllegalArgumentException("Uknown native RtpTransceiverDirection type" + nativeIndex);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static final class RtpTransceiverInit {
         private final RtpTransceiverDirection direction;
         private final List<RtpParameters.Encoding> sendEncodings;
@@ -71,41 +69,37 @@ public class RtpTransceiver {
             this(RtpTransceiverDirection.SEND_RECV);
         }
 
-        public RtpTransceiverInit(RtpTransceiverDirection rtpTransceiverDirection) {
-            this(rtpTransceiverDirection, Collections.emptyList(), Collections.emptyList());
+        public RtpTransceiverInit(RtpTransceiverDirection direction) {
+            this(direction, Collections.emptyList(), Collections.emptyList());
         }
 
-        public RtpTransceiverInit(RtpTransceiverDirection rtpTransceiverDirection, List<String> list) {
-            this(rtpTransceiverDirection, list, Collections.emptyList());
+        public RtpTransceiverInit(RtpTransceiverDirection direction, List<String> streamIds) {
+            this(direction, streamIds, Collections.emptyList());
         }
 
-        public RtpTransceiverInit(RtpTransceiverDirection rtpTransceiverDirection, List<String> list, List<RtpParameters.Encoding> list2) {
-            this.direction = rtpTransceiverDirection;
-            this.streamIds = new ArrayList(list);
-            this.sendEncodings = new ArrayList(list2);
+        public RtpTransceiverInit(RtpTransceiverDirection direction, List<String> streamIds, List<RtpParameters.Encoding> sendEncodings) {
+            this.direction = direction;
+            this.streamIds = new ArrayList(streamIds);
+            this.sendEncodings = new ArrayList(sendEncodings);
         }
 
-        @CalledByNative("RtpTransceiverInit")
         int getDirectionNativeIndex() {
             return this.direction.getNativeIndex();
         }
 
-        @CalledByNative("RtpTransceiverInit")
         List<String> getStreamIds() {
             return new ArrayList(this.streamIds);
         }
 
-        @CalledByNative("RtpTransceiverInit")
         List<RtpParameters.Encoding> getSendEncodings() {
             return new ArrayList(this.sendEncodings);
         }
     }
 
-    @CalledByNative
-    protected RtpTransceiver(long j) {
-        this.nativeRtpTransceiver = j;
-        this.cachedSender = nativeGetSender(j);
-        this.cachedReceiver = nativeGetReceiver(j);
+    protected RtpTransceiver(long nativeRtpTransceiver) {
+        this.nativeRtpTransceiver = nativeRtpTransceiver;
+        this.cachedSender = nativeGetSender(nativeRtpTransceiver);
+        this.cachedReceiver = nativeGetReceiver(nativeRtpTransceiver);
     }
 
     public MediaStreamTrack.MediaType getMediaType() {
@@ -161,7 +155,6 @@ public class RtpTransceiver {
         nativeStopStandard(this.nativeRtpTransceiver);
     }
 
-    @CalledByNative
     public void dispose() {
         checkRtpTransceiverExists();
         this.cachedSender.dispose();
@@ -171,9 +164,8 @@ public class RtpTransceiver {
     }
 
     private void checkRtpTransceiverExists() {
-        if (this.nativeRtpTransceiver != 0) {
-            return;
+        if (this.nativeRtpTransceiver == 0) {
+            throw new IllegalStateException("RtpTransceiver has been disposed.");
         }
-        throw new IllegalStateException("RtpTransceiver has been disposed.");
     }
 }

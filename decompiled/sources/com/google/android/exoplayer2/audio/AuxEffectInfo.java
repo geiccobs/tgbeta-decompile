@@ -1,26 +1,28 @@
 package com.google.android.exoplayer2.audio;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AuxEffectInfo {
+    public static final int NO_AUX_EFFECT_ID = 0;
     public final int effectId;
     public final float sendLevel;
 
-    public AuxEffectInfo(int i, float f) {
-        this.effectId = i;
-        this.sendLevel = f;
+    public AuxEffectInfo(int effectId, float sendLevel) {
+        this.effectId = effectId;
+        this.sendLevel = sendLevel;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || AuxEffectInfo.class != obj.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        AuxEffectInfo auxEffectInfo = (AuxEffectInfo) obj;
+        AuxEffectInfo auxEffectInfo = (AuxEffectInfo) o;
         return this.effectId == auxEffectInfo.effectId && Float.compare(auxEffectInfo.sendLevel, this.sendLevel) == 0;
     }
 
     public int hashCode() {
-        return ((527 + this.effectId) * 31) + Float.floatToIntBits(this.sendLevel);
+        int result = (17 * 31) + this.effectId;
+        return (result * 31) + Float.floatToIntBits(this.sendLevel);
     }
 }

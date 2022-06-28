@@ -4,7 +4,7 @@ import android.content.Context;
 import com.microsoft.appcenter.utils.crypto.CryptoUtils;
 import java.security.KeyStore;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface CryptoHandler {
     byte[] decrypt(CryptoUtils.ICryptoFactory iCryptoFactory, int i, KeyStore.Entry entry, byte[] bArr) throws Exception;
 

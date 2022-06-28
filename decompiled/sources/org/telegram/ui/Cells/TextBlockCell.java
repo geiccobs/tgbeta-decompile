@@ -5,11 +5,12 @@ import android.graphics.Canvas;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class TextBlockCell extends FrameLayout {
     private boolean needDivider;
     private TextView textView;
@@ -18,26 +19,26 @@ public class TextBlockCell extends FrameLayout {
         super(context);
         TextView textView = new TextView(context);
         this.textView = textView;
-        textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         this.textView.setTextSize(1, 16.0f);
         int i = 5;
         this.textView.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
         addView(this.textView, LayoutHelper.createFrame(-1, -2.0f, (!LocaleController.isRTL ? 3 : i) | 48, 23.0f, 10.0f, 23.0f, 10.0f));
     }
 
-    public void setTextColor(int i) {
-        this.textView.setTextColor(i);
+    public void setTextColor(int color) {
+        this.textView.setTextColor(color);
     }
 
-    public void setText(String str, boolean z) {
-        this.textView.setText(str);
-        this.needDivider = z;
-        setWillNotDraw(!z);
+    public void setText(String text, boolean divider) {
+        this.textView.setText(text);
+        this.needDivider = divider;
+        setWillNotDraw(!divider);
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), i2);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), heightMeasureSpec);
     }
 
     @Override // android.view.View

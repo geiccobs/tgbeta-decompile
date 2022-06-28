@@ -1,7 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzhb extends zzfu<zzhb> implements Cloneable {
     private static volatile zzhb[] zzbkd;
     private String zzbke = "";
@@ -56,23 +56,17 @@ public final class zzhb extends zzfu<zzhb> implements Cloneable {
         } else if (!str2.equals(zzhbVar.value)) {
             return false;
         }
-        zzfw zzfwVar = this.zzrj;
-        if (zzfwVar != null && !zzfwVar.isEmpty()) {
-            return this.zzrj.equals(zzhbVar.zzrj);
-        }
-        zzfw zzfwVar2 = zzhbVar.zzrj;
-        return zzfwVar2 == null || zzfwVar2.isEmpty();
+        return (this.zzrj == null || this.zzrj.isEmpty()) ? zzhbVar.zzrj == null || zzhbVar.zzrj.isEmpty() : this.zzrj.equals(zzhbVar.zzrj);
     }
 
     public final int hashCode() {
-        int hashCode = (zzhb.class.getName().hashCode() + 527) * 31;
+        int hashCode = (getClass().getName().hashCode() + 527) * 31;
         String str = this.zzbke;
         int i = 0;
         int hashCode2 = (hashCode + (str == null ? 0 : str.hashCode())) * 31;
         String str2 = this.value;
         int hashCode3 = (hashCode2 + (str2 == null ? 0 : str2.hashCode())) * 31;
-        zzfw zzfwVar = this.zzrj;
-        if (zzfwVar != null && !zzfwVar.isEmpty()) {
+        if (this.zzrj != null && !this.zzrj.isEmpty()) {
             i = this.zzrj.hashCode();
         }
         return hashCode3 + i;

@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import android.content.DialogInterface;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class StickersArchiveAlert$$ExternalSyntheticLambda1 implements DialogInterface.OnClickListener {
     public static final /* synthetic */ StickersArchiveAlert$$ExternalSyntheticLambda1 INSTANCE = new StickersArchiveAlert$$ExternalSyntheticLambda1();
 

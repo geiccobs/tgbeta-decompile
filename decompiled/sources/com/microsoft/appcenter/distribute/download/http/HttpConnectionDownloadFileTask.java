@@ -3,6 +3,7 @@ package com.microsoft.appcenter.distribute.download.http;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.AsyncTask;
+import com.microsoft.appcenter.distribute.DistributeConstants;
 import com.microsoft.appcenter.http.HttpUtils;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import java.io.BufferedInputStream;
@@ -16,27 +17,32 @@ import java.net.URL;
 import java.net.URLConnection;
 import javax.net.ssl.HttpsURLConnection;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class HttpConnectionDownloadFileTask extends AsyncTask<Void, Void, Void> {
+    static final String APK_CONTENT_TYPE = "application/vnd.android.package-archive";
     private final Uri mDownloadUri;
     private final HttpConnectionReleaseDownloader mDownloader;
     private final File mTargetFile;
 
-    public HttpConnectionDownloadFileTask(HttpConnectionReleaseDownloader httpConnectionReleaseDownloader, Uri uri, File file) {
-        this.mDownloader = httpConnectionReleaseDownloader;
-        this.mDownloadUri = uri;
-        this.mTargetFile = file;
+    public HttpConnectionDownloadFileTask(HttpConnectionReleaseDownloader downloader, Uri downloadUri, File targetFile) {
+        this.mDownloader = downloader;
+        this.mDownloadUri = downloadUri;
+        this.mTargetFile = targetFile;
     }
 
-    public Void doInBackground(Void... voidArr) {
-        TrafficStats.setThreadStatsTag(-667034599);
+    public Void doInBackground(Void... params) {
+        long totalBytesDownloaded;
+        TrafficStats.setThreadStatsTag(HttpUtils.THREAD_STATS_TAG);
         try {
             try {
-                this.mDownloader.onDownloadStarted(System.currentTimeMillis());
+                long enqueueTime = System.currentTimeMillis();
+                this.mDownloader.onDownloadStarted(enqueueTime);
+                URLConnection connection = createConnection();
+                totalBytesDownloaded = downloadFile(connection);
             } catch (IOException e) {
                 this.mDownloader.onDownloadError(e.getMessage());
             }
-            if (downloadFile(createConnection()) > 0) {
+            if (totalBytesDownloaded > 0) {
                 this.mDownloader.onDownloadComplete(this.mTargetFile);
                 TrafficStats.clearThreadStatsTag();
                 return null;
@@ -49,84 +55,65 @@ public class HttpConnectionDownloadFileTask extends AsyncTask<Void, Void, Void> 
     }
 
     private URLConnection createConnection() throws IOException {
-        HttpsURLConnection createHttpsConnection = HttpUtils.createHttpsConnection(new URL(this.mDownloadUri.toString()));
-        createHttpsConnection.setInstanceFollowRedirects(true);
-        createHttpsConnection.connect();
-        if (!"application/vnd.android.package-archive".equals(createHttpsConnection.getContentType())) {
-            AppCenterLog.warn("AppCenterDistribute", "The requested download has not expected content type.");
+        URL url = new URL(this.mDownloadUri.toString());
+        HttpsURLConnection connection = HttpUtils.createHttpsConnection(url);
+        connection.setInstanceFollowRedirects(true);
+        connection.connect();
+        String contentType = connection.getContentType();
+        if (!APK_CONTENT_TYPE.equals(contentType)) {
+            AppCenterLog.warn(DistributeConstants.LOG_TAG, "The requested download has not expected content type.");
         }
-        int responseCode = createHttpsConnection.getResponseCode();
+        int responseCode = connection.getResponseCode();
         if (responseCode < 200 || responseCode >= 300) {
             throw new IOException("Download failed with HTTP error code: " + responseCode);
         }
-        return createHttpsConnection;
+        return connection;
     }
 
-    private long downloadFile(URLConnection uRLConnection) throws IOException {
-        Throwable th;
-        FileOutputStream fileOutputStream;
-        BufferedInputStream bufferedInputStream = null;
+    private long downloadFile(URLConnection connection) throws IOException {
+        InputStream input = null;
+        OutputStream output = null;
         try {
-            BufferedInputStream bufferedInputStream2 = new BufferedInputStream(uRLConnection.getInputStream());
-            try {
-                fileOutputStream = new FileOutputStream(this.mTargetFile);
-                try {
-                    long copyStream = copyStream(bufferedInputStream2, fileOutputStream, uRLConnection.getContentLength());
-                    close(bufferedInputStream2, fileOutputStream);
-                    return copyStream;
-                } catch (Throwable th2) {
-                    th = th2;
-                    bufferedInputStream = bufferedInputStream2;
-                    close(bufferedInputStream, fileOutputStream);
-                    throw th;
-                }
-            } catch (Throwable th3) {
-                th = th3;
-                fileOutputStream = null;
-            }
-        } catch (Throwable th4) {
-            th = th4;
-            fileOutputStream = null;
+            input = new BufferedInputStream(connection.getInputStream());
+            output = new FileOutputStream(this.mTargetFile);
+            long copyStream = copyStream(input, output, connection.getContentLength());
+            close(input, output);
+            return copyStream;
+        } catch (Throwable th) {
+            close(input, output);
+            throw th;
         }
     }
 
-    private long copyStream(InputStream inputStream, OutputStream outputStream, long j) throws IOException {
-        long j2;
-        byte[] bArr = new byte[1024];
-        long j3 = 0;
-        long j4 = 0;
-        long j5 = 0;
-        while (true) {
-            int read = inputStream.read(bArr);
-            if (read == -1) {
+    private long copyStream(InputStream inputStream, OutputStream outputStream, long lengthOfFile) throws IOException {
+        byte[] data = new byte[1024];
+        long totalBytesDownloaded = 0;
+        long lastReportedBytes = 0;
+        long lastReportedTime = 0;
+        do {
+            int count = inputStream.read(data);
+            if (count == -1) {
                 break;
             }
-            j3 += read;
-            outputStream.write(bArr, 0, read);
-            long currentTimeMillis = System.currentTimeMillis();
-            if (j3 >= 524288 + j4 || j3 == j || currentTimeMillis >= 500 + j5) {
-                this.mDownloader.onDownloadProgress(j3, j);
-                j2 = j3;
-            } else {
-                currentTimeMillis = j5;
-                j2 = j4;
+            totalBytesDownloaded += count;
+            outputStream.write(data, 0, count);
+            long now = System.currentTimeMillis();
+            if (totalBytesDownloaded >= DistributeConstants.UPDATE_PROGRESS_BYTES_THRESHOLD + lastReportedBytes || totalBytesDownloaded == lengthOfFile || now >= 500 + lastReportedTime) {
+                this.mDownloader.onDownloadProgress(totalBytesDownloaded, lengthOfFile);
+                lastReportedBytes = totalBytesDownloaded;
+                lastReportedTime = now;
             }
-            if (isCancelled()) {
-                break;
-            }
-            j4 = j2;
-            j5 = currentTimeMillis;
-        }
+        } while (!isCancelled());
         outputStream.flush();
-        return j3;
+        return totalBytesDownloaded;
     }
 
-    private static void close(Closeable... closeableArr) {
-        for (Closeable closeable : closeableArr) {
+    private static void close(Closeable... closeables) {
+        for (Closeable closeable : closeables) {
             if (closeable != null) {
                 try {
                     closeable.close();
-                } catch (IOException unused) {
+                } catch (IOException e) {
                 }
             }
         }

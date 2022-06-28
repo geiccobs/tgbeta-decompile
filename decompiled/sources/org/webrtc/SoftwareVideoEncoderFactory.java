@@ -2,8 +2,9 @@ package org.webrtc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.webrtc.VideoEncoderFactory;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class SoftwareVideoEncoderFactory implements VideoEncoderFactory {
     @Override // org.webrtc.VideoEncoderFactory
     public /* synthetic */ VideoEncoderFactory.VideoEncoderSelector getEncoderSelector() {
@@ -18,17 +19,17 @@ public class SoftwareVideoEncoderFactory implements VideoEncoderFactory {
     }
 
     @Override // org.webrtc.VideoEncoderFactory
-    public VideoEncoder createEncoder(VideoCodecInfo videoCodecInfo) {
-        if (videoCodecInfo.name.equalsIgnoreCase("VP8")) {
+    public VideoEncoder createEncoder(VideoCodecInfo info) {
+        if (info.name.equalsIgnoreCase("VP8")) {
             return new LibvpxVp8Encoder();
         }
-        if (videoCodecInfo.name.equalsIgnoreCase("VP9") && LibvpxVp9Encoder.nativeIsSupported()) {
+        if (info.name.equalsIgnoreCase("VP9") && LibvpxVp9Encoder.nativeIsSupported()) {
             return new LibvpxVp9Encoder();
         }
-        if (!videoCodecInfo.name.equalsIgnoreCase("H264")) {
-            return null;
+        if (info.name.equalsIgnoreCase("H264")) {
+            return new OpenH264Encoder();
         }
-        return new OpenH264Encoder();
+        return null;
     }
 
     @Override // org.webrtc.VideoEncoderFactory
@@ -37,12 +38,12 @@ public class SoftwareVideoEncoderFactory implements VideoEncoderFactory {
     }
 
     static VideoCodecInfo[] supportedCodecs() {
-        ArrayList arrayList = new ArrayList();
-        arrayList.add(new VideoCodecInfo("VP8", new HashMap()));
-        arrayList.add(new VideoCodecInfo("H264", new HashMap()));
+        List<VideoCodecInfo> codecs = new ArrayList<>();
+        codecs.add(new VideoCodecInfo("VP8", new HashMap()));
+        codecs.add(new VideoCodecInfo("H264", new HashMap()));
         if (LibvpxVp9Encoder.nativeIsSupported()) {
-            arrayList.add(new VideoCodecInfo("VP9", new HashMap()));
+            codecs.add(new VideoCodecInfo("VP9", new HashMap()));
         }
-        return (VideoCodecInfo[]) arrayList.toArray(new VideoCodecInfo[arrayList.size()]);
+        return (VideoCodecInfo[]) codecs.toArray(new VideoCodecInfo[codecs.size()]);
     }
 }

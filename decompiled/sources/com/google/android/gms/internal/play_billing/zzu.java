@@ -16,10 +16,7 @@ public abstract class zzu extends zzr implements List, RandomAccess {
     }
 
     static zzu zzj(Object[] objArr, int i) {
-        if (i == 0) {
-            return zzaa.zza;
-        }
-        return new zzaa(objArr, i);
+        return i == 0 ? zzaa.zza : new zzaa(objArr, i);
     }
 
     public static zzu zzk(Collection collection) {
@@ -62,40 +59,75 @@ public abstract class zzu extends zzr implements List, RandomAccess {
         return indexOf(obj) >= 0;
     }
 
+    /* JADX WARN: Removed duplicated region for block: B:21:0x0042  */
     @Override // java.util.Collection, java.util.List
-    public final boolean equals(@CheckForNull Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof List) {
-            List list = (List) obj;
-            int size = size();
-            if (size == list.size()) {
-                if (list instanceof RandomAccess) {
-                    for (int i = 0; i < size; i++) {
-                        if (zzl.zza(get(i), list.get(i))) {
-                        }
-                    }
-                    return true;
-                }
-                Iterator it = iterator();
-                Iterator it2 = list.iterator();
-                while (true) {
-                    if (it.hasNext()) {
-                        if (it2.hasNext()) {
-                            if (!zzl.zza(it.next(), it2.next())) {
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    } else if (!it2.hasNext()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public final boolean equals(@javax.annotation.CheckForNull java.lang.Object r7) {
+        /*
+            r6 = this;
+            r0 = 1
+            r1 = 0
+            if (r7 != r6) goto L5
+            goto L62
+        L5:
+            boolean r2 = r7 instanceof java.util.List
+            if (r2 != 0) goto Lb
+            r0 = 0
+            goto L62
+        Lb:
+            java.util.List r7 = (java.util.List) r7
+            int r2 = r6.size()
+            int r3 = r7.size()
+            if (r2 == r3) goto L19
+            r0 = 0
+            goto L62
+        L19:
+            boolean r3 = r7 instanceof java.util.RandomAccess
+            if (r3 == 0) goto L34
+            r3 = 0
+        L1e:
+            if (r3 >= r2) goto L33
+            java.lang.Object r4 = r6.get(r3)
+            java.lang.Object r5 = r7.get(r3)
+            boolean r4 = com.google.android.gms.internal.play_billing.zzl.zza(r4, r5)
+            if (r4 != 0) goto L30
+            r0 = 0
+            goto L62
+        L30:
+            int r3 = r3 + 1
+            goto L1e
+        L33:
+            goto L62
+        L34:
+            java.util.Iterator r2 = r6.iterator()
+            java.util.Iterator r7 = r7.iterator()
+        L3c:
+            boolean r3 = r2.hasNext()
+            if (r3 == 0) goto L5a
+            boolean r3 = r7.hasNext()
+            if (r3 != 0) goto L4a
+            r0 = 0
+            goto L62
+        L4a:
+            java.lang.Object r3 = r2.next()
+            java.lang.Object r4 = r7.next()
+            boolean r3 = com.google.android.gms.internal.play_billing.zzl.zza(r3, r4)
+            if (r3 != 0) goto L3c
+            r0 = 0
+            goto L62
+        L5a:
+            boolean r7 = r7.hasNext()
+            if (r7 != 0) goto L61
+            goto L62
+        L61:
+            r0 = 0
+        L62:
+            return r0
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.play_billing.zzu.equals(java.lang.Object):boolean");
     }
 
     @Override // java.util.Collection, java.util.List

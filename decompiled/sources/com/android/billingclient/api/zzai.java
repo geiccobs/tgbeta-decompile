@@ -1,9 +1,8 @@
 package com.android.billingclient.api;
 
-import com.google.android.gms.internal.play_billing.zzu;
 import java.util.concurrent.Callable;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzai implements Callable {
     final /* synthetic */ String zza;
     final /* synthetic */ PurchasesResponseListener zzb;
@@ -22,7 +21,7 @@ public final class zzai implements Callable {
             this.zzb.onQueryPurchasesResponse(zzi.zza(), zzi.zzb());
             return null;
         }
-        this.zzb.onQueryPurchasesResponse(zzi.zza(), zzu.zzl());
+        this.zzb.onQueryPurchasesResponse(zzi.zza(), com.google.android.gms.internal.play_billing.zzu.zzl());
         return null;
     }
 }

@@ -1,8 +1,11 @@
 package com.google.android.gms.internal.flags;
 
+import android.os.IInterface;
 import android.os.Parcel;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzc {
+    private static final ClassLoader zzd = zzc.class.getClassLoader();
+
     private zzc() {
     }
 
@@ -14,7 +17,11 @@ public class zzc {
         parcel.writeInt(z ? 1 : 0);
     }
 
-    static {
-        zzc.class.getClassLoader();
+    public static void zza(Parcel parcel, IInterface iInterface) {
+        if (iInterface == null) {
+            parcel.writeStrongBinder(null);
+        } else {
+            parcel.writeStrongBinder(iInterface.asBinder());
+        }
     }
 }

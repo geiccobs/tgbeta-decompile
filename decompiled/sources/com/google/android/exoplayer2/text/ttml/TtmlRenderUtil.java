@@ -11,83 +11,93 @@ import android.text.style.StyleSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.UnderlineSpan;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class TtmlRenderUtil {
-    public static TtmlStyle resolveStyle(TtmlStyle ttmlStyle, String[] strArr, Map<String, TtmlStyle> map) {
-        if (ttmlStyle == null && strArr == null) {
+    public static TtmlStyle resolveStyle(TtmlStyle style, String[] styleIds, Map<String, TtmlStyle> globalStyles) {
+        if (style == null && styleIds == null) {
             return null;
         }
         int i = 0;
-        if (ttmlStyle == null && strArr.length == 1) {
-            return map.get(strArr[0]);
+        if (style == null && styleIds.length == 1) {
+            return globalStyles.get(styleIds[0]);
         }
-        if (ttmlStyle == null && strArr.length > 1) {
-            TtmlStyle ttmlStyle2 = new TtmlStyle();
-            int length = strArr.length;
+        if (style == null && styleIds.length > 1) {
+            TtmlStyle chainedStyle = new TtmlStyle();
+            int length = styleIds.length;
             while (i < length) {
-                ttmlStyle2.chain(map.get(strArr[i]));
+                String id = styleIds[i];
+                chainedStyle.chain(globalStyles.get(id));
                 i++;
             }
-            return ttmlStyle2;
-        } else if (ttmlStyle != null && strArr != null && strArr.length == 1) {
-            return ttmlStyle.chain(map.get(strArr[0]));
+            return chainedStyle;
+        } else if (style != null && styleIds != null && styleIds.length == 1) {
+            return style.chain(globalStyles.get(styleIds[0]));
         } else {
-            if (ttmlStyle != null && strArr != null && strArr.length > 1) {
-                int length2 = strArr.length;
+            if (style != null && styleIds != null && styleIds.length > 1) {
+                int length2 = styleIds.length;
                 while (i < length2) {
-                    ttmlStyle.chain(map.get(strArr[i]));
+                    String id2 = styleIds[i];
+                    style.chain(globalStyles.get(id2));
                     i++;
                 }
+                return style;
             }
-            return ttmlStyle;
+            return style;
         }
     }
 
-    public static void applyStylesToSpan(SpannableStringBuilder spannableStringBuilder, int i, int i2, TtmlStyle ttmlStyle) {
-        if (ttmlStyle.getStyle() != -1) {
-            spannableStringBuilder.setSpan(new StyleSpan(ttmlStyle.getStyle()), i, i2, 33);
+    public static void applyStylesToSpan(SpannableStringBuilder builder, int start, int end, TtmlStyle style) {
+        if (style.getStyle() != -1) {
+            builder.setSpan(new StyleSpan(style.getStyle()), start, end, 33);
         }
-        if (ttmlStyle.isLinethrough()) {
-            spannableStringBuilder.setSpan(new StrikethroughSpan(), i, i2, 33);
+        if (style.isLinethrough()) {
+            builder.setSpan(new StrikethroughSpan(), start, end, 33);
         }
-        if (ttmlStyle.isUnderline()) {
-            spannableStringBuilder.setSpan(new UnderlineSpan(), i, i2, 33);
+        if (style.isUnderline()) {
+            builder.setSpan(new UnderlineSpan(), start, end, 33);
         }
-        if (ttmlStyle.hasFontColor()) {
-            spannableStringBuilder.setSpan(new ForegroundColorSpan(ttmlStyle.getFontColor()), i, i2, 33);
+        if (style.hasFontColor()) {
+            builder.setSpan(new ForegroundColorSpan(style.getFontColor()), start, end, 33);
         }
-        if (ttmlStyle.hasBackgroundColor()) {
-            spannableStringBuilder.setSpan(new BackgroundColorSpan(ttmlStyle.getBackgroundColor()), i, i2, 33);
+        if (style.hasBackgroundColor()) {
+            builder.setSpan(new BackgroundColorSpan(style.getBackgroundColor()), start, end, 33);
         }
-        if (ttmlStyle.getFontFamily() != null) {
-            spannableStringBuilder.setSpan(new TypefaceSpan(ttmlStyle.getFontFamily()), i, i2, 33);
+        if (style.getFontFamily() != null) {
+            builder.setSpan(new TypefaceSpan(style.getFontFamily()), start, end, 33);
         }
-        if (ttmlStyle.getTextAlign() != null) {
-            spannableStringBuilder.setSpan(new AlignmentSpan.Standard(ttmlStyle.getTextAlign()), i, i2, 33);
+        if (style.getTextAlign() != null) {
+            builder.setSpan(new AlignmentSpan.Standard(style.getTextAlign()), start, end, 33);
         }
-        int fontSizeUnit = ttmlStyle.getFontSizeUnit();
-        if (fontSizeUnit == 1) {
-            spannableStringBuilder.setSpan(new AbsoluteSizeSpan((int) ttmlStyle.getFontSize(), true), i, i2, 33);
-        } else if (fontSizeUnit == 2) {
-            spannableStringBuilder.setSpan(new RelativeSizeSpan(ttmlStyle.getFontSize()), i, i2, 33);
-        } else if (fontSizeUnit != 3) {
-        } else {
-            spannableStringBuilder.setSpan(new RelativeSizeSpan(ttmlStyle.getFontSize() / 100.0f), i, i2, 33);
+        switch (style.getFontSizeUnit()) {
+            case 1:
+                builder.setSpan(new AbsoluteSizeSpan((int) style.getFontSize(), true), start, end, 33);
+                return;
+            case 2:
+                builder.setSpan(new RelativeSizeSpan(style.getFontSize()), start, end, 33);
+                return;
+            case 3:
+                builder.setSpan(new RelativeSizeSpan(style.getFontSize() / 100.0f), start, end, 33);
+                return;
+            default:
+                return;
         }
     }
 
-    public static void endParagraph(SpannableStringBuilder spannableStringBuilder) {
-        int length = spannableStringBuilder.length() - 1;
-        while (length >= 0 && spannableStringBuilder.charAt(length) == ' ') {
-            length--;
+    public static void endParagraph(SpannableStringBuilder builder) {
+        int position = builder.length() - 1;
+        while (position >= 0 && builder.charAt(position) == ' ') {
+            position--;
         }
-        if (length < 0 || spannableStringBuilder.charAt(length) == '\n') {
-            return;
+        if (position >= 0 && builder.charAt(position) != '\n') {
+            builder.append('\n');
         }
-        spannableStringBuilder.append('\n');
     }
 
-    public static String applyTextElementSpacePolicy(String str) {
-        return str.replaceAll("\r\n", "\n").replaceAll(" *\n *", "\n").replaceAll("\n", " ").replaceAll("[ \t\\x0B\f\r]+", " ");
+    public static String applyTextElementSpacePolicy(String in) {
+        String out = in.replaceAll("\r\n", "\n");
+        return out.replaceAll(" *\n *", "\n").replaceAll("\n", " ").replaceAll("[ \t\\x0B\f\r]+", " ");
+    }
+
+    private TtmlRenderUtil() {
     }
 }

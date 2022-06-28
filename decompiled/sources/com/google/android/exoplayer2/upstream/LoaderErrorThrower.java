@@ -1,15 +1,20 @@
 package com.google.android.exoplayer2.upstream;
 
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface LoaderErrorThrower {
+    void maybeThrowError() throws IOException;
 
-    /* loaded from: classes.dex */
+    void maybeThrowError(int i) throws IOException;
+
+    /* loaded from: classes3.dex */
     public static final class Dummy implements LoaderErrorThrower {
         @Override // com.google.android.exoplayer2.upstream.LoaderErrorThrower
         public void maybeThrowError() throws IOException {
         }
-    }
 
-    void maybeThrowError() throws IOException;
+        @Override // com.google.android.exoplayer2.upstream.LoaderErrorThrower
+        public void maybeThrowError(int minRetryCount) throws IOException {
+        }
+    }
 }

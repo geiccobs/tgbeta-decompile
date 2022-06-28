@@ -8,11 +8,10 @@ import android.os.Looper;
 import android.text.TextUtils;
 import com.google.android.gms.auth.api.AuthProxy;
 import com.google.android.gms.auth.api.AuthProxyOptions;
-import com.google.android.gms.common.GooglePlayServicesUtilLight;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzak extends GmsClient<zzan> {
     private final Bundle zzbv;
 
@@ -25,8 +24,14 @@ public final class zzak extends GmsClient<zzan> {
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient, com.google.android.gms.common.api.Api.Client
-    public final int getMinApkVersion() {
-        return GooglePlayServicesUtilLight.GOOGLE_PLAY_SERVICES_VERSION_CODE;
+    public final boolean requiresSignIn() {
+        ClientSettings clientSettings = getClientSettings();
+        return !TextUtils.isEmpty(clientSettings.getAccountName()) && !clientSettings.getApplicableScopes(AuthProxy.API).isEmpty();
+    }
+
+    @Override // com.google.android.gms.common.internal.BaseGmsClient
+    protected final String getStartServiceAction() {
+        return "com.google.android.gms.auth.service.START";
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient
@@ -35,19 +40,13 @@ public final class zzak extends GmsClient<zzan> {
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient
-    protected final String getStartServiceAction() {
-        return "com.google.android.gms.auth.service.START";
+    protected final Bundle getGetServiceRequestExtraArgs() {
+        return this.zzbv;
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient, com.google.android.gms.common.api.Api.Client
-    public final boolean requiresSignIn() {
-        ClientSettings clientSettings = getClientSettings();
-        return !TextUtils.isEmpty(clientSettings.getAccountName()) && !clientSettings.getApplicableScopes(AuthProxy.API).isEmpty();
-    }
-
-    @Override // com.google.android.gms.common.internal.BaseGmsClient
-    protected final Bundle getGetServiceRequestExtraArgs() {
-        return this.zzbv;
+    public final int getMinApkVersion() {
+        return 12451000;
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient

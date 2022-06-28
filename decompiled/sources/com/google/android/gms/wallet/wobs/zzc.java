@@ -6,9 +6,8 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzc implements Parcelable.Creator<CommonWalletObject> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ CommonWalletObject createFromParcel(Parcel parcel) {
@@ -86,13 +85,13 @@ public final class zzc implements Parcelable.Creator<CommonWalletObject> {
                 case 17:
                     z = SafeParcelReader.readBoolean(parcel, readHeader);
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     newArrayList4 = SafeParcelReader.createTypedList(parcel, readHeader, UriData.CREATOR);
                     break;
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                     newArrayList5 = SafeParcelReader.createTypedList(parcel, readHeader, TextModuleData.CREATOR);
                     break;
-                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                case 20:
                     newArrayList6 = SafeParcelReader.createTypedList(parcel, readHeader, UriData.CREATOR);
                     break;
                 default:

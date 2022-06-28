@@ -3,28 +3,28 @@ package com.google.android.exoplayer2.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class SlidingPercentile {
-    private static final Comparator<Sample> INDEX_COMPARATOR = SlidingPercentile$$ExternalSyntheticLambda0.INSTANCE;
-    private static final Comparator<Sample> VALUE_COMPARATOR = SlidingPercentile$$ExternalSyntheticLambda1.INSTANCE;
+    private static final int MAX_RECYCLED_SAMPLES = 5;
+    private static final int SORT_ORDER_BY_INDEX = 1;
+    private static final int SORT_ORDER_BY_VALUE = 0;
+    private static final int SORT_ORDER_NONE = -1;
     private final int maxWeight;
     private int nextSampleIndex;
     private int recycledSampleCount;
     private int totalWeight;
+    private static final Comparator<Sample> INDEX_COMPARATOR = SlidingPercentile$$ExternalSyntheticLambda0.INSTANCE;
+    private static final Comparator<Sample> VALUE_COMPARATOR = SlidingPercentile$$ExternalSyntheticLambda1.INSTANCE;
     private final Sample[] recycledSamples = new Sample[5];
     private final ArrayList<Sample> samples = new ArrayList<>();
     private int currentSortOrder = -1;
 
-    public static /* synthetic */ int lambda$static$0(Sample sample, Sample sample2) {
-        return sample.index - sample2.index;
+    public static /* synthetic */ int lambda$static$0(Sample a, Sample b) {
+        return a.index - b.index;
     }
 
-    public static /* synthetic */ int lambda$static$1(Sample sample, Sample sample2) {
-        return Float.compare(sample.value, sample2.value);
-    }
-
-    public SlidingPercentile(int i) {
-        this.maxWeight = i;
+    public SlidingPercentile(int maxWeight) {
+        this.maxWeight = maxWeight;
     }
 
     public void reset() {
@@ -34,44 +34,43 @@ public class SlidingPercentile {
         this.totalWeight = 0;
     }
 
-    public void addSample(int i, float f) {
-        Sample sample;
+    public void addSample(int weight, float value) {
+        Sample newSample;
         ensureSortedByIndex();
-        int i2 = this.recycledSampleCount;
-        if (i2 > 0) {
+        int i = this.recycledSampleCount;
+        if (i > 0) {
             Sample[] sampleArr = this.recycledSamples;
-            int i3 = i2 - 1;
-            this.recycledSampleCount = i3;
-            sample = sampleArr[i3];
+            int i2 = i - 1;
+            this.recycledSampleCount = i2;
+            newSample = sampleArr[i2];
         } else {
-            sample = new Sample();
+            newSample = new Sample();
         }
-        int i4 = this.nextSampleIndex;
-        this.nextSampleIndex = i4 + 1;
-        sample.index = i4;
-        sample.weight = i;
-        sample.value = f;
-        this.samples.add(sample);
-        this.totalWeight += i;
+        int i3 = this.nextSampleIndex;
+        this.nextSampleIndex = i3 + 1;
+        newSample.index = i3;
+        newSample.weight = weight;
+        newSample.value = value;
+        this.samples.add(newSample);
+        this.totalWeight += weight;
         while (true) {
-            int i5 = this.totalWeight;
-            int i6 = this.maxWeight;
-            if (i5 > i6) {
-                int i7 = i5 - i6;
-                Sample sample2 = this.samples.get(0);
-                int i8 = sample2.weight;
-                if (i8 <= i7) {
-                    this.totalWeight -= i8;
+            int i4 = this.totalWeight;
+            int i5 = this.maxWeight;
+            if (i4 > i5) {
+                int excessWeight = i4 - i5;
+                Sample oldestSample = this.samples.get(0);
+                if (oldestSample.weight <= excessWeight) {
+                    this.totalWeight -= oldestSample.weight;
                     this.samples.remove(0);
-                    int i9 = this.recycledSampleCount;
-                    if (i9 < 5) {
+                    int i6 = this.recycledSampleCount;
+                    if (i6 < 5) {
                         Sample[] sampleArr2 = this.recycledSamples;
-                        this.recycledSampleCount = i9 + 1;
-                        sampleArr2[i9] = sample2;
+                        this.recycledSampleCount = i6 + 1;
+                        sampleArr2[i6] = oldestSample;
                     }
                 } else {
-                    sample2.weight = i8 - i7;
-                    this.totalWeight -= i7;
+                    oldestSample.weight -= excessWeight;
+                    this.totalWeight -= excessWeight;
                 }
             } else {
                 return;
@@ -79,15 +78,15 @@ public class SlidingPercentile {
         }
     }
 
-    public float getPercentile(float f) {
+    public float getPercentile(float percentile) {
         ensureSortedByValue();
-        float f2 = f * this.totalWeight;
-        int i = 0;
-        for (int i2 = 0; i2 < this.samples.size(); i2++) {
-            Sample sample = this.samples.get(i2);
-            i += sample.weight;
-            if (i >= f2) {
-                return sample.value;
+        float desiredWeight = this.totalWeight * percentile;
+        int accumulatedWeight = 0;
+        for (int i = 0; i < this.samples.size(); i++) {
+            Sample currentSample = this.samples.get(i);
+            accumulatedWeight += currentSample.weight;
+            if (accumulatedWeight >= desiredWeight) {
+                return currentSample.value;
             }
         }
         if (this.samples.isEmpty()) {
@@ -111,7 +110,7 @@ public class SlidingPercentile {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class Sample {
         public int index;
         public float value;

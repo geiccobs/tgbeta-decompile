@@ -1,16 +1,18 @@
 package com.google.android.gms.internal.clearcut;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
-final class zzbq extends zzav<Double> implements zzcn<Double> {
+import java.util.RandomAccess;
+/* loaded from: classes3.dex */
+final class zzbq extends zzav<Double> implements zzcn<Double>, RandomAccess {
+    private static final zzbq zzgj;
     private int size;
     private double[] zzgk;
 
     static {
-        new zzbq().zzv();
+        zzbq zzbqVar = new zzbq();
+        zzgj = zzbqVar;
+        zzbqVar.zzv();
     }
 
     zzbq() {
@@ -39,7 +41,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
         }
         this.zzgk[i] = d;
         this.size++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     private final void zzg(int i) {
@@ -58,7 +60,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zzc(i, ((Double) obj).doubleValue());
     }
@@ -76,7 +78,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
             return false;
         }
         int i2 = this.size;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -86,7 +88,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
         }
         System.arraycopy(zzbqVar.zzgk, 0, this.zzgk, this.size, zzbqVar.size);
         this.size = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -126,7 +128,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
         return i;
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzw();
         zzg(i);
@@ -137,7 +139,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
             System.arraycopy(dArr, i + 1, dArr, i, i2 - i);
         }
         this.size--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Double.valueOf(d);
     }
 
@@ -149,7 +151,7 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
                 double[] dArr = this.zzgk;
                 System.arraycopy(dArr, i + 1, dArr, i, this.size - i);
                 this.size--;
-                ((AbstractList) this).modCount++;
+                this.modCount++;
                 return true;
             }
         }
@@ -163,13 +165,13 @@ final class zzbq extends zzav<Double> implements zzcn<Double> {
             double[] dArr = this.zzgk;
             System.arraycopy(dArr, i2, dArr, i, this.size - i2);
             this.size -= i2 - i;
-            ((AbstractList) this).modCount++;
+            this.modCount++;
             return;
         }
         throw new IndexOutOfBoundsException("toIndex < fromIndex");
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         double doubleValue = ((Double) obj).doubleValue();
         zzw();

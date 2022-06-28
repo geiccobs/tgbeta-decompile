@@ -3,7 +3,7 @@ package org.webrtc;
 import android.media.MediaCodecInfo;
 import org.webrtc.EglBase;
 import org.webrtc.Predicate;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class HardwareVideoDecoderFactory extends MediaCodecVideoDecoderFactory {
     private static final Predicate<MediaCodecInfo> defaultAllowedPredicate = new Predicate<MediaCodecInfo>() { // from class: org.webrtc.HardwareVideoDecoderFactory.1
         @Override // org.webrtc.Predicate
@@ -22,115 +22,110 @@ public class HardwareVideoDecoderFactory extends MediaCodecVideoDecoderFactory {
         }
 
         /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-        /* JADX WARN: Code restructure failed: missing block: B:22:0x0047, code lost:
-            if (r3.equals(org.telegram.messenger.MediaController.VIDEO_MIME_TYPE) == false) goto L14;
+        /* JADX WARN: Code restructure failed: missing block: B:15:0x002d, code lost:
+            if (r4.equals(com.google.android.exoplayer2.util.MimeTypes.VIDEO_VP9) != false) goto L26;
          */
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public boolean test(android.media.MediaCodecInfo r8) {
+        public boolean test(android.media.MediaCodecInfo r9) {
             /*
-                r7 = this;
-                boolean r0 = org.webrtc.MediaCodecUtils.isHardwareAccelerated(r8)
+                r8 = this;
+                boolean r0 = org.webrtc.MediaCodecUtils.isHardwareAccelerated(r9)
                 r1 = 0
                 if (r0 != 0) goto L8
                 return r1
             L8:
-                java.lang.String[] r8 = r8.getSupportedTypes()
-                if (r8 == 0) goto L85
-                int r0 = r8.length
-                if (r0 != 0) goto L13
-                goto L85
+                java.lang.String[] r0 = r9.getSupportedTypes()
+                if (r0 == 0) goto L80
+                int r2 = r0.length
+                if (r2 != 0) goto L13
+                goto L80
             L13:
-                org.telegram.messenger.voip.Instance$ServerConfig r0 = org.telegram.messenger.voip.Instance.getGlobalServerConfig()
-                r2 = 0
+                org.telegram.messenger.voip.Instance$ServerConfig r2 = org.telegram.messenger.voip.Instance.getGlobalServerConfig()
+                r3 = 0
             L18:
-                int r3 = r8.length
-                r4 = 1
-                if (r2 >= r3) goto L84
-                r3 = r8[r2]
-                r3.hashCode()
+                int r4 = r0.length
+                r5 = 1
+                if (r3 >= r4) goto L7f
+                r4 = r0[r3]
+                r6 = -1
+                int r7 = r4.hashCode()
+                switch(r7) {
+                    case -1662541442: goto L44;
+                    case 1331836730: goto L3a;
+                    case 1599127256: goto L30;
+                    case 1599127257: goto L27;
+                    default: goto L26;
+                }
+            L26:
+                goto L4e
+            L27:
+                java.lang.String r7 = "video/x-vnd.on2.vp9"
+                boolean r4 = r4.equals(r7)
+                if (r4 == 0) goto L26
+                goto L4f
+            L30:
+                java.lang.String r5 = "video/x-vnd.on2.vp8"
+                boolean r4 = r4.equals(r5)
+                if (r4 == 0) goto L26
+                r5 = 0
+                goto L4f
+            L3a:
+                java.lang.String r5 = "video/avc"
+                boolean r4 = r4.equals(r5)
+                if (r4 == 0) goto L26
+                r5 = 2
+                goto L4f
+            L44:
+                java.lang.String r5 = "video/hevc"
+                boolean r4 = r4.equals(r5)
+                if (r4 == 0) goto L26
+                r5 = 3
+                goto L4f
+            L4e:
                 r5 = -1
-                int r6 = r3.hashCode()
-                switch(r6) {
-                    case -1662541442: goto L4a;
-                    case 1331836730: goto L41;
-                    case 1599127256: goto L36;
-                    case 1599127257: goto L2b;
-                    default: goto L29;
+            L4f:
+                switch(r5) {
+                    case 0: goto L6d;
+                    case 1: goto L6a;
+                    case 2: goto L58;
+                    case 3: goto L55;
+                    default: goto L52;
                 }
-            L29:
-                r4 = -1
-                goto L54
-            L2b:
-                java.lang.String r4 = "video/x-vnd.on2.vp9"
-                boolean r3 = r3.equals(r4)
-                if (r3 != 0) goto L34
-                goto L29
-            L34:
-                r4 = 3
-                goto L54
-            L36:
-                java.lang.String r4 = "video/x-vnd.on2.vp8"
-                boolean r3 = r3.equals(r4)
-                if (r3 != 0) goto L3f
-                goto L29
-            L3f:
-                r4 = 2
-                goto L54
-            L41:
-                java.lang.String r6 = "video/avc"
-                boolean r3 = r3.equals(r6)
-                if (r3 != 0) goto L54
-                goto L29
-            L4a:
-                java.lang.String r4 = "video/hevc"
-                boolean r3 = r3.equals(r4)
-                if (r3 != 0) goto L53
-                goto L29
-            L53:
-                r4 = 0
-            L54:
-                switch(r4) {
-                    case 0: goto L81;
-                    case 1: goto L6f;
-                    case 2: goto L5d;
-                    case 3: goto L5a;
-                    default: goto L57;
-                }
-            L57:
-                int r2 = r2 + 1
+            L52:
+                int r3 = r3 + 1
                 goto L18
-            L5a:
-                boolean r8 = r0.enable_vp9_decoder
-                return r8
-            L5d:
-                org.telegram.messenger.voip.VoIPService r8 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
-                if (r8 == 0) goto L6c
-                org.telegram.messenger.voip.VoIPService r8 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
-                org.telegram.messenger.ChatObject$Call r8 = r8.groupCall
-                if (r8 == 0) goto L6c
+            L55:
+                boolean r1 = r2.enable_h265_decoder
                 return r1
-            L6c:
-                boolean r8 = r0.enable_vp8_decoder
-                return r8
-            L6f:
-                org.telegram.messenger.voip.VoIPService r8 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
-                if (r8 == 0) goto L7e
-                org.telegram.messenger.voip.VoIPService r8 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
-                org.telegram.messenger.ChatObject$Call r8 = r8.groupCall
-                if (r8 == 0) goto L7e
+            L58:
+                org.telegram.messenger.voip.VoIPService r4 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
+                if (r4 == 0) goto L67
+                org.telegram.messenger.voip.VoIPService r4 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
+                org.telegram.messenger.ChatObject$Call r4 = r4.groupCall
+                if (r4 == 0) goto L67
                 return r1
-            L7e:
-                boolean r8 = r0.enable_h264_decoder
-                return r8
-            L81:
-                boolean r8 = r0.enable_h265_decoder
-                return r8
-            L84:
-                return r4
-            L85:
+            L67:
+                boolean r1 = r2.enable_h264_decoder
+                return r1
+            L6a:
+                boolean r1 = r2.enable_vp9_decoder
+                return r1
+            L6d:
+                org.telegram.messenger.voip.VoIPService r4 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
+                if (r4 == 0) goto L7c
+                org.telegram.messenger.voip.VoIPService r4 = org.telegram.messenger.voip.VoIPService.getSharedInstance()
+                org.telegram.messenger.ChatObject$Call r4 = r4.groupCall
+                if (r4 == 0) goto L7c
+                return r1
+            L7c:
+                boolean r1 = r2.enable_vp8_decoder
+                return r1
+            L7f:
+                return r5
+            L80:
                 return r1
             */
             throw new UnsupportedOperationException("Method not decompiled: org.webrtc.HardwareVideoDecoderFactory.AnonymousClass1.test(android.media.MediaCodecInfo):boolean");
@@ -152,28 +147,11 @@ public class HardwareVideoDecoderFactory extends MediaCodecVideoDecoderFactory {
         this(null);
     }
 
-    public HardwareVideoDecoderFactory(EglBase.Context context) {
-        this(context, null);
+    public HardwareVideoDecoderFactory(EglBase.Context sharedContext) {
+        this(sharedContext, null);
     }
 
-    /* JADX WARN: Illegal instructions before constructor call */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public HardwareVideoDecoderFactory(org.webrtc.EglBase.Context r2, org.webrtc.Predicate<android.media.MediaCodecInfo> r3) {
-        /*
-            r1 = this;
-            if (r3 != 0) goto L5
-            org.webrtc.Predicate<android.media.MediaCodecInfo> r3 = org.webrtc.HardwareVideoDecoderFactory.defaultAllowedPredicate
-            goto Lb
-        L5:
-            org.webrtc.Predicate<android.media.MediaCodecInfo> r0 = org.webrtc.HardwareVideoDecoderFactory.defaultAllowedPredicate
-            org.webrtc.Predicate r3 = r3.and(r0)
-        Lb:
-            r1.<init>(r2, r3)
-            return
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.webrtc.HardwareVideoDecoderFactory.<init>(org.webrtc.EglBase$Context, org.webrtc.Predicate):void");
+    public HardwareVideoDecoderFactory(EglBase.Context sharedContext, Predicate<MediaCodecInfo> codecAllowedPredicate) {
+        super(sharedContext, codecAllowedPredicate == null ? defaultAllowedPredicate : codecAllowedPredicate.and(defaultAllowedPredicate));
     }
 }

@@ -1,11 +1,11 @@
 package com.google.android.gms.common.internal;
 
 import android.accounts.Account;
+import android.content.Context;
 import android.view.View;
-import androidx.annotation.RecentlyNonNull;
-import androidx.annotation.RecentlyNullable;
 import androidx.collection.ArraySet;
 import com.google.android.gms.common.api.Api;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.signin.SignInOptions;
 import java.util.Collection;
@@ -22,15 +22,31 @@ public final class ClientSettings {
     private final Set<Scope> zab;
     private final Set<Scope> zac;
     private final Map<Api<?>, zaa> zad;
+    private final int zae;
+    private final View zaf;
     private final String zag;
     private final String zah;
     private final SignInOptions zai;
+    private final boolean zaj;
     private Integer zak;
 
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class zaa {
         public final Set<Scope> zaa;
+
+        public zaa(Set<Scope> set) {
+            Preconditions.checkNotNull(set);
+            this.zaa = Collections.unmodifiableSet(set);
+        }
+    }
+
+    public static ClientSettings createDefault(Context context) {
+        return new GoogleApiClient.Builder(context).buildClientSettings();
+    }
+
+    public ClientSettings(Account account, Set<Scope> set, Map<Api<?>, zaa> map, int i, View view, String str, String str2, SignInOptions signInOptions) {
+        this(account, set, map, i, view, str, str2, signInOptions, false);
     }
 
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
@@ -41,16 +57,15 @@ public final class ClientSettings {
         private ArraySet<Scope> zab;
         private String zad;
         private String zae;
+        private int zac = 0;
         private SignInOptions zaf = SignInOptions.zaa;
 
-        @RecentlyNonNull
         public final Builder zaa(@Nullable Account account) {
             this.zaa = account;
             return this;
         }
 
-        @RecentlyNonNull
-        public final Builder zaa(@RecentlyNonNull Collection<Scope> collection) {
+        public final Builder zaa(Collection<Scope> collection) {
             if (this.zab == null) {
                 this.zab = new ArraySet<>();
             }
@@ -58,33 +73,33 @@ public final class ClientSettings {
             return this;
         }
 
-        @RecentlyNonNull
-        public final Builder setRealClientPackageName(@RecentlyNonNull String str) {
+        public final Builder setRealClientPackageName(String str) {
             this.zad = str;
             return this;
         }
 
-        @RecentlyNonNull
-        public final Builder zaa(@RecentlyNonNull String str) {
+        public final Builder zaa(String str) {
             this.zae = str;
             return this;
         }
 
-        @RecentlyNonNull
         public final ClientSettings build() {
             return new ClientSettings(this.zaa, this.zab, null, 0, null, this.zad, this.zae, this.zaf, false);
         }
     }
 
-    public ClientSettings(@Nullable Account account, @RecentlyNonNull Set<Scope> set, @RecentlyNonNull Map<Api<?>, zaa> map, int i, @RecentlyNonNull View view, @RecentlyNonNull String str, @RecentlyNonNull String str2, @RecentlyNonNull SignInOptions signInOptions, boolean z) {
+    public ClientSettings(@Nullable Account account, Set<Scope> set, Map<Api<?>, zaa> map, int i, View view, String str, String str2, SignInOptions signInOptions, boolean z) {
         this.zaa = account;
         Set<Scope> emptySet = set == null ? Collections.emptySet() : Collections.unmodifiableSet(set);
         this.zab = emptySet;
         map = map == null ? Collections.emptyMap() : map;
         this.zad = map;
+        this.zaf = view;
+        this.zae = i;
         this.zag = str;
         this.zah = str2;
         this.zai = signInOptions;
+        this.zaj = false;
         HashSet hashSet = new HashSet(emptySet);
         for (zaa zaaVar : map.values()) {
             hashSet.addAll(zaaVar.zaa);
@@ -92,7 +107,6 @@ public final class ClientSettings {
         this.zac = Collections.unmodifiableSet(hashSet);
     }
 
-    @RecentlyNullable
     @Deprecated
     public final String getAccountName() {
         Account account = this.zaa;
@@ -102,58 +116,59 @@ public final class ClientSettings {
         return null;
     }
 
-    @RecentlyNullable
     public final Account getAccount() {
         return this.zaa;
     }
 
-    @RecentlyNonNull
     public final Account getAccountOrDefault() {
         Account account = this.zaa;
-        return account != null ? account : new Account("<<default account>>", "com.google");
+        if (account != null) {
+            return account;
+        }
+        return new Account("<<default account>>", "com.google");
     }
 
-    @RecentlyNonNull
+    public final int getGravityForPopups() {
+        return this.zae;
+    }
+
     public final Set<Scope> getRequiredScopes() {
         return this.zab;
     }
 
-    @RecentlyNonNull
     public final Set<Scope> getAllRequestedScopes() {
         return this.zac;
     }
 
-    @RecentlyNonNull
     public final Map<Api<?>, zaa> zaa() {
         return this.zad;
     }
 
-    @RecentlyNullable
     public final String getRealClientPackageName() {
         return this.zag;
     }
 
-    @RecentlyNullable
     public final String zab() {
         return this.zah;
     }
 
-    @RecentlyNonNull
+    public final View getViewForPopups() {
+        return this.zaf;
+    }
+
     public final SignInOptions zac() {
         return this.zai;
     }
 
-    @RecentlyNullable
     public final Integer zad() {
         return this.zak;
     }
 
-    public final void zaa(@RecentlyNonNull Integer num) {
+    public final void zaa(Integer num) {
         this.zak = num;
     }
 
-    @RecentlyNonNull
-    public final Set<Scope> getApplicableScopes(@RecentlyNonNull Api<?> api) {
+    public final Set<Scope> getApplicableScopes(Api<?> api) {
         zaa zaaVar = this.zad.get(api);
         if (zaaVar == null || zaaVar.zaa.isEmpty()) {
             return this.zab;

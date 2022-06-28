@@ -1,5 +1,5 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzdf implements zzdn {
     private zzdn[] zzma;
 
@@ -25,7 +25,7 @@ final class zzdf implements zzdn {
                 return zzdnVar.zzb(cls);
             }
         }
-        String name = cls.getName();
-        throw new UnsupportedOperationException(name.length() != 0 ? "No factory is available for message type: ".concat(name) : new String("No factory is available for message type: "));
+        String valueOf = String.valueOf(cls.getName());
+        throw new UnsupportedOperationException(valueOf.length() != 0 ? "No factory is available for message type: ".concat(valueOf) : new String("No factory is available for message type: "));
     }
 }

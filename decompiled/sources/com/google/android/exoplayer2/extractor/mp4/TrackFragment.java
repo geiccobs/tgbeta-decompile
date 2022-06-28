@@ -2,8 +2,9 @@ package com.google.android.exoplayer2.extractor.mp4;
 
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.microsoft.appcenter.crashes.utils.ErrorLogHelper;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class TrackFragment {
     public long atomPosition;
     public long auxiliaryDataPosition;
@@ -33,52 +34,52 @@ final class TrackFragment {
         this.trackEncryptionBox = null;
     }
 
-    public void initTables(int i, int i2) {
-        this.trunCount = i;
-        this.sampleCount = i2;
+    public void initTables(int trunCount, int sampleCount) {
+        this.trunCount = trunCount;
+        this.sampleCount = sampleCount;
         int[] iArr = this.trunLength;
-        if (iArr == null || iArr.length < i) {
-            this.trunDataPosition = new long[i];
-            this.trunLength = new int[i];
+        if (iArr == null || iArr.length < trunCount) {
+            this.trunDataPosition = new long[trunCount];
+            this.trunLength = new int[trunCount];
         }
         int[] iArr2 = this.sampleSizeTable;
-        if (iArr2 == null || iArr2.length < i2) {
-            int i3 = (i2 * 125) / 100;
-            this.sampleSizeTable = new int[i3];
-            this.sampleCompositionTimeOffsetUsTable = new int[i3];
-            this.sampleDecodingTimeUsTable = new long[i3];
-            this.sampleIsSyncFrameTable = new boolean[i3];
-            this.sampleHasSubsampleEncryptionTable = new boolean[i3];
+        if (iArr2 == null || iArr2.length < sampleCount) {
+            int tableSize = (sampleCount * ErrorLogHelper.MAX_PROPERTY_ITEM_LENGTH) / 100;
+            this.sampleSizeTable = new int[tableSize];
+            this.sampleCompositionTimeOffsetUsTable = new int[tableSize];
+            this.sampleDecodingTimeUsTable = new long[tableSize];
+            this.sampleIsSyncFrameTable = new boolean[tableSize];
+            this.sampleHasSubsampleEncryptionTable = new boolean[tableSize];
         }
     }
 
-    public void initEncryptionData(int i) {
+    public void initEncryptionData(int length) {
         ParsableByteArray parsableByteArray = this.sampleEncryptionData;
-        if (parsableByteArray == null || parsableByteArray.limit() < i) {
-            this.sampleEncryptionData = new ParsableByteArray(i);
+        if (parsableByteArray == null || parsableByteArray.limit() < length) {
+            this.sampleEncryptionData = new ParsableByteArray(length);
         }
-        this.sampleEncryptionDataLength = i;
+        this.sampleEncryptionDataLength = length;
         this.definesEncryptionData = true;
         this.sampleEncryptionDataNeedsFill = true;
     }
 
-    public void fillEncryptionData(ExtractorInput extractorInput) throws IOException, InterruptedException {
-        extractorInput.readFully(this.sampleEncryptionData.data, 0, this.sampleEncryptionDataLength);
+    public void fillEncryptionData(ExtractorInput input) throws IOException, InterruptedException {
+        input.readFully(this.sampleEncryptionData.data, 0, this.sampleEncryptionDataLength);
         this.sampleEncryptionData.setPosition(0);
         this.sampleEncryptionDataNeedsFill = false;
     }
 
-    public void fillEncryptionData(ParsableByteArray parsableByteArray) {
-        parsableByteArray.readBytes(this.sampleEncryptionData.data, 0, this.sampleEncryptionDataLength);
+    public void fillEncryptionData(ParsableByteArray source) {
+        source.readBytes(this.sampleEncryptionData.data, 0, this.sampleEncryptionDataLength);
         this.sampleEncryptionData.setPosition(0);
         this.sampleEncryptionDataNeedsFill = false;
     }
 
-    public long getSamplePresentationTimeUs(int i) {
-        return this.sampleDecodingTimeUsTable[i] + this.sampleCompositionTimeOffsetUsTable[i];
+    public long getSamplePresentationTimeUs(int index) {
+        return this.sampleDecodingTimeUsTable[index] + this.sampleCompositionTimeOffsetUsTable[index];
     }
 
-    public boolean sampleHasSubsampleEncryptionTable(int i) {
-        return this.definesEncryptionData && this.sampleHasSubsampleEncryptionTable[i];
+    public boolean sampleHasSubsampleEncryptionTable(int index) {
+        return this.definesEncryptionData && this.sampleHasSubsampleEncryptionTable[index];
     }
 }

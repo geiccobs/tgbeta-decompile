@@ -4,7 +4,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zaau extends com.google.android.gms.internal.base.zas {
     private final /* synthetic */ zaar zaa;
 
@@ -16,16 +16,20 @@ public final class zaau extends com.google.android.gms.internal.base.zas {
 
     @Override // android.os.Handler
     public final void handleMessage(Message message) {
-        int i = message.what;
-        if (i == 1) {
-            this.zaa.zaf();
-        } else if (i != 2) {
-            StringBuilder sb = new StringBuilder(31);
-            sb.append("Unknown message id: ");
-            sb.append(i);
-            Log.w("GoogleApiClientImpl", sb.toString());
-        } else {
-            this.zaa.zae();
+        switch (message.what) {
+            case 1:
+                this.zaa.zaf();
+                return;
+            case 2:
+                this.zaa.zae();
+                return;
+            default:
+                int i = message.what;
+                StringBuilder sb = new StringBuilder(31);
+                sb.append("Unknown message id: ");
+                sb.append(i);
+                Log.w("GoogleApiClientImpl", sb.toString());
+                return;
         }
     }
 }

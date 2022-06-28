@@ -5,7 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzb implements Parcelable.Creator<CloudMessage> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ CloudMessage[] newArray(int i) {
@@ -18,10 +18,13 @@ public final class zzb implements Parcelable.Creator<CloudMessage> {
         Intent intent = null;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            if (SafeParcelReader.getFieldId(readHeader) == 1) {
-                intent = (Intent) SafeParcelReader.createParcelable(parcel, readHeader, Intent.CREATOR);
-            } else {
-                SafeParcelReader.skipUnknownField(parcel, readHeader);
+            switch (SafeParcelReader.getFieldId(readHeader)) {
+                case 1:
+                    intent = (Intent) SafeParcelReader.createParcelable(parcel, readHeader, Intent.CREATOR);
+                    break;
+                default:
+                    SafeParcelReader.skipUnknownField(parcel, readHeader);
+                    break;
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

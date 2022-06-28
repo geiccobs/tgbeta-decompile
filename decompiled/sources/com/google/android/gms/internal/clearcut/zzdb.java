@@ -1,5 +1,5 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzdb extends zzcy {
     /* JADX INFO: Access modifiers changed from: private */
     public zzdb() {
@@ -16,7 +16,7 @@ final class zzdb extends zzcy {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r0v2, types: [java.util.List] */
+    /* JADX WARN: Type inference failed for: r0v2, types: [com.google.android.gms.internal.clearcut.zzcn] */
     @Override // com.google.android.gms.internal.clearcut.zzcy
     public final <E> void zza(Object obj, Object obj2, long j) {
         zzcn<E> zzc = zzc(obj, j);

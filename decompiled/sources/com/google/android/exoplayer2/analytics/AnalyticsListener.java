@@ -13,124 +13,8 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface AnalyticsListener {
-
-    /* renamed from: com.google.android.exoplayer2.analytics.AnalyticsListener$-CC */
-    /* loaded from: classes.dex */
-    public final /* synthetic */ class CC {
-        public static void $default$onAudioAttributesChanged(AnalyticsListener analyticsListener, EventTime eventTime, AudioAttributes audioAttributes) {
-        }
-
-        public static void $default$onAudioSessionId(AnalyticsListener analyticsListener, EventTime eventTime, int i) {
-        }
-
-        public static void $default$onAudioUnderrun(AnalyticsListener analyticsListener, EventTime eventTime, int i, long j, long j2) {
-        }
-
-        public static void $default$onBandwidthEstimate(AnalyticsListener analyticsListener, EventTime eventTime, int i, long j, long j2) {
-        }
-
-        public static void $default$onDecoderDisabled(AnalyticsListener analyticsListener, EventTime eventTime, int i, DecoderCounters decoderCounters) {
-        }
-
-        public static void $default$onDecoderEnabled(AnalyticsListener analyticsListener, EventTime eventTime, int i, DecoderCounters decoderCounters) {
-        }
-
-        public static void $default$onDecoderInitialized(AnalyticsListener analyticsListener, EventTime eventTime, int i, String str, long j) {
-        }
-
-        public static void $default$onDecoderInputFormatChanged(AnalyticsListener analyticsListener, EventTime eventTime, int i, Format format) {
-        }
-
-        public static void $default$onDownstreamFormatChanged(AnalyticsListener analyticsListener, EventTime eventTime, MediaSourceEventListener.MediaLoadData mediaLoadData) {
-        }
-
-        public static void $default$onDrmKeysLoaded(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onDrmKeysRestored(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onDrmSessionAcquired(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onDrmSessionManagerError(AnalyticsListener analyticsListener, EventTime eventTime, Exception exc) {
-        }
-
-        public static void $default$onDrmSessionReleased(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onDroppedVideoFrames(AnalyticsListener analyticsListener, EventTime eventTime, int i, long j) {
-        }
-
-        public static void $default$onIsPlayingChanged(AnalyticsListener analyticsListener, EventTime eventTime, boolean z) {
-        }
-
-        public static void $default$onLoadCanceled(AnalyticsListener analyticsListener, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData) {
-        }
-
-        public static void $default$onLoadCompleted(AnalyticsListener analyticsListener, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData) {
-        }
-
-        public static void $default$onLoadError(AnalyticsListener analyticsListener, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData, IOException iOException, boolean z) {
-        }
-
-        public static void $default$onLoadStarted(AnalyticsListener analyticsListener, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData) {
-        }
-
-        public static void $default$onLoadingChanged(AnalyticsListener analyticsListener, EventTime eventTime, boolean z) {
-        }
-
-        public static void $default$onMediaPeriodCreated(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onMediaPeriodReleased(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onMetadata(AnalyticsListener analyticsListener, EventTime eventTime, Metadata metadata) {
-        }
-
-        public static void $default$onPlaybackParametersChanged(AnalyticsListener analyticsListener, EventTime eventTime, PlaybackParameters playbackParameters) {
-        }
-
-        public static void $default$onPlaybackSuppressionReasonChanged(AnalyticsListener analyticsListener, EventTime eventTime, int i) {
-        }
-
-        public static void $default$onPlayerError(AnalyticsListener analyticsListener, EventTime eventTime, ExoPlaybackException exoPlaybackException) {
-        }
-
-        public static void $default$onPlayerStateChanged(AnalyticsListener analyticsListener, EventTime eventTime, boolean z, int i) {
-        }
-
-        public static void $default$onPositionDiscontinuity(AnalyticsListener analyticsListener, EventTime eventTime, int i) {
-        }
-
-        public static void $default$onReadingStarted(AnalyticsListener analyticsListener, EventTime eventTime) {
-        }
-
-        public static void $default$onRepeatModeChanged(AnalyticsListener analyticsListener, EventTime eventTime, int i) {
-        }
-
-        public static void $default$onSurfaceSizeChanged(AnalyticsListener analyticsListener, EventTime eventTime, int i, int i2) {
-        }
-
-        public static void $default$onTimelineChanged(AnalyticsListener analyticsListener, EventTime eventTime, int i) {
-        }
-
-        public static void $default$onTracksChanged(AnalyticsListener analyticsListener, EventTime eventTime, TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
-        }
-
-        public static void $default$onUpstreamDiscarded(AnalyticsListener analyticsListener, EventTime eventTime, MediaSourceEventListener.MediaLoadData mediaLoadData) {
-        }
-
-        public static void $default$onVideoSizeChanged(AnalyticsListener analyticsListener, EventTime eventTime, int i, int i2, int i3, float f) {
-        }
-
-        public static void $default$onVolumeChanged(AnalyticsListener analyticsListener, EventTime eventTime, float f) {
-        }
-    }
-
     void onAudioAttributesChanged(EventTime eventTime, AudioAttributes audioAttributes);
 
     void onAudioSessionId(EventTime eventTime, int i);
@@ -150,6 +34,8 @@ public interface AnalyticsListener {
     void onDownstreamFormatChanged(EventTime eventTime, MediaSourceEventListener.MediaLoadData mediaLoadData);
 
     void onDrmKeysLoaded(EventTime eventTime);
+
+    void onDrmKeysRemoved(EventTime eventTime);
 
     void onDrmKeysRestored(EventTime eventTime);
 
@@ -199,6 +85,8 @@ public interface AnalyticsListener {
 
     void onSeekStarted(EventTime eventTime);
 
+    void onShuffleModeChanged(EventTime eventTime, boolean z);
+
     void onSurfaceSizeChanged(EventTime eventTime, int i, int i2);
 
     void onTimelineChanged(EventTime eventTime, int i);
@@ -211,12 +99,154 @@ public interface AnalyticsListener {
 
     void onVolumeChanged(EventTime eventTime, float f);
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class EventTime {
+        public final long currentPlaybackPositionMs;
         public final long eventPlaybackPositionMs;
+        public final MediaSource.MediaPeriodId mediaPeriodId;
+        public final long realtimeMs;
+        public final Timeline timeline;
+        public final long totalBufferedDurationMs;
+        public final int windowIndex;
 
-        public EventTime(long j, Timeline timeline, int i, MediaSource.MediaPeriodId mediaPeriodId, long j2, long j3, long j4) {
-            this.eventPlaybackPositionMs = j2;
+        public EventTime(long realtimeMs, Timeline timeline, int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, long eventPlaybackPositionMs, long currentPlaybackPositionMs, long totalBufferedDurationMs) {
+            this.realtimeMs = realtimeMs;
+            this.timeline = timeline;
+            this.windowIndex = windowIndex;
+            this.mediaPeriodId = mediaPeriodId;
+            this.eventPlaybackPositionMs = eventPlaybackPositionMs;
+            this.currentPlaybackPositionMs = currentPlaybackPositionMs;
+            this.totalBufferedDurationMs = totalBufferedDurationMs;
+        }
+    }
+
+    /* renamed from: com.google.android.exoplayer2.analytics.AnalyticsListener$-CC */
+    /* loaded from: classes3.dex */
+    public final /* synthetic */ class CC {
+        public static void $default$onPlayerStateChanged(AnalyticsListener _this, EventTime eventTime, boolean playWhenReady, int playbackState) {
+        }
+
+        public static void $default$onPlaybackSuppressionReasonChanged(AnalyticsListener _this, EventTime eventTime, int playbackSuppressionReason) {
+        }
+
+        public static void $default$onIsPlayingChanged(AnalyticsListener _this, EventTime eventTime, boolean isPlaying) {
+        }
+
+        public static void $default$onTimelineChanged(AnalyticsListener _this, EventTime eventTime, int reason) {
+        }
+
+        public static void $default$onPositionDiscontinuity(AnalyticsListener _this, EventTime eventTime, int reason) {
+        }
+
+        public static void $default$onSeekStarted(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onSeekProcessed(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onPlaybackParametersChanged(AnalyticsListener _this, EventTime eventTime, PlaybackParameters playbackParameters) {
+        }
+
+        public static void $default$onRepeatModeChanged(AnalyticsListener _this, EventTime eventTime, int repeatMode) {
+        }
+
+        public static void $default$onShuffleModeChanged(AnalyticsListener _this, EventTime eventTime, boolean shuffleModeEnabled) {
+        }
+
+        public static void $default$onLoadingChanged(AnalyticsListener _this, EventTime eventTime, boolean isLoading) {
+        }
+
+        public static void $default$onPlayerError(AnalyticsListener _this, EventTime eventTime, ExoPlaybackException error) {
+        }
+
+        public static void $default$onTracksChanged(AnalyticsListener _this, EventTime eventTime, TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+        }
+
+        public static void $default$onLoadStarted(AnalyticsListener _this, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData) {
+        }
+
+        public static void $default$onLoadCompleted(AnalyticsListener _this, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData) {
+        }
+
+        public static void $default$onLoadCanceled(AnalyticsListener _this, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData) {
+        }
+
+        public static void $default$onLoadError(AnalyticsListener _this, EventTime eventTime, MediaSourceEventListener.LoadEventInfo loadEventInfo, MediaSourceEventListener.MediaLoadData mediaLoadData, IOException error, boolean wasCanceled) {
+        }
+
+        public static void $default$onDownstreamFormatChanged(AnalyticsListener _this, EventTime eventTime, MediaSourceEventListener.MediaLoadData mediaLoadData) {
+        }
+
+        public static void $default$onUpstreamDiscarded(AnalyticsListener _this, EventTime eventTime, MediaSourceEventListener.MediaLoadData mediaLoadData) {
+        }
+
+        public static void $default$onMediaPeriodCreated(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onMediaPeriodReleased(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onReadingStarted(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onBandwidthEstimate(AnalyticsListener _this, EventTime eventTime, int totalLoadTimeMs, long totalBytesLoaded, long bitrateEstimate) {
+        }
+
+        public static void $default$onSurfaceSizeChanged(AnalyticsListener _this, EventTime eventTime, int width, int height) {
+        }
+
+        public static void $default$onMetadata(AnalyticsListener _this, EventTime eventTime, Metadata metadata) {
+        }
+
+        public static void $default$onDecoderEnabled(AnalyticsListener _this, EventTime eventTime, int trackType, DecoderCounters decoderCounters) {
+        }
+
+        public static void $default$onDecoderInitialized(AnalyticsListener _this, EventTime eventTime, int trackType, String decoderName, long initializationDurationMs) {
+        }
+
+        public static void $default$onDecoderInputFormatChanged(AnalyticsListener _this, EventTime eventTime, int trackType, Format format) {
+        }
+
+        public static void $default$onDecoderDisabled(AnalyticsListener _this, EventTime eventTime, int trackType, DecoderCounters decoderCounters) {
+        }
+
+        public static void $default$onAudioSessionId(AnalyticsListener _this, EventTime eventTime, int audioSessionId) {
+        }
+
+        public static void $default$onAudioAttributesChanged(AnalyticsListener _this, EventTime eventTime, AudioAttributes audioAttributes) {
+        }
+
+        public static void $default$onVolumeChanged(AnalyticsListener _this, EventTime eventTime, float volume) {
+        }
+
+        public static void $default$onAudioUnderrun(AnalyticsListener _this, EventTime eventTime, int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
+        }
+
+        public static void $default$onDroppedVideoFrames(AnalyticsListener _this, EventTime eventTime, int droppedFrames, long elapsedMs) {
+        }
+
+        public static void $default$onVideoSizeChanged(AnalyticsListener _this, EventTime eventTime, int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+        }
+
+        public static void $default$onRenderedFirstFrame(AnalyticsListener _this, EventTime eventTime, Surface surface) {
+        }
+
+        public static void $default$onDrmSessionAcquired(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onDrmKeysLoaded(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onDrmSessionManagerError(AnalyticsListener _this, EventTime eventTime, Exception error) {
+        }
+
+        public static void $default$onDrmKeysRestored(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onDrmKeysRemoved(AnalyticsListener _this, EventTime eventTime) {
+        }
+
+        public static void $default$onDrmSessionReleased(AnalyticsListener _this, EventTime eventTime) {
         }
     }
 }

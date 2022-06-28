@@ -9,19 +9,19 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.LocationController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC$Message;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ShareLocationDrawable;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class SendLocationCell extends FrameLayout {
     private SimpleTextView accurateTextView;
     private long dialogId;
@@ -41,68 +41,65 @@ public class SendLocationCell extends FrameLayout {
         }
     };
 
-    public SendLocationCell(Context context, boolean z, Theme.ResourcesProvider resourcesProvider) {
+    public SendLocationCell(Context context, boolean live, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
-        this.live = z;
+        this.live = live;
         this.imageView = new ImageView(context);
         setBackground(Theme.AdaptiveRipple.rect());
-        this.imageView.setTag(z ? "location_sendLiveLocationBackgroundlocation_sendLiveLocationIcon" : "location_sendLocationBackgroundlocation_sendLocationIcon");
-        String str = "location_sendLiveLocationBackground";
-        Drawable createSimpleSelectorCircleDrawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(42.0f), getThemedColor(z ? str : "location_sendLocationBackground"), getThemedColor(!z ? "location_sendLocationBackground" : str));
-        if (z) {
+        this.imageView.setTag(live ? "location_sendLiveLocationBackgroundlocation_sendLiveLocationIcon" : "location_sendLocationBackgroundlocation_sendLocationIcon");
+        int dp = AndroidUtilities.dp(42.0f);
+        String str = Theme.key_location_sendLiveLocationBackground;
+        Drawable circle = Theme.createSimpleSelectorCircleDrawable(dp, getThemedColor(live ? str : Theme.key_location_sendLocationBackground), getThemedColor(!live ? Theme.key_location_sendLocationBackground : str));
+        if (live) {
             this.rect = new RectF();
-            ShareLocationDrawable shareLocationDrawable = new ShareLocationDrawable(context, 4);
-            shareLocationDrawable.setColorFilter(new PorterDuffColorFilter(getThemedColor("location_sendLiveLocationIcon"), PorterDuff.Mode.MULTIPLY));
-            CombinedDrawable combinedDrawable = new CombinedDrawable(createSimpleSelectorCircleDrawable, shareLocationDrawable);
+            Drawable drawable = new ShareLocationDrawable(context, 4);
+            drawable.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_location_sendLiveLocationIcon), PorterDuff.Mode.MULTIPLY));
+            CombinedDrawable combinedDrawable = new CombinedDrawable(circle, drawable);
             combinedDrawable.setCustomSize(AndroidUtilities.dp(42.0f), AndroidUtilities.dp(42.0f));
             this.imageView.setBackgroundDrawable(combinedDrawable);
             AndroidUtilities.runOnUIThread(this.invalidateRunnable, 1000L);
             setWillNotDraw(false);
         } else {
-            Drawable drawable = getResources().getDrawable(R.drawable.pin);
-            drawable.setColorFilter(new PorterDuffColorFilter(getThemedColor("location_sendLocationIcon"), PorterDuff.Mode.MULTIPLY));
-            CombinedDrawable combinedDrawable2 = new CombinedDrawable(createSimpleSelectorCircleDrawable, drawable);
+            Drawable drawable2 = getResources().getDrawable(R.drawable.pin);
+            drawable2.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_location_sendLocationIcon), PorterDuff.Mode.MULTIPLY));
+            CombinedDrawable combinedDrawable2 = new CombinedDrawable(circle, drawable2);
             combinedDrawable2.setCustomSize(AndroidUtilities.dp(42.0f), AndroidUtilities.dp(42.0f));
             combinedDrawable2.setIconSize(AndroidUtilities.dp(24.0f), AndroidUtilities.dp(24.0f));
             this.imageView.setBackgroundDrawable(combinedDrawable2);
         }
-        ImageView imageView = this.imageView;
-        boolean z2 = LocaleController.isRTL;
         int i = 5;
-        addView(imageView, LayoutHelper.createFrame(42, 42.0f, (z2 ? 5 : 3) | 48, z2 ? 0.0f : 15.0f, 12.0f, !z2 ? 0.0f : 15.0f, 0.0f));
+        addView(this.imageView, LayoutHelper.createFrame(42, 42.0f, (LocaleController.isRTL ? 5 : 3) | 48, LocaleController.isRTL ? 0.0f : 15.0f, 12.0f, !LocaleController.isRTL ? 0.0f : 15.0f, 0.0f));
         SimpleTextView simpleTextView = new SimpleTextView(context);
         this.titleTextView = simpleTextView;
         simpleTextView.setTextSize(16);
-        String str2 = "location_sendLiveLocationText";
-        this.titleTextView.setTag(z ? str2 : "location_sendLocationText");
-        this.titleTextView.setTextColor(getThemedColor(!z ? "location_sendLocationText" : str2));
+        SimpleTextView simpleTextView2 = this.titleTextView;
+        String str2 = Theme.key_location_sendLiveLocationText;
+        simpleTextView2.setTag(live ? str2 : Theme.key_location_sendLocationText);
+        this.titleTextView.setTextColor(getThemedColor(!live ? Theme.key_location_sendLocationText : str2));
         this.titleTextView.setGravity(LocaleController.isRTL ? 5 : 3);
         this.titleTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        SimpleTextView simpleTextView2 = this.titleTextView;
-        boolean z3 = LocaleController.isRTL;
-        addView(simpleTextView2, LayoutHelper.createFrame(-1, 20.0f, (z3 ? 5 : 3) | 48, z3 ? 16.0f : 73.0f, 12.0f, z3 ? 73.0f : 16.0f, 0.0f));
+        addView(this.titleTextView, LayoutHelper.createFrame(-1, 20.0f, (LocaleController.isRTL ? 5 : 3) | 48, LocaleController.isRTL ? 16.0f : 73.0f, 12.0f, LocaleController.isRTL ? 73.0f : 16.0f, 0.0f));
         SimpleTextView simpleTextView3 = new SimpleTextView(context);
         this.accurateTextView = simpleTextView3;
         simpleTextView3.setTextSize(14);
-        this.accurateTextView.setTextColor(getThemedColor("windowBackgroundWhiteGrayText3"));
+        this.accurateTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
         this.accurateTextView.setGravity(LocaleController.isRTL ? 5 : 3);
-        SimpleTextView simpleTextView4 = this.accurateTextView;
-        boolean z4 = LocaleController.isRTL;
-        addView(simpleTextView4, LayoutHelper.createFrame(-1, 20.0f, (!z4 ? 3 : i) | 48, z4 ? 16.0f : 73.0f, 37.0f, z4 ? 73.0f : 16.0f, 0.0f));
+        addView(this.accurateTextView, LayoutHelper.createFrame(-1, 20.0f, (!LocaleController.isRTL ? 3 : i) | 48, LocaleController.isRTL ? 16.0f : 73.0f, 37.0f, LocaleController.isRTL ? 73.0f : 16.0f, 0.0f));
     }
 
     private ImageView getImageView() {
         return this.imageView;
     }
 
-    public void setHasLocation(boolean z) {
-        if (LocationController.getInstance(this.currentAccount).getSharingLocationInfo(this.dialogId) == null) {
+    public void setHasLocation(boolean value) {
+        LocationController.SharingLocationInfo info = LocationController.getInstance(this.currentAccount).getSharingLocationInfo(this.dialogId);
+        if (info == null) {
             float f = 1.0f;
-            this.titleTextView.setAlpha(z ? 1.0f : 0.5f);
-            this.accurateTextView.setAlpha(z ? 1.0f : 0.5f);
+            this.titleTextView.setAlpha(value ? 1.0f : 0.5f);
+            this.accurateTextView.setAlpha(value ? 1.0f : 0.5f);
             ImageView imageView = this.imageView;
-            if (!z) {
+            if (!value) {
                 f = 0.5f;
             }
             imageView.setAlpha(f);
@@ -113,8 +110,8 @@ public class SendLocationCell extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(66.0f), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(66.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
     @Override // android.view.ViewGroup, android.view.View
@@ -131,54 +128,52 @@ public class SendLocationCell extends FrameLayout {
         }
     }
 
-    public void setText(String str, String str2) {
-        this.titleTextView.setText(str);
-        this.accurateTextView.setText(str2);
+    public void setText(String title, String text) {
+        this.titleTextView.setText(title);
+        this.accurateTextView.setText(text);
     }
 
-    public void setDialogId(long j) {
-        this.dialogId = j;
+    public void setDialogId(long did) {
+        this.dialogId = did;
         if (this.live) {
             checkText();
         }
     }
 
     public void checkText() {
-        LocationController.SharingLocationInfo sharingLocationInfo = LocationController.getInstance(this.currentAccount).getSharingLocationInfo(this.dialogId);
-        if (sharingLocationInfo != null) {
-            String string = LocaleController.getString("StopLiveLocation", R.string.StopLiveLocation);
-            TLRPC$Message tLRPC$Message = sharingLocationInfo.messageObject.messageOwner;
-            int i = tLRPC$Message.edit_date;
-            setText(string, LocaleController.formatLocationUpdateDate(i != 0 ? i : tLRPC$Message.date));
-            return;
+        LocationController.SharingLocationInfo info = LocationController.getInstance(this.currentAccount).getSharingLocationInfo(this.dialogId);
+        if (info != null) {
+            setText(LocaleController.getString("StopLiveLocation", R.string.StopLiveLocation), LocaleController.formatLocationUpdateDate(info.messageObject.messageOwner.edit_date != 0 ? info.messageObject.messageOwner.edit_date : info.messageObject.messageOwner.date));
+        } else {
+            setText(LocaleController.getString("SendLiveLocation", R.string.SendLiveLocation), LocaleController.getString("SendLiveLocationInfo", R.string.SendLiveLocationInfo));
         }
-        setText(LocaleController.getString("SendLiveLocation", R.string.SendLiveLocation), LocaleController.getString("SendLiveLocationInfo", R.string.SendLiveLocationInfo));
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
         int currentTime;
-        int i;
-        LocationController.SharingLocationInfo sharingLocationInfo = LocationController.getInstance(this.currentAccount).getSharingLocationInfo(this.dialogId);
-        if (sharingLocationInfo != null && (i = sharingLocationInfo.stopTime) >= (currentTime = ConnectionsManager.getInstance(this.currentAccount).getCurrentTime())) {
-            float abs = Math.abs(i - currentTime) / sharingLocationInfo.period;
-            if (LocaleController.isRTL) {
-                this.rect.set(AndroidUtilities.dp(13.0f), AndroidUtilities.dp(18.0f), AndroidUtilities.dp(43.0f), AndroidUtilities.dp(48.0f));
-            } else {
-                this.rect.set(getMeasuredWidth() - AndroidUtilities.dp(43.0f), AndroidUtilities.dp(18.0f), getMeasuredWidth() - AndroidUtilities.dp(13.0f), AndroidUtilities.dp(48.0f));
-            }
-            int themedColor = getThemedColor("location_liveLocationProgress");
-            Theme.chat_radialProgress2Paint.setColor(themedColor);
-            Theme.chat_livePaint.setColor(themedColor);
-            canvas.drawArc(this.rect, -90.0f, abs * (-360.0f), false, Theme.chat_radialProgress2Paint);
-            String formatLocationLeftTime = LocaleController.formatLocationLeftTime(Math.abs(sharingLocationInfo.stopTime - currentTime));
-            canvas.drawText(formatLocationLeftTime, this.rect.centerX() - (Theme.chat_livePaint.measureText(formatLocationLeftTime) / 2.0f), AndroidUtilities.dp(37.0f), Theme.chat_livePaint);
+        LocationController.SharingLocationInfo currentInfo = LocationController.getInstance(this.currentAccount).getSharingLocationInfo(this.dialogId);
+        if (currentInfo == null || currentInfo.stopTime < (currentTime = ConnectionsManager.getInstance(this.currentAccount).getCurrentTime())) {
+            return;
         }
+        float progress = Math.abs(currentInfo.stopTime - currentTime) / currentInfo.period;
+        if (LocaleController.isRTL) {
+            this.rect.set(AndroidUtilities.dp(13.0f), AndroidUtilities.dp(18.0f), AndroidUtilities.dp(43.0f), AndroidUtilities.dp(48.0f));
+        } else {
+            this.rect.set(getMeasuredWidth() - AndroidUtilities.dp(43.0f), AndroidUtilities.dp(18.0f), getMeasuredWidth() - AndroidUtilities.dp(13.0f), AndroidUtilities.dp(48.0f));
+        }
+        int color = getThemedColor(Theme.key_location_liveLocationProgress);
+        Theme.chat_radialProgress2Paint.setColor(color);
+        Theme.chat_livePaint.setColor(color);
+        canvas.drawArc(this.rect, -90.0f, progress * (-360.0f), false, Theme.chat_radialProgress2Paint);
+        String text = LocaleController.formatLocationLeftTime(Math.abs(currentInfo.stopTime - currentTime));
+        float size = Theme.chat_livePaint.measureText(text);
+        canvas.drawText(text, this.rect.centerX() - (size / 2.0f), AndroidUtilities.dp(37.0f), Theme.chat_livePaint);
     }
 
-    private int getThemedColor(String str) {
+    private int getThemedColor(String key) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
-        return color != null ? color.intValue() : Theme.getColor(str);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
+        return color != null ? color.intValue() : Theme.getColor(key);
     }
 }

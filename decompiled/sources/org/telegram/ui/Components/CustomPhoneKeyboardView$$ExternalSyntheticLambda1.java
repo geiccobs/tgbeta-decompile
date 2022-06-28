@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import android.view.View;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class CustomPhoneKeyboardView$$ExternalSyntheticLambda1 implements View.OnClickListener {
     public static final /* synthetic */ CustomPhoneKeyboardView$$ExternalSyntheticLambda1 INSTANCE = new CustomPhoneKeyboardView$$ExternalSyntheticLambda1();
 

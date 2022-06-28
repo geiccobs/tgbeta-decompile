@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.source.hls.playlist;
 
 import com.google.android.exoplayer2.upstream.ParsingLoadable;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class DefaultHlsPlaylistParserFactory implements HlsPlaylistParserFactory {
     @Override // com.google.android.exoplayer2.source.hls.playlist.HlsPlaylistParserFactory
     public ParsingLoadable.Parser<HlsPlaylist> createPlaylistParser() {
@@ -9,7 +9,7 @@ public final class DefaultHlsPlaylistParserFactory implements HlsPlaylistParserF
     }
 
     @Override // com.google.android.exoplayer2.source.hls.playlist.HlsPlaylistParserFactory
-    public ParsingLoadable.Parser<HlsPlaylist> createPlaylistParser(HlsMasterPlaylist hlsMasterPlaylist) {
-        return new HlsPlaylistParser(hlsMasterPlaylist);
+    public ParsingLoadable.Parser<HlsPlaylist> createPlaylistParser(HlsMasterPlaylist masterPlaylist) {
+        return new HlsPlaylistParser(masterPlaylist);
     }
 }

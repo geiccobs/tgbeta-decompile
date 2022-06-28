@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class CircularProgressDrawable extends Drawable {
     private final RectF bounds;
     private final FastOutSlowInInterpolator interpolator;
@@ -19,16 +19,11 @@ public class CircularProgressDrawable extends Drawable {
     private long start;
     private float thickness;
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
+    public CircularProgressDrawable() {
+        this(-1);
     }
 
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
-
-    public CircularProgressDrawable(int i) {
+    public CircularProgressDrawable(int color) {
         this.size = AndroidUtilities.dp(18.0f);
         this.thickness = AndroidUtilities.dp(2.25f);
         this.start = -1L;
@@ -37,10 +32,10 @@ public class CircularProgressDrawable extends Drawable {
         this.paint = paint;
         paint.setStyle(Paint.Style.STROKE);
         this.bounds = new RectF();
-        setColor(i);
+        setColor(color);
     }
 
-    public CircularProgressDrawable(float f, float f2, int i) {
+    public CircularProgressDrawable(float size, float thickness, int color) {
         this.size = AndroidUtilities.dp(18.0f);
         this.thickness = AndroidUtilities.dp(2.25f);
         this.start = -1L;
@@ -49,20 +44,22 @@ public class CircularProgressDrawable extends Drawable {
         this.paint = paint;
         paint.setStyle(Paint.Style.STROKE);
         this.bounds = new RectF();
-        this.size = f;
-        this.thickness = f2;
-        setColor(i);
+        this.size = size;
+        this.thickness = thickness;
+        setColor(color);
     }
 
     private void updateSegment() {
-        int i;
-        long elapsedRealtime = (SystemClock.elapsedRealtime() - this.start) % 5400;
-        float f = ((float) (1520 * elapsedRealtime)) / 5400.0f;
-        this.segmentFrom = f - 20.0f;
-        this.segmentTo = f;
-        for (int i2 = 0; i2 < 4; i2++) {
-            this.segmentTo += this.interpolator.getInterpolation(((float) (elapsedRealtime - (i2 * 1350))) / 667.0f) * 250.0f;
-            this.segmentFrom += this.interpolator.getInterpolation(((float) (elapsedRealtime - (i + 667))) / 667.0f) * 250.0f;
+        long now = SystemClock.elapsedRealtime();
+        long t = (now - this.start) % 5400;
+        this.segmentFrom = (((float) (t * 1520)) / 5400.0f) - 20.0f;
+        this.segmentTo = ((float) (1520 * t)) / 5400.0f;
+        for (int i = 0; i < 4; i++) {
+            float fraction = ((float) (t - (i * 1350))) / 667.0f;
+            this.segmentTo += this.interpolator.getInterpolation(fraction) * 250.0f;
+            float fraction2 = ((float) (t - ((i * 1350) + 667))) / 667.0f;
+            float fraction3 = this.segmentFrom;
+            this.segmentFrom = fraction3 + (this.interpolator.getInterpolation(fraction2) * 250.0f);
         }
     }
 
@@ -79,25 +76,32 @@ public class CircularProgressDrawable extends Drawable {
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setBounds(int i, int i2, int i3, int i4) {
+    public void setBounds(int left, int top, int right, int bottom) {
+        int width = right - left;
+        int height = bottom - top;
         RectF rectF = this.bounds;
-        float f = i;
-        float f2 = i3 - i;
-        float f3 = this.thickness;
-        float f4 = this.size;
-        float f5 = i2;
-        float f6 = i4 - i2;
-        rectF.set((((f2 - (f3 / 2.0f)) - f4) / 2.0f) + f, (((f6 - (f3 / 2.0f)) - f4) / 2.0f) + f5, f + (((f2 + (f3 / 2.0f)) + f4) / 2.0f), f5 + (((f6 + (f3 / 2.0f)) + f4) / 2.0f));
-        super.setBounds(i, i2, i3, i4);
+        float f = this.thickness;
+        float f2 = this.size;
+        rectF.set(left + (((width - (f / 2.0f)) - f2) / 2.0f), top + (((height - (f / 2.0f)) - f2) / 2.0f), left + (((width + (f / 2.0f)) + f2) / 2.0f), top + (((height + (f / 2.0f)) + f2) / 2.0f));
+        super.setBounds(left, top, right, bottom);
         this.paint.setStrokeWidth(this.thickness);
     }
 
-    public void setColor(int i) {
-        this.paint.setColor(i);
+    public void setColor(int color) {
+        this.paint.setColor(color);
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-        this.paint.setAlpha(i);
+    public void setAlpha(int alpha) {
+        this.paint.setAlpha(alpha);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
     }
 }

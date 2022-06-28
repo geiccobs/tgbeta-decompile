@@ -1,7 +1,10 @@
 package com.google.android.exoplayer2.drm;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DecryptionException extends Exception {
-    public DecryptionException(int i, String str) {
-        super(str);
+    public final int errorCode;
+
+    public DecryptionException(int errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
     }
 }

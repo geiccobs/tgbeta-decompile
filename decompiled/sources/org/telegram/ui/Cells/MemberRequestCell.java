@@ -6,34 +6,34 @@ import android.util.LongSparseArray;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
-import org.telegram.tgnet.TLRPC$TL_chatInviteImporter;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class MemberRequestCell extends FrameLayout {
     private final AvatarDrawable avatarDrawable = new AvatarDrawable();
     private final BackupImageView avatarImageView;
-    private TLRPC$TL_chatInviteImporter importer;
+    private TLRPC.TL_chatInviteImporter importer;
     private boolean isNeedDivider;
     private final SimpleTextView nameTextView;
     private final SimpleTextView statusTextView;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface OnClickListener {
-        void onAddClicked(TLRPC$TL_chatInviteImporter tLRPC$TL_chatInviteImporter);
+        void onAddClicked(TLRPC.TL_chatInviteImporter tL_chatInviteImporter);
 
-        void onDismissClicked(TLRPC$TL_chatInviteImporter tLRPC$TL_chatInviteImporter);
+        void onDismissClicked(TLRPC.TL_chatInviteImporter tL_chatInviteImporter);
     }
 
-    public MemberRequestCell(Context context, final OnClickListener onClickListener, boolean z) {
+    public MemberRequestCell(Context context, final OnClickListener clickListener, boolean isChannel) {
         super(context);
         String str;
         int i;
@@ -48,105 +48,101 @@ public class MemberRequestCell extends FrameLayout {
         addView(backupImageView, LayoutHelper.createFrame(46, 46.0f, LocaleController.isRTL ? 5 : 3, 12.0f, 8.0f, 12.0f, 0.0f));
         simpleTextView.setGravity(LocaleController.isRTL ? 5 : 3);
         simpleTextView.setMaxLines(1);
-        simpleTextView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        simpleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         simpleTextView.setTextSize(17);
         simpleTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        boolean z2 = LocaleController.isRTL;
-        addView(simpleTextView, LayoutHelper.createFrame(-1, -2.0f, 48, z2 ? 12.0f : 74.0f, 12.0f, z2 ? 74.0f : 12.0f, 0.0f));
+        addView(simpleTextView, LayoutHelper.createFrame(-1, -2.0f, 48, LocaleController.isRTL ? 12.0f : 74.0f, 12.0f, LocaleController.isRTL ? 74.0f : 12.0f, 0.0f));
         simpleTextView2.setGravity(LocaleController.isRTL ? 5 : 3);
         simpleTextView2.setMaxLines(1);
-        simpleTextView2.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
+        simpleTextView2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         simpleTextView2.setTextSize(14);
-        boolean z3 = LocaleController.isRTL;
-        addView(simpleTextView2, LayoutHelper.createFrame(-1, -2.0f, 48, z3 ? 12.0f : 74.0f, 36.0f, z3 ? 74.0f : 12.0f, 0.0f));
-        int dp = AndroidUtilities.dp(17.0f);
-        TextView textView = new TextView(getContext());
+        addView(simpleTextView2, LayoutHelper.createFrame(-1, -2.0f, 48, LocaleController.isRTL ? 12.0f : 74.0f, 36.0f, LocaleController.isRTL ? 74.0f : 12.0f, 0.0f));
+        int btnPadding = AndroidUtilities.dp(17.0f);
+        TextView addButton = new TextView(getContext());
         int i3 = 0;
-        textView.setBackground(Theme.AdaptiveRipple.filledRect("featuredStickers_addButton", 4.0f));
-        textView.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
-        textView.setMaxLines(1);
-        textView.setPadding(dp, 0, dp, 0);
-        if (z) {
+        addButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_featuredStickers_addButton, 4.0f));
+        addButton.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
+        addButton.setMaxLines(1);
+        addButton.setPadding(btnPadding, 0, btnPadding, 0);
+        if (isChannel) {
             i = R.string.AddToChannel;
             str = "AddToChannel";
         } else {
             i = R.string.AddToGroup;
             str = "AddToGroup";
         }
-        textView.setText(LocaleController.getString(str, i));
-        textView.setTextColor(Theme.getColor("featuredStickers_buttonText"));
-        textView.setTextSize(14.0f);
-        textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        textView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.MemberRequestCell$$ExternalSyntheticLambda1
+        addButton.setText(LocaleController.getString(str, i));
+        addButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+        addButton.setTextSize(14.0f);
+        addButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        addButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.MemberRequestCell$$ExternalSyntheticLambda0
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                MemberRequestCell.this.lambda$new$0(onClickListener, view);
+                MemberRequestCell.this.m1659lambda$new$0$orgtelegramuiCellsMemberRequestCell(clickListener, view);
             }
         });
-        boolean z4 = LocaleController.isRTL;
-        addView(textView, LayoutHelper.createFrame(-2, 32.0f, z4 ? 5 : 3, z4 ? 0.0f : 73.0f, 62.0f, z4 ? 73.0f : 0.0f, 0.0f));
-        float measureText = textView.getPaint().measureText(textView.getText().toString()) + (dp * 2);
-        TextView textView2 = new TextView(getContext());
-        textView2.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4.0f), 0, Theme.getColor("listSelectorSDK21"), -16777216));
-        textView2.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
-        textView2.setMaxLines(1);
-        textView2.setPadding(dp, 0, dp, 0);
-        textView2.setText(LocaleController.getString("Dismiss", R.string.Dismiss));
-        textView2.setTextColor(Theme.getColor("windowBackgroundWhiteBlueText"));
-        textView2.setTextSize(14.0f);
-        textView2.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        textView2.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.MemberRequestCell$$ExternalSyntheticLambda0
+        addView(addButton, LayoutHelper.createFrame(-2, 32.0f, LocaleController.isRTL ? 5 : 3, LocaleController.isRTL ? 0.0f : 73.0f, 62.0f, LocaleController.isRTL ? 73.0f : 0.0f, 0.0f));
+        float addButtonWidth = addButton.getPaint().measureText(addButton.getText().toString()) + (btnPadding * 2);
+        TextView dismissButton = new TextView(getContext());
+        dismissButton.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4.0f), 0, Theme.getColor(Theme.key_listSelector), -16777216));
+        dismissButton.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
+        dismissButton.setMaxLines(1);
+        dismissButton.setPadding(btnPadding, 0, btnPadding, 0);
+        dismissButton.setText(LocaleController.getString("Dismiss", R.string.Dismiss));
+        dismissButton.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));
+        dismissButton.setTextSize(14.0f);
+        dismissButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        dismissButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.MemberRequestCell$$ExternalSyntheticLambda1
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                MemberRequestCell.this.lambda$new$1(onClickListener, view);
+                MemberRequestCell.this.m1660lambda$new$1$orgtelegramuiCellsMemberRequestCell(clickListener, view);
             }
         });
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(-2, AndroidUtilities.dp(32.0f), !LocaleController.isRTL ? 3 : i2);
-        layoutParams.topMargin = AndroidUtilities.dp(62.0f);
-        layoutParams.leftMargin = LocaleController.isRTL ? 0 : (int) (AndroidUtilities.dp(79.0f) + measureText);
-        layoutParams.rightMargin = LocaleController.isRTL ? (int) (measureText + AndroidUtilities.dp(79.0f)) : i3;
-        addView(textView2, layoutParams);
+        FrameLayout.LayoutParams dismissLayoutParams = new FrameLayout.LayoutParams(-2, AndroidUtilities.dp(32.0f), !LocaleController.isRTL ? 3 : i2);
+        dismissLayoutParams.topMargin = AndroidUtilities.dp(62.0f);
+        dismissLayoutParams.leftMargin = LocaleController.isRTL ? 0 : (int) (AndroidUtilities.dp(79.0f) + addButtonWidth);
+        dismissLayoutParams.rightMargin = LocaleController.isRTL ? (int) (AndroidUtilities.dp(79.0f) + addButtonWidth) : i3;
+        addView(dismissButton, dismissLayoutParams);
     }
 
-    public /* synthetic */ void lambda$new$0(OnClickListener onClickListener, View view) {
-        TLRPC$TL_chatInviteImporter tLRPC$TL_chatInviteImporter;
-        if (onClickListener == null || (tLRPC$TL_chatInviteImporter = this.importer) == null) {
-            return;
+    /* renamed from: lambda$new$0$org-telegram-ui-Cells-MemberRequestCell */
+    public /* synthetic */ void m1659lambda$new$0$orgtelegramuiCellsMemberRequestCell(OnClickListener clickListener, View v) {
+        TLRPC.TL_chatInviteImporter tL_chatInviteImporter;
+        if (clickListener != null && (tL_chatInviteImporter = this.importer) != null) {
+            clickListener.onAddClicked(tL_chatInviteImporter);
         }
-        onClickListener.onAddClicked(tLRPC$TL_chatInviteImporter);
     }
 
-    public /* synthetic */ void lambda$new$1(OnClickListener onClickListener, View view) {
-        TLRPC$TL_chatInviteImporter tLRPC$TL_chatInviteImporter;
-        if (onClickListener == null || (tLRPC$TL_chatInviteImporter = this.importer) == null) {
-            return;
+    /* renamed from: lambda$new$1$org-telegram-ui-Cells-MemberRequestCell */
+    public /* synthetic */ void m1660lambda$new$1$orgtelegramuiCellsMemberRequestCell(OnClickListener clickListener, View v) {
+        TLRPC.TL_chatInviteImporter tL_chatInviteImporter;
+        if (clickListener != null && (tL_chatInviteImporter = this.importer) != null) {
+            clickListener.onDismissClicked(tL_chatInviteImporter);
         }
-        onClickListener.onDismissClicked(tLRPC$TL_chatInviteImporter);
     }
 
-    public void setData(LongSparseArray<TLRPC$User> longSparseArray, TLRPC$TL_chatInviteImporter tLRPC$TL_chatInviteImporter, boolean z) {
-        this.importer = tLRPC$TL_chatInviteImporter;
-        this.isNeedDivider = z;
-        setWillNotDraw(!z);
-        TLRPC$User tLRPC$User = longSparseArray.get(tLRPC$TL_chatInviteImporter.user_id);
-        this.avatarDrawable.setInfo(tLRPC$User);
-        this.avatarImageView.setForUserOrChat(tLRPC$User, this.avatarDrawable);
-        this.nameTextView.setText(UserObject.getUserName(tLRPC$User));
-        String formatDateAudio = LocaleController.formatDateAudio(tLRPC$TL_chatInviteImporter.date, false);
-        long j = tLRPC$TL_chatInviteImporter.approved_by;
-        if (j == 0) {
-            this.statusTextView.setText(LocaleController.formatString("RequestedToJoinAt", R.string.RequestedToJoinAt, formatDateAudio));
+    public void setData(LongSparseArray<TLRPC.User> users, TLRPC.TL_chatInviteImporter importer, boolean isNeedDivider) {
+        this.importer = importer;
+        this.isNeedDivider = isNeedDivider;
+        setWillNotDraw(!isNeedDivider);
+        TLRPC.User user = users.get(importer.user_id);
+        this.avatarDrawable.setInfo(user);
+        this.avatarImageView.setForUserOrChat(user, this.avatarDrawable);
+        this.nameTextView.setText(UserObject.getUserName(user));
+        String dateText = LocaleController.formatDateAudio(importer.date, false);
+        if (importer.approved_by == 0) {
+            this.statusTextView.setText(LocaleController.formatString("RequestedToJoinAt", R.string.RequestedToJoinAt, dateText));
             return;
         }
-        TLRPC$User tLRPC$User2 = longSparseArray.get(j);
-        if (tLRPC$User2 != null) {
-            this.statusTextView.setText(LocaleController.formatString("AddedBy", R.string.AddedBy, UserObject.getFirstName(tLRPC$User2), formatDateAudio));
+        TLRPC.User approvedByUser = users.get(importer.approved_by);
+        if (approvedByUser != null) {
+            this.statusTextView.setText(LocaleController.formatString("AddedBy", R.string.AddedBy, UserObject.getFirstName(approvedByUser), dateText));
         } else {
             this.statusTextView.setText("");
         }
     }
 
-    public TLRPC$TL_chatInviteImporter getImporter() {
+    public TLRPC.TL_chatInviteImporter getImporter() {
         return this.importer;
     }
 
@@ -159,8 +155,8 @@ public class MemberRequestCell extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(107.0f), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(107.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
     @Override // android.view.View

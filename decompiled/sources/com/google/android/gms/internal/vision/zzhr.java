@@ -1,12 +1,12 @@
 package com.google.android.gms.internal.vision;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
+import java.util.RandomAccess;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
-final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
+/* loaded from: classes3.dex */
+final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw, RandomAccess {
+    private static final zzhr zza;
     private boolean[] zzb;
     private int zzc;
 
@@ -28,7 +28,7 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
         boolean[] zArr = this.zzb;
         System.arraycopy(zArr, i2, zArr, i, this.zzc - i2);
         this.zzc -= i2 - i;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.Collection, java.util.List
@@ -114,7 +114,7 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
             return false;
         }
         int i2 = this.zzc;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -124,7 +124,7 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
         }
         System.arraycopy(zzhrVar.zzb, 0, this.zzb, this.zzc, zzhrVar.zzc);
         this.zzc = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -144,7 +144,7 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         boolean booleanValue = ((Boolean) obj).booleanValue();
         zzc();
@@ -166,11 +166,11 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
             System.arraycopy(zArr, i + 1, zArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Boolean.valueOf(z);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         int i2;
         boolean booleanValue = ((Boolean) obj).booleanValue();
@@ -189,7 +189,7 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
         }
         this.zzb[i] = booleanValue;
         this.zzc++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List
@@ -213,6 +213,8 @@ final class zzhr extends zzhj<Boolean> implements zzjl<Boolean>, zzkw {
     }
 
     static {
-        new zzhr(new boolean[0], 0).zzb();
+        zzhr zzhrVar = new zzhr(new boolean[0], 0);
+        zza = zzhrVar;
+        zzhrVar.zzb();
     }
 }

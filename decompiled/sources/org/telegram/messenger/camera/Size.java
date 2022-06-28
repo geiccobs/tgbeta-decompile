@@ -1,12 +1,12 @@
 package org.telegram.messenger.camera;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final class Size {
     public final int mHeight;
     public final int mWidth;
 
-    public Size(int i, int i2) {
-        this.mWidth = i;
-        this.mHeight = i2;
+    public Size(int width, int height) {
+        this.mWidth = width;
+        this.mHeight = height;
     }
 
     public int getWidth() {
@@ -27,30 +27,31 @@ public final class Size {
         if (!(obj instanceof Size)) {
             return false;
         }
-        Size size = (Size) obj;
-        return this.mWidth == size.mWidth && this.mHeight == size.mHeight;
+        Size other = (Size) obj;
+        return this.mWidth == other.mWidth && this.mHeight == other.mHeight;
     }
 
     public String toString() {
         return this.mWidth + "x" + this.mHeight;
     }
 
-    private static NumberFormatException invalidSize(String str) {
-        throw new NumberFormatException("Invalid Size: \"" + str + "\"");
+    private static NumberFormatException invalidSize(String s) {
+        throw new NumberFormatException("Invalid Size: \"" + s + "\"");
     }
 
-    public static Size parseSize(String str) throws NumberFormatException {
-        int indexOf = str.indexOf(42);
-        if (indexOf < 0) {
-            indexOf = str.indexOf(120);
+    public static Size parseSize(String string) throws NumberFormatException {
+        int sep_ix = string.indexOf(42);
+        if (sep_ix < 0) {
+            sep_ix = string.indexOf(120);
         }
-        if (indexOf < 0) {
-            throw invalidSize(str);
+        if (sep_ix < 0) {
+            NumberFormatException e = invalidSize(string);
+            throw e;
         }
         try {
-            return new Size(Integer.parseInt(str.substring(0, indexOf)), Integer.parseInt(str.substring(indexOf + 1)));
-        } catch (NumberFormatException unused) {
-            throw invalidSize(str);
+            return new Size(Integer.parseInt(string.substring(0, sep_ix)), Integer.parseInt(string.substring(sep_ix + 1)));
+        } catch (NumberFormatException e2) {
+            throw invalidSize(string);
         }
     }
 

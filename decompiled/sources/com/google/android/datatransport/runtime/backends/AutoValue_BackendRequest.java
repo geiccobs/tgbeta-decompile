@@ -3,14 +3,14 @@ package com.google.android.datatransport.runtime.backends;
 import com.google.android.datatransport.runtime.EventInternal;
 import com.google.android.datatransport.runtime.backends.BackendRequest;
 import java.util.Arrays;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class AutoValue_BackendRequest extends BackendRequest {
     private final Iterable<EventInternal> events;
     private final byte[] extras;
 
-    private AutoValue_BackendRequest(Iterable<EventInternal> iterable, byte[] bArr) {
-        this.events = iterable;
-        this.extras = bArr;
+    private AutoValue_BackendRequest(Iterable<EventInternal> events, byte[] extras) {
+        this.events = events;
+        this.extras = extras;
     }
 
     @Override // com.google.android.datatransport.runtime.backends.BackendRequest
@@ -27,16 +27,16 @@ final class AutoValue_BackendRequest extends BackendRequest {
         return "BackendRequest{events=" + this.events + ", extras=" + Arrays.toString(this.extras) + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof BackendRequest)) {
+        if (!(o instanceof BackendRequest)) {
             return false;
         }
-        BackendRequest backendRequest = (BackendRequest) obj;
-        if (this.events.equals(backendRequest.getEvents())) {
-            if (Arrays.equals(this.extras, backendRequest instanceof AutoValue_BackendRequest ? ((AutoValue_BackendRequest) backendRequest).extras : backendRequest.getExtras())) {
+        BackendRequest that = (BackendRequest) o;
+        if (this.events.equals(that.getEvents())) {
+            if (Arrays.equals(this.extras, that instanceof AutoValue_BackendRequest ? ((AutoValue_BackendRequest) that).extras : that.getExtras())) {
                 return true;
             }
         }
@@ -44,37 +44,38 @@ final class AutoValue_BackendRequest extends BackendRequest {
     }
 
     public int hashCode() {
-        return ((this.events.hashCode() ^ 1000003) * 1000003) ^ Arrays.hashCode(this.extras);
+        int h$ = 1 * 1000003;
+        return ((h$ ^ this.events.hashCode()) * 1000003) ^ Arrays.hashCode(this.extras);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class Builder extends BackendRequest.Builder {
         private Iterable<EventInternal> events;
         private byte[] extras;
 
         @Override // com.google.android.datatransport.runtime.backends.BackendRequest.Builder
-        public BackendRequest.Builder setEvents(Iterable<EventInternal> iterable) {
-            if (iterable == null) {
+        public BackendRequest.Builder setEvents(Iterable<EventInternal> events) {
+            if (events == null) {
                 throw new NullPointerException("Null events");
             }
-            this.events = iterable;
+            this.events = events;
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.backends.BackendRequest.Builder
-        public BackendRequest.Builder setExtras(byte[] bArr) {
-            this.extras = bArr;
+        public BackendRequest.Builder setExtras(byte[] extras) {
+            this.extras = extras;
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.backends.BackendRequest.Builder
         public BackendRequest build() {
-            String str = "";
+            String missing = "";
             if (this.events == null) {
-                str = str + " events";
+                missing = missing + " events";
             }
-            if (!str.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + str);
+            if (!missing.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + missing);
             }
             return new AutoValue_BackendRequest(this.events, this.extras);
         }

@@ -9,8 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.beta.R;
+/* loaded from: classes5.dex */
 public class ScamDrawable extends Drawable {
     private int currentType;
     private String text;
@@ -21,24 +21,15 @@ public class ScamDrawable extends Drawable {
     int colorAlpha = 255;
     int alpha = 255;
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
-
-    public ScamDrawable(int i, int i2) {
+    public ScamDrawable(int textSize, int type) {
         TextPaint textPaint = new TextPaint(1);
         this.textPaint = textPaint;
-        this.currentType = i2;
-        textPaint.setTextSize(AndroidUtilities.dp(i));
+        this.currentType = type;
+        textPaint.setTextSize(AndroidUtilities.dp(textSize));
         this.textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         this.paint.setStyle(Paint.Style.STROKE);
         this.paint.setStrokeWidth(AndroidUtilities.dp(1.0f));
-        if (i2 == 0) {
+        if (type == 0) {
             this.text = LocaleController.getString("ScamMessage", R.string.ScamMessage);
         } else {
             this.text = LocaleController.getString("FakeMessage", R.string.FakeMessage);
@@ -47,30 +38,30 @@ public class ScamDrawable extends Drawable {
     }
 
     public void checkText() {
-        String str;
+        String newText;
         if (this.currentType == 0) {
-            str = LocaleController.getString("ScamMessage", R.string.ScamMessage);
+            newText = LocaleController.getString("ScamMessage", R.string.ScamMessage);
         } else {
-            str = LocaleController.getString("FakeMessage", R.string.FakeMessage);
+            newText = LocaleController.getString("FakeMessage", R.string.FakeMessage);
         }
-        if (!str.equals(this.text)) {
-            this.text = str;
-            this.textWidth = (int) Math.ceil(this.textPaint.measureText(str));
+        if (!newText.equals(this.text)) {
+            this.text = newText;
+            this.textWidth = (int) Math.ceil(this.textPaint.measureText(newText));
         }
     }
 
-    public void setColor(int i) {
-        this.textPaint.setColor(i);
-        this.paint.setColor(i);
-        this.colorAlpha = Color.alpha(i);
+    public void setColor(int color) {
+        this.textPaint.setColor(color);
+        this.paint.setColor(color);
+        this.colorAlpha = Color.alpha(color);
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-        if (this.alpha != i) {
-            int i2 = (int) (this.colorAlpha * (i / 255.0f));
-            this.paint.setAlpha(i2);
-            this.textPaint.setAlpha(i2);
+    public void setAlpha(int alpha) {
+        if (this.alpha != alpha) {
+            int localAlpha = (int) (this.colorAlpha * (alpha / 255.0f));
+            this.paint.setAlpha(localAlpha);
+            this.textPaint.setAlpha(localAlpha);
         }
     }
 
@@ -89,5 +80,14 @@ public class ScamDrawable extends Drawable {
         this.rect.set(getBounds());
         canvas.drawRoundRect(this.rect, AndroidUtilities.dp(2.0f), AndroidUtilities.dp(2.0f), this.paint);
         canvas.drawText(this.text, this.rect.left + AndroidUtilities.dp(5.0f), this.rect.top + AndroidUtilities.dp(12.0f), this.textPaint);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
     }
 }

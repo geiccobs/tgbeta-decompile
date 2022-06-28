@@ -4,7 +4,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseDataSource implements DataSource {
     private DataSpec dataSpec;
     private final boolean isNetwork;
@@ -18,8 +18,8 @@ public abstract class BaseDataSource implements DataSource {
         return emptyMap;
     }
 
-    public BaseDataSource(boolean z) {
-        this.isNetwork = z;
+    public BaseDataSource(boolean isNetwork) {
+        this.isNetwork = isNetwork;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
@@ -43,10 +43,10 @@ public abstract class BaseDataSource implements DataSource {
         }
     }
 
-    public final void bytesTransferred(int i) {
+    public final void bytesTransferred(int bytesTransferred) {
         DataSpec dataSpec = (DataSpec) Util.castNonNull(this.dataSpec);
-        for (int i2 = 0; i2 < this.listenerCount; i2++) {
-            this.listeners.get(i2).onBytesTransferred(this, dataSpec, this.isNetwork, i);
+        for (int i = 0; i < this.listenerCount; i++) {
+            this.listeners.get(i).onBytesTransferred(this, dataSpec, this.isNetwork, bytesTransferred);
         }
     }
 

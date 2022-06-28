@@ -1,7 +1,7 @@
 package org.telegram.ui;
 
 import org.telegram.ui.SessionsActivity;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class SessionsActivity$4$$ExternalSyntheticLambda0 implements Runnable {
     public static final /* synthetic */ SessionsActivity$4$$ExternalSyntheticLambda0 INSTANCE = new SessionsActivity$4$$ExternalSyntheticLambda0();
 

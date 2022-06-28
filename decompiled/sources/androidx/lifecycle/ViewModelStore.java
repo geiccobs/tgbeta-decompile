@@ -1,24 +1,24 @@
 package androidx.lifecycle;
 
 import java.util.HashMap;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ViewModelStore {
     private final HashMap<String, ViewModel> mMap = new HashMap<>();
 
-    public final void put(String str, ViewModel viewModel) {
-        ViewModel put = this.mMap.put(str, viewModel);
-        if (put != null) {
-            put.onCleared();
+    public final void put(String key, ViewModel viewModel) {
+        ViewModel oldViewModel = this.mMap.put(key, viewModel);
+        if (oldViewModel != null) {
+            oldViewModel.onCleared();
         }
     }
 
-    public final ViewModel get(String str) {
-        return this.mMap.get(str);
+    public final ViewModel get(String key) {
+        return this.mMap.get(key);
     }
 
     public final void clear() {
-        for (ViewModel viewModel : this.mMap.values()) {
-            viewModel.onCleared();
+        for (ViewModel vm : this.mMap.values()) {
+            vm.onCleared();
         }
         this.mMap.clear();
     }

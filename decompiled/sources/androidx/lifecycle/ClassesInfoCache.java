@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 class ClassesInfoCache {
+    private static final int CALL_TYPE_NO_ARG = 0;
+    private static final int CALL_TYPE_PROVIDER = 1;
+    private static final int CALL_TYPE_PROVIDER_WITH_EVENT = 2;
     static ClassesInfoCache sInstance = new ClassesInfoCache();
     private final Map<Class, CallbackInfo> mCallbackMap = new HashMap();
     private final Map<Class, Boolean> mHasLifecycleMethods = new HashMap();
@@ -16,151 +19,161 @@ class ClassesInfoCache {
     ClassesInfoCache() {
     }
 
-    public boolean hasLifecycleMethods(Class cls) {
-        if (this.mHasLifecycleMethods.containsKey(cls)) {
-            return this.mHasLifecycleMethods.get(cls).booleanValue();
+    public boolean hasLifecycleMethods(Class klass) {
+        if (this.mHasLifecycleMethods.containsKey(klass)) {
+            return this.mHasLifecycleMethods.get(klass).booleanValue();
         }
-        Method[] declaredMethods = getDeclaredMethods(cls);
-        for (Method method : declaredMethods) {
-            if (((OnLifecycleEvent) method.getAnnotation(OnLifecycleEvent.class)) != null) {
-                createInfo(cls, declaredMethods);
+        Method[] methods = getDeclaredMethods(klass);
+        for (Method method : methods) {
+            OnLifecycleEvent annotation = (OnLifecycleEvent) method.getAnnotation(OnLifecycleEvent.class);
+            if (annotation != null) {
+                createInfo(klass, methods);
                 return true;
             }
         }
-        this.mHasLifecycleMethods.put(cls, Boolean.FALSE);
+        this.mHasLifecycleMethods.put(klass, false);
         return false;
     }
 
-    private Method[] getDeclaredMethods(Class cls) {
+    private Method[] getDeclaredMethods(Class klass) {
         try {
-            return cls.getDeclaredMethods();
+            return klass.getDeclaredMethods();
         } catch (NoClassDefFoundError e) {
             throw new IllegalArgumentException("The observer class has some methods that use newer APIs which are not available in the current OS version. Lifecycles cannot access even other methods so you should make sure that your observer classes only access framework classes that are available in your min API level OR use lifecycle:compiler annotation processor.", e);
         }
     }
 
-    public CallbackInfo getInfo(Class cls) {
-        CallbackInfo callbackInfo = this.mCallbackMap.get(cls);
-        return callbackInfo != null ? callbackInfo : createInfo(cls, null);
+    public CallbackInfo getInfo(Class klass) {
+        CallbackInfo existing = this.mCallbackMap.get(klass);
+        if (existing != null) {
+            return existing;
+        }
+        return createInfo(klass, null);
     }
 
-    private void verifyAndPutHandler(Map<MethodReference, Lifecycle.Event> map, MethodReference methodReference, Lifecycle.Event event, Class cls) {
-        Lifecycle.Event event2 = map.get(methodReference);
-        if (event2 == null || event == event2) {
-            if (event2 != null) {
-                return;
-            }
-            map.put(methodReference, event);
-            return;
+    private void verifyAndPutHandler(Map<MethodReference, Lifecycle.Event> handlers, MethodReference newHandler, Lifecycle.Event newEvent, Class klass) {
+        Lifecycle.Event event = handlers.get(newHandler);
+        if (event != null && newEvent != event) {
+            Method method = newHandler.mMethod;
+            throw new IllegalArgumentException("Method " + method.getName() + " in " + klass.getName() + " already declared with different @OnLifecycleEvent value: previous value " + event + ", new value " + newEvent);
+        } else if (event == null) {
+            handlers.put(newHandler, newEvent);
         }
-        Method method = methodReference.mMethod;
-        throw new IllegalArgumentException("Method " + method.getName() + " in " + cls.getName() + " already declared with different @OnLifecycleEvent value: previous value " + event2 + ", new value " + event);
     }
 
-    private CallbackInfo createInfo(Class cls, Method[] methodArr) {
-        int i;
-        CallbackInfo info;
-        Class superclass = cls.getSuperclass();
-        HashMap hashMap = new HashMap();
-        if (superclass != null && (info = getInfo(superclass)) != null) {
-            hashMap.putAll(info.mHandlerToEvent);
+    private CallbackInfo createInfo(Class klass, Method[] declaredMethods) {
+        CallbackInfo superInfo;
+        Class superclass = klass.getSuperclass();
+        Map<MethodReference, Lifecycle.Event> handlerToEvent = new HashMap<>();
+        if (superclass != null && (superInfo = getInfo(superclass)) != null) {
+            handlerToEvent.putAll(superInfo.mHandlerToEvent);
         }
-        for (Class<?> cls2 : cls.getInterfaces()) {
-            for (Map.Entry<MethodReference, Lifecycle.Event> entry : getInfo(cls2).mHandlerToEvent.entrySet()) {
-                verifyAndPutHandler(hashMap, entry.getKey(), entry.getValue(), cls);
+        Class[] interfaces = klass.getInterfaces();
+        char c = 0;
+        for (Class intrfc : interfaces) {
+            for (Map.Entry<MethodReference, Lifecycle.Event> entry : getInfo(intrfc).mHandlerToEvent.entrySet()) {
+                verifyAndPutHandler(handlerToEvent, entry.getKey(), entry.getValue(), klass);
             }
         }
-        if (methodArr == null) {
-            methodArr = getDeclaredMethods(cls);
-        }
-        boolean z = false;
-        for (Method method : methodArr) {
-            OnLifecycleEvent onLifecycleEvent = (OnLifecycleEvent) method.getAnnotation(OnLifecycleEvent.class);
-            if (onLifecycleEvent != null) {
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes.length <= 0) {
-                    i = 0;
-                } else if (!parameterTypes[0].isAssignableFrom(LifecycleOwner.class)) {
-                    throw new IllegalArgumentException("invalid parameter type. Must be one and instanceof LifecycleOwner");
-                } else {
-                    i = 1;
+        Method[] methods = declaredMethods != null ? declaredMethods : getDeclaredMethods(klass);
+        boolean hasLifecycleMethods = false;
+        int length = methods.length;
+        int i = 0;
+        while (i < length) {
+            Method method = methods[i];
+            OnLifecycleEvent annotation = (OnLifecycleEvent) method.getAnnotation(OnLifecycleEvent.class);
+            if (annotation != null) {
+                hasLifecycleMethods = true;
+                Class<?>[] params = method.getParameterTypes();
+                int callType = 0;
+                if (params.length > 0) {
+                    callType = 1;
+                    if (!params[c].isAssignableFrom(LifecycleOwner.class)) {
+                        throw new IllegalArgumentException("invalid parameter type. Must be one and instanceof LifecycleOwner");
+                    }
                 }
-                Lifecycle.Event value = onLifecycleEvent.value();
-                if (parameterTypes.length > 1) {
-                    if (!parameterTypes[1].isAssignableFrom(Lifecycle.Event.class)) {
+                Lifecycle.Event event = annotation.value();
+                if (params.length > 1) {
+                    callType = 2;
+                    if (!params[1].isAssignableFrom(Lifecycle.Event.class)) {
                         throw new IllegalArgumentException("invalid parameter type. second arg must be an event");
                     }
-                    if (value != Lifecycle.Event.ON_ANY) {
+                    if (event != Lifecycle.Event.ON_ANY) {
                         throw new IllegalArgumentException("Second arg is supported only for ON_ANY value");
                     }
-                    i = 2;
                 }
-                if (parameterTypes.length > 2) {
+                if (params.length > 2) {
                     throw new IllegalArgumentException("cannot have more than 2 params");
                 }
-                verifyAndPutHandler(hashMap, new MethodReference(i, method), value, cls);
-                z = true;
+                MethodReference methodReference = new MethodReference(callType, method);
+                verifyAndPutHandler(handlerToEvent, methodReference, event, klass);
             }
+            i++;
+            c = 0;
         }
-        CallbackInfo callbackInfo = new CallbackInfo(hashMap);
-        this.mCallbackMap.put(cls, callbackInfo);
-        this.mHasLifecycleMethods.put(cls, Boolean.valueOf(z));
-        return callbackInfo;
+        CallbackInfo info = new CallbackInfo(handlerToEvent);
+        this.mCallbackMap.put(klass, info);
+        this.mHasLifecycleMethods.put(klass, Boolean.valueOf(hasLifecycleMethods));
+        return info;
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class CallbackInfo {
         final Map<Lifecycle.Event, List<MethodReference>> mEventToHandlers = new HashMap();
         final Map<MethodReference, Lifecycle.Event> mHandlerToEvent;
 
-        CallbackInfo(Map<MethodReference, Lifecycle.Event> map) {
-            this.mHandlerToEvent = map;
-            for (Map.Entry<MethodReference, Lifecycle.Event> entry : map.entrySet()) {
-                Lifecycle.Event value = entry.getValue();
-                List<MethodReference> list = this.mEventToHandlers.get(value);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    this.mEventToHandlers.put(value, list);
+        CallbackInfo(Map<MethodReference, Lifecycle.Event> handlerToEvent) {
+            this.mHandlerToEvent = handlerToEvent;
+            for (Map.Entry<MethodReference, Lifecycle.Event> entry : handlerToEvent.entrySet()) {
+                Lifecycle.Event event = entry.getValue();
+                List<MethodReference> methodReferences = this.mEventToHandlers.get(event);
+                if (methodReferences == null) {
+                    methodReferences = new ArrayList();
+                    this.mEventToHandlers.put(event, methodReferences);
                 }
-                list.add(entry.getKey());
+                methodReferences.add(entry.getKey());
             }
         }
 
-        public void invokeCallbacks(LifecycleOwner lifecycleOwner, Lifecycle.Event event, Object obj) {
-            invokeMethodsForEvent(this.mEventToHandlers.get(event), lifecycleOwner, event, obj);
-            invokeMethodsForEvent(this.mEventToHandlers.get(Lifecycle.Event.ON_ANY), lifecycleOwner, event, obj);
+        public void invokeCallbacks(LifecycleOwner source, Lifecycle.Event event, Object target) {
+            invokeMethodsForEvent(this.mEventToHandlers.get(event), source, event, target);
+            invokeMethodsForEvent(this.mEventToHandlers.get(Lifecycle.Event.ON_ANY), source, event, target);
         }
 
-        private static void invokeMethodsForEvent(List<MethodReference> list, LifecycleOwner lifecycleOwner, Lifecycle.Event event, Object obj) {
-            if (list != null) {
-                for (int size = list.size() - 1; size >= 0; size--) {
-                    list.get(size).invokeCallback(lifecycleOwner, event, obj);
+        private static void invokeMethodsForEvent(List<MethodReference> handlers, LifecycleOwner source, Lifecycle.Event event, Object mWrapped) {
+            if (handlers != null) {
+                for (int i = handlers.size() - 1; i >= 0; i--) {
+                    handlers.get(i).invokeCallback(source, event, mWrapped);
                 }
             }
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class MethodReference {
         final int mCallType;
         final Method mMethod;
 
-        MethodReference(int i, Method method) {
-            this.mCallType = i;
+        MethodReference(int callType, Method method) {
+            this.mCallType = callType;
             this.mMethod = method;
             method.setAccessible(true);
         }
 
-        void invokeCallback(LifecycleOwner lifecycleOwner, Lifecycle.Event event, Object obj) {
+        void invokeCallback(LifecycleOwner source, Lifecycle.Event event, Object target) {
             try {
-                int i = this.mCallType;
-                if (i == 0) {
-                    this.mMethod.invoke(obj, new Object[0]);
-                } else if (i == 1) {
-                    this.mMethod.invoke(obj, lifecycleOwner);
-                } else if (i != 2) {
-                } else {
-                    this.mMethod.invoke(obj, lifecycleOwner, event);
+                switch (this.mCallType) {
+                    case 0:
+                        this.mMethod.invoke(target, new Object[0]);
+                        return;
+                    case 1:
+                        this.mMethod.invoke(target, source);
+                        return;
+                    case 2:
+                        this.mMethod.invoke(target, source, event);
+                        return;
+                    default:
+                        return;
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -169,15 +182,15 @@ class ClassesInfoCache {
             }
         }
 
-        public boolean equals(Object obj) {
-            if (this == obj) {
+        public boolean equals(Object o) {
+            if (this == o) {
                 return true;
             }
-            if (obj == null || MethodReference.class != obj.getClass()) {
+            if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            MethodReference methodReference = (MethodReference) obj;
-            return this.mCallType == methodReference.mCallType && this.mMethod.getName().equals(methodReference.mMethod.getName());
+            MethodReference that = (MethodReference) o;
+            return this.mCallType == that.mCallType && this.mMethod.getName().equals(that.mMethod.getName());
         }
 
         public int hashCode() {

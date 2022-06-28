@@ -1,7 +1,7 @@
 package com.google.firebase.installations.remote;
 
 import com.google.firebase.installations.remote.InstallationResponse;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class AutoValue_InstallationResponse extends InstallationResponse {
     private final TokenResult authToken;
     private final String fid;
@@ -9,11 +9,11 @@ final class AutoValue_InstallationResponse extends InstallationResponse {
     private final InstallationResponse.ResponseCode responseCode;
     private final String uri;
 
-    private AutoValue_InstallationResponse(String str, String str2, String str3, TokenResult tokenResult, InstallationResponse.ResponseCode responseCode) {
-        this.uri = str;
-        this.fid = str2;
-        this.refreshToken = str3;
-        this.authToken = tokenResult;
+    private AutoValue_InstallationResponse(String uri, String fid, String refreshToken, TokenResult authToken, InstallationResponse.ResponseCode responseCode) {
+        this.uri = uri;
+        this.fid = fid;
+        this.refreshToken = refreshToken;
+        this.authToken = authToken;
         this.responseCode = responseCode;
     }
 
@@ -46,28 +46,28 @@ final class AutoValue_InstallationResponse extends InstallationResponse {
         return "InstallationResponse{uri=" + this.uri + ", fid=" + this.fid + ", refreshToken=" + this.refreshToken + ", authToken=" + this.authToken + ", responseCode=" + this.responseCode + "}";
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof InstallationResponse)) {
+        if (!(o instanceof InstallationResponse)) {
             return false;
         }
-        InstallationResponse installationResponse = (InstallationResponse) obj;
+        InstallationResponse that = (InstallationResponse) o;
         String str = this.uri;
-        if (str != null ? str.equals(installationResponse.getUri()) : installationResponse.getUri() == null) {
+        if (str != null ? str.equals(that.getUri()) : that.getUri() == null) {
             String str2 = this.fid;
-            if (str2 != null ? str2.equals(installationResponse.getFid()) : installationResponse.getFid() == null) {
+            if (str2 != null ? str2.equals(that.getFid()) : that.getFid() == null) {
                 String str3 = this.refreshToken;
-                if (str3 != null ? str3.equals(installationResponse.getRefreshToken()) : installationResponse.getRefreshToken() == null) {
+                if (str3 != null ? str3.equals(that.getRefreshToken()) : that.getRefreshToken() == null) {
                     TokenResult tokenResult = this.authToken;
-                    if (tokenResult != null ? tokenResult.equals(installationResponse.getAuthToken()) : installationResponse.getAuthToken() == null) {
+                    if (tokenResult != null ? tokenResult.equals(that.getAuthToken()) : that.getAuthToken() == null) {
                         InstallationResponse.ResponseCode responseCode = this.responseCode;
                         if (responseCode == null) {
-                            if (installationResponse.getResponseCode() == null) {
+                            if (that.getResponseCode() == null) {
                                 return true;
                             }
-                        } else if (responseCode.equals(installationResponse.getResponseCode())) {
+                        } else if (responseCode.equals(that.getResponseCode())) {
                             return true;
                         }
                     }
@@ -78,24 +78,30 @@ final class AutoValue_InstallationResponse extends InstallationResponse {
     }
 
     public int hashCode() {
+        int h$ = 1 * 1000003;
         String str = this.uri;
         int i = 0;
-        int hashCode = ((str == null ? 0 : str.hashCode()) ^ 1000003) * 1000003;
+        int h$2 = (h$ ^ (str == null ? 0 : str.hashCode())) * 1000003;
         String str2 = this.fid;
-        int hashCode2 = (hashCode ^ (str2 == null ? 0 : str2.hashCode())) * 1000003;
+        int h$3 = (h$2 ^ (str2 == null ? 0 : str2.hashCode())) * 1000003;
         String str3 = this.refreshToken;
-        int hashCode3 = (hashCode2 ^ (str3 == null ? 0 : str3.hashCode())) * 1000003;
+        int h$4 = (h$3 ^ (str3 == null ? 0 : str3.hashCode())) * 1000003;
         TokenResult tokenResult = this.authToken;
-        int hashCode4 = (hashCode3 ^ (tokenResult == null ? 0 : tokenResult.hashCode())) * 1000003;
+        int h$5 = (h$4 ^ (tokenResult == null ? 0 : tokenResult.hashCode())) * 1000003;
         InstallationResponse.ResponseCode responseCode = this.responseCode;
         if (responseCode != null) {
             i = responseCode.hashCode();
         }
-        return hashCode4 ^ i;
+        return h$5 ^ i;
+    }
+
+    @Override // com.google.firebase.installations.remote.InstallationResponse
+    public InstallationResponse.Builder toBuilder() {
+        return new Builder(this);
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class Builder extends InstallationResponse.Builder {
         private TokenResult authToken;
         private String fid;
@@ -103,27 +109,38 @@ final class AutoValue_InstallationResponse extends InstallationResponse {
         private InstallationResponse.ResponseCode responseCode;
         private String uri;
 
+        public Builder() {
+        }
+
+        private Builder(InstallationResponse source) {
+            this.uri = source.getUri();
+            this.fid = source.getFid();
+            this.refreshToken = source.getRefreshToken();
+            this.authToken = source.getAuthToken();
+            this.responseCode = source.getResponseCode();
+        }
+
         @Override // com.google.firebase.installations.remote.InstallationResponse.Builder
-        public InstallationResponse.Builder setUri(String str) {
-            this.uri = str;
+        public InstallationResponse.Builder setUri(String uri) {
+            this.uri = uri;
             return this;
         }
 
         @Override // com.google.firebase.installations.remote.InstallationResponse.Builder
-        public InstallationResponse.Builder setFid(String str) {
-            this.fid = str;
+        public InstallationResponse.Builder setFid(String fid) {
+            this.fid = fid;
             return this;
         }
 
         @Override // com.google.firebase.installations.remote.InstallationResponse.Builder
-        public InstallationResponse.Builder setRefreshToken(String str) {
-            this.refreshToken = str;
+        public InstallationResponse.Builder setRefreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
             return this;
         }
 
         @Override // com.google.firebase.installations.remote.InstallationResponse.Builder
-        public InstallationResponse.Builder setAuthToken(TokenResult tokenResult) {
-            this.authToken = tokenResult;
+        public InstallationResponse.Builder setAuthToken(TokenResult authToken) {
+            this.authToken = authToken;
             return this;
         }
 

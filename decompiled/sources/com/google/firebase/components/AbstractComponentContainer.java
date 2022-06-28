@@ -2,11 +2,11 @@ package com.google.firebase.components;
 
 import com.google.firebase.inject.Provider;
 import java.util.Set;
-/* loaded from: classes.dex */
-public abstract class AbstractComponentContainer implements ComponentContainer {
+/* loaded from: classes3.dex */
+abstract class AbstractComponentContainer implements ComponentContainer {
     @Override // com.google.firebase.components.ComponentContainer
-    public <T> T get(Class<T> cls) {
-        Provider<T> provider = getProvider(cls);
+    public <T> T get(Class<T> anInterface) {
+        Provider<T> provider = getProvider(anInterface);
         if (provider == null) {
             return null;
         }
@@ -14,7 +14,7 @@ public abstract class AbstractComponentContainer implements ComponentContainer {
     }
 
     @Override // com.google.firebase.components.ComponentContainer
-    public <T> Set<T> setOf(Class<T> cls) {
-        return setOfProvider(cls).get();
+    public <T> Set<T> setOf(Class<T> anInterface) {
+        return setOfProvider(anInterface).get();
     }
 }

@@ -1,5 +1,5 @@
 package org.telegram.ui.Components.voip;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class VoIPPiPView$$ExternalSyntheticLambda3 implements Runnable {
     public static final /* synthetic */ VoIPPiPView$$ExternalSyntheticLambda3 INSTANCE = new VoIPPiPView$$ExternalSyntheticLambda3();
 

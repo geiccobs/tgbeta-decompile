@@ -1,158 +1,156 @@
 package com.google.zxing.qrcode.encoder;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class MaskUtil {
-    public static int applyMaskPenaltyRule1(ByteMatrix byteMatrix) {
-        return applyMaskPenaltyRule1Internal(byteMatrix, true) + applyMaskPenaltyRule1Internal(byteMatrix, false);
+    private static final int N1 = 3;
+    private static final int N2 = 3;
+    private static final int N3 = 40;
+    private static final int N4 = 10;
+
+    private MaskUtil() {
     }
 
-    public static int applyMaskPenaltyRule2(ByteMatrix byteMatrix) {
-        byte[][] array = byteMatrix.getArray();
-        int width = byteMatrix.getWidth();
-        int height = byteMatrix.getHeight();
-        int i = 0;
-        for (int i2 = 0; i2 < height - 1; i2++) {
-            byte[] bArr = array[i2];
-            int i3 = 0;
-            while (i3 < width - 1) {
-                byte b = bArr[i3];
-                int i4 = i3 + 1;
-                if (b == bArr[i4]) {
-                    int i5 = i2 + 1;
-                    if (b == array[i5][i3] && b == array[i5][i4]) {
-                        i++;
-                    }
-                }
-                i3 = i4;
-            }
-        }
-        return i * 3;
+    public static int applyMaskPenaltyRule1(ByteMatrix matrix) {
+        return applyMaskPenaltyRule1Internal(matrix, true) + applyMaskPenaltyRule1Internal(matrix, false);
     }
 
-    public static int applyMaskPenaltyRule3(ByteMatrix byteMatrix) {
-        byte[][] array = byteMatrix.getArray();
-        int width = byteMatrix.getWidth();
-        int height = byteMatrix.getHeight();
-        int i = 0;
-        for (int i2 = 0; i2 < height; i2++) {
-            for (int i3 = 0; i3 < width; i3++) {
-                byte[] bArr = array[i2];
-                int i4 = i3 + 6;
-                if (i4 < width && bArr[i3] == 1 && bArr[i3 + 1] == 0 && bArr[i3 + 2] == 1 && bArr[i3 + 3] == 1 && bArr[i3 + 4] == 1 && bArr[i3 + 5] == 0 && bArr[i4] == 1 && (isWhiteHorizontal(bArr, i3 - 4, i3) || isWhiteHorizontal(bArr, i3 + 7, i3 + 11))) {
-                    i++;
-                }
-                int i5 = i2 + 6;
-                if (i5 < height && array[i2][i3] == 1 && array[i2 + 1][i3] == 0 && array[i2 + 2][i3] == 1 && array[i2 + 3][i3] == 1 && array[i2 + 4][i3] == 1 && array[i2 + 5][i3] == 0 && array[i5][i3] == 1 && (isWhiteVertical(array, i3, i2 - 4, i2) || isWhiteVertical(array, i3, i2 + 7, i2 + 11))) {
-                    i++;
+    public static int applyMaskPenaltyRule2(ByteMatrix matrix) {
+        int penalty = 0;
+        byte[][] array = matrix.getArray();
+        int width = matrix.getWidth();
+        int height = matrix.getHeight();
+        for (int y = 0; y < height - 1; y++) {
+            byte[] arrayY = array[y];
+            for (int x = 0; x < width - 1; x++) {
+                int value = arrayY[x];
+                if (value == arrayY[x + 1] && value == array[y + 1][x] && value == array[y + 1][x + 1]) {
+                    penalty++;
                 }
             }
         }
-        return i * 40;
+        int y2 = penalty * 3;
+        return y2;
     }
 
-    private static boolean isWhiteHorizontal(byte[] bArr, int i, int i2) {
-        int min = Math.min(i2, bArr.length);
-        for (int max = Math.max(i, 0); max < min; max++) {
-            if (bArr[max] == 1) {
+    public static int applyMaskPenaltyRule3(ByteMatrix matrix) {
+        int numPenalties = 0;
+        byte[][] array = matrix.getArray();
+        int width = matrix.getWidth();
+        int height = matrix.getHeight();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                byte[] arrayY = array[y];
+                if (x + 6 < width && arrayY[x] == 1 && arrayY[x + 1] == 0 && arrayY[x + 2] == 1 && arrayY[x + 3] == 1 && arrayY[x + 4] == 1 && arrayY[x + 5] == 0 && arrayY[x + 6] == 1 && (isWhiteHorizontal(arrayY, x - 4, x) || isWhiteHorizontal(arrayY, x + 7, x + 11))) {
+                    numPenalties++;
+                }
+                if (y + 6 < height && array[y][x] == 1 && array[y + 1][x] == 0 && array[y + 2][x] == 1 && array[y + 3][x] == 1 && array[y + 4][x] == 1 && array[y + 5][x] == 0 && array[y + 6][x] == 1 && (isWhiteVertical(array, x, y - 4, y) || isWhiteVertical(array, x, y + 7, y + 11))) {
+                    numPenalties++;
+                }
+            }
+        }
+        int y2 = numPenalties * 40;
+        return y2;
+    }
+
+    private static boolean isWhiteHorizontal(byte[] rowArray, int from, int to) {
+        int from2 = Math.max(from, 0);
+        int to2 = Math.min(to, rowArray.length);
+        for (int i = from2; i < to2; i++) {
+            if (rowArray[i] == 1) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean isWhiteVertical(byte[][] bArr, int i, int i2, int i3) {
-        int min = Math.min(i3, bArr.length);
-        for (int max = Math.max(i2, 0); max < min; max++) {
-            if (bArr[max][i] == 1) {
+    private static boolean isWhiteVertical(byte[][] array, int col, int from, int to) {
+        int from2 = Math.max(from, 0);
+        int to2 = Math.min(to, array.length);
+        for (int i = from2; i < to2; i++) {
+            if (array[i][col] == 1) {
                 return false;
             }
         }
         return true;
     }
 
-    public static int applyMaskPenaltyRule4(ByteMatrix byteMatrix) {
-        byte[][] array = byteMatrix.getArray();
-        int width = byteMatrix.getWidth();
-        int height = byteMatrix.getHeight();
-        int i = 0;
-        for (int i2 = 0; i2 < height; i2++) {
-            byte[] bArr = array[i2];
-            for (int i3 = 0; i3 < width; i3++) {
-                if (bArr[i3] == 1) {
-                    i++;
+    public static int applyMaskPenaltyRule4(ByteMatrix matrix) {
+        int numDarkCells = 0;
+        byte[][] array = matrix.getArray();
+        int width = matrix.getWidth();
+        int height = matrix.getHeight();
+        for (int y = 0; y < height; y++) {
+            byte[] arrayY = array[y];
+            for (int x = 0; x < width; x++) {
+                if (arrayY[x] == 1) {
+                    numDarkCells++;
                 }
             }
         }
-        int height2 = byteMatrix.getHeight() * byteMatrix.getWidth();
-        return ((Math.abs((i * 2) - height2) * 10) / height2) * 10;
+        int y2 = matrix.getHeight();
+        int numTotalCells = y2 * matrix.getWidth();
+        int fivePercentVariances = (Math.abs((numDarkCells * 2) - numTotalCells) * 10) / numTotalCells;
+        return fivePercentVariances * 10;
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    public static boolean getDataMaskBit(int i, int i2, int i3) {
-        int i4;
-        int i5;
-        switch (i) {
+    public static boolean getDataMaskBit(int maskPattern, int x, int y) {
+        int intermediate;
+        switch (maskPattern) {
             case 0:
-                i3 += i2;
-                i4 = i3 & 1;
+                intermediate = (y + x) & 1;
                 break;
             case 1:
-                i4 = i3 & 1;
+                intermediate = y & 1;
                 break;
             case 2:
-                i4 = i2 % 3;
+                intermediate = x % 3;
                 break;
             case 3:
-                i4 = (i3 + i2) % 3;
+                intermediate = (y + x) % 3;
                 break;
             case 4:
-                i3 /= 2;
-                i2 /= 3;
-                i3 += i2;
-                i4 = i3 & 1;
+                intermediate = ((y / 2) + (x / 3)) & 1;
                 break;
             case 5:
-                int i6 = i3 * i2;
-                i4 = (i6 & 1) + (i6 % 3);
+                int temp = y * x;
+                intermediate = (temp & 1) + (temp % 3);
                 break;
             case 6:
-                int i7 = i3 * i2;
-                i5 = (i7 & 1) + (i7 % 3);
-                i4 = i5 & 1;
+                int temp2 = y * x;
+                intermediate = ((temp2 & 1) + (temp2 % 3)) & 1;
                 break;
             case 7:
-                i5 = ((i3 * i2) % 3) + ((i3 + i2) & 1);
-                i4 = i5 & 1;
+                intermediate = (((y * x) % 3) + ((y + x) & 1)) & 1;
                 break;
             default:
-                throw new IllegalArgumentException("Invalid mask pattern: " + i);
+                throw new IllegalArgumentException("Invalid mask pattern: " + maskPattern);
         }
-        return i4 == 0;
+        return intermediate == 0;
     }
 
-    private static int applyMaskPenaltyRule1Internal(ByteMatrix byteMatrix, boolean z) {
-        int height = z ? byteMatrix.getHeight() : byteMatrix.getWidth();
-        int width = z ? byteMatrix.getWidth() : byteMatrix.getHeight();
-        byte[][] array = byteMatrix.getArray();
-        int i = 0;
-        for (int i2 = 0; i2 < height; i2++) {
-            byte b = -1;
-            int i3 = 0;
-            for (int i4 = 0; i4 < width; i4++) {
-                byte b2 = z ? array[i2][i4] : array[i4][i2];
-                if (b2 == b) {
-                    i3++;
+    private static int applyMaskPenaltyRule1Internal(ByteMatrix matrix, boolean isHorizontal) {
+        int penalty = 0;
+        int iLimit = isHorizontal ? matrix.getHeight() : matrix.getWidth();
+        int jLimit = isHorizontal ? matrix.getWidth() : matrix.getHeight();
+        byte[][] array = matrix.getArray();
+        for (int i = 0; i < iLimit; i++) {
+            int numSameBitCells = 0;
+            int prevBit = -1;
+            for (int j = 0; j < jLimit; j++) {
+                int bit = isHorizontal ? array[i][j] : array[j][i];
+                if (bit == prevBit) {
+                    numSameBitCells++;
                 } else {
-                    if (i3 >= 5) {
-                        i += (i3 - 5) + 3;
+                    if (numSameBitCells >= 5) {
+                        penalty += (numSameBitCells - 5) + 3;
                     }
-                    b = b2;
-                    i3 = 1;
+                    numSameBitCells = 1;
+                    prevBit = bit;
                 }
             }
-            if (i3 >= 5) {
-                i += (i3 - 5) + 3;
+            if (numSameBitCells >= 5) {
+                penalty += (numSameBitCells - 5) + 3;
             }
         }
-        return i;
+        return penalty;
     }
 }

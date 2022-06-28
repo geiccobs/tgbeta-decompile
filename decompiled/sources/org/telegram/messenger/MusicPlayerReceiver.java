@@ -4,7 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.view.KeyEvent;
-/* loaded from: classes.dex */
+import org.telegram.ui.Components.UndoView;
+/* loaded from: classes4.dex */
 public class MusicPlayerReceiver extends BroadcastReceiver {
     @Override // android.content.BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
@@ -13,38 +14,39 @@ public class MusicPlayerReceiver extends BroadcastReceiver {
             if (intent.getExtras() == null || (keyEvent = (KeyEvent) intent.getExtras().get("android.intent.extra.KEY_EVENT")) == null || keyEvent.getAction() != 0) {
                 return;
             }
-            int keyCode = keyEvent.getKeyCode();
-            if (keyCode == 79 || keyCode == 85) {
-                if (MediaController.getInstance().isMessagePaused()) {
+            switch (keyEvent.getKeyCode()) {
+                case UndoView.ACTION_UNPIN_DIALOGS /* 79 */:
+                case 85:
+                    if (MediaController.getInstance().isMessagePaused()) {
+                        MediaController.getInstance().playMessage(MediaController.getInstance().getPlayingMessageObject());
+                        return;
+                    } else {
+                        MediaController.getInstance().m383lambda$startAudioAgain$7$orgtelegrammessengerMediaController(MediaController.getInstance().getPlayingMessageObject());
+                        return;
+                    }
+                case 86:
+                default:
+                    return;
+                case 87:
+                    MediaController.getInstance().playNextMessage();
+                    return;
+                case 88:
+                    MediaController.getInstance().playPreviousMessage();
+                    return;
+                case 126:
                     MediaController.getInstance().playMessage(MediaController.getInstance().getPlayingMessageObject());
                     return;
-                } else {
-                    MediaController.getInstance().lambda$startAudioAgain$7(MediaController.getInstance().getPlayingMessageObject());
+                case 127:
+                    MediaController.getInstance().m383lambda$startAudioAgain$7$orgtelegrammessengerMediaController(MediaController.getInstance().getPlayingMessageObject());
                     return;
-                }
-            } else if (keyCode == 87) {
-                MediaController.getInstance().playNextMessage();
-                return;
-            } else if (keyCode == 88) {
-                MediaController.getInstance().playPreviousMessage();
-                return;
-            } else if (keyCode == 126) {
-                MediaController.getInstance().playMessage(MediaController.getInstance().getPlayingMessageObject());
-                return;
-            } else if (keyCode != 127) {
-                return;
-            } else {
-                MediaController.getInstance().lambda$startAudioAgain$7(MediaController.getInstance().getPlayingMessageObject());
-                return;
             }
         }
         String action = intent.getAction();
-        action.hashCode();
         char c = 65535;
         switch (action.hashCode()) {
             case -1461225938:
                 if (action.equals(MusicPlayerService.NOTIFY_CLOSE)) {
-                    c = 0;
+                    c = 4;
                     break;
                 }
                 break;
@@ -56,19 +58,19 @@ public class MusicPlayerReceiver extends BroadcastReceiver {
                 break;
             case -1293741059:
                 if (action.equals(MusicPlayerService.NOTIFY_NEXT)) {
-                    c = 2;
+                    c = 3;
                     break;
                 }
                 break;
             case -1293675458:
                 if (action.equals(MusicPlayerService.NOTIFY_PLAY)) {
-                    c = 3;
+                    c = 0;
                     break;
                 }
                 break;
             case -549244379:
                 if (action.equals("android.media.AUDIO_BECOMING_NOISY")) {
-                    c = 4;
+                    c = 2;
                     break;
                 }
                 break;
@@ -81,17 +83,17 @@ public class MusicPlayerReceiver extends BroadcastReceiver {
         }
         switch (c) {
             case 0:
-                MediaController.getInstance().cleanupPlayer(true, true);
+                MediaController.getInstance().playMessage(MediaController.getInstance().getPlayingMessageObject());
                 return;
             case 1:
-            case 4:
-                MediaController.getInstance().lambda$startAudioAgain$7(MediaController.getInstance().getPlayingMessageObject());
-                return;
             case 2:
-                MediaController.getInstance().playNextMessage();
+                MediaController.getInstance().m383lambda$startAudioAgain$7$orgtelegrammessengerMediaController(MediaController.getInstance().getPlayingMessageObject());
                 return;
             case 3:
-                MediaController.getInstance().playMessage(MediaController.getInstance().getPlayingMessageObject());
+                MediaController.getInstance().playNextMessage();
+                return;
+            case 4:
+                MediaController.getInstance().cleanupPlayer(true, true);
                 return;
             case 5:
                 MediaController.getInstance().playPreviousMessage();

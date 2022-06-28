@@ -6,9 +6,7 @@ import android.os.SystemClock;
 import android.util.Base64;
 import java.util.Arrays;
 import org.telegram.tgnet.SerializedData;
-import org.telegram.tgnet.TLRPC$TL_account_tmpPassword;
-import org.telegram.tgnet.TLRPC$TL_help_termsOfService;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC;
 /* loaded from: classes.dex */
 public class UserConfig extends BaseController {
     private static volatile UserConfig[] Instance = new UserConfig[4];
@@ -27,7 +25,7 @@ public class UserConfig extends BaseController {
     private boolean configLoaded;
     public boolean contactsReimported;
     public int contactsSavedCount;
-    private TLRPC$User currentUser;
+    private TLRPC.User currentUser;
     public boolean draftsLoaded;
     public boolean filtersLoaded;
     public boolean hasSecureData;
@@ -44,8 +42,8 @@ public class UserConfig extends BaseController {
     public volatile long savedPasswordTime;
     public volatile byte[] savedSaltedPassword;
     public int sharingMyLocationUntil;
-    public TLRPC$TL_account_tmpPassword tmpPassword;
-    public TLRPC$TL_help_termsOfService unacceptedTermsOfService;
+    public TLRPC.TL_account_tmpPassword tmpPassword;
+    public TLRPC.TL_help_termsOfService unacceptedTermsOfService;
     private final Object sync = new Object();
     public int lastSendMessageId = -210000;
     public int lastBroadcastId = -1;
@@ -59,39 +57,39 @@ public class UserConfig extends BaseController {
     public boolean syncContacts = true;
     public boolean suggestContacts = true;
 
-    public static UserConfig getInstance(int i) {
-        UserConfig userConfig = Instance[i];
-        if (userConfig == null) {
+    public static UserConfig getInstance(int num) {
+        UserConfig localInstance = Instance[num];
+        if (localInstance == null) {
             synchronized (UserConfig.class) {
-                userConfig = Instance[i];
-                if (userConfig == null) {
+                localInstance = Instance[num];
+                if (localInstance == null) {
                     UserConfig[] userConfigArr = Instance;
-                    UserConfig userConfig2 = new UserConfig(i);
-                    userConfigArr[i] = userConfig2;
-                    userConfig = userConfig2;
+                    UserConfig userConfig = new UserConfig(num);
+                    localInstance = userConfig;
+                    userConfigArr[num] = userConfig;
                 }
             }
         }
-        return userConfig;
+        return localInstance;
     }
 
     public static int getActivatedAccountsCount() {
-        int i = 0;
-        for (int i2 = 0; i2 < 4; i2++) {
-            if (AccountInstance.getInstance(i2).getUserConfig().isClientActivated()) {
-                i++;
+        int count = 0;
+        for (int a = 0; a < 4; a++) {
+            if (AccountInstance.getInstance(a).getUserConfig().isClientActivated()) {
+                count++;
             }
         }
-        return i;
+        return count;
     }
 
-    public UserConfig(int i) {
-        super(i);
+    public UserConfig(int instance) {
+        super(instance);
     }
 
     public static boolean hasPremiumOnAccounts() {
-        for (int i = 0; i < 4; i++) {
-            if (AccountInstance.getInstance(i).getUserConfig().isClientActivated() && AccountInstance.getInstance(i).getUserConfig().getUserConfig().isPremium()) {
+        for (int a = 0; a < 4; a++) {
+            if (AccountInstance.getInstance(a).getUserConfig().isClientActivated() && AccountInstance.getInstance(a).getUserConfig().getUserConfig().isPremium()) {
                 return true;
             }
         }
@@ -103,98 +101,102 @@ public class UserConfig extends BaseController {
     }
 
     public int getNewMessageId() {
-        int i;
+        int id;
         synchronized (this.sync) {
-            i = this.lastSendMessageId;
-            this.lastSendMessageId = i - 1;
+            id = this.lastSendMessageId;
+            this.lastSendMessageId = id - 1;
         }
-        return i;
+        return id;
     }
 
-    public void saveConfig(final boolean z) {
+    public void saveConfig(final boolean withFile) {
         NotificationCenter.getInstance(this.currentAccount).doOnIdle(new Runnable() { // from class: org.telegram.messenger.UserConfig$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                UserConfig.this.lambda$saveConfig$0(z);
+                UserConfig.this.m1231lambda$saveConfig$0$orgtelegrammessengerUserConfig(withFile);
             }
         });
     }
 
-    public /* synthetic */ void lambda$saveConfig$0(boolean z) {
+    /* renamed from: lambda$saveConfig$0$org-telegram-messenger-UserConfig */
+    public /* synthetic */ void m1231lambda$saveConfig$0$orgtelegrammessengerUserConfig(boolean withFile) {
         synchronized (this.sync) {
             try {
-                SharedPreferences.Editor edit = getPreferences().edit();
+                SharedPreferences.Editor editor = getPreferences().edit();
                 if (this.currentAccount == 0) {
-                    edit.putInt("selectedAccount", selectedAccount);
+                    editor.putInt("selectedAccount", selectedAccount);
                 }
-                edit.putBoolean("registeredForPush", this.registeredForPush);
-                edit.putInt("lastSendMessageId", this.lastSendMessageId);
-                edit.putInt("contactsSavedCount", this.contactsSavedCount);
-                edit.putInt("lastBroadcastId", this.lastBroadcastId);
-                edit.putInt("lastContactsSyncTime", this.lastContactsSyncTime);
-                edit.putInt("lastHintsSyncTime", this.lastHintsSyncTime);
-                edit.putBoolean("draftsLoaded", this.draftsLoaded);
-                edit.putBoolean("unreadDialogsLoaded", this.unreadDialogsLoaded);
-                edit.putInt("ratingLoadTime", this.ratingLoadTime);
-                edit.putInt("botRatingLoadTime", this.botRatingLoadTime);
-                edit.putBoolean("contactsReimported", this.contactsReimported);
-                edit.putInt("loginTime", this.loginTime);
-                edit.putBoolean("syncContacts", this.syncContacts);
-                edit.putBoolean("suggestContacts", this.suggestContacts);
-                edit.putBoolean("hasSecureData", this.hasSecureData);
-                edit.putBoolean("notificationsSettingsLoaded3", this.notificationsSettingsLoaded);
-                edit.putBoolean("notificationsSignUpSettingsLoaded", this.notificationsSignUpSettingsLoaded);
-                edit.putLong("autoDownloadConfigLoadTime", this.autoDownloadConfigLoadTime);
-                edit.putBoolean("hasValidDialogLoadIds", this.hasValidDialogLoadIds);
-                edit.putInt("sharingMyLocationUntil", this.sharingMyLocationUntil);
-                edit.putInt("lastMyLocationShareTime", this.lastMyLocationShareTime);
-                edit.putBoolean("filtersLoaded", this.filtersLoaded);
-                edit.putInt("6migrateOffsetId", this.migrateOffsetId);
+                editor.putBoolean("registeredForPush", this.registeredForPush);
+                editor.putInt("lastSendMessageId", this.lastSendMessageId);
+                editor.putInt("contactsSavedCount", this.contactsSavedCount);
+                editor.putInt("lastBroadcastId", this.lastBroadcastId);
+                editor.putInt("lastContactsSyncTime", this.lastContactsSyncTime);
+                editor.putInt("lastHintsSyncTime", this.lastHintsSyncTime);
+                editor.putBoolean("draftsLoaded", this.draftsLoaded);
+                editor.putBoolean("unreadDialogsLoaded", this.unreadDialogsLoaded);
+                editor.putInt("ratingLoadTime", this.ratingLoadTime);
+                editor.putInt("botRatingLoadTime", this.botRatingLoadTime);
+                editor.putBoolean("contactsReimported", this.contactsReimported);
+                editor.putInt("loginTime", this.loginTime);
+                editor.putBoolean("syncContacts", this.syncContacts);
+                editor.putBoolean("suggestContacts", this.suggestContacts);
+                editor.putBoolean("hasSecureData", this.hasSecureData);
+                editor.putBoolean("notificationsSettingsLoaded3", this.notificationsSettingsLoaded);
+                editor.putBoolean("notificationsSignUpSettingsLoaded", this.notificationsSignUpSettingsLoaded);
+                editor.putLong("autoDownloadConfigLoadTime", this.autoDownloadConfigLoadTime);
+                editor.putBoolean("hasValidDialogLoadIds", this.hasValidDialogLoadIds);
+                editor.putInt("sharingMyLocationUntil", this.sharingMyLocationUntil);
+                editor.putInt("lastMyLocationShareTime", this.lastMyLocationShareTime);
+                editor.putBoolean("filtersLoaded", this.filtersLoaded);
+                editor.putInt("6migrateOffsetId", this.migrateOffsetId);
                 if (this.migrateOffsetId != -1) {
-                    edit.putInt("6migrateOffsetDate", this.migrateOffsetDate);
-                    edit.putLong("6migrateOffsetUserId", this.migrateOffsetUserId);
-                    edit.putLong("6migrateOffsetChatId", this.migrateOffsetChatId);
-                    edit.putLong("6migrateOffsetChannelId", this.migrateOffsetChannelId);
-                    edit.putLong("6migrateOffsetAccess", this.migrateOffsetAccess);
+                    editor.putInt("6migrateOffsetDate", this.migrateOffsetDate);
+                    editor.putLong("6migrateOffsetUserId", this.migrateOffsetUserId);
+                    editor.putLong("6migrateOffsetChatId", this.migrateOffsetChatId);
+                    editor.putLong("6migrateOffsetChannelId", this.migrateOffsetChannelId);
+                    editor.putLong("6migrateOffsetAccess", this.migrateOffsetAccess);
                 }
-                TLRPC$TL_help_termsOfService tLRPC$TL_help_termsOfService = this.unacceptedTermsOfService;
-                if (tLRPC$TL_help_termsOfService != null) {
+                if (this.unacceptedTermsOfService != null) {
                     try {
-                        SerializedData serializedData = new SerializedData(tLRPC$TL_help_termsOfService.getObjectSize());
-                        this.unacceptedTermsOfService.serializeToStream(serializedData);
-                        edit.putString("terms", Base64.encodeToString(serializedData.toByteArray(), 0));
-                        serializedData.cleanup();
-                    } catch (Exception unused) {
+                        SerializedData data = new SerializedData(this.unacceptedTermsOfService.getObjectSize());
+                        this.unacceptedTermsOfService.serializeToStream(data);
+                        editor.putString("terms", Base64.encodeToString(data.toByteArray(), 0));
+                        data.cleanup();
+                    } catch (Exception e) {
                     }
                 } else {
-                    edit.remove("terms");
+                    editor.remove("terms");
                 }
                 SharedConfig.saveConfig();
                 if (this.tmpPassword != null) {
-                    SerializedData serializedData2 = new SerializedData();
-                    this.tmpPassword.serializeToStream(serializedData2);
-                    edit.putString("tmpPassword", Base64.encodeToString(serializedData2.toByteArray(), 0));
-                    serializedData2.cleanup();
+                    SerializedData data2 = new SerializedData();
+                    this.tmpPassword.serializeToStream(data2);
+                    String string = Base64.encodeToString(data2.toByteArray(), 0);
+                    editor.putString("tmpPassword", string);
+                    data2.cleanup();
                 } else {
-                    edit.remove("tmpPassword");
+                    editor.remove("tmpPassword");
                 }
-                if (this.currentUser == null) {
-                    edit.remove("user");
-                } else if (z) {
-                    SerializedData serializedData3 = new SerializedData();
-                    this.currentUser.serializeToStream(serializedData3);
-                    edit.putString("user", Base64.encodeToString(serializedData3.toByteArray(), 0));
-                    serializedData3.cleanup();
+                if (this.currentUser != null) {
+                    if (withFile) {
+                        SerializedData data3 = new SerializedData();
+                        this.currentUser.serializeToStream(data3);
+                        String string2 = Base64.encodeToString(data3.toByteArray(), 0);
+                        editor.putString("user", string2);
+                        data3.cleanup();
+                    }
+                } else {
+                    editor.remove("user");
                 }
-                edit.commit();
-            } catch (Exception e) {
-                FileLog.e(e);
+                editor.commit();
+            } catch (Exception e2) {
+                FileLog.e(e2);
             }
         }
     }
 
-    public static boolean isValidAccount(int i) {
-        return i >= 0 && i < 4 && getInstance(i).isClientActivated();
+    public static boolean isValidAccount(int num) {
+        return num >= 0 && num < 4 && getInstance(num).isClientActivated();
     }
 
     public boolean isClientActivated() {
@@ -208,8 +210,8 @@ public class UserConfig extends BaseController {
     public long getClientUserId() {
         long j;
         synchronized (this.sync) {
-            TLRPC$User tLRPC$User = this.currentUser;
-            j = tLRPC$User != null ? tLRPC$User.id : 0L;
+            TLRPC.User user = this.currentUser;
+            j = user != null ? user.id : 0L;
         }
         return j;
     }
@@ -217,44 +219,43 @@ public class UserConfig extends BaseController {
     public String getClientPhone() {
         String str;
         synchronized (this.sync) {
-            TLRPC$User tLRPC$User = this.currentUser;
-            if (tLRPC$User == null || (str = tLRPC$User.phone) == null) {
-                str = "";
-            }
+            TLRPC.User user = this.currentUser;
+            str = (user == null || user.phone == null) ? "" : this.currentUser.phone;
         }
         return str;
     }
 
-    public TLRPC$User getCurrentUser() {
-        TLRPC$User tLRPC$User;
+    public TLRPC.User getCurrentUser() {
+        TLRPC.User user;
         synchronized (this.sync) {
-            tLRPC$User = this.currentUser;
+            user = this.currentUser;
         }
-        return tLRPC$User;
+        return user;
     }
 
-    public void setCurrentUser(TLRPC$User tLRPC$User) {
+    public void setCurrentUser(TLRPC.User user) {
         synchronized (this.sync) {
-            TLRPC$User tLRPC$User2 = this.currentUser;
-            this.currentUser = tLRPC$User;
-            this.clientUserId = tLRPC$User.id;
-            checkPremium(tLRPC$User2, tLRPC$User);
+            TLRPC.User oldUser = this.currentUser;
+            this.currentUser = user;
+            this.clientUserId = user.id;
+            checkPremium(oldUser, user);
         }
     }
 
-    private void checkPremium(TLRPC$User tLRPC$User, final TLRPC$User tLRPC$User2) {
-        if (tLRPC$User == null || !(tLRPC$User2 == null || tLRPC$User.premium == tLRPC$User2.premium)) {
+    private void checkPremium(TLRPC.User oldUser, final TLRPC.User newUser) {
+        if (oldUser == null || (newUser != null && oldUser.premium != newUser.premium)) {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.UserConfig$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    UserConfig.this.lambda$checkPremium$1(tLRPC$User2);
+                    UserConfig.this.m1230lambda$checkPremium$1$orgtelegrammessengerUserConfig(newUser);
                 }
             });
         }
     }
 
-    public /* synthetic */ void lambda$checkPremium$1(TLRPC$User tLRPC$User) {
-        getMessagesController().updatePremium(tLRPC$User.premium);
+    /* renamed from: lambda$checkPremium$1$org-telegram-messenger-UserConfig */
+    public /* synthetic */ void m1230lambda$checkPremium$1$orgtelegrammessengerUserConfig(TLRPC.User newUser) {
+        getMessagesController().updatePremium(newUser.premium);
         NotificationCenter.getInstance(this.currentAccount).postNotificationName(NotificationCenter.currentUserPremiumStatusChanged, new Object[0]);
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.premiumStatusChangedGlobal, new Object[0]);
         getMediaDataController().loadPremiumPromo(false);
@@ -267,15 +268,15 @@ public class UserConfig extends BaseController {
     /* JADX WARN: Code restructure failed: missing block: B:26:0x011a, code lost:
         org.telegram.messenger.FileLog.e(r8);
      */
-    /* JADX WARN: Removed duplicated region for block: B:29:0x0127 A[Catch: all -> 0x01a0, TryCatch #0 {, blocks: (B:4:0x0003, B:6:0x0007, B:8:0x0009, B:10:0x0012, B:11:0x001a, B:13:0x00d1, B:18:0x00dd, B:20:0x00f8, B:22:0x0100, B:24:0x0106, B:26:0x011a, B:27:0x011d, B:29:0x0127, B:30:0x014f, B:32:0x0157, B:34:0x015d, B:35:0x016f, B:37:0x0177, B:39:0x017d, B:40:0x018f, B:42:0x0193, B:43:0x019c, B:44:0x019e), top: B:49:0x0003, inners: #1 }] */
-    /* JADX WARN: Removed duplicated region for block: B:42:0x0193 A[Catch: all -> 0x01a0, TryCatch #0 {, blocks: (B:4:0x0003, B:6:0x0007, B:8:0x0009, B:10:0x0012, B:11:0x001a, B:13:0x00d1, B:18:0x00dd, B:20:0x00f8, B:22:0x0100, B:24:0x0106, B:26:0x011a, B:27:0x011d, B:29:0x0127, B:30:0x014f, B:32:0x0157, B:34:0x015d, B:35:0x016f, B:37:0x0177, B:39:0x017d, B:40:0x018f, B:42:0x0193, B:43:0x019c, B:44:0x019e), top: B:49:0x0003, inners: #1 }] */
+    /* JADX WARN: Removed duplicated region for block: B:29:0x0127 A[Catch: all -> 0x01a1, TryCatch #0 {, blocks: (B:4:0x0003, B:6:0x0007, B:8:0x0009, B:10:0x0012, B:11:0x001a, B:13:0x00d1, B:18:0x00dd, B:20:0x00f8, B:22:0x0100, B:24:0x0106, B:26:0x011a, B:27:0x011d, B:29:0x0127, B:30:0x014f, B:32:0x0157, B:34:0x015d, B:35:0x016f, B:37:0x0178, B:39:0x017e, B:40:0x0190, B:42:0x0194, B:43:0x019d, B:44:0x019f), top: B:49:0x0003, inners: #1 }] */
+    /* JADX WARN: Removed duplicated region for block: B:42:0x0194 A[Catch: all -> 0x01a1, TryCatch #0 {, blocks: (B:4:0x0003, B:6:0x0007, B:8:0x0009, B:10:0x0012, B:11:0x001a, B:13:0x00d1, B:18:0x00dd, B:20:0x00f8, B:22:0x0100, B:24:0x0106, B:26:0x011a, B:27:0x011d, B:29:0x0127, B:30:0x014f, B:32:0x0157, B:34:0x015d, B:35:0x016f, B:37:0x0178, B:39:0x017e, B:40:0x0190, B:42:0x0194, B:43:0x019d, B:44:0x019f), top: B:49:0x0003, inners: #1 }] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void loadConfig() {
         /*
-            Method dump skipped, instructions count: 419
+            Method dump skipped, instructions count: 420
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.UserConfig.loadConfig():void");
@@ -285,16 +286,17 @@ public class UserConfig extends BaseController {
         return this.configLoaded;
     }
 
-    public void savePassword(byte[] bArr, byte[] bArr2) {
+    public void savePassword(byte[] hash, byte[] salted) {
         this.savedPasswordTime = SystemClock.elapsedRealtime();
-        this.savedPasswordHash = bArr;
-        this.savedSaltedPassword = bArr2;
+        this.savedPasswordHash = hash;
+        this.savedSaltedPassword = salted;
     }
 
     public void checkSavedPassword() {
-        if (!(this.savedSaltedPassword == null && this.savedPasswordHash == null) && Math.abs(SystemClock.elapsedRealtime() - this.savedPasswordTime) >= 1800000) {
-            resetSavedPassword();
+        if ((this.savedSaltedPassword == null && this.savedPasswordHash == null) || Math.abs(SystemClock.elapsedRealtime() - this.savedPasswordTime) < 1800000) {
+            return;
         }
+        resetSavedPassword();
     }
 
     public void resetSavedPassword() {
@@ -319,7 +321,6 @@ public class UserConfig extends BaseController {
 
     public void clearConfig() {
         getPreferences().edit().clear().apply();
-        boolean z = false;
         this.sharingMyLocationUntil = 0;
         this.lastMyLocationShareTime = 0;
         this.currentUser = null;
@@ -351,130 +352,132 @@ public class UserConfig extends BaseController {
         this.lastContactsSyncTime = ((int) (System.currentTimeMillis() / 1000)) - 82800;
         this.lastHintsSyncTime = ((int) (System.currentTimeMillis() / 1000)) - 90000;
         resetSavedPassword();
-        int i = 0;
+        boolean hasActivated = false;
+        int a = 0;
         while (true) {
-            if (i >= 4) {
+            if (a >= 4) {
                 break;
-            } else if (AccountInstance.getInstance(i).getUserConfig().isClientActivated()) {
-                z = true;
-                break;
+            } else if (!AccountInstance.getInstance(a).getUserConfig().isClientActivated()) {
+                a++;
             } else {
-                i++;
+                hasActivated = true;
+                break;
             }
         }
-        if (!z) {
+        if (!hasActivated) {
             SharedConfig.clearConfig();
         }
         saveConfig(true);
     }
 
-    public boolean isPinnedDialogsLoaded(int i) {
+    public boolean isPinnedDialogsLoaded(int folderId) {
         SharedPreferences preferences = getPreferences();
-        return preferences.getBoolean("2pinnedDialogsLoaded" + i, false);
+        return preferences.getBoolean("2pinnedDialogsLoaded" + folderId, false);
     }
 
-    public void setPinnedDialogsLoaded(int i, boolean z) {
+    public void setPinnedDialogsLoaded(int folderId, boolean loaded) {
         SharedPreferences.Editor edit = getPreferences().edit();
-        edit.putBoolean("2pinnedDialogsLoaded" + i, z).commit();
+        edit.putBoolean("2pinnedDialogsLoaded" + folderId, loaded).commit();
     }
 
-    public int getTotalDialogsCount(int i) {
+    public int getTotalDialogsCount(int folderId) {
         SharedPreferences preferences = getPreferences();
         StringBuilder sb = new StringBuilder();
         sb.append("2totalDialogsLoadCount");
-        sb.append(i == 0 ? "" : Integer.valueOf(i));
+        sb.append(folderId == 0 ? "" : Integer.valueOf(folderId));
         return preferences.getInt(sb.toString(), 0);
     }
 
-    public void setTotalDialogsCount(int i, int i2) {
+    public void setTotalDialogsCount(int folderId, int totalDialogsLoadCount) {
         SharedPreferences.Editor edit = getPreferences().edit();
         StringBuilder sb = new StringBuilder();
         sb.append("2totalDialogsLoadCount");
-        sb.append(i == 0 ? "" : Integer.valueOf(i));
-        edit.putInt(sb.toString(), i2).commit();
+        sb.append(folderId == 0 ? "" : Integer.valueOf(folderId));
+        edit.putInt(sb.toString(), totalDialogsLoadCount).commit();
     }
 
-    public long[] getDialogLoadOffsets(int i) {
+    public long[] getDialogLoadOffsets(int folderId) {
         SharedPreferences preferences = getPreferences();
         StringBuilder sb = new StringBuilder();
         sb.append("2dialogsLoadOffsetId");
         Object obj = "";
-        sb.append(i == 0 ? obj : Integer.valueOf(i));
-        int i2 = -1;
-        int i3 = preferences.getInt(sb.toString(), this.hasValidDialogLoadIds ? 0 : -1);
+        sb.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        int i = -1;
+        int dialogsLoadOffsetId = preferences.getInt(sb.toString(), this.hasValidDialogLoadIds ? 0 : -1);
         StringBuilder sb2 = new StringBuilder();
         sb2.append("2dialogsLoadOffsetDate");
-        sb2.append(i == 0 ? obj : Integer.valueOf(i));
+        sb2.append(folderId == 0 ? obj : Integer.valueOf(folderId));
         String sb3 = sb2.toString();
         if (this.hasValidDialogLoadIds) {
-            i2 = 0;
+            i = 0;
         }
-        int i4 = preferences.getInt(sb3, i2);
+        int dialogsLoadOffsetDate = preferences.getInt(sb3, i);
         StringBuilder sb4 = new StringBuilder();
         sb4.append("2dialogsLoadOffsetUserId");
-        sb4.append(i == 0 ? obj : Integer.valueOf(i));
+        sb4.append(folderId == 0 ? obj : Integer.valueOf(folderId));
         long j = -1;
-        long prefIntOrLong = AndroidUtilities.getPrefIntOrLong(preferences, sb4.toString(), this.hasValidDialogLoadIds ? 0L : -1L);
+        long dialogsLoadOffsetUserId = AndroidUtilities.getPrefIntOrLong(preferences, sb4.toString(), this.hasValidDialogLoadIds ? 0L : -1L);
         StringBuilder sb5 = new StringBuilder();
         sb5.append("2dialogsLoadOffsetChatId");
-        sb5.append(i == 0 ? obj : Integer.valueOf(i));
-        long prefIntOrLong2 = AndroidUtilities.getPrefIntOrLong(preferences, sb5.toString(), this.hasValidDialogLoadIds ? 0L : -1L);
+        sb5.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        long dialogsLoadOffsetChatId = AndroidUtilities.getPrefIntOrLong(preferences, sb5.toString(), this.hasValidDialogLoadIds ? 0L : -1L);
         StringBuilder sb6 = new StringBuilder();
         sb6.append("2dialogsLoadOffsetChannelId");
-        sb6.append(i == 0 ? obj : Integer.valueOf(i));
-        long prefIntOrLong3 = AndroidUtilities.getPrefIntOrLong(preferences, sb6.toString(), this.hasValidDialogLoadIds ? 0L : -1L);
+        sb6.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        long dialogsLoadOffsetChannelId = AndroidUtilities.getPrefIntOrLong(preferences, sb6.toString(), this.hasValidDialogLoadIds ? 0L : -1L);
         StringBuilder sb7 = new StringBuilder();
         sb7.append("2dialogsLoadOffsetAccess");
-        if (i != 0) {
-            obj = Integer.valueOf(i);
+        if (folderId != 0) {
+            obj = Integer.valueOf(folderId);
         }
         sb7.append(obj);
         String sb8 = sb7.toString();
         if (this.hasValidDialogLoadIds) {
             j = 0;
         }
-        return new long[]{i3, i4, prefIntOrLong, prefIntOrLong2, prefIntOrLong3, preferences.getLong(sb8, j)};
+        long dialogsLoadOffsetAccess = preferences.getLong(sb8, j);
+        return new long[]{dialogsLoadOffsetId, dialogsLoadOffsetDate, dialogsLoadOffsetUserId, dialogsLoadOffsetChatId, dialogsLoadOffsetChannelId, dialogsLoadOffsetAccess};
     }
 
-    public void setDialogsLoadOffset(int i, int i2, int i3, long j, long j2, long j3, long j4) {
-        SharedPreferences.Editor edit = getPreferences().edit();
+    public void setDialogsLoadOffset(int folderId, int dialogsLoadOffsetId, int dialogsLoadOffsetDate, long dialogsLoadOffsetUserId, long dialogsLoadOffsetChatId, long dialogsLoadOffsetChannelId, long dialogsLoadOffsetAccess) {
+        SharedPreferences.Editor editor = getPreferences().edit();
         StringBuilder sb = new StringBuilder();
         sb.append("2dialogsLoadOffsetId");
         Object obj = "";
-        sb.append(i == 0 ? obj : Integer.valueOf(i));
-        edit.putInt(sb.toString(), i2);
+        sb.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        editor.putInt(sb.toString(), dialogsLoadOffsetId);
         StringBuilder sb2 = new StringBuilder();
         sb2.append("2dialogsLoadOffsetDate");
-        sb2.append(i == 0 ? obj : Integer.valueOf(i));
-        edit.putInt(sb2.toString(), i3);
+        sb2.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        editor.putInt(sb2.toString(), dialogsLoadOffsetDate);
         StringBuilder sb3 = new StringBuilder();
         sb3.append("2dialogsLoadOffsetUserId");
-        sb3.append(i == 0 ? obj : Integer.valueOf(i));
-        edit.putLong(sb3.toString(), j);
+        sb3.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        editor.putLong(sb3.toString(), dialogsLoadOffsetUserId);
         StringBuilder sb4 = new StringBuilder();
         sb4.append("2dialogsLoadOffsetChatId");
-        sb4.append(i == 0 ? obj : Integer.valueOf(i));
-        edit.putLong(sb4.toString(), j2);
+        sb4.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        editor.putLong(sb4.toString(), dialogsLoadOffsetChatId);
         StringBuilder sb5 = new StringBuilder();
         sb5.append("2dialogsLoadOffsetChannelId");
-        sb5.append(i == 0 ? obj : Integer.valueOf(i));
-        edit.putLong(sb5.toString(), j3);
+        sb5.append(folderId == 0 ? obj : Integer.valueOf(folderId));
+        editor.putLong(sb5.toString(), dialogsLoadOffsetChannelId);
         StringBuilder sb6 = new StringBuilder();
         sb6.append("2dialogsLoadOffsetAccess");
-        if (i != 0) {
-            obj = Integer.valueOf(i);
+        if (folderId != 0) {
+            obj = Integer.valueOf(folderId);
         }
         sb6.append(obj);
-        edit.putLong(sb6.toString(), j4);
-        edit.putBoolean("hasValidDialogLoadIds", true);
-        edit.commit();
+        editor.putLong(sb6.toString(), dialogsLoadOffsetAccess);
+        editor.putBoolean("hasValidDialogLoadIds", true);
+        editor.commit();
     }
 
     public boolean isPremium() {
-        TLRPC$User tLRPC$User = this.currentUser;
-        if (tLRPC$User == null) {
+        TLRPC.User user = this.currentUser;
+        if (user == null) {
             return false;
         }
-        return tLRPC$User.premium;
+        return user.premium;
     }
 }

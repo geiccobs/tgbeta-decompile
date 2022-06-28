@@ -1,7 +1,7 @@
 package org.telegram.messenger;
 
 import org.telegram.messenger.ContactsController;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class ContactsController$MyContentObserver$$ExternalSyntheticLambda0 implements Runnable {
     public static final /* synthetic */ ContactsController$MyContentObserver$$ExternalSyntheticLambda0 INSTANCE = new ContactsController$MyContentObserver$$ExternalSyntheticLambda0();
 

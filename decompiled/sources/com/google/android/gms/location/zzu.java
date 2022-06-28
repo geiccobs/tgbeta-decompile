@@ -2,7 +2,7 @@ package com.google.android.gms.location;
 
 import com.google.android.gms.common.Feature;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzu {
     public static final Feature zza;
     public static final Feature zzb;

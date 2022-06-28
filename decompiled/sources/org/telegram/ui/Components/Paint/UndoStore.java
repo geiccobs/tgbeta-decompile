@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class UndoStore {
     private UndoStoreDelegate delegate;
     private Map<UUID, Runnable> uuidToOperationMap = new HashMap();
     private List<UUID> operations = new ArrayList();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface UndoStoreDelegate {
         void historyChanged();
     }
@@ -25,8 +25,8 @@ public class UndoStore {
         this.delegate = undoStoreDelegate;
     }
 
-    public void registerUndo(UUID uuid, Runnable runnable) {
-        this.uuidToOperationMap.put(uuid, runnable);
+    public void registerUndo(UUID uuid, Runnable undoRunnable) {
+        this.uuidToOperationMap.put(uuid, undoRunnable);
         this.operations.add(uuid);
         notifyOfHistoryChanges();
     }
@@ -41,11 +41,18 @@ public class UndoStore {
         if (this.operations.size() == 0) {
             return;
         }
-        int size = this.operations.size() - 1;
-        UUID uuid = this.operations.get(size);
+        int lastIndex = this.operations.size() - 1;
+        UUID uuid = this.operations.get(lastIndex);
+        Runnable undoRunnable = this.uuidToOperationMap.get(uuid);
         this.uuidToOperationMap.remove(uuid);
-        this.operations.remove(size);
-        this.uuidToOperationMap.get(uuid).run();
+        this.operations.remove(lastIndex);
+        undoRunnable.run();
+        notifyOfHistoryChanges();
+    }
+
+    public void reset() {
+        this.operations.clear();
+        this.uuidToOperationMap.clear();
         notifyOfHistoryChanges();
     }
 
@@ -53,12 +60,13 @@ public class UndoStore {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.Paint.UndoStore$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                UndoStore.this.lambda$notifyOfHistoryChanges$0();
+                UndoStore.this.m2787xe8ebcf59();
             }
         });
     }
 
-    public /* synthetic */ void lambda$notifyOfHistoryChanges$0() {
+    /* renamed from: lambda$notifyOfHistoryChanges$0$org-telegram-ui-Components-Paint-UndoStore */
+    public /* synthetic */ void m2787xe8ebcf59() {
         UndoStoreDelegate undoStoreDelegate = this.delegate;
         if (undoStoreDelegate != null) {
             undoStoreDelegate.historyChanged();

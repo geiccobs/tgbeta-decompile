@@ -1,7 +1,7 @@
 package androidx.recyclerview.widget;
 
 import androidx.recyclerview.widget.RecyclerView;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class AdapterListUpdateCallback implements ListUpdateCallback {
     private final RecyclerView.Adapter mAdapter;
 
@@ -10,22 +10,22 @@ public final class AdapterListUpdateCallback implements ListUpdateCallback {
     }
 
     @Override // androidx.recyclerview.widget.ListUpdateCallback
-    public void onInserted(int i, int i2) {
-        this.mAdapter.notifyItemRangeInserted(i, i2);
+    public void onInserted(int position, int count) {
+        this.mAdapter.notifyItemRangeInserted(position, count);
     }
 
     @Override // androidx.recyclerview.widget.ListUpdateCallback
-    public void onRemoved(int i, int i2) {
-        this.mAdapter.notifyItemRangeRemoved(i, i2);
+    public void onRemoved(int position, int count) {
+        this.mAdapter.notifyItemRangeRemoved(position, count);
     }
 
     @Override // androidx.recyclerview.widget.ListUpdateCallback
-    public void onMoved(int i, int i2) {
-        this.mAdapter.notifyItemMoved(i, i2);
+    public void onMoved(int fromPosition, int toPosition) {
+        this.mAdapter.notifyItemMoved(fromPosition, toPosition);
     }
 
     @Override // androidx.recyclerview.widget.ListUpdateCallback
-    public void onChanged(int i, int i2, Object obj) {
-        this.mAdapter.notifyItemRangeChanged(i, i2, obj);
+    public void onChanged(int position, int count, Object payload) {
+        this.mAdapter.notifyItemRangeChanged(position, count, payload);
     }
 }

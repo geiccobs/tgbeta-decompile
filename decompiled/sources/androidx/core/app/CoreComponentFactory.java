@@ -1,14 +1,13 @@
 package androidx.core.app;
 
 import android.app.Activity;
-import android.app.AppComponentFactory;
 import android.app.Application;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Intent;
 /* loaded from: classes.dex */
-public class CoreComponentFactory extends AppComponentFactory {
+public class CoreComponentFactory extends android.app.AppComponentFactory {
 
     /* loaded from: classes.dex */
     public interface CompatWrapped {
@@ -40,8 +39,11 @@ public class CoreComponentFactory extends AppComponentFactory {
         return (Service) checkCompatWrapper(super.instantiateService(cl, className, intent));
     }
 
-    static <T> T checkCompatWrapper(T obj) {
-        T t;
-        return (!(obj instanceof CompatWrapped) || (t = (T) ((CompatWrapped) obj).getWrapper()) == null) ? obj : t;
+    public static <T> T checkCompatWrapper(T obj) {
+        T wrapper;
+        if ((obj instanceof CompatWrapped) && (wrapper = (T) ((CompatWrapped) obj).getWrapper()) != null) {
+            return wrapper;
+        }
+        return obj;
     }
 }

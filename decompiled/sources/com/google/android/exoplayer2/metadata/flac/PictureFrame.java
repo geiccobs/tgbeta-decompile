@@ -6,17 +6,17 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.util.Util;
 import java.util.Arrays;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class PictureFrame implements Metadata.Entry {
     public static final Parcelable.Creator<PictureFrame> CREATOR = new Parcelable.Creator<PictureFrame>() { // from class: com.google.android.exoplayer2.metadata.flac.PictureFrame.1
         @Override // android.os.Parcelable.Creator
-        public PictureFrame createFromParcel(Parcel parcel) {
-            return new PictureFrame(parcel);
+        public PictureFrame createFromParcel(Parcel in) {
+            return new PictureFrame(in);
         }
 
         @Override // android.os.Parcelable.Creator
-        public PictureFrame[] newArray(int i) {
-            return new PictureFrame[i];
+        public PictureFrame[] newArray(int size) {
+            return new PictureFrame[size];
         }
     };
     public final int colors;
@@ -28,41 +28,36 @@ public final class PictureFrame implements Metadata.Entry {
     public final int pictureType;
     public final int width;
 
-    @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
-    }
-
     @Override // com.google.android.exoplayer2.metadata.Metadata.Entry
-    public /* bridge */ /* synthetic */ byte[] getWrappedMetadataBytes() {
+    public /* synthetic */ byte[] getWrappedMetadataBytes() {
         return Metadata.Entry.CC.$default$getWrappedMetadataBytes(this);
     }
 
     @Override // com.google.android.exoplayer2.metadata.Metadata.Entry
-    public /* bridge */ /* synthetic */ Format getWrappedMetadataFormat() {
+    public /* synthetic */ Format getWrappedMetadataFormat() {
         return Metadata.Entry.CC.$default$getWrappedMetadataFormat(this);
     }
 
-    public PictureFrame(int i, String str, String str2, int i2, int i3, int i4, int i5, byte[] bArr) {
-        this.pictureType = i;
-        this.mimeType = str;
-        this.description = str2;
-        this.width = i2;
-        this.height = i3;
-        this.depth = i4;
-        this.colors = i5;
-        this.pictureData = bArr;
+    public PictureFrame(int pictureType, String mimeType, String description, int width, int height, int depth, int colors, byte[] pictureData) {
+        this.pictureType = pictureType;
+        this.mimeType = mimeType;
+        this.description = description;
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.colors = colors;
+        this.pictureData = pictureData;
     }
 
-    PictureFrame(Parcel parcel) {
-        this.pictureType = parcel.readInt();
-        this.mimeType = (String) Util.castNonNull(parcel.readString());
-        this.description = (String) Util.castNonNull(parcel.readString());
-        this.width = parcel.readInt();
-        this.height = parcel.readInt();
-        this.depth = parcel.readInt();
-        this.colors = parcel.readInt();
-        this.pictureData = (byte[]) Util.castNonNull(parcel.createByteArray());
+    PictureFrame(Parcel in) {
+        this.pictureType = in.readInt();
+        this.mimeType = (String) Util.castNonNull(in.readString());
+        this.description = (String) Util.castNonNull(in.readString());
+        this.width = in.readInt();
+        this.height = in.readInt();
+        this.depth = in.readInt();
+        this.colors = in.readInt();
+        this.pictureData = (byte[]) Util.castNonNull(in.createByteArray());
     }
 
     public String toString() {
@@ -73,26 +68,32 @@ public final class PictureFrame implements Metadata.Entry {
         if (this == obj) {
             return true;
         }
-        if (obj == null || PictureFrame.class != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        PictureFrame pictureFrame = (PictureFrame) obj;
-        return this.pictureType == pictureFrame.pictureType && this.mimeType.equals(pictureFrame.mimeType) && this.description.equals(pictureFrame.description) && this.width == pictureFrame.width && this.height == pictureFrame.height && this.depth == pictureFrame.depth && this.colors == pictureFrame.colors && Arrays.equals(this.pictureData, pictureFrame.pictureData);
+        PictureFrame other = (PictureFrame) obj;
+        return this.pictureType == other.pictureType && this.mimeType.equals(other.mimeType) && this.description.equals(other.description) && this.width == other.width && this.height == other.height && this.depth == other.depth && this.colors == other.colors && Arrays.equals(this.pictureData, other.pictureData);
     }
 
     public int hashCode() {
-        return ((((((((((((((527 + this.pictureType) * 31) + this.mimeType.hashCode()) * 31) + this.description.hashCode()) * 31) + this.width) * 31) + this.height) * 31) + this.depth) * 31) + this.colors) * 31) + Arrays.hashCode(this.pictureData);
+        int result = (17 * 31) + this.pictureType;
+        return (((((((((((((result * 31) + this.mimeType.hashCode()) * 31) + this.description.hashCode()) * 31) + this.width) * 31) + this.height) * 31) + this.depth) * 31) + this.colors) * 31) + Arrays.hashCode(this.pictureData);
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(this.pictureType);
-        parcel.writeString(this.mimeType);
-        parcel.writeString(this.description);
-        parcel.writeInt(this.width);
-        parcel.writeInt(this.height);
-        parcel.writeInt(this.depth);
-        parcel.writeInt(this.colors);
-        parcel.writeByteArray(this.pictureData);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.pictureType);
+        dest.writeString(this.mimeType);
+        dest.writeString(this.description);
+        dest.writeInt(this.width);
+        dest.writeInt(this.height);
+        dest.writeInt(this.depth);
+        dest.writeInt(this.colors);
+        dest.writeByteArray(this.pictureData);
+    }
+
+    @Override // android.os.Parcelable
+    public int describeContents() {
+        return 0;
     }
 }

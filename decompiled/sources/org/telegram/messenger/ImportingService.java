@@ -6,20 +6,20 @@ import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import org.telegram.messenger.NotificationCenter;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class ImportingService extends Service implements NotificationCenter.NotificationCenterDelegate {
     private NotificationCompat.Builder builder;
 
-    @Override // android.app.Service
-    public IBinder onBind(Intent intent) {
-        return null;
+    public ImportingService() {
+        for (int a = 0; a < 4; a++) {
+            NotificationCenter.getInstance(a).addObserver(this, NotificationCenter.historyImportProgressChanged);
+            NotificationCenter.getInstance(a).addObserver(this, NotificationCenter.stickersImportProgressChanged);
+        }
     }
 
-    public ImportingService() {
-        for (int i = 0; i < 4; i++) {
-            NotificationCenter.getInstance(i).addObserver(this, NotificationCenter.historyImportProgressChanged);
-            NotificationCenter.getInstance(i).addObserver(this, NotificationCenter.stickersImportProgressChanged);
-        }
+    @Override // android.app.Service
+    public IBinder onBind(Intent arg2) {
+        return null;
     }
 
     @Override // android.app.Service
@@ -27,12 +27,12 @@ public class ImportingService extends Service implements NotificationCenter.Noti
         super.onDestroy();
         try {
             stopForeground(true);
-        } catch (Throwable unused) {
+        } catch (Throwable th) {
         }
         NotificationManagerCompat.from(ApplicationLoader.applicationContext).cancel(5);
-        for (int i = 0; i < 4; i++) {
-            NotificationCenter.getInstance(i).removeObserver(this, NotificationCenter.historyImportProgressChanged);
-            NotificationCenter.getInstance(i).removeObserver(this, NotificationCenter.stickersImportProgressChanged);
+        for (int a = 0; a < 4; a++) {
+            NotificationCenter.getInstance(a).removeObserver(this, NotificationCenter.historyImportProgressChanged);
+            NotificationCenter.getInstance(a).removeObserver(this, NotificationCenter.stickersImportProgressChanged);
         }
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("destroy import service");
@@ -40,15 +40,15 @@ public class ImportingService extends Service implements NotificationCenter.Noti
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int i, int i2, Object... objArr) {
-        if ((i == NotificationCenter.historyImportProgressChanged || i == NotificationCenter.stickersImportProgressChanged) && !hasImportingStickers() && !hasImportingStickers()) {
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if ((id == NotificationCenter.historyImportProgressChanged || id == NotificationCenter.stickersImportProgressChanged) && !hasImportingStickers() && !hasImportingStickers()) {
             stopSelf();
         }
     }
 
     private boolean hasImportingHistory() {
-        for (int i = 0; i < 4; i++) {
-            if (SendMessagesHelper.getInstance(i).isImportingHistory()) {
+        for (int a = 0; a < 4; a++) {
+            if (SendMessagesHelper.getInstance(a).isImportingHistory()) {
                 return true;
             }
         }
@@ -56,8 +56,8 @@ public class ImportingService extends Service implements NotificationCenter.Noti
     }
 
     private boolean hasImportingStickers() {
-        for (int i = 0; i < 4; i++) {
-            if (SendMessagesHelper.getInstance(i).isImportingStickers()) {
+        for (int a = 0; a < 4; a++) {
+            if (SendMessagesHelper.getInstance(a).isImportingStickers()) {
                 return true;
             }
         }
@@ -65,7 +65,7 @@ public class ImportingService extends Service implements NotificationCenter.Noti
     }
 
     @Override // android.app.Service
-    public int onStartCommand(Intent intent, int i, int i2) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         if (!hasImportingStickers() && !hasImportingHistory()) {
             stopSelf();
             return 2;
@@ -80,13 +80,13 @@ public class ImportingService extends Service implements NotificationCenter.Noti
             builder.setSmallIcon(17301640);
             this.builder.setWhen(System.currentTimeMillis());
             this.builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
-            this.builder.setContentTitle(LocaleController.getString("AppName", R.string.AppName));
+            this.builder.setContentTitle(LocaleController.getString("AppName", org.telegram.messenger.beta.R.string.AppName));
             if (hasImportingHistory()) {
-                this.builder.setTicker(LocaleController.getString("ImporImportingService", R.string.ImporImportingService));
-                this.builder.setContentText(LocaleController.getString("ImporImportingService", R.string.ImporImportingService));
+                this.builder.setTicker(LocaleController.getString("ImporImportingService", org.telegram.messenger.beta.R.string.ImporImportingService));
+                this.builder.setContentText(LocaleController.getString("ImporImportingService", org.telegram.messenger.beta.R.string.ImporImportingService));
             } else {
-                this.builder.setTicker(LocaleController.getString("ImporImportingStickersService", R.string.ImporImportingStickersService));
-                this.builder.setContentText(LocaleController.getString("ImporImportingStickersService", R.string.ImporImportingStickersService));
+                this.builder.setTicker(LocaleController.getString("ImporImportingStickersService", org.telegram.messenger.beta.R.string.ImporImportingStickersService));
+                this.builder.setContentText(LocaleController.getString("ImporImportingStickersService", org.telegram.messenger.beta.R.string.ImporImportingStickersService));
             }
         }
         this.builder.setProgress(100, 0, true);

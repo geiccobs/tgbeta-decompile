@@ -3,68 +3,84 @@ package com.google.android.exoplayer2.text.cea;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.ParsableByteArray;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class CeaUtil {
-    public static void consume(long j, ParsableByteArray parsableByteArray, TrackOutput[] trackOutputArr) {
+    private static final int COUNTRY_CODE = 181;
+    private static final int PAYLOAD_TYPE_CC = 4;
+    private static final int PROVIDER_CODE_ATSC = 49;
+    private static final int PROVIDER_CODE_DIRECTV = 47;
+    private static final String TAG = "CeaUtil";
+    public static final int USER_DATA_IDENTIFIER_GA94 = 1195456820;
+    public static final int USER_DATA_TYPE_CODE_MPEG_CC = 3;
+
+    public static void consume(long presentationTimeUs, ParsableByteArray seiBuffer, TrackOutput[] outputs) {
         while (true) {
             boolean z = true;
-            if (parsableByteArray.bytesLeft() > 1) {
-                int readNon255TerminatedValue = readNon255TerminatedValue(parsableByteArray);
-                int readNon255TerminatedValue2 = readNon255TerminatedValue(parsableByteArray);
-                int position = parsableByteArray.getPosition() + readNon255TerminatedValue2;
-                if (readNon255TerminatedValue2 == -1 || readNon255TerminatedValue2 > parsableByteArray.bytesLeft()) {
-                    Log.w("CeaUtil", "Skipping remainder of malformed SEI NAL unit.");
-                    position = parsableByteArray.limit();
-                } else if (readNon255TerminatedValue == 4 && readNon255TerminatedValue2 >= 8) {
-                    int readUnsignedByte = parsableByteArray.readUnsignedByte();
-                    int readUnsignedShort = parsableByteArray.readUnsignedShort();
-                    int readInt = readUnsignedShort == 49 ? parsableByteArray.readInt() : 0;
-                    int readUnsignedByte2 = parsableByteArray.readUnsignedByte();
-                    if (readUnsignedShort == 47) {
-                        parsableByteArray.skipBytes(1);
+            if (seiBuffer.bytesLeft() > 1) {
+                int payloadType = readNon255TerminatedValue(seiBuffer);
+                int payloadSize = readNon255TerminatedValue(seiBuffer);
+                int nextPayloadPosition = seiBuffer.getPosition() + payloadSize;
+                if (payloadSize == -1 || payloadSize > seiBuffer.bytesLeft()) {
+                    Log.w(TAG, "Skipping remainder of malformed SEI NAL unit.");
+                    nextPayloadPosition = seiBuffer.limit();
+                } else if (payloadType == 4 && payloadSize >= 8) {
+                    int countryCode = seiBuffer.readUnsignedByte();
+                    int providerCode = seiBuffer.readUnsignedShort();
+                    int userIdentifier = 0;
+                    if (providerCode == 49) {
+                        userIdentifier = seiBuffer.readInt();
                     }
-                    boolean z2 = readUnsignedByte == 181 && (readUnsignedShort == 49 || readUnsignedShort == 47) && readUnsignedByte2 == 3;
-                    if (readUnsignedShort == 49) {
-                        if (readInt != 1195456820) {
+                    int userDataTypeCode = seiBuffer.readUnsignedByte();
+                    if (providerCode == 47) {
+                        seiBuffer.skipBytes(1);
+                    }
+                    boolean messageIsSupportedCeaCaption = countryCode == COUNTRY_CODE && (providerCode == 49 || providerCode == 47) && userDataTypeCode == 3;
+                    if (providerCode == 49) {
+                        if (userIdentifier != 1195456820) {
                             z = false;
                         }
-                        z2 &= z;
+                        messageIsSupportedCeaCaption &= z;
                     }
-                    if (z2) {
-                        consumeCcData(j, parsableByteArray, trackOutputArr);
+                    if (messageIsSupportedCeaCaption) {
+                        consumeCcData(presentationTimeUs, seiBuffer, outputs);
                     }
                 }
-                parsableByteArray.setPosition(position);
+                seiBuffer.setPosition(nextPayloadPosition);
             } else {
                 return;
             }
         }
     }
 
-    public static void consumeCcData(long j, ParsableByteArray parsableByteArray, TrackOutput[] trackOutputArr) {
-        int readUnsignedByte = parsableByteArray.readUnsignedByte();
-        if (!((readUnsignedByte & 64) != 0)) {
+    public static void consumeCcData(long presentationTimeUs, ParsableByteArray ccDataBuffer, TrackOutput[] outputs) {
+        int firstByte = ccDataBuffer.readUnsignedByte();
+        boolean processCcDataFlag = (firstByte & 64) != 0;
+        if (!processCcDataFlag) {
             return;
         }
-        parsableByteArray.skipBytes(1);
-        int i = (readUnsignedByte & 31) * 3;
-        int position = parsableByteArray.getPosition();
-        for (TrackOutput trackOutput : trackOutputArr) {
-            parsableByteArray.setPosition(position);
-            trackOutput.sampleData(parsableByteArray, i);
-            trackOutput.sampleMetadata(j, 1, i, 0, null);
+        int ccCount = firstByte & 31;
+        ccDataBuffer.skipBytes(1);
+        int sampleLength = ccCount * 3;
+        int sampleStartPosition = ccDataBuffer.getPosition();
+        for (TrackOutput output : outputs) {
+            ccDataBuffer.setPosition(sampleStartPosition);
+            output.sampleData(ccDataBuffer, sampleLength);
+            output.sampleMetadata(presentationTimeUs, 1, sampleLength, 0, null);
         }
     }
 
-    private static int readNon255TerminatedValue(ParsableByteArray parsableByteArray) {
-        int i = 0;
-        while (parsableByteArray.bytesLeft() != 0) {
-            int readUnsignedByte = parsableByteArray.readUnsignedByte();
-            i += readUnsignedByte;
-            if (readUnsignedByte != 255) {
-                return i;
+    private static int readNon255TerminatedValue(ParsableByteArray buffer) {
+        int value = 0;
+        while (buffer.bytesLeft() != 0) {
+            int b = buffer.readUnsignedByte();
+            value += b;
+            if (b != 255) {
+                return value;
             }
         }
         return -1;
+    }
+
+    private CeaUtil() {
     }
 }

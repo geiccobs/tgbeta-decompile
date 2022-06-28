@@ -6,13 +6,17 @@ import android.text.style.URLSpan;
 import android.view.View;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.Components.TextStyleSpan;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class URLSpanBrowser extends URLSpan {
     private TextStyleSpan.TextStyleRun style;
 
-    public URLSpanBrowser(String str, TextStyleSpan.TextStyleRun textStyleRun) {
-        super(str != null ? str.replace((char) 8238, ' ') : str);
-        this.style = textStyleRun;
+    public URLSpanBrowser(String url) {
+        this(url, null);
+    }
+
+    public URLSpanBrowser(String url, TextStyleSpan.TextStyleRun run) {
+        super(url != null ? url.replace((char) 8238, ' ') : url);
+        this.style = run;
     }
 
     public TextStyleSpan.TextStyleRun getStyle() {
@@ -20,17 +24,18 @@ public class URLSpanBrowser extends URLSpan {
     }
 
     @Override // android.text.style.URLSpan, android.text.style.ClickableSpan
-    public void onClick(View view) {
-        Browser.openUrl(view.getContext(), Uri.parse(getURL()));
+    public void onClick(View widget) {
+        Uri uri = Uri.parse(getURL());
+        Browser.openUrl(widget.getContext(), uri);
     }
 
     @Override // android.text.style.ClickableSpan, android.text.style.CharacterStyle
-    public void updateDrawState(TextPaint textPaint) {
-        super.updateDrawState(textPaint);
+    public void updateDrawState(TextPaint p) {
+        super.updateDrawState(p);
         TextStyleSpan.TextStyleRun textStyleRun = this.style;
         if (textStyleRun != null) {
-            textStyleRun.applyStyle(textPaint);
+            textStyleRun.applyStyle(p);
         }
-        textPaint.setUnderlineText(true);
+        p.setUnderlineText(true);
     }
 }

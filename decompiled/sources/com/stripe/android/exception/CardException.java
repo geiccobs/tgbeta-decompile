@@ -1,7 +1,32 @@
 package com.stripe.android.exception;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class CardException extends StripeException {
-    public CardException(String str, String str2, String str3, String str4, String str5, String str6, Integer num, Throwable th) {
-        super(str, str2, num, th);
+    private String charge;
+    private String code;
+    private String declineCode;
+    private String param;
+
+    public CardException(String message, String requestId, String code, String param, String declineCode, String charge, Integer statusCode, Throwable e) {
+        super(message, requestId, statusCode, e);
+        this.code = code;
+        this.param = param;
+        this.declineCode = declineCode;
+        this.charge = charge;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public String getParam() {
+        return this.param;
+    }
+
+    public String getDeclineCode() {
+        return this.declineCode;
+    }
+
+    public String getCharge() {
+        return this.charge;
     }
 }

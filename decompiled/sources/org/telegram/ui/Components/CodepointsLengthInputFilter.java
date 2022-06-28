@@ -2,24 +2,32 @@ package org.telegram.ui.Components;
 
 import android.text.InputFilter;
 import android.text.Spanned;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class CodepointsLengthInputFilter implements InputFilter {
     private final int mMax;
 
-    public CodepointsLengthInputFilter(int i) {
-        this.mMax = i;
+    public CodepointsLengthInputFilter(int max) {
+        this.mMax = max;
     }
 
     @Override // android.text.InputFilter
-    public CharSequence filter(CharSequence charSequence, int i, int i2, Spanned spanned, int i3, int i4) {
-        int codePointCount = this.mMax - (Character.codePointCount(spanned, 0, spanned.length()) - Character.codePointCount(spanned, i3, i4));
-        if (codePointCount <= 0) {
+    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+        int destAfter = Character.codePointCount(dest, 0, dest.length()) - Character.codePointCount(dest, dstart, dend);
+        int keep = this.mMax - destAfter;
+        if (keep <= 0) {
             return "";
         }
-        if (codePointCount >= Character.codePointCount(charSequence, i, i2)) {
+        if (keep >= Character.codePointCount(source, start, end)) {
             return null;
         }
-        int i5 = codePointCount + i;
-        return (!Character.isHighSurrogate(charSequence.charAt(i5 + (-1))) || (i5 = i5 + (-1)) != i) ? charSequence.subSequence(i, i5) : "";
+        int keep2 = keep + start;
+        if (Character.isHighSurrogate(source.charAt(keep2 - 1)) && keep2 - 1 == start) {
+            return "";
+        }
+        return source.subSequence(start, keep2);
+    }
+
+    public int getMax() {
+        return this.mMax;
     }
 }

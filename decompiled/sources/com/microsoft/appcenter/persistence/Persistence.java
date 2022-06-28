@@ -5,7 +5,7 @@ import com.microsoft.appcenter.ingestion.models.json.LogSerializer;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class Persistence implements Closeable {
     private LogSerializer mLogSerializer;
 
@@ -25,24 +25,24 @@ public abstract class Persistence implements Closeable {
 
     public LogSerializer getLogSerializer() {
         LogSerializer logSerializer = this.mLogSerializer;
-        if (logSerializer != null) {
-            return logSerializer;
+        if (logSerializer == null) {
+            throw new IllegalStateException("logSerializer not configured");
         }
-        throw new IllegalStateException("logSerializer not configured");
+        return logSerializer;
     }
 
     public void setLogSerializer(LogSerializer logSerializer) {
         this.mLogSerializer = logSerializer;
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class PersistenceException extends Exception {
-        public PersistenceException(String str, Throwable th) {
-            super(str, th);
+        public PersistenceException(String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
         }
 
-        public PersistenceException(String str) {
-            super(str);
+        public PersistenceException(String detailMessage) {
+            super(detailMessage);
         }
     }
 }

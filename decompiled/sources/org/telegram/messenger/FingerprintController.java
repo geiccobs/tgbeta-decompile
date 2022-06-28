@@ -11,7 +11,7 @@ import java.security.KeyStoreException;
 import java.util.Locale;
 import javax.crypto.Cipher;
 import org.telegram.messenger.support.fingerprint.FingerprintManagerCompat;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class FingerprintController {
     private static final String KEY_ALIAS = "tmessages_passcode";
     private static Boolean hasChangedFingerprints;
@@ -49,39 +49,35 @@ public class FingerprintController {
         }
     }
 
-    public static void generateNewKey(final boolean z) {
-        KeyPairGenerator keyPairGenerator2 = getKeyPairGenerator();
-        if (keyPairGenerator2 != null) {
+    public static void generateNewKey(final boolean notifyCheckFingerprint) {
+        KeyPairGenerator generator = getKeyPairGenerator();
+        if (generator != null) {
             try {
-                Locale locale = Locale.getDefault();
+                Locale realLocale = Locale.getDefault();
                 setLocale(Locale.ENGLISH);
-                keyPairGenerator2.initialize(new KeyGenParameterSpec.Builder(KEY_ALIAS, 3).setDigests("SHA-256", "SHA-512").setEncryptionPaddings("OAEPPadding").setUserAuthenticationRequired(true).build());
-                keyPairGenerator2.generateKeyPair();
-                setLocale(locale);
-                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.FingerprintController$$ExternalSyntheticLambda0
+                generator.initialize(new KeyGenParameterSpec.Builder(KEY_ALIAS, 3).setDigests("SHA-256", "SHA-512").setEncryptionPaddings("OAEPPadding").setUserAuthenticationRequired(true).build());
+                generator.generateKeyPair();
+                setLocale(realLocale);
+                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.FingerprintController$$ExternalSyntheticLambda1
                     @Override // java.lang.Runnable
                     public final void run() {
-                        FingerprintController.lambda$generateNewKey$0(z);
+                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didGenerateFingerprintKeyPair, Boolean.valueOf(notifyCheckFingerprint));
                     }
                 });
             } catch (InvalidAlgorithmParameterException e) {
                 FileLog.e(e);
             } catch (Exception e2) {
-                if (e2.getClass().getName().equals("android.security.KeyStoreException")) {
-                    return;
+                if (!e2.getClass().getName().equals("android.security.KeyStoreException")) {
+                    FileLog.e(e2);
                 }
-                FileLog.e(e2);
             }
         }
     }
 
-    public static /* synthetic */ void lambda$generateNewKey$0(boolean z) {
-        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didGenerateFingerprintKeyPair, Boolean.valueOf(z));
-    }
-
     public static void deleteInvalidKey() {
+        KeyStore keyStore2 = getKeyStore();
         try {
-            getKeyStore().deleteEntry(KEY_ALIAS);
+            keyStore2.deleteEntry(KEY_ALIAS);
         } catch (KeyStoreException e) {
             FileLog.e(e);
         }
@@ -93,16 +89,15 @@ public class FingerprintController {
         checkKeyReady(true);
     }
 
-    public static void checkKeyReady(final boolean z) {
-        if (isKeyReady() || !AndroidUtilities.isKeyguardSecure() || !FingerprintManagerCompat.from(ApplicationLoader.applicationContext).isHardwareDetected() || !FingerprintManagerCompat.from(ApplicationLoader.applicationContext).hasEnrolledFingerprints()) {
-            return;
+    public static void checkKeyReady(final boolean notifyCheckFingerprint) {
+        if (!isKeyReady() && AndroidUtilities.isKeyguardSecure() && FingerprintManagerCompat.from(ApplicationLoader.applicationContext).isHardwareDetected() && FingerprintManagerCompat.from(ApplicationLoader.applicationContext).hasEnrolledFingerprints()) {
+            Utilities.globalQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FingerprintController$$ExternalSyntheticLambda0
+                @Override // java.lang.Runnable
+                public final void run() {
+                    FingerprintController.generateNewKey(notifyCheckFingerprint);
+                }
+            });
         }
-        Utilities.globalQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FingerprintController$$ExternalSyntheticLambda1
-            @Override // java.lang.Runnable
-            public final void run() {
-                FingerprintController.generateNewKey(z);
-            }
-        });
     }
 
     public static boolean isKeyReady() {
@@ -120,24 +115,28 @@ public class FingerprintController {
             return bool.booleanValue();
         }
         try {
-            Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding").init(2, keyStore.getKey(KEY_ALIAS, null));
-            hasChangedFingerprints = Boolean.FALSE;
-            return false;
-        } catch (KeyPermanentlyInvalidatedException unused) {
-            hasChangedFingerprints = Boolean.TRUE;
-            return true;
-        } catch (Exception e) {
-            FileLog.e(e);
-            hasChangedFingerprints = Boolean.FALSE;
-            return false;
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            cipher.init(2, keyStore.getKey(KEY_ALIAS, null));
+            Boolean bool2 = false;
+            hasChangedFingerprints = bool2;
+            return bool2.booleanValue();
+        } catch (KeyPermanentlyInvalidatedException e) {
+            Boolean bool3 = true;
+            hasChangedFingerprints = bool3;
+            return bool3.booleanValue();
+        } catch (Exception e2) {
+            FileLog.e(e2);
+            Boolean bool4 = false;
+            hasChangedFingerprints = bool4;
+            return bool4.booleanValue();
         }
     }
 
     private static void setLocale(Locale locale) {
         Locale.setDefault(locale);
         Resources resources = ApplicationLoader.applicationContext.getResources();
-        Configuration configuration = resources.getConfiguration();
-        configuration.setLocale(locale);
-        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        Configuration config = resources.getConfiguration();
+        config.setLocale(locale);
+        resources.updateConfiguration(config, resources.getDisplayMetrics());
     }
 }

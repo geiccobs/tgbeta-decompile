@@ -1,11 +1,13 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+
+import org.webrtc.VideoFrame;
+/* loaded from: classes5.dex */
 public interface VideoProcessor extends CapturerObserver {
     void onFrameCaptured(VideoFrame videoFrame, FrameAdaptationParameters frameAdaptationParameters);
 
     void setSink(VideoSink videoSink);
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class FrameAdaptationParameters {
         public final int cropHeight;
         public final int cropWidth;
@@ -16,34 +18,35 @@ public interface VideoProcessor extends CapturerObserver {
         public final int scaleWidth;
         public final long timestampNs;
 
-        public FrameAdaptationParameters(int i, int i2, int i3, int i4, int i5, int i6, long j, boolean z) {
-            this.cropX = i;
-            this.cropY = i2;
-            this.cropWidth = i3;
-            this.cropHeight = i4;
-            this.scaleWidth = i5;
-            this.scaleHeight = i6;
-            this.timestampNs = j;
-            this.drop = z;
+        public FrameAdaptationParameters(int cropX, int cropY, int cropWidth, int cropHeight, int scaleWidth, int scaleHeight, long timestampNs, boolean drop) {
+            this.cropX = cropX;
+            this.cropY = cropY;
+            this.cropWidth = cropWidth;
+            this.cropHeight = cropHeight;
+            this.scaleWidth = scaleWidth;
+            this.scaleHeight = scaleHeight;
+            this.timestampNs = timestampNs;
+            this.drop = drop;
         }
     }
 
     /* renamed from: org.webrtc.VideoProcessor$-CC */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public final /* synthetic */ class CC {
-        public static void $default$onFrameCaptured(VideoProcessor _this, VideoFrame videoFrame, FrameAdaptationParameters frameAdaptationParameters) {
-            VideoFrame applyFrameAdaptationParameters = applyFrameAdaptationParameters(videoFrame, frameAdaptationParameters);
-            if (applyFrameAdaptationParameters != null) {
-                _this.onFrameCaptured(applyFrameAdaptationParameters);
-                applyFrameAdaptationParameters.release();
+        public static void $default$onFrameCaptured(VideoProcessor _this, VideoFrame frame, FrameAdaptationParameters parameters) {
+            VideoFrame adaptedFrame = applyFrameAdaptationParameters(frame, parameters);
+            if (adaptedFrame != null) {
+                _this.onFrameCaptured(adaptedFrame);
+                adaptedFrame.release();
             }
         }
 
-        public static VideoFrame applyFrameAdaptationParameters(VideoFrame videoFrame, FrameAdaptationParameters frameAdaptationParameters) {
-            if (frameAdaptationParameters.drop) {
+        public static VideoFrame applyFrameAdaptationParameters(VideoFrame frame, FrameAdaptationParameters parameters) {
+            if (parameters.drop) {
                 return null;
             }
-            return new VideoFrame(videoFrame.getBuffer().cropAndScale(frameAdaptationParameters.cropX, frameAdaptationParameters.cropY, frameAdaptationParameters.cropWidth, frameAdaptationParameters.cropHeight, frameAdaptationParameters.scaleWidth, frameAdaptationParameters.scaleHeight), videoFrame.getRotation(), frameAdaptationParameters.timestampNs);
+            VideoFrame.Buffer adaptedBuffer = frame.getBuffer().cropAndScale(parameters.cropX, parameters.cropY, parameters.cropWidth, parameters.cropHeight, parameters.scaleWidth, parameters.scaleHeight);
+            return new VideoFrame(adaptedBuffer, frame.getRotation(), parameters.timestampNs);
         }
     }
 }

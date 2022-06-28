@@ -4,19 +4,19 @@ import android.graphics.RectF;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class Utils {
     public static void HasGLError() {
-        int glGetError = GLES20.glGetError();
-        if (glGetError != 0) {
-            Log.d("Paint", GLUtils.getEGLErrorString(glGetError));
+        int error = GLES20.glGetError();
+        if (error != 0) {
+            Log.d("Paint", GLUtils.getEGLErrorString(error));
         }
     }
 
-    public static void RectFIntegral(RectF rectF) {
-        rectF.left = (int) Math.floor(rectF.left);
-        rectF.top = (int) Math.floor(rectF.top);
-        rectF.right = (int) Math.ceil(rectF.right);
-        rectF.bottom = (int) Math.ceil(rectF.bottom);
+    public static void RectFIntegral(RectF rect) {
+        rect.left = (int) Math.floor(rect.left);
+        rect.top = (int) Math.floor(rect.top);
+        rect.right = (int) Math.ceil(rect.right);
+        rect.bottom = (int) Math.ceil(rect.bottom);
     }
 }

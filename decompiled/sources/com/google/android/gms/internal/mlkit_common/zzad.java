@@ -7,7 +7,7 @@ import java.util.ListIterator;
 import java.util.RandomAccess;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
     private static final zzaj<Object> zza = new zzaf(zzah.zza, 0);
 
@@ -24,7 +24,7 @@ public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
         return zzb(objArr, 11);
     }
 
-    static <E> zzad<E> zzb(Object[] objArr, int i) {
+    public static <E> zzad<E> zzb(Object[] objArr, int i) {
         if (i == 0) {
             return (zzad<E>) zzah.zza;
         }
@@ -41,10 +41,30 @@ public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
         if (obj == null) {
             return -1;
         }
-        int size = size();
-        for (int i = 0; i < size; i++) {
-            if (obj.equals(get(i))) {
-                return i;
+        if (this instanceof RandomAccess) {
+            int size = size();
+            int i = 0;
+            if (obj == null) {
+                while (i < size) {
+                    if (get(i) == null) {
+                        return i;
+                    }
+                    i++;
+                }
+            } else {
+                while (i < size) {
+                    if (obj.equals(get(i))) {
+                        return i;
+                    }
+                    i++;
+                }
+            }
+            return -1;
+        }
+        ListIterator<E> listIterator = listIterator();
+        while (listIterator.hasNext()) {
+            if (zzs.zza(obj, listIterator.next())) {
+                return listIterator.previousIndex();
             }
         }
         return -1;
@@ -55,9 +75,26 @@ public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
         if (obj == null) {
             return -1;
         }
-        for (int size = size() - 1; size >= 0; size--) {
-            if (obj.equals(get(size))) {
-                return size;
+        if (this instanceof RandomAccess) {
+            if (obj == null) {
+                for (int size = size() - 1; size >= 0; size--) {
+                    if (get(size) == null) {
+                        return size;
+                    }
+                }
+            } else {
+                for (int size2 = size() - 1; size2 >= 0; size2--) {
+                    if (obj.equals(get(size2))) {
+                        return size2;
+                    }
+                }
+            }
+            return -1;
+        }
+        ListIterator<E> listIterator = listIterator(size());
+        while (listIterator.hasPrevious()) {
+            if (zzs.zza(obj, listIterator.previous())) {
+                return listIterator.nextIndex();
             }
         }
         return -1;
@@ -123,14 +160,15 @@ public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
             List list = (List) obj;
             int size = size();
             if (size == list.size()) {
-                if (list instanceof RandomAccess) {
+                if ((this instanceof RandomAccess) && (list instanceof RandomAccess)) {
                     for (int i = 0; i < size; i++) {
                         if (zzs.zza(get(i), list.get(i))) {
                         }
                     }
                     return true;
                 }
-                int size2 = size();
+                zzad<E> zzadVar = this;
+                int size2 = zzadVar.size();
                 Iterator<E> it = list.iterator();
                 int i2 = 0;
                 while (true) {
@@ -138,7 +176,7 @@ public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
                         if (!it.hasNext()) {
                             break;
                         }
-                        E e = get(i2);
+                        E e = zzadVar.get(i2);
                         i2++;
                         if (!zzs.zza(e, it.next())) {
                             break;
@@ -162,9 +200,13 @@ public abstract class zzad<E> extends zzac<E> implements List<E>, RandomAccess {
         return i;
     }
 
-    @Override // java.util.AbstractCollection, java.util.Collection, java.lang.Iterable, java.util.List
+    public static <E> zzag<E> zze() {
+        return new zzag<>();
+    }
+
+    @Override // com.google.android.gms.internal.mlkit_common.zzac, java.util.AbstractCollection, java.util.Collection, java.lang.Iterable
     public /* synthetic */ Iterator iterator() {
-        return zza();
+        return iterator();
     }
 
     @Override // java.util.List

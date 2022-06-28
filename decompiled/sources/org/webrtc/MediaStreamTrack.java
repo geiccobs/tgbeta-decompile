@@ -1,5 +1,5 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class MediaStreamTrack {
     public static final String AUDIO_TRACK_KIND = "audio";
     public static final String VIDEO_TRACK_KIND = "video";
@@ -15,64 +15,61 @@ public class MediaStreamTrack {
 
     private static native boolean nativeSetEnabled(long j, boolean z);
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public enum State {
         LIVE,
         ENDED;
 
-        @CalledByNative("State")
-        static State fromNativeIndex(int i) {
-            return values()[i];
+        static State fromNativeIndex(int nativeIndex) {
+            return values()[nativeIndex];
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public enum MediaType {
         MEDIA_TYPE_AUDIO(0),
         MEDIA_TYPE_VIDEO(1);
         
         private final int nativeIndex;
 
-        MediaType(int i) {
-            this.nativeIndex = i;
+        MediaType(int nativeIndex) {
+            this.nativeIndex = nativeIndex;
         }
 
-        @CalledByNative("MediaType")
         int getNative() {
             return this.nativeIndex;
         }
 
-        @CalledByNative("MediaType")
-        static MediaType fromNativeIndex(int i) {
+        static MediaType fromNativeIndex(int nativeIndex) {
             MediaType[] values;
-            for (MediaType mediaType : values()) {
-                if (mediaType.getNative() == i) {
-                    return mediaType;
+            for (MediaType type : values()) {
+                if (type.getNative() == nativeIndex) {
+                    return type;
                 }
             }
-            throw new IllegalArgumentException("Unknown native media type: " + i);
+            throw new IllegalArgumentException("Unknown native media type: " + nativeIndex);
         }
     }
 
-    public static MediaStreamTrack createMediaStreamTrack(long j) {
-        if (j == 0) {
+    public static MediaStreamTrack createMediaStreamTrack(long nativeTrack) {
+        if (nativeTrack == 0) {
             return null;
         }
-        String nativeGetKind = nativeGetKind(j);
-        if (nativeGetKind.equals(AUDIO_TRACK_KIND)) {
-            return new AudioTrack(j);
+        String trackKind = nativeGetKind(nativeTrack);
+        if (trackKind.equals("audio")) {
+            return new AudioTrack(nativeTrack);
         }
-        if (!nativeGetKind.equals(VIDEO_TRACK_KIND)) {
+        if (!trackKind.equals("video")) {
             return null;
         }
-        return new VideoTrack(j);
+        return new VideoTrack(nativeTrack);
     }
 
-    public MediaStreamTrack(long j) {
-        if (j == 0) {
+    public MediaStreamTrack(long nativeTrack) {
+        if (nativeTrack == 0) {
             throw new IllegalArgumentException("nativeTrack may not be null");
         }
-        this.nativeTrack = j;
+        this.nativeTrack = nativeTrack;
     }
 
     public String id() {
@@ -90,9 +87,9 @@ public class MediaStreamTrack {
         return nativeGetEnabled(this.nativeTrack);
     }
 
-    public boolean setEnabled(boolean z) {
+    public boolean setEnabled(boolean enable) {
         checkMediaStreamTrackExists();
-        return nativeSetEnabled(this.nativeTrack, z);
+        return nativeSetEnabled(this.nativeTrack, enable);
     }
 
     public State state() {
@@ -112,9 +109,8 @@ public class MediaStreamTrack {
     }
 
     private void checkMediaStreamTrackExists() {
-        if (this.nativeTrack != 0) {
-            return;
+        if (this.nativeTrack == 0) {
+            throw new IllegalStateException("MediaStreamTrack has been disposed.");
         }
-        throw new IllegalStateException("MediaStreamTrack has been disposed.");
     }
 }

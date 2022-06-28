@@ -6,7 +6,8 @@ import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-/* loaded from: classes.dex */
+import com.google.android.gms.internal.clearcut.zzge;
+/* loaded from: classes3.dex */
 public final class zzr extends AbstractSafeParcelable {
     public static final Parcelable.Creator<zzr> CREATOR = new zzs();
     private final String packageName;
@@ -19,7 +20,7 @@ public final class zzr extends AbstractSafeParcelable {
     private final String zzm;
     private final boolean zzn;
 
-    public zzr(String str, int i, int i2, String str2, String str3, String str4, boolean z, zzge$zzv$zzb zzge_zzv_zzb) {
+    public zzr(String str, int i, int i2, String str2, String str3, String str4, boolean z, zzge.zzv.zzb zzbVar) {
         this.packageName = (String) Preconditions.checkNotNull(str);
         this.zzi = i;
         this.zzk = i2;
@@ -28,7 +29,7 @@ public final class zzr extends AbstractSafeParcelable {
         this.zzm = str4;
         this.zzay = !z;
         this.zzn = z;
-        this.zzaz = zzge_zzv_zzb.zzc();
+        this.zzaz = zzbVar.zzc();
     }
 
     public zzr(String str, int i, int i2, String str2, String str3, boolean z, String str4, boolean z2, int i3) {

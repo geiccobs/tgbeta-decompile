@@ -5,9 +5,11 @@ import com.microsoft.appcenter.ingestion.models.LogContainer;
 import com.microsoft.appcenter.ingestion.models.one.CommonSchemaLog;
 import java.util.Collection;
 import org.json.JSONException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface LogSerializer {
     void addLogFactory(String str, LogFactory logFactory);
+
+    LogContainer deserializeContainer(String str, String str2) throws JSONException;
 
     Log deserializeLog(String str, String str2) throws JSONException;
 

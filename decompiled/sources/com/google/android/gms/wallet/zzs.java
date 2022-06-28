@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.identity.intents.model.UserAddress;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzs implements Parcelable.Creator<MaskedWallet> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ MaskedWallet createFromParcel(Parcel parcel) {

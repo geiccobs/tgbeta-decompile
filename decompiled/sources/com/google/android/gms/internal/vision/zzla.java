@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzla implements zzki {
     private final zzkk zza;
     private final String zzb;
@@ -22,13 +22,14 @@ public final class zzla implements zzki {
         while (true) {
             int i4 = i3 + 1;
             char charAt2 = str.charAt(i3);
-            if (charAt2 < 55296) {
+            if (charAt2 >= 55296) {
+                i |= (charAt2 & 8191) << i2;
+                i2 += 13;
+                i3 = i4;
+            } else {
                 this.zzd = i | (charAt2 << i2);
                 return;
             }
-            i |= (charAt2 & 8191) << i2;
-            i2 += 13;
-            i3 = i4;
         }
     }
 

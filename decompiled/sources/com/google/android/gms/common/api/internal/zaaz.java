@@ -7,24 +7,24 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailabilityLight;
 import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.Result;
+import com.google.android.gms.common.api.internal.BaseImplementation;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.signin.SignInOptions;
-import com.google.android.gms.signin.zae;
+import com.microsoft.appcenter.Constants;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import javax.annotation.concurrent.GuardedBy;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zaaz implements zabo, zap {
     final Map<Api.AnyClientKey<?>, Api.Client> zaa;
-    final Map<Api.AnyClientKey<?>, ConnectionResult> zab = new HashMap();
     int zac;
     final zaar zad;
     final zabn zae;
@@ -35,11 +35,13 @@ public final class zaaz implements zabo, zap {
     private final zabb zaj;
     private final ClientSettings zak;
     private final Map<Api<?>, Boolean> zal;
-    private final Api.AbstractClientBuilder<? extends zae, SignInOptions> zam;
+    private final Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> zam;
     @NotOnlyInitialized
     private volatile zaaw zan;
+    final Map<Api.AnyClientKey<?>, ConnectionResult> zab = new HashMap();
+    private ConnectionResult zao = null;
 
-    public zaaz(Context context, zaar zaarVar, Lock lock, Looper looper, GoogleApiAvailabilityLight googleApiAvailabilityLight, Map<Api.AnyClientKey<?>, Api.Client> map, ClientSettings clientSettings, Map<Api<?>, Boolean> map2, Api.AbstractClientBuilder<? extends zae, SignInOptions> abstractClientBuilder, ArrayList<zaq> arrayList, zabn zabnVar) {
+    public zaaz(Context context, zaar zaarVar, Lock lock, Looper looper, GoogleApiAvailabilityLight googleApiAvailabilityLight, Map<Api.AnyClientKey<?>, Api.Client> map, ClientSettings clientSettings, Map<Api<?>, Boolean> map2, Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> abstractClientBuilder, ArrayList<zaq> arrayList, zabn zabnVar) {
         this.zah = context;
         this.zaf = lock;
         this.zai = googleApiAvailabilityLight;
@@ -49,10 +51,11 @@ public final class zaaz implements zabo, zap {
         this.zam = abstractClientBuilder;
         this.zad = zaarVar;
         this.zae = zabnVar;
-        int size = arrayList.size();
+        ArrayList<zaq> arrayList2 = arrayList;
+        int size = arrayList2.size();
         int i = 0;
         while (i < size) {
-            zaq zaqVar = arrayList.get(i);
+            zaq zaqVar = arrayList2.get(i);
             i++;
             zaqVar.zaa(this);
         }
@@ -62,40 +65,91 @@ public final class zaaz implements zabo, zap {
     }
 
     @Override // com.google.android.gms.common.api.internal.zabo
-    public final boolean zaa(SignInConnectionListener signInConnectionListener) {
-        return false;
-    }
-
-    @Override // com.google.android.gms.common.api.internal.zabo
-    public final void zag() {
-    }
-
-    @Override // com.google.android.gms.common.api.internal.zabo
-    @GuardedBy("mLock")
-    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation$ApiMethodImpl<R, A>> T zaa(T t) {
+    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation.ApiMethodImpl<R, A>> T zaa(T t) {
         t.zab();
         return (T) this.zan.zaa((zaaw) t);
     }
 
     @Override // com.google.android.gms.common.api.internal.zabo
-    @GuardedBy("mLock")
-    public final <A extends Api.AnyClient, T extends BaseImplementation$ApiMethodImpl<? extends Result, A>> T zab(T t) {
+    public final <A extends Api.AnyClient, T extends BaseImplementation.ApiMethodImpl<? extends Result, A>> T zab(T t) {
         t.zab();
         return (T) this.zan.zab(t);
     }
 
     @Override // com.google.android.gms.common.api.internal.zabo
-    @GuardedBy("mLock")
     public final void zaa() {
         this.zan.zac();
     }
 
     @Override // com.google.android.gms.common.api.internal.zabo
-    @GuardedBy("mLock")
+    public final ConnectionResult zab() {
+        zaa();
+        while (zae()) {
+            try {
+                this.zag.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new ConnectionResult(15, null);
+            }
+        }
+        if (zad()) {
+            return ConnectionResult.RESULT_SUCCESS;
+        }
+        ConnectionResult connectionResult = this.zao;
+        if (connectionResult != null) {
+            return connectionResult;
+        }
+        return new ConnectionResult(13, null);
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zabo
+    public final ConnectionResult zaa(long j, TimeUnit timeUnit) {
+        zaa();
+        long nanos = timeUnit.toNanos(j);
+        while (zae()) {
+            if (nanos <= 0) {
+                zac();
+                return new ConnectionResult(14, null);
+            }
+            try {
+                nanos = this.zag.awaitNanos(nanos);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new ConnectionResult(15, null);
+            }
+            Thread.currentThread().interrupt();
+            return new ConnectionResult(15, null);
+        }
+        if (zad()) {
+            return ConnectionResult.RESULT_SUCCESS;
+        }
+        ConnectionResult connectionResult = this.zao;
+        if (connectionResult != null) {
+            return connectionResult;
+        }
+        return new ConnectionResult(13, null);
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zabo
     public final void zac() {
         if (this.zan.zab()) {
             this.zab.clear();
         }
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zabo
+    public final ConnectionResult zaa(Api<?> api) {
+        Api.AnyClientKey<?> zac = api.zac();
+        if (this.zaa.containsKey(zac)) {
+            if (this.zaa.get(zac).isConnected()) {
+                return ConnectionResult.RESULT_SUCCESS;
+            }
+            if (this.zab.containsKey(zac)) {
+                return this.zab.get(zac);
+            }
+            return null;
+        }
+        return null;
     }
 
     public final void zah() {
@@ -124,6 +178,7 @@ public final class zaaz implements zabo, zap {
     public final void zaa(ConnectionResult connectionResult) {
         this.zaf.lock();
         try {
+            this.zao = connectionResult;
             this.zan = new zaao(this);
             this.zan.zaa();
             this.zag.signalAll();
@@ -138,7 +193,20 @@ public final class zaaz implements zabo, zap {
     }
 
     @Override // com.google.android.gms.common.api.internal.zabo
-    @GuardedBy("mLock")
+    public final boolean zae() {
+        return this.zan instanceof zaaf;
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zabo
+    public final boolean zaa(SignInConnectionListener signInConnectionListener) {
+        return false;
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zabo
+    public final void zag() {
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zabo
     public final void zaf() {
         if (zad()) {
             ((zaaa) this.zan).zad();
@@ -188,7 +256,7 @@ public final class zaaz implements zabo, zap {
         String concat = String.valueOf(str).concat("  ");
         printWriter.append((CharSequence) str).append("mState=").println(this.zan);
         for (Api<?> api : this.zal.keySet()) {
-            printWriter.append((CharSequence) str).append((CharSequence) api.zad()).println(":");
+            printWriter.append((CharSequence) str).append((CharSequence) api.zad()).println(Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
             ((Api.Client) Preconditions.checkNotNull(this.zaa.get(api.zac()))).dump(concat, fileDescriptor, printWriter, strArr);
         }
     }

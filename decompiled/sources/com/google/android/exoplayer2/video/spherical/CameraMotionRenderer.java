@@ -3,23 +3,21 @@ package com.google.android.exoplayer2.video.spherical;
 import com.google.android.exoplayer2.BaseRenderer;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.FormatHolder;
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.decoder.DecoderInputBuffer;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
 import java.nio.ByteBuffer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class CameraMotionRenderer extends BaseRenderer {
+    private static final int SAMPLE_WINDOW_DURATION_US = 100000;
     private long lastTimestampUs;
     private CameraMotionListener listener;
     private long offsetUs;
     private final DecoderInputBuffer buffer = new DecoderInputBuffer(1);
     private final ParsableByteArray scratch = new ParsableByteArray();
-
-    @Override // com.google.android.exoplayer2.Renderer
-    public boolean isReady() {
-        return true;
-    }
 
     public CameraMotionRenderer() {
         super(5);
@@ -27,28 +25,28 @@ public class CameraMotionRenderer extends BaseRenderer {
 
     @Override // com.google.android.exoplayer2.RendererCapabilities
     public int supportsFormat(Format format) {
-        if ("application/x-camera-motion".equals(format.sampleMimeType)) {
+        if (MimeTypes.APPLICATION_CAMERA_MOTION.equals(format.sampleMimeType)) {
             return RendererCapabilities.CC.create(4);
         }
         return RendererCapabilities.CC.create(0);
     }
 
     @Override // com.google.android.exoplayer2.BaseRenderer, com.google.android.exoplayer2.PlayerMessage.Target
-    public void handleMessage(int i, Object obj) throws ExoPlaybackException {
-        if (i == 7) {
-            this.listener = (CameraMotionListener) obj;
+    public void handleMessage(int messageType, Object message) throws ExoPlaybackException {
+        if (messageType == 7) {
+            this.listener = (CameraMotionListener) message;
         } else {
-            super.handleMessage(i, obj);
+            super.handleMessage(messageType, message);
         }
     }
 
     @Override // com.google.android.exoplayer2.BaseRenderer
-    public void onStreamChanged(Format[] formatArr, long j) throws ExoPlaybackException {
-        this.offsetUs = j;
+    public void onStreamChanged(Format[] formats, long offsetUs) throws ExoPlaybackException {
+        this.offsetUs = offsetUs;
     }
 
     @Override // com.google.android.exoplayer2.BaseRenderer
-    protected void onPositionReset(long j, boolean z) throws ExoPlaybackException {
+    protected void onPositionReset(long positionUs, boolean joining) throws ExoPlaybackException {
         resetListener();
     }
 
@@ -58,18 +56,19 @@ public class CameraMotionRenderer extends BaseRenderer {
     }
 
     @Override // com.google.android.exoplayer2.Renderer
-    public void render(long j, long j2) throws ExoPlaybackException {
-        float[] parseMetadata;
-        while (!hasReadStreamToEnd() && this.lastTimestampUs < 100000 + j) {
+    public void render(long positionUs, long elapsedRealtimeUs) throws ExoPlaybackException {
+        float[] rotation;
+        while (!hasReadStreamToEnd() && this.lastTimestampUs < 100000 + positionUs) {
             this.buffer.clear();
-            if (readSource(getFormatHolder(), this.buffer, false) != -4 || this.buffer.isEndOfStream()) {
+            FormatHolder formatHolder = getFormatHolder();
+            int result = readSource(formatHolder, this.buffer, false);
+            if (result != -4 || this.buffer.isEndOfStream()) {
                 return;
             }
             this.buffer.flip();
-            DecoderInputBuffer decoderInputBuffer = this.buffer;
-            this.lastTimestampUs = decoderInputBuffer.timeUs;
-            if (this.listener != null && (parseMetadata = parseMetadata((ByteBuffer) Util.castNonNull(decoderInputBuffer.data))) != null) {
-                ((CameraMotionListener) Util.castNonNull(this.listener)).onCameraMotion(this.lastTimestampUs - this.offsetUs, parseMetadata);
+            this.lastTimestampUs = this.buffer.timeUs;
+            if (this.listener != null && (rotation = parseMetadata((ByteBuffer) Util.castNonNull(this.buffer.data))) != null) {
+                ((CameraMotionListener) Util.castNonNull(this.listener)).onCameraMotion(this.lastTimestampUs - this.offsetUs, rotation);
             }
         }
     }
@@ -79,17 +78,22 @@ public class CameraMotionRenderer extends BaseRenderer {
         return hasReadStreamToEnd();
     }
 
-    private float[] parseMetadata(ByteBuffer byteBuffer) {
-        if (byteBuffer.remaining() != 16) {
+    @Override // com.google.android.exoplayer2.Renderer
+    public boolean isReady() {
+        return true;
+    }
+
+    private float[] parseMetadata(ByteBuffer data) {
+        if (data.remaining() != 16) {
             return null;
         }
-        this.scratch.reset(byteBuffer.array(), byteBuffer.limit());
-        this.scratch.setPosition(byteBuffer.arrayOffset() + 4);
-        float[] fArr = new float[3];
+        this.scratch.reset(data.array(), data.limit());
+        this.scratch.setPosition(data.arrayOffset() + 4);
+        float[] result = new float[3];
         for (int i = 0; i < 3; i++) {
-            fArr[i] = Float.intBitsToFloat(this.scratch.readLittleEndianInt());
+            result[i] = Float.intBitsToFloat(this.scratch.readLittleEndianInt());
         }
-        return fArr;
+        return result;
     }
 
     private void resetListener() {

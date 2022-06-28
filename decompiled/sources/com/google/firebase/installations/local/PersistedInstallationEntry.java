@@ -1,14 +1,12 @@
 package com.google.firebase.installations.local;
 
-import com.google.auto.value.AutoValue;
 import com.google.firebase.installations.local.AutoValue_PersistedInstallationEntry;
 import com.google.firebase.installations.local.PersistedInstallation;
-@AutoValue
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class PersistedInstallationEntry {
+    public static PersistedInstallationEntry INSTANCE = builder().build();
 
-    @AutoValue.Builder
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static abstract class Builder {
         public abstract PersistedInstallationEntry build();
 
@@ -43,10 +41,6 @@ public abstract class PersistedInstallationEntry {
 
     public abstract Builder toBuilder();
 
-    static {
-        builder().build();
-    }
-
     public boolean isRegistered() {
         return getRegistrationStatus() == PersistedInstallation.RegistrationStatus.REGISTERED;
     }
@@ -67,24 +61,24 @@ public abstract class PersistedInstallationEntry {
         return getRegistrationStatus() == PersistedInstallation.RegistrationStatus.ATTEMPT_MIGRATION;
     }
 
-    public PersistedInstallationEntry withUnregisteredFid(String str) {
-        return toBuilder().setFirebaseInstallationId(str).setRegistrationStatus(PersistedInstallation.RegistrationStatus.UNREGISTERED).build();
+    public PersistedInstallationEntry withUnregisteredFid(String fid) {
+        return toBuilder().setFirebaseInstallationId(fid).setRegistrationStatus(PersistedInstallation.RegistrationStatus.UNREGISTERED).build();
     }
 
-    public PersistedInstallationEntry withRegisteredFid(String str, String str2, long j, String str3, long j2) {
-        return toBuilder().setFirebaseInstallationId(str).setRegistrationStatus(PersistedInstallation.RegistrationStatus.REGISTERED).setAuthToken(str3).setRefreshToken(str2).setExpiresInSecs(j2).setTokenCreationEpochInSecs(j).build();
+    public PersistedInstallationEntry withRegisteredFid(String fid, String refreshToken, long creationTime, String authToken, long authTokenExpiration) {
+        return toBuilder().setFirebaseInstallationId(fid).setRegistrationStatus(PersistedInstallation.RegistrationStatus.REGISTERED).setAuthToken(authToken).setRefreshToken(refreshToken).setExpiresInSecs(authTokenExpiration).setTokenCreationEpochInSecs(creationTime).build();
     }
 
-    public PersistedInstallationEntry withFisError(String str) {
-        return toBuilder().setFisError(str).setRegistrationStatus(PersistedInstallation.RegistrationStatus.REGISTER_ERROR).build();
+    public PersistedInstallationEntry withFisError(String message) {
+        return toBuilder().setFisError(message).setRegistrationStatus(PersistedInstallation.RegistrationStatus.REGISTER_ERROR).build();
     }
 
     public PersistedInstallationEntry withNoGeneratedFid() {
         return toBuilder().setRegistrationStatus(PersistedInstallation.RegistrationStatus.NOT_GENERATED).build();
     }
 
-    public PersistedInstallationEntry withAuthToken(String str, long j, long j2) {
-        return toBuilder().setAuthToken(str).setExpiresInSecs(j).setTokenCreationEpochInSecs(j2).build();
+    public PersistedInstallationEntry withAuthToken(String authToken, long authTokenExpiration, long creationTime) {
+        return toBuilder().setAuthToken(authToken).setExpiresInSecs(authTokenExpiration).setTokenCreationEpochInSecs(creationTime).build();
     }
 
     public PersistedInstallationEntry withClearedAuthToken() {

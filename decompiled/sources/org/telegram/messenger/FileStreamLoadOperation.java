@@ -4,48 +4,34 @@ import android.net.Uri;
 import com.google.android.exoplayer2.upstream.BaseDataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$TL_document;
-import org.telegram.tgnet.TLRPC$TL_documentAttributeAudio;
-import org.telegram.tgnet.TLRPC$TL_documentAttributeFilename;
-import org.telegram.tgnet.TLRPC$TL_documentAttributeVideo;
-import org.webrtc.MediaStreamTrack;
-/* loaded from: classes.dex */
+import org.telegram.tgnet.TLRPC;
+/* loaded from: classes4.dex */
 public class FileStreamLoadOperation extends BaseDataSource implements FileLoadOperationStream {
     private long bytesRemaining;
     private CountDownLatch countDownLatch;
     private int currentAccount;
     private int currentOffset;
-    private TLRPC$Document document;
+    private TLRPC.Document document;
     private RandomAccessFile file;
     private FileLoadOperation loadOperation;
     private boolean opened;
     private Object parentObject;
     private Uri uri;
 
-    @Override // com.google.android.exoplayer2.upstream.BaseDataSource, com.google.android.exoplayer2.upstream.DataSource
-    public /* bridge */ /* synthetic */ Map<String, List<String>> getResponseHeaders() {
-        Map<String, List<String>> emptyMap;
-        emptyMap = Collections.emptyMap();
-        return emptyMap;
-    }
-
     public FileStreamLoadOperation() {
         super(false);
     }
 
     @Deprecated
-    public FileStreamLoadOperation(TransferListener transferListener) {
+    public FileStreamLoadOperation(TransferListener listener) {
         this();
-        if (transferListener != null) {
-            addTransferListener(transferListener);
+        if (listener != null) {
+            addTransferListener(listener);
         }
     }
 
@@ -56,32 +42,29 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
         int intValue = Utilities.parseInt((CharSequence) uri.getQueryParameter("account")).intValue();
         this.currentAccount = intValue;
         this.parentObject = FileLoader.getInstance(intValue).getParentObject(Utilities.parseInt((CharSequence) this.uri.getQueryParameter("rid")).intValue());
-        TLRPC$TL_document tLRPC$TL_document = new TLRPC$TL_document();
-        this.document = tLRPC$TL_document;
-        tLRPC$TL_document.access_hash = Utilities.parseLong(this.uri.getQueryParameter("hash")).longValue();
+        TLRPC.TL_document tL_document = new TLRPC.TL_document();
+        this.document = tL_document;
+        tL_document.access_hash = Utilities.parseLong(this.uri.getQueryParameter("hash")).longValue();
         this.document.id = Utilities.parseLong(this.uri.getQueryParameter("id")).longValue();
         this.document.size = Utilities.parseLong(this.uri.getQueryParameter("size")).longValue();
         this.document.dc_id = Utilities.parseInt((CharSequence) this.uri.getQueryParameter("dc")).intValue();
         this.document.mime_type = this.uri.getQueryParameter("mime");
         this.document.file_reference = Utilities.hexToBytes(this.uri.getQueryParameter("reference"));
-        TLRPC$TL_documentAttributeFilename tLRPC$TL_documentAttributeFilename = new TLRPC$TL_documentAttributeFilename();
-        tLRPC$TL_documentAttributeFilename.file_name = this.uri.getQueryParameter("name");
-        this.document.attributes.add(tLRPC$TL_documentAttributeFilename);
-        if (this.document.mime_type.startsWith(MediaStreamTrack.VIDEO_TRACK_KIND)) {
-            this.document.attributes.add(new TLRPC$TL_documentAttributeVideo());
-        } else if (this.document.mime_type.startsWith(MediaStreamTrack.AUDIO_TRACK_KIND)) {
-            this.document.attributes.add(new TLRPC$TL_documentAttributeAudio());
+        TLRPC.TL_documentAttributeFilename filename = new TLRPC.TL_documentAttributeFilename();
+        filename.file_name = this.uri.getQueryParameter(CommonProperties.NAME);
+        this.document.attributes.add(filename);
+        if (this.document.mime_type.startsWith("video")) {
+            this.document.attributes.add(new TLRPC.TL_documentAttributeVideo());
+        } else if (this.document.mime_type.startsWith("audio")) {
+            this.document.attributes.add(new TLRPC.TL_documentAttributeAudio());
         }
         FileLoader fileLoader = FileLoader.getInstance(this.currentAccount);
-        TLRPC$Document tLRPC$Document = this.document;
+        TLRPC.Document document = this.document;
         Object obj = this.parentObject;
         int i = (int) dataSpec.position;
         this.currentOffset = i;
-        this.loadOperation = fileLoader.loadStreamFile(this, tLRPC$Document, null, obj, i, false);
-        long j = dataSpec.length;
-        if (j == -1) {
-            j = this.document.size - dataSpec.position;
-        }
+        this.loadOperation = fileLoader.loadStreamFile(this, document, null, obj, i, false);
+        long j = dataSpec.length == -1 ? this.document.size - dataSpec.position : dataSpec.length;
         this.bytesRemaining = j;
         if (j < 0) {
             throw new EOFException();
@@ -97,25 +80,25 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] bArr, int i, int i2) throws IOException {
-        if (i2 == 0) {
+    public int read(byte[] buffer, int offset, int readLength) throws IOException {
+        if (readLength == 0) {
             return 0;
         }
         long j = this.bytesRemaining;
         if (j == 0) {
             return -1;
         }
-        if (j < i2) {
-            i2 = (int) j;
+        int availableLength = 0;
+        if (j < readLength) {
+            readLength = (int) j;
         }
-        int i3 = 0;
-        while (i3 == 0) {
+        while (availableLength == 0) {
             try {
                 if (!this.opened) {
                     break;
                 }
-                i3 = (int) this.loadOperation.getDownloadedLengthFromOffset(this.currentOffset, i2)[0];
-                if (i3 == 0) {
+                availableLength = (int) this.loadOperation.getDownloadedLengthFromOffset(this.currentOffset, readLength)[0];
+                if (availableLength == 0) {
                     FileLoader.getInstance(this.currentAccount).loadStreamFile(this, this.document, null, this.parentObject, this.currentOffset, false);
                     CountDownLatch countDownLatch = new CountDownLatch(1);
                     this.countDownLatch = countDownLatch;
@@ -128,11 +111,11 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
         if (!this.opened) {
             return 0;
         }
-        this.file.readFully(bArr, i, i3);
-        this.currentOffset += i3;
-        this.bytesRemaining -= i3;
-        bytesTransferred(i3);
-        return i3;
+        this.file.readFully(buffer, offset, availableLength);
+        this.currentOffset += availableLength;
+        this.bytesRemaining -= availableLength;
+        bytesTransferred(availableLength);
+        return availableLength;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource

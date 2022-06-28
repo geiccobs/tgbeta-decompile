@@ -26,6 +26,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.C;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.util.ArrayList;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -33,11 +35,11 @@ import org.telegram.messenger.ChatsWidgetProvider;
 import org.telegram.messenger.ContactsWidgetProvider;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -53,8 +55,11 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.EditWidgetActivity;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class EditWidgetActivity extends BaseFragment {
+    public static final int TYPE_CHATS = 0;
+    public static final int TYPE_CONTACTS = 1;
+    private static final int done_item = 1;
     private int chatsEndRow;
     private int chatsStartRow;
     private int currentWidgetId;
@@ -68,22 +73,22 @@ public class EditWidgetActivity extends BaseFragment {
     private int rowCount;
     private int selectChatsRow;
     private ArrayList<Long> selectedDialogs = new ArrayList<>();
+    private FrameLayout widgetPreview;
     private WidgetPreviewCell widgetPreviewCell;
     private int widgetType;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public interface EditWidgetActivityDelegate {
         void didSelectDialogs(ArrayList<Long> arrayList);
     }
 
-    @Override // org.telegram.ui.ActionBar.BaseFragment
-    public boolean isSwipeBackEnabled(MotionEvent motionEvent) {
-        return false;
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class TouchHelperCallback extends ItemTouchHelper.Callback {
         private boolean moved;
+
+        public TouchHelperCallback() {
+            EditWidgetActivity.this = this$0;
+        }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
         public boolean isLongPressDragEnabled() {
@@ -91,33 +96,25 @@ public class EditWidgetActivity extends BaseFragment {
         }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int i) {
-        }
-
-        public TouchHelperCallback() {
-            EditWidgetActivity.this = r1;
-        }
-
-        @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
         public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
             if (viewHolder.getItemViewType() != 3) {
-                return ItemTouchHelper.Callback.makeMovementFlags(0, 0);
+                return makeMovementFlags(0, 0);
             }
-            return ItemTouchHelper.Callback.makeMovementFlags(3, 0);
+            return makeMovementFlags(3, 0);
         }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2) {
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
             boolean z = false;
-            if (viewHolder.getItemViewType() != viewHolder2.getItemViewType()) {
+            if (source.getItemViewType() != target.getItemViewType()) {
                 return false;
             }
-            int adapterPosition = viewHolder.getAdapterPosition();
-            int adapterPosition2 = viewHolder2.getAdapterPosition();
-            if (EditWidgetActivity.this.listAdapter.swapElements(adapterPosition, adapterPosition2)) {
-                ((GroupCreateUserCell) viewHolder.itemView).setDrawDivider(adapterPosition2 != EditWidgetActivity.this.chatsEndRow - 1);
-                GroupCreateUserCell groupCreateUserCell = (GroupCreateUserCell) viewHolder2.itemView;
-                if (adapterPosition != EditWidgetActivity.this.chatsEndRow - 1) {
+            int p1 = source.getAdapterPosition();
+            int p2 = target.getAdapterPosition();
+            if (EditWidgetActivity.this.listAdapter.swapElements(p1, p2)) {
+                ((GroupCreateUserCell) source.itemView).setDrawDivider(p2 != EditWidgetActivity.this.chatsEndRow - 1);
+                GroupCreateUserCell groupCreateUserCell = (GroupCreateUserCell) target.itemView;
+                if (p1 != EditWidgetActivity.this.chatsEndRow - 1) {
                     z = true;
                 }
                 groupCreateUserCell.setDrawDivider(z);
@@ -127,13 +124,13 @@ public class EditWidgetActivity extends BaseFragment {
         }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
-        public void onChildDraw(Canvas canvas, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float f, float f2, int i, boolean z) {
-            super.onChildDraw(canvas, recyclerView, viewHolder, f, f2, i, z);
+        public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
-        public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int i) {
-            if (i != 0) {
+        public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+            if (actionState != 0) {
                 EditWidgetActivity.this.listView.cancelClickRunnables(false);
                 viewHolder.itemView.setPressed(true);
             } else if (this.moved) {
@@ -142,7 +139,11 @@ public class EditWidgetActivity extends BaseFragment {
                 }
                 this.moved = false;
             }
-            super.onSelectedChanged(viewHolder, i);
+            super.onSelectedChanged(viewHolder, actionState);
+        }
+
+        @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
@@ -152,7 +153,7 @@ public class EditWidgetActivity extends BaseFragment {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class WidgetPreviewCell extends FrameLayout {
         private Drawable backgroundDrawable;
         private BackgroundGradientDrawable.Disposable backgroundGradientDisposable;
@@ -163,30 +164,10 @@ public class EditWidgetActivity extends BaseFragment {
         private RectF bitmapRect = new RectF();
         private ViewGroup[] cells = new ViewGroup[2];
 
-        @Override // android.view.ViewGroup, android.view.View
-        protected void dispatchSetPressed(boolean z) {
-        }
-
-        @Override // android.view.ViewGroup, android.view.View
-        public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override // android.view.ViewGroup
-        public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override // android.view.View
-        public boolean onTouchEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public WidgetPreviewCell(Context context) {
             super(context);
-            EditWidgetActivity.this = r19;
-            int i = 0;
+            EditWidgetActivity.this = this$0;
             setWillNotDraw(false);
             setPadding(0, AndroidUtilities.dp(24.0f), 0, AndroidUtilities.dp(24.0f));
             LinearLayout linearLayout = new LinearLayout(context);
@@ -195,75 +176,72 @@ public class EditWidgetActivity extends BaseFragment {
             ChatActionCell chatActionCell = new ChatActionCell(context);
             chatActionCell.setCustomText(LocaleController.getString("WidgetPreview", R.string.WidgetPreview));
             linearLayout.addView(chatActionCell, LayoutHelper.createLinear(-2, -2, 17, 0, 0, 0, 4));
-            LinearLayout linearLayout2 = new LinearLayout(context);
-            linearLayout2.setOrientation(1);
-            linearLayout2.setBackgroundResource(R.drawable.widget_bg);
-            linearLayout.addView(linearLayout2, LayoutHelper.createLinear(-2, -2, 17, 10, 0, 10, 0));
-            r19.previewImageView = new ImageView(context);
-            if (r19.widgetType == 0) {
-                while (i < 2) {
-                    this.cells[i] = (ViewGroup) r19.getParentActivity().getLayoutInflater().inflate(R.layout.shortcut_widget_item, (ViewGroup) null);
-                    linearLayout2.addView(this.cells[i], LayoutHelper.createLinear(-1, -2));
-                    i++;
+            LinearLayout widgetPreview = new LinearLayout(context);
+            widgetPreview.setOrientation(1);
+            widgetPreview.setBackgroundResource(R.drawable.widget_bg);
+            linearLayout.addView(widgetPreview, LayoutHelper.createLinear(-2, -2, 17, 10, 0, 10, 0));
+            this$0.previewImageView = new ImageView(context);
+            if (this$0.widgetType != 0) {
+                if (this$0.widgetType == 1) {
+                    for (int a = 0; a < 2; a++) {
+                        this.cells[a] = (ViewGroup) this$0.getParentActivity().getLayoutInflater().inflate(R.layout.contacts_widget_item, (ViewGroup) null);
+                        widgetPreview.addView(this.cells[a], LayoutHelper.createLinear(160, -2));
+                    }
+                    widgetPreview.addView(this$0.previewImageView, LayoutHelper.createLinear(160, 160, 17));
+                    this$0.previewImageView.setImageResource(R.drawable.contacts_widget_preview);
                 }
-                linearLayout2.addView(r19.previewImageView, LayoutHelper.createLinear(218, 160, 17));
-                r19.previewImageView.setImageResource(R.drawable.chats_widget_preview);
-            } else if (r19.widgetType == 1) {
-                while (i < 2) {
-                    this.cells[i] = (ViewGroup) r19.getParentActivity().getLayoutInflater().inflate(R.layout.contacts_widget_item, (ViewGroup) null);
-                    linearLayout2.addView(this.cells[i], LayoutHelper.createLinear(160, -2));
-                    i++;
+            } else {
+                for (int a2 = 0; a2 < 2; a2++) {
+                    this.cells[a2] = (ViewGroup) this$0.getParentActivity().getLayoutInflater().inflate(R.layout.shortcut_widget_item, (ViewGroup) null);
+                    widgetPreview.addView(this.cells[a2], LayoutHelper.createLinear(-1, -2));
                 }
-                linearLayout2.addView(r19.previewImageView, LayoutHelper.createLinear(160, 160, 17));
-                r19.previewImageView.setImageResource(R.drawable.contacts_widget_preview);
+                widgetPreview.addView(this$0.previewImageView, LayoutHelper.createLinear(218, 160, 17));
+                this$0.previewImageView.setImageResource(R.drawable.chats_widget_preview);
             }
             updateDialogs();
-            this.shadowDrawable = Theme.getThemedDrawable(context, (int) R.drawable.greydivider_bottom, "windowBackgroundGrayShadow");
+            this.shadowDrawable = Theme.getThemedDrawable(context, (int) R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
         }
 
-        /* JADX WARN: Can't wrap try/catch for region: R(9:145|(2:147|(1:149)(1:150))(2:151|(2:153|(1:155)(1:156))(8:158|(2:160|(1:162)(1:163))(1:164)|165|389|166|169|395|178))|157|165|389|166|169|395|178) */
-        /* JADX WARN: Code restructure failed: missing block: B:103:0x028a, code lost:
-            if ((r0 instanceof org.telegram.tgnet.TLRPC$TL_messageActionChannelMigrateFrom) != false) goto L105;
+        /* JADX WARN: Code restructure failed: missing block: B:293:0x0853, code lost:
+            if (r3 != 2) goto L296;
          */
-        /* JADX WARN: Code restructure failed: missing block: B:167:0x0418, code lost:
-            r0 = move-exception;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:168:0x0419, code lost:
-            org.telegram.messenger.FileLog.e(r0);
-         */
-        /* JADX WARN: Removed duplicated region for block: B:20:0x008e  */
-        /* JADX WARN: Removed duplicated region for block: B:21:0x0099  */
-        /* JADX WARN: Removed duplicated region for block: B:228:0x0591  */
-        /* JADX WARN: Removed duplicated region for block: B:235:0x05d4  */
-        /* JADX WARN: Removed duplicated region for block: B:239:0x0629  */
-        /* JADX WARN: Removed duplicated region for block: B:358:0x08dd  */
-        /* JADX WARN: Removed duplicated region for block: B:371:0x092d  */
-        /* JADX WARN: Removed duplicated region for block: B:385:0x016a A[EXC_TOP_SPLITTER, SYNTHETIC] */
-        /* JADX WARN: Removed duplicated region for block: B:70:0x017e  */
-        /* JADX WARN: Removed duplicated region for block: B:73:0x0193  */
-        /* JADX WARN: Removed duplicated region for block: B:83:0x01be A[Catch: all -> 0x0222, TryCatch #1 {all -> 0x0222, blocks: (B:69:0x016a, B:71:0x017f, B:74:0x0195, B:76:0x01a0, B:77:0x01a6, B:79:0x01ac, B:80:0x01b1, B:81:0x01b6, B:83:0x01be, B:85:0x01c9, B:86:0x01d8, B:87:0x020e), top: B:385:0x016a }] */
-        /* JADX WARN: Removed duplicated region for block: B:92:0x0239  */
+        /* JADX WARN: Removed duplicated region for block: B:246:0x06c0  */
+        /* JADX WARN: Removed duplicated region for block: B:250:0x0716  */
+        /* JADX WARN: Removed duplicated region for block: B:337:0x0939  */
+        /* JADX WARN: Removed duplicated region for block: B:338:0x093d  */
+        /* JADX WARN: Removed duplicated region for block: B:348:0x0983  */
+        /* JADX WARN: Removed duplicated region for block: B:358:0x09b4 A[Catch: all -> 0x0a28, TRY_ENTER, TRY_LEAVE, TryCatch #5 {all -> 0x0a28, blocks: (B:346:0x096e, B:358:0x09b4), top: B:418:0x096e }] */
+        /* JADX WARN: Removed duplicated region for block: B:368:0x0a06  */
+        /* JADX WARN: Removed duplicated region for block: B:369:0x0a0a  */
+        /* JADX WARN: Removed duplicated region for block: B:383:0x0a37  */
+        /* JADX WARN: Removed duplicated region for block: B:396:0x0a8e  */
+        /* JADX WARN: Removed duplicated region for block: B:412:0x094c A[EXC_TOP_SPLITTER, SYNTHETIC] */
+        /* JADX WARN: Type inference failed for: r11v0 */
+        /* JADX WARN: Type inference failed for: r11v17, types: [int, boolean] */
+        /* JADX WARN: Type inference failed for: r11v18 */
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
         public void updateDialogs() {
             /*
-                Method dump skipped, instructions count: 2427
+                Method dump skipped, instructions count: 2773
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.EditWidgetActivity.WidgetPreviewCell.updateDialogs():void");
         }
 
         @Override // android.widget.FrameLayout, android.view.View
-        protected void onMeasure(int i, int i2) {
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(264.0f), 1073741824));
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(264.0f), C.BUFFER_FLAG_ENCRYPTED));
         }
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
-            Drawable cachedWallpaperNonBlocking = Theme.getCachedWallpaperNonBlocking();
-            if (cachedWallpaperNonBlocking != this.backgroundDrawable && cachedWallpaperNonBlocking != null) {
+            int a;
+            Drawable drawable;
+            Drawable newDrawable = Theme.getCachedWallpaperNonBlocking();
+            if (newDrawable != this.backgroundDrawable && newDrawable != null) {
                 if (Theme.isAnimatingColor()) {
                     this.oldBackgroundDrawable = this.backgroundDrawable;
                     this.oldBackgroundGradientDisposable = this.backgroundGradientDisposable;
@@ -274,56 +252,76 @@ public class EditWidgetActivity extends BaseFragment {
                         this.backgroundGradientDisposable = null;
                     }
                 }
-                this.backgroundDrawable = cachedWallpaperNonBlocking;
+                this.backgroundDrawable = newDrawable;
             }
-            float themeAnimationValue = ((BaseFragment) EditWidgetActivity.this).parentLayout.getThemeAnimationValue();
-            int i = 0;
-            while (i < 2) {
-                Drawable drawable = i == 0 ? this.oldBackgroundDrawable : this.backgroundDrawable;
-                if (drawable != null) {
-                    if (i == 1 && this.oldBackgroundDrawable != null && ((BaseFragment) EditWidgetActivity.this).parentLayout != null) {
-                        drawable.setAlpha((int) (255.0f * themeAnimationValue));
+            float themeAnimationValue = EditWidgetActivity.this.parentLayout.getThemeAnimationValue();
+            int a2 = 0;
+            while (a2 < 2) {
+                Drawable drawable2 = a2 == 0 ? this.oldBackgroundDrawable : this.backgroundDrawable;
+                if (drawable2 == null) {
+                    a = a2;
+                } else {
+                    if (a2 == 1 && this.oldBackgroundDrawable != null && EditWidgetActivity.this.parentLayout != null) {
+                        drawable2.setAlpha((int) (255.0f * themeAnimationValue));
                     } else {
-                        drawable.setAlpha(255);
+                        drawable2.setAlpha(255);
                     }
-                    if ((drawable instanceof ColorDrawable) || (drawable instanceof GradientDrawable) || (drawable instanceof MotionBackgroundDrawable)) {
-                        drawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                        if (drawable instanceof BackgroundGradientDrawable) {
-                            this.backgroundGradientDisposable = ((BackgroundGradientDrawable) drawable).drawExactBoundsSize(canvas, this);
+                    if ((drawable2 instanceof ColorDrawable) || (drawable2 instanceof GradientDrawable)) {
+                        a = a2;
+                    } else if (drawable2 instanceof MotionBackgroundDrawable) {
+                        a = a2;
+                    } else {
+                        if (!(drawable2 instanceof BitmapDrawable)) {
+                            a = a2;
                         } else {
-                            drawable.draw(canvas);
+                            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable2;
+                            if (bitmapDrawable.getTileModeX() == Shader.TileMode.REPEAT) {
+                                canvas.save();
+                                float scale = 2.0f / AndroidUtilities.density;
+                                canvas.scale(scale, scale);
+                                drawable2.setBounds(0, 0, (int) Math.ceil(getMeasuredWidth() / scale), (int) Math.ceil(getMeasuredHeight() / scale));
+                                a = a2;
+                            } else {
+                                int viewHeight = getMeasuredHeight();
+                                float scaleX = getMeasuredWidth() / drawable2.getIntrinsicWidth();
+                                float scaleY = viewHeight / drawable2.getIntrinsicHeight();
+                                float scale2 = Math.max(scaleX, scaleY);
+                                int width = (int) Math.ceil(drawable2.getIntrinsicWidth() * scale2);
+                                a = a2;
+                                int height = (int) Math.ceil(drawable2.getIntrinsicHeight() * scale2);
+                                int x = (getMeasuredWidth() - width) / 2;
+                                int y = (viewHeight - height) / 2;
+                                canvas.save();
+                                canvas.clipRect(0, 0, width, getMeasuredHeight());
+                                drawable2.setBounds(x, y, x + width, y + height);
+                            }
+                            drawable2.draw(canvas);
+                            canvas.restore();
                         }
-                    } else if (drawable instanceof BitmapDrawable) {
-                        if (((BitmapDrawable) drawable).getTileModeX() == Shader.TileMode.REPEAT) {
-                            canvas.save();
-                            float f = 2.0f / AndroidUtilities.density;
-                            canvas.scale(f, f);
-                            drawable.setBounds(0, 0, (int) Math.ceil(getMeasuredWidth() / f), (int) Math.ceil(getMeasuredHeight() / f));
-                        } else {
-                            int measuredHeight = getMeasuredHeight();
-                            float max = Math.max(getMeasuredWidth() / drawable.getIntrinsicWidth(), measuredHeight / drawable.getIntrinsicHeight());
-                            int ceil = (int) Math.ceil(drawable.getIntrinsicWidth() * max);
-                            int ceil2 = (int) Math.ceil(drawable.getIntrinsicHeight() * max);
-                            int measuredWidth = (getMeasuredWidth() - ceil) / 2;
-                            int i2 = (measuredHeight - ceil2) / 2;
-                            canvas.save();
-                            canvas.clipRect(0, 0, ceil, getMeasuredHeight());
-                            drawable.setBounds(measuredWidth, i2, ceil + measuredWidth, ceil2 + i2);
+                        if (a != 0 && this.oldBackgroundDrawable != null && themeAnimationValue >= 1.0f) {
+                            BackgroundGradientDrawable.Disposable disposable2 = this.oldBackgroundGradientDisposable;
+                            if (disposable2 == null) {
+                                drawable = null;
+                            } else {
+                                disposable2.dispose();
+                                drawable = null;
+                                this.oldBackgroundGradientDisposable = null;
+                            }
+                            this.oldBackgroundDrawable = drawable;
+                            invalidate();
                         }
-                        drawable.draw(canvas);
-                        canvas.restore();
                     }
-                    if (i == 0 && this.oldBackgroundDrawable != null && themeAnimationValue >= 1.0f) {
-                        BackgroundGradientDrawable.Disposable disposable2 = this.oldBackgroundGradientDisposable;
-                        if (disposable2 != null) {
-                            disposable2.dispose();
-                            this.oldBackgroundGradientDisposable = null;
-                        }
-                        this.oldBackgroundDrawable = null;
-                        invalidate();
+                    drawable2.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                    if (drawable2 instanceof BackgroundGradientDrawable) {
+                        BackgroundGradientDrawable backgroundGradientDrawable = (BackgroundGradientDrawable) drawable2;
+                        this.backgroundGradientDisposable = backgroundGradientDrawable.drawExactBoundsSize(canvas, this);
+                    } else {
+                        drawable2.draw(canvas);
+                    }
+                    if (a != 0) {
                     }
                 }
-                i++;
+                a2 = a + 1;
             }
             this.shadowDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
             this.shadowDrawable.draw(canvas);
@@ -343,16 +341,35 @@ public class EditWidgetActivity extends BaseFragment {
                 this.oldBackgroundGradientDisposable = null;
             }
         }
+
+        @Override // android.view.ViewGroup
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            return false;
+        }
+
+        @Override // android.view.ViewGroup, android.view.View
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            return false;
+        }
+
+        @Override // android.view.ViewGroup, android.view.View
+        protected void dispatchSetPressed(boolean pressed) {
+        }
+
+        @Override // android.view.View
+        public boolean onTouchEvent(MotionEvent event) {
+            return false;
+        }
     }
 
-    public EditWidgetActivity(int i, int i2) {
-        this.widgetType = i;
-        this.currentWidgetId = i2;
-        ArrayList<TLRPC$User> arrayList = new ArrayList<>();
-        ArrayList<TLRPC$Chat> arrayList2 = new ArrayList<>();
-        getMessagesStorage().getWidgetDialogIds(this.currentWidgetId, this.widgetType, this.selectedDialogs, arrayList, arrayList2, true);
-        getMessagesController().putUsers(arrayList, true);
-        getMessagesController().putChats(arrayList2, true);
+    public EditWidgetActivity(int type, int widgetId) {
+        this.widgetType = type;
+        this.currentWidgetId = widgetId;
+        ArrayList<TLRPC.User> users = new ArrayList<>();
+        ArrayList<TLRPC.Chat> chats = new ArrayList<>();
+        getMessagesStorage().getWidgetDialogIds(this.currentWidgetId, this.widgetType, this.selectedDialogs, users, chats, true);
+        getMessagesController().putUsers(users, true);
+        getMessagesController().putChats(chats, true);
         updateRows();
     }
 
@@ -405,23 +422,24 @@ public class EditWidgetActivity extends BaseFragment {
         } else {
             this.actionBar.setTitle(LocaleController.getString("WidgetShortcuts", R.string.WidgetShortcuts));
         }
-        this.actionBar.createMenu().addItem(1, LocaleController.getString("Done", R.string.Done).toUpperCase());
+        ActionBarMenu menu = this.actionBar.createMenu();
+        menu.addItem(1, LocaleController.getString("Done", R.string.Done).toUpperCase());
         this.actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() { // from class: org.telegram.ui.EditWidgetActivity.1
             @Override // org.telegram.ui.ActionBar.ActionBar.ActionBarMenuOnItemClick
-            public void onItemClick(int i) {
-                if (i == -1) {
+            public void onItemClick(int id) {
+                if (id == -1) {
                     if (EditWidgetActivity.this.delegate == null) {
                         EditWidgetActivity.this.finishActivity();
                     } else {
                         EditWidgetActivity.this.finishFragment();
                     }
-                } else if (i != 1 || EditWidgetActivity.this.getParentActivity() == null) {
-                } else {
+                } else if (id == 1 && EditWidgetActivity.this.getParentActivity() != null) {
                     EditWidgetActivity.this.getMessagesStorage().putWidgetDialogs(EditWidgetActivity.this.currentWidgetId, EditWidgetActivity.this.selectedDialogs);
-                    SharedPreferences.Editor edit = EditWidgetActivity.this.getParentActivity().getSharedPreferences("shortcut_widget", 0).edit();
-                    edit.putInt("account" + EditWidgetActivity.this.currentWidgetId, ((BaseFragment) EditWidgetActivity.this).currentAccount);
-                    edit.putInt("type" + EditWidgetActivity.this.currentWidgetId, EditWidgetActivity.this.widgetType);
-                    edit.commit();
+                    SharedPreferences preferences = EditWidgetActivity.this.getParentActivity().getSharedPreferences("shortcut_widget", 0);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt("account" + EditWidgetActivity.this.currentWidgetId, EditWidgetActivity.this.currentAccount);
+                    editor.putInt(CommonProperties.TYPE + EditWidgetActivity.this.currentWidgetId, EditWidgetActivity.this.widgetType);
+                    editor.commit();
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(EditWidgetActivity.this.getParentActivity());
                     if (EditWidgetActivity.this.widgetType == 0) {
                         ChatsWidgetProvider.updateWidget(EditWidgetActivity.this.getParentActivity(), appWidgetManager, EditWidgetActivity.this.currentWidgetId);
@@ -438,7 +456,7 @@ public class EditWidgetActivity extends BaseFragment {
         });
         this.listAdapter = new ListAdapter(context);
         FrameLayout frameLayout = new FrameLayout(context);
-        frameLayout.setBackgroundColor(Theme.getColor("windowBackgroundGray"));
+        frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
         this.fragmentView = frameLayout;
         RecyclerListView recyclerListView = new RecyclerListView(context);
         this.listView = recyclerListView;
@@ -453,30 +471,32 @@ public class EditWidgetActivity extends BaseFragment {
         this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.EditWidgetActivity$$ExternalSyntheticLambda2
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
             public final void onItemClick(View view, int i) {
-                EditWidgetActivity.this.lambda$createView$1(context, view, i);
+                EditWidgetActivity.this.m3402lambda$createView$1$orgtelegramuiEditWidgetActivity(context, view, i);
             }
         });
         this.listView.setOnItemLongClickListener(new AnonymousClass2());
         return this.fragmentView;
     }
 
-    public /* synthetic */ void lambda$createView$1(Context context, View view, int i) {
-        if (i == this.selectChatsRow) {
-            InviteMembersBottomSheet inviteMembersBottomSheet = new InviteMembersBottomSheet(context, this.currentAccount, null, 0L, this, null);
-            inviteMembersBottomSheet.setDelegate(new InviteMembersBottomSheet.InviteMembersBottomSheetDelegate() { // from class: org.telegram.ui.EditWidgetActivity$$ExternalSyntheticLambda1
+    /* renamed from: lambda$createView$1$org-telegram-ui-EditWidgetActivity */
+    public /* synthetic */ void m3402lambda$createView$1$orgtelegramuiEditWidgetActivity(Context context, View view, int position) {
+        if (position == this.selectChatsRow) {
+            InviteMembersBottomSheet bottomSheet = new InviteMembersBottomSheet(context, this.currentAccount, null, 0L, this, null);
+            bottomSheet.setDelegate(new InviteMembersBottomSheet.InviteMembersBottomSheetDelegate() { // from class: org.telegram.ui.EditWidgetActivity$$ExternalSyntheticLambda1
                 @Override // org.telegram.ui.Components.InviteMembersBottomSheet.InviteMembersBottomSheetDelegate
                 public final void didSelectDialogs(ArrayList arrayList) {
-                    EditWidgetActivity.this.lambda$createView$0(arrayList);
+                    EditWidgetActivity.this.m3401lambda$createView$0$orgtelegramuiEditWidgetActivity(arrayList);
                 }
             }, this.selectedDialogs);
-            inviteMembersBottomSheet.setSelectedContacts(this.selectedDialogs);
-            showDialog(inviteMembersBottomSheet);
+            bottomSheet.setSelectedContacts(this.selectedDialogs);
+            showDialog(bottomSheet);
         }
     }
 
-    public /* synthetic */ void lambda$createView$0(ArrayList arrayList) {
+    /* renamed from: lambda$createView$0$org-telegram-ui-EditWidgetActivity */
+    public /* synthetic */ void m3401lambda$createView$0$orgtelegramuiEditWidgetActivity(ArrayList dids) {
         this.selectedDialogs.clear();
-        this.selectedDialogs.addAll(arrayList);
+        this.selectedDialogs.addAll(dids);
         updateRows();
         WidgetPreviewCell widgetPreviewCell = this.widgetPreviewCell;
         if (widgetPreviewCell != null) {
@@ -485,50 +505,53 @@ public class EditWidgetActivity extends BaseFragment {
     }
 
     /* renamed from: org.telegram.ui.EditWidgetActivity$2 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class AnonymousClass2 implements RecyclerListView.OnItemLongClickListenerExtended {
         private Rect rect = new Rect();
 
+        AnonymousClass2() {
+            EditWidgetActivity.this = this$0;
+        }
+
+        @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListenerExtended
+        public boolean onItemClick(View view, final int position, float x, float y) {
+            if (EditWidgetActivity.this.getParentActivity() == null || !(view instanceof GroupCreateUserCell)) {
+                return false;
+            }
+            ImageView imageView = (ImageView) view.getTag(R.id.object_tag);
+            imageView.getHitRect(this.rect);
+            if (this.rect.contains((int) x, (int) y)) {
+                return false;
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(EditWidgetActivity.this.getParentActivity());
+            CharSequence[] items = {LocaleController.getString("Delete", R.string.Delete)};
+            builder.setItems(items, new DialogInterface.OnClickListener() { // from class: org.telegram.ui.EditWidgetActivity$2$$ExternalSyntheticLambda0
+                @Override // android.content.DialogInterface.OnClickListener
+                public final void onClick(DialogInterface dialogInterface, int i) {
+                    EditWidgetActivity.AnonymousClass2.this.m3403lambda$onItemClick$0$orgtelegramuiEditWidgetActivity$2(position, dialogInterface, i);
+                }
+            });
+            EditWidgetActivity.this.showDialog(builder.create());
+            return true;
+        }
+
+        /* renamed from: lambda$onItemClick$0$org-telegram-ui-EditWidgetActivity$2 */
+        public /* synthetic */ void m3403lambda$onItemClick$0$orgtelegramuiEditWidgetActivity$2(int position, DialogInterface dialogInterface, int i) {
+            if (i == 0) {
+                EditWidgetActivity.this.selectedDialogs.remove(position - EditWidgetActivity.this.chatsStartRow);
+                EditWidgetActivity.this.updateRows();
+                if (EditWidgetActivity.this.widgetPreviewCell != null) {
+                    EditWidgetActivity.this.widgetPreviewCell.updateDialogs();
+                }
+            }
+        }
+
+        @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListenerExtended
+        public void onMove(float dx, float dy) {
+        }
+
         @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListenerExtended
         public void onLongClickRelease() {
-        }
-
-        @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListenerExtended
-        public void onMove(float f, float f2) {
-        }
-
-        AnonymousClass2() {
-            EditWidgetActivity.this = r1;
-        }
-
-        @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListenerExtended
-        public boolean onItemClick(View view, final int i, float f, float f2) {
-            if (EditWidgetActivity.this.getParentActivity() != null && (view instanceof GroupCreateUserCell)) {
-                ((ImageView) view.getTag(R.id.object_tag)).getHitRect(this.rect);
-                if (!this.rect.contains((int) f, (int) f2)) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(EditWidgetActivity.this.getParentActivity());
-                    builder.setItems(new CharSequence[]{LocaleController.getString("Delete", R.string.Delete)}, new DialogInterface.OnClickListener() { // from class: org.telegram.ui.EditWidgetActivity$2$$ExternalSyntheticLambda0
-                        @Override // android.content.DialogInterface.OnClickListener
-                        public final void onClick(DialogInterface dialogInterface, int i2) {
-                            EditWidgetActivity.AnonymousClass2.this.lambda$onItemClick$0(i, dialogInterface, i2);
-                        }
-                    });
-                    EditWidgetActivity.this.showDialog(builder.create());
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public /* synthetic */ void lambda$onItemClick$0(int i, DialogInterface dialogInterface, int i2) {
-            if (i2 == 0) {
-                EditWidgetActivity.this.selectedDialogs.remove(i - EditWidgetActivity.this.chatsStartRow);
-                EditWidgetActivity.this.updateRows();
-                if (EditWidgetActivity.this.widgetPreviewCell == null) {
-                    return;
-                }
-                EditWidgetActivity.this.widgetPreviewCell.updateDialogs();
-            }
         }
     }
 
@@ -545,7 +568,7 @@ public class EditWidgetActivity extends BaseFragment {
         }, 1000L);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class ListAdapter extends RecyclerListView.SelectionAdapter {
         private Context mContext;
 
@@ -560,139 +583,158 @@ public class EditWidgetActivity extends BaseFragment {
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            int itemViewType = viewHolder.getItemViewType();
-            return itemViewType == 1 || itemViewType == 3;
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            int type = holder.getItemViewType();
+            return type == 1 || type == 3;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            GroupCreateUserCell groupCreateUserCell;
-            if (i == 0) {
-                TextInfoPrivacyCell textInfoPrivacyCell = new TextInfoPrivacyCell(this.mContext);
-                textInfoPrivacyCell.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider_bottom, "windowBackgroundGrayShadow"));
-                groupCreateUserCell = textInfoPrivacyCell;
-            } else if (i == 1) {
-                TextCell textCell = new TextCell(this.mContext);
-                textCell.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
-                groupCreateUserCell = textCell;
-            } else if (i == 2) {
-                groupCreateUserCell = EditWidgetActivity.this.widgetPreviewCell = new WidgetPreviewCell(this.mContext);
-            } else {
-                final GroupCreateUserCell groupCreateUserCell2 = new GroupCreateUserCell(this.mContext, 0, 0, false);
-                ImageView imageView = new ImageView(this.mContext);
-                imageView.setImageResource(R.drawable.list_reorder);
-                imageView.setScaleType(ImageView.ScaleType.CENTER);
-                groupCreateUserCell2.setTag(R.id.object_tag, imageView);
-                groupCreateUserCell2.addView(imageView, LayoutHelper.createFrame(40, -1.0f, (LocaleController.isRTL ? 3 : 5) | 16, 10.0f, 0.0f, 10.0f, 0.0f));
-                imageView.setOnTouchListener(new View.OnTouchListener() { // from class: org.telegram.ui.EditWidgetActivity$ListAdapter$$ExternalSyntheticLambda0
-                    @Override // android.view.View.OnTouchListener
-                    public final boolean onTouch(View view, MotionEvent motionEvent) {
-                        boolean lambda$onCreateViewHolder$0;
-                        lambda$onCreateViewHolder$0 = EditWidgetActivity.ListAdapter.this.lambda$onCreateViewHolder$0(groupCreateUserCell2, view, motionEvent);
-                        return lambda$onCreateViewHolder$0;
-                    }
-                });
-                imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor("chats_pinnedIcon"), PorterDuff.Mode.MULTIPLY));
-                groupCreateUserCell = groupCreateUserCell2;
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            GroupCreateUserCell cell;
+            switch (viewType) {
+                case 0:
+                    TextInfoPrivacyCell textInfoPrivacyCell = new TextInfoPrivacyCell(this.mContext);
+                    textInfoPrivacyCell.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                    cell = textInfoPrivacyCell;
+                    break;
+                case 1:
+                    TextCell textCell = new TextCell(this.mContext);
+                    textCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    cell = textCell;
+                    break;
+                case 2:
+                    cell = EditWidgetActivity.this.widgetPreviewCell = new WidgetPreviewCell(this.mContext);
+                    break;
+                default:
+                    final GroupCreateUserCell cell2 = new GroupCreateUserCell(this.mContext, 0, 0, false);
+                    ImageView sortImageView = new ImageView(this.mContext);
+                    sortImageView.setImageResource(R.drawable.list_reorder);
+                    sortImageView.setScaleType(ImageView.ScaleType.CENTER);
+                    cell2.setTag(R.id.object_tag, sortImageView);
+                    cell2.addView(sortImageView, LayoutHelper.createFrame(40, -1.0f, (LocaleController.isRTL ? 3 : 5) | 16, 10.0f, 0.0f, 10.0f, 0.0f));
+                    sortImageView.setOnTouchListener(new View.OnTouchListener() { // from class: org.telegram.ui.EditWidgetActivity$ListAdapter$$ExternalSyntheticLambda0
+                        @Override // android.view.View.OnTouchListener
+                        public final boolean onTouch(View view, MotionEvent motionEvent) {
+                            return EditWidgetActivity.ListAdapter.this.m3404x37efab4f(cell2, view, motionEvent);
+                        }
+                    });
+                    sortImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_pinnedIcon), PorterDuff.Mode.MULTIPLY));
+                    cell = cell2;
+                    break;
             }
-            return new RecyclerListView.Holder(groupCreateUserCell);
+            return new RecyclerListView.Holder(cell);
         }
 
-        public /* synthetic */ boolean lambda$onCreateViewHolder$0(GroupCreateUserCell groupCreateUserCell, View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == 0) {
-                EditWidgetActivity.this.itemTouchHelper.startDrag(EditWidgetActivity.this.listView.getChildViewHolder(groupCreateUserCell));
+        /* renamed from: lambda$onCreateViewHolder$0$org-telegram-ui-EditWidgetActivity$ListAdapter */
+        public /* synthetic */ boolean m3404x37efab4f(GroupCreateUserCell cell, View v, MotionEvent event) {
+            if (event.getAction() == 0) {
+                EditWidgetActivity.this.itemTouchHelper.startDrag(EditWidgetActivity.this.listView.getChildViewHolder(cell));
                 return false;
             }
             return false;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            int itemViewType = viewHolder.getItemViewType();
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             boolean z = true;
-            if (itemViewType == 0) {
-                TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) viewHolder.itemView;
-                if (i != EditWidgetActivity.this.infoRow) {
-                    return;
-                }
-                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-                if (EditWidgetActivity.this.widgetType != 0) {
-                    if (EditWidgetActivity.this.widgetType == 1) {
-                        spannableStringBuilder.append((CharSequence) LocaleController.getString("EditWidgetContactsInfo", R.string.EditWidgetContactsInfo));
+            switch (holder.getItemViewType()) {
+                case 0:
+                    TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
+                    if (position == EditWidgetActivity.this.infoRow) {
+                        SpannableStringBuilder builder = new SpannableStringBuilder();
+                        if (EditWidgetActivity.this.widgetType != 0) {
+                            if (EditWidgetActivity.this.widgetType == 1) {
+                                builder.append((CharSequence) LocaleController.getString("EditWidgetContactsInfo", R.string.EditWidgetContactsInfo));
+                            }
+                        } else {
+                            builder.append((CharSequence) LocaleController.getString("EditWidgetChatsInfo", R.string.EditWidgetChatsInfo));
+                        }
+                        if (SharedConfig.passcodeHash.length() > 0) {
+                            builder.append((CharSequence) "\n\n").append((CharSequence) AndroidUtilities.replaceTags(LocaleController.getString("WidgetPasscode2", R.string.WidgetPasscode2)));
+                        }
+                        cell.setText(builder);
+                        return;
                     }
-                } else {
-                    spannableStringBuilder.append((CharSequence) LocaleController.getString("EditWidgetChatsInfo", R.string.EditWidgetChatsInfo));
-                }
-                if (SharedConfig.passcodeHash.length() > 0) {
-                    spannableStringBuilder.append((CharSequence) "\n\n").append((CharSequence) AndroidUtilities.replaceTags(LocaleController.getString("WidgetPasscode2", R.string.WidgetPasscode2)));
-                }
-                textInfoPrivacyCell.setText(spannableStringBuilder);
-            } else if (itemViewType == 1) {
-                TextCell textCell = (TextCell) viewHolder.itemView;
-                textCell.setColors(null, "windowBackgroundWhiteBlueText4");
-                Drawable drawable = this.mContext.getResources().getDrawable(R.drawable.poll_add_circle);
-                Drawable drawable2 = this.mContext.getResources().getDrawable(R.drawable.poll_add_plus);
-                drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor("switchTrackChecked"), PorterDuff.Mode.MULTIPLY));
-                drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor("checkboxCheck"), PorterDuff.Mode.MULTIPLY));
-                CombinedDrawable combinedDrawable = new CombinedDrawable(drawable, drawable2);
-                String string = LocaleController.getString("SelectChats", R.string.SelectChats);
-                if (EditWidgetActivity.this.chatsStartRow == -1) {
-                    z = false;
-                }
-                textCell.setTextAndIcon(string, combinedDrawable, z);
-                textCell.getImageView().setPadding(0, AndroidUtilities.dp(7.0f), 0, 0);
-            } else if (itemViewType != 3) {
-            } else {
-                GroupCreateUserCell groupCreateUserCell = (GroupCreateUserCell) viewHolder.itemView;
-                long longValue = ((Long) EditWidgetActivity.this.selectedDialogs.get(i - EditWidgetActivity.this.chatsStartRow)).longValue();
-                if (DialogObject.isUserDialog(longValue)) {
-                    TLRPC$User user = EditWidgetActivity.this.getMessagesController().getUser(Long.valueOf(longValue));
-                    if (i == EditWidgetActivity.this.chatsEndRow - 1) {
+                    return;
+                case 1:
+                    TextCell cell2 = (TextCell) holder.itemView;
+                    cell2.setColors(null, Theme.key_windowBackgroundWhiteBlueText4);
+                    Drawable drawable1 = this.mContext.getResources().getDrawable(R.drawable.poll_add_circle);
+                    Drawable drawable2 = this.mContext.getResources().getDrawable(R.drawable.poll_add_plus);
+                    drawable1.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
+                    drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_checkboxCheck), PorterDuff.Mode.MULTIPLY));
+                    CombinedDrawable combinedDrawable = new CombinedDrawable(drawable1, drawable2);
+                    String string = LocaleController.getString("SelectChats", R.string.SelectChats);
+                    if (EditWidgetActivity.this.chatsStartRow == -1) {
                         z = false;
                     }
-                    groupCreateUserCell.setObject(user, null, null, z);
+                    cell2.setTextAndIcon(string, combinedDrawable, z);
+                    cell2.getImageView().setPadding(0, AndroidUtilities.dp(7.0f), 0, 0);
                     return;
-                }
-                TLRPC$Chat chat = EditWidgetActivity.this.getMessagesController().getChat(Long.valueOf(-longValue));
-                if (i == EditWidgetActivity.this.chatsEndRow - 1) {
-                    z = false;
-                }
-                groupCreateUserCell.setObject(chat, null, null, z);
+                case 2:
+                default:
+                    return;
+                case 3:
+                    GroupCreateUserCell cell3 = (GroupCreateUserCell) holder.itemView;
+                    long did = ((Long) EditWidgetActivity.this.selectedDialogs.get(position - EditWidgetActivity.this.chatsStartRow)).longValue();
+                    if (DialogObject.isUserDialog(did)) {
+                        TLRPC.User user = EditWidgetActivity.this.getMessagesController().getUser(Long.valueOf(did));
+                        if (position == EditWidgetActivity.this.chatsEndRow - 1) {
+                            z = false;
+                        }
+                        cell3.setObject(user, null, null, z);
+                        return;
+                    }
+                    TLRPC.Chat chat = EditWidgetActivity.this.getMessagesController().getChat(Long.valueOf(-did));
+                    if (position == EditWidgetActivity.this.chatsEndRow - 1) {
+                        z = false;
+                    }
+                    cell3.setObject(chat, null, null, z);
+                    return;
             }
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onViewAttachedToWindow(RecyclerView.ViewHolder viewHolder) {
-            int itemViewType = viewHolder.getItemViewType();
-            if (itemViewType == 3 || itemViewType == 1) {
-                viewHolder.itemView.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
+        public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+            int type = holder.getItemViewType();
+            if (type == 3 || type == 1) {
+                holder.itemView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
             }
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int i) {
-            if (i == EditWidgetActivity.this.previewRow) {
-                return 2;
-            }
-            if (i == EditWidgetActivity.this.selectChatsRow) {
+        public int getItemViewType(int position) {
+            if (position != EditWidgetActivity.this.previewRow) {
+                if (position != EditWidgetActivity.this.selectChatsRow) {
+                    if (position == EditWidgetActivity.this.infoRow) {
+                        return 0;
+                    }
+                    return 3;
+                }
                 return 1;
             }
-            return i == EditWidgetActivity.this.infoRow ? 0 : 3;
+            return 2;
         }
 
-        public boolean swapElements(int i, int i2) {
-            int i3 = i - EditWidgetActivity.this.chatsStartRow;
-            int i4 = i2 - EditWidgetActivity.this.chatsStartRow;
-            int i5 = EditWidgetActivity.this.chatsEndRow - EditWidgetActivity.this.chatsStartRow;
-            if (i3 < 0 || i4 < 0 || i3 >= i5 || i4 >= i5) {
-                return false;
+        public boolean swapElements(int fromIndex, int toIndex) {
+            int idx1 = fromIndex - EditWidgetActivity.this.chatsStartRow;
+            int idx2 = toIndex - EditWidgetActivity.this.chatsStartRow;
+            int count = EditWidgetActivity.this.chatsEndRow - EditWidgetActivity.this.chatsStartRow;
+            if (idx1 >= 0 && idx2 >= 0 && idx1 < count && idx2 < count) {
+                Long did1 = (Long) EditWidgetActivity.this.selectedDialogs.get(idx1);
+                Long did2 = (Long) EditWidgetActivity.this.selectedDialogs.get(idx2);
+                EditWidgetActivity.this.selectedDialogs.set(idx1, did2);
+                EditWidgetActivity.this.selectedDialogs.set(idx2, did1);
+                notifyItemMoved(fromIndex, toIndex);
+                return true;
             }
-            EditWidgetActivity.this.selectedDialogs.set(i3, (Long) EditWidgetActivity.this.selectedDialogs.get(i4));
-            EditWidgetActivity.this.selectedDialogs.set(i4, (Long) EditWidgetActivity.this.selectedDialogs.get(i3));
-            notifyItemMoved(i, i2);
-            return true;
+            return false;
         }
+    }
+
+    @Override // org.telegram.ui.ActionBar.BaseFragment
+    public boolean isSwipeBackEnabled(MotionEvent event) {
+        return false;
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
@@ -706,23 +748,23 @@ public class EditWidgetActivity extends BaseFragment {
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public ArrayList<ThemeDescription> getThemeDescriptions() {
-        ArrayList<ThemeDescription> arrayList = new ArrayList<>();
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextCell.class}, null, null, null, "windowBackgroundWhite"));
-        arrayList.add(new ThemeDescription(this.fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "windowBackgroundGray"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "actionBarDefault"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, "actionBarDefault"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, "actionBarDefaultIcon"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, "actionBarDefaultTitle"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, "actionBarDefaultSelector"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SUBMENUBACKGROUND, null, null, null, null, "actionBarDefaultSubmenuBackground"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SUBMENUITEM, null, null, null, null, "actionBarDefaultSubmenuItem"));
-        arrayList.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SUBMENUITEM | ThemeDescription.FLAG_IMAGECOLOR, null, null, null, null, "actionBarDefaultSubmenuItemIcon"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, "listSelectorSDK21"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, "divider"));
-        arrayList.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{TextInfoPrivacyCell.class}, null, null, null, "windowBackgroundGrayShadow"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextInfoPrivacyCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteGrayText4"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlueText4"));
-        arrayList.add(new ThemeDescription(this.listView, 0, new Class[]{TextCell.class}, new String[]{"imageView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, "windowBackgroundWhiteBlueText4"));
-        return arrayList;
+        ArrayList<ThemeDescription> themeDescriptions = new ArrayList<>();
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
+        themeDescriptions.add(new ThemeDescription(this.fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundGray));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, Theme.key_actionBarDefaultSelector));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SUBMENUBACKGROUND, null, null, null, null, Theme.key_actionBarDefaultSubmenuBackground));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SUBMENUITEM, null, null, null, null, Theme.key_actionBarDefaultSubmenuItem));
+        themeDescriptions.add(new ThemeDescription(this.actionBar, ThemeDescription.FLAG_AB_SUBMENUITEM | ThemeDescription.FLAG_IMAGECOLOR, null, null, null, null, Theme.key_actionBarDefaultSubmenuItemIcon));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, Theme.key_listSelector));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, Theme.key_divider));
+        themeDescriptions.add(new ThemeDescription(this.listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{TextInfoPrivacyCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextInfoPrivacyCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteGrayText4));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextCell.class}, new String[]{"textView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlueText4));
+        themeDescriptions.add(new ThemeDescription(this.listView, 0, new Class[]{TextCell.class}, new String[]{"imageView"}, (Paint[]) null, (Drawable[]) null, (ThemeDescription.ThemeDescriptionDelegate) null, Theme.key_windowBackgroundWhiteBlueText4));
+        return themeDescriptions;
     }
 }

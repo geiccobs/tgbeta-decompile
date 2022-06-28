@@ -1,10 +1,9 @@
 package com.google.android.gms.internal.clearcut;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.UserManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzaa {
     private static volatile UserManager zzdc;
     private static volatile boolean zzdd = !zzf();
@@ -20,7 +19,6 @@ public class zzaa {
         return Build.VERSION.SDK_INT >= 24;
     }
 
-    @TargetApi(24)
     private static boolean zzf(Context context) {
         boolean z = zzdd;
         if (!z) {

@@ -13,7 +13,7 @@ import com.google.android.gms.maps.model.RuntimeRemoteException;
 import java.util.ArrayList;
 import java.util.List;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzah extends DeferredLifecycleHelper<zzag> {
     protected OnDelegateCreatedListener<zzag> zza;
     private final ViewGroup zzb;
@@ -34,23 +34,22 @@ final class zzah extends DeferredLifecycleHelper<zzag> {
     }
 
     public final void zza() {
-        if (this.zza == null || getDelegate() != null) {
-            return;
-        }
-        try {
-            MapsInitializer.initialize(this.zzc);
-            IMapViewDelegate zze = zzca.zza(this.zzc).zze(ObjectWrapper.wrap(this.zzc), this.zzd);
-            if (zze == null) {
-                return;
+        if (this.zza != null && getDelegate() == null) {
+            try {
+                MapsInitializer.initialize(this.zzc);
+                IMapViewDelegate zze = zzca.zza(this.zzc).zze(ObjectWrapper.wrap(this.zzc), this.zzd);
+                if (zze == null) {
+                    return;
+                }
+                this.zza.onDelegateCreated(new zzag(this.zzb, zze));
+                for (OnMapReadyCallback onMapReadyCallback : this.zze) {
+                    getDelegate().getMapAsync(onMapReadyCallback);
+                }
+                this.zze.clear();
+            } catch (RemoteException e) {
+                throw new RuntimeRemoteException(e);
+            } catch (GooglePlayServicesNotAvailableException e2) {
             }
-            this.zza.onDelegateCreated(new zzag(this.zzb, zze));
-            for (OnMapReadyCallback onMapReadyCallback : this.zze) {
-                getDelegate().getMapAsync(onMapReadyCallback);
-            }
-            this.zze.clear();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        } catch (GooglePlayServicesNotAvailableException unused) {
         }
     }
 

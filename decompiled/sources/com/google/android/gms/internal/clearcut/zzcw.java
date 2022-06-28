@@ -1,20 +1,21 @@
 package com.google.android.gms.internal.clearcut;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzcw extends zzav<String> implements zzcx, RandomAccess {
     private static final zzcw zzlq;
+    private static final zzcx zzlr;
     private final List<Object> zzls;
 
     static {
         zzcw zzcwVar = new zzcw();
         zzlq = zzcwVar;
         zzcwVar.zzv();
+        zzlr = zzcwVar;
     }
 
     public zzcw() {
@@ -33,11 +34,11 @@ public final class zzcw extends zzav<String> implements zzcx, RandomAccess {
         return obj instanceof String ? (String) obj : obj instanceof zzbb ? ((zzbb) obj).zzz() : zzci.zzf((byte[]) obj);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zzw();
         this.zzls.add(i, (String) obj);
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
@@ -47,7 +48,7 @@ public final class zzcw extends zzav<String> implements zzcx, RandomAccess {
             collection = ((zzcx) collection).zzbt();
         }
         boolean addAll = this.zzls.addAll(i, collection);
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return addAll;
     }
 
@@ -60,7 +61,12 @@ public final class zzcw extends zzav<String> implements zzcx, RandomAccess {
     public final void clear() {
         zzw();
         this.zzls.clear();
-        ((AbstractList) this).modCount++;
+        this.modCount++;
+    }
+
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.Collection, java.util.List
+    public final /* bridge */ /* synthetic */ boolean equals(Object obj) {
+        return super.equals(obj);
     }
 
     @Override // java.util.AbstractList, java.util.List
@@ -90,15 +96,35 @@ public final class zzcw extends zzav<String> implements zzcx, RandomAccess {
         return this.zzls.get(i);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.Collection, java.util.List
+    public final /* bridge */ /* synthetic */ int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzw();
         Object remove = this.zzls.remove(i);
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return zze(remove);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractCollection, java.util.Collection, java.util.List
+    public final /* bridge */ /* synthetic */ boolean remove(Object obj) {
+        return super.remove(obj);
+    }
+
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractCollection, java.util.Collection, java.util.List
+    public final /* bridge */ /* synthetic */ boolean removeAll(Collection collection) {
+        return super.removeAll(collection);
+    }
+
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractCollection, java.util.Collection, java.util.List
+    public final /* bridge */ /* synthetic */ boolean retainAll(Collection collection) {
+        return super.retainAll(collection);
+    }
+
+    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         zzw();
         return zze(this.zzls.set(i, (String) obj));
@@ -127,5 +153,10 @@ public final class zzcw extends zzav<String> implements zzcx, RandomAccess {
             return new zzcw(arrayList);
         }
         throw new IllegalArgumentException();
+    }
+
+    @Override // com.google.android.gms.internal.clearcut.zzav, com.google.android.gms.internal.clearcut.zzcn
+    public final /* bridge */ /* synthetic */ boolean zzu() {
+        return super.zzu();
     }
 }

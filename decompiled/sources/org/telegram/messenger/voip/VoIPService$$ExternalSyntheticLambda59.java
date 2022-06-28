@@ -1,5 +1,7 @@
 package org.telegram.messenger.voip;
-/* loaded from: classes.dex */
+
+import org.telegram.messenger.NotificationCenter;
+/* loaded from: classes4.dex */
 public final /* synthetic */ class VoIPService$$ExternalSyntheticLambda59 implements Runnable {
     public static final /* synthetic */ VoIPService$$ExternalSyntheticLambda59 INSTANCE = new VoIPService$$ExternalSyntheticLambda59();
 
@@ -8,6 +10,6 @@ public final /* synthetic */ class VoIPService$$ExternalSyntheticLambda59 implem
 
     @Override // java.lang.Runnable
     public final void run() {
-        VoIPService.lambda$onDestroy$64();
+        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didStartedCall, new Object[0]);
     }
 }

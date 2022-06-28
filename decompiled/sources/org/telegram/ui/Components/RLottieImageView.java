@@ -5,13 +5,14 @@ import android.widget.ImageView;
 import java.util.HashMap;
 import java.util.Map;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class RLottieImageView extends ImageView {
     private boolean attachedToWindow;
     private boolean autoRepeat;
     private RLottieDrawable drawable;
     private HashMap<String, Integer> layerColors;
     private boolean playing;
+    private boolean startOnAttach;
 
     public RLottieImageView(Context context) {
         super(context);
@@ -21,46 +22,46 @@ public class RLottieImageView extends ImageView {
         this.layerColors.clear();
     }
 
-    public void setLayerColor(String str, int i) {
+    public void setLayerColor(String layer, int color) {
         if (this.layerColors == null) {
             this.layerColors = new HashMap<>();
         }
-        this.layerColors.put(str, Integer.valueOf(i));
+        this.layerColors.put(layer, Integer.valueOf(color));
         RLottieDrawable rLottieDrawable = this.drawable;
         if (rLottieDrawable != null) {
-            rLottieDrawable.setLayerColor(str, i);
+            rLottieDrawable.setLayerColor(layer, color);
         }
     }
 
-    public void replaceColors(int[] iArr) {
+    public void replaceColors(int[] colors) {
         RLottieDrawable rLottieDrawable = this.drawable;
         if (rLottieDrawable != null) {
-            rLottieDrawable.replaceColors(iArr);
+            rLottieDrawable.replaceColors(colors);
         }
     }
 
-    public void setAnimation(int i, int i2, int i3) {
-        setAnimation(i, i2, i3, null);
+    public void setAnimation(int resId, int w, int h) {
+        setAnimation(resId, w, h, null);
     }
 
-    public void setAnimation(int i, int i2, int i3, int[] iArr) {
-        setAnimation(new RLottieDrawable(i, "" + i, AndroidUtilities.dp(i2), AndroidUtilities.dp(i3), false, iArr));
+    public void setAnimation(int resId, int w, int h, int[] colorReplacement) {
+        setAnimation(new RLottieDrawable(resId, "" + resId, AndroidUtilities.dp(w), AndroidUtilities.dp(h), false, colorReplacement));
     }
 
-    public void setOnAnimationEndListener(Runnable runnable) {
+    public void setOnAnimationEndListener(Runnable r) {
         RLottieDrawable rLottieDrawable = this.drawable;
         if (rLottieDrawable != null) {
-            rLottieDrawable.setOnAnimationEndListener(runnable);
+            rLottieDrawable.setOnAnimationEndListener(r);
         }
     }
 
-    public void setAnimation(RLottieDrawable rLottieDrawable) {
-        if (this.drawable == rLottieDrawable) {
+    public void setAnimation(RLottieDrawable lottieDrawable) {
+        if (this.drawable == lottieDrawable) {
             return;
         }
-        this.drawable = rLottieDrawable;
+        this.drawable = lottieDrawable;
         if (this.autoRepeat) {
-            rLottieDrawable.setAutoRepeat(1);
+            lottieDrawable.setAutoRepeat(1);
         }
         if (this.layerColors != null) {
             this.drawable.beginApplyLayerColors();
@@ -89,10 +90,9 @@ public class RLottieImageView extends ImageView {
         RLottieDrawable rLottieDrawable = this.drawable;
         if (rLottieDrawable != null) {
             rLottieDrawable.setCallback(this);
-            if (!this.playing) {
-                return;
+            if (this.playing) {
+                this.drawable.start();
             }
-            this.drawable.start();
         }
     }
 
@@ -111,21 +111,21 @@ public class RLottieImageView extends ImageView {
         return rLottieDrawable != null && rLottieDrawable.isRunning();
     }
 
-    public void setAutoRepeat(boolean z) {
-        this.autoRepeat = z;
+    public void setAutoRepeat(boolean repeat) {
+        this.autoRepeat = repeat;
     }
 
-    public void setProgress(float f) {
+    public void setProgress(float progress) {
         RLottieDrawable rLottieDrawable = this.drawable;
         if (rLottieDrawable == null) {
             return;
         }
-        rLottieDrawable.setProgress(f);
+        rLottieDrawable.setProgress(progress);
     }
 
     @Override // android.widget.ImageView
-    public void setImageResource(int i) {
-        super.setImageResource(i);
+    public void setImageResource(int resId) {
+        super.setImageResource(resId);
         this.drawable = null;
     }
 
@@ -135,10 +135,11 @@ public class RLottieImageView extends ImageView {
             return;
         }
         this.playing = true;
-        if (!this.attachedToWindow) {
-            return;
+        if (this.attachedToWindow) {
+            rLottieDrawable.start();
+        } else {
+            this.startOnAttach = true;
         }
-        rLottieDrawable.start();
     }
 
     public void stopAnimation() {
@@ -147,10 +148,11 @@ public class RLottieImageView extends ImageView {
             return;
         }
         this.playing = false;
-        if (!this.attachedToWindow) {
-            return;
+        if (this.attachedToWindow) {
+            rLottieDrawable.stop();
+        } else {
+            this.startOnAttach = false;
         }
-        rLottieDrawable.stop();
     }
 
     public RLottieDrawable getAnimatedDrawable() {

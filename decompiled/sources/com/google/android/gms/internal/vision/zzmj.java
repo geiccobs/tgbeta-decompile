@@ -1,13 +1,13 @@
 package com.google.android.gms.internal.vision;
 
-import org.telegram.tgnet.ConnectionsManager;
+import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzmj extends zzme {
-    /* JADX WARN: Code restructure failed: missing block: B:31:0x0061, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:31:0x0063, code lost:
         return -1;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:59:0x00b6, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:60:0x00be, code lost:
         return -1;
      */
     @Override // com.google.android.gms.internal.vision.zzme
@@ -17,7 +17,7 @@ final class zzmj extends zzme {
     */
     final int zza(int r16, byte[] r17, int r18, int r19) {
         /*
-            Method dump skipped, instructions count: 219
+            Method dump skipped, instructions count: 227
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.vision.zzmj.zza(int, byte[], int, int):int");
@@ -51,8 +51,36 @@ final class zzmj extends zzme {
             int i6 = i + 1;
             byte zza2 = zzma.zza(bArr, i);
             zzd = zzmf.zzd(zza2);
-            if (zzd) {
-                int i7 = i5 + 1;
+            if (!zzd) {
+                zze = zzmf.zze(zza2);
+                if (!zze) {
+                    zzf = zzmf.zzf(zza2);
+                    if (zzf) {
+                        if (i6 >= i3 - 1) {
+                            throw zzjk.zzh();
+                        }
+                        int i7 = i6 + 1;
+                        zzmf.zzb(zza2, zzma.zza(bArr, i6), zzma.zza(bArr, i7), cArr, i5);
+                        i = i7 + 1;
+                        i5++;
+                    } else if (i6 >= i3 - 2) {
+                        throw zzjk.zzh();
+                    } else {
+                        int i8 = i6 + 1;
+                        int i9 = i8 + 1;
+                        zzmf.zzb(zza2, zzma.zza(bArr, i6), zzma.zza(bArr, i8), zzma.zza(bArr, i9), cArr, i5);
+                        i = i9 + 1;
+                        i5 = i5 + 1 + 1;
+                    }
+                } else if (i6 >= i3) {
+                    throw zzjk.zzh();
+                } else {
+                    zzmf.zzb(zza2, zzma.zza(bArr, i6), cArr, i5);
+                    i = i6 + 1;
+                    i5++;
+                }
+            } else {
+                int i10 = i5 + 1;
                 zzmf.zzb(zza2, cArr, i5);
                 while (i6 < i3) {
                     byte zza3 = zzma.zza(bArr, i6);
@@ -61,40 +89,11 @@ final class zzmj extends zzme {
                         break;
                     }
                     i6++;
-                    zzmf.zzb(zza3, cArr, i7);
-                    i7++;
+                    zzmf.zzb(zza3, cArr, i10);
+                    i10++;
                 }
                 i = i6;
-                i5 = i7;
-            } else {
-                zze = zzmf.zze(zza2);
-                if (!zze) {
-                    zzf = zzmf.zzf(zza2);
-                    if (zzf) {
-                        if (i6 < i3 - 1) {
-                            int i8 = i6 + 1;
-                            zzmf.zzb(zza2, zzma.zza(bArr, i6), zzma.zza(bArr, i8), cArr, i5);
-                            i = i8 + 1;
-                            i5++;
-                        } else {
-                            throw zzjk.zzh();
-                        }
-                    } else if (i6 < i3 - 2) {
-                        int i9 = i6 + 1;
-                        int i10 = i9 + 1;
-                        zzmf.zzb(zza2, zzma.zza(bArr, i6), zzma.zza(bArr, i9), zzma.zza(bArr, i10), cArr, i5);
-                        i = i10 + 1;
-                        i5 = i5 + 1 + 1;
-                    } else {
-                        throw zzjk.zzh();
-                    }
-                } else if (i6 < i3) {
-                    zzmf.zzb(zza2, zzma.zza(bArr, i6), cArr, i5);
-                    i = i6 + 1;
-                    i5++;
-                } else {
-                    throw zzjk.zzh();
-                }
+                i5 = i10;
             }
         }
         return new String(cArr, 0, i5);
@@ -136,70 +135,61 @@ final class zzmj extends zzme {
         }
         while (i4 < length) {
             char charAt3 = charSequence.charAt(i4);
-            if (charAt3 >= c || j4 >= j5) {
-                if (charAt3 < 2048 && j4 <= j5 - 2) {
-                    long j6 = j4 + j;
-                    zzma.zza(bArr, j4, (byte) ((charAt3 >>> 6) | 960));
-                    zzma.zza(bArr, j6, (byte) ((charAt3 & '?') | ConnectionsManager.RequestFlagNeedQuickAck));
-                    j2 = j6 + j;
-                    j3 = j;
-                } else if ((charAt3 >= 55296 && 57343 >= charAt3) || j4 > j5 - 3) {
-                    if (j4 <= j5 - 4) {
-                        int i5 = i4 + 1;
-                        if (i5 != length) {
-                            char charAt4 = charSequence.charAt(i5);
-                            if (Character.isSurrogatePair(charAt3, charAt4)) {
-                                int codePoint = Character.toCodePoint(charAt3, charAt4);
-                                long j7 = j4 + 1;
-                                zzma.zza(bArr, j4, (byte) ((codePoint >>> 18) | 240));
-                                long j8 = j7 + 1;
-                                zzma.zza(bArr, j7, (byte) (((codePoint >>> 12) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                                long j9 = j8 + 1;
-                                zzma.zza(bArr, j8, (byte) (((codePoint >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                                j3 = 1;
-                                j2 = j9 + 1;
-                                zzma.zza(bArr, j9, (byte) ((codePoint & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                                i4 = i5;
-                            } else {
-                                i4 = i5;
-                            }
-                        }
-                        throw new zzmg(i4 - 1, length);
-                    } else if (55296 <= charAt3 && charAt3 <= 57343 && ((i3 = i4 + 1) == length || !Character.isSurrogatePair(charAt3, charSequence.charAt(i3)))) {
-                        throw new zzmg(i4, length);
-                    } else {
-                        StringBuilder sb2 = new StringBuilder(46);
-                        sb2.append("Failed writing ");
-                        sb2.append(charAt3);
-                        sb2.append(" at index ");
-                        sb2.append(j4);
-                        throw new ArrayIndexOutOfBoundsException(sb2.toString());
-                    }
-                } else {
-                    long j10 = j4 + j;
-                    zzma.zza(bArr, j4, (byte) ((charAt3 >>> '\f') | 480));
-                    long j11 = j10 + j;
-                    zzma.zza(bArr, j10, (byte) (((charAt3 >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                    zzma.zza(bArr, j11, (byte) ((charAt3 & '?') | ConnectionsManager.RequestFlagNeedQuickAck));
-                    j2 = j11 + 1;
-                    j3 = 1;
-                }
-                i4++;
-                c = 128;
-                long j12 = j3;
-                j4 = j2;
-                j = j12;
-            } else {
-                long j13 = j4 + j;
+            if (charAt3 < c && j4 < j5) {
+                long j6 = j4 + j;
                 zzma.zza(bArr, j4, (byte) charAt3);
                 j3 = j;
-                j2 = j13;
+                j2 = j6;
+            } else if (charAt3 < 2048 && j4 <= j5 - 2) {
+                long j7 = j4 + j;
+                zzma.zza(bArr, j4, (byte) ((charAt3 >>> 6) | 960));
+                zzma.zza(bArr, j7, (byte) ((charAt3 & '?') | 128));
+                j2 = j7 + j;
+                j3 = j;
+            } else if ((charAt3 < 55296 || 57343 < charAt3) && j4 <= j5 - 3) {
+                long j8 = j4 + j;
+                zzma.zza(bArr, j4, (byte) ((charAt3 >>> '\f') | 480));
+                long j9 = j8 + j;
+                zzma.zza(bArr, j8, (byte) (((charAt3 >>> 6) & 63) | 128));
+                zzma.zza(bArr, j9, (byte) ((charAt3 & '?') | 128));
+                j2 = j9 + 1;
+                j3 = 1;
+            } else if (j4 <= j5 - 4) {
+                int i5 = i4 + 1;
+                if (i5 != length) {
+                    char charAt4 = charSequence.charAt(i5);
+                    if (!Character.isSurrogatePair(charAt3, charAt4)) {
+                        i4 = i5;
+                    } else {
+                        int codePoint = Character.toCodePoint(charAt3, charAt4);
+                        long j10 = j4 + 1;
+                        zzma.zza(bArr, j4, (byte) ((codePoint >>> 18) | PsExtractor.VIDEO_STREAM_MASK));
+                        long j11 = j10 + 1;
+                        zzma.zza(bArr, j10, (byte) (((codePoint >>> 12) & 63) | 128));
+                        long j12 = j11 + 1;
+                        zzma.zza(bArr, j11, (byte) (((codePoint >>> 6) & 63) | 128));
+                        j3 = 1;
+                        j2 = j12 + 1;
+                        zzma.zza(bArr, j12, (byte) ((codePoint & 63) | 128));
+                        i4 = i5;
+                    }
+                }
+                throw new zzmg(i4 - 1, length);
+            } else if (55296 > charAt3 || charAt3 > 57343 || ((i3 = i4 + 1) != length && Character.isSurrogatePair(charAt3, charSequence.charAt(i3)))) {
+                StringBuilder sb2 = new StringBuilder(46);
+                sb2.append("Failed writing ");
+                sb2.append(charAt3);
+                sb2.append(" at index ");
+                sb2.append(j4);
+                throw new ArrayIndexOutOfBoundsException(sb2.toString());
+            } else {
+                throw new zzmg(i4, length);
             }
             i4++;
             c = 128;
-            long j122 = j3;
+            long j13 = j3;
             j4 = j2;
-            j = j122;
+            j = j13;
         }
         return (int) j4;
     }
@@ -208,17 +198,18 @@ final class zzmj extends zzme {
         int zzb;
         int zzb2;
         int zzb3;
-        if (i2 == 0) {
-            zzb = zzmd.zzb(i);
-            return zzb;
-        } else if (i2 == 1) {
-            zzb2 = zzmd.zzb(i, zzma.zza(bArr, j));
-            return zzb2;
-        } else if (i2 == 2) {
-            zzb3 = zzmd.zzb(i, zzma.zza(bArr, j), zzma.zza(bArr, j + 1));
-            return zzb3;
-        } else {
-            throw new AssertionError();
+        switch (i2) {
+            case 0:
+                zzb = zzmd.zzb(i);
+                return zzb;
+            case 1:
+                zzb2 = zzmd.zzb(i, zzma.zza(bArr, j));
+                return zzb2;
+            case 2:
+                zzb3 = zzmd.zzb(i, zzma.zza(bArr, j), zzma.zza(bArr, j + 1));
+                return zzb3;
+            default:
+                throw new AssertionError();
         }
     }
 }

@@ -1,12 +1,13 @@
 package org.telegram.ui.Components;
 
+import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class MessageBackgroundDrawable extends Drawable {
     private boolean animationInProgress;
     private float currentAnimationProgress;
@@ -22,42 +23,37 @@ public class MessageBackgroundDrawable extends Drawable {
     private float touchOverrideX = -1.0f;
     private float touchOverrideY = -1.0f;
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
+    public MessageBackgroundDrawable(View parent) {
+        this.parentView = parent;
     }
 
-    public MessageBackgroundDrawable(View view) {
-        this.parentView = view;
-    }
-
-    public void setColor(int i) {
-        this.paint.setColor(i);
+    public void setColor(int color) {
+        this.paint.setColor(color);
     }
 
     public void setCustomPaint(Paint paint) {
         this.customPaint = paint;
     }
 
-    public void setSelected(boolean z, boolean z2) {
+    public void setSelected(boolean selected, boolean animated) {
         float f = 1.0f;
-        if (this.isSelected == z) {
-            if (this.animationInProgress == z2 || z2) {
+        if (this.isSelected == selected) {
+            if (this.animationInProgress != animated && !animated) {
+                if (!selected) {
+                    f = 0.0f;
+                }
+                this.currentAnimationProgress = f;
+                this.animationInProgress = false;
                 return;
             }
-            if (!z) {
-                f = 0.0f;
-            }
-            this.currentAnimationProgress = f;
-            this.animationInProgress = false;
             return;
         }
-        this.isSelected = z;
-        this.animationInProgress = z2;
-        if (z2) {
+        this.isSelected = selected;
+        this.animationInProgress = animated;
+        if (animated) {
             this.lastAnimationTime = SystemClock.elapsedRealtime();
         } else {
-            if (!z) {
+            if (!selected) {
                 f = 0.0f;
             }
             this.currentAnimationProgress = f;
@@ -70,31 +66,28 @@ public class MessageBackgroundDrawable extends Drawable {
         View view = this.parentView;
         if (view != null) {
             view.invalidate();
-            if (this.parentView.getParent() == null) {
-                return;
+            if (this.parentView.getParent() != null) {
+                ((ViewGroup) this.parentView.getParent()).invalidate();
             }
-            ((ViewGroup) this.parentView.getParent()).invalidate();
         }
     }
 
     private void calcRadius() {
         android.graphics.Rect bounds = getBounds();
-        float centerX = bounds.centerX();
-        float centerY = bounds.centerY();
-        int i = bounds.left;
-        int i2 = bounds.top;
-        this.finalRadius = (float) Math.ceil(Math.sqrt(((i - centerX) * (i - centerX)) + ((i2 - centerY) * (i2 - centerY))));
+        float x1 = bounds.centerX();
+        float y1 = bounds.centerY();
+        this.finalRadius = (float) Math.ceil(Math.sqrt(((bounds.left - x1) * (bounds.left - x1)) + ((bounds.top - y1) * (bounds.top - y1))));
     }
 
-    public void setTouchCoords(float f, float f2) {
-        this.touchX = f;
-        this.touchY = f2;
+    public void setTouchCoords(float x, float y) {
+        this.touchX = x;
+        this.touchY = y;
         this.lastTouchTime = SystemClock.elapsedRealtime();
     }
 
-    public void setTouchCoordsOverride(float f, float f2) {
-        this.touchOverrideX = f;
-        this.touchOverrideY = f2;
+    public void setTouchCoordsOverride(float x, float y) {
+        this.touchOverrideX = x;
+        this.touchOverrideY = y;
     }
 
     public float getTouchX() {
@@ -114,14 +107,14 @@ public class MessageBackgroundDrawable extends Drawable {
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setBounds(int i, int i2, int i3, int i4) {
-        super.setBounds(i, i2, i3, i4);
+    public void setBounds(int left, int top, int right, int bottom) {
+        super.setBounds(left, top, right, bottom);
         calcRadius();
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setBounds(android.graphics.Rect rect) {
-        super.setBounds(rect);
+    public void setBounds(android.graphics.Rect bounds) {
+        super.setBounds(bounds);
         calcRadius();
     }
 
@@ -131,27 +124,92 @@ public class MessageBackgroundDrawable extends Drawable {
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-        this.paint.setAlpha(i);
+    public int getOpacity() {
+        return -2;
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:17:0x0049, code lost:
-        if (r6 >= 0.0f) goto L23;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:21:0x0056, code lost:
-        if (r6 >= 0.0f) goto L23;
-     */
-    /* JADX WARN: Removed duplicated region for block: B:42:0x00b0  */
     @Override // android.graphics.drawable.Drawable
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public void draw(android.graphics.Canvas r10) {
-        /*
-            Method dump skipped, instructions count: 192
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.MessageBackgroundDrawable.draw(android.graphics.Canvas):void");
+    public void setAlpha(int alpha) {
+        this.paint.setAlpha(alpha);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void draw(Canvas canvas) {
+        float interpolatedProgress;
+        float y1;
+        float x1;
+        float f = this.currentAnimationProgress;
+        if (f == 1.0f) {
+            android.graphics.Rect bounds = getBounds();
+            Paint paint = this.customPaint;
+            if (paint == null) {
+                paint = this.paint;
+            }
+            canvas.drawRect(bounds, paint);
+        } else if (f != 0.0f) {
+            if (this.isSelected) {
+                interpolatedProgress = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(this.currentAnimationProgress);
+            } else {
+                interpolatedProgress = 1.0f - CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(1.0f - this.currentAnimationProgress);
+            }
+            android.graphics.Rect bounds2 = getBounds();
+            float centerX = bounds2.centerX();
+            float centerY = bounds2.centerY();
+            if (this.touchOverrideX >= 0.0f && this.touchOverrideY >= 0.0f) {
+                x1 = this.touchOverrideX;
+                y1 = this.touchOverrideY;
+            } else {
+                float x12 = this.touchX;
+                if (x12 >= 0.0f && this.touchY >= 0.0f) {
+                    x1 = this.touchX;
+                    y1 = this.touchY;
+                } else {
+                    x1 = centerX;
+                    y1 = centerY;
+                }
+            }
+            float x13 = ((1.0f - interpolatedProgress) * (x1 - centerX)) + centerX;
+            float x14 = 1.0f - interpolatedProgress;
+            float y12 = (x14 * (y1 - centerY)) + centerY;
+            float y13 = this.finalRadius;
+            float f2 = y13 * interpolatedProgress;
+            Paint paint2 = this.customPaint;
+            if (paint2 == null) {
+                paint2 = this.paint;
+            }
+            canvas.drawCircle(x13, y12, f2, paint2);
+        }
+        if (this.animationInProgress) {
+            long newTime = SystemClock.elapsedRealtime();
+            long dt = newTime - this.lastAnimationTime;
+            if (dt > 20) {
+                dt = 17;
+            }
+            this.lastAnimationTime = newTime;
+            boolean finished = false;
+            if (this.isSelected) {
+                float f3 = this.currentAnimationProgress + (((float) dt) / 240.0f);
+                this.currentAnimationProgress = f3;
+                if (f3 >= 1.0f) {
+                    this.currentAnimationProgress = 1.0f;
+                    finished = true;
+                }
+            } else {
+                float f4 = this.currentAnimationProgress - (((float) dt) / 240.0f);
+                this.currentAnimationProgress = f4;
+                if (f4 <= 0.0f) {
+                    this.currentAnimationProgress = 0.0f;
+                    finished = true;
+                }
+            }
+            if (finished) {
+                this.touchX = -1.0f;
+                this.touchY = -1.0f;
+                this.touchOverrideX = -1.0f;
+                this.touchOverrideY = -1.0f;
+                this.animationInProgress = false;
+            }
+            invalidate();
+        }
     }
 }

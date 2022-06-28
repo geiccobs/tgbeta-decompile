@@ -8,7 +8,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class TypingDotsDrawable extends StatusDrawable {
     private Paint currentPaint;
     private int currentAccount = UserConfig.selectedAccount;
@@ -20,63 +20,54 @@ public class TypingDotsDrawable extends StatusDrawable {
     private boolean started = false;
     private DecelerateInterpolator decelerateInterpolator = new DecelerateInterpolator();
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
-
-    public TypingDotsDrawable(boolean z) {
-        if (z) {
+    public TypingDotsDrawable(boolean createPaint) {
+        if (createPaint) {
             this.currentPaint = new Paint(1);
         }
     }
 
     @Override // org.telegram.ui.Components.StatusDrawable
-    public void setColor(int i) {
+    public void setColor(int color) {
         Paint paint = this.currentPaint;
         if (paint != null) {
-            paint.setColor(i);
+            paint.setColor(color);
         }
     }
 
     @Override // org.telegram.ui.Components.StatusDrawable
-    public void setIsChat(boolean z) {
-        this.isChat = z;
+    public void setIsChat(boolean value) {
+        this.isChat = value;
     }
 
     private void update() {
-        long currentTimeMillis = System.currentTimeMillis();
-        long j = currentTimeMillis - this.lastUpdateTime;
-        this.lastUpdateTime = currentTimeMillis;
-        if (j > 50) {
-            j = 50;
+        long newTime = System.currentTimeMillis();
+        long dt = newTime - this.lastUpdateTime;
+        this.lastUpdateTime = newTime;
+        if (dt > 50) {
+            dt = 50;
         }
-        for (int i = 0; i < 3; i++) {
+        for (int a = 0; a < 3; a++) {
             float[] fArr = this.elapsedTimes;
-            fArr[i] = fArr[i] + ((float) j);
-            float f = fArr[i];
+            fArr[a] = fArr[a] + ((float) dt);
+            float f = fArr[a];
             float[] fArr2 = this.startTimes;
-            float f2 = f - fArr2[i];
-            if (f2 <= 0.0f) {
-                this.scales[i] = 1.33f;
-            } else if (f2 <= 320.0f) {
-                this.scales[i] = this.decelerateInterpolator.getInterpolation(f2 / 320.0f) + 1.33f;
-            } else if (f2 <= 640.0f) {
-                this.scales[i] = (1.0f - this.decelerateInterpolator.getInterpolation((f2 - 320.0f) / 320.0f)) + 1.33f;
-            } else if (f2 >= 800.0f) {
-                fArr[i] = 0.0f;
-                fArr2[i] = 0.0f;
-                this.scales[i] = 1.33f;
+            float timeSinceStart = f - fArr2[a];
+            if (timeSinceStart > 0.0f) {
+                if (timeSinceStart <= 320.0f) {
+                    float diff = this.decelerateInterpolator.getInterpolation(timeSinceStart / 320.0f);
+                    this.scales[a] = 1.33f + diff;
+                } else if (timeSinceStart <= 640.0f) {
+                    float diff2 = this.decelerateInterpolator.getInterpolation((timeSinceStart - 320.0f) / 320.0f);
+                    this.scales[a] = (1.0f - diff2) + 1.33f;
+                } else if (timeSinceStart >= 800.0f) {
+                    fArr[a] = 0.0f;
+                    fArr2[a] = 0.0f;
+                    this.scales[a] = 1.33f;
+                } else {
+                    this.scales[a] = 1.33f;
+                }
             } else {
-                this.scales[i] = 1.33f;
+                this.scales[a] = 1.33f;
             }
         }
         invalidateSelf();
@@ -91,9 +82,9 @@ public class TypingDotsDrawable extends StatusDrawable {
 
     @Override // org.telegram.ui.Components.StatusDrawable
     public void stop() {
-        for (int i = 0; i < 3; i++) {
-            this.elapsedTimes[i] = 0.0f;
-            this.scales[i] = 1.33f;
+        for (int a = 0; a < 3; a++) {
+            this.elapsedTimes[a] = 0.0f;
+            this.scales[a] = 1.33f;
         }
         float[] fArr = this.startTimes;
         fArr[0] = 0.0f;
@@ -104,25 +95,22 @@ public class TypingDotsDrawable extends StatusDrawable {
 
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
-        int i;
-        int i2;
+        int y;
+        Paint paint;
         if (this.isChat) {
-            i2 = AndroidUtilities.dp(8.5f);
-            i = getBounds().top;
+            y = AndroidUtilities.dp(8.5f) + getBounds().top;
         } else {
-            i2 = AndroidUtilities.dp(9.3f);
-            i = getBounds().top;
+            y = AndroidUtilities.dp(9.3f) + getBounds().top;
         }
-        int i3 = i2 + i;
-        Paint paint = this.currentPaint;
-        if (paint == null) {
+        if (this.currentPaint == null) {
             paint = Theme.chat_statusPaint;
             paint.setAlpha(255);
+        } else {
+            paint = this.currentPaint;
         }
-        float f = i3;
-        canvas.drawCircle(AndroidUtilities.dp(3.0f), f, this.scales[0] * AndroidUtilities.density, paint);
-        canvas.drawCircle(AndroidUtilities.dp(9.0f), f, this.scales[1] * AndroidUtilities.density, paint);
-        canvas.drawCircle(AndroidUtilities.dp(15.0f), f, this.scales[2] * AndroidUtilities.density, paint);
+        canvas.drawCircle(AndroidUtilities.dp(3.0f), y, this.scales[0] * AndroidUtilities.density, paint);
+        canvas.drawCircle(AndroidUtilities.dp(9.0f), y, this.scales[1] * AndroidUtilities.density, paint);
+        canvas.drawCircle(AndroidUtilities.dp(15.0f), y, this.scales[2] * AndroidUtilities.density, paint);
         checkUpdate();
     }
 
@@ -139,6 +127,19 @@ public class TypingDotsDrawable extends StatusDrawable {
                 }, 100L);
             }
         }
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int alpha) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter cf) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
     }
 
     @Override // android.graphics.drawable.Drawable

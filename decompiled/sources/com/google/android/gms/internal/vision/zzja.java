@@ -1,12 +1,12 @@
 package com.google.android.gms.internal.vision;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
+import java.util.RandomAccess;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
-final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
+/* loaded from: classes3.dex */
+final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw, RandomAccess {
+    private static final zzja zza;
     private float[] zzb;
     private int zzc;
 
@@ -28,7 +28,7 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
         float[] fArr = this.zzb;
         System.arraycopy(fArr, i2, fArr, i, this.zzc - i2);
         this.zzc -= i2 - i;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.Collection, java.util.List
@@ -114,7 +114,7 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
             return false;
         }
         int i2 = this.zzc;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -124,7 +124,7 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
         }
         System.arraycopy(zzjaVar.zzb, 0, this.zzb, this.zzc, zzjaVar.zzc);
         this.zzc = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -144,7 +144,7 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         float floatValue = ((Float) obj).floatValue();
         zzc();
@@ -166,11 +166,11 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
             System.arraycopy(fArr, i + 1, fArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Float.valueOf(f);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         int i2;
         float floatValue = ((Float) obj).floatValue();
@@ -189,7 +189,7 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
         }
         this.zzb[i] = floatValue;
         this.zzc++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List
@@ -213,6 +213,8 @@ final class zzja extends zzhj<Float> implements zzjl<Float>, zzkw {
     }
 
     static {
-        new zzja(new float[0], 0).zzb();
+        zzja zzjaVar = new zzja(new float[0], 0);
+        zza = zzjaVar;
+        zzjaVar.zzb();
     }
 }

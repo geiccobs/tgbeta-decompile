@@ -2,42 +2,41 @@ package org.telegram.ui.ActionBar;
 
 import android.content.Context;
 import org.telegram.ui.ActionBar.AlertDialog;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class DarkAlertDialog extends AlertDialog {
-    public DarkAlertDialog(Context context, int i) {
-        super(context, i);
+    public DarkAlertDialog(Context context, int progressStyle) {
+        super(context, progressStyle);
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
     @Override // org.telegram.ui.ActionBar.AlertDialog
-    public int getThemedColor(String str) {
+    public int getThemedColor(String key) {
         char c;
-        str.hashCode();
-        switch (str.hashCode()) {
+        switch (key.hashCode()) {
             case -1849805674:
-                if (str.equals("dialogBackground")) {
+                if (key.equals(Theme.key_dialogBackground)) {
                     c = 0;
                     break;
                 }
                 c = 65535;
                 break;
             case -451706526:
-                if (str.equals("dialogScrollGlow")) {
-                    c = 1;
+                if (key.equals(Theme.key_dialogScrollGlow)) {
+                    c = 3;
                     break;
                 }
                 c = 65535;
                 break;
             case -93324646:
-                if (str.equals("dialogButton")) {
+                if (key.equals(Theme.key_dialogButton)) {
                     c = 2;
                     break;
                 }
                 c = 65535;
                 break;
             case 1828201066:
-                if (str.equals("dialogTextBlack")) {
-                    c = 3;
+                if (key.equals(Theme.key_dialogTextBlack)) {
+                    c = 1;
                     break;
                 }
                 c = 65535;
@@ -54,14 +53,18 @@ public class DarkAlertDialog extends AlertDialog {
             case 3:
                 return -1;
             default:
-                return super.getThemedColor(str);
+                return super.getThemedColor(key);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static class Builder extends AlertDialog.Builder {
         public Builder(Context context) {
             super(new DarkAlertDialog(context, 0));
+        }
+
+        public Builder(Context context, int progressViewStyle) {
+            super(new DarkAlertDialog(context, progressViewStyle));
         }
     }
 }

@@ -9,7 +9,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class CrossOutDrawable extends Drawable {
     int color;
     String colorKey;
@@ -23,24 +23,11 @@ public class CrossOutDrawable extends Drawable {
     RectF rectF = new RectF();
     Paint paint = new Paint(1);
 
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
-
-    public CrossOutDrawable(Context context, int i, String str) {
+    public CrossOutDrawable(Context context, int iconRes, String colorKey) {
         Paint paint = new Paint(1);
         this.xRefPaint = paint;
-        this.iconDrawable = ContextCompat.getDrawable(context, i);
-        this.colorKey = str;
+        this.iconDrawable = ContextCompat.getDrawable(context, iconRes);
+        this.colorKey = colorKey;
         this.paint.setStyle(Paint.Style.STROKE);
         this.paint.setStrokeWidth(AndroidUtilities.dpf2(1.7f));
         this.paint.setStrokeCap(Paint.Cap.ROUND);
@@ -50,17 +37,17 @@ public class CrossOutDrawable extends Drawable {
         paint.setStrokeWidth(AndroidUtilities.dpf2(2.5f));
     }
 
-    public void setCrossOut(boolean z, boolean z2) {
-        if (this.cross != z) {
-            this.cross = z;
+    public void setCrossOut(boolean cross, boolean animated) {
+        if (this.cross != cross) {
+            this.cross = cross;
             float f = 0.0f;
-            if (!z2) {
-                if (z) {
+            if (!animated) {
+                if (cross) {
                     f = 1.0f;
                 }
                 this.progress = f;
             } else {
-                if (!z) {
+                if (!cross) {
                     f = 1.0f;
                 }
                 this.progress = f;
@@ -79,18 +66,26 @@ public class CrossOutDrawable extends Drawable {
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void draw(android.graphics.Canvas r13) {
+    public void draw(android.graphics.Canvas r14) {
         /*
-            Method dump skipped, instructions count: 260
+            Method dump skipped, instructions count: 264
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.CrossOutDrawable.draw(android.graphics.Canvas):void");
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setBounds(int i, int i2, int i3, int i4) {
-        super.setBounds(i, i2, i3, i4);
-        this.iconDrawable.setBounds(i, i2, i3, i4);
+    public void setAlpha(int i) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setBounds(int left, int top, int right, int bottom) {
+        super.setBounds(left, top, right, bottom);
+        this.iconDrawable.setBounds(left, top, right, bottom);
     }
 
     @Override // android.graphics.drawable.Drawable
@@ -103,16 +98,25 @@ public class CrossOutDrawable extends Drawable {
         return this.iconDrawable.getIntrinsicWidth();
     }
 
-    public void setOffsets(float f, float f2, float f3) {
-        this.xOffset = f;
-        this.lenOffsetTop = f2;
-        this.lenOffsetBottom = f3;
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    public void setColorKey(String colorKey) {
+        this.colorKey = colorKey;
+    }
+
+    public void setOffsets(float xOffset, float lenOffsetTop, float lenOffsetBottom) {
+        this.xOffset = xOffset;
+        this.lenOffsetTop = lenOffsetTop;
+        this.lenOffsetBottom = lenOffsetBottom;
         invalidateSelf();
     }
 
-    public void setStrokeWidth(float f) {
-        this.paint.setStrokeWidth(f);
-        this.xRefPaint.setStrokeWidth(f * 1.47f);
+    public void setStrokeWidth(float w) {
+        this.paint.setStrokeWidth(w);
+        this.xRefPaint.setStrokeWidth(1.47f * w);
     }
 
     public float getProgress() {

@@ -5,8 +5,10 @@ import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class OsExtension implements Model {
+    private static final String NAME = "name";
+    private static final String VER = "ver";
     private String name;
     private String ver;
 
@@ -14,55 +16,56 @@ public class OsExtension implements Model {
         return this.name;
     }
 
-    public void setName(String str) {
-        this.name = str;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getVer() {
         return this.ver;
     }
 
-    public void setVer(String str) {
-        this.ver = str;
+    public void setVer(String ver) {
+        this.ver = ver;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject jSONObject) {
-        setName(jSONObject.optString("name", null));
-        setVer(jSONObject.optString("ver", null));
+    public void read(JSONObject object) {
+        setName(object.optString("name", null));
+        setVer(object.optString(VER, null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer jSONStringer) throws JSONException {
-        JSONUtils.write(jSONStringer, "name", getName());
-        JSONUtils.write(jSONStringer, "ver", getVer());
+    public void write(JSONStringer writer) throws JSONException {
+        JSONUtils.write(writer, "name", getName());
+        JSONUtils.write(writer, VER, getVer());
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || OsExtension.class != obj.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        OsExtension osExtension = (OsExtension) obj;
+        OsExtension that = (OsExtension) o;
         String str = this.name;
-        if (str == null ? osExtension.name != null : !str.equals(osExtension.name)) {
+        if (str == null ? that.name != null : !str.equals(that.name)) {
             return false;
         }
         String str2 = this.ver;
-        String str3 = osExtension.ver;
-        return str2 != null ? str2.equals(str3) : str3 == null;
+        return str2 != null ? str2.equals(that.ver) : that.ver == null;
     }
 
     public int hashCode() {
         String str = this.name;
         int i = 0;
-        int hashCode = (str != null ? str.hashCode() : 0) * 31;
+        int result = str != null ? str.hashCode() : 0;
+        int i2 = result * 31;
         String str2 = this.ver;
         if (str2 != null) {
             i = str2.hashCode();
         }
-        return hashCode + i;
+        int result2 = i2 + i;
+        return result2;
     }
 }

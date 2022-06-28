@@ -11,7 +11,7 @@ import com.google.android.gms.common.stats.ConnectionTracker;
 import java.util.HashMap;
 import java.util.Map;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzi implements ServiceConnection, zzk {
     private final Map<ServiceConnection, ServiceConnection> zza = new HashMap();
     private int zzb = 2;
@@ -83,7 +83,7 @@ public final class zzi implements ServiceConnection, zzk {
                 context3 = this.zzg.zzb;
                 connectionTracker2.unbindService(context3, this);
                 return;
-            } catch (IllegalArgumentException unused) {
+            } catch (IllegalArgumentException e) {
                 return;
             }
         }

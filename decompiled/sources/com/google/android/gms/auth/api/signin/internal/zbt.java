@@ -8,7 +8,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.util.UidVerifier;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zbt extends zbo {
     private final Context zba;
 

@@ -11,7 +11,7 @@ import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
 import org.webrtc.RendererCommon;
 import org.webrtc.VideoSink;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Callback, VideoSink, RendererCommon.RendererEvents {
     private static final String TAG = "SurfaceViewRenderer";
     private final SurfaceEglRenderer eglRenderer;
@@ -29,14 +29,6 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
         VideoSink.CC.$default$setParentSink(this, videoSink);
     }
 
-    @Override // android.view.SurfaceHolder.Callback
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
-    }
-
-    @Override // android.view.SurfaceHolder.Callback
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-    }
-
     public SurfaceViewRenderer(Context context) {
         super(context);
         String resourceName = getResourceName();
@@ -47,8 +39,8 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
         getHolder().addCallback(surfaceEglRenderer);
     }
 
-    public SurfaceViewRenderer(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
+    public SurfaceViewRenderer(Context context, AttributeSet attrs) {
+        super(context, attrs);
         String resourceName = getResourceName();
         this.resourceName = resourceName;
         SurfaceEglRenderer surfaceEglRenderer = new SurfaceEglRenderer(resourceName);
@@ -57,42 +49,42 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
         getHolder().addCallback(surfaceEglRenderer);
     }
 
-    public void init(EglBase.Context context, RendererCommon.RendererEvents rendererEvents) {
-        init(context, rendererEvents, EglBase.CONFIG_PLAIN, new GlRectDrawer());
+    public void init(EglBase.Context sharedContext, RendererCommon.RendererEvents rendererEvents) {
+        init(sharedContext, rendererEvents, EglBase.CONFIG_PLAIN, new GlRectDrawer());
     }
 
-    public void init(EglBase.Context context, RendererCommon.RendererEvents rendererEvents, int[] iArr, RendererCommon.GlDrawer glDrawer) {
+    public void init(EglBase.Context sharedContext, RendererCommon.RendererEvents rendererEvents, int[] configAttributes, RendererCommon.GlDrawer drawer) {
         ThreadUtils.checkIsOnMainThread();
         this.rendererEvents = rendererEvents;
         this.rotatedFrameWidth = 0;
         this.rotatedFrameHeight = 0;
-        this.eglRenderer.init(context, this, iArr, glDrawer);
+        this.eglRenderer.init(sharedContext, this, configAttributes, drawer);
     }
 
     public void release() {
         this.eglRenderer.release();
     }
 
-    public void addFrameListener(EglRenderer.FrameListener frameListener, float f, RendererCommon.GlDrawer glDrawer) {
-        this.eglRenderer.addFrameListener(frameListener, f, glDrawer);
+    public void addFrameListener(EglRenderer.FrameListener listener, float scale, RendererCommon.GlDrawer drawerParam) {
+        this.eglRenderer.addFrameListener(listener, scale, drawerParam);
     }
 
-    public void addFrameListener(EglRenderer.FrameListener frameListener, float f) {
-        this.eglRenderer.addFrameListener(frameListener, f);
+    public void addFrameListener(EglRenderer.FrameListener listener, float scale) {
+        this.eglRenderer.addFrameListener(listener, scale);
     }
 
-    public void removeFrameListener(EglRenderer.FrameListener frameListener) {
-        this.eglRenderer.removeFrameListener(frameListener);
+    public void removeFrameListener(EglRenderer.FrameListener listener) {
+        this.eglRenderer.removeFrameListener(listener);
     }
 
-    public void setEnableHardwareScaler(boolean z) {
+    public void setEnableHardwareScaler(boolean enabled) {
         ThreadUtils.checkIsOnMainThread();
-        this.enableFixedSize = z;
+        this.enableFixedSize = enabled;
         updateSurfaceSize();
     }
 
-    public void setMirror(boolean z) {
-        this.eglRenderer.setMirror(z);
+    public void setMirror(boolean mirror) {
+        this.eglRenderer.setMirror(mirror);
     }
 
     public void setScalingType(RendererCommon.ScalingType scalingType) {
@@ -101,14 +93,14 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
         requestLayout();
     }
 
-    public void setScalingType(RendererCommon.ScalingType scalingType, RendererCommon.ScalingType scalingType2) {
+    public void setScalingType(RendererCommon.ScalingType scalingTypeMatchOrientation, RendererCommon.ScalingType scalingTypeMismatchOrientation) {
         ThreadUtils.checkIsOnMainThread();
-        this.videoLayoutMeasure.setScalingType(scalingType, scalingType2);
+        this.videoLayoutMeasure.setScalingType(scalingTypeMatchOrientation, scalingTypeMismatchOrientation);
         requestLayout();
     }
 
-    public void setFpsReduction(float f) {
-        this.eglRenderer.setFpsReduction(f);
+    public void setFpsReduction(float fps) {
+        this.eglRenderer.setFpsReduction(fps);
     }
 
     public void disableFpsReduction() {
@@ -120,45 +112,51 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
     }
 
     @Override // org.webrtc.VideoSink
-    public void onFrame(VideoFrame videoFrame) {
-        this.eglRenderer.onFrame(videoFrame);
+    public void onFrame(VideoFrame frame) {
+        this.eglRenderer.onFrame(frame);
     }
 
     @Override // android.view.SurfaceView, android.view.View
-    protected void onMeasure(int i, int i2) {
+    protected void onMeasure(int widthSpec, int heightSpec) {
         ThreadUtils.checkIsOnMainThread();
-        Point measure = this.videoLayoutMeasure.measure(true, i, i2, this.rotatedFrameWidth, this.rotatedFrameHeight);
-        setMeasuredDimension(measure.x, measure.y);
-        logD("onMeasure(). New size: " + measure.x + "x" + measure.y);
+        Point size = this.videoLayoutMeasure.measure(true, widthSpec, heightSpec, this.rotatedFrameWidth, this.rotatedFrameHeight);
+        setMeasuredDimension(size.x, size.y);
+        logD("onMeasure(). New size: " + size.x + "x" + size.y);
     }
 
     @Override // android.view.View
-    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         ThreadUtils.checkIsOnMainThread();
-        this.eglRenderer.setLayoutAspectRatio((i3 - i) / (i4 - i2));
+        this.eglRenderer.setLayoutAspectRatio((right - left) / (bottom - top));
         updateSurfaceSize();
     }
 
     private void updateSurfaceSize() {
+        int drawnFrameWidth;
+        int drawnFrameWidth2;
         ThreadUtils.checkIsOnMainThread();
         if (this.enableFixedSize && this.rotatedFrameWidth != 0 && this.rotatedFrameHeight != 0 && getWidth() != 0 && getHeight() != 0) {
-            float width = getWidth() / getHeight();
+            float layoutAspectRatio = getWidth() / getHeight();
             int i = this.rotatedFrameWidth;
             int i2 = this.rotatedFrameHeight;
-            if (i / i2 > width) {
-                i = (int) (i2 * width);
+            float frameAspectRatio = i / i2;
+            if (frameAspectRatio > layoutAspectRatio) {
+                drawnFrameWidth2 = (int) (i2 * layoutAspectRatio);
+                drawnFrameWidth = this.rotatedFrameHeight;
             } else {
-                i2 = (int) (i / width);
+                int drawnFrameHeight = this.rotatedFrameWidth;
+                drawnFrameWidth = (int) (i / layoutAspectRatio);
+                drawnFrameWidth2 = drawnFrameHeight;
             }
-            int min = Math.min(getWidth(), i);
-            int min2 = Math.min(getHeight(), i2);
-            logD("updateSurfaceSize. Layout size: " + getWidth() + "x" + getHeight() + ", frame size: " + this.rotatedFrameWidth + "x" + this.rotatedFrameHeight + ", requested surface size: " + min + "x" + min2 + ", old surface size: " + this.surfaceWidth + "x" + this.surfaceHeight);
-            if (min == this.surfaceWidth && min2 == this.surfaceHeight) {
+            int width = Math.min(getWidth(), drawnFrameWidth2);
+            int height = Math.min(getHeight(), drawnFrameWidth);
+            logD("updateSurfaceSize. Layout size: " + getWidth() + "x" + getHeight() + ", frame size: " + this.rotatedFrameWidth + "x" + this.rotatedFrameHeight + ", requested surface size: " + width + "x" + height + ", old surface size: " + this.surfaceWidth + "x" + this.surfaceHeight);
+            if (width != this.surfaceWidth || height != this.surfaceHeight) {
+                this.surfaceWidth = width;
+                this.surfaceHeight = height;
+                getHolder().setFixedSize(width, height);
                 return;
             }
-            this.surfaceWidth = min;
-            this.surfaceHeight = min2;
-            getHolder().setFixedSize(min, min2);
             return;
         }
         this.surfaceHeight = 0;
@@ -167,17 +165,25 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
     }
 
     @Override // android.view.SurfaceHolder.Callback
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+    public void surfaceCreated(SurfaceHolder holder) {
         ThreadUtils.checkIsOnMainThread();
         this.surfaceHeight = 0;
         this.surfaceWidth = 0;
         updateSurfaceSize();
     }
 
+    @Override // android.view.SurfaceHolder.Callback
+    public void surfaceDestroyed(SurfaceHolder holder) {
+    }
+
+    @Override // android.view.SurfaceHolder.Callback
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+    }
+
     private String getResourceName() {
         try {
             return getResources().getResourceEntryName(getId());
-        } catch (Resources.NotFoundException unused) {
+        } catch (Resources.NotFoundException e) {
             return "";
         }
     }
@@ -195,39 +201,38 @@ public class SurfaceViewRenderer extends SurfaceView implements SurfaceHolder.Ca
     }
 
     @Override // org.webrtc.RendererCommon.RendererEvents
-    public void onFrameResolutionChanged(final int i, int i2, int i3) {
+    public void onFrameResolutionChanged(int videoWidth, int videoHeight, int rotation) {
         RendererCommon.RendererEvents rendererEvents = this.rendererEvents;
         if (rendererEvents != null) {
-            rendererEvents.onFrameResolutionChanged(i, i2, i3);
+            rendererEvents.onFrameResolutionChanged(videoWidth, videoHeight, rotation);
         }
-        final int i4 = (i3 == 0 || i3 == 180) ? i : i2;
-        if (i3 == 0 || i3 == 180) {
-            i = i2;
-        }
+        final int rotatedWidth = (rotation == 0 || rotation == 180) ? videoWidth : videoHeight;
+        final int rotatedHeight = (rotation == 0 || rotation == 180) ? videoHeight : videoWidth;
         postOrRun(new Runnable() { // from class: org.webrtc.SurfaceViewRenderer$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                SurfaceViewRenderer.this.lambda$onFrameResolutionChanged$0(i4, i);
+                SurfaceViewRenderer.this.m4850lambda$onFrameResolutionChanged$0$orgwebrtcSurfaceViewRenderer(rotatedWidth, rotatedHeight);
             }
         });
     }
 
-    public /* synthetic */ void lambda$onFrameResolutionChanged$0(int i, int i2) {
-        this.rotatedFrameWidth = i;
-        this.rotatedFrameHeight = i2;
+    /* renamed from: lambda$onFrameResolutionChanged$0$org-webrtc-SurfaceViewRenderer */
+    public /* synthetic */ void m4850lambda$onFrameResolutionChanged$0$orgwebrtcSurfaceViewRenderer(int rotatedWidth, int rotatedHeight) {
+        this.rotatedFrameWidth = rotatedWidth;
+        this.rotatedFrameHeight = rotatedHeight;
         updateSurfaceSize();
         requestLayout();
     }
 
-    private void postOrRun(Runnable runnable) {
+    private void postOrRun(Runnable r) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            runnable.run();
+            r.run();
         } else {
-            post(runnable);
+            post(r);
         }
     }
 
-    private void logD(String str) {
-        Logging.d(TAG, this.resourceName + ": " + str);
+    private void logD(String string) {
+        Logging.d(TAG, this.resourceName + ": " + string);
     }
 }

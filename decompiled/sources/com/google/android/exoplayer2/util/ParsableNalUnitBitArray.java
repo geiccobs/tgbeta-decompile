@@ -1,21 +1,19 @@
 package com.google.android.exoplayer2.util;
-
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class ParsableNalUnitBitArray {
     private int bitOffset;
     private int byteLimit;
     private int byteOffset;
     private byte[] data;
 
-    public ParsableNalUnitBitArray(byte[] bArr, int i, int i2) {
-        reset(bArr, i, i2);
+    public ParsableNalUnitBitArray(byte[] data, int offset, int limit) {
+        reset(data, offset, limit);
     }
 
-    public void reset(byte[] bArr, int i, int i2) {
-        this.data = bArr;
-        this.byteOffset = i;
-        this.byteLimit = i2;
+    public void reset(byte[] data, int offset, int limit) {
+        this.data = data;
+        this.byteOffset = offset;
+        this.byteLimit = limit;
         this.bitOffset = 0;
         assertValidOffset();
     }
@@ -35,108 +33,104 @@ public final class ParsableNalUnitBitArray {
         assertValidOffset();
     }
 
-    public void skipBits(int i) {
-        int i2 = this.byteOffset;
-        int i3 = i / 8;
-        int i4 = i2 + i3;
-        this.byteOffset = i4;
-        int i5 = this.bitOffset + (i - (i3 * 8));
-        this.bitOffset = i5;
-        if (i5 > 7) {
-            this.byteOffset = i4 + 1;
-            this.bitOffset = i5 - 8;
+    public void skipBits(int numBits) {
+        int oldByteOffset = this.byteOffset;
+        int numBytes = numBits / 8;
+        int i = this.byteOffset + numBytes;
+        this.byteOffset = i;
+        int i2 = this.bitOffset + (numBits - (numBytes * 8));
+        this.bitOffset = i2;
+        if (i2 > 7) {
+            this.byteOffset = i + 1;
+            this.bitOffset = i2 - 8;
         }
-        while (true) {
-            i2++;
-            if (i2 <= this.byteOffset) {
-                if (shouldSkipByte(i2)) {
-                    this.byteOffset++;
-                    i2 += 2;
-                }
-            } else {
-                assertValidOffset();
-                return;
+        int i3 = oldByteOffset + 1;
+        while (i3 <= this.byteOffset) {
+            if (shouldSkipByte(i3)) {
+                this.byteOffset++;
+                i3 += 2;
             }
+            i3++;
         }
+        assertValidOffset();
     }
 
-    public boolean canReadBits(int i) {
-        int i2 = this.byteOffset;
-        int i3 = i / 8;
-        int i4 = i2 + i3;
-        int i5 = (this.bitOffset + i) - (i3 * 8);
-        if (i5 > 7) {
-            i4++;
-            i5 -= 8;
+    public boolean canReadBits(int numBits) {
+        int oldByteOffset = this.byteOffset;
+        int numBytes = numBits / 8;
+        int newByteOffset = this.byteOffset + numBytes;
+        int newBitOffset = (this.bitOffset + numBits) - (numBytes * 8);
+        if (newBitOffset > 7) {
+            newByteOffset++;
+            newBitOffset -= 8;
         }
-        while (true) {
-            i2++;
-            if (i2 > i4 || i4 >= this.byteLimit) {
-                break;
-            } else if (shouldSkipByte(i2)) {
-                i4++;
-                i2 += 2;
+        int i = oldByteOffset + 1;
+        while (i <= newByteOffset && newByteOffset < this.byteLimit) {
+            if (shouldSkipByte(i)) {
+                newByteOffset++;
+                i += 2;
             }
+            i++;
         }
-        int i6 = this.byteLimit;
-        if (i4 >= i6) {
-            return i4 == i6 && i5 == 0;
+        int i2 = this.byteLimit;
+        if (newByteOffset >= i2) {
+            return newByteOffset == i2 && newBitOffset == 0;
         }
         return true;
     }
 
     public boolean readBit() {
-        boolean z = (this.data[this.byteOffset] & (ConnectionsManager.RequestFlagNeedQuickAck >> this.bitOffset)) != 0;
+        boolean returnValue = (this.data[this.byteOffset] & (128 >> this.bitOffset)) != 0;
         skipBit();
-        return z;
+        return returnValue;
     }
 
-    public int readBits(int i) {
+    public int readBits(int numBits) {
+        int i;
         int i2;
-        int i3;
-        this.bitOffset += i;
-        int i4 = 0;
+        int returnValue = 0;
+        this.bitOffset += numBits;
         while (true) {
-            i2 = this.bitOffset;
-            i3 = 2;
-            if (i2 <= 8) {
+            i = this.bitOffset;
+            i2 = 2;
+            if (i <= 8) {
                 break;
             }
-            int i5 = i2 - 8;
-            this.bitOffset = i5;
+            int i3 = i - 8;
+            this.bitOffset = i3;
             byte[] bArr = this.data;
-            int i6 = this.byteOffset;
-            i4 |= (bArr[i6] & 255) << i5;
-            if (!shouldSkipByte(i6 + 1)) {
-                i3 = 1;
+            int i4 = this.byteOffset;
+            returnValue |= (bArr[i4] & 255) << i3;
+            if (!shouldSkipByte(i4 + 1)) {
+                i2 = 1;
             }
-            this.byteOffset = i6 + i3;
+            this.byteOffset = i4 + i2;
         }
         byte[] bArr2 = this.data;
-        int i7 = this.byteOffset;
-        int i8 = ((-1) >>> (32 - i)) & (i4 | ((bArr2[i7] & 255) >> (8 - i2)));
-        if (i2 == 8) {
+        int i5 = this.byteOffset;
+        int returnValue2 = (returnValue | ((bArr2[i5] & 255) >> (8 - i))) & ((-1) >>> (32 - numBits));
+        if (i == 8) {
             this.bitOffset = 0;
-            if (!shouldSkipByte(i7 + 1)) {
-                i3 = 1;
+            if (!shouldSkipByte(i5 + 1)) {
+                i2 = 1;
             }
-            this.byteOffset = i7 + i3;
+            this.byteOffset = i5 + i2;
         }
         assertValidOffset();
-        return i8;
+        return returnValue2;
     }
 
     public boolean canReadExpGolombCodedNum() {
-        int i = this.byteOffset;
-        int i2 = this.bitOffset;
-        int i3 = 0;
+        int initialByteOffset = this.byteOffset;
+        int initialBitOffset = this.bitOffset;
+        int leadingZeros = 0;
         while (this.byteOffset < this.byteLimit && !readBit()) {
-            i3++;
+            leadingZeros++;
         }
-        boolean z = this.byteOffset == this.byteLimit;
-        this.byteOffset = i;
-        this.bitOffset = i2;
-        return !z && canReadBits((i3 * 2) + 1);
+        boolean hitLimit = this.byteOffset == this.byteLimit;
+        this.byteOffset = initialByteOffset;
+        this.bitOffset = initialBitOffset;
+        return !hitLimit && canReadBits((leadingZeros * 2) + 1);
     }
 
     public int readUnsignedExpGolombCodedInt() {
@@ -144,27 +138,22 @@ public final class ParsableNalUnitBitArray {
     }
 
     public int readSignedExpGolombCodedInt() {
-        int readExpGolombCodeNum = readExpGolombCodeNum();
-        return (readExpGolombCodeNum % 2 == 0 ? -1 : 1) * ((readExpGolombCodeNum + 1) / 2);
+        int codeNum = readExpGolombCodeNum();
+        return (codeNum % 2 == 0 ? -1 : 1) * ((codeNum + 1) / 2);
     }
 
     private int readExpGolombCodeNum() {
-        int i = 0;
-        int i2 = 0;
+        int leadingZeros = 0;
         while (!readBit()) {
-            i2++;
+            leadingZeros++;
         }
-        int i3 = (1 << i2) - 1;
-        if (i2 > 0) {
-            i = readBits(i2);
-        }
-        return i3 + i;
+        return ((1 << leadingZeros) - 1) + (leadingZeros > 0 ? readBits(leadingZeros) : 0);
     }
 
-    private boolean shouldSkipByte(int i) {
-        if (2 <= i && i < this.byteLimit) {
+    private boolean shouldSkipByte(int offset) {
+        if (2 <= offset && offset < this.byteLimit) {
             byte[] bArr = this.data;
-            if (bArr[i] == 3 && bArr[i - 2] == 0 && bArr[i - 1] == 0) {
+            if (bArr[offset] == 3 && bArr[offset - 2] == 0 && bArr[offset - 1] == 0) {
                 return true;
             }
         }

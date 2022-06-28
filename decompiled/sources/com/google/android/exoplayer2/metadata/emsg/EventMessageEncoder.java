@@ -3,7 +3,7 @@ package com.google.android.exoplayer2.metadata.emsg;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class EventMessageEncoder {
     private final ByteArrayOutputStream byteArrayOutputStream;
     private final DataOutputStream dataOutputStream;
@@ -18,11 +18,8 @@ public final class EventMessageEncoder {
         this.byteArrayOutputStream.reset();
         try {
             writeNullTerminatedString(this.dataOutputStream, eventMessage.schemeIdUri);
-            String str = eventMessage.value;
-            if (str == null) {
-                str = "";
-            }
-            writeNullTerminatedString(this.dataOutputStream, str);
+            String nonNullValue = eventMessage.value != null ? eventMessage.value : "";
+            writeNullTerminatedString(this.dataOutputStream, nonNullValue);
             writeUnsignedInt(this.dataOutputStream, eventMessage.durationMs);
             writeUnsignedInt(this.dataOutputStream, eventMessage.id);
             this.dataOutputStream.write(eventMessage.messageData);
@@ -33,15 +30,15 @@ public final class EventMessageEncoder {
         }
     }
 
-    private static void writeNullTerminatedString(DataOutputStream dataOutputStream, String str) throws IOException {
-        dataOutputStream.writeBytes(str);
+    private static void writeNullTerminatedString(DataOutputStream dataOutputStream, String value) throws IOException {
+        dataOutputStream.writeBytes(value);
         dataOutputStream.writeByte(0);
     }
 
-    private static void writeUnsignedInt(DataOutputStream dataOutputStream, long j) throws IOException {
-        dataOutputStream.writeByte(((int) (j >>> 24)) & 255);
-        dataOutputStream.writeByte(((int) (j >>> 16)) & 255);
-        dataOutputStream.writeByte(((int) (j >>> 8)) & 255);
-        dataOutputStream.writeByte(((int) j) & 255);
+    private static void writeUnsignedInt(DataOutputStream outputStream, long value) throws IOException {
+        outputStream.writeByte(((int) (value >>> 24)) & 255);
+        outputStream.writeByte(((int) (value >>> 16)) & 255);
+        outputStream.writeByte(((int) (value >>> 8)) & 255);
+        outputStream.writeByte(((int) value) & 255);
     }
 }

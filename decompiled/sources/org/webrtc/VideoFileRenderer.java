@@ -2,6 +2,7 @@ package org.webrtc;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import com.google.android.exoplayer2.C;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import org.webrtc.EglBase;
 import org.webrtc.VideoFrame;
 import org.webrtc.VideoSink;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class VideoFileRenderer implements VideoSink {
     private static final String TAG = "VideoFileRenderer";
     private EglBase eglBase;
@@ -32,19 +33,19 @@ public class VideoFileRenderer implements VideoSink {
         VideoSink.CC.$default$setParentSink(this, videoSink);
     }
 
-    public VideoFileRenderer(String str, int i, int i2, final EglBase.Context context) throws IOException {
-        if (i % 2 == 1 || i2 % 2 == 1) {
+    public VideoFileRenderer(String outputFile, int outputFileWidth, int outputFileHeight, final EglBase.Context sharedContext) throws IOException {
+        if (outputFileWidth % 2 == 1 || outputFileHeight % 2 == 1) {
             throw new IllegalArgumentException("Does not support uneven width or height");
         }
-        this.outputFileName = str;
-        this.outputFileWidth = i;
-        this.outputFileHeight = i2;
-        int i3 = ((i * i2) * 3) / 2;
-        this.outputFrameSize = i3;
-        this.outputFrameBuffer = ByteBuffer.allocateDirect(i3);
-        FileOutputStream fileOutputStream = new FileOutputStream(str);
+        this.outputFileName = outputFile;
+        this.outputFileWidth = outputFileWidth;
+        this.outputFileHeight = outputFileHeight;
+        int i = ((outputFileWidth * outputFileHeight) * 3) / 2;
+        this.outputFrameSize = i;
+        this.outputFrameBuffer = ByteBuffer.allocateDirect(i);
+        FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
         this.videoOutFile = fileOutputStream;
-        fileOutputStream.write(("YUV4MPEG2 C420 W" + i + " H" + i2 + " Ip F30:1 A1:1\n").getBytes(Charset.forName("US-ASCII")));
+        fileOutputStream.write(("YUV4MPEG2 C420 W" + outputFileWidth + " H" + outputFileHeight + " Ip F30:1 A1:1\n").getBytes(Charset.forName(C.ASCII_NAME)));
         HandlerThread handlerThread = new HandlerThread("VideoFileRendererRenderThread");
         this.renderThread = handlerThread;
         handlerThread.start();
@@ -57,7 +58,7 @@ public class VideoFileRenderer implements VideoSink {
         ThreadUtils.invokeAtFrontUninterruptibly(handler, new Runnable() { // from class: org.webrtc.VideoFileRenderer.1
             @Override // java.lang.Runnable
             public void run() {
-                VideoFileRenderer.this.eglBase = EglBase.CC.create(context, EglBase.CONFIG_PIXEL_BUFFER);
+                VideoFileRenderer.this.eglBase = EglBase.CC.create(sharedContext, EglBase.CONFIG_PIXEL_BUFFER);
                 VideoFileRenderer.this.eglBase.createDummyPbufferSurface();
                 VideoFileRenderer.this.eglBase.makeCurrent();
                 VideoFileRenderer.this.yuvConverter = new YuvConverter();
@@ -66,47 +67,54 @@ public class VideoFileRenderer implements VideoSink {
     }
 
     @Override // org.webrtc.VideoSink
-    public void onFrame(final VideoFrame videoFrame) {
-        videoFrame.retain();
+    public void onFrame(final VideoFrame frame) {
+        frame.retain();
         this.renderThreadHandler.post(new Runnable() { // from class: org.webrtc.VideoFileRenderer$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                VideoFileRenderer.this.lambda$onFrame$0(videoFrame);
+                VideoFileRenderer.this.m4856lambda$onFrame$0$orgwebrtcVideoFileRenderer(frame);
             }
         });
     }
 
     /* renamed from: renderFrameOnRenderThread */
-    public void lambda$onFrame$0(final VideoFrame videoFrame) {
-        VideoFrame.Buffer buffer = videoFrame.getBuffer();
-        int i = videoFrame.getRotation() % 180 == 0 ? this.outputFileWidth : this.outputFileHeight;
-        int i2 = videoFrame.getRotation() % 180 == 0 ? this.outputFileHeight : this.outputFileWidth;
-        float width = buffer.getWidth() / buffer.getHeight();
-        float f = i / i2;
-        int width2 = buffer.getWidth();
-        int height = buffer.getHeight();
-        if (f > width) {
-            height = (int) (height * (width / f));
+    public void m4856lambda$onFrame$0$orgwebrtcVideoFileRenderer(final VideoFrame frame) {
+        int cropHeight;
+        int cropWidth;
+        VideoFrame.Buffer buffer = frame.getBuffer();
+        int targetWidth = frame.getRotation() % 180 == 0 ? this.outputFileWidth : this.outputFileHeight;
+        int targetHeight = frame.getRotation() % 180 == 0 ? this.outputFileHeight : this.outputFileWidth;
+        float frameAspectRatio = buffer.getWidth() / buffer.getHeight();
+        float fileAspectRatio = targetWidth / targetHeight;
+        int cropWidth2 = buffer.getWidth();
+        int cropHeight2 = buffer.getHeight();
+        if (fileAspectRatio > frameAspectRatio) {
+            cropWidth = cropWidth2;
+            cropHeight = (int) (cropHeight2 * (frameAspectRatio / fileAspectRatio));
         } else {
-            width2 = (int) (width2 * (f / width));
+            cropWidth = (int) (cropWidth2 * (fileAspectRatio / frameAspectRatio));
+            cropHeight = cropHeight2;
         }
-        VideoFrame.Buffer cropAndScale = buffer.cropAndScale((buffer.getWidth() - width2) / 2, (buffer.getHeight() - height) / 2, width2, height, i, i2);
-        videoFrame.release();
-        final VideoFrame.I420Buffer i420 = cropAndScale.toI420();
-        cropAndScale.release();
+        int cropX = (buffer.getWidth() - cropWidth) / 2;
+        int cropY = (buffer.getHeight() - cropHeight) / 2;
+        VideoFrame.Buffer scaledBuffer = buffer.cropAndScale(cropX, cropY, cropWidth, cropHeight, targetWidth, targetHeight);
+        frame.release();
+        final VideoFrame.I420Buffer i420 = scaledBuffer.toI420();
+        scaledBuffer.release();
         this.fileThreadHandler.post(new Runnable() { // from class: org.webrtc.VideoFileRenderer$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                VideoFileRenderer.this.lambda$renderFrameOnRenderThread$1(i420, videoFrame);
+                VideoFileRenderer.this.m4859lambda$renderFrameOnRenderThread$1$orgwebrtcVideoFileRenderer(i420, frame);
             }
         });
     }
 
-    public /* synthetic */ void lambda$renderFrameOnRenderThread$1(VideoFrame.I420Buffer i420Buffer, VideoFrame videoFrame) {
-        YuvHelper.I420Rotate(i420Buffer.getDataY(), i420Buffer.getStrideY(), i420Buffer.getDataU(), i420Buffer.getStrideU(), i420Buffer.getDataV(), i420Buffer.getStrideV(), this.outputFrameBuffer, i420Buffer.getWidth(), i420Buffer.getHeight(), videoFrame.getRotation());
-        i420Buffer.release();
+    /* renamed from: lambda$renderFrameOnRenderThread$1$org-webrtc-VideoFileRenderer */
+    public /* synthetic */ void m4859lambda$renderFrameOnRenderThread$1$orgwebrtcVideoFileRenderer(VideoFrame.I420Buffer i420, VideoFrame frame) {
+        YuvHelper.I420Rotate(i420.getDataY(), i420.getStrideY(), i420.getDataU(), i420.getStrideU(), i420.getDataV(), i420.getStrideV(), this.outputFrameBuffer, i420.getWidth(), i420.getHeight(), frame.getRotation());
+        i420.release();
         try {
-            this.videoOutFile.write("FRAME\n".getBytes(Charset.forName("US-ASCII")));
+            this.videoOutFile.write("FRAME\n".getBytes(Charset.forName(C.ASCII_NAME)));
             this.videoOutFile.write(this.outputFrameBuffer.array(), this.outputFrameBuffer.arrayOffset(), this.outputFrameSize);
             this.frameCount++;
         } catch (IOException e) {
@@ -115,18 +123,18 @@ public class VideoFileRenderer implements VideoSink {
     }
 
     public void release() {
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final CountDownLatch cleanupBarrier = new CountDownLatch(1);
         this.renderThreadHandler.post(new Runnable() { // from class: org.webrtc.VideoFileRenderer$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                VideoFileRenderer.this.lambda$release$2(countDownLatch);
+                VideoFileRenderer.this.m4857lambda$release$2$orgwebrtcVideoFileRenderer(cleanupBarrier);
             }
         });
-        ThreadUtils.awaitUninterruptibly(countDownLatch);
+        ThreadUtils.awaitUninterruptibly(cleanupBarrier);
         this.fileThreadHandler.post(new Runnable() { // from class: org.webrtc.VideoFileRenderer$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                VideoFileRenderer.this.lambda$release$3();
+                VideoFileRenderer.this.m4858lambda$release$3$orgwebrtcVideoFileRenderer();
             }
         });
         try {
@@ -137,14 +145,16 @@ public class VideoFileRenderer implements VideoSink {
         }
     }
 
-    public /* synthetic */ void lambda$release$2(CountDownLatch countDownLatch) {
+    /* renamed from: lambda$release$2$org-webrtc-VideoFileRenderer */
+    public /* synthetic */ void m4857lambda$release$2$orgwebrtcVideoFileRenderer(CountDownLatch cleanupBarrier) {
         this.yuvConverter.release();
         this.eglBase.release();
         this.renderThread.quit();
-        countDownLatch.countDown();
+        cleanupBarrier.countDown();
     }
 
-    public /* synthetic */ void lambda$release$3() {
+    /* renamed from: lambda$release$3$org-webrtc-VideoFileRenderer */
+    public /* synthetic */ void m4858lambda$release$3$orgwebrtcVideoFileRenderer() {
         try {
             this.videoOutFile.close();
             Logging.d(TAG, "Video written to disk as " + this.outputFileName + ". The number of frames is " + this.frameCount + " and the dimensions of the frames are " + this.outputFileWidth + "x" + this.outputFileHeight + ".");

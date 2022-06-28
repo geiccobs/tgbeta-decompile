@@ -13,17 +13,16 @@ import android.net.Uri;
 import android.text.TextPaint;
 import android.view.View;
 import android.view.ViewGroup;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.io.File;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Bitmaps;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.TLRPC$TL_document;
-import org.telegram.tgnet.TLRPC$TL_documentAttributeFilename;
-import org.telegram.tgnet.TLRPC$TL_documentAttributeVideo;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
+/* loaded from: classes5.dex */
 public class VideoSeekPreviewImage extends View {
     private BitmapShader bitmapShader;
     private Bitmap bitmapToDraw;
@@ -48,7 +47,7 @@ public class VideoSeekPreviewImage extends View {
     private RectF bitmapRect = new RectF();
     private Matrix matrix = new Matrix();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface VideoSeekPreviewImageDelegate {
         void onReady();
     }
@@ -62,105 +61,113 @@ public class VideoSeekPreviewImage extends View {
         this.delegate = videoSeekPreviewImageDelegate;
     }
 
-    public void setProgress(final float f, int i) {
+    public void setProgress(final float progress, int w) {
         String formatShortDuration;
-        if (i != 0) {
-            this.pixelWidth = i;
-            int i2 = ((int) (i * f)) / 5;
-            if (this.currentPixel == i2) {
+        if (w != 0) {
+            this.pixelWidth = w;
+            int pixel = ((int) (w * progress)) / 5;
+            if (this.currentPixel == pixel) {
                 return;
             }
-            this.currentPixel = i2;
+            this.currentPixel = pixel;
         }
-        final long j = ((float) this.duration) * f;
-        this.frameTime = AndroidUtilities.formatShortDuration((int) (j / 1000));
+        final long time = ((float) this.duration) * progress;
+        this.frameTime = AndroidUtilities.formatShortDuration((int) (time / 1000));
         this.timeWidth = (int) Math.ceil(this.textPaint.measureText(formatShortDuration));
         invalidate();
         if (this.progressRunnable != null) {
             Utilities.globalQueue.cancelRunnable(this.progressRunnable);
         }
-        AnimatedFileDrawable animatedFileDrawable = this.fileDrawable;
-        if (animatedFileDrawable != null) {
-            animatedFileDrawable.resetStream(false);
+        AnimatedFileDrawable file = this.fileDrawable;
+        if (file != null) {
+            file.resetStream(false);
         }
         DispatchQueue dispatchQueue = Utilities.globalQueue;
         Runnable runnable = new Runnable() { // from class: org.telegram.ui.Components.VideoSeekPreviewImage$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                VideoSeekPreviewImage.this.lambda$setProgress$1(f, j);
+                VideoSeekPreviewImage.this.m3206xe0c1106a(progress, time);
             }
         };
         this.progressRunnable = runnable;
         dispatchQueue.postRunnable(runnable);
     }
 
-    public /* synthetic */ void lambda$setProgress$1(float f, long j) {
-        int i;
+    /* renamed from: lambda$setProgress$1$org-telegram-ui-Components-VideoSeekPreviewImage */
+    public /* synthetic */ void m3206xe0c1106a(float progress, long time) {
+        int height;
+        int width;
         if (this.fileDrawable == null) {
-            this.pendingProgress = f;
+            this.pendingProgress = progress;
             return;
         }
-        int max = Math.max(200, AndroidUtilities.dp(100.0f));
-        final Bitmap frameAtTime = this.fileDrawable.getFrameAtTime(j);
-        if (frameAtTime != null) {
-            int width = frameAtTime.getWidth();
-            int height = frameAtTime.getHeight();
-            if (width > height) {
-                i = (int) (height / (width / max));
+        int bitmapSize = Math.max(200, AndroidUtilities.dp(100.0f));
+        Bitmap bitmap = this.fileDrawable.getFrameAtTime(time);
+        if (bitmap != null) {
+            int width2 = bitmap.getWidth();
+            int height2 = bitmap.getHeight();
+            if (width2 > height2) {
+                float scale = width2 / bitmapSize;
+                width = bitmapSize;
+                height = (int) (height2 / scale);
             } else {
-                int i2 = (int) (width / (height / max));
-                i = max;
-                max = i2;
+                float scale2 = height2 / bitmapSize;
+                height = bitmapSize;
+                width = (int) (width2 / scale2);
             }
             try {
-                Bitmap createBitmap = Bitmaps.createBitmap(max, i, Bitmap.Config.ARGB_8888);
-                this.dstR.set(0.0f, 0.0f, max, i);
-                Canvas canvas = new Canvas(createBitmap);
-                canvas.drawBitmap(frameAtTime, (android.graphics.Rect) null, this.dstR, this.paint);
+                Bitmap backgroundBitmap = Bitmaps.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                this.dstR.set(0.0f, 0.0f, width, height);
+                Canvas canvas = new Canvas(backgroundBitmap);
+                canvas.drawBitmap(bitmap, (android.graphics.Rect) null, this.dstR, this.paint);
                 canvas.setBitmap(null);
-                frameAtTime = createBitmap;
-            } catch (Throwable unused) {
-                frameAtTime = null;
+                bitmap = backgroundBitmap;
+            } catch (Throwable th) {
+                bitmap = null;
             }
         }
+        final Bitmap bitmapFinal = bitmap;
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.VideoSeekPreviewImage$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                VideoSeekPreviewImage.this.lambda$setProgress$0(frameAtTime);
+                VideoSeekPreviewImage.this.m3205xef176a4b(bitmapFinal);
             }
         });
     }
 
-    public /* synthetic */ void lambda$setProgress$0(Bitmap bitmap) {
-        int i;
-        if (bitmap != null) {
+    /* renamed from: lambda$setProgress$0$org-telegram-ui-Components-VideoSeekPreviewImage */
+    public /* synthetic */ void m3205xef176a4b(Bitmap bitmapFinal) {
+        int viewHeight;
+        int viewWidth;
+        if (bitmapFinal != null) {
             if (this.bitmapToDraw != null) {
-                Bitmap bitmap2 = this.bitmapToRecycle;
-                if (bitmap2 != null) {
-                    bitmap2.recycle();
+                Bitmap bitmap = this.bitmapToRecycle;
+                if (bitmap != null) {
+                    bitmap.recycle();
                 }
                 this.bitmapToRecycle = this.bitmapToDraw;
             }
-            this.bitmapToDraw = bitmap;
-            Bitmap bitmap3 = this.bitmapToDraw;
-            Shader.TileMode tileMode = Shader.TileMode.CLAMP;
-            BitmapShader bitmapShader = new BitmapShader(bitmap3, tileMode, tileMode);
+            this.bitmapToDraw = bitmapFinal;
+            BitmapShader bitmapShader = new BitmapShader(this.bitmapToDraw, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             this.bitmapShader = bitmapShader;
             bitmapShader.setLocalMatrix(this.matrix);
             this.bitmapPaint.setShader(this.bitmapShader);
             invalidate();
-            int dp = AndroidUtilities.dp(150.0f);
-            float width = bitmap.getWidth() / bitmap.getHeight();
-            if (width > 1.0f) {
-                i = (int) (dp / width);
+            int viewSize = AndroidUtilities.dp(150.0f);
+            float bitmapWidth = bitmapFinal.getWidth();
+            float bitmapHeight = bitmapFinal.getHeight();
+            float aspect = bitmapWidth / bitmapHeight;
+            if (aspect > 1.0f) {
+                viewWidth = viewSize;
+                viewHeight = (int) (viewSize / aspect);
             } else {
-                dp = (int) (dp * width);
-                i = dp;
+                viewHeight = viewSize;
+                viewWidth = (int) (viewSize * aspect);
             }
             ViewGroup.LayoutParams layoutParams = getLayoutParams();
-            if (getVisibility() != 0 || layoutParams.width != dp || layoutParams.height != i) {
-                layoutParams.width = dp;
-                layoutParams.height = i;
+            if (getVisibility() != 0 || layoutParams.width != viewWidth || layoutParams.height != viewHeight) {
+                layoutParams.width = viewWidth;
+                layoutParams.height = viewHeight;
                 setVisibility(0);
                 requestLayout();
             }
@@ -177,38 +184,42 @@ public class VideoSeekPreviewImage extends View {
         Runnable runnable = new Runnable() { // from class: org.telegram.ui.Components.VideoSeekPreviewImage$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
-                VideoSeekPreviewImage.this.lambda$open$3(uri);
+                VideoSeekPreviewImage.this.m3204lambda$open$3$orgtelegramuiComponentsVideoSeekPreviewImage(uri);
             }
         };
         this.loadRunnable = runnable;
         dispatchQueue.postRunnable(runnable);
     }
 
-    public /* synthetic */ void lambda$open$3(Uri uri) {
-        String str;
-        if ("tg".equals(uri.getScheme())) {
-            int intValue = Utilities.parseInt((CharSequence) uri.getQueryParameter("account")).intValue();
-            Object parentObject = FileLoader.getInstance(intValue).getParentObject(Utilities.parseInt((CharSequence) uri.getQueryParameter("rid")).intValue());
-            TLRPC$TL_document tLRPC$TL_document = new TLRPC$TL_document();
-            tLRPC$TL_document.access_hash = Utilities.parseLong(uri.getQueryParameter("hash")).longValue();
-            tLRPC$TL_document.id = Utilities.parseLong(uri.getQueryParameter("id")).longValue();
-            tLRPC$TL_document.size = Utilities.parseInt((CharSequence) uri.getQueryParameter("size")).intValue();
-            tLRPC$TL_document.dc_id = Utilities.parseInt((CharSequence) uri.getQueryParameter("dc")).intValue();
-            tLRPC$TL_document.mime_type = uri.getQueryParameter("mime");
-            tLRPC$TL_document.file_reference = Utilities.hexToBytes(uri.getQueryParameter("reference"));
-            TLRPC$TL_documentAttributeFilename tLRPC$TL_documentAttributeFilename = new TLRPC$TL_documentAttributeFilename();
-            tLRPC$TL_documentAttributeFilename.file_name = uri.getQueryParameter("name");
-            tLRPC$TL_document.attributes.add(tLRPC$TL_documentAttributeFilename);
-            tLRPC$TL_document.attributes.add(new TLRPC$TL_documentAttributeVideo());
-            if (FileLoader.getInstance(intValue).isLoadingFile(FileLoader.getAttachFileName(tLRPC$TL_document))) {
+    /* renamed from: lambda$open$3$org-telegram-ui-Components-VideoSeekPreviewImage */
+    public /* synthetic */ void m3204lambda$open$3$orgtelegramuiComponentsVideoSeekPreviewImage(Uri uri) {
+        String path;
+        String scheme = uri.getScheme();
+        if ("tg".equals(scheme)) {
+            int currentAccount = Utilities.parseInt((CharSequence) uri.getQueryParameter("account")).intValue();
+            Object parentObject = FileLoader.getInstance(currentAccount).getParentObject(Utilities.parseInt((CharSequence) uri.getQueryParameter("rid")).intValue());
+            TLRPC.TL_document document = new TLRPC.TL_document();
+            document.access_hash = Utilities.parseLong(uri.getQueryParameter("hash")).longValue();
+            document.id = Utilities.parseLong(uri.getQueryParameter("id")).longValue();
+            document.size = Utilities.parseInt((CharSequence) uri.getQueryParameter("size")).intValue();
+            document.dc_id = Utilities.parseInt((CharSequence) uri.getQueryParameter("dc")).intValue();
+            document.mime_type = uri.getQueryParameter("mime");
+            document.file_reference = Utilities.hexToBytes(uri.getQueryParameter("reference"));
+            TLRPC.TL_documentAttributeFilename filename = new TLRPC.TL_documentAttributeFilename();
+            filename.file_name = uri.getQueryParameter(CommonProperties.NAME);
+            document.attributes.add(filename);
+            document.attributes.add(new TLRPC.TL_documentAttributeVideo());
+            String name = FileLoader.getAttachFileName(document);
+            if (FileLoader.getInstance(currentAccount).isLoadingFile(name)) {
                 File directory = FileLoader.getDirectory(4);
-                str = new File(directory, tLRPC$TL_document.dc_id + "_" + tLRPC$TL_document.id + ".temp").getAbsolutePath();
+                path = new File(directory, document.dc_id + "_" + document.id + ".temp").getAbsolutePath();
             } else {
-                str = FileLoader.getInstance(intValue).getPathToAttach(tLRPC$TL_document, false).getAbsolutePath();
+                path = FileLoader.getInstance(currentAccount).getPathToAttach(document, false).getAbsolutePath();
             }
-            this.fileDrawable = new AnimatedFileDrawable(new File(str), true, tLRPC$TL_document.size, tLRPC$TL_document, null, parentObject, 0L, intValue, true);
+            this.fileDrawable = new AnimatedFileDrawable(new File(path), true, document.size, document, null, parentObject, 0L, currentAccount, true);
         } else {
-            this.fileDrawable = new AnimatedFileDrawable(new File(uri.getPath()), true, 0L, null, null, null, 0L, 0, true);
+            String path2 = uri.getPath();
+            this.fileDrawable = new AnimatedFileDrawable(new File(path2), true, 0L, null, null, null, 0L, 0, true);
         }
         this.duration = this.fileDrawable.getDurationMs();
         float f = this.pendingProgress;
@@ -219,12 +230,13 @@ public class VideoSeekPreviewImage extends View {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.VideoSeekPreviewImage$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                VideoSeekPreviewImage.this.lambda$open$2();
+                VideoSeekPreviewImage.this.m3203lambda$open$2$orgtelegramuiComponentsVideoSeekPreviewImage();
             }
         });
     }
 
-    public /* synthetic */ void lambda$open$2() {
+    /* renamed from: lambda$open$2$org-telegram-ui-Components-VideoSeekPreviewImage */
+    public /* synthetic */ void m3203lambda$open$2$orgtelegramuiComponentsVideoSeekPreviewImage() {
         this.loadRunnable = null;
         if (this.fileDrawable != null) {
             this.ready = true;
@@ -243,17 +255,16 @@ public class VideoSeekPreviewImage extends View {
             bitmap.recycle();
             this.bitmapToRecycle = null;
         }
-        if (this.bitmapToDraw == null || this.bitmapShader == null) {
-            return;
+        if (this.bitmapToDraw != null && this.bitmapShader != null) {
+            this.matrix.reset();
+            float scale = getMeasuredWidth() / this.bitmapToDraw.getWidth();
+            this.matrix.preScale(scale, scale);
+            this.bitmapRect.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
+            canvas.drawRoundRect(this.bitmapRect, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f), this.bitmapPaint);
+            this.frameDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            this.frameDrawable.draw(canvas);
+            canvas.drawText(this.frameTime, (getMeasuredWidth() - this.timeWidth) / 2, getMeasuredHeight() - AndroidUtilities.dp(9.0f), this.textPaint);
         }
-        this.matrix.reset();
-        float measuredWidth = getMeasuredWidth() / this.bitmapToDraw.getWidth();
-        this.matrix.preScale(measuredWidth, measuredWidth);
-        this.bitmapRect.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
-        canvas.drawRoundRect(this.bitmapRect, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f), this.bitmapPaint);
-        this.frameDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
-        this.frameDrawable.draw(canvas);
-        canvas.drawText(this.frameTime, (getMeasuredWidth() - this.timeWidth) / 2, getMeasuredHeight() - AndroidUtilities.dp(9.0f), this.textPaint);
     }
 
     public void close() {
@@ -265,14 +276,14 @@ public class VideoSeekPreviewImage extends View {
             Utilities.globalQueue.cancelRunnable(this.progressRunnable);
             this.progressRunnable = null;
         }
-        AnimatedFileDrawable animatedFileDrawable = this.fileDrawable;
-        if (animatedFileDrawable != null) {
-            animatedFileDrawable.resetStream(true);
+        AnimatedFileDrawable drawable = this.fileDrawable;
+        if (drawable != null) {
+            drawable.resetStream(true);
         }
         Utilities.globalQueue.postRunnable(new Runnable() { // from class: org.telegram.ui.Components.VideoSeekPreviewImage$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                VideoSeekPreviewImage.this.lambda$close$4();
+                VideoSeekPreviewImage.this.m3202lambda$close$4$orgtelegramuiComponentsVideoSeekPreviewImage();
             }
         });
         setVisibility(4);
@@ -284,7 +295,8 @@ public class VideoSeekPreviewImage extends View {
         this.ready = false;
     }
 
-    public /* synthetic */ void lambda$close$4() {
+    /* renamed from: lambda$close$4$org-telegram-ui-Components-VideoSeekPreviewImage */
+    public /* synthetic */ void m3202lambda$close$4$orgtelegramuiComponentsVideoSeekPreviewImage() {
         this.pendingProgress = 0.0f;
         AnimatedFileDrawable animatedFileDrawable = this.fileDrawable;
         if (animatedFileDrawable != null) {

@@ -1,7 +1,7 @@
 package org.webrtc;
 
 import org.webrtc.VideoEncoder;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public abstract class WrappedNativeVideoEncoder implements VideoEncoder {
     @Override // org.webrtc.VideoEncoder
     public abstract long createNativeVideoEncoder();
@@ -21,13 +21,11 @@ public abstract class WrappedNativeVideoEncoder implements VideoEncoder {
 
     @Override // org.webrtc.VideoEncoder
     public /* synthetic */ VideoCodecStatus setRates(VideoEncoder.RateControlParameters rateControlParameters) {
-        VideoCodecStatus rateAllocation;
-        rateAllocation = setRateAllocation(rateControlParameters.bitrate, (int) Math.ceil(rateControlParameters.framerateFps));
-        return rateAllocation;
+        return VideoEncoder.CC.$default$setRates(this, rateControlParameters);
     }
 
     @Override // org.webrtc.VideoEncoder
-    public final VideoCodecStatus initEncode(VideoEncoder.Settings settings, VideoEncoder.Callback callback) {
+    public final VideoCodecStatus initEncode(VideoEncoder.Settings settings, VideoEncoder.Callback encodeCallback) {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
@@ -37,12 +35,12 @@ public abstract class WrappedNativeVideoEncoder implements VideoEncoder {
     }
 
     @Override // org.webrtc.VideoEncoder
-    public final VideoCodecStatus encode(VideoFrame videoFrame, VideoEncoder.EncodeInfo encodeInfo) {
+    public final VideoCodecStatus encode(VideoFrame frame, VideoEncoder.EncodeInfo info) {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
     @Override // org.webrtc.VideoEncoder
-    public final VideoCodecStatus setRateAllocation(VideoEncoder.BitrateAllocation bitrateAllocation, int i) {
+    public final VideoCodecStatus setRateAllocation(VideoEncoder.BitrateAllocation allocation, int framerate) {
         throw new UnsupportedOperationException("Not implemented.");
     }
 

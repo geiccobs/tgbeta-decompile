@@ -3,7 +3,7 @@ package org.webrtc;
 import android.content.Context;
 import org.webrtc.CameraSession;
 import org.webrtc.CameraVideoCapturer;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class Camera1Capturer extends CameraCapturer {
     private final boolean captureToTexture;
 
@@ -52,13 +52,13 @@ public class Camera1Capturer extends CameraCapturer {
         super.switchCamera(cameraSwitchHandler, str);
     }
 
-    public Camera1Capturer(String str, CameraVideoCapturer.CameraEventsHandler cameraEventsHandler, boolean z) {
-        super(str, cameraEventsHandler, new Camera1Enumerator(z));
-        this.captureToTexture = z;
+    public Camera1Capturer(String cameraName, CameraVideoCapturer.CameraEventsHandler eventsHandler, boolean captureToTexture) {
+        super(cameraName, eventsHandler, new Camera1Enumerator(captureToTexture));
+        this.captureToTexture = captureToTexture;
     }
 
     @Override // org.webrtc.CameraCapturer
-    protected void createCameraSession(CameraSession.CreateSessionCallback createSessionCallback, CameraSession.Events events, Context context, SurfaceTextureHelper surfaceTextureHelper, String str, int i, int i2, int i3) {
-        Camera1Session.create(createSessionCallback, events, this.captureToTexture, context, surfaceTextureHelper, Camera1Enumerator.getCameraIndex(str), i, i2, i3);
+    protected void createCameraSession(CameraSession.CreateSessionCallback createSessionCallback, CameraSession.Events events, Context applicationContext, SurfaceTextureHelper surfaceTextureHelper, String cameraName, int width, int height, int framerate) {
+        Camera1Session.create(createSessionCallback, events, this.captureToTexture, applicationContext, surfaceTextureHelper, Camera1Enumerator.getCameraIndex(cameraName), width, height, framerate);
     }
 }

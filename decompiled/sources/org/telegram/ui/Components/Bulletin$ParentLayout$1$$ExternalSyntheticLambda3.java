@@ -2,7 +2,7 @@ package org.telegram.ui.Components;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import org.telegram.ui.Components.Bulletin;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class Bulletin$ParentLayout$1$$ExternalSyntheticLambda3 implements DynamicAnimation.OnAnimationUpdateListener {
     public static final /* synthetic */ Bulletin$ParentLayout$1$$ExternalSyntheticLambda3 INSTANCE = new Bulletin$ParentLayout$1$$ExternalSyntheticLambda3();
 

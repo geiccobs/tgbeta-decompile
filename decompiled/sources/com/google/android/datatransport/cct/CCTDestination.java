@@ -8,20 +8,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class CCTDestination implements EncodedDestination {
     private static final String DEFAULT_API_KEY;
     static final String DEFAULT_END_POINT;
+    static final String DESTINATION_NAME = "cct";
+    private static final String EXTRAS_DELIMITER = "\\";
+    private static final String EXTRAS_VERSION_MARKER = "1$";
+    public static final CCTDestination INSTANCE;
     static final String LEGACY_END_POINT;
     public static final CCTDestination LEGACY_INSTANCE;
     private static final Set<Encoding> SUPPORTED_ENCODINGS = Collections.unmodifiableSet(new HashSet(Arrays.asList(Encoding.of("proto"), Encoding.of("json"))));
     private final String apiKey;
     private final String endPoint;
-
-    @Override // com.google.android.datatransport.runtime.Destination
-    public String getName() {
-        return "cct";
-    }
 
     static {
         String mergeStrings = StringMerger.mergeStrings("hts/frbslgiggolai.o/0clgbthfra=snpoo", "tp:/ieaeogn.ogepscmvc/o/ac?omtjo_rt3");
@@ -30,13 +29,18 @@ public final class CCTDestination implements EncodedDestination {
         LEGACY_END_POINT = mergeStrings2;
         String mergeStrings3 = StringMerger.mergeStrings("AzSCki82AwsLzKd5O8zo", "IayckHiZRO1EFl1aGoK");
         DEFAULT_API_KEY = mergeStrings3;
-        new CCTDestination(mergeStrings, null);
+        INSTANCE = new CCTDestination(mergeStrings, null);
         LEGACY_INSTANCE = new CCTDestination(mergeStrings2, mergeStrings3);
     }
 
-    public CCTDestination(String str, String str2) {
-        this.endPoint = str;
-        this.apiKey = str2;
+    public CCTDestination(String endPoint, String apiKey) {
+        this.endPoint = endPoint;
+        this.apiKey = apiKey;
+    }
+
+    @Override // com.google.android.datatransport.runtime.Destination
+    public String getName() {
+        return DESTINATION_NAME;
     }
 
     @Override // com.google.android.datatransport.runtime.Destination
@@ -63,33 +67,39 @@ public final class CCTDestination implements EncodedDestination {
             return null;
         }
         Object[] objArr = new Object[4];
-        objArr[0] = "1$";
+        objArr[0] = EXTRAS_VERSION_MARKER;
         objArr[1] = this.endPoint;
-        objArr[2] = "\\";
+        objArr[2] = EXTRAS_DELIMITER;
         if (str == null) {
             str = "";
         }
         objArr[3] = str;
-        return String.format("%s%s%s%s", objArr).getBytes(Charset.forName("UTF-8"));
+        String buffer = String.format("%s%s%s%s", objArr);
+        return buffer.getBytes(Charset.forName("UTF-8"));
     }
 
-    public static CCTDestination fromByteArray(byte[] bArr) {
-        String str = new String(bArr, Charset.forName("UTF-8"));
-        if (!str.startsWith("1$")) {
+    public static CCTDestination fromByteArray(byte[] a) {
+        String buffer = new String(a, Charset.forName("UTF-8"));
+        if (!buffer.startsWith(EXTRAS_VERSION_MARKER)) {
             throw new IllegalArgumentException("Version marker missing from extras");
         }
-        String[] split = str.substring(2).split(Pattern.quote("\\"), 2);
-        if (split.length != 2) {
+        String[] fields = buffer.substring(EXTRAS_VERSION_MARKER.length()).split(Pattern.quote(EXTRAS_DELIMITER), 2);
+        if (fields.length != 2) {
             throw new IllegalArgumentException("Extra is not a valid encoded LegacyFlgDestination");
         }
-        String str2 = split[0];
-        if (str2.isEmpty()) {
+        String endPoint = fields[0];
+        if (endPoint.isEmpty()) {
             throw new IllegalArgumentException("Missing endpoint in CCTDestination extras");
         }
-        String str3 = split[1];
-        if (str3.isEmpty()) {
-            str3 = null;
-        }
-        return new CCTDestination(str2, str3);
+        String apiKey = fields[1];
+        return new CCTDestination(endPoint, apiKey.isEmpty() ? null : apiKey);
+    }
+
+    static byte[] encodeString(String s) {
+        return s.getBytes(Charset.forName("UTF-8"));
+    }
+
+    static String decodeExtras(byte[] a) {
+        return new String(a, Charset.forName("UTF-8"));
     }
 }

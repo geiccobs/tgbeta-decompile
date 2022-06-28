@@ -2,8 +2,7 @@ package com.google.android.exoplayer2.video;
 
 import com.google.android.exoplayer2.decoder.OutputBuffer;
 import java.nio.ByteBuffer;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class VideoDecoderOutputBuffer extends OutputBuffer {
     public static final int COLORSPACE_BT2020 = 3;
     public static final int COLORSPACE_BT601 = 1;
@@ -21,7 +20,7 @@ public class VideoDecoderOutputBuffer extends OutputBuffer {
     public ByteBuffer[] yuvPlanes;
     public int[] yuvStrides;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Owner {
         void releaseOutputBuffer(VideoDecoderOutputBuffer videoDecoderOutputBuffer);
     }
@@ -35,75 +34,76 @@ public class VideoDecoderOutputBuffer extends OutputBuffer {
         this.owner.releaseOutputBuffer(this);
     }
 
-    public void init(long j, int i, ByteBuffer byteBuffer) {
-        this.timeUs = j;
-        this.mode = i;
-        if (byteBuffer != null && byteBuffer.hasRemaining()) {
+    public void init(long timeUs, int mode, ByteBuffer supplementalData) {
+        this.timeUs = timeUs;
+        this.mode = mode;
+        if (supplementalData != null && supplementalData.hasRemaining()) {
             addFlag(268435456);
-            int limit = byteBuffer.limit();
-            ByteBuffer byteBuffer2 = this.supplementalData;
-            if (byteBuffer2 == null || byteBuffer2.capacity() < limit) {
-                this.supplementalData = ByteBuffer.allocate(limit);
+            int size = supplementalData.limit();
+            ByteBuffer byteBuffer = this.supplementalData;
+            if (byteBuffer == null || byteBuffer.capacity() < size) {
+                this.supplementalData = ByteBuffer.allocate(size);
             } else {
                 this.supplementalData.clear();
             }
-            this.supplementalData.put(byteBuffer);
+            this.supplementalData.put(supplementalData);
             this.supplementalData.flip();
-            byteBuffer.position(0);
+            supplementalData.position(0);
             return;
         }
         this.supplementalData = null;
     }
 
-    public boolean initForYuvFrame(int i, int i2, int i3, int i4, int i5) {
-        this.width = i;
-        this.height = i2;
-        this.colorspace = i5;
-        int i6 = (int) ((i2 + 1) / 2);
-        if (isSafeToMultiply(i3, i2) && isSafeToMultiply(i4, i6)) {
-            int i7 = i2 * i3;
-            int i8 = i6 * i4;
-            int i9 = (i8 * 2) + i7;
-            if (isSafeToMultiply(i8, 2) && i9 >= i7) {
-                ByteBuffer byteBuffer = this.data;
-                if (byteBuffer == null || byteBuffer.capacity() < i9) {
-                    this.data = ByteBuffer.allocateDirect(i9);
-                } else {
-                    this.data.position(0);
-                    this.data.limit(i9);
-                }
-                if (this.yuvPlanes == null) {
-                    this.yuvPlanes = new ByteBuffer[3];
-                }
-                ByteBuffer byteBuffer2 = this.data;
-                ByteBuffer[] byteBufferArr = this.yuvPlanes;
-                byteBufferArr[0] = byteBuffer2.slice();
-                byteBufferArr[0].limit(i7);
-                byteBuffer2.position(i7);
-                byteBufferArr[1] = byteBuffer2.slice();
-                byteBufferArr[1].limit(i8);
-                byteBuffer2.position(i7 + i8);
-                byteBufferArr[2] = byteBuffer2.slice();
-                byteBufferArr[2].limit(i8);
-                if (this.yuvStrides == null) {
-                    this.yuvStrides = new int[3];
-                }
-                int[] iArr = this.yuvStrides;
-                iArr[0] = i3;
-                iArr[1] = i4;
-                iArr[2] = i4;
-                return true;
-            }
+    public boolean initForYuvFrame(int width, int height, int yStride, int uvStride, int colorspace) {
+        this.width = width;
+        this.height = height;
+        this.colorspace = colorspace;
+        int uvHeight = (int) ((height + 1) / 2);
+        if (!isSafeToMultiply(yStride, height) || !isSafeToMultiply(uvStride, uvHeight)) {
+            return false;
         }
-        return false;
+        int yLength = yStride * height;
+        int uvLength = uvStride * uvHeight;
+        int minimumYuvSize = (uvLength * 2) + yLength;
+        if (!isSafeToMultiply(uvLength, 2) || minimumYuvSize < yLength) {
+            return false;
+        }
+        ByteBuffer byteBuffer = this.data;
+        if (byteBuffer == null || byteBuffer.capacity() < minimumYuvSize) {
+            this.data = ByteBuffer.allocateDirect(minimumYuvSize);
+        } else {
+            this.data.position(0);
+            this.data.limit(minimumYuvSize);
+        }
+        if (this.yuvPlanes == null) {
+            this.yuvPlanes = new ByteBuffer[3];
+        }
+        ByteBuffer data = this.data;
+        ByteBuffer[] yuvPlanes = this.yuvPlanes;
+        yuvPlanes[0] = data.slice();
+        yuvPlanes[0].limit(yLength);
+        data.position(yLength);
+        yuvPlanes[1] = data.slice();
+        yuvPlanes[1].limit(uvLength);
+        data.position(yLength + uvLength);
+        yuvPlanes[2] = data.slice();
+        yuvPlanes[2].limit(uvLength);
+        if (this.yuvStrides == null) {
+            this.yuvStrides = new int[3];
+        }
+        int[] iArr = this.yuvStrides;
+        iArr[0] = yStride;
+        iArr[1] = uvStride;
+        iArr[2] = uvStride;
+        return true;
     }
 
-    public void initForPrivateFrame(int i, int i2) {
-        this.width = i;
-        this.height = i2;
+    public void initForPrivateFrame(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
-    private static boolean isSafeToMultiply(int i, int i2) {
-        return i >= 0 && i2 >= 0 && (i2 <= 0 || i < ConnectionsManager.DEFAULT_DATACENTER_ID / i2);
+    private static boolean isSafeToMultiply(int a, int b) {
+        return a >= 0 && b >= 0 && (b <= 0 || a < Integer.MAX_VALUE / b);
     }
 }

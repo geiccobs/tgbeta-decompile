@@ -2,7 +2,7 @@ package com.google.android.gms.internal.mlkit_language_id;
 
 import java.util.Map;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzfc<K> implements Map.Entry<K, Object> {
     private Map.Entry<K, zzfa> zza;
 

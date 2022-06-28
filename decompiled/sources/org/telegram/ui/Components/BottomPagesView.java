@@ -6,11 +6,13 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import androidx.core.view.ViewCompat;
 import androidx.viewpager.widget.ViewPager;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class BottomPagesView extends View {
+    private float animatedProgress;
     private String colorKey;
     private int currentPage;
     private int pagesCount;
@@ -19,45 +21,45 @@ public class BottomPagesView extends View {
     private String selectedColorKey;
     private ViewPager viewPager;
     private Paint paint = new Paint(1);
+    private DecelerateInterpolator decelerateInterpolator = new DecelerateInterpolator();
     private RectF rect = new RectF();
 
-    public BottomPagesView(Context context, ViewPager viewPager, int i) {
+    public BottomPagesView(Context context, ViewPager pager, int count) {
         super(context);
-        new DecelerateInterpolator();
-        this.viewPager = viewPager;
-        this.pagesCount = i;
+        this.viewPager = pager;
+        this.pagesCount = count;
     }
 
-    public void setPageOffset(int i, float f) {
-        this.progress = f;
-        this.scrollPosition = i;
+    public void setPageOffset(int position, float offset) {
+        this.progress = offset;
+        this.scrollPosition = position;
         invalidate();
     }
 
-    public void setCurrentPage(int i) {
-        this.currentPage = i;
+    public void setCurrentPage(int page) {
+        this.currentPage = page;
         invalidate();
     }
 
-    public void setColor(String str, String str2) {
-        this.colorKey = str;
-        this.selectedColorKey = str2;
+    public void setColor(String key, String selectedKey) {
+        this.colorKey = key;
+        this.selectedColorKey = selectedKey;
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
+        int x;
         AndroidUtilities.dp(5.0f);
         String str = this.colorKey;
         if (str != null) {
-            this.paint.setColor((Theme.getColor(str) & 16777215) | (-1275068416));
+            this.paint.setColor((Theme.getColor(str) & ViewCompat.MEASURED_SIZE_MASK) | (-1275068416));
         } else {
             this.paint.setColor(Theme.getCurrentTheme().isDark() ? -11184811 : -4473925);
         }
         this.currentPage = this.viewPager.getCurrentItem();
-        for (int i = 0; i < this.pagesCount; i++) {
-            if (i != this.currentPage) {
-                int dp = AndroidUtilities.dp(11.0f) * i;
-                this.rect.set(dp, 0.0f, dp + AndroidUtilities.dp(5.0f), AndroidUtilities.dp(5.0f));
+        for (int a = 0; a < this.pagesCount; a++) {
+            if (a != this.currentPage) {
+                this.rect.set(AndroidUtilities.dp(11.0f) * a, 0.0f, AndroidUtilities.dp(5.0f) + x, AndroidUtilities.dp(5.0f));
                 canvas.drawRoundRect(this.rect, AndroidUtilities.dp(2.5f), AndroidUtilities.dp(2.5f), this.paint);
             }
         }
@@ -67,15 +69,13 @@ public class BottomPagesView extends View {
         } else {
             this.paint.setColor(-13851168);
         }
-        int dp2 = this.currentPage * AndroidUtilities.dp(11.0f);
-        if (this.progress != 0.0f) {
-            if (this.scrollPosition >= this.currentPage) {
-                this.rect.set(dp2, 0.0f, dp2 + AndroidUtilities.dp(5.0f) + (AndroidUtilities.dp(11.0f) * this.progress), AndroidUtilities.dp(5.0f));
-            } else {
-                this.rect.set(dp2 - (AndroidUtilities.dp(11.0f) * (1.0f - this.progress)), 0.0f, dp2 + AndroidUtilities.dp(5.0f), AndroidUtilities.dp(5.0f));
-            }
+        int x2 = this.currentPage * AndroidUtilities.dp(11.0f);
+        if (this.progress == 0.0f) {
+            this.rect.set(x2, 0.0f, AndroidUtilities.dp(5.0f) + x2, AndroidUtilities.dp(5.0f));
+        } else if (this.scrollPosition >= this.currentPage) {
+            this.rect.set(x2, 0.0f, AndroidUtilities.dp(5.0f) + x2 + (AndroidUtilities.dp(11.0f) * this.progress), AndroidUtilities.dp(5.0f));
         } else {
-            this.rect.set(dp2, 0.0f, dp2 + AndroidUtilities.dp(5.0f), AndroidUtilities.dp(5.0f));
+            this.rect.set(x2 - (AndroidUtilities.dp(11.0f) * (1.0f - this.progress)), 0.0f, AndroidUtilities.dp(5.0f) + x2, AndroidUtilities.dp(5.0f));
         }
         canvas.drawRoundRect(this.rect, AndroidUtilities.dp(2.5f), AndroidUtilities.dp(2.5f), this.paint);
     }

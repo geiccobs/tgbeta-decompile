@@ -3,13 +3,14 @@ package androidx.collection;
 import j$.util.Iterator;
 import j$.util.Map;
 import j$.util.function.Consumer;
+import j$.wrappers.C$r8$wrapper$java$util$function$Consumer$VWRP;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class MapCollections<K, V> {
     MapCollections<K, V>.EntrySet mEntrySet;
     MapCollections<K, V>.KeySet mKeySet;
@@ -33,7 +34,7 @@ public abstract class MapCollections<K, V> {
 
     protected abstract V colSetValue(int i, V v);
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     final class ArrayIterator<T> implements Iterator<T>, j$.util.Iterator {
         boolean mCanRemove = false;
         int mIndex;
@@ -45,10 +46,15 @@ public abstract class MapCollections<K, V> {
             Iterator.CC.$default$forEachRemaining(this, consumer);
         }
 
-        ArrayIterator(int i) {
-            MapCollections.this = r2;
-            this.mOffset = i;
-            this.mSize = r2.colGetSize();
+        @Override // java.util.Iterator
+        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
+            forEachRemaining(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
+        }
+
+        ArrayIterator(int offset) {
+            MapCollections.this = this$0;
+            this.mOffset = offset;
+            this.mSize = this$0.colGetSize();
         }
 
         @Override // java.util.Iterator, j$.util.Iterator
@@ -80,7 +86,7 @@ public abstract class MapCollections<K, V> {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     final class MapIterator implements java.util.Iterator<Map.Entry<K, V>>, Map.Entry<K, V>, j$.util.Iterator, Map.Entry {
         int mEnd;
         boolean mEntryValid = false;
@@ -91,9 +97,14 @@ public abstract class MapCollections<K, V> {
             Iterator.CC.$default$forEachRemaining(this, consumer);
         }
 
+        @Override // java.util.Iterator
+        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
+            forEachRemaining(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
+        }
+
         MapIterator() {
-            MapCollections.this = r2;
-            this.mEnd = r2.colGetSize() - 1;
+            MapCollections.this = this$0;
+            this.mEnd = this$0.colGetSize() - 1;
         }
 
         @Override // java.util.Iterator, j$.util.Iterator
@@ -139,23 +150,23 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Map.Entry, j$.util.Map.Entry
-        public V setValue(V v) {
+        public V setValue(V object) {
             if (!this.mEntryValid) {
                 throw new IllegalStateException("This container does not support retaining Map.Entry objects");
             }
-            return (V) MapCollections.this.colSetValue(this.mIndex, v);
+            return (V) MapCollections.this.colSetValue(this.mIndex, object);
         }
 
         @Override // java.util.Map.Entry, j$.util.Map.Entry
-        public boolean equals(Object obj) {
+        public boolean equals(Object o) {
             if (!this.mEntryValid) {
                 throw new IllegalStateException("This container does not support retaining Map.Entry objects");
             }
-            if (!(obj instanceof Map.Entry)) {
+            if (!(o instanceof Map.Entry)) {
                 return false;
             }
-            Map.Entry entry = (Map.Entry) obj;
-            return ContainerHelpers.equal(entry.getKey(), MapCollections.this.colGetEntry(this.mIndex, 0)) && ContainerHelpers.equal(entry.getValue(), MapCollections.this.colGetEntry(this.mIndex, 1));
+            Map.Entry<?, ?> e = (Map.Entry) o;
+            return ContainerHelpers.equal(e.getKey(), MapCollections.this.colGetEntry(this.mIndex, 0)) && ContainerHelpers.equal(e.getValue(), MapCollections.this.colGetEntry(this.mIndex, 1));
         }
 
         @Override // java.util.Map.Entry, j$.util.Map.Entry
@@ -164,13 +175,13 @@ public abstract class MapCollections<K, V> {
                 throw new IllegalStateException("This container does not support retaining Map.Entry objects");
             }
             int i = 0;
-            Object colGetEntry = MapCollections.this.colGetEntry(this.mIndex, 0);
-            Object colGetEntry2 = MapCollections.this.colGetEntry(this.mIndex, 1);
-            int hashCode = colGetEntry == null ? 0 : colGetEntry.hashCode();
-            if (colGetEntry2 != null) {
-                i = colGetEntry2.hashCode();
+            Object key = MapCollections.this.colGetEntry(this.mIndex, 0);
+            Object value = MapCollections.this.colGetEntry(this.mIndex, 1);
+            int hashCode = key == null ? 0 : key.hashCode();
+            if (value != null) {
+                i = value.hashCode();
             }
-            return hashCode ^ i;
+            return i ^ hashCode;
         }
 
         public String toString() {
@@ -178,10 +189,10 @@ public abstract class MapCollections<K, V> {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public final class EntrySet implements Set<Map.Entry<K, V>> {
         EntrySet() {
-            MapCollections.this = r1;
+            MapCollections.this = this$0;
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -189,17 +200,17 @@ public abstract class MapCollections<K, V> {
             return add((Map.Entry) ((Map.Entry) obj));
         }
 
-        public boolean add(Map.Entry<K, V> entry) {
+        public boolean add(Map.Entry<K, V> object) {
             throw new UnsupportedOperationException();
         }
 
         @Override // java.util.Set, java.util.Collection
         public boolean addAll(Collection<? extends Map.Entry<K, V>> collection) {
-            int colGetSize = MapCollections.this.colGetSize();
+            int oldSize = MapCollections.this.colGetSize();
             for (Map.Entry<K, V> entry : collection) {
                 MapCollections.this.colPut(entry.getKey(), entry.getValue());
             }
-            return colGetSize != MapCollections.this.colGetSize();
+            return oldSize != MapCollections.this.colGetSize();
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -208,16 +219,17 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean contains(Object obj) {
-            if (!(obj instanceof Map.Entry)) {
+        public boolean contains(Object o) {
+            if (!(o instanceof Map.Entry)) {
                 return false;
             }
-            Map.Entry entry = (Map.Entry) obj;
-            int colIndexOfKey = MapCollections.this.colIndexOfKey(entry.getKey());
-            if (colIndexOfKey >= 0) {
-                return ContainerHelpers.equal(MapCollections.this.colGetEntry(colIndexOfKey, 1), entry.getValue());
+            Map.Entry<?, ?> e = (Map.Entry) o;
+            int index = MapCollections.this.colIndexOfKey(e.getKey());
+            if (index < 0) {
+                return false;
             }
-            return false;
+            Object foundVal = MapCollections.this.colGetEntry(index, 1);
+            return ContainerHelpers.equal(foundVal, e.getValue());
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -242,7 +254,7 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean remove(Object obj) {
+        public boolean remove(Object object) {
             throw new UnsupportedOperationException();
         }
 
@@ -267,35 +279,40 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Set, java.util.Collection
-        public <T> T[] toArray(T[] tArr) {
+        public <T> T[] toArray(T[] array) {
             throw new UnsupportedOperationException();
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean equals(Object obj) {
-            return MapCollections.equalsSetHelper(this, obj);
+        public boolean equals(Object object) {
+            return MapCollections.equalsSetHelper(this, object);
         }
 
         @Override // java.util.Set, java.util.Collection
         public int hashCode() {
-            int i = 0;
-            for (int colGetSize = MapCollections.this.colGetSize() - 1; colGetSize >= 0; colGetSize--) {
-                Object colGetEntry = MapCollections.this.colGetEntry(colGetSize, 0);
-                Object colGetEntry2 = MapCollections.this.colGetEntry(colGetSize, 1);
-                i += (colGetEntry == null ? 0 : colGetEntry.hashCode()) ^ (colGetEntry2 == null ? 0 : colGetEntry2.hashCode());
+            int result = 0;
+            for (int i = MapCollections.this.colGetSize() - 1; i >= 0; i--) {
+                int i2 = 0;
+                Object key = MapCollections.this.colGetEntry(i, 0);
+                Object value = MapCollections.this.colGetEntry(i, 1);
+                int hashCode = key == null ? 0 : key.hashCode();
+                if (value != null) {
+                    i2 = value.hashCode();
+                }
+                result += i2 ^ hashCode;
             }
-            return i;
+            return result;
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public final class KeySet implements Set<K> {
         KeySet() {
-            MapCollections.this = r1;
+            MapCollections.this = this$0;
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean add(K k) {
+        public boolean add(K object) {
             throw new UnsupportedOperationException();
         }
 
@@ -310,8 +327,8 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean contains(Object obj) {
-            return MapCollections.this.colIndexOfKey(obj) >= 0;
+        public boolean contains(Object object) {
+            return MapCollections.this.colIndexOfKey(object) >= 0;
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -330,10 +347,10 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean remove(Object obj) {
-            int colIndexOfKey = MapCollections.this.colIndexOfKey(obj);
-            if (colIndexOfKey >= 0) {
-                MapCollections.this.colRemoveAt(colIndexOfKey);
+        public boolean remove(Object object) {
+            int index = MapCollections.this.colIndexOfKey(object);
+            if (index >= 0) {
+                MapCollections.this.colRemoveAt(index);
                 return true;
             }
             return false;
@@ -360,34 +377,38 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Set, java.util.Collection
-        public <T> T[] toArray(T[] tArr) {
-            return (T[]) MapCollections.this.toArrayHelper(tArr, 0);
+        public <T> T[] toArray(T[] array) {
+            return (T[]) MapCollections.this.toArrayHelper(array, 0);
         }
 
         @Override // java.util.Set, java.util.Collection
-        public boolean equals(Object obj) {
-            return MapCollections.equalsSetHelper(this, obj);
+        public boolean equals(Object object) {
+            return MapCollections.equalsSetHelper(this, object);
         }
 
         @Override // java.util.Set, java.util.Collection
         public int hashCode() {
-            int i = 0;
-            for (int colGetSize = MapCollections.this.colGetSize() - 1; colGetSize >= 0; colGetSize--) {
-                Object colGetEntry = MapCollections.this.colGetEntry(colGetSize, 0);
-                i += colGetEntry == null ? 0 : colGetEntry.hashCode();
+            int result = 0;
+            for (int i = MapCollections.this.colGetSize() - 1; i >= 0; i--) {
+                int i2 = 0;
+                Object obj = MapCollections.this.colGetEntry(i, 0);
+                if (obj != null) {
+                    i2 = obj.hashCode();
+                }
+                result += i2;
             }
-            return i;
+            return result;
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public final class ValuesCollection implements Collection<V> {
         ValuesCollection() {
-            MapCollections.this = r1;
+            MapCollections.this = this$0;
         }
 
         @Override // java.util.Collection
-        public boolean add(V v) {
+        public boolean add(V object) {
             throw new UnsupportedOperationException();
         }
 
@@ -402,8 +423,8 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Collection
-        public boolean contains(Object obj) {
-            return MapCollections.this.colIndexOfValue(obj) >= 0;
+        public boolean contains(Object object) {
+            return MapCollections.this.colIndexOfValue(object) >= 0;
         }
 
         @Override // java.util.Collection
@@ -428,10 +449,10 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Collection
-        public boolean remove(Object obj) {
-            int colIndexOfValue = MapCollections.this.colIndexOfValue(obj);
-            if (colIndexOfValue >= 0) {
-                MapCollections.this.colRemoveAt(colIndexOfValue);
+        public boolean remove(Object object) {
+            int index = MapCollections.this.colIndexOfValue(object);
+            if (index >= 0) {
+                MapCollections.this.colRemoveAt(index);
                 return true;
             }
             return false;
@@ -439,36 +460,38 @@ public abstract class MapCollections<K, V> {
 
         @Override // java.util.Collection
         public boolean removeAll(Collection<?> collection) {
-            int colGetSize = MapCollections.this.colGetSize();
+            int N = MapCollections.this.colGetSize();
+            boolean changed = false;
             int i = 0;
-            boolean z = false;
-            while (i < colGetSize) {
-                if (collection.contains(MapCollections.this.colGetEntry(i, 1))) {
+            while (i < N) {
+                Object cur = MapCollections.this.colGetEntry(i, 1);
+                if (collection.contains(cur)) {
                     MapCollections.this.colRemoveAt(i);
                     i--;
-                    colGetSize--;
-                    z = true;
+                    N--;
+                    changed = true;
                 }
                 i++;
             }
-            return z;
+            return changed;
         }
 
         @Override // java.util.Collection
         public boolean retainAll(Collection<?> collection) {
-            int colGetSize = MapCollections.this.colGetSize();
+            int N = MapCollections.this.colGetSize();
+            boolean changed = false;
             int i = 0;
-            boolean z = false;
-            while (i < colGetSize) {
-                if (!collection.contains(MapCollections.this.colGetEntry(i, 1))) {
+            while (i < N) {
+                Object cur = MapCollections.this.colGetEntry(i, 1);
+                if (!collection.contains(cur)) {
                     MapCollections.this.colRemoveAt(i);
                     i--;
-                    colGetSize--;
-                    z = true;
+                    N--;
+                    changed = true;
                 }
                 i++;
             }
-            return z;
+            return changed;
         }
 
         @Override // java.util.Collection
@@ -482,8 +505,8 @@ public abstract class MapCollections<K, V> {
         }
 
         @Override // java.util.Collection
-        public <T> T[] toArray(T[] tArr) {
-            return (T[]) MapCollections.this.toArrayHelper(tArr, 1);
+        public <T> T[] toArray(T[] array) {
+            return (T[]) MapCollections.this.toArrayHelper(array, 1);
         }
     }
 
@@ -498,66 +521,72 @@ public abstract class MapCollections<K, V> {
     }
 
     public static <K, V> boolean removeAllHelper(java.util.Map<K, V> map, Collection<?> collection) {
-        int size = map.size();
+        int oldSize = map.size();
         java.util.Iterator<?> it = collection.iterator();
         while (it.hasNext()) {
             map.remove(it.next());
         }
-        return size != map.size();
+        return oldSize != map.size();
     }
 
     public static <K, V> boolean retainAllHelper(java.util.Map<K, V> map, Collection<?> collection) {
-        int size = map.size();
+        int oldSize = map.size();
         java.util.Iterator<K> it = map.keySet().iterator();
         while (it.hasNext()) {
             if (!collection.contains(it.next())) {
                 it.remove();
             }
         }
-        return size != map.size();
+        return oldSize != map.size();
     }
 
-    public Object[] toArrayHelper(int i) {
-        int colGetSize = colGetSize();
-        Object[] objArr = new Object[colGetSize];
-        for (int i2 = 0; i2 < colGetSize; i2++) {
-            objArr[i2] = colGetEntry(i2, i);
+    public Object[] toArrayHelper(int offset) {
+        int N = colGetSize();
+        Object[] result = new Object[N];
+        for (int i = 0; i < N; i++) {
+            result[i] = colGetEntry(i, offset);
         }
-        return objArr;
+        return result;
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    public <T> T[] toArrayHelper(T[] tArr, int i) {
-        int colGetSize = colGetSize();
-        if (tArr.length < colGetSize) {
-            tArr = (T[]) ((Object[]) Array.newInstance(tArr.getClass().getComponentType(), colGetSize));
+    /* JADX WARN: Type inference failed for: r1v10, types: [java.lang.Object[]] */
+    /* JADX WARN: Type inference failed for: r4v6 */
+    public <T> T[] toArrayHelper(T[] array, int offset) {
+        int N = colGetSize();
+        if (array.length < N) {
+            array = (Object[]) Array.newInstance(array.getClass().getComponentType(), N);
         }
-        for (int i2 = 0; i2 < colGetSize; i2++) {
-            tArr[i2] = colGetEntry(i2, i);
+        for (int i = 0; i < N; i++) {
+            array[i] = colGetEntry(i, offset);
         }
-        if (tArr.length > colGetSize) {
-            tArr[colGetSize] = null;
+        int i2 = array.length;
+        if (i2 > N) {
+            array[N] = null;
         }
-        return tArr;
+        return array;
     }
 
-    public static <T> boolean equalsSetHelper(Set<T> set, Object obj) {
-        if (set == obj) {
+    public static <T> boolean equalsSetHelper(Set<T> set, Object object) {
+        if (set == object) {
             return true;
         }
-        if (obj instanceof Set) {
-            Set set2 = (Set) obj;
-            try {
-                if (set.size() == set2.size()) {
-                    if (set.containsAll(set2)) {
-                        return true;
-                    }
-                }
-                return false;
-            } catch (ClassCastException | NullPointerException unused) {
-            }
+        if (!(object instanceof Set)) {
+            return false;
         }
-        return false;
+        Set<?> s = (Set) object;
+        try {
+            if (set.size() == s.size()) {
+                if (set.containsAll(s)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (ClassCastException e) {
+            return false;
+        } catch (NullPointerException e2) {
+            return false;
+        }
     }
 
     public Set<Map.Entry<K, V>> getEntrySet() {

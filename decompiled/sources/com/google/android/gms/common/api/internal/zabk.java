@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zabk extends BroadcastReceiver {
     private Context zaa;
     private final zabm zab;
@@ -28,8 +28,14 @@ public final class zabk extends BroadcastReceiver {
 
     @Override // android.content.BroadcastReceiver
     public final void onReceive(Context context, Intent intent) {
+        String str;
         Uri data = intent.getData();
-        if ("com.google.android.gms".equals(data != null ? data.getSchemeSpecificPart() : null)) {
+        if (data == null) {
+            str = null;
+        } else {
+            str = data.getSchemeSpecificPart();
+        }
+        if ("com.google.android.gms".equals(str)) {
             this.zab.zaa();
             zaa();
         }

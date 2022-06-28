@@ -1,29 +1,36 @@
 package com.google.android.exoplayer2.drm;
 
 import android.util.Pair;
+import com.google.android.exoplayer2.C;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class WidevineUtil {
-    public static Pair<Long, Long> getLicenseDurationRemainingSec(DrmSession<?> drmSession) {
-        Map<String, String> queryKeyStatus = drmSession.queryKeyStatus();
-        if (queryKeyStatus == null) {
-            return null;
-        }
-        return new Pair<>(Long.valueOf(getDurationRemainingSec(queryKeyStatus, "LicenseDurationRemaining")), Long.valueOf(getDurationRemainingSec(queryKeyStatus, "PlaybackDurationRemaining")));
+    public static final String PROPERTY_LICENSE_DURATION_REMAINING = "LicenseDurationRemaining";
+    public static final String PROPERTY_PLAYBACK_DURATION_REMAINING = "PlaybackDurationRemaining";
+
+    private WidevineUtil() {
     }
 
-    private static long getDurationRemainingSec(Map<String, String> map, String str) {
-        if (map != null) {
+    public static Pair<Long, Long> getLicenseDurationRemainingSec(DrmSession<?> drmSession) {
+        Map<String, String> keyStatus = drmSession.queryKeyStatus();
+        if (keyStatus == null) {
+            return null;
+        }
+        return new Pair<>(Long.valueOf(getDurationRemainingSec(keyStatus, PROPERTY_LICENSE_DURATION_REMAINING)), Long.valueOf(getDurationRemainingSec(keyStatus, PROPERTY_PLAYBACK_DURATION_REMAINING)));
+    }
+
+    private static long getDurationRemainingSec(Map<String, String> keyStatus, String property) {
+        if (keyStatus != null) {
             try {
-                String str2 = map.get(str);
-                if (str2 == null) {
-                    return -9223372036854775807L;
+                String value = keyStatus.get(property);
+                if (value != null) {
+                    return Long.parseLong(value);
                 }
-                return Long.parseLong(str2);
-            } catch (NumberFormatException unused) {
-                return -9223372036854775807L;
+                return C.TIME_UNSET;
+            } catch (NumberFormatException e) {
+                return C.TIME_UNSET;
             }
         }
-        return -9223372036854775807L;
+        return C.TIME_UNSET;
     }
 }

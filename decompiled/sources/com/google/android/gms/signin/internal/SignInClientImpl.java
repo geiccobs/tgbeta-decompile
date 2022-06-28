@@ -8,10 +8,8 @@ import android.os.IInterface;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.internal.Storage;
-import com.google.android.gms.common.GooglePlayServicesUtilLight;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.BaseGmsClient;
 import com.google.android.gms.common.internal.ClientSettings;
@@ -21,14 +19,14 @@ import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.zat;
 import com.google.android.gms.signin.SignInOptions;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class SignInClientImpl extends GmsClient<zag> implements com.google.android.gms.signin.zae {
     private final boolean zaa;
     private final ClientSettings zab;
     private final Bundle zac;
     private final Integer zad;
 
-    public SignInClientImpl(@RecentlyNonNull Context context, @RecentlyNonNull Looper looper, boolean z, @RecentlyNonNull ClientSettings clientSettings, @RecentlyNonNull Bundle bundle, @RecentlyNonNull GoogleApiClient.ConnectionCallbacks connectionCallbacks, @RecentlyNonNull GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
+    public SignInClientImpl(Context context, Looper looper, boolean z, ClientSettings clientSettings, Bundle bundle, GoogleApiClient.ConnectionCallbacks connectionCallbacks, GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         super(context, looper, 44, clientSettings, connectionCallbacks, onConnectionFailedListener);
         this.zaa = z;
         this.zab = clientSettings;
@@ -36,24 +34,7 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
         this.zad = clientSettings.zad();
     }
 
-    @Override // com.google.android.gms.common.internal.BaseGmsClient, com.google.android.gms.common.api.Api.Client
-    public int getMinApkVersion() {
-        return GooglePlayServicesUtilLight.GOOGLE_PLAY_SERVICES_VERSION_CODE;
-    }
-
-    @Override // com.google.android.gms.common.internal.BaseGmsClient
-    @RecentlyNonNull
-    protected String getServiceDescriptor() {
-        return "com.google.android.gms.signin.internal.ISignInService";
-    }
-
-    @Override // com.google.android.gms.common.internal.BaseGmsClient
-    @RecentlyNonNull
-    protected String getStartServiceAction() {
-        return "com.google.android.gms.signin.service.START";
-    }
-
-    public SignInClientImpl(@RecentlyNonNull Context context, @RecentlyNonNull Looper looper, boolean z, @RecentlyNonNull ClientSettings clientSettings, @RecentlyNonNull SignInOptions signInOptions, @RecentlyNonNull GoogleApiClient.ConnectionCallbacks connectionCallbacks, @RecentlyNonNull GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
+    public SignInClientImpl(Context context, Looper looper, boolean z, ClientSettings clientSettings, SignInOptions signInOptions, GoogleApiClient.ConnectionCallbacks connectionCallbacks, GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         this(context, looper, true, clientSettings, createBundleFromClientSettings(clientSettings), connectionCallbacks, onConnectionFailedListener);
     }
 
@@ -63,10 +44,10 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
     }
 
     @Override // com.google.android.gms.signin.zae
-    public final void zaa(@RecentlyNonNull IAccountAccessor iAccountAccessor, boolean z) {
+    public final void zaa(IAccountAccessor iAccountAccessor, boolean z) {
         try {
             ((zag) getService()).zaa(iAccountAccessor, ((Integer) Preconditions.checkNotNull(this.zad)).intValue(), z);
-        } catch (RemoteException unused) {
+        } catch (RemoteException e) {
             Log.w("SignInClientImpl", "Remote service probably died when saveDefaultAccount is called");
         }
     }
@@ -75,7 +56,7 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
     public final void zaa() {
         try {
             ((zag) getService()).zaa(((Integer) Preconditions.checkNotNull(this.zad)).intValue());
-        } catch (RemoteException unused) {
+        } catch (RemoteException e) {
             Log.w("SignInClientImpl", "Remote service probably died when clearAccountFromSessionStore is called");
         }
     }
@@ -94,14 +75,23 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
             Log.w("SignInClientImpl", "Remote service probably died when signIn is called");
             try {
                 zaeVar.zaa(new zak(8));
-            } catch (RemoteException unused) {
+            } catch (RemoteException e2) {
                 Log.wtf("SignInClientImpl", "ISignInCallbacks#onSignInComplete should be executed from the same process, unexpected RemoteException.", e);
             }
         }
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient
-    @RecentlyNonNull
+    protected String getStartServiceAction() {
+        return "com.google.android.gms.signin.service.START";
+    }
+
+    @Override // com.google.android.gms.common.internal.BaseGmsClient
+    protected String getServiceDescriptor() {
+        return "com.google.android.gms.signin.internal.ISignInService";
+    }
+
+    @Override // com.google.android.gms.common.internal.BaseGmsClient
     protected Bundle getGetServiceRequestExtraArgs() {
         if (!getContext().getPackageName().equals(this.zab.getRealClientPackageName())) {
             this.zac.putString("com.google.android.gms.signin.internal.realClientPackageName", this.zab.getRealClientPackageName());
@@ -114,8 +104,7 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
         connect(new BaseGmsClient.LegacyClientCallbackAdapter());
     }
 
-    @RecentlyNonNull
-    public static Bundle createBundleFromClientSettings(@RecentlyNonNull ClientSettings clientSettings) {
+    public static Bundle createBundleFromClientSettings(ClientSettings clientSettings) {
         SignInOptions zac = clientSettings.zac();
         Integer zad = clientSettings.zad();
         Bundle bundle = new Bundle();
@@ -136,9 +125,13 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
         return bundle;
     }
 
+    @Override // com.google.android.gms.common.internal.BaseGmsClient, com.google.android.gms.common.api.Api.Client
+    public int getMinApkVersion() {
+        return 12451000;
+    }
+
     @Override // com.google.android.gms.common.internal.BaseGmsClient
-    @RecentlyNonNull
-    protected /* synthetic */ IInterface createServiceInterface(@RecentlyNonNull IBinder iBinder) {
+    protected /* synthetic */ IInterface createServiceInterface(IBinder iBinder) {
         if (iBinder == null) {
             return null;
         }

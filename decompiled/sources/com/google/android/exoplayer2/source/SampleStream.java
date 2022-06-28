@@ -3,7 +3,7 @@ package com.google.android.exoplayer2.source;
 import com.google.android.exoplayer2.FormatHolder;
 import com.google.android.exoplayer2.decoder.DecoderInputBuffer;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface SampleStream {
     boolean isReady();
 

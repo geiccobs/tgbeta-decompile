@@ -3,26 +3,27 @@ package org.telegram.ui.Components;
 import android.content.Context;
 import android.text.Layout;
 import android.widget.TextView;
-/* loaded from: classes3.dex */
+import com.google.android.exoplayer2.C;
+/* loaded from: classes5.dex */
 public class CorrectlyMeasuringTextView extends TextView {
     public CorrectlyMeasuringTextView(Context context) {
         super(context);
     }
 
     @Override // android.widget.TextView, android.view.View
-    public void onMeasure(int i, int i2) {
-        super.onMeasure(i, i2);
+    public void onMeasure(int wms, int hms) {
+        super.onMeasure(wms, hms);
         try {
-            Layout layout = getLayout();
-            if (layout.getLineCount() <= 1) {
+            Layout l = getLayout();
+            if (l.getLineCount() <= 1) {
                 return;
             }
-            int i3 = 0;
-            for (int lineCount = layout.getLineCount() - 1; lineCount >= 0; lineCount--) {
-                i3 = Math.max(i3, Math.round(layout.getPaint().measureText(getText(), layout.getLineStart(lineCount), layout.getLineEnd(lineCount))));
+            int maxw = 0;
+            for (int i = l.getLineCount() - 1; i >= 0; i--) {
+                maxw = Math.max(maxw, Math.round(l.getPaint().measureText(getText(), l.getLineStart(i), l.getLineEnd(i))));
             }
-            super.onMeasure(Math.min(i3 + getPaddingLeft() + getPaddingRight(), getMeasuredWidth()) | 1073741824, 1073741824 | getMeasuredHeight());
-        } catch (Exception unused) {
+            super.onMeasure(Math.min(getPaddingLeft() + maxw + getPaddingRight(), getMeasuredWidth()) | C.BUFFER_FLAG_ENCRYPTED, 1073741824 | getMeasuredHeight());
+        } catch (Exception e) {
         }
     }
 }

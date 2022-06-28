@@ -1,8 +1,9 @@
 package org.webrtc;
 
+import com.microsoft.appcenter.Constants;
 import java.util.Arrays;
 import org.webrtc.PeerConnection;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class IceCandidate {
     public final PeerConnection.AdapterType adapterType;
     public final String sdp;
@@ -10,53 +11,51 @@ public class IceCandidate {
     public final String sdpMid;
     public final String serverUrl;
 
-    public IceCandidate(String str, int i, String str2) {
-        this.sdpMid = str;
-        this.sdpMLineIndex = i;
-        this.sdp = str2;
+    public IceCandidate(String sdpMid, int sdpMLineIndex, String sdp) {
+        this.sdpMid = sdpMid;
+        this.sdpMLineIndex = sdpMLineIndex;
+        this.sdp = sdp;
         this.serverUrl = "";
         this.adapterType = PeerConnection.AdapterType.UNKNOWN;
     }
 
-    @CalledByNative
-    IceCandidate(String str, int i, String str2, String str3, PeerConnection.AdapterType adapterType) {
-        this.sdpMid = str;
-        this.sdpMLineIndex = i;
-        this.sdp = str2;
-        this.serverUrl = str3;
+    IceCandidate(String sdpMid, int sdpMLineIndex, String sdp, String serverUrl, PeerConnection.AdapterType adapterType) {
+        this.sdpMid = sdpMid;
+        this.sdpMLineIndex = sdpMLineIndex;
+        this.sdp = sdp;
+        this.serverUrl = serverUrl;
         this.adapterType = adapterType;
     }
 
     public String toString() {
-        return this.sdpMid + ":" + this.sdpMLineIndex + ":" + this.sdp + ":" + this.serverUrl + ":" + this.adapterType.toString();
+        return this.sdpMid + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + this.sdpMLineIndex + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + this.sdp + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + this.serverUrl + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + this.adapterType.toString();
     }
 
-    @CalledByNative
     String getSdpMid() {
         return this.sdpMid;
     }
 
-    @CalledByNative
     String getSdp() {
         return this.sdp;
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof IceCandidate)) {
+    public boolean equals(Object object) {
+        if (!(object instanceof IceCandidate)) {
             return false;
         }
-        IceCandidate iceCandidate = (IceCandidate) obj;
-        return objectEquals(this.sdpMid, iceCandidate.sdpMid) && this.sdpMLineIndex == iceCandidate.sdpMLineIndex && objectEquals(this.sdp, iceCandidate.sdp);
+        IceCandidate that = (IceCandidate) object;
+        return objectEquals(this.sdpMid, that.sdpMid) && this.sdpMLineIndex == that.sdpMLineIndex && objectEquals(this.sdp, that.sdp);
     }
 
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{this.sdpMid, Integer.valueOf(this.sdpMLineIndex), this.sdp});
+        Object[] values = {this.sdpMid, Integer.valueOf(this.sdpMLineIndex), this.sdp};
+        return Arrays.hashCode(values);
     }
 
-    private static boolean objectEquals(Object obj, Object obj2) {
-        if (obj == null) {
-            return obj2 == null;
+    private static boolean objectEquals(Object o1, Object o2) {
+        if (o1 == null) {
+            return o2 == null;
         }
-        return obj.equals(obj2);
+        return o1.equals(o2);
     }
 }

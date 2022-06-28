@@ -4,7 +4,7 @@ import com.google.android.gms.common.api.internal.ListenerHolder;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzap implements ListenerHolder.Notifier<LocationCallback> {
     final /* synthetic */ LocationResult zza;
 

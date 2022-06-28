@@ -7,8 +7,9 @@ import android.graphics.RectF;
 import android.view.View;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class ContextProgressView extends View {
+    private int currentColorType;
     private int innerColor;
     private String innerKey;
     private long lastUpdateTime;
@@ -19,34 +20,34 @@ public class ContextProgressView extends View {
     private RectF cicleRect = new RectF();
     private int radOffset = 0;
 
-    public ContextProgressView(Context context, int i) {
+    public ContextProgressView(Context context, int colorType) {
         super(context);
         this.innerPaint.setStyle(Paint.Style.STROKE);
         this.innerPaint.setStrokeWidth(AndroidUtilities.dp(2.0f));
         this.outerPaint.setStyle(Paint.Style.STROKE);
         this.outerPaint.setStrokeWidth(AndroidUtilities.dp(2.0f));
         this.outerPaint.setStrokeCap(Paint.Cap.ROUND);
-        if (i == 0) {
-            this.innerKey = "contextProgressInner1";
-            this.outerKey = "contextProgressOuter1";
-        } else if (i == 1) {
-            this.innerKey = "contextProgressInner2";
-            this.outerKey = "contextProgressOuter2";
-        } else if (i == 2) {
-            this.innerKey = "contextProgressInner3";
-            this.outerKey = "contextProgressOuter3";
-        } else if (i == 3) {
-            this.innerKey = "contextProgressInner4";
-            this.outerKey = "contextProgressOuter4";
+        if (colorType == 0) {
+            this.innerKey = Theme.key_contextProgressInner1;
+            this.outerKey = Theme.key_contextProgressOuter1;
+        } else if (colorType == 1) {
+            this.innerKey = Theme.key_contextProgressInner2;
+            this.outerKey = Theme.key_contextProgressOuter2;
+        } else if (colorType == 2) {
+            this.innerKey = Theme.key_contextProgressInner3;
+            this.outerKey = Theme.key_contextProgressOuter3;
+        } else if (colorType == 3) {
+            this.innerKey = Theme.key_contextProgressInner4;
+            this.outerKey = Theme.key_contextProgressOuter4;
         }
         updateColors();
     }
 
-    public void setColors(int i, int i2) {
+    public void setColors(int innerColor, int outerColor) {
         this.innerKey = null;
         this.outerKey = null;
-        this.innerColor = i;
-        this.outerColor = i2;
+        this.innerColor = innerColor;
+        this.outerColor = outerColor;
         updateColors();
     }
 
@@ -67,8 +68,8 @@ public class ContextProgressView extends View {
     }
 
     @Override // android.view.View
-    public void setVisibility(int i) {
-        super.setVisibility(i);
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
         this.lastUpdateTime = System.currentTimeMillis();
         invalidate();
     }
@@ -85,13 +86,13 @@ public class ContextProgressView extends View {
         if (getVisibility() != 0) {
             return;
         }
-        long currentTimeMillis = System.currentTimeMillis();
-        long j = currentTimeMillis - this.lastUpdateTime;
-        this.lastUpdateTime = currentTimeMillis;
-        this.radOffset = (int) (this.radOffset + (((float) (j * 360)) / 1000.0f));
-        int measuredWidth = (getMeasuredWidth() / 2) - AndroidUtilities.dp(9.0f);
-        int measuredHeight = (getMeasuredHeight() / 2) - AndroidUtilities.dp(9.0f);
-        this.cicleRect.set(measuredWidth, measuredHeight, measuredWidth + AndroidUtilities.dp(18.0f), measuredHeight + AndroidUtilities.dp(18.0f));
+        long newTime = System.currentTimeMillis();
+        long dt = newTime - this.lastUpdateTime;
+        this.lastUpdateTime = newTime;
+        this.radOffset = (int) (this.radOffset + (((float) (360 * dt)) / 1000.0f));
+        int x = (getMeasuredWidth() / 2) - AndroidUtilities.dp(9.0f);
+        int y = (getMeasuredHeight() / 2) - AndroidUtilities.dp(9.0f);
+        this.cicleRect.set(x, y, AndroidUtilities.dp(18.0f) + x, AndroidUtilities.dp(18.0f) + y);
         canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, AndroidUtilities.dp(9.0f), this.innerPaint);
         canvas.drawArc(this.cicleRect, this.radOffset - 90, 90.0f, false, this.outerPaint);
         invalidate();

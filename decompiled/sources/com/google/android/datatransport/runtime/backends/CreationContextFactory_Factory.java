@@ -4,16 +4,16 @@ import android.content.Context;
 import com.google.android.datatransport.runtime.dagger.internal.Factory;
 import com.google.android.datatransport.runtime.time.Clock;
 import javax.inject.Provider;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class CreationContextFactory_Factory implements Factory<CreationContextFactory> {
     private final Provider<Context> applicationContextProvider;
     private final Provider<Clock> monotonicClockProvider;
     private final Provider<Clock> wallClockProvider;
 
-    public CreationContextFactory_Factory(Provider<Context> provider, Provider<Clock> provider2, Provider<Clock> provider3) {
-        this.applicationContextProvider = provider;
-        this.wallClockProvider = provider2;
-        this.monotonicClockProvider = provider3;
+    public CreationContextFactory_Factory(Provider<Context> applicationContextProvider, Provider<Clock> wallClockProvider, Provider<Clock> monotonicClockProvider) {
+        this.applicationContextProvider = applicationContextProvider;
+        this.wallClockProvider = wallClockProvider;
+        this.monotonicClockProvider = monotonicClockProvider;
     }
 
     @Override // javax.inject.Provider
@@ -21,11 +21,11 @@ public final class CreationContextFactory_Factory implements Factory<CreationCon
         return newInstance(this.applicationContextProvider.get(), this.wallClockProvider.get(), this.monotonicClockProvider.get());
     }
 
-    public static CreationContextFactory_Factory create(Provider<Context> provider, Provider<Clock> provider2, Provider<Clock> provider3) {
-        return new CreationContextFactory_Factory(provider, provider2, provider3);
+    public static CreationContextFactory_Factory create(Provider<Context> applicationContextProvider, Provider<Clock> wallClockProvider, Provider<Clock> monotonicClockProvider) {
+        return new CreationContextFactory_Factory(applicationContextProvider, wallClockProvider, monotonicClockProvider);
     }
 
-    public static CreationContextFactory newInstance(Context context, Clock clock, Clock clock2) {
-        return new CreationContextFactory(context, clock, clock2);
+    public static CreationContextFactory newInstance(Context applicationContext, Clock wallClock, Clock monotonicClock) {
+        return new CreationContextFactory(applicationContext, wallClock, monotonicClock);
     }
 }

@@ -7,63 +7,64 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ObjectDescriptorFactory {
     protected static Logger log = Logger.getLogger(ObjectDescriptorFactory.class.getName());
     protected static Map<Integer, Map<Integer, Class<? extends BaseDescriptor>>> descriptorRegistry = new HashMap();
 
     static {
-        HashSet<Class<? extends BaseDescriptor>> hashSet = new HashSet();
-        hashSet.add(DecoderSpecificInfo.class);
-        hashSet.add(SLConfigDescriptor.class);
-        hashSet.add(BaseDescriptor.class);
-        hashSet.add(ExtensionDescriptor.class);
-        hashSet.add(ObjectDescriptorBase.class);
-        hashSet.add(ProfileLevelIndicationDescriptor.class);
-        hashSet.add(AudioSpecificConfig.class);
-        hashSet.add(ExtensionProfileLevelDescriptor.class);
-        hashSet.add(ESDescriptor.class);
-        hashSet.add(DecoderConfigDescriptor.class);
-        for (Class<? extends BaseDescriptor> cls : hashSet) {
-            Descriptor descriptor = (Descriptor) cls.getAnnotation(Descriptor.class);
+        Set<Class<? extends BaseDescriptor>> annotated = new HashSet<>();
+        annotated.add(DecoderSpecificInfo.class);
+        annotated.add(SLConfigDescriptor.class);
+        annotated.add(BaseDescriptor.class);
+        annotated.add(ExtensionDescriptor.class);
+        annotated.add(ObjectDescriptorBase.class);
+        annotated.add(ProfileLevelIndicationDescriptor.class);
+        annotated.add(AudioSpecificConfig.class);
+        annotated.add(ExtensionProfileLevelDescriptor.class);
+        annotated.add(ESDescriptor.class);
+        annotated.add(DecoderConfigDescriptor.class);
+        for (Class<? extends BaseDescriptor> clazz : annotated) {
+            Descriptor descriptor = (Descriptor) clazz.getAnnotation(Descriptor.class);
             int[] tags = descriptor.tags();
-            int objectTypeIndication = descriptor.objectTypeIndication();
-            Map<Integer, Class<? extends BaseDescriptor>> map = descriptorRegistry.get(Integer.valueOf(objectTypeIndication));
-            if (map == null) {
-                map = new HashMap<>();
+            int objectTypeInd = descriptor.objectTypeIndication();
+            Map<Integer, Class<? extends BaseDescriptor>> tagMap = descriptorRegistry.get(Integer.valueOf(objectTypeInd));
+            if (tagMap == null) {
+                tagMap = new HashMap();
             }
-            for (int i : tags) {
-                map.put(Integer.valueOf(i), cls);
+            for (int tag : tags) {
+                tagMap.put(Integer.valueOf(tag), clazz);
             }
-            descriptorRegistry.put(Integer.valueOf(objectTypeIndication), map);
+            descriptorRegistry.put(Integer.valueOf(objectTypeInd), tagMap);
         }
     }
 
-    public static BaseDescriptor createFrom(int i, ByteBuffer byteBuffer) throws IOException {
+    public static BaseDescriptor createFrom(int objectTypeIndication, ByteBuffer bb) throws IOException {
         BaseDescriptor baseDescriptor;
-        int readUInt8 = IsoTypeReader.readUInt8(byteBuffer);
-        Map<Integer, Class<? extends BaseDescriptor>> map = descriptorRegistry.get(Integer.valueOf(i));
-        if (map == null) {
-            map = descriptorRegistry.get(-1);
+        int tag = IsoTypeReader.readUInt8(bb);
+        Map<Integer, Class<? extends BaseDescriptor>> tagMap = descriptorRegistry.get(Integer.valueOf(objectTypeIndication));
+        if (tagMap == null) {
+            tagMap = descriptorRegistry.get(-1);
         }
-        Class<? extends BaseDescriptor> cls = map.get(Integer.valueOf(readUInt8));
-        if (cls == null || cls.isInterface() || Modifier.isAbstract(cls.getModifiers())) {
+        Class<? extends BaseDescriptor> aClass = tagMap.get(Integer.valueOf(tag));
+        if (aClass == null || aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers())) {
             Logger logger = log;
-            logger.warning("No ObjectDescriptor found for objectTypeIndication " + Integer.toHexString(i) + " and tag " + Integer.toHexString(readUInt8) + " found: " + cls);
+            logger.warning("No ObjectDescriptor found for objectTypeIndication " + Integer.toHexString(objectTypeIndication) + " and tag " + Integer.toHexString(tag) + " found: " + aClass);
             baseDescriptor = new UnknownDescriptor();
         } else {
             try {
-                baseDescriptor = cls.newInstance();
+                baseDescriptor = aClass.newInstance();
             } catch (Exception e) {
                 Logger logger2 = log;
                 Level level = Level.SEVERE;
-                logger2.log(level, "Couldn't instantiate BaseDescriptor class " + cls + " for objectTypeIndication " + i + " and tag " + readUInt8, (Throwable) e);
+                logger2.log(level, "Couldn't instantiate BaseDescriptor class " + aClass + " for objectTypeIndication " + objectTypeIndication + " and tag " + tag, (Throwable) e);
                 throw new RuntimeException(e);
             }
         }
-        baseDescriptor.parse(readUInt8, byteBuffer);
+        baseDescriptor.parse(tag, bb);
         return baseDescriptor;
     }
 }

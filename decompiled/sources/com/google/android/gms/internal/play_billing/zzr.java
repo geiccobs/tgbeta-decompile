@@ -83,20 +83,22 @@ public abstract class zzr extends AbstractCollection implements Serializable {
 
     @Override // java.util.AbstractCollection, java.util.Collection
     public final Object[] toArray(Object[] objArr) {
-        objArr.getClass();
-        int size = size();
-        int length = objArr.length;
-        if (length < size) {
-            Object[] zzg = zzg();
-            if (zzg == null) {
-                objArr = (Object[]) Array.newInstance(objArr.getClass().getComponentType(), size);
-            } else {
-                return Arrays.copyOfRange(zzg, zzc(), zzb(), objArr.getClass());
+        if (objArr != null) {
+            int size = size();
+            int length = objArr.length;
+            if (length < size) {
+                Object[] zzg = zzg();
+                if (zzg == null) {
+                    objArr = (Object[]) Array.newInstance(objArr.getClass().getComponentType(), size);
+                } else {
+                    return Arrays.copyOfRange(zzg, zzc(), zzb(), objArr.getClass());
+                }
+            } else if (length > size) {
+                objArr[size] = null;
             }
-        } else if (length > size) {
-            objArr[size] = null;
+            zza(objArr, 0);
+            return objArr;
         }
-        zza(objArr, 0);
-        return objArr;
+        throw null;
     }
 }

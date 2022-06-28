@@ -1,24 +1,25 @@
 package com.google.android.gms.internal.clearcut;
 
+import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import java.nio.ByteBuffer;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzfj extends zzfg {
     private static int zza(byte[] bArr, int i, long j, int i2) {
         int zzam;
         int zzp;
         int zzd;
-        if (i2 == 0) {
-            zzam = zzff.zzam(i);
-            return zzam;
-        } else if (i2 == 1) {
-            zzp = zzff.zzp(i, zzfd.zza(bArr, j));
-            return zzp;
-        } else if (i2 != 2) {
-            throw new AssertionError();
-        } else {
-            zzd = zzff.zzd(i, zzfd.zza(bArr, j), zzfd.zza(bArr, j + 1));
-            return zzd;
+        switch (i2) {
+            case 0:
+                zzam = zzff.zzam(i);
+                return zzam;
+            case 1:
+                zzp = zzff.zzp(i, zzfd.zza(bArr, j));
+                return zzp;
+            case 2:
+                zzd = zzff.zzd(i, zzfd.zza(bArr, j), zzfd.zza(bArr, j + 1));
+                return zzd;
+            default:
+                throw new AssertionError();
         }
     }
 
@@ -81,7 +82,7 @@ final class zzfj extends zzfg {
                 if (charAt3 < 2048 && j4 <= j5 - 2) {
                     long j6 = j4 + j;
                     zzfd.zza(bArr, j4, (byte) ((charAt3 >>> 6) | 960));
-                    zzfd.zza(bArr, j6, (byte) ((charAt3 & '?') | ConnectionsManager.RequestFlagNeedQuickAck));
+                    zzfd.zza(bArr, j6, (byte) ((charAt3 & '?') | 128));
                     j2 = j6 + j;
                     j3 = j;
                 } else if ((charAt3 >= 55296 && 57343 >= charAt3) || j4 > j5 - 3) {
@@ -102,14 +103,14 @@ final class zzfj extends zzfg {
                         if (Character.isSurrogatePair(charAt3, charAt4)) {
                             int codePoint = Character.toCodePoint(charAt3, charAt4);
                             long j7 = j4 + 1;
-                            zzfd.zza(bArr, j4, (byte) ((codePoint >>> 18) | 240));
+                            zzfd.zza(bArr, j4, (byte) ((codePoint >>> 18) | PsExtractor.VIDEO_STREAM_MASK));
                             long j8 = j7 + 1;
-                            zzfd.zza(bArr, j7, (byte) (((codePoint >>> 12) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                            zzfd.zza(bArr, j7, (byte) (((codePoint >>> 12) & 63) | 128));
                             long j9 = j8 + 1;
-                            zzfd.zza(bArr, j8, (byte) (((codePoint >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                            zzfd.zza(bArr, j8, (byte) (((codePoint >>> 6) & 63) | 128));
                             j3 = 1;
                             j2 = j9 + 1;
-                            zzfd.zza(bArr, j9, (byte) ((codePoint & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                            zzfd.zza(bArr, j9, (byte) ((codePoint & 63) | 128));
                             i4 = i5;
                         } else {
                             i4 = i5;
@@ -120,8 +121,8 @@ final class zzfj extends zzfg {
                     long j10 = j4 + j;
                     zzfd.zza(bArr, j4, (byte) ((charAt3 >>> '\f') | 480));
                     long j11 = j10 + j;
-                    zzfd.zza(bArr, j10, (byte) (((charAt3 >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                    zzfd.zza(bArr, j11, (byte) ((charAt3 & '?') | ConnectionsManager.RequestFlagNeedQuickAck));
+                    zzfd.zza(bArr, j10, (byte) (((charAt3 >>> 6) & 63) | 128));
+                    zzfd.zza(bArr, j11, (byte) ((charAt3 & '?') | 128));
                     j2 = j11 + 1;
                     j3 = 1;
                 }
@@ -206,13 +207,13 @@ final class zzfj extends zzfg {
                             if (Character.isSurrogatePair(charAt3, charAt4)) {
                                 int codePoint = Character.toCodePoint(charAt3, charAt4);
                                 long j2 = position + 1;
-                                zzfd.zza(position, (byte) ((codePoint >>> 18) | 240));
+                                zzfd.zza(position, (byte) ((codePoint >>> 18) | PsExtractor.VIDEO_STREAM_MASK));
                                 long j3 = j2 + 1;
-                                zzfd.zza(j2, (byte) (((codePoint >>> 12) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                                zzfd.zza(j2, (byte) (((codePoint >>> 12) & 63) | 128));
                                 long j4 = j3 + 1;
-                                zzfd.zza(j3, (byte) (((codePoint >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                                zzfd.zza(j3, (byte) (((codePoint >>> 6) & 63) | 128));
                                 long j5 = j4 + 1;
-                                zzfd.zza(j4, (byte) ((codePoint & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
+                                zzfd.zza(j4, (byte) ((codePoint & 63) | 128));
                                 i3 = i4;
                                 position = j5;
                             } else {
@@ -224,14 +225,14 @@ final class zzfj extends zzfg {
                     long j6 = position + 1;
                     zzfd.zza(position, (byte) ((charAt3 >>> '\f') | 480));
                     long j7 = j6 + 1;
-                    zzfd.zza(j6, (byte) (((charAt3 >>> 6) & 63) | ConnectionsManager.RequestFlagNeedQuickAck));
-                    zzfd.zza(j7, (byte) ((charAt3 & '?') | ConnectionsManager.RequestFlagNeedQuickAck));
+                    zzfd.zza(j6, (byte) (((charAt3 >>> 6) & 63) | 128));
+                    zzfd.zza(j7, (byte) ((charAt3 & '?') | 128));
                     position = j7 + 1;
                 } else {
                     j = zzb;
                     long j8 = position + 1;
                     zzfd.zza(position, (byte) ((charAt3 >>> 6) | 960));
-                    zzfd.zza(j8, (byte) ((charAt3 & '?') | ConnectionsManager.RequestFlagNeedQuickAck));
+                    zzfd.zza(j8, (byte) ((charAt3 & '?') | 128));
                     position = j8 + 1;
                 }
                 i3++;

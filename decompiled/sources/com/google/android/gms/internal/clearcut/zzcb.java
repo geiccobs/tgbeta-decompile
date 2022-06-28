@@ -1,124 +1,69 @@
 package com.google.android.gms.internal.clearcut;
-/* JADX WARN: Init of enum zzgy can be incorrect */
-/* JADX WARN: Init of enum zzgz can be incorrect */
-/* JADX WARN: Init of enum zzha can be incorrect */
-/* JADX WARN: Init of enum zzhb can be incorrect */
-/* JADX WARN: Init of enum zzhc can be incorrect */
-/* JADX WARN: Init of enum zzhd can be incorrect */
-/* JADX WARN: Init of enum zzhe can be incorrect */
-/* JADX WARN: Init of enum zzhf can be incorrect */
-/* JADX WARN: Init of enum zzhg can be incorrect */
-/* JADX WARN: Init of enum zzhh can be incorrect */
-/* JADX WARN: Init of enum zzhi can be incorrect */
-/* JADX WARN: Init of enum zzhj can be incorrect */
-/* JADX WARN: Init of enum zzhk can be incorrect */
-/* JADX WARN: Init of enum zzhl can be incorrect */
-/* JADX WARN: Init of enum zzhm can be incorrect */
-/* JADX WARN: Init of enum zzhn can be incorrect */
-/* JADX WARN: Init of enum zzho can be incorrect */
-/* JADX WARN: Init of enum zzhp can be incorrect */
-/* JADX WARN: Init of enum zzhq can be incorrect */
-/* JADX WARN: Init of enum zzhr can be incorrect */
-/* JADX WARN: Init of enum zzhs can be incorrect */
-/* JADX WARN: Init of enum zzht can be incorrect */
-/* JADX WARN: Init of enum zzhu can be incorrect */
-/* JADX WARN: Init of enum zzhv can be incorrect */
-/* JADX WARN: Init of enum zzhw can be incorrect */
-/* JADX WARN: Init of enum zzhx can be incorrect */
-/* JADX WARN: Init of enum zzhy can be incorrect */
-/* JADX WARN: Init of enum zzhz can be incorrect */
-/* JADX WARN: Init of enum zzia can be incorrect */
-/* JADX WARN: Init of enum zzib can be incorrect */
-/* JADX WARN: Init of enum zzic can be incorrect */
-/* JADX WARN: Init of enum zzid can be incorrect */
-/* JADX WARN: Init of enum zzie can be incorrect */
-/* JADX WARN: Init of enum zzif can be incorrect */
-/* JADX WARN: Init of enum zzig can be incorrect */
-/* JADX WARN: Init of enum zzih can be incorrect */
-/* JADX WARN: Init of enum zzii can be incorrect */
-/* JADX WARN: Init of enum zzij can be incorrect */
-/* JADX WARN: Init of enum zzik can be incorrect */
-/* JADX WARN: Init of enum zzil can be incorrect */
-/* JADX WARN: Init of enum zzim can be incorrect */
-/* JADX WARN: Init of enum zzin can be incorrect */
-/* JADX WARN: Init of enum zzio can be incorrect */
-/* JADX WARN: Init of enum zzip can be incorrect */
-/* JADX WARN: Init of enum zziq can be incorrect */
-/* JADX WARN: Init of enum zzir can be incorrect */
-/* JADX WARN: Init of enum zzis can be incorrect */
-/* JADX WARN: Init of enum zzit can be incorrect */
-/* JADX WARN: Init of enum zziu can be incorrect */
-/* JADX WARN: Init of enum zziv can be incorrect */
-/* loaded from: classes.dex */
+
+import java.lang.reflect.Type;
+/* loaded from: classes3.dex */
 public enum zzcb {
-    DOUBLE(0, r7, r8),
-    FLOAT(1, r7, r10),
-    INT64(2, r7, r12),
-    UINT64(3, r7, r12),
-    INT32(4, r7, r15),
-    FIXED64(5, r7, r12),
-    FIXED32(6, r7, r15),
-    BOOL(7, r7, r19),
-    STRING(8, r7, r21),
-    MESSAGE(9, r7, r23),
-    BYTES(10, r7, r25),
-    UINT32(11, r7, r15),
-    ENUM(12, r7, r28),
-    SFIXED32(13, r7, r15),
-    SFIXED64(14, r7, r12),
-    SINT32(15, r7, r15),
-    SINT64(16, r7, r12),
-    GROUP(17, r7, r23),
-    DOUBLE_LIST(18, r34, r8),
-    FLOAT_LIST(19, r34, r10),
-    INT64_LIST(20, r34, r12),
-    UINT64_LIST(21, r34, r12),
-    INT32_LIST(22, r34, r15),
-    FIXED64_LIST(23, r34, r12),
-    FIXED32_LIST(24, r34, r15),
-    BOOL_LIST(25, r34, r19),
-    STRING_LIST(26, r34, r21),
-    MESSAGE_LIST(27, r34, r23),
-    BYTES_LIST(28, r34, r25),
-    UINT32_LIST(29, r34, r15),
-    ENUM_LIST(30, r34, r28),
-    SFIXED32_LIST(31, r34, r15),
-    SFIXED64_LIST(32, r34, r12),
-    SINT32_LIST(33, r34, r15),
-    SINT64_LIST(34, r34, r12),
-    DOUBLE_LIST_PACKED(35, r50, r8),
-    FLOAT_LIST_PACKED(36, r50, r10),
-    INT64_LIST_PACKED(37, r50, r12),
-    UINT64_LIST_PACKED(38, r50, r12),
-    INT32_LIST_PACKED(39, r50, r15),
-    FIXED64_LIST_PACKED(40, r50, r12),
-    FIXED32_LIST_PACKED(41, r50, r15),
-    BOOL_LIST_PACKED(42, r50, r19),
-    UINT32_LIST_PACKED(43, r50, r15),
-    ENUM_LIST_PACKED(44, r50, r28),
-    SFIXED32_LIST_PACKED(45, r50, r15),
-    SFIXED64_LIST_PACKED(46, r50, r12),
-    SINT32_LIST_PACKED(47, r50, r15),
-    SINT64_LIST_PACKED(48, r50, r12),
-    GROUP_LIST(49, r34, r23),
+    DOUBLE(0, zzcd.SCALAR, zzcq.DOUBLE),
+    FLOAT(1, zzcd.SCALAR, zzcq.FLOAT),
+    INT64(2, zzcd.SCALAR, zzcq.LONG),
+    UINT64(3, zzcd.SCALAR, zzcq.LONG),
+    INT32(4, zzcd.SCALAR, zzcq.INT),
+    FIXED64(5, zzcd.SCALAR, zzcq.LONG),
+    FIXED32(6, zzcd.SCALAR, zzcq.INT),
+    BOOL(7, zzcd.SCALAR, zzcq.BOOLEAN),
+    STRING(8, zzcd.SCALAR, zzcq.STRING),
+    MESSAGE(9, zzcd.SCALAR, zzcq.MESSAGE),
+    BYTES(10, zzcd.SCALAR, zzcq.BYTE_STRING),
+    UINT32(11, zzcd.SCALAR, zzcq.INT),
+    ENUM(12, zzcd.SCALAR, zzcq.ENUM),
+    SFIXED32(13, zzcd.SCALAR, zzcq.INT),
+    SFIXED64(14, zzcd.SCALAR, zzcq.LONG),
+    SINT32(15, zzcd.SCALAR, zzcq.INT),
+    SINT64(16, zzcd.SCALAR, zzcq.LONG),
+    GROUP(17, zzcd.SCALAR, zzcq.MESSAGE),
+    DOUBLE_LIST(18, zzcd.VECTOR, zzcq.DOUBLE),
+    FLOAT_LIST(19, zzcd.VECTOR, zzcq.FLOAT),
+    INT64_LIST(20, zzcd.VECTOR, zzcq.LONG),
+    UINT64_LIST(21, zzcd.VECTOR, zzcq.LONG),
+    INT32_LIST(22, zzcd.VECTOR, zzcq.INT),
+    FIXED64_LIST(23, zzcd.VECTOR, zzcq.LONG),
+    FIXED32_LIST(24, zzcd.VECTOR, zzcq.INT),
+    BOOL_LIST(25, zzcd.VECTOR, zzcq.BOOLEAN),
+    STRING_LIST(26, zzcd.VECTOR, zzcq.STRING),
+    MESSAGE_LIST(27, zzcd.VECTOR, zzcq.MESSAGE),
+    BYTES_LIST(28, zzcd.VECTOR, zzcq.BYTE_STRING),
+    UINT32_LIST(29, zzcd.VECTOR, zzcq.INT),
+    ENUM_LIST(30, zzcd.VECTOR, zzcq.ENUM),
+    SFIXED32_LIST(31, zzcd.VECTOR, zzcq.INT),
+    SFIXED64_LIST(32, zzcd.VECTOR, zzcq.LONG),
+    SINT32_LIST(33, zzcd.VECTOR, zzcq.INT),
+    SINT64_LIST(34, zzcd.VECTOR, zzcq.LONG),
+    DOUBLE_LIST_PACKED(35, zzcd.PACKED_VECTOR, zzcq.DOUBLE),
+    FLOAT_LIST_PACKED(36, zzcd.PACKED_VECTOR, zzcq.FLOAT),
+    INT64_LIST_PACKED(37, zzcd.PACKED_VECTOR, zzcq.LONG),
+    UINT64_LIST_PACKED(38, zzcd.PACKED_VECTOR, zzcq.LONG),
+    INT32_LIST_PACKED(39, zzcd.PACKED_VECTOR, zzcq.INT),
+    FIXED64_LIST_PACKED(40, zzcd.PACKED_VECTOR, zzcq.LONG),
+    FIXED32_LIST_PACKED(41, zzcd.PACKED_VECTOR, zzcq.INT),
+    BOOL_LIST_PACKED(42, zzcd.PACKED_VECTOR, zzcq.BOOLEAN),
+    UINT32_LIST_PACKED(43, zzcd.PACKED_VECTOR, zzcq.INT),
+    ENUM_LIST_PACKED(44, zzcd.PACKED_VECTOR, zzcq.ENUM),
+    SFIXED32_LIST_PACKED(45, zzcd.PACKED_VECTOR, zzcq.INT),
+    SFIXED64_LIST_PACKED(46, zzcd.PACKED_VECTOR, zzcq.LONG),
+    SINT32_LIST_PACKED(47, zzcd.PACKED_VECTOR, zzcq.INT),
+    SINT64_LIST_PACKED(48, zzcd.PACKED_VECTOR, zzcq.LONG),
+    GROUP_LIST(49, zzcd.VECTOR, zzcq.MESSAGE),
     MAP(50, zzcd.MAP, zzcq.VOID);
     
     private static final zzcb[] zzjb;
+    private static final Type[] zzjc = new Type[0];
     private final int id;
+    private final zzcq zzix;
+    private final zzcd zziy;
+    private final Class<?> zziz;
+    private final boolean zzja;
 
     static {
-        zzcd zzcdVar = zzcd.SCALAR;
-        zzcq zzcqVar = zzcq.DOUBLE;
-        zzcq zzcqVar2 = zzcq.FLOAT;
-        zzcq zzcqVar3 = zzcq.LONG;
-        zzcq zzcqVar4 = zzcq.INT;
-        zzcq zzcqVar5 = zzcq.BOOLEAN;
-        zzcq zzcqVar6 = zzcq.STRING;
-        zzcq zzcqVar7 = zzcq.MESSAGE;
-        zzcq zzcqVar8 = zzcq.BYTE_STRING;
-        zzcq zzcqVar9 = zzcq.ENUM;
-        zzcd zzcdVar2 = zzcd.VECTOR;
-        zzcd zzcdVar3 = zzcd.PACKED_VECTOR;
         zzcb[] values = values();
         zzjb = new zzcb[values.length];
         for (zzcb zzcbVar : values) {
@@ -127,14 +72,33 @@ public enum zzcb {
     }
 
     zzcb(int i, zzcd zzcdVar, zzcq zzcqVar) {
+        Class<?> cls;
         this.id = i;
-        int i2 = zzcc.zzje[zzcdVar.ordinal()];
-        if (i2 == 1 || i2 == 2) {
-            zzcqVar.zzbq();
+        this.zziy = zzcdVar;
+        this.zzix = zzcqVar;
+        switch (zzcc.zzje[zzcdVar.ordinal()]) {
+            case 1:
+            case 2:
+                cls = zzcqVar.zzbq();
+                break;
+            default:
+                cls = null;
+                break;
         }
+        this.zziz = cls;
+        boolean z = false;
         if (zzcdVar == zzcd.SCALAR) {
-            int i3 = zzcc.zzjf[zzcqVar.ordinal()];
+            switch (zzcc.zzjf[zzcqVar.ordinal()]) {
+                case 1:
+                case 2:
+                case 3:
+                    break;
+                default:
+                    z = true;
+                    break;
+            }
         }
+        this.zzja = z;
     }
 
     public final int id() {

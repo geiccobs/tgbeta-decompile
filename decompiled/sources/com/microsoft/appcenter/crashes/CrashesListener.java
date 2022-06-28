@@ -2,7 +2,7 @@ package com.microsoft.appcenter.crashes;
 
 import com.microsoft.appcenter.crashes.ingestion.models.ErrorAttachmentLog;
 import com.microsoft.appcenter.crashes.model.ErrorReport;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface CrashesListener {
     Iterable<ErrorAttachmentLog> getErrorAttachments(ErrorReport errorReport);
 

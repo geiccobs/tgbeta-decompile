@@ -5,32 +5,37 @@ import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class MetadataExtension implements Model {
     private JSONObject mMetadata = new JSONObject();
 
-    @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject jSONObject) {
-        this.mMetadata = jSONObject;
+    public JSONObject getMetadata() {
+        return this.mMetadata;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer jSONStringer) throws JSONException {
-        Iterator<String> keys = this.mMetadata.keys();
-        while (keys.hasNext()) {
-            String next = keys.next();
-            jSONStringer.key(next).value(this.mMetadata.get(next));
+    public void read(JSONObject object) {
+        this.mMetadata = object;
+    }
+
+    @Override // com.microsoft.appcenter.ingestion.models.Model
+    public void write(JSONStringer writer) throws JSONException {
+        Iterator<String> iterator = this.mMetadata.keys();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            writer.key(key).value(this.mMetadata.get(key));
         }
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj != null && MetadataExtension.class == obj.getClass()) {
-            return this.mMetadata.toString().equals(((MetadataExtension) obj).mMetadata.toString());
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        return false;
+        MetadataExtension metadataExtension = (MetadataExtension) o;
+        return this.mMetadata.toString().equals(metadataExtension.mMetadata.toString());
     }
 
     public int hashCode() {

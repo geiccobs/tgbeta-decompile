@@ -5,16 +5,17 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class JoinSheetUserCell extends FrameLayout {
     private BackupImageView imageView;
     private TextView nameTextView;
@@ -29,7 +30,7 @@ public class JoinSheetUserCell extends FrameLayout {
         addView(this.imageView, LayoutHelper.createFrame(54, 54.0f, 49, 0.0f, 7.0f, 0.0f, 0.0f));
         TextView textView = new TextView(context);
         this.nameTextView = textView;
-        textView.setTextColor(Theme.getColor("dialogTextBlack"));
+        textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         this.nameTextView.setTextSize(1, 12.0f);
         this.nameTextView.setMaxLines(1);
         this.nameTextView.setGravity(49);
@@ -40,20 +41,20 @@ public class JoinSheetUserCell extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(100.0f), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(90.0f), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(100.0f), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(90.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
-    public void setUser(TLRPC$User tLRPC$User) {
-        this.nameTextView.setText(ContactsController.formatName(tLRPC$User.first_name, tLRPC$User.last_name));
-        this.avatarDrawable.setInfo(tLRPC$User);
-        this.imageView.setForUserOrChat(tLRPC$User, this.avatarDrawable);
+    public void setUser(TLRPC.User user) {
+        this.nameTextView.setText(ContactsController.formatName(user.first_name, user.last_name));
+        this.avatarDrawable.setInfo(user);
+        this.imageView.setForUserOrChat(user, this.avatarDrawable);
     }
 
-    public void setCount(int i) {
+    public void setCount(int count) {
         this.nameTextView.setText("");
         AvatarDrawable avatarDrawable = this.avatarDrawable;
-        avatarDrawable.setInfo(0L, null, null, "+" + LocaleController.formatShortNumber(i, this.result));
+        avatarDrawable.setInfo(0L, null, null, "+" + LocaleController.formatShortNumber(count, this.result));
         this.imageView.setImage((ImageLocation) null, "50_50", this.avatarDrawable, (Object) null);
     }
 }

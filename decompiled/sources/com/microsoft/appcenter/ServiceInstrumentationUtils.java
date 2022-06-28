@@ -1,23 +1,32 @@
 package com.microsoft.appcenter;
 
+import android.os.Bundle;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.appcenter.utils.InstrumentationRegistryHelper;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 class ServiceInstrumentationUtils {
-    public static boolean isServiceDisabledByInstrumentation(String str) {
+    static final String DISABLE_ALL_SERVICES = "All";
+    static final String DISABLE_SERVICES = "APP_CENTER_DISABLE";
+
+    ServiceInstrumentationUtils() {
+    }
+
+    public static boolean isServiceDisabledByInstrumentation(String serviceName) {
         try {
-            String string = InstrumentationRegistryHelper.getArguments().getString("APP_CENTER_DISABLE");
-            if (string == null) {
+            Bundle arguments = InstrumentationRegistryHelper.getArguments();
+            String disableServices = arguments.getString(DISABLE_SERVICES);
+            if (disableServices == null) {
                 return false;
             }
-            for (String str2 : string.split(",")) {
-                String trim = str2.trim();
-                if (trim.equals("All") || trim.equals(str)) {
+            String[] disableServicesList = disableServices.split(",");
+            for (String service : disableServicesList) {
+                String service2 = service.trim();
+                if (service2.equals(DISABLE_ALL_SERVICES) || service2.equals(serviceName)) {
                     return true;
                 }
             }
             return false;
-        } catch (IllegalStateException | LinkageError unused) {
+        } catch (IllegalStateException | LinkageError e) {
             AppCenterLog.debug("AppCenter", "Cannot read instrumentation variables in a non-test environment.");
             return false;
         }

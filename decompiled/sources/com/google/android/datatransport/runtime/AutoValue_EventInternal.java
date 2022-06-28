@@ -2,7 +2,7 @@ package com.google.android.datatransport.runtime;
 
 import com.google.android.datatransport.runtime.EventInternal;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class AutoValue_EventInternal extends EventInternal {
     private final Map<String, String> autoMetadata;
     private final Integer code;
@@ -11,13 +11,13 @@ final class AutoValue_EventInternal extends EventInternal {
     private final String transportName;
     private final long uptimeMillis;
 
-    private AutoValue_EventInternal(String str, Integer num, EncodedPayload encodedPayload, long j, long j2, Map<String, String> map) {
-        this.transportName = str;
-        this.code = num;
+    private AutoValue_EventInternal(String transportName, Integer code, EncodedPayload encodedPayload, long eventMillis, long uptimeMillis, Map<String, String> autoMetadata) {
+        this.transportName = transportName;
+        this.code = code;
         this.encodedPayload = encodedPayload;
-        this.eventMillis = j;
-        this.uptimeMillis = j2;
-        this.autoMetadata = map;
+        this.eventMillis = eventMillis;
+        this.uptimeMillis = uptimeMillis;
+        this.autoMetadata = autoMetadata;
     }
 
     @Override // com.google.android.datatransport.runtime.EventInternal
@@ -54,28 +54,29 @@ final class AutoValue_EventInternal extends EventInternal {
         return "EventInternal{transportName=" + this.transportName + ", code=" + this.code + ", encodedPayload=" + this.encodedPayload + ", eventMillis=" + this.eventMillis + ", uptimeMillis=" + this.uptimeMillis + ", autoMetadata=" + this.autoMetadata + "}";
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(Object o) {
         Integer num;
-        if (obj == this) {
+        if (o == this) {
             return true;
         }
-        if (!(obj instanceof EventInternal)) {
+        if (!(o instanceof EventInternal)) {
             return false;
         }
-        EventInternal eventInternal = (EventInternal) obj;
-        return this.transportName.equals(eventInternal.getTransportName()) && ((num = this.code) != null ? num.equals(eventInternal.getCode()) : eventInternal.getCode() == null) && this.encodedPayload.equals(eventInternal.getEncodedPayload()) && this.eventMillis == eventInternal.getEventMillis() && this.uptimeMillis == eventInternal.getUptimeMillis() && this.autoMetadata.equals(eventInternal.getAutoMetadata());
+        EventInternal that = (EventInternal) o;
+        return this.transportName.equals(that.getTransportName()) && ((num = this.code) != null ? num.equals(that.getCode()) : that.getCode() == null) && this.encodedPayload.equals(that.getEncodedPayload()) && this.eventMillis == that.getEventMillis() && this.uptimeMillis == that.getUptimeMillis() && this.autoMetadata.equals(that.getAutoMetadata());
     }
 
     public int hashCode() {
-        int hashCode = (this.transportName.hashCode() ^ 1000003) * 1000003;
+        int h$ = 1 * 1000003;
+        int h$2 = (h$ ^ this.transportName.hashCode()) * 1000003;
         Integer num = this.code;
-        int hashCode2 = num == null ? 0 : num.hashCode();
+        int hashCode = num == null ? 0 : num.hashCode();
         long j = this.eventMillis;
         long j2 = this.uptimeMillis;
-        return ((((((((hashCode ^ hashCode2) * 1000003) ^ this.encodedPayload.hashCode()) * 1000003) ^ ((int) (j ^ (j >>> 32)))) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003) ^ this.autoMetadata.hashCode();
+        return ((((((((h$2 ^ hashCode) * 1000003) ^ this.encodedPayload.hashCode()) * 1000003) ^ ((int) (j ^ (j >>> 32)))) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003) ^ this.autoMetadata.hashCode();
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class Builder extends EventInternal.Builder {
         private Map<String, String> autoMetadata;
         private Integer code;
@@ -85,17 +86,17 @@ final class AutoValue_EventInternal extends EventInternal {
         private Long uptimeMillis;
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
-        public EventInternal.Builder setTransportName(String str) {
-            if (str == null) {
+        public EventInternal.Builder setTransportName(String transportName) {
+            if (transportName == null) {
                 throw new NullPointerException("Null transportName");
             }
-            this.transportName = str;
+            this.transportName = transportName;
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
-        public EventInternal.Builder setCode(Integer num) {
-            this.code = num;
+        public EventInternal.Builder setCode(Integer code) {
+            this.code = code;
             return this;
         }
 
@@ -109,55 +110,55 @@ final class AutoValue_EventInternal extends EventInternal {
         }
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
-        public EventInternal.Builder setEventMillis(long j) {
-            this.eventMillis = Long.valueOf(j);
+        public EventInternal.Builder setEventMillis(long eventMillis) {
+            this.eventMillis = Long.valueOf(eventMillis);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
-        public EventInternal.Builder setUptimeMillis(long j) {
-            this.uptimeMillis = Long.valueOf(j);
+        public EventInternal.Builder setUptimeMillis(long uptimeMillis) {
+            this.uptimeMillis = Long.valueOf(uptimeMillis);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
-        public EventInternal.Builder setAutoMetadata(Map<String, String> map) {
-            if (map == null) {
+        public EventInternal.Builder setAutoMetadata(Map<String, String> autoMetadata) {
+            if (autoMetadata == null) {
                 throw new NullPointerException("Null autoMetadata");
             }
-            this.autoMetadata = map;
+            this.autoMetadata = autoMetadata;
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
         protected Map<String, String> getAutoMetadata() {
             Map<String, String> map = this.autoMetadata;
-            if (map != null) {
-                return map;
+            if (map == null) {
+                throw new IllegalStateException("Property \"autoMetadata\" has not been set");
             }
-            throw new IllegalStateException("Property \"autoMetadata\" has not been set");
+            return map;
         }
 
         @Override // com.google.android.datatransport.runtime.EventInternal.Builder
         public EventInternal build() {
-            String str = "";
+            String missing = "";
             if (this.transportName == null) {
-                str = str + " transportName";
+                missing = missing + " transportName";
             }
             if (this.encodedPayload == null) {
-                str = str + " encodedPayload";
+                missing = missing + " encodedPayload";
             }
             if (this.eventMillis == null) {
-                str = str + " eventMillis";
+                missing = missing + " eventMillis";
             }
             if (this.uptimeMillis == null) {
-                str = str + " uptimeMillis";
+                missing = missing + " uptimeMillis";
             }
             if (this.autoMetadata == null) {
-                str = str + " autoMetadata";
+                missing = missing + " autoMetadata";
             }
-            if (!str.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + str);
+            if (!missing.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + missing);
             }
             return new AutoValue_EventInternal(this.transportName, this.code, this.encodedPayload, this.eventMillis.longValue(), this.uptimeMillis.longValue(), this.autoMetadata);
         }

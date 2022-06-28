@@ -5,9 +5,8 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLngBounds;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzab implements Parcelable.Creator<GoogleMapOptions> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ GoogleMapOptions createFromParcel(Parcel parcel) {
@@ -81,10 +80,10 @@ public final class zzab implements Parcelable.Creator<GoogleMapOptions> {
                 case 17:
                     f2 = SafeParcelReader.readFloatObject(parcel, readHeader);
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     latLngBounds = (LatLngBounds) SafeParcelReader.createParcelable(parcel, readHeader, LatLngBounds.CREATOR);
                     break;
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                     b12 = SafeParcelReader.readByte(parcel, readHeader);
                     break;
             }

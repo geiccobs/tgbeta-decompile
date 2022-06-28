@@ -4,19 +4,19 @@ import com.google.android.exoplayer2.extractor.SeekMap;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.FlacStreamMetadata;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class FlacSeekTableSeekMap implements SeekMap {
     private final long firstFrameOffset;
     private final FlacStreamMetadata flacStreamMetadata;
 
+    public FlacSeekTableSeekMap(FlacStreamMetadata flacStreamMetadata, long firstFrameOffset) {
+        this.flacStreamMetadata = flacStreamMetadata;
+        this.firstFrameOffset = firstFrameOffset;
+    }
+
     @Override // com.google.android.exoplayer2.extractor.SeekMap
     public boolean isSeekable() {
         return true;
-    }
-
-    public FlacSeekTableSeekMap(FlacStreamMetadata flacStreamMetadata, long j) {
-        this.flacStreamMetadata = flacStreamMetadata;
-        this.firstFrameOffset = j;
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
@@ -25,27 +25,28 @@ public final class FlacSeekTableSeekMap implements SeekMap {
     }
 
     @Override // com.google.android.exoplayer2.extractor.SeekMap
-    public SeekMap.SeekPoints getSeekPoints(long j) {
+    public SeekMap.SeekPoints getSeekPoints(long timeUs) {
         Assertions.checkNotNull(this.flacStreamMetadata.seekTable);
-        FlacStreamMetadata flacStreamMetadata = this.flacStreamMetadata;
-        FlacStreamMetadata.SeekTable seekTable = flacStreamMetadata.seekTable;
-        long[] jArr = seekTable.pointSampleNumbers;
-        long[] jArr2 = seekTable.pointOffsets;
-        int binarySearchFloor = Util.binarySearchFloor(jArr, flacStreamMetadata.getSampleNumber(j), true, false);
-        long j2 = 0;
-        long j3 = binarySearchFloor == -1 ? 0L : jArr[binarySearchFloor];
-        if (binarySearchFloor != -1) {
-            j2 = jArr2[binarySearchFloor];
+        long[] pointSampleNumbers = this.flacStreamMetadata.seekTable.pointSampleNumbers;
+        long[] pointOffsets = this.flacStreamMetadata.seekTable.pointOffsets;
+        long targetSampleNumber = this.flacStreamMetadata.getSampleNumber(timeUs);
+        int index = Util.binarySearchFloor(pointSampleNumbers, targetSampleNumber, true, false);
+        long seekPointOffsetFromFirstFrame = 0;
+        long seekPointSampleNumber = index == -1 ? 0L : pointSampleNumbers[index];
+        if (index != -1) {
+            seekPointOffsetFromFirstFrame = pointOffsets[index];
         }
-        SeekPoint seekPoint = getSeekPoint(j3, j2);
-        if (seekPoint.timeUs == j || binarySearchFloor == jArr.length - 1) {
+        SeekPoint seekPoint = getSeekPoint(seekPointSampleNumber, seekPointOffsetFromFirstFrame);
+        if (seekPoint.timeUs == timeUs || index == pointSampleNumbers.length - 1) {
             return new SeekMap.SeekPoints(seekPoint);
         }
-        int i = binarySearchFloor + 1;
-        return new SeekMap.SeekPoints(seekPoint, getSeekPoint(jArr[i], jArr2[i]));
+        SeekPoint secondSeekPoint = getSeekPoint(pointSampleNumbers[index + 1], pointOffsets[index + 1]);
+        return new SeekMap.SeekPoints(seekPoint, secondSeekPoint);
     }
 
-    private SeekPoint getSeekPoint(long j, long j2) {
-        return new SeekPoint((j * 1000000) / this.flacStreamMetadata.sampleRate, this.firstFrameOffset + j2);
+    private SeekPoint getSeekPoint(long sampleNumber, long offsetFromFirstFrame) {
+        long seekTimeUs = (1000000 * sampleNumber) / this.flacStreamMetadata.sampleRate;
+        long seekPosition = this.firstFrameOffset + offsetFromFirstFrame;
+        return new SeekPoint(seekTimeUs, seekPosition);
     }
 }

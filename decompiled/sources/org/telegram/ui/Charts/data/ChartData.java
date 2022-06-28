@@ -13,13 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.SegmentTree;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class ChartData {
     public String[] daysLookup;
     public ArrayList<Line> lines = new ArrayList<>();
     public int maxValue = 0;
-    public int minValue = ConnectionsManager.DEFAULT_DATACENTER_ID;
+    public int minValue = Integer.MAX_VALUE;
     public float oneDayPercentage = 0.0f;
     protected long timeStep;
     public long[] x;
@@ -28,38 +27,31 @@ public class ChartData {
     public ChartData() {
     }
 
-    public ChartData(JSONObject jSONObject) throws JSONException {
-        JSONArray jSONArray = jSONObject.getJSONArray("columns");
-        jSONArray.length();
-        for (int i = 0; i < jSONArray.length(); i++) {
-            JSONArray jSONArray2 = jSONArray.getJSONArray(i);
-            if (jSONArray2.getString(0).equals("x")) {
-                int length = jSONArray2.length() - 1;
-                this.x = new long[length];
-                int i2 = 0;
-                while (i2 < length) {
-                    int i3 = i2 + 1;
-                    this.x[i2] = jSONArray2.getLong(i3);
-                    i2 = i3;
+    public ChartData(JSONObject jsonObject) throws JSONException {
+        JSONArray columns = jsonObject.getJSONArray("columns");
+        columns.length();
+        for (int i = 0; i < columns.length(); i++) {
+            JSONArray a = columns.getJSONArray(i);
+            if (a.getString(0).equals("x")) {
+                int len = a.length() - 1;
+                this.x = new long[len];
+                for (int j = 0; j < len; j++) {
+                    this.x[j] = a.getLong(j + 1);
                 }
             } else {
-                Line line = new Line(this);
-                this.lines.add(line);
-                int length2 = jSONArray2.length() - 1;
-                line.id = jSONArray2.getString(0);
-                line.y = new int[length2];
-                int i4 = 0;
-                while (i4 < length2) {
-                    int i5 = i4 + 1;
-                    line.y[i4] = jSONArray2.getInt(i5);
-                    int[] iArr = line.y;
-                    if (iArr[i4] > line.maxValue) {
-                        line.maxValue = iArr[i4];
+                Line l = new Line();
+                this.lines.add(l);
+                int len2 = a.length() - 1;
+                l.id = a.getString(0);
+                l.y = new int[len2];
+                for (int j2 = 0; j2 < len2; j2++) {
+                    l.y[j2] = a.getInt(j2 + 1);
+                    if (l.y[j2] > l.maxValue) {
+                        l.maxValue = l.y[j2];
                     }
-                    if (iArr[i4] < line.minValue) {
-                        line.minValue = iArr[i4];
+                    if (l.y[j2] < l.minValue) {
+                        l.minValue = l.y[j2];
                     }
-                    i4 = i5;
                 }
             }
             long[] jArr = this.x;
@@ -70,44 +62,44 @@ public class ChartData {
             }
             measure();
         }
-        JSONObject optJSONObject = jSONObject.optJSONObject("colors");
-        JSONObject optJSONObject2 = jSONObject.optJSONObject("names");
-        Pattern compile = Pattern.compile("(.*)(#.*)");
-        for (int i6 = 0; i6 < this.lines.size(); i6++) {
-            Line line2 = this.lines.get(i6);
-            if (optJSONObject != null) {
-                Matcher matcher = compile.matcher(optJSONObject.getString(line2.id));
+        JSONObject colors = jsonObject.optJSONObject("colors");
+        JSONObject names = jsonObject.optJSONObject("names");
+        Pattern colorPattern = Pattern.compile("(.*)(#.*)");
+        for (int i2 = 0; i2 < this.lines.size(); i2++) {
+            Line line = this.lines.get(i2);
+            if (colors != null) {
+                Matcher matcher = colorPattern.matcher(colors.getString(line.id));
                 if (matcher.matches()) {
-                    if (!TextUtils.isEmpty(matcher.group(1))) {
-                        line2.colorKey = "statisticChartLine_" + matcher.group(1).toLowerCase();
+                    String key = matcher.group(1);
+                    if (!TextUtils.isEmpty(key)) {
+                        line.colorKey = "statisticChartLine_" + matcher.group(1).toLowerCase();
                     }
-                    int parseColor = Color.parseColor(matcher.group(2));
-                    line2.color = parseColor;
-                    line2.colorDark = ColorUtils.blendARGB(-1, parseColor, 0.85f);
+                    line.color = Color.parseColor(matcher.group(2));
+                    line.colorDark = ColorUtils.blendARGB(-1, line.color, 0.85f);
                 }
             }
-            if (optJSONObject2 != null) {
-                line2.name = optJSONObject2.getString(line2.id);
+            if (names != null) {
+                line.name = names.getString(line.id);
             }
         }
     }
 
     public void measure() {
-        SimpleDateFormat simpleDateFormat;
+        SimpleDateFormat formatter;
         long[] jArr = this.x;
-        int length = jArr.length;
-        if (length == 0) {
+        int n = jArr.length;
+        if (n == 0) {
             return;
         }
-        long j = jArr[0];
-        long j2 = jArr[length - 1];
-        float[] fArr = new float[length];
+        long start = jArr[0];
+        long end = jArr[n - 1];
+        float[] fArr = new float[n];
         this.xPercentage = fArr;
-        if (length == 1) {
+        if (n == 1) {
             fArr[0] = 1.0f;
         } else {
-            for (int i = 0; i < length; i++) {
-                this.xPercentage[i] = ((float) (this.x[i] - j)) / ((float) (j2 - j));
+            for (int i = 0; i < n; i++) {
+                this.xPercentage[i] = ((float) (this.x[i] - start)) / ((float) (end - start));
             }
         }
         for (int i2 = 0; i2 < this.lines.size(); i2++) {
@@ -119,30 +111,31 @@ public class ChartData {
             }
             this.lines.get(i2).segmentTree = new SegmentTree(this.lines.get(i2).y);
         }
-        long j3 = this.timeStep;
-        this.daysLookup = new String[((int) ((j2 - j) / j3)) + 10];
-        if (j3 == 1) {
-            simpleDateFormat = null;
-        } else if (j3 < 86400000) {
-            simpleDateFormat = new SimpleDateFormat("HH:mm");
+        long j = this.timeStep;
+        this.daysLookup = new String[((int) ((end - start) / j)) + 10];
+        long j2 = 1;
+        if (j == 1) {
+            formatter = null;
+        } else if (j < 86400000) {
+            formatter = new SimpleDateFormat("HH:mm");
         } else {
-            simpleDateFormat = new SimpleDateFormat("MMM d");
+            formatter = new SimpleDateFormat("MMM d");
         }
         int i3 = 0;
         while (true) {
             String[] strArr = this.daysLookup;
-            if (i3 < strArr.length) {
-                if (this.timeStep == 1) {
-                    strArr[i3] = String.format(Locale.ENGLISH, "%02d:00", Integer.valueOf(i3));
-                } else {
-                    strArr[i3] = simpleDateFormat.format(new Date((i3 * this.timeStep) + j));
-                }
-                i3++;
-            } else {
+            if (i3 >= strArr.length) {
                 long[] jArr2 = this.x;
                 this.oneDayPercentage = ((float) this.timeStep) / ((float) (jArr2[jArr2.length - 1] - jArr2[0]));
                 return;
             }
+            if (this.timeStep == j2) {
+                strArr[i3] = String.format(Locale.ENGLISH, "%02d:00", Integer.valueOf(i3));
+            } else {
+                strArr[i3] = formatter.format(new Date((i3 * this.timeStep) + start));
+            }
+            i3++;
+            j2 = 1;
         }
     }
 
@@ -152,75 +145,83 @@ public class ChartData {
         return strArr[(int) ((jArr[i] - jArr[0]) / this.timeStep)];
     }
 
-    public int findStartIndex(float f) {
-        int length;
-        int i = 0;
-        if (f != 0.0f && (length = this.xPercentage.length) >= 2) {
-            int i2 = length - 1;
-            while (i <= i2) {
-                int i3 = (i2 + i) >> 1;
-                float[] fArr = this.xPercentage;
-                if ((f < fArr[i3] && (i3 == 0 || f > fArr[i3 - 1])) || f == fArr[i3]) {
-                    return i3;
-                }
-                if (f < fArr[i3]) {
-                    i2 = i3 - 1;
-                } else if (f > fArr[i3]) {
-                    i = i3 + 1;
-                }
-            }
-            return i;
+    public int findStartIndex(float v) {
+        int n;
+        if (v == 0.0f || (n = this.xPercentage.length) < 2) {
+            return 0;
         }
-        return 0;
-    }
-
-    public int findEndIndex(int i, float f) {
-        int length = this.xPercentage.length;
-        if (f == 1.0f) {
-            return length - 1;
-        }
-        int i2 = length - 1;
-        int i3 = i2;
-        while (i <= i3) {
-            int i4 = (i3 + i) >> 1;
+        int left = 0;
+        int right = n - 1;
+        while (left <= right) {
+            int middle = (right + left) >> 1;
             float[] fArr = this.xPercentage;
-            if ((f > fArr[i4] && (i4 == i2 || f < fArr[i4 + 1])) || f == fArr[i4]) {
-                return i4;
+            if (v < fArr[middle] && (middle == 0 || v > fArr[middle - 1])) {
+                return middle;
             }
-            if (f < fArr[i4]) {
-                i3 = i4 - 1;
-            } else if (f > fArr[i4]) {
-                i = i4 + 1;
+            if (v == fArr[middle]) {
+                return middle;
+            }
+            if (v < fArr[middle]) {
+                right = middle - 1;
+            } else if (v > fArr[middle]) {
+                left = middle + 1;
             }
         }
-        return i3;
+        return left;
     }
 
-    public int findIndex(int i, int i2, float f) {
+    public int findEndIndex(int left, float v) {
+        int n = this.xPercentage.length;
+        if (v == 1.0f) {
+            return n - 1;
+        }
+        int right = n - 1;
+        while (left <= right) {
+            int middle = (right + left) >> 1;
+            float[] fArr = this.xPercentage;
+            if (v > fArr[middle] && (middle == n - 1 || v < fArr[middle + 1])) {
+                return middle;
+            }
+            if (v == fArr[middle]) {
+                return middle;
+            }
+            if (v < fArr[middle]) {
+                right = middle - 1;
+            } else if (v > fArr[middle]) {
+                left = middle + 1;
+            }
+        }
+        return right;
+    }
+
+    public int findIndex(int left, int right, float v) {
         float[] fArr = this.xPercentage;
-        int length = fArr.length;
-        if (f <= fArr[i]) {
-            return i;
+        int n = fArr.length;
+        if (v <= fArr[left]) {
+            return left;
         }
-        if (f >= fArr[i2]) {
-            return i2;
+        if (v >= fArr[right]) {
+            return right;
         }
-        while (i <= i2) {
-            int i3 = (i2 + i) >> 1;
+        while (left <= right) {
+            int middle = (right + left) >> 1;
             float[] fArr2 = this.xPercentage;
-            if ((f > fArr2[i3] && (i3 == length - 1 || f < fArr2[i3 + 1])) || f == fArr2[i3]) {
-                return i3;
+            if (v > fArr2[middle] && (middle == n - 1 || v < fArr2[middle + 1])) {
+                return middle;
             }
-            if (f < fArr2[i3]) {
-                i2 = i3 - 1;
-            } else if (f > fArr2[i3]) {
-                i = i3 + 1;
+            if (v == fArr2[middle]) {
+                return middle;
+            }
+            if (v < fArr2[middle]) {
+                right = middle - 1;
+            } else if (v > fArr2[middle]) {
+                left = middle + 1;
             }
         }
-        return i2;
+        return right;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class Line {
         public String colorKey;
         public String id;
@@ -228,11 +229,12 @@ public class ChartData {
         public SegmentTree segmentTree;
         public int[] y;
         public int maxValue = 0;
-        public int minValue = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        public int minValue = Integer.MAX_VALUE;
         public int color = -16777216;
         public int colorDark = -1;
 
-        public Line(ChartData chartData) {
+        public Line() {
+            ChartData.this = this$0;
         }
     }
 }

@@ -6,41 +6,42 @@ import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.extractor.ts.TsPayloadReader;
 import com.google.android.exoplayer2.text.cea.CeaUtil;
 import com.google.android.exoplayer2.util.Assertions;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class UserDataReader {
+    private static final int USER_DATA_START_CODE = 434;
     private final List<Format> closedCaptionFormats;
     private final TrackOutput[] outputs;
 
-    public UserDataReader(List<Format> list) {
-        this.closedCaptionFormats = list;
-        this.outputs = new TrackOutput[list.size()];
+    public UserDataReader(List<Format> closedCaptionFormats) {
+        this.closedCaptionFormats = closedCaptionFormats;
+        this.outputs = new TrackOutput[closedCaptionFormats.size()];
     }
 
-    public void createTracks(ExtractorOutput extractorOutput, TsPayloadReader.TrackIdGenerator trackIdGenerator) {
+    public void createTracks(ExtractorOutput extractorOutput, TsPayloadReader.TrackIdGenerator idGenerator) {
         for (int i = 0; i < this.outputs.length; i++) {
-            trackIdGenerator.generateNewId();
-            TrackOutput track = extractorOutput.track(trackIdGenerator.getTrackId(), 3);
-            Format format = this.closedCaptionFormats.get(i);
-            String str = format.sampleMimeType;
-            boolean z = "application/cea-608".equals(str) || "application/cea-708".equals(str);
-            Assertions.checkArgument(z, "Invalid closed caption mime type provided: " + str);
-            track.format(Format.createTextSampleFormat(trackIdGenerator.getFormatId(), str, null, -1, format.selectionFlags, format.language, format.accessibilityChannel, null, Long.MAX_VALUE, format.initializationData));
-            this.outputs[i] = track;
+            idGenerator.generateNewId();
+            TrackOutput output = extractorOutput.track(idGenerator.getTrackId(), 3);
+            Format channelFormat = this.closedCaptionFormats.get(i);
+            String channelMimeType = channelFormat.sampleMimeType;
+            boolean z = MimeTypes.APPLICATION_CEA608.equals(channelMimeType) || MimeTypes.APPLICATION_CEA708.equals(channelMimeType);
+            Assertions.checkArgument(z, "Invalid closed caption mime type provided: " + channelMimeType);
+            output.format(Format.createTextSampleFormat(idGenerator.getFormatId(), channelMimeType, null, -1, channelFormat.selectionFlags, channelFormat.language, channelFormat.accessibilityChannel, null, Long.MAX_VALUE, channelFormat.initializationData));
+            this.outputs[i] = output;
         }
     }
 
-    public void consume(long j, ParsableByteArray parsableByteArray) {
-        if (parsableByteArray.bytesLeft() < 9) {
+    public void consume(long pesTimeUs, ParsableByteArray userDataPayload) {
+        if (userDataPayload.bytesLeft() < 9) {
             return;
         }
-        int readInt = parsableByteArray.readInt();
-        int readInt2 = parsableByteArray.readInt();
-        int readUnsignedByte = parsableByteArray.readUnsignedByte();
-        if (readInt != 434 || readInt2 != 1195456820 || readUnsignedByte != 3) {
-            return;
+        int userDataStartCode = userDataPayload.readInt();
+        int userDataIdentifier = userDataPayload.readInt();
+        int userDataTypeCode = userDataPayload.readUnsignedByte();
+        if (userDataStartCode == USER_DATA_START_CODE && userDataIdentifier == 1195456820 && userDataTypeCode == 3) {
+            CeaUtil.consumeCcData(pesTimeUs, userDataPayload, this.outputs);
         }
-        CeaUtil.consumeCcData(j, parsableByteArray, this.outputs);
     }
 }

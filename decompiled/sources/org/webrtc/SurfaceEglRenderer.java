@@ -2,10 +2,10 @@ package org.webrtc;
 
 import android.view.SurfaceHolder;
 import java.util.concurrent.CountDownLatch;
-import org.telegram.ui.ActionBar.Theme$$ExternalSyntheticLambda2;
+import org.telegram.ui.ActionBar.Theme$$ExternalSyntheticLambda4;
 import org.webrtc.EglBase;
 import org.webrtc.RendererCommon;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class SurfaceEglRenderer extends EglRenderer implements SurfaceHolder.Callback {
     private static final String TAG = "SurfaceEglRenderer";
     private int frameRotation;
@@ -16,11 +16,11 @@ public class SurfaceEglRenderer extends EglRenderer implements SurfaceHolder.Cal
     private int rotatedFrameHeight;
     private int rotatedFrameWidth;
 
-    public SurfaceEglRenderer(String str) {
-        super(str);
+    public SurfaceEglRenderer(String name) {
+        super(name);
     }
 
-    public void init(EglBase.Context context, RendererCommon.RendererEvents rendererEvents, int[] iArr, RendererCommon.GlDrawer glDrawer) {
+    public void init(EglBase.Context sharedContext, RendererCommon.RendererEvents rendererEvents, int[] configAttributes, RendererCommon.GlDrawer drawer) {
         ThreadUtils.checkIsOnMainThread();
         this.rendererEvents = rendererEvents;
         synchronized (this.layoutLock) {
@@ -29,20 +29,20 @@ public class SurfaceEglRenderer extends EglRenderer implements SurfaceHolder.Cal
             this.rotatedFrameHeight = 0;
             this.frameRotation = 0;
         }
-        super.init(context, iArr, glDrawer);
+        super.init(sharedContext, configAttributes, drawer);
     }
 
     @Override // org.webrtc.EglRenderer
-    public void init(EglBase.Context context, int[] iArr, RendererCommon.GlDrawer glDrawer) {
-        init(context, (RendererCommon.RendererEvents) null, iArr, glDrawer);
+    public void init(EglBase.Context sharedContext, int[] configAttributes, RendererCommon.GlDrawer drawer) {
+        init(sharedContext, (RendererCommon.RendererEvents) null, configAttributes, drawer);
     }
 
     @Override // org.webrtc.EglRenderer
-    public void setFpsReduction(float f) {
+    public void setFpsReduction(float fps) {
         synchronized (this.layoutLock) {
-            this.isRenderingPaused = f == 0.0f;
+            this.isRenderingPaused = fps == 0.0f;
         }
-        super.setFpsReduction(f);
+        super.setFpsReduction(fps);
     }
 
     @Override // org.webrtc.EglRenderer
@@ -62,32 +62,33 @@ public class SurfaceEglRenderer extends EglRenderer implements SurfaceHolder.Cal
     }
 
     @Override // org.webrtc.EglRenderer, org.webrtc.VideoSink
-    public void onFrame(VideoFrame videoFrame) {
-        updateFrameDimensionsAndReportEvents(videoFrame);
-        super.onFrame(videoFrame);
+    public void onFrame(VideoFrame frame) {
+        updateFrameDimensionsAndReportEvents(frame);
+        super.onFrame(frame);
     }
 
     @Override // android.view.SurfaceHolder.Callback
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+    public void surfaceCreated(SurfaceHolder holder) {
         ThreadUtils.checkIsOnMainThread();
-        createEglSurface(surfaceHolder.getSurface());
+        createEglSurface(holder.getSurface());
     }
 
     @Override // android.view.SurfaceHolder.Callback
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+    public void surfaceDestroyed(SurfaceHolder holder) {
         ThreadUtils.checkIsOnMainThread();
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        releaseEglSurface(new Theme$$ExternalSyntheticLambda2(countDownLatch), false);
-        ThreadUtils.awaitUninterruptibly(countDownLatch);
+        CountDownLatch completionLatch = new CountDownLatch(1);
+        completionLatch.getClass();
+        releaseEglSurface(new Theme$$ExternalSyntheticLambda4(completionLatch), false);
+        ThreadUtils.awaitUninterruptibly(completionLatch);
     }
 
     @Override // android.view.SurfaceHolder.Callback
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         ThreadUtils.checkIsOnMainThread();
-        logD("surfaceChanged: format: " + i + " size: " + i2 + "x" + i3);
+        logD("surfaceChanged: format: " + format + " size: " + width + "x" + height);
     }
 
-    private void updateFrameDimensionsAndReportEvents(VideoFrame videoFrame) {
+    private void updateFrameDimensionsAndReportEvents(VideoFrame frame) {
         synchronized (this.layoutLock) {
             if (this.isRenderingPaused) {
                 return;
@@ -100,20 +101,20 @@ public class SurfaceEglRenderer extends EglRenderer implements SurfaceHolder.Cal
                     rendererEvents.onFirstFrameRendered();
                 }
             }
-            if (this.rotatedFrameWidth != videoFrame.getRotatedWidth() || this.rotatedFrameHeight != videoFrame.getRotatedHeight() || this.frameRotation != videoFrame.getRotation()) {
-                logD("Reporting frame resolution changed to " + videoFrame.getBuffer().getWidth() + "x" + videoFrame.getBuffer().getHeight() + " with rotation " + videoFrame.getRotation());
+            if (this.rotatedFrameWidth != frame.getRotatedWidth() || this.rotatedFrameHeight != frame.getRotatedHeight() || this.frameRotation != frame.getRotation()) {
+                logD("Reporting frame resolution changed to " + frame.getBuffer().getWidth() + "x" + frame.getBuffer().getHeight() + " with rotation " + frame.getRotation());
                 RendererCommon.RendererEvents rendererEvents2 = this.rendererEvents;
                 if (rendererEvents2 != null) {
-                    rendererEvents2.onFrameResolutionChanged(videoFrame.getBuffer().getWidth(), videoFrame.getBuffer().getHeight(), videoFrame.getRotation());
+                    rendererEvents2.onFrameResolutionChanged(frame.getBuffer().getWidth(), frame.getBuffer().getHeight(), frame.getRotation());
                 }
-                this.rotatedFrameWidth = videoFrame.getRotatedWidth();
-                this.rotatedFrameHeight = videoFrame.getRotatedHeight();
-                this.frameRotation = videoFrame.getRotation();
+                this.rotatedFrameWidth = frame.getRotatedWidth();
+                this.rotatedFrameHeight = frame.getRotatedHeight();
+                this.frameRotation = frame.getRotation();
             }
         }
     }
 
-    private void logD(String str) {
-        Logging.d(TAG, this.name + ": " + str);
+    private void logD(String string) {
+        Logging.d(TAG, this.name + ": " + string);
     }
 }

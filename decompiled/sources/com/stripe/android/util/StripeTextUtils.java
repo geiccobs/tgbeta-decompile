@@ -1,58 +1,88 @@
 package com.stripe.android.util;
-/* loaded from: classes.dex */
+
+import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
+/* loaded from: classes3.dex */
 public class StripeTextUtils {
-    public static boolean hasAnyPrefix(String str, String... strArr) {
-        if (str == null) {
+    public static boolean hasAnyPrefix(String number, String... prefixes) {
+        if (number == null) {
             return false;
         }
-        for (String str2 : strArr) {
-            if (str.startsWith(str2)) {
+        for (String prefix : prefixes) {
+            if (number.startsWith(prefix)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean isWholePositiveNumber(String str) {
-        if (str == null) {
+    public static boolean isWholePositiveNumber(String value) {
+        if (value == null) {
             return false;
         }
-        for (int i = 0; i < str.length(); i++) {
-            if (!Character.isDigit(str.charAt(i))) {
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
                 return false;
             }
         }
         return true;
     }
 
-    public static String nullIfBlank(String str) {
-        if (isBlank(str)) {
+    public static String nullIfBlank(String value) {
+        if (isBlank(value)) {
             return null;
         }
-        return str;
+        return value;
     }
 
-    public static boolean isBlank(String str) {
-        return str == null || str.trim().length() == 0;
+    public static boolean isBlank(String value) {
+        return value == null || value.trim().length() == 0;
     }
 
-    public static String asCardBrand(String str) {
-        if (isBlank(str)) {
+    public static String asCardBrand(String possibleCardType) {
+        if (isBlank(possibleCardType)) {
             return null;
         }
-        return "American Express".equalsIgnoreCase(str) ? "American Express" : "MasterCard".equalsIgnoreCase(str) ? "MasterCard" : "Diners Club".equalsIgnoreCase(str) ? "Diners Club" : "Discover".equalsIgnoreCase(str) ? "Discover" : "JCB".equalsIgnoreCase(str) ? "JCB" : "Visa".equalsIgnoreCase(str) ? "Visa" : "Unknown";
+        if (Card.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
+            return Card.AMERICAN_EXPRESS;
+        }
+        if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
+            return Card.MASTERCARD;
+        }
+        if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
+            return Card.DINERS_CLUB;
+        }
+        if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
+            return Card.DISCOVER;
+        }
+        if (Card.JCB.equalsIgnoreCase(possibleCardType)) {
+            return Card.JCB;
+        }
+        if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
+            return Card.VISA;
+        }
+        return "Unknown";
     }
 
-    public static String asFundingType(String str) {
-        if (isBlank(str)) {
+    public static String asFundingType(String possibleFundingType) {
+        if (isBlank(possibleFundingType)) {
             return null;
         }
-        return "credit".equalsIgnoreCase(str) ? "credit" : "debit".equalsIgnoreCase(str) ? "debit" : "prepaid".equalsIgnoreCase(str) ? "prepaid" : "unknown";
+        if (Card.FUNDING_CREDIT.equalsIgnoreCase(possibleFundingType)) {
+            return Card.FUNDING_CREDIT;
+        }
+        if (Card.FUNDING_DEBIT.equalsIgnoreCase(possibleFundingType)) {
+            return Card.FUNDING_DEBIT;
+        }
+        if (Card.FUNDING_PREPAID.equalsIgnoreCase(possibleFundingType)) {
+            return Card.FUNDING_PREPAID;
+        }
+        return "unknown";
     }
 
-    public static String asTokenType(String str) {
-        if ("card".equals(str)) {
-            return "card";
+    public static String asTokenType(String possibleTokenType) {
+        if (Token.TYPE_CARD.equals(possibleTokenType)) {
+            return Token.TYPE_CARD;
         }
         return null;
     }

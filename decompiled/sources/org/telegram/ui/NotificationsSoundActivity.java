@@ -15,7 +15,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.MotionEvent;
@@ -27,6 +26,9 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.util.MimeTypes;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,17 +41,11 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.messenger.ringtone.RingtoneUploader;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$Document;
-import org.telegram.tgnet.TLRPC$TL_account_saveRingtone;
-import org.telegram.tgnet.TLRPC$TL_document;
-import org.telegram.tgnet.TLRPC$TL_error;
-import org.telegram.tgnet.TLRPC$TL_inputDocument;
-import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -69,11 +65,14 @@ import org.telegram.ui.Components.NumberTextView;
 import org.telegram.ui.Components.RadioButton;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.NotificationsSoundActivity;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class NotificationsSoundActivity extends BaseFragment implements ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate, NotificationCenter.NotificationCenterDelegate {
+    private static final int deleteId = 1;
+    private static final int shareId = 2;
     Adapter adapter;
     ChatAvatarContainer avatarContainer;
     ChatAttachAlert chatAttachAlert;
+    int currentType;
     long dialogId;
     int dividerRow;
     int dividerRow2;
@@ -83,25 +82,21 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
     int rowCount;
     Tone selectedTone;
     boolean selectedToneChanged;
+    SparseArray<Tone> selectedTones;
     NumberTextView selectedTonesCountTextView;
+    ArrayList<Tone> serverTones;
     int serverTonesEndRow;
     int serverTonesHeaderRow;
     int serverTonesStartRow;
+    private int stableIds;
     private Tone startSelectedTone;
+    ArrayList<Tone> systemTones;
     int systemTonesEndRow;
     int systemTonesHeaderRow;
     int systemTonesStartRow;
+    private final int tonesStreamType;
     int uploadRow;
-    ArrayList<Tone> serverTones = new ArrayList<>();
-    ArrayList<Tone> systemTones = new ArrayList<>();
-    ArrayList<Tone> uploadingTones = new ArrayList<>();
-    private int stableIds = 100;
-    SparseArray<Tone> selectedTones = new SparseArray<>();
-    int currentType = -1;
-
-    public static /* synthetic */ boolean lambda$createView$0(View view, MotionEvent motionEvent) {
-        return true;
-    }
+    ArrayList<Tone> uploadingTones;
 
     @Override // org.telegram.ui.Components.ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate
     public /* synthetic */ void didSelectPhotos(ArrayList arrayList, boolean z, int i) {
@@ -113,47 +108,58 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
         ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate.CC.$default$startMusicSelectActivity(this);
     }
 
-    public NotificationsSoundActivity(Bundle bundle, Theme.ResourcesProvider resourcesProvider) {
-        super(bundle);
+    public NotificationsSoundActivity(Bundle args) {
+        this(args, null);
+    }
+
+    public NotificationsSoundActivity(Bundle args, Theme.ResourcesProvider resourcesProvider) {
+        super(args);
+        this.serverTones = new ArrayList<>();
+        this.systemTones = new ArrayList<>();
+        this.uploadingTones = new ArrayList<>();
+        this.stableIds = 100;
+        this.selectedTones = new SparseArray<>();
+        this.currentType = -1;
+        this.tonesStreamType = 4;
         this.resourcesProvider = resourcesProvider;
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public boolean onFragmentCreate() {
-        String str;
-        String str2;
+        String prefPath;
+        String prefDocId;
         if (getArguments() != null) {
             this.dialogId = getArguments().getLong("dialog_id", 0L);
-            this.currentType = getArguments().getInt("type", -1);
+            this.currentType = getArguments().getInt(CommonProperties.TYPE, -1);
         }
         if (this.dialogId != 0) {
-            str2 = "sound_document_id_" + this.dialogId;
-            str = "sound_path_" + this.dialogId;
+            prefDocId = "sound_document_id_" + this.dialogId;
+            prefPath = "sound_path_" + this.dialogId;
         } else {
             int i = this.currentType;
             if (i == 1) {
-                str = "GlobalSoundPath";
-                str2 = "GlobalSoundDocId";
+                prefPath = "GlobalSoundPath";
+                prefDocId = "GlobalSoundDocId";
             } else if (i == 0) {
-                str = "GroupSoundPath";
-                str2 = "GroupSoundDocId";
-            } else if (i != 2) {
-                throw new RuntimeException("Unsupported type");
+                prefPath = "GroupSoundPath";
+                prefDocId = "GroupSoundDocId";
+            } else if (i == 2) {
+                prefPath = "ChannelSoundPath";
+                prefDocId = "ChannelSoundDocId";
             } else {
-                str = "ChannelSoundPath";
-                str2 = "ChannelSoundDocId";
+                throw new RuntimeException("Unsupported type");
             }
         }
-        SharedPreferences notificationsSettings = getNotificationsSettings();
-        long j = notificationsSettings.getLong(str2, 0L);
-        String string = notificationsSettings.getString(str, "NoSound");
+        SharedPreferences preferences = getNotificationsSettings();
+        long documentId = preferences.getLong(prefDocId, 0L);
+        String localUri = preferences.getString(prefPath, "NoSound");
         Tone tone = new Tone(null);
         this.startSelectedTone = tone;
-        if (j != 0) {
-            tone.document = new TLRPC$TL_document();
-            this.startSelectedTone.document.id = j;
+        if (documentId != 0) {
+            tone.document = new TLRPC.TL_document();
+            this.startSelectedTone.document.id = documentId;
         } else {
-            tone.uri = string;
+            tone.uri = localUri;
         }
         return super.onFragmentCreate();
     }
@@ -165,8 +171,8 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public View createView(final Context context) {
-        this.actionBar.setItemsBackgroundColor(Theme.getColor("avatar_actionBarSelectorBlue", this.resourcesProvider), false);
-        this.actionBar.setItemsColor(Theme.getColor("actionBarDefaultIcon", this.resourcesProvider), false);
+        this.actionBar.setItemsBackgroundColor(Theme.getColor(Theme.key_avatar_actionBarSelectorBlue, this.resourcesProvider), false);
+        this.actionBar.setItemsColor(Theme.getColor(Theme.key_actionBarDefaultIcon, this.resourcesProvider), false);
         this.actionBar.setBackButtonDrawable(new BackDrawable(false));
         this.actionBar.setAllowOverlayTitle(false);
         this.actionBar.setActionBarMenuOnItemClick(new AnonymousClass1(context));
@@ -185,11 +191,11 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             chatAvatarContainer.setOccupyStatusBar(!AndroidUtilities.isTablet());
             this.actionBar.addView(this.avatarContainer, 0, LayoutHelper.createFrame(-2, -1.0f, 51, !this.inPreviewMode ? 56.0f : 0.0f, 0.0f, 40.0f, 0.0f));
             if (this.dialogId < 0) {
-                TLRPC$Chat chat = getMessagesController().getChat(Long.valueOf(-this.dialogId));
-                this.avatarContainer.setChatAvatar(chat);
-                this.avatarContainer.setTitle(chat.title);
+                TLRPC.Chat chatLocal = getMessagesController().getChat(Long.valueOf(-this.dialogId));
+                this.avatarContainer.setChatAvatar(chatLocal);
+                this.avatarContainer.setTitle(chatLocal.title);
             } else {
-                TLRPC$User user = getMessagesController().getUser(Long.valueOf(this.dialogId));
+                TLRPC.User user = getMessagesController().getUser(Long.valueOf(this.dialogId));
                 if (user != null) {
                     this.avatarContainer.setUserAvatar(user);
                     this.avatarContainer.setTitle(ContactsController.formatName(user.first_name, user.last_name));
@@ -197,23 +203,22 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             }
             this.avatarContainer.setSubtitle(LocaleController.getString("NotificationsSound", R.string.NotificationsSound));
         }
-        ActionBarMenu createActionMode = this.actionBar.createActionMode();
-        NumberTextView numberTextView = new NumberTextView(createActionMode.getContext());
+        ActionBarMenu actionMode = this.actionBar.createActionMode();
+        NumberTextView numberTextView = new NumberTextView(actionMode.getContext());
         this.selectedTonesCountTextView = numberTextView;
         numberTextView.setTextSize(18);
         this.selectedTonesCountTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        this.selectedTonesCountTextView.setTextColor(Theme.getColor("actionBarActionModeDefaultIcon", this.resourcesProvider));
-        createActionMode.addView(this.selectedTonesCountTextView, LayoutHelper.createLinear(0, -1, 1.0f, 72, 0, 0, 0));
+        this.selectedTonesCountTextView.setTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon, this.resourcesProvider));
+        actionMode.addView(this.selectedTonesCountTextView, LayoutHelper.createLinear(0, -1, 1.0f, 72, 0, 0, 0));
         this.selectedTonesCountTextView.setOnTouchListener(NotificationsSoundActivity$$ExternalSyntheticLambda0.INSTANCE);
-        createActionMode.addItemWithWidth(2, R.drawable.msg_forward, AndroidUtilities.dp(54.0f), LocaleController.getString("ShareFile", R.string.ShareFile));
-        createActionMode.addItemWithWidth(1, R.drawable.msg_delete, AndroidUtilities.dp(54.0f), LocaleController.getString("Delete", R.string.Delete));
-        FrameLayout frameLayout = new FrameLayout(context);
-        this.fragmentView = frameLayout;
-        FrameLayout frameLayout2 = frameLayout;
-        frameLayout2.setBackgroundColor(Theme.getColor("windowBackgroundGray", this.resourcesProvider));
+        actionMode.addItemWithWidth(2, R.drawable.msg_forward, AndroidUtilities.dp(54.0f), LocaleController.getString("ShareFile", R.string.ShareFile));
+        actionMode.addItemWithWidth(1, R.drawable.msg_delete, AndroidUtilities.dp(54.0f), LocaleController.getString("Delete", R.string.Delete));
+        this.fragmentView = new FrameLayout(context);
+        FrameLayout frameLayout = (FrameLayout) this.fragmentView;
+        frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray, this.resourcesProvider));
         RecyclerListView recyclerListView = new RecyclerListView(context);
         this.listView = recyclerListView;
-        frameLayout2.addView(recyclerListView, LayoutHelper.createFrame(-1, -1.0f));
+        frameLayout.addView(recyclerListView, LayoutHelper.createFrame(-1, -1.0f));
         Adapter adapter = new Adapter(this, null);
         this.adapter = adapter;
         adapter.setHasStableIds(true);
@@ -224,15 +229,13 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
         this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.NotificationsSoundActivity$$ExternalSyntheticLambda1
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
             public final void onItemClick(View view, int i2) {
-                NotificationsSoundActivity.this.lambda$createView$1(context, view, i2);
+                NotificationsSoundActivity.this.m3961lambda$createView$1$orgtelegramuiNotificationsSoundActivity(context, view, i2);
             }
         });
         this.listView.setOnItemLongClickListener(new RecyclerListView.OnItemLongClickListener() { // from class: org.telegram.ui.NotificationsSoundActivity$$ExternalSyntheticLambda2
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListener
             public final boolean onItemClick(View view, int i2) {
-                boolean lambda$createView$2;
-                lambda$createView$2 = NotificationsSoundActivity.this.lambda$createView$2(view, i2);
-                return lambda$createView$2;
+                return NotificationsSoundActivity.this.m3962lambda$createView$2$orgtelegramuiNotificationsSoundActivity(view, i2);
             }
         });
         loadTones();
@@ -241,66 +244,60 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
     }
 
     /* renamed from: org.telegram.ui.NotificationsSoundActivity$1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class AnonymousClass1 extends ActionBar.ActionBarMenuOnItemClick {
         final /* synthetic */ Context val$context;
 
-        public static /* synthetic */ void lambda$deleteSelectedMessages$2(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-        }
-
         AnonymousClass1(Context context) {
-            NotificationsSoundActivity.this = r1;
+            NotificationsSoundActivity.this = this$0;
             this.val$context = context;
         }
 
         @Override // org.telegram.ui.ActionBar.ActionBar.ActionBarMenuOnItemClick
-        public void onItemClick(int i) {
-            if (i == -1) {
-                if (((BaseFragment) NotificationsSoundActivity.this).actionBar.isActionModeShowed()) {
+        public void onItemClick(int id) {
+            if (id == -1) {
+                if (NotificationsSoundActivity.this.actionBar.isActionModeShowed()) {
                     NotificationsSoundActivity.this.hideActionMode();
-                    return;
                 } else {
                     NotificationsSoundActivity.this.finishFragment();
-                    return;
                 }
-            }
-            if (i == 1) {
+            } else if (id == 1) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(NotificationsSoundActivity.this.getParentActivity(), NotificationsSoundActivity.this.resourcesProvider);
                 builder.setTitle(LocaleController.formatPluralString("DeleteTones", NotificationsSoundActivity.this.selectedTones.size(), new Object[0]));
                 builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatPluralString("DeleteTonesMessage", NotificationsSoundActivity.this.selectedTones.size(), new Object[0])));
                 builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), NotificationsSoundActivity$1$$ExternalSyntheticLambda1.INSTANCE);
                 builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.NotificationsSoundActivity$1$$ExternalSyntheticLambda0
                     @Override // android.content.DialogInterface.OnClickListener
-                    public final void onClick(DialogInterface dialogInterface, int i2) {
-                        NotificationsSoundActivity.AnonymousClass1.this.lambda$onItemClick$1(dialogInterface, i2);
+                    public final void onClick(DialogInterface dialogInterface, int i) {
+                        NotificationsSoundActivity.AnonymousClass1.this.m3963xe3a080d7(dialogInterface, i);
                     }
                 });
-                TextView textView = (TextView) builder.show().getButton(-1);
-                if (textView == null) {
-                    return;
+                AlertDialog dialog = builder.show();
+                TextView button = (TextView) dialog.getButton(-1);
+                if (button != null) {
+                    button.setTextColor(Theme.getColor(Theme.key_dialogTextRed2, NotificationsSoundActivity.this.resourcesProvider));
                 }
-                textView.setTextColor(Theme.getColor("dialogTextRed2", NotificationsSoundActivity.this.resourcesProvider));
-            } else if (i == 2) {
+            } else if (id == 2) {
                 if (NotificationsSoundActivity.this.selectedTones.size() == 1) {
                     Intent intent = new Intent(this.val$context, LaunchActivity.class);
                     intent.setAction("android.intent.action.SEND");
-                    Uri uriForShare = NotificationsSoundActivity.this.selectedTones.valueAt(0).getUriForShare(((BaseFragment) NotificationsSoundActivity.this).currentAccount);
-                    if (uriForShare != null) {
-                        intent.putExtra("android.intent.extra.STREAM", uriForShare);
+                    Uri uri = NotificationsSoundActivity.this.selectedTones.valueAt(0).getUriForShare(NotificationsSoundActivity.this.currentAccount);
+                    if (uri != null) {
+                        intent.putExtra("android.intent.extra.STREAM", uri);
                         this.val$context.startActivity(intent);
                     }
                 } else {
                     Intent intent2 = new Intent(this.val$context, LaunchActivity.class);
                     intent2.setAction("android.intent.action.SEND_MULTIPLE");
-                    ArrayList<? extends Parcelable> arrayList = new ArrayList<>();
-                    for (int i2 = 0; i2 < NotificationsSoundActivity.this.selectedTones.size(); i2++) {
-                        Uri uriForShare2 = NotificationsSoundActivity.this.selectedTones.valueAt(i2).getUriForShare(((BaseFragment) NotificationsSoundActivity.this).currentAccount);
-                        if (uriForShare2 != null) {
-                            arrayList.add(uriForShare2);
+                    ArrayList<Uri> uries = new ArrayList<>();
+                    for (int i = 0; i < NotificationsSoundActivity.this.selectedTones.size(); i++) {
+                        Uri uri2 = NotificationsSoundActivity.this.selectedTones.valueAt(i).getUriForShare(NotificationsSoundActivity.this.currentAccount);
+                        if (uri2 != null) {
+                            uries.add(uri2);
                         }
                     }
-                    if (!arrayList.isEmpty()) {
-                        intent2.putParcelableArrayListExtra("android.intent.extra.STREAM", arrayList);
+                    if (!uries.isEmpty()) {
+                        intent2.putParcelableArrayListExtra("android.intent.extra.STREAM", uries);
                         this.val$context.startActivity(intent2);
                     }
                 }
@@ -310,74 +307,127 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             }
         }
 
-        public /* synthetic */ void lambda$onItemClick$1(DialogInterface dialogInterface, int i) {
+        /* renamed from: lambda$onItemClick$1$org-telegram-ui-NotificationsSoundActivity$1 */
+        public /* synthetic */ void m3963xe3a080d7(DialogInterface dialog, int which) {
             deleteSelectedMessages();
-            dialogInterface.dismiss();
+            dialog.dismiss();
         }
 
         private void deleteSelectedMessages() {
             RingtoneUploader ringtoneUploader;
-            ArrayList arrayList = new ArrayList();
+            ArrayList<TLRPC.Document> documentsToRemove = new ArrayList<>();
             for (int i = 0; i < NotificationsSoundActivity.this.selectedTones.size(); i++) {
-                Tone valueAt = NotificationsSoundActivity.this.selectedTones.valueAt(i);
-                TLRPC$Document tLRPC$Document = valueAt.document;
-                if (tLRPC$Document != null) {
-                    arrayList.add(tLRPC$Document);
-                    NotificationsSoundActivity.this.getMediaDataController().ringtoneDataStore.remove(valueAt.document);
+                Tone tone = NotificationsSoundActivity.this.selectedTones.valueAt(i);
+                if (tone.document != null) {
+                    documentsToRemove.add(tone.document);
+                    NotificationsSoundActivity.this.getMediaDataController().ringtoneDataStore.remove(tone.document);
                 }
-                if (valueAt.uri != null && (ringtoneUploader = NotificationsSoundActivity.this.getMediaDataController().ringtoneUploaderHashMap.get(valueAt.uri)) != null) {
+                if (tone.uri != null && (ringtoneUploader = NotificationsSoundActivity.this.getMediaDataController().ringtoneUploaderHashMap.get(tone.uri)) != null) {
                     ringtoneUploader.cancel();
                 }
-                NotificationsSoundActivity notificationsSoundActivity = NotificationsSoundActivity.this;
-                if (valueAt == notificationsSoundActivity.selectedTone) {
-                    notificationsSoundActivity.startSelectedTone = null;
-                    NotificationsSoundActivity notificationsSoundActivity2 = NotificationsSoundActivity.this;
-                    notificationsSoundActivity2.selectedTone = notificationsSoundActivity2.systemTones.get(0);
+                if (tone == NotificationsSoundActivity.this.selectedTone) {
+                    NotificationsSoundActivity.this.startSelectedTone = null;
+                    NotificationsSoundActivity notificationsSoundActivity = NotificationsSoundActivity.this;
+                    notificationsSoundActivity.selectedTone = notificationsSoundActivity.systemTones.get(0);
                     NotificationsSoundActivity.this.selectedToneChanged = true;
                 }
-                NotificationsSoundActivity.this.serverTones.remove(valueAt);
-                NotificationsSoundActivity.this.uploadingTones.remove(valueAt);
+                NotificationsSoundActivity.this.serverTones.remove(tone);
+                NotificationsSoundActivity.this.uploadingTones.remove(tone);
             }
             NotificationsSoundActivity.this.getMediaDataController().ringtoneDataStore.saveTones();
-            for (int i2 = 0; i2 < arrayList.size(); i2++) {
-                TLRPC$Document tLRPC$Document2 = (TLRPC$Document) arrayList.get(i2);
-                TLRPC$TL_account_saveRingtone tLRPC$TL_account_saveRingtone = new TLRPC$TL_account_saveRingtone();
-                TLRPC$TL_inputDocument tLRPC$TL_inputDocument = new TLRPC$TL_inputDocument();
-                tLRPC$TL_account_saveRingtone.id = tLRPC$TL_inputDocument;
-                tLRPC$TL_inputDocument.id = tLRPC$Document2.id;
-                tLRPC$TL_inputDocument.access_hash = tLRPC$Document2.access_hash;
-                byte[] bArr = tLRPC$Document2.file_reference;
-                tLRPC$TL_inputDocument.file_reference = bArr;
-                if (bArr == null) {
-                    tLRPC$TL_inputDocument.file_reference = new byte[0];
+            for (int i2 = 0; i2 < documentsToRemove.size(); i2++) {
+                TLRPC.Document document = documentsToRemove.get(i2);
+                TLRPC.TL_account_saveRingtone req = new TLRPC.TL_account_saveRingtone();
+                req.id = new TLRPC.TL_inputDocument();
+                req.id.id = document.id;
+                req.id.access_hash = document.access_hash;
+                req.id.file_reference = document.file_reference;
+                if (req.id.file_reference == null) {
+                    req.id.file_reference = new byte[0];
                 }
-                tLRPC$TL_account_saveRingtone.unsave = true;
-                NotificationsSoundActivity.this.getConnectionsManager().sendRequest(tLRPC$TL_account_saveRingtone, NotificationsSoundActivity$1$$ExternalSyntheticLambda2.INSTANCE);
+                req.unsave = true;
+                NotificationsSoundActivity.this.getConnectionsManager().sendRequest(req, NotificationsSoundActivity$1$$ExternalSyntheticLambda2.INSTANCE);
             }
             NotificationsSoundActivity.this.hideActionMode();
             NotificationsSoundActivity.this.updateRows();
             NotificationsSoundActivity.this.adapter.notifyDataSetChanged();
         }
+
+        public static /* synthetic */ void lambda$deleteSelectedMessages$2(TLObject response, TLRPC.TL_error error) {
+        }
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:32:0x0098 A[Catch: Exception -> 0x00d1, TryCatch #0 {Exception -> 0x00d1, blocks: (B:15:0x003c, B:17:0x0044, B:18:0x005a, B:20:0x005e, B:22:0x0062, B:23:0x007b, B:25:0x007f, B:27:0x0085, B:32:0x0098, B:34:0x00a6, B:36:0x00ac, B:37:0x00c5), top: B:43:0x003c }] */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public /* synthetic */ void lambda$createView$1(android.content.Context r8, android.view.View r9, int r10) {
-        /*
-            Method dump skipped, instructions count: 238
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.NotificationsSoundActivity.lambda$createView$1(android.content.Context, android.view.View, int):void");
+    public static /* synthetic */ boolean lambda$createView$0(View v, MotionEvent event) {
+        return true;
     }
 
-    public /* synthetic */ boolean lambda$createView$2(View view, int i) {
+    /* renamed from: lambda$createView$1$org-telegram-ui-NotificationsSoundActivity */
+    public /* synthetic */ void m3961lambda$createView$1$orgtelegramuiNotificationsSoundActivity(Context context, View view, int position) {
+        if (position == this.uploadRow) {
+            ChatAttachAlert chatAttachAlert = new ChatAttachAlert(context, this, false, false, this.resourcesProvider);
+            this.chatAttachAlert = chatAttachAlert;
+            chatAttachAlert.setSoundPicker();
+            this.chatAttachAlert.init();
+            this.chatAttachAlert.show();
+        }
         if (view instanceof ToneCell) {
-            ToneCell toneCell = (ToneCell) view;
-            checkSelection(toneCell.tone);
-            toneCell.performHapticFeedback(0);
+            ToneCell cell = (ToneCell) view;
+            if (this.actionBar.isActionModeShowed() || cell.tone == null) {
+                checkSelection(cell.tone);
+                return;
+            }
+            Ringtone ringtone = this.lastPlayedRingtone;
+            if (ringtone != null) {
+                ringtone.stop();
+            }
+            try {
+                if (cell.tone.isSystemDefault) {
+                    Ringtone r = RingtoneManager.getRingtone(context.getApplicationContext(), RingtoneManager.getDefaultUri(2));
+                    r.setStreamType(4);
+                    this.lastPlayedRingtone = r;
+                    r.play();
+                } else if (cell.tone.uri != null && !cell.tone.fromServer) {
+                    Ringtone r2 = RingtoneManager.getRingtone(context.getApplicationContext(), Uri.parse(cell.tone.uri));
+                    r2.setStreamType(4);
+                    this.lastPlayedRingtone = r2;
+                    r2.play();
+                } else if (cell.tone.fromServer) {
+                    File file = null;
+                    if (!TextUtils.isEmpty(cell.tone.uri)) {
+                        File localUriFile = new File(cell.tone.uri);
+                        if (localUriFile.exists()) {
+                            file = localUriFile;
+                        }
+                    }
+                    if (file == null) {
+                        file = getFileLoader().getPathToAttach(cell.tone.document);
+                    }
+                    if (file == null || !file.exists()) {
+                        getFileLoader().loadFile(cell.tone.document, cell.tone.document, 2, 0);
+                    } else {
+                        Ringtone r3 = RingtoneManager.getRingtone(context.getApplicationContext(), Uri.parse(file.toString()));
+                        r3.setStreamType(4);
+                        this.lastPlayedRingtone = r3;
+                        r3.play();
+                    }
+                }
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+            this.startSelectedTone = null;
+            this.selectedTone = cell.tone;
+            this.selectedToneChanged = true;
+            Adapter adapter = this.adapter;
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+        }
+    }
+
+    /* renamed from: lambda$createView$2$org-telegram-ui-NotificationsSoundActivity */
+    public /* synthetic */ boolean m3962lambda$createView$2$orgtelegramuiNotificationsSoundActivity(View view, int position) {
+        if (view instanceof ToneCell) {
+            ToneCell cell = (ToneCell) view;
+            checkSelection(cell.tone);
+            cell.performHapticFeedback(0);
         }
         return false;
     }
@@ -390,15 +440,15 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
     }
 
     private void checkSelection(Tone tone) {
-        boolean z = true;
+        boolean changed = false;
         if (this.selectedTones.get(tone.stableId) != null) {
             this.selectedTones.remove(tone.stableId);
+            changed = true;
         } else if (tone.fromServer) {
             this.selectedTones.put(tone.stableId, tone);
-        } else {
-            z = false;
+            changed = true;
         }
-        if (z) {
+        if (changed) {
             updateActionMode();
             Adapter adapter = this.adapter;
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
@@ -415,9 +465,7 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
     }
 
     private void loadTones() {
-        TLRPC$Document tLRPC$Document;
-        TLRPC$Document tLRPC$Document2;
-        getMediaDataController().ringtoneDataStore.lambda$new$0();
+        getMediaDataController().ringtoneDataStore.m1261lambda$new$0$orgtelegrammessengerringtoneRingtoneDataStore();
         this.serverTones.clear();
         this.systemTones.clear();
         for (int i = 0; i < getMediaDataController().ringtoneDataStore.userRingtones.size(); i++) {
@@ -428,62 +476,62 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             tone.stableId = i2;
             tone.fromServer = true;
             tone.localId = cachedTone.localId;
-            TLRPC$Document tLRPC$Document3 = cachedTone.document;
-            tone.title = tLRPC$Document3.file_name_fixed;
-            tone.document = tLRPC$Document3;
+            tone.title = cachedTone.document.file_name_fixed;
+            tone.document = cachedTone.document;
             trimTitle(tone);
             tone.uri = cachedTone.localUri;
             Tone tone2 = this.startSelectedTone;
-            if (tone2 != null && (tLRPC$Document = tone2.document) != null && (tLRPC$Document2 = cachedTone.document) != null && tLRPC$Document.id == tLRPC$Document2.id) {
+            if (tone2 != null && tone2.document != null && cachedTone.document != null && this.startSelectedTone.document.id == cachedTone.document.id) {
                 this.startSelectedTone = null;
                 this.selectedTone = tone;
             }
             this.serverTones.add(tone);
         }
-        RingtoneManager ringtoneManager = new RingtoneManager(ApplicationLoader.applicationContext);
-        ringtoneManager.setType(2);
-        Cursor cursor = ringtoneManager.getCursor();
-        Tone tone3 = new Tone(null);
+        RingtoneManager manager = new RingtoneManager(ApplicationLoader.applicationContext);
+        manager.setType(2);
+        Cursor cursor = manager.getCursor();
+        Tone noSoundTone = new Tone(null);
         int i3 = this.stableIds;
         this.stableIds = i3 + 1;
-        tone3.stableId = i3;
-        tone3.title = LocaleController.getString("NoSound", R.string.NoSound);
-        this.systemTones.add(tone3);
-        Tone tone4 = new Tone(null);
+        noSoundTone.stableId = i3;
+        noSoundTone.title = LocaleController.getString("NoSound", R.string.NoSound);
+        noSoundTone.isSystemNoSound = true;
+        this.systemTones.add(noSoundTone);
+        Tone defaultTone = new Tone(null);
         int i4 = this.stableIds;
         this.stableIds = i4 + 1;
-        tone4.stableId = i4;
-        tone4.title = LocaleController.getString("DefaultRingtone", R.string.DefaultRingtone);
-        tone4.isSystemDefault = true;
-        this.systemTones.add(tone4);
-        Tone tone5 = this.startSelectedTone;
-        if (tone5 != null && tone5.document == null && tone5.uri.equals("NoSound")) {
+        defaultTone.stableId = i4;
+        defaultTone.title = LocaleController.getString("DefaultRingtone", R.string.DefaultRingtone);
+        defaultTone.isSystemDefault = true;
+        this.systemTones.add(defaultTone);
+        Tone tone3 = this.startSelectedTone;
+        if (tone3 != null && tone3.document == null && this.startSelectedTone.uri.equals("NoSound")) {
             this.startSelectedTone = null;
-            this.selectedTone = tone3;
+            this.selectedTone = noSoundTone;
         }
-        Tone tone6 = this.startSelectedTone;
-        if (tone6 != null && tone6.document == null && tone6.uri.equals("Default")) {
+        Tone tone4 = this.startSelectedTone;
+        if (tone4 != null && tone4.document == null && this.startSelectedTone.uri.equals("Default")) {
             this.startSelectedTone = null;
-            this.selectedTone = tone4;
+            this.selectedTone = defaultTone;
         }
         while (cursor.moveToNext()) {
-            String string = cursor.getString(1);
-            String str = cursor.getString(2) + "/" + cursor.getString(0);
-            Tone tone7 = new Tone(null);
+            String notificationTitle = cursor.getString(1);
+            String notificationUri = cursor.getString(2) + "/" + cursor.getString(0);
+            Tone tone5 = new Tone(null);
             int i5 = this.stableIds;
             this.stableIds = i5 + 1;
-            tone7.stableId = i5;
-            tone7.title = string;
-            tone7.uri = str;
-            Tone tone8 = this.startSelectedTone;
-            if (tone8 != null && tone8.document == null && tone8.uri.equals(str)) {
+            tone5.stableId = i5;
+            tone5.title = notificationTitle;
+            tone5.uri = notificationUri;
+            Tone tone6 = this.startSelectedTone;
+            if (tone6 != null && tone6.document == null && this.startSelectedTone.uri.equals(notificationUri)) {
                 this.startSelectedTone = null;
-                this.selectedTone = tone7;
+                this.selectedTone = tone5;
             }
-            this.systemTones.add(tone7);
+            this.systemTones.add(tone5);
         }
         if (getMediaDataController().ringtoneDataStore.isLoaded() && this.selectedTone == null) {
-            this.selectedTone = tone4;
+            this.selectedTone = defaultTone;
             this.selectedToneChanged = true;
         }
         updateRows();
@@ -530,160 +578,155 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate
-    public void didSelectFiles(ArrayList<String> arrayList, String str, ArrayList<MessageObject> arrayList2, boolean z, int i) {
-        for (int i2 = 0; i2 < arrayList.size(); i2++) {
-            getMediaDataController().uploadRingtone(arrayList.get(i2));
+    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fmessages, boolean notify, int scheduleDate) {
+        for (int i = 0; i < files.size(); i++) {
+            getMediaDataController().uploadRingtone(files.get(i));
         }
         getNotificationCenter().postNotificationName(NotificationCenter.onUserRingtonesUpdated, new Object[0]);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public class Adapter extends RecyclerListView.SelectionAdapter {
         private Adapter() {
             NotificationsSoundActivity.this = r1;
         }
 
-        /* synthetic */ Adapter(NotificationsSoundActivity notificationsSoundActivity, AnonymousClass1 anonymousClass1) {
+        /* synthetic */ Adapter(NotificationsSoundActivity x0, AnonymousClass1 x1) {
             this();
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public long getItemId(int i) {
-            Tone tone = getTone(i);
+        public long getItemId(int position) {
+            Tone tone = getTone(position);
             if (tone != null) {
                 return tone.stableId;
             }
-            NotificationsSoundActivity notificationsSoundActivity = NotificationsSoundActivity.this;
-            if (i == notificationsSoundActivity.serverTonesHeaderRow) {
+            if (position == NotificationsSoundActivity.this.serverTonesHeaderRow) {
                 return 1L;
             }
-            if (i == notificationsSoundActivity.systemTonesHeaderRow) {
+            if (position == NotificationsSoundActivity.this.systemTonesHeaderRow) {
                 return 2L;
             }
-            if (i == notificationsSoundActivity.uploadRow) {
+            if (position == NotificationsSoundActivity.this.uploadRow) {
                 return 3L;
             }
-            if (i == notificationsSoundActivity.dividerRow) {
+            if (position == NotificationsSoundActivity.this.dividerRow) {
                 return 4L;
             }
-            if (i != notificationsSoundActivity.dividerRow2) {
-                throw new RuntimeException();
+            if (position == NotificationsSoundActivity.this.dividerRow2) {
+                return 5L;
             }
-            return 5L;
+            throw new RuntimeException();
         }
 
-        private Tone getTone(int i) {
-            NotificationsSoundActivity notificationsSoundActivity = NotificationsSoundActivity.this;
-            int i2 = notificationsSoundActivity.systemTonesStartRow;
-            if (i >= i2 && i < notificationsSoundActivity.systemTonesEndRow) {
-                return notificationsSoundActivity.systemTones.get(i - i2);
+        private Tone getTone(int position) {
+            if (position >= NotificationsSoundActivity.this.systemTonesStartRow && position < NotificationsSoundActivity.this.systemTonesEndRow) {
+                return NotificationsSoundActivity.this.systemTones.get(position - NotificationsSoundActivity.this.systemTonesStartRow);
             }
-            int i3 = notificationsSoundActivity.serverTonesStartRow;
-            if (i >= i3 && i < notificationsSoundActivity.serverTonesEndRow) {
-                return notificationsSoundActivity.serverTones.get(i - i3);
+            if (position >= NotificationsSoundActivity.this.serverTonesStartRow && position < NotificationsSoundActivity.this.serverTonesEndRow) {
+                return NotificationsSoundActivity.this.serverTones.get(position - NotificationsSoundActivity.this.serverTonesStartRow);
             }
             return null;
         }
 
-        /* JADX WARN: Multi-variable type inference failed */
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            HeaderCell headerCell;
-            Context context = viewGroup.getContext();
-            if (i == 0) {
-                ToneCell toneCell = new ToneCell(context, NotificationsSoundActivity.this.resourcesProvider);
-                toneCell.setBackgroundColor(Theme.getColor("windowBackgroundWhite", NotificationsSoundActivity.this.resourcesProvider));
-                headerCell = toneCell;
-            } else if (i == 2) {
-                CreationTextCell creationTextCell = new CreationTextCell(context, NotificationsSoundActivity.this.resourcesProvider);
-                creationTextCell.startPadding = 61;
-                creationTextCell.setBackgroundColor(Theme.getColor("windowBackgroundWhite", NotificationsSoundActivity.this.resourcesProvider));
-                headerCell = creationTextCell;
-            } else if (i != 3) {
-                HeaderCell headerCell2 = new HeaderCell(context, NotificationsSoundActivity.this.resourcesProvider);
-                headerCell2.setBackgroundColor(Theme.getColor("windowBackgroundWhite", NotificationsSoundActivity.this.resourcesProvider));
-                headerCell = headerCell2;
-            } else {
-                headerCell = new ShadowSectionCell(context, NotificationsSoundActivity.this.resourcesProvider);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view;
+            Context context = parent.getContext();
+            switch (viewType) {
+                case 0:
+                    View view2 = new ToneCell(context, NotificationsSoundActivity.this.resourcesProvider);
+                    view2.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite, NotificationsSoundActivity.this.resourcesProvider));
+                    view = view2;
+                    break;
+                case 1:
+                default:
+                    View view3 = new HeaderCell(context, NotificationsSoundActivity.this.resourcesProvider);
+                    view3.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite, NotificationsSoundActivity.this.resourcesProvider));
+                    view = view3;
+                    break;
+                case 2:
+                    CreationTextCell creationTextCell = new CreationTextCell(context, NotificationsSoundActivity.this.resourcesProvider);
+                    creationTextCell.startPadding = 61;
+                    creationTextCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite, NotificationsSoundActivity.this.resourcesProvider));
+                    view = creationTextCell;
+                    break;
+                case 3:
+                    view = new ShadowSectionCell(context, NotificationsSoundActivity.this.resourcesProvider);
+                    break;
             }
-            headerCell.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
-            return new RecyclerListView.Holder(headerCell);
+            view.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
+            return new RecyclerListView.Holder(view);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            int itemViewType = viewHolder.getItemViewType();
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             boolean z = false;
-            if (itemViewType != 0) {
-                if (itemViewType != 1) {
-                    if (itemViewType != 2) {
+            switch (holder.getItemViewType()) {
+                case 0:
+                    ToneCell toneCell = (ToneCell) holder.itemView;
+                    Tone tone = null;
+                    if (position >= NotificationsSoundActivity.this.systemTonesStartRow && position < NotificationsSoundActivity.this.systemTonesEndRow) {
+                        tone = NotificationsSoundActivity.this.systemTones.get(position - NotificationsSoundActivity.this.systemTonesStartRow);
+                    }
+                    if (position >= NotificationsSoundActivity.this.serverTonesStartRow && position < NotificationsSoundActivity.this.serverTonesEndRow) {
+                        tone = NotificationsSoundActivity.this.serverTones.get(position - NotificationsSoundActivity.this.serverTonesStartRow);
+                    }
+                    if (tone != null) {
+                        boolean animated = toneCell.tone == tone;
+                        boolean checked = tone == NotificationsSoundActivity.this.selectedTone;
+                        boolean selected = NotificationsSoundActivity.this.selectedTones.get(tone.stableId) != null;
+                        toneCell.tone = tone;
+                        toneCell.textView.setText(tone.title);
+                        if (position != NotificationsSoundActivity.this.systemTonesEndRow - 1) {
+                            z = true;
+                        }
+                        toneCell.needDivider = z;
+                        toneCell.radioButton.setChecked(checked, animated);
+                        toneCell.checkBox.setChecked(selected, animated);
                         return;
                     }
-                    CreationTextCell creationTextCell = (CreationTextCell) viewHolder.itemView;
-                    Drawable drawable = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_circle);
-                    Drawable drawable2 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_plus);
-                    drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor("switchTrackChecked", NotificationsSoundActivity.this.resourcesProvider), PorterDuff.Mode.MULTIPLY));
-                    drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor("checkboxCheck", NotificationsSoundActivity.this.resourcesProvider), PorterDuff.Mode.MULTIPLY));
-                    creationTextCell.setTextAndIcon(LocaleController.getString("UploadSound", R.string.UploadSound), new CombinedDrawable(drawable, drawable2), false);
                     return;
-                }
-                HeaderCell headerCell = (HeaderCell) viewHolder.itemView;
-                NotificationsSoundActivity notificationsSoundActivity = NotificationsSoundActivity.this;
-                if (i == notificationsSoundActivity.serverTonesHeaderRow) {
-                    headerCell.setText(LocaleController.getString("TelegramTones", R.string.TelegramTones));
+                case 1:
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    if (position == NotificationsSoundActivity.this.serverTonesHeaderRow) {
+                        headerCell.setText(LocaleController.getString("TelegramTones", R.string.TelegramTones));
+                        return;
+                    } else if (position == NotificationsSoundActivity.this.systemTonesHeaderRow) {
+                        headerCell.setText(LocaleController.getString("SystemTones", R.string.SystemTones));
+                        return;
+                    } else {
+                        return;
+                    }
+                case 2:
+                    CreationTextCell textCell = (CreationTextCell) holder.itemView;
+                    Drawable drawable1 = textCell.getContext().getResources().getDrawable(R.drawable.poll_add_circle);
+                    Drawable drawable2 = textCell.getContext().getResources().getDrawable(R.drawable.poll_add_plus);
+                    drawable1.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked, NotificationsSoundActivity.this.resourcesProvider), PorterDuff.Mode.MULTIPLY));
+                    drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_checkboxCheck, NotificationsSoundActivity.this.resourcesProvider), PorterDuff.Mode.MULTIPLY));
+                    CombinedDrawable combinedDrawable = new CombinedDrawable(drawable1, drawable2);
+                    textCell.setTextAndIcon(LocaleController.getString("UploadSound", R.string.UploadSound), combinedDrawable, false);
                     return;
-                } else if (i != notificationsSoundActivity.systemTonesHeaderRow) {
+                default:
                     return;
-                } else {
-                    headerCell.setText(LocaleController.getString("SystemTones", R.string.SystemTones));
-                    return;
-                }
             }
-            ToneCell toneCell = (ToneCell) viewHolder.itemView;
-            Tone tone = null;
-            NotificationsSoundActivity notificationsSoundActivity2 = NotificationsSoundActivity.this;
-            int i2 = notificationsSoundActivity2.systemTonesStartRow;
-            if (i >= i2 && i < notificationsSoundActivity2.systemTonesEndRow) {
-                tone = notificationsSoundActivity2.systemTones.get(i - i2);
-            }
-            NotificationsSoundActivity notificationsSoundActivity3 = NotificationsSoundActivity.this;
-            int i3 = notificationsSoundActivity3.serverTonesStartRow;
-            if (i >= i3 && i < notificationsSoundActivity3.serverTonesEndRow) {
-                tone = notificationsSoundActivity3.serverTones.get(i - i3);
-            }
-            if (tone == null) {
-                return;
-            }
-            boolean z2 = toneCell.tone == tone;
-            NotificationsSoundActivity notificationsSoundActivity4 = NotificationsSoundActivity.this;
-            boolean z3 = tone == notificationsSoundActivity4.selectedTone;
-            boolean z4 = notificationsSoundActivity4.selectedTones.get(tone.stableId) != null;
-            toneCell.tone = tone;
-            toneCell.textView.setText(tone.title);
-            if (i != NotificationsSoundActivity.this.systemTonesEndRow - 1) {
-                z = true;
-            }
-            toneCell.needDivider = z;
-            toneCell.radioButton.setChecked(z3, z2);
-            toneCell.checkBox.setChecked(z4, z2);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int i) {
-            NotificationsSoundActivity notificationsSoundActivity = NotificationsSoundActivity.this;
-            if (i < notificationsSoundActivity.systemTonesStartRow || i >= notificationsSoundActivity.systemTonesEndRow) {
-                if (i == notificationsSoundActivity.serverTonesHeaderRow || i == notificationsSoundActivity.systemTonesHeaderRow) {
-                    return 1;
-                }
-                if (i == notificationsSoundActivity.uploadRow) {
-                    return 2;
-                }
-                if (i != notificationsSoundActivity.dividerRow && i != notificationsSoundActivity.dividerRow2) {
-                    return super.getItemViewType(i);
-                }
+        public int getItemViewType(int position) {
+            if (position >= NotificationsSoundActivity.this.systemTonesStartRow && position < NotificationsSoundActivity.this.systemTonesEndRow) {
+                return 0;
+            }
+            if (position == NotificationsSoundActivity.this.serverTonesHeaderRow || position == NotificationsSoundActivity.this.systemTonesHeaderRow) {
+                return 1;
+            }
+            if (position == NotificationsSoundActivity.this.uploadRow) {
+                return 2;
+            }
+            if (position == NotificationsSoundActivity.this.dividerRow || position == NotificationsSoundActivity.this.dividerRow2) {
                 return 3;
             }
-            return 0;
+            return super.getItemViewType(position);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -692,55 +735,51 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-            return viewHolder.getItemViewType() == 0 || viewHolder.getItemViewType() == 2;
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            return holder.getItemViewType() == 0 || holder.getItemViewType() == 2;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* JADX INFO: Access modifiers changed from: private */
+    /* loaded from: classes4.dex */
     public static class ToneCell extends FrameLayout {
         private CheckBox2 checkBox;
         private boolean needDivider;
         private RadioButton radioButton;
         private TextView textView;
         Tone tone;
+        public TextView valueTextView;
 
         public ToneCell(Context context, Theme.ResourcesProvider resourcesProvider) {
             super(context);
             RadioButton radioButton = new RadioButton(context);
             this.radioButton = radioButton;
             radioButton.setSize(AndroidUtilities.dp(20.0f));
-            this.radioButton.setColor(Theme.getColor("radioBackground", resourcesProvider), Theme.getColor("radioBackgroundChecked", resourcesProvider));
-            RadioButton radioButton2 = this.radioButton;
-            boolean z = LocaleController.isRTL;
+            this.radioButton.setColor(Theme.getColor(Theme.key_radioBackground, resourcesProvider), Theme.getColor(Theme.key_radioBackgroundChecked, resourcesProvider));
             int i = 5;
-            addView(radioButton2, LayoutHelper.createFrame(22, 22.0f, (z ? 5 : 3) | 16, z ? 0 : 20, 0.0f, !z ? 0 : 20, 0.0f));
+            addView(this.radioButton, LayoutHelper.createFrame(22, 22.0f, (LocaleController.isRTL ? 5 : 3) | 16, LocaleController.isRTL ? 0 : 20, 0.0f, !LocaleController.isRTL ? 0 : 20, 0.0f));
             CheckBox2 checkBox2 = new CheckBox2(context, 24, resourcesProvider);
             this.checkBox = checkBox2;
-            checkBox2.setColor(null, "windowBackgroundWhite", "checkboxCheck");
+            checkBox2.setColor(null, Theme.key_windowBackgroundWhite, Theme.key_checkboxCheck);
             this.checkBox.setDrawUnchecked(false);
             this.checkBox.setDrawBackgroundAsArc(3);
-            CheckBox2 checkBox22 = this.checkBox;
-            boolean z2 = LocaleController.isRTL;
-            addView(checkBox22, LayoutHelper.createFrame(26, 26.0f, (z2 ? 5 : 3) | 16, z2 ? 0 : 18, 0.0f, !z2 ? 0 : 18, 0.0f));
+            addView(this.checkBox, LayoutHelper.createFrame(26, 26.0f, (LocaleController.isRTL ? 5 : 3) | 16, LocaleController.isRTL ? 0 : 18, 0.0f, !LocaleController.isRTL ? 0 : 18, 0.0f));
             this.checkBox.setChecked(true, false);
             TextView textView = new TextView(context);
             this.textView = textView;
-            textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText", resourcesProvider));
+            textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
             this.textView.setTextSize(1, 16.0f);
             this.textView.setLines(1);
             this.textView.setMaxLines(1);
             this.textView.setSingleLine(true);
             this.textView.setEllipsize(TextUtils.TruncateAt.END);
             this.textView.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
-            TextView textView2 = this.textView;
-            boolean z3 = LocaleController.isRTL;
-            addView(textView2, LayoutHelper.createFrame(-2, -2.0f, (!z3 ? 3 : i) | 16, z3 ? 23 : 61, 0.0f, z3 ? 61 : 23, 0.0f));
+            addView(this.textView, LayoutHelper.createFrame(-2, -2.0f, (!LocaleController.isRTL ? 3 : i) | 16, LocaleController.isRTL ? 23 : 61, 0.0f, LocaleController.isRTL ? 61 : 23, 0.0f));
         }
 
         @Override // android.widget.FrameLayout, android.view.View
-        protected void onMeasure(int i, int i2) {
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824));
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED));
         }
 
         @Override // android.view.View
@@ -758,11 +797,11 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
         }
 
         @Override // android.view.View
-        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-            super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
-            accessibilityNodeInfo.setClassName("android.widget.RadioButton");
-            accessibilityNodeInfo.setCheckable(true);
-            accessibilityNodeInfo.setChecked(this.radioButton.isChecked());
+        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(info);
+            info.setClassName("android.widget.RadioButton");
+            info.setCheckable(true);
+            info.setChecked(this.radioButton.isChecked());
         }
     }
 
@@ -780,46 +819,43 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public int getNavigationBarColor() {
-        return getThemedColor("windowBackgroundGray");
+        return getThemedColor(Theme.key_windowBackgroundGray);
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int i, int i2, Object... objArr) {
-        TLRPC$Document tLRPC$Document;
-        TLRPC$Document tLRPC$Document2;
-        if (i == NotificationCenter.onUserRingtonesUpdated) {
-            HashMap hashMap = new HashMap();
-            for (int i3 = 0; i3 < this.serverTones.size(); i3++) {
-                hashMap.put(Integer.valueOf(this.serverTones.get(i3).localId), this.serverTones.get(i3));
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.onUserRingtonesUpdated) {
+            HashMap<Integer, Tone> currentTones = new HashMap<>();
+            for (int i = 0; i < this.serverTones.size(); i++) {
+                currentTones.put(Integer.valueOf(this.serverTones.get(i).localId), this.serverTones.get(i));
             }
             this.serverTones.clear();
-            for (int i4 = 0; i4 < getMediaDataController().ringtoneDataStore.userRingtones.size(); i4++) {
-                RingtoneDataStore.CachedTone cachedTone = getMediaDataController().ringtoneDataStore.userRingtones.get(i4);
+            for (int i2 = 0; i2 < getMediaDataController().ringtoneDataStore.userRingtones.size(); i2++) {
+                RingtoneDataStore.CachedTone cachedTone = getMediaDataController().ringtoneDataStore.userRingtones.get(i2);
                 Tone tone = new Tone(null);
-                Tone tone2 = (Tone) hashMap.get(Integer.valueOf(cachedTone.localId));
-                if (tone2 != null) {
-                    if (tone2 == this.selectedTone) {
+                Tone currentTone = currentTones.get(Integer.valueOf(cachedTone.localId));
+                if (currentTone != null) {
+                    if (currentTone == this.selectedTone) {
                         this.selectedTone = tone;
                     }
-                    tone.stableId = tone2.stableId;
+                    tone.stableId = currentTone.stableId;
                 } else {
-                    int i5 = this.stableIds;
-                    this.stableIds = i5 + 1;
-                    tone.stableId = i5;
+                    int i3 = this.stableIds;
+                    this.stableIds = i3 + 1;
+                    tone.stableId = i3;
                 }
                 tone.fromServer = true;
                 tone.localId = cachedTone.localId;
-                TLRPC$Document tLRPC$Document3 = cachedTone.document;
-                if (tLRPC$Document3 != null) {
-                    tone.title = tLRPC$Document3.file_name_fixed;
+                if (cachedTone.document != null) {
+                    tone.title = cachedTone.document.file_name_fixed;
                 } else {
                     tone.title = new File(cachedTone.localUri).getName();
                 }
                 tone.document = cachedTone.document;
                 trimTitle(tone);
                 tone.uri = cachedTone.localUri;
-                Tone tone3 = this.startSelectedTone;
-                if (tone3 != null && (tLRPC$Document = tone3.document) != null && (tLRPC$Document2 = cachedTone.document) != null && tLRPC$Document.id == tLRPC$Document2.id) {
+                Tone tone2 = this.startSelectedTone;
+                if (tone2 != null && tone2.document != null && cachedTone.document != null && this.startSelectedTone.document.id == cachedTone.document.id) {
                     this.startSelectedTone = null;
                     this.selectedTone = tone;
                 }
@@ -827,11 +863,10 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             }
             updateRows();
             this.adapter.notifyDataSetChanged();
-            if (!getMediaDataController().ringtoneDataStore.isLoaded() || this.selectedTone != null || this.systemTones.size() <= 0) {
-                return;
+            if (getMediaDataController().ringtoneDataStore.isLoaded() && this.selectedTone == null && this.systemTones.size() > 0) {
+                this.startSelectedTone = null;
+                this.selectedTone = this.systemTones.get(0);
             }
-            this.startSelectedTone = null;
-            this.selectedTone = this.systemTones.get(0);
         }
     }
 
@@ -839,131 +874,127 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
         tone.title = trimTitle(tone.document, tone.title);
     }
 
-    public static String trimTitle(TLRPC$Document tLRPC$Document, String str) {
-        int lastIndexOf;
-        if (str != null && (lastIndexOf = str.lastIndexOf(46)) != -1) {
-            str = str.substring(0, lastIndexOf);
+    public static String trimTitle(TLRPC.Document document, String title) {
+        int idx;
+        if (title != null && (idx = title.lastIndexOf(46)) != -1) {
+            title = title.substring(0, idx);
         }
-        return (!TextUtils.isEmpty(str) || tLRPC$Document == null) ? str : LocaleController.formatString("SoundNameEmpty", R.string.SoundNameEmpty, LocaleController.formatDateChat(tLRPC$Document.date, true));
+        if (TextUtils.isEmpty(title) && document != null) {
+            return LocaleController.formatString("SoundNameEmpty", R.string.SoundNameEmpty, LocaleController.formatDateChat(document.date, true));
+        }
+        return title;
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
     public void onFragmentDestroy() {
-        String str;
-        String str2;
-        String str3;
-        TLRPC$Document tLRPC$Document;
+        String prefDocId;
+        String prefPath;
+        String prefName;
         super.onFragmentDestroy();
-        if (this.selectedTone == null || !this.selectedToneChanged) {
-            return;
-        }
-        SharedPreferences.Editor edit = getNotificationsSettings().edit();
-        if (this.dialogId != 0) {
-            str3 = "sound_" + this.dialogId;
-            str2 = "sound_path_" + this.dialogId;
-            str = "sound_document_id_" + this.dialogId;
-            edit.putBoolean("sound_enabled_" + this.dialogId, true);
-        } else {
-            int i = this.currentType;
-            if (i == 1) {
-                str3 = "GlobalSound";
-                str2 = "GlobalSoundPath";
-                str = "GlobalSoundDocId";
-            } else if (i == 0) {
-                str3 = "GroupSound";
-                str2 = "GroupSoundPath";
-                str = "GroupSoundDocId";
-            } else if (i != 2) {
-                throw new RuntimeException("Unsupported type");
+        if (this.selectedTone != null && this.selectedToneChanged) {
+            SharedPreferences preferences = getNotificationsSettings();
+            SharedPreferences.Editor editor = preferences.edit();
+            if (this.dialogId != 0) {
+                prefName = "sound_" + this.dialogId;
+                prefPath = "sound_path_" + this.dialogId;
+                prefDocId = "sound_document_id_" + this.dialogId;
+                editor.putBoolean("sound_enabled_" + this.dialogId, true);
             } else {
-                str3 = "ChannelSound";
-                str2 = "ChannelSoundPath";
-                str = "ChannelSoundDocId";
+                int i = this.currentType;
+                if (i == 1) {
+                    prefName = "GlobalSound";
+                    prefPath = "GlobalSoundPath";
+                    prefDocId = "GlobalSoundDocId";
+                } else if (i == 0) {
+                    prefName = "GroupSound";
+                    prefPath = "GroupSoundPath";
+                    prefDocId = "GroupSoundDocId";
+                } else if (i == 2) {
+                    prefName = "ChannelSound";
+                    prefPath = "ChannelSoundPath";
+                    prefDocId = "ChannelSoundDocId";
+                } else {
+                    throw new RuntimeException("Unsupported type");
+                }
             }
+            if (this.selectedTone.fromServer && this.selectedTone.document != null) {
+                editor.putLong(prefDocId, this.selectedTone.document.id);
+                editor.putString(prefName, this.selectedTone.title);
+                editor.putString(prefPath, "NoSound");
+            } else if (this.selectedTone.uri != null) {
+                editor.putString(prefName, this.selectedTone.title);
+                editor.putString(prefPath, this.selectedTone.uri);
+                editor.remove(prefDocId);
+            } else if (this.selectedTone.isSystemDefault) {
+                editor.putString(prefName, "Default");
+                editor.putString(prefPath, "Default");
+                editor.remove(prefDocId);
+            } else {
+                editor.putString(prefName, "NoSound");
+                editor.putString(prefPath, "NoSound");
+                editor.remove(prefDocId);
+            }
+            editor.apply();
+            if (this.dialogId != 0) {
+                getNotificationsController().updateServerNotificationsSettings(this.dialogId);
+                return;
+            }
+            getNotificationsController().updateServerNotificationsSettings(this.currentType);
+            getNotificationCenter().postNotificationName(NotificationCenter.notificationsSettingsUpdated, new Object[0]);
         }
-        Tone tone = this.selectedTone;
-        if (tone.fromServer && (tLRPC$Document = tone.document) != null) {
-            edit.putLong(str, tLRPC$Document.id);
-            edit.putString(str3, this.selectedTone.title);
-            edit.putString(str2, "NoSound");
-        } else if (tone.uri != null) {
-            edit.putString(str3, tone.title);
-            edit.putString(str2, this.selectedTone.uri);
-            edit.remove(str);
-        } else if (tone.isSystemDefault) {
-            edit.putString(str3, "Default");
-            edit.putString(str2, "Default");
-            edit.remove(str);
-        } else {
-            edit.putString(str3, "NoSound");
-            edit.putString(str2, "NoSound");
-            edit.remove(str);
-        }
-        edit.apply();
-        if (this.dialogId != 0) {
-            getNotificationsController().updateServerNotificationsSettings(this.dialogId);
-            return;
-        }
-        getNotificationsController().updateServerNotificationsSettings(this.currentType);
-        getNotificationCenter().postNotificationName(NotificationCenter.notificationsSettingsUpdated, new Object[0]);
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate
     public void startDocumentSelectActivity() {
         try {
-            Intent intent = new Intent("android.intent.action.GET_CONTENT");
+            Intent photoPickerIntent = new Intent("android.intent.action.GET_CONTENT");
             if (Build.VERSION.SDK_INT >= 18) {
-                intent.putExtra("android.intent.extra.ALLOW_MULTIPLE", true);
+                photoPickerIntent.putExtra("android.intent.extra.ALLOW_MULTIPLE", true);
             }
-            intent.setType("audio/mpeg");
-            startActivityForResult(intent, 21);
+            photoPickerIntent.setType(MimeTypes.AUDIO_MPEG);
+            startActivityForResult(photoPickerIntent, 21);
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment
-    public void onActivityResultFragment(int i, int i2, Intent intent) {
-        if (i != 21 || intent == null || this.chatAttachAlert == null) {
-            return;
-        }
-        boolean z = true;
-        boolean z2 = false;
-        if (intent.getData() != null) {
-            String path = AndroidUtilities.getPath(intent.getData());
-            if (path != null) {
-                if (this.chatAttachAlert.getDocumentLayout().isRingtone(new File(path))) {
-                    getMediaDataController().uploadRingtone(path);
-                    getNotificationCenter().postNotificationName(NotificationCenter.onUserRingtonesUpdated, new Object[0]);
-                    z2 = z;
+    public void onActivityResultFragment(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 21 && data != null && this.chatAttachAlert != null) {
+            boolean apply = false;
+            if (data.getData() != null) {
+                String path = AndroidUtilities.getPath(data.getData());
+                if (path != null) {
+                    File file = new File(path);
+                    if (this.chatAttachAlert.getDocumentLayout().isRingtone(file)) {
+                        apply = true;
+                        getMediaDataController().uploadRingtone(path);
+                        getNotificationCenter().postNotificationName(NotificationCenter.onUserRingtonesUpdated, new Object[0]);
+                    }
+                }
+            } else if (data.getClipData() != null) {
+                ClipData clipData = data.getClipData();
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    String path2 = clipData.getItemAt(i).getUri().toString();
+                    if (this.chatAttachAlert.getDocumentLayout().isRingtone(new File(path2))) {
+                        apply = true;
+                        getMediaDataController().uploadRingtone(path2);
+                        getNotificationCenter().postNotificationName(NotificationCenter.onUserRingtonesUpdated, new Object[0]);
+                    }
                 }
             }
-            z = false;
-            z2 = z;
-        } else if (intent.getClipData() != null) {
-            ClipData clipData = intent.getClipData();
-            boolean z3 = false;
-            for (int i3 = 0; i3 < clipData.getItemCount(); i3++) {
-                String uri = clipData.getItemAt(i3).getUri().toString();
-                if (this.chatAttachAlert.getDocumentLayout().isRingtone(new File(uri))) {
-                    getMediaDataController().uploadRingtone(uri);
-                    getNotificationCenter().postNotificationName(NotificationCenter.onUserRingtonesUpdated, new Object[0]);
-                    z3 = true;
-                }
+            if (apply) {
+                this.chatAttachAlert.dismiss();
             }
-            z2 = z3;
         }
-        if (!z2) {
-            return;
-        }
-        this.chatAttachAlert.dismiss();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public static class Tone {
-        TLRPC$Document document;
+        TLRPC.Document document;
         public boolean fromServer;
         boolean isSystemDefault;
+        boolean isSystemNoSound;
         int localId;
         int stableId;
         String title;
@@ -972,36 +1003,36 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
         private Tone() {
         }
 
-        /* synthetic */ Tone(AnonymousClass1 anonymousClass1) {
+        /* synthetic */ Tone(AnonymousClass1 x0) {
             this();
         }
 
-        public Uri getUriForShare(int i) {
+        public Uri getUriForShare(int currentAccount) {
             if (!TextUtils.isEmpty(this.uri)) {
                 return Uri.fromFile(new File(this.uri));
             }
-            TLRPC$Document tLRPC$Document = this.document;
-            if (tLRPC$Document == null) {
-                return null;
-            }
-            String str = tLRPC$Document.file_name_fixed;
-            String documentExtension = FileLoader.getDocumentExtension(tLRPC$Document);
-            if (documentExtension == null) {
-                return null;
-            }
-            String lowerCase = documentExtension.toLowerCase();
-            if (!str.endsWith(lowerCase)) {
-                str = str + "." + lowerCase;
-            }
-            File file = new File(AndroidUtilities.getCacheDir(), str);
-            if (!file.exists()) {
-                try {
-                    AndroidUtilities.copyFile(FileLoader.getInstance(i).getPathToAttach(this.document), file);
-                } catch (IOException e) {
-                    e.printStackTrace();
+            TLRPC.Document document = this.document;
+            if (document != null) {
+                String fileName = document.file_name_fixed;
+                String ext = FileLoader.getDocumentExtension(this.document);
+                if (ext != null) {
+                    String ext2 = ext.toLowerCase();
+                    if (!fileName.endsWith(ext2)) {
+                        fileName = fileName + "." + ext2;
+                    }
+                    File file = new File(AndroidUtilities.getCacheDir(), fileName);
+                    if (!file.exists()) {
+                        try {
+                            AndroidUtilities.copyFile(FileLoader.getInstance(currentAccount).getPathToAttach(this.document), file);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return Uri.fromFile(file);
                 }
+                return null;
             }
-            return Uri.fromFile(file);
+            return null;
         }
     }
 }

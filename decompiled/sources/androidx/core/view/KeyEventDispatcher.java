@@ -11,16 +11,19 @@ import android.view.Window;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class KeyEventDispatcher {
     private static boolean sActionBarFieldsFetched = false;
     private static Method sActionBarOnMenuKeyMethod = null;
     private static boolean sDialogFieldsFetched = false;
-    private static Field sDialogKeyListenerField;
+    private static Field sDialogKeyListenerField = null;
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Component {
         boolean superDispatchKeyEvent(KeyEvent event);
+    }
+
+    private KeyEventDispatcher() {
     }
 
     public static boolean dispatchBeforeHierarchy(View root, KeyEvent event) {
@@ -47,7 +50,7 @@ public class KeyEventDispatcher {
         if (!sActionBarFieldsFetched) {
             try {
                 sActionBarOnMenuKeyMethod = actionBar.getClass().getMethod("onMenuKeyEvent", KeyEvent.class);
-            } catch (NoSuchMethodException unused) {
+            } catch (NoSuchMethodException e) {
             }
             sActionBarFieldsFetched = true;
         }
@@ -55,7 +58,8 @@ public class KeyEventDispatcher {
         if (method != null) {
             try {
                 return ((Boolean) method.invoke(actionBar, event)).booleanValue();
-            } catch (IllegalAccessException | InvocationTargetException unused2) {
+            } catch (IllegalAccessException e2) {
+            } catch (InvocationTargetException e3) {
             }
         }
         return false;
@@ -63,21 +67,22 @@ public class KeyEventDispatcher {
 
     private static boolean activitySuperDispatchKeyEventPre28(Activity activity, KeyEvent event) {
         activity.onUserInteraction();
-        Window window = activity.getWindow();
-        if (window.hasFeature(8)) {
+        Window win = activity.getWindow();
+        if (win.hasFeature(8)) {
             ActionBar actionBar = activity.getActionBar();
-            if (event.getKeyCode() == 82 && actionBar != null && actionBarOnMenuKeyEventPre28(actionBar, event)) {
+            int keyCode = event.getKeyCode();
+            if (keyCode == 82 && actionBar != null && actionBarOnMenuKeyEventPre28(actionBar, event)) {
                 return true;
             }
         }
-        if (window.superDispatchKeyEvent(event)) {
+        if (win.superDispatchKeyEvent(event)) {
             return true;
         }
-        View decorView = window.getDecorView();
-        if (ViewCompat.dispatchUnhandledKeyEventBeforeCallback(decorView, event)) {
+        View decor = win.getDecorView();
+        if (ViewCompat.dispatchUnhandledKeyEventBeforeCallback(decor, event)) {
             return true;
         }
-        return event.dispatch(activity, decorView != null ? decorView.getKeyDispatcherState() : null, activity);
+        return event.dispatch(activity, decor != null ? decor.getKeyDispatcherState() : null, activity);
     }
 
     private static DialogInterface.OnKeyListener getDialogKeyListenerPre28(Dialog dialog) {
@@ -86,7 +91,7 @@ public class KeyEventDispatcher {
                 Field declaredField = Dialog.class.getDeclaredField("mOnKeyListener");
                 sDialogKeyListenerField = declaredField;
                 declaredField.setAccessible(true);
-            } catch (NoSuchFieldException unused) {
+            } catch (NoSuchFieldException e) {
             }
             sDialogFieldsFetched = true;
         }
@@ -94,7 +99,7 @@ public class KeyEventDispatcher {
         if (field != null) {
             try {
                 return (DialogInterface.OnKeyListener) field.get(dialog);
-            } catch (IllegalAccessException unused2) {
+            } catch (IllegalAccessException e2) {
                 return null;
             }
         }
@@ -102,18 +107,18 @@ public class KeyEventDispatcher {
     }
 
     private static boolean dialogSuperDispatchKeyEventPre28(Dialog dialog, KeyEvent event) {
-        DialogInterface.OnKeyListener dialogKeyListenerPre28 = getDialogKeyListenerPre28(dialog);
-        if (dialogKeyListenerPre28 == null || !dialogKeyListenerPre28.onKey(dialog, event.getKeyCode(), event)) {
-            Window window = dialog.getWindow();
-            if (window.superDispatchKeyEvent(event)) {
-                return true;
-            }
-            View decorView = window.getDecorView();
-            if (ViewCompat.dispatchUnhandledKeyEventBeforeCallback(decorView, event)) {
-                return true;
-            }
-            return event.dispatch(dialog, decorView != null ? decorView.getKeyDispatcherState() : null, dialog);
+        DialogInterface.OnKeyListener onKeyListener = getDialogKeyListenerPre28(dialog);
+        if (onKeyListener != null && onKeyListener.onKey(dialog, event.getKeyCode(), event)) {
+            return true;
         }
-        return true;
+        Window win = dialog.getWindow();
+        if (win.superDispatchKeyEvent(event)) {
+            return true;
+        }
+        View decor = win.getDecorView();
+        if (ViewCompat.dispatchUnhandledKeyEventBeforeCallback(decor, event)) {
+            return true;
+        }
+        return event.dispatch(dialog, decor != null ? decor.getKeyDispatcherState() : null, dialog);
     }
 }

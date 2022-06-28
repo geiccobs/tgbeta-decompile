@@ -3,15 +3,12 @@ package com.google.android.gms.maps.model;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.RecentlyNonNull;
-import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import com.google.android.gms.dynamic.IObjectWrapper;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class MarkerOptions extends AbstractSafeParcelable {
-    @RecentlyNonNull
     public static final Parcelable.Creator<MarkerOptions> CREATOR = new zzi();
     private LatLng zza;
     private String zzb;
@@ -39,14 +36,22 @@ public final class MarkerOptions extends AbstractSafeParcelable {
         this.zzm = 1.0f;
     }
 
-    @RecentlyNonNull
+    public MarkerOptions alpha(float f) {
+        this.zzm = f;
+        return this;
+    }
+
     public MarkerOptions anchor(float f, float f2) {
         this.zze = f;
         this.zzf = f2;
         return this;
     }
 
-    @RecentlyNonNull
+    public MarkerOptions draggable(boolean z) {
+        this.zzg = z;
+        return this;
+    }
+
     public MarkerOptions flat(boolean z) {
         this.zzi = z;
         return this;
@@ -64,6 +69,10 @@ public final class MarkerOptions extends AbstractSafeParcelable {
         return this.zzf;
     }
 
+    public BitmapDescriptor getIcon() {
+        return this.zzd;
+    }
+
     public float getInfoWindowAnchorU() {
         return this.zzk;
     }
@@ -72,7 +81,6 @@ public final class MarkerOptions extends AbstractSafeParcelable {
         return this.zzl;
     }
 
-    @RecentlyNonNull
     public LatLng getPosition() {
         return this.zza;
     }
@@ -81,12 +89,10 @@ public final class MarkerOptions extends AbstractSafeParcelable {
         return this.zzj;
     }
 
-    @RecentlyNullable
     public String getSnippet() {
         return this.zzc;
     }
 
-    @RecentlyNullable
     public String getTitle() {
         return this.zzb;
     }
@@ -95,9 +101,14 @@ public final class MarkerOptions extends AbstractSafeParcelable {
         return this.zzn;
     }
 
-    @RecentlyNonNull
     public MarkerOptions icon(BitmapDescriptor bitmapDescriptor) {
         this.zzd = bitmapDescriptor;
+        return this;
+    }
+
+    public MarkerOptions infoWindowAnchor(float f, float f2) {
+        this.zzk = f;
+        this.zzl = f2;
         return this;
     }
 
@@ -113,46 +124,58 @@ public final class MarkerOptions extends AbstractSafeParcelable {
         return this.zzh;
     }
 
-    @RecentlyNonNull
-    public MarkerOptions position(@RecentlyNonNull LatLng latLng) {
-        if (latLng != null) {
-            this.zza = latLng;
+    public MarkerOptions position(LatLng latlng) {
+        if (latlng != null) {
+            this.zza = latlng;
             return this;
         }
         throw new IllegalArgumentException("latlng cannot be null - a position is required.");
     }
 
-    @RecentlyNonNull
+    public MarkerOptions rotation(float f) {
+        this.zzj = f;
+        return this;
+    }
+
     public MarkerOptions snippet(String str) {
         this.zzc = str;
         return this;
     }
 
-    @RecentlyNonNull
     public MarkerOptions title(String str) {
         this.zzb = str;
         return this;
     }
 
+    public MarkerOptions visible(boolean z) {
+        this.zzh = z;
+        return this;
+    }
+
     @Override // android.os.Parcelable
-    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
-        int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
-        SafeParcelWriter.writeParcelable(parcel, 2, getPosition(), i, false);
-        SafeParcelWriter.writeString(parcel, 3, getTitle(), false);
-        SafeParcelWriter.writeString(parcel, 4, getSnippet(), false);
+    public void writeToParcel(Parcel out, int flags) {
+        int beginObjectHeader = SafeParcelWriter.beginObjectHeader(out);
+        SafeParcelWriter.writeParcelable(out, 2, getPosition(), flags, false);
+        SafeParcelWriter.writeString(out, 3, getTitle(), false);
+        SafeParcelWriter.writeString(out, 4, getSnippet(), false);
         BitmapDescriptor bitmapDescriptor = this.zzd;
-        SafeParcelWriter.writeIBinder(parcel, 5, bitmapDescriptor == null ? null : bitmapDescriptor.zza().asBinder(), false);
-        SafeParcelWriter.writeFloat(parcel, 6, getAnchorU());
-        SafeParcelWriter.writeFloat(parcel, 7, getAnchorV());
-        SafeParcelWriter.writeBoolean(parcel, 8, isDraggable());
-        SafeParcelWriter.writeBoolean(parcel, 9, isVisible());
-        SafeParcelWriter.writeBoolean(parcel, 10, isFlat());
-        SafeParcelWriter.writeFloat(parcel, 11, getRotation());
-        SafeParcelWriter.writeFloat(parcel, 12, getInfoWindowAnchorU());
-        SafeParcelWriter.writeFloat(parcel, 13, getInfoWindowAnchorV());
-        SafeParcelWriter.writeFloat(parcel, 14, getAlpha());
-        SafeParcelWriter.writeFloat(parcel, 15, getZIndex());
-        SafeParcelWriter.finishObjectHeader(parcel, beginObjectHeader);
+        SafeParcelWriter.writeIBinder(out, 5, bitmapDescriptor == null ? null : bitmapDescriptor.zza().asBinder(), false);
+        SafeParcelWriter.writeFloat(out, 6, getAnchorU());
+        SafeParcelWriter.writeFloat(out, 7, getAnchorV());
+        SafeParcelWriter.writeBoolean(out, 8, isDraggable());
+        SafeParcelWriter.writeBoolean(out, 9, isVisible());
+        SafeParcelWriter.writeBoolean(out, 10, isFlat());
+        SafeParcelWriter.writeFloat(out, 11, getRotation());
+        SafeParcelWriter.writeFloat(out, 12, getInfoWindowAnchorU());
+        SafeParcelWriter.writeFloat(out, 13, getInfoWindowAnchorV());
+        SafeParcelWriter.writeFloat(out, 14, getAlpha());
+        SafeParcelWriter.writeFloat(out, 15, getZIndex());
+        SafeParcelWriter.finishObjectHeader(out, beginObjectHeader);
+    }
+
+    public MarkerOptions zIndex(float f) {
+        this.zzn = f;
+        return this;
     }
 
     public MarkerOptions(LatLng latLng, String str, String str2, IBinder iBinder, float f, float f2, boolean z, boolean z2, boolean z3, float f3, float f4, float f5, float f6, float f7) {

@@ -3,10 +3,19 @@ package com.google.android.exoplayer2.audio;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class SilenceSkippingAudioProcessor extends BaseAudioProcessor {
+    public static final long DEFAULT_MINIMUM_SILENCE_DURATION_US = 150000;
+    public static final long DEFAULT_PADDING_SILENCE_US = 20000;
+    public static final short DEFAULT_SILENCE_THRESHOLD_LEVEL = 1024;
+    private static final int STATE_MAYBE_SILENT = 1;
+    private static final int STATE_NOISY = 0;
+    private static final int STATE_SILENT = 2;
     private int bytesPerFrame;
     private boolean enabled;
     private boolean hasOutputNoise;
@@ -20,22 +29,27 @@ public final class SilenceSkippingAudioProcessor extends BaseAudioProcessor {
     private long skippedFrames;
     private int state;
 
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    private @interface State {
+    }
+
     public SilenceSkippingAudioProcessor() {
-        this(150000L, 20000L, (short) 1024);
+        this(DEFAULT_MINIMUM_SILENCE_DURATION_US, DEFAULT_PADDING_SILENCE_US, DEFAULT_SILENCE_THRESHOLD_LEVEL);
     }
 
-    public SilenceSkippingAudioProcessor(long j, long j2, short s) {
-        Assertions.checkArgument(j2 <= j);
-        this.minimumSilenceDurationUs = j;
-        this.paddingSilenceUs = j2;
-        this.silenceThresholdLevel = s;
-        byte[] bArr = Util.EMPTY_BYTE_ARRAY;
-        this.maybeSilenceBuffer = bArr;
-        this.paddingBuffer = bArr;
+    public SilenceSkippingAudioProcessor(long minimumSilenceDurationUs, long paddingSilenceUs, short silenceThresholdLevel) {
+        Assertions.checkArgument(paddingSilenceUs <= minimumSilenceDurationUs);
+        this.minimumSilenceDurationUs = minimumSilenceDurationUs;
+        this.paddingSilenceUs = paddingSilenceUs;
+        this.silenceThresholdLevel = silenceThresholdLevel;
+        this.maybeSilenceBuffer = Util.EMPTY_BYTE_ARRAY;
+        this.paddingBuffer = Util.EMPTY_BYTE_ARRAY;
     }
 
-    public void setEnabled(boolean z) {
-        this.enabled = z;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public long getSkippedFrames() {
@@ -43,11 +57,11 @@ public final class SilenceSkippingAudioProcessor extends BaseAudioProcessor {
     }
 
     @Override // com.google.android.exoplayer2.audio.BaseAudioProcessor
-    public AudioProcessor.AudioFormat onConfigure(AudioProcessor.AudioFormat audioFormat) throws AudioProcessor.UnhandledAudioFormatException {
-        if (audioFormat.encoding == 2) {
-            return this.enabled ? audioFormat : AudioProcessor.AudioFormat.NOT_SET;
+    public AudioProcessor.AudioFormat onConfigure(AudioProcessor.AudioFormat inputAudioFormat) throws AudioProcessor.UnhandledAudioFormatException {
+        if (inputAudioFormat.encoding == 2) {
+            return this.enabled ? inputAudioFormat : AudioProcessor.AudioFormat.NOT_SET;
         }
-        throw new AudioProcessor.UnhandledAudioFormatException(audioFormat);
+        throw new AudioProcessor.UnhandledAudioFormatException(inputAudioFormat);
     }
 
     @Override // com.google.android.exoplayer2.audio.BaseAudioProcessor, com.google.android.exoplayer2.audio.AudioProcessor
@@ -56,17 +70,20 @@ public final class SilenceSkippingAudioProcessor extends BaseAudioProcessor {
     }
 
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
-    public void queueInput(ByteBuffer byteBuffer) {
-        while (byteBuffer.hasRemaining() && !hasPendingOutput()) {
-            int i = this.state;
-            if (i == 0) {
-                processNoisy(byteBuffer);
-            } else if (i == 1) {
-                processMaybeSilence(byteBuffer);
-            } else if (i == 2) {
-                processSilence(byteBuffer);
-            } else {
-                throw new IllegalStateException();
+    public void queueInput(ByteBuffer inputBuffer) {
+        while (inputBuffer.hasRemaining() && !hasPendingOutput()) {
+            switch (this.state) {
+                case 0:
+                    processNoisy(inputBuffer);
+                    break;
+                case 1:
+                    processMaybeSilence(inputBuffer);
+                    break;
+                case 2:
+                    processSilence(inputBuffer);
+                    break;
+                default:
+                    throw new IllegalStateException();
             }
         }
     }
@@ -86,14 +103,14 @@ public final class SilenceSkippingAudioProcessor extends BaseAudioProcessor {
     protected void onFlush() {
         if (this.enabled) {
             this.bytesPerFrame = this.inputAudioFormat.bytesPerFrame;
-            int durationUsToFrames = durationUsToFrames(this.minimumSilenceDurationUs) * this.bytesPerFrame;
-            if (this.maybeSilenceBuffer.length != durationUsToFrames) {
-                this.maybeSilenceBuffer = new byte[durationUsToFrames];
+            int maybeSilenceBufferSize = durationUsToFrames(this.minimumSilenceDurationUs) * this.bytesPerFrame;
+            if (this.maybeSilenceBuffer.length != maybeSilenceBufferSize) {
+                this.maybeSilenceBuffer = new byte[maybeSilenceBufferSize];
             }
-            int durationUsToFrames2 = durationUsToFrames(this.paddingSilenceUs) * this.bytesPerFrame;
-            this.paddingSize = durationUsToFrames2;
-            if (this.paddingBuffer.length != durationUsToFrames2) {
-                this.paddingBuffer = new byte[durationUsToFrames2];
+            int durationUsToFrames = durationUsToFrames(this.paddingSilenceUs) * this.bytesPerFrame;
+            this.paddingSize = durationUsToFrames;
+            if (this.paddingBuffer.length != durationUsToFrames) {
+                this.paddingBuffer = new byte[durationUsToFrames];
             }
         }
         this.state = 0;
@@ -106,121 +123,122 @@ public final class SilenceSkippingAudioProcessor extends BaseAudioProcessor {
     protected void onReset() {
         this.enabled = false;
         this.paddingSize = 0;
-        byte[] bArr = Util.EMPTY_BYTE_ARRAY;
-        this.maybeSilenceBuffer = bArr;
-        this.paddingBuffer = bArr;
+        this.maybeSilenceBuffer = Util.EMPTY_BYTE_ARRAY;
+        this.paddingBuffer = Util.EMPTY_BYTE_ARRAY;
     }
 
-    private void processNoisy(ByteBuffer byteBuffer) {
-        int limit = byteBuffer.limit();
-        byteBuffer.limit(Math.min(limit, byteBuffer.position() + this.maybeSilenceBuffer.length));
-        int findNoiseLimit = findNoiseLimit(byteBuffer);
-        if (findNoiseLimit == byteBuffer.position()) {
+    private void processNoisy(ByteBuffer inputBuffer) {
+        int limit = inputBuffer.limit();
+        inputBuffer.limit(Math.min(limit, inputBuffer.position() + this.maybeSilenceBuffer.length));
+        int noiseLimit = findNoiseLimit(inputBuffer);
+        if (noiseLimit == inputBuffer.position()) {
             this.state = 1;
         } else {
-            byteBuffer.limit(findNoiseLimit);
-            output(byteBuffer);
+            inputBuffer.limit(noiseLimit);
+            output(inputBuffer);
         }
-        byteBuffer.limit(limit);
+        inputBuffer.limit(limit);
     }
 
-    private void processMaybeSilence(ByteBuffer byteBuffer) {
-        int limit = byteBuffer.limit();
-        int findNoisePosition = findNoisePosition(byteBuffer);
-        int position = findNoisePosition - byteBuffer.position();
+    private void processMaybeSilence(ByteBuffer inputBuffer) {
+        int limit = inputBuffer.limit();
+        int noisePosition = findNoisePosition(inputBuffer);
+        int maybeSilenceInputSize = noisePosition - inputBuffer.position();
         byte[] bArr = this.maybeSilenceBuffer;
         int length = bArr.length;
         int i = this.maybeSilenceBufferSize;
-        int i2 = length - i;
-        if (findNoisePosition < limit && position < i2) {
+        int maybeSilenceBufferRemaining = length - i;
+        if (noisePosition < limit && maybeSilenceInputSize < maybeSilenceBufferRemaining) {
             output(bArr, i);
             this.maybeSilenceBufferSize = 0;
             this.state = 0;
             return;
         }
-        int min = Math.min(position, i2);
-        byteBuffer.limit(byteBuffer.position() + min);
-        byteBuffer.get(this.maybeSilenceBuffer, this.maybeSilenceBufferSize, min);
-        int i3 = this.maybeSilenceBufferSize + min;
-        this.maybeSilenceBufferSize = i3;
+        int bytesToWrite = Math.min(maybeSilenceInputSize, maybeSilenceBufferRemaining);
+        inputBuffer.limit(inputBuffer.position() + bytesToWrite);
+        inputBuffer.get(this.maybeSilenceBuffer, this.maybeSilenceBufferSize, bytesToWrite);
+        int i2 = this.maybeSilenceBufferSize + bytesToWrite;
+        this.maybeSilenceBufferSize = i2;
         byte[] bArr2 = this.maybeSilenceBuffer;
-        if (i3 == bArr2.length) {
+        if (i2 == bArr2.length) {
             if (this.hasOutputNoise) {
                 output(bArr2, this.paddingSize);
                 this.skippedFrames += (this.maybeSilenceBufferSize - (this.paddingSize * 2)) / this.bytesPerFrame;
             } else {
-                this.skippedFrames += (i3 - this.paddingSize) / this.bytesPerFrame;
+                this.skippedFrames += (i2 - this.paddingSize) / this.bytesPerFrame;
             }
-            updatePaddingBuffer(byteBuffer, this.maybeSilenceBuffer, this.maybeSilenceBufferSize);
+            updatePaddingBuffer(inputBuffer, this.maybeSilenceBuffer, this.maybeSilenceBufferSize);
             this.maybeSilenceBufferSize = 0;
             this.state = 2;
         }
-        byteBuffer.limit(limit);
+        inputBuffer.limit(limit);
     }
 
-    private void processSilence(ByteBuffer byteBuffer) {
-        int limit = byteBuffer.limit();
-        int findNoisePosition = findNoisePosition(byteBuffer);
-        byteBuffer.limit(findNoisePosition);
-        this.skippedFrames += byteBuffer.remaining() / this.bytesPerFrame;
-        updatePaddingBuffer(byteBuffer, this.paddingBuffer, this.paddingSize);
-        if (findNoisePosition < limit) {
+    private void processSilence(ByteBuffer inputBuffer) {
+        int limit = inputBuffer.limit();
+        int noisyPosition = findNoisePosition(inputBuffer);
+        inputBuffer.limit(noisyPosition);
+        this.skippedFrames += inputBuffer.remaining() / this.bytesPerFrame;
+        updatePaddingBuffer(inputBuffer, this.paddingBuffer, this.paddingSize);
+        if (noisyPosition < limit) {
             output(this.paddingBuffer, this.paddingSize);
             this.state = 0;
-            byteBuffer.limit(limit);
+            inputBuffer.limit(limit);
         }
     }
 
-    private void output(byte[] bArr, int i) {
-        replaceOutputBuffer(i).put(bArr, 0, i).flip();
-        if (i > 0) {
+    private void output(byte[] data, int length) {
+        replaceOutputBuffer(length).put(data, 0, length).flip();
+        if (length > 0) {
             this.hasOutputNoise = true;
         }
     }
 
-    private void output(ByteBuffer byteBuffer) {
-        int remaining = byteBuffer.remaining();
-        replaceOutputBuffer(remaining).put(byteBuffer).flip();
-        if (remaining > 0) {
+    private void output(ByteBuffer data) {
+        int length = data.remaining();
+        replaceOutputBuffer(length).put(data).flip();
+        if (length > 0) {
             this.hasOutputNoise = true;
         }
     }
 
-    private void updatePaddingBuffer(ByteBuffer byteBuffer, byte[] bArr, int i) {
-        int min = Math.min(byteBuffer.remaining(), this.paddingSize);
-        int i2 = this.paddingSize - min;
-        System.arraycopy(bArr, i - i2, this.paddingBuffer, 0, i2);
-        byteBuffer.position(byteBuffer.limit() - min);
-        byteBuffer.get(this.paddingBuffer, i2, min);
+    private void updatePaddingBuffer(ByteBuffer input, byte[] buffer, int size) {
+        int fromInputSize = Math.min(input.remaining(), this.paddingSize);
+        int fromBufferSize = this.paddingSize - fromInputSize;
+        System.arraycopy(buffer, size - fromBufferSize, this.paddingBuffer, 0, fromBufferSize);
+        input.position(input.limit() - fromInputSize);
+        input.get(this.paddingBuffer, fromBufferSize, fromInputSize);
     }
 
-    private int durationUsToFrames(long j) {
-        return (int) ((j * this.inputAudioFormat.sampleRate) / 1000000);
+    private int durationUsToFrames(long durationUs) {
+        return (int) ((this.inputAudioFormat.sampleRate * durationUs) / 1000000);
     }
 
-    private int findNoisePosition(ByteBuffer byteBuffer) {
-        Assertions.checkArgument(byteBuffer.order() == ByteOrder.LITTLE_ENDIAN);
-        for (int position = byteBuffer.position(); position < byteBuffer.limit(); position += 2) {
-            if (Math.abs((int) byteBuffer.getShort(position)) > this.silenceThresholdLevel) {
-                int i = this.bytesPerFrame;
-                return i * (position / i);
+    private int findNoisePosition(ByteBuffer buffer) {
+        Assertions.checkArgument(buffer.order() == ByteOrder.LITTLE_ENDIAN);
+        for (int i = buffer.position(); i < buffer.limit(); i += 2) {
+            if (Math.abs((int) buffer.getShort(i)) > this.silenceThresholdLevel) {
+                int i2 = this.bytesPerFrame;
+                return i2 * (i / i2);
             }
         }
-        return byteBuffer.limit();
+        int i3 = buffer.limit();
+        return i3;
     }
 
-    private int findNoiseLimit(ByteBuffer byteBuffer) {
-        Assertions.checkArgument(byteBuffer.order() == ByteOrder.LITTLE_ENDIAN);
-        int limit = byteBuffer.limit();
+    private int findNoiseLimit(ByteBuffer buffer) {
+        Assertions.checkArgument(buffer.order() == ByteOrder.LITTLE_ENDIAN);
+        int i = buffer.limit();
         while (true) {
-            limit -= 2;
-            if (limit >= byteBuffer.position()) {
-                if (Math.abs((int) byteBuffer.getShort(limit)) > this.silenceThresholdLevel) {
-                    int i = this.bytesPerFrame;
-                    return ((limit / i) * i) + i;
+            i -= 2;
+            if (i >= buffer.position()) {
+                if (Math.abs((int) buffer.getShort(i)) > this.silenceThresholdLevel) {
+                    int i2 = this.bytesPerFrame;
+                    return ((i / i2) * i2) + i2;
                 }
             } else {
-                return byteBuffer.position();
+                int i3 = buffer.position();
+                return i3;
             }
         }
     }

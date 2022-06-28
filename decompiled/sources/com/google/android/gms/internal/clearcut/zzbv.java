@@ -3,8 +3,7 @@ package com.google.android.gms.internal.clearcut;
 import com.google.android.gms.internal.clearcut.zzcg;
 import java.io.IOException;
 import java.util.Map;
-import org.telegram.messenger.R;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzbv extends zzbu<zzcg.zze> {
     @Override // com.google.android.gms.internal.clearcut.zzbu
     public final int zza(Map.Entry<?, ?> entry) {
@@ -71,7 +70,7 @@ final class zzbv extends zzbu<zzcg.zze> {
             case 17:
                 zzfrVar.zzb(zzeVar.number, entry.getValue(), zzea.zzcm().zze(entry.getValue().getClass()));
                 return;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 zzfrVar.zza(zzeVar.number, entry.getValue(), zzea.zzcm().zze(entry.getValue().getClass()));
                 return;
             default:

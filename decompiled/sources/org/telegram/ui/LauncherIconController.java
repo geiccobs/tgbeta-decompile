@@ -4,39 +4,40 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 /* loaded from: classes.dex */
 public class LauncherIconController {
     public static void tryFixLauncherIconIfNeeded() {
-        for (LauncherIcon launcherIcon : LauncherIcon.values()) {
-            if (isEnabled(launcherIcon)) {
+        LauncherIcon[] values;
+        for (LauncherIcon icon : LauncherIcon.values()) {
+            if (isEnabled(icon)) {
                 return;
             }
         }
         setIcon(LauncherIcon.DEFAULT);
     }
 
-    public static boolean isEnabled(LauncherIcon launcherIcon) {
-        Context context = ApplicationLoader.applicationContext;
-        int componentEnabledSetting = context.getPackageManager().getComponentEnabledSetting(launcherIcon.getComponentName(context));
-        if (componentEnabledSetting != 1) {
-            return componentEnabledSetting == 0 && launcherIcon == LauncherIcon.DEFAULT;
+    public static boolean isEnabled(LauncherIcon icon) {
+        Context ctx = ApplicationLoader.applicationContext;
+        int i = ctx.getPackageManager().getComponentEnabledSetting(icon.getComponentName(ctx));
+        if (i != 1) {
+            return i == 0 && icon == LauncherIcon.DEFAULT;
         }
         return true;
     }
 
-    public static void setIcon(LauncherIcon launcherIcon) {
-        Context context = ApplicationLoader.applicationContext;
-        PackageManager packageManager = context.getPackageManager();
+    public static void setIcon(LauncherIcon icon) {
+        Context ctx = ApplicationLoader.applicationContext;
+        PackageManager pm = ctx.getPackageManager();
         LauncherIcon[] values = LauncherIcon.values();
         int length = values.length;
         for (int i = 0; i < length; i++) {
-            LauncherIcon launcherIcon2 = values[i];
-            packageManager.setComponentEnabledSetting(launcherIcon2.getComponentName(context), launcherIcon2 == launcherIcon ? 1 : 2, 1);
+            LauncherIcon i2 = values[i];
+            pm.setComponentEnabledSetting(i2.getComponentName(ctx), i2 == icon ? 1 : 2, 1);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes4.dex */
     public enum LauncherIcon {
         DEFAULT("DefaultIcon", R.drawable.icon_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconDefault),
         VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.icon_6_foreground_sa, R.string.AppIconVintage),
@@ -52,24 +53,24 @@ public class LauncherIconController {
         public final boolean premium;
         public final int title;
 
-        public ComponentName getComponentName(Context context) {
+        public ComponentName getComponentName(Context ctx) {
             if (this.componentName == null) {
-                String packageName = context.getPackageName();
+                String packageName = ctx.getPackageName();
                 this.componentName = new ComponentName(packageName, "org.telegram.messenger." + this.key);
             }
             return this.componentName;
         }
 
-        LauncherIcon(String str, int i, int i2, int i3) {
-            this(str, i, i2, i3, false);
+        LauncherIcon(String key, int background, int foreground, int title) {
+            this(key, background, foreground, title, false);
         }
 
-        LauncherIcon(String str, int i, int i2, int i3, boolean z) {
-            this.key = str;
-            this.background = i;
-            this.foreground = i2;
-            this.title = i3;
-            this.premium = z;
+        LauncherIcon(String key, int background, int foreground, int title, boolean premium) {
+            this.key = key;
+            this.background = background;
+            this.foreground = foreground;
+            this.title = title;
+            this.premium = premium;
         }
     }
 }

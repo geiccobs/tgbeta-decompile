@@ -1,13 +1,13 @@
 package com.google.firebase.remoteconfig;
 
 import com.google.firebase.FirebaseException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class FirebaseRemoteConfigException extends FirebaseException {
-    public FirebaseRemoteConfigException(String str) {
-        super(str);
+    public FirebaseRemoteConfigException(String detailMessage) {
+        super(detailMessage);
     }
 
-    public FirebaseRemoteConfigException(String str, Throwable th) {
-        super(str, th);
+    public FirebaseRemoteConfigException(String detailMessage, Throwable cause) {
+        super(detailMessage, cause);
     }
 }

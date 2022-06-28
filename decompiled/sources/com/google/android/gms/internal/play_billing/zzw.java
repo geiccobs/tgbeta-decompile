@@ -1,9 +1,8 @@
 package com.google.android.gms.internal.play_billing;
 
 import java.util.Arrays;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzw {
     Object[] zza = new Object[8];
     int zzb = 0;
@@ -21,7 +20,7 @@ public final class zzw {
                 i3 = highestOneBit + highestOneBit;
             }
             if (i3 < 0) {
-                i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+                i3 = Integer.MAX_VALUE;
             }
             this.zza = Arrays.copyOf(objArr, i3);
         }

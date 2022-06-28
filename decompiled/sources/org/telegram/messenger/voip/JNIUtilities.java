@@ -1,6 +1,5 @@
 package org.telegram.messenger.voip;
 
-import android.annotation.TargetApi;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -18,107 +17,105 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
-/* loaded from: classes.dex */
+import org.telegram.ui.GroupCallActivity;
+/* loaded from: classes4.dex */
 public class JNIUtilities {
-    public static int getMaxVideoResolution() {
-        return 320;
-    }
-
-    public static String getSupportedVideoCodecs() {
-        return "";
-    }
-
-    @TargetApi(R.styleable.MapAttrs_zOrderOnTop)
     public static String getCurrentNetworkInterfaceName() {
-        LinkProperties linkProperties;
-        ConnectivityManager connectivityManager = (ConnectivityManager) ApplicationLoader.applicationContext.getSystemService("connectivity");
-        Network activeNetwork = connectivityManager.getActiveNetwork();
-        if (activeNetwork == null || (linkProperties = connectivityManager.getLinkProperties(activeNetwork)) == null) {
+        LinkProperties props;
+        ConnectivityManager cm = (ConnectivityManager) ApplicationLoader.applicationContext.getSystemService("connectivity");
+        Network net = cm.getActiveNetwork();
+        if (net == null || (props = cm.getLinkProperties(net)) == null) {
             return null;
         }
-        return linkProperties.getInterfaceName();
+        return props.getInterfaceName();
     }
 
     public static String[] getLocalNetworkAddressesAndInterfaceName() {
-        LinkProperties linkProperties;
-        ConnectivityManager connectivityManager = (ConnectivityManager) ApplicationLoader.applicationContext.getSystemService("connectivity");
-        String str = null;
+        LinkProperties linkProps;
+        ConnectivityManager cm = (ConnectivityManager) ApplicationLoader.applicationContext.getSystemService("connectivity");
         if (Build.VERSION.SDK_INT >= 23) {
-            Network activeNetwork = connectivityManager.getActiveNetwork();
-            if (activeNetwork == null || (linkProperties = connectivityManager.getLinkProperties(activeNetwork)) == null) {
+            Network net = cm.getActiveNetwork();
+            if (net == null || (linkProps = cm.getLinkProperties(net)) == null) {
                 return null;
             }
-            String str2 = null;
-            for (LinkAddress linkAddress : linkProperties.getLinkAddresses()) {
-                InetAddress address = linkAddress.getAddress();
-                if (address instanceof Inet4Address) {
-                    if (!address.isLinkLocalAddress()) {
-                        str = address.getHostAddress();
+            String ipv4 = null;
+            String ipv6 = null;
+            for (LinkAddress addr : linkProps.getLinkAddresses()) {
+                InetAddress a = addr.getAddress();
+                if (a instanceof Inet4Address) {
+                    if (!a.isLinkLocalAddress()) {
+                        ipv4 = a.getHostAddress();
                     }
-                } else if ((address instanceof Inet6Address) && !address.isLinkLocalAddress() && (address.getAddress()[0] & 240) != 240) {
-                    str2 = address.getHostAddress();
+                } else if ((a instanceof Inet6Address) && !a.isLinkLocalAddress() && (a.getAddress()[0] & 240) != 240) {
+                    ipv6 = a.getHostAddress();
                 }
             }
-            return new String[]{linkProperties.getInterfaceName(), str, str2};
+            return new String[]{linkProps.getInterfaceName(), ipv4, ipv6};
         }
         try {
-            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-            if (networkInterfaces == null) {
+            Enumeration<NetworkInterface> itfs = NetworkInterface.getNetworkInterfaces();
+            if (itfs == null) {
                 return null;
             }
-            while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface nextElement = networkInterfaces.nextElement();
-                if (!nextElement.isLoopback() && nextElement.isUp()) {
-                    Enumeration<InetAddress> inetAddresses = nextElement.getInetAddresses();
-                    String str3 = null;
-                    String str4 = null;
-                    while (inetAddresses.hasMoreElements()) {
-                        InetAddress nextElement2 = inetAddresses.nextElement();
-                        if (nextElement2 instanceof Inet4Address) {
-                            if (!nextElement2.isLinkLocalAddress()) {
-                                str3 = nextElement2.getHostAddress();
+            while (itfs.hasMoreElements()) {
+                NetworkInterface itf = itfs.nextElement();
+                if (!itf.isLoopback() && itf.isUp()) {
+                    Enumeration<InetAddress> addrs = itf.getInetAddresses();
+                    String ipv42 = null;
+                    String ipv62 = null;
+                    while (addrs.hasMoreElements()) {
+                        InetAddress a2 = addrs.nextElement();
+                        if (a2 instanceof Inet4Address) {
+                            if (!a2.isLinkLocalAddress()) {
+                                ipv42 = a2.getHostAddress();
                             }
-                        } else if ((nextElement2 instanceof Inet6Address) && !nextElement2.isLinkLocalAddress() && (nextElement2.getAddress()[0] & 240) != 240) {
-                            str4 = nextElement2.getHostAddress();
+                        } else if ((a2 instanceof Inet6Address) && !a2.isLinkLocalAddress() && (a2.getAddress()[0] & 240) != 240) {
+                            ipv62 = a2.getHostAddress();
                         }
                     }
-                    return new String[]{nextElement.getName(), str3, str4};
+                    return new String[]{itf.getName(), ipv42, ipv62};
                 }
             }
             return null;
-        } catch (Exception e) {
-            FileLog.e(e);
+        } catch (Exception x) {
+            FileLog.e(x);
             return null;
         }
     }
 
     public static String[] getCarrierInfo() {
-        String str;
-        TelephonyManager telephonyManager = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService("phone");
+        TelephonyManager tm = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService("phone");
         if (Build.VERSION.SDK_INT >= 24) {
-            telephonyManager = telephonyManager.createForSubscriptionId(SubscriptionManager.getDefaultDataSubscriptionId());
+            tm = tm.createForSubscriptionId(SubscriptionManager.getDefaultDataSubscriptionId());
         }
-        if (!TextUtils.isEmpty(telephonyManager.getNetworkOperatorName())) {
-            String networkOperator = telephonyManager.getNetworkOperator();
-            String str2 = "";
-            if (networkOperator == null || networkOperator.length() <= 3) {
-                str = str2;
-            } else {
-                str2 = networkOperator.substring(0, 3);
-                str = networkOperator.substring(3);
+        if (!TextUtils.isEmpty(tm.getNetworkOperatorName())) {
+            String mnc = "";
+            String mcc = "";
+            String carrierID = tm.getNetworkOperator();
+            if (carrierID != null && carrierID.length() > 3) {
+                mcc = carrierID.substring(0, 3);
+                mnc = carrierID.substring(3);
             }
-            return new String[]{telephonyManager.getNetworkOperatorName(), telephonyManager.getNetworkCountryIso().toUpperCase(), str2, str};
+            return new String[]{tm.getNetworkOperatorName(), tm.getNetworkCountryIso().toUpperCase(), mcc, mnc};
         }
         return null;
     }
 
     public static int[] getWifiInfo() {
         try {
-            WifiInfo connectionInfo = ((WifiManager) ApplicationLoader.applicationContext.getSystemService("wifi")).getConnectionInfo();
-            return new int[]{connectionInfo.getRssi(), connectionInfo.getLinkSpeed()};
-        } catch (Exception unused) {
+            WifiManager wmgr = (WifiManager) ApplicationLoader.applicationContext.getSystemService("wifi");
+            WifiInfo info = wmgr.getConnectionInfo();
+            return new int[]{info.getRssi(), info.getLinkSpeed()};
+        } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String getSupportedVideoCodecs() {
+        return "";
+    }
+
+    public static int getMaxVideoResolution() {
+        return GroupCallActivity.TABLET_LIST_SIZE;
     }
 }

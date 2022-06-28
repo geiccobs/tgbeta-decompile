@@ -9,67 +9,73 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzal extends zzz implements ExecutorService {
-    public abstract ExecutorService zzb();
+    /* renamed from: zzb */
+    public abstract ExecutorService zza();
 
     @Override // java.util.concurrent.ExecutorService
     public boolean awaitTermination(long j, TimeUnit timeUnit) throws InterruptedException {
-        return zzb().awaitTermination(j, timeUnit);
+        return zza().awaitTermination(j, timeUnit);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> collection) throws InterruptedException {
-        return zzb().invokeAll(collection);
+        return zza().invokeAll(collection);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> collection, long j, TimeUnit timeUnit) throws InterruptedException {
-        return zzb().invokeAll(collection, j, timeUnit);
+        return zza().invokeAll(collection, j, timeUnit);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public <T> T invokeAny(Collection<? extends Callable<T>> collection) throws InterruptedException, ExecutionException {
-        return (T) zzb().invokeAny(collection);
+        return (T) zza().invokeAny(collection);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public <T> T invokeAny(Collection<? extends Callable<T>> collection, long j, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
-        return (T) zzb().invokeAny(collection, j, timeUnit);
+        return (T) zza().invokeAny(collection, j, timeUnit);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public boolean isShutdown() {
-        return zzb().isShutdown();
+        return zza().isShutdown();
     }
 
     @Override // java.util.concurrent.ExecutorService
     public boolean isTerminated() {
-        return zzb().isTerminated();
+        return zza().isTerminated();
     }
 
     @Override // java.util.concurrent.ExecutorService
     public void shutdown() {
-        zzb().shutdown();
+        zza().shutdown();
     }
 
     @Override // java.util.concurrent.ExecutorService
     public List<Runnable> shutdownNow() {
-        return zzb().shutdownNow();
+        return zza().shutdownNow();
+    }
+
+    @Override // java.util.concurrent.Executor
+    public void execute(Runnable runnable) {
+        zza().execute(runnable);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public <T> Future<T> submit(Callable<T> callable) {
-        return zzb().submit(callable);
+        return zza().submit(callable);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public Future<?> submit(Runnable runnable) {
-        return zzb().submit(runnable);
+        return zza().submit(runnable);
     }
 
     @Override // java.util.concurrent.ExecutorService
     public <T> Future<T> submit(Runnable runnable, T t) {
-        return zzb().submit(runnable, t);
+        return zza().submit(runnable, t);
     }
 }

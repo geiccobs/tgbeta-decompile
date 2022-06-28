@@ -8,7 +8,7 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import java.util.ArrayList;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zad implements Parcelable.Creator<GoogleSignInOptions> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ GoogleSignInOptions[] newArray(int i) {

@@ -2,10 +2,9 @@ package com.google.android.gms.maps;
 
 import android.os.RemoteException;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.internal.zzam;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes.dex */
-public final class zzj extends zzam {
+/* loaded from: classes3.dex */
+public final class zzj extends com.google.android.gms.maps.internal.zzam {
     final /* synthetic */ GoogleMap.OnMapLoadedCallback zza;
 
     public zzj(GoogleMap googleMap, GoogleMap.OnMapLoadedCallback onMapLoadedCallback) {

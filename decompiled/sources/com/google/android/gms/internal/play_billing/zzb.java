@@ -4,17 +4,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.InAppMessageResult;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.zzbv;
+import com.google.android.gms.wearable.WearableStatusCodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import org.telegram.messenger.OneUIUtilities;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzb {
     public static final int zza = Runtime.getRuntime().availableProcessors();
 
@@ -38,9 +43,56 @@ public final class zzb {
         } else if (obj instanceof Integer) {
             return ((Integer) obj).intValue();
         } else {
-            zzo(str, "Unexpected type for bundle response code: ".concat(obj.getClass().getName()));
+            zzo(str, "Unexpected type for bundle response code: ".concat(String.valueOf(obj.getClass().getName())));
             return 6;
         }
+    }
+
+    public static Bundle zzc(AcknowledgePurchaseParams acknowledgePurchaseParams, String str) {
+        Bundle bundle = new Bundle();
+        bundle.putString("playBillingLibraryVersion", str);
+        return bundle;
+    }
+
+    public static Bundle zzd(ConsumeParams consumeParams, boolean z, String str) {
+        Bundle bundle = new Bundle();
+        if (z) {
+            bundle.putString("playBillingLibraryVersion", str);
+        }
+        return bundle;
+    }
+
+    public static Bundle zze(int i, boolean z, String str, String str2, ArrayList arrayList) {
+        Bundle bundle = new Bundle();
+        if (i >= 9) {
+            bundle.putString("playBillingLibraryVersion", str);
+        }
+        if (i >= 9 && z) {
+            bundle.putBoolean("enablePendingPurchases", true);
+        }
+        if (i >= 14) {
+            ArrayList<String> arrayList2 = new ArrayList<>();
+            ArrayList<String> arrayList3 = new ArrayList<>();
+            ArrayList arrayList4 = new ArrayList();
+            int size = arrayList.size();
+            boolean z2 = false;
+            boolean z3 = false;
+            for (int i2 = 0; i2 < size; i2++) {
+                zzbv zzbvVar = (zzbv) arrayList.get(i2);
+                arrayList2.add(null);
+                z2 |= !TextUtils.isEmpty(null);
+                arrayList3.add(null);
+                z3 |= !TextUtils.isEmpty(null);
+                arrayList4.add(0);
+            }
+            if (z2) {
+                bundle.putStringArrayList("SKU_OFFER_ID_TOKEN_LIST", arrayList2);
+            }
+            if (z3) {
+                bundle.putStringArrayList("SKU_OFFER_ID_LIST", arrayList3);
+            }
+        }
+        return bundle;
     }
 
     public static Bundle zzf(BillingFlowParams billingFlowParams, boolean z, boolean z2, boolean z3, String str) {
@@ -50,7 +102,7 @@ public final class zzb {
             bundle.putInt("prorationMode", billingFlowParams.zza());
         }
         if (!TextUtils.isEmpty(billingFlowParams.zzb())) {
-            bundle.putString("accountId", billingFlowParams.zzb());
+            bundle.putString(BillingFlowParams.EXTRA_PARAM_KEY_ACCOUNT_ID, billingFlowParams.zzb());
         }
         if (!TextUtils.isEmpty(billingFlowParams.zzc())) {
             bundle.putString("obfuscatedProfileId", billingFlowParams.zzc());
@@ -124,6 +176,10 @@ public final class zzb {
         return newBuilder2.build();
     }
 
+    public static InAppMessageResult zzj(Bundle bundle, String str) {
+        return bundle == null ? new InAppMessageResult(0, null) : new InAppMessageResult(zzq(bundle, "BillingClient"), bundle.getString("IN_APP_MESSAGE_PURCHASE_TOKEN"));
+    }
+
     public static String zzk(Bundle bundle, String str) {
         if (bundle == null) {
             zzo(str, "Unexpected null bundle received!");
@@ -136,7 +192,7 @@ public final class zzb {
         } else if (obj instanceof String) {
             return (String) obj;
         } else {
-            zzo(str, "Unexpected type for debug message: ".concat(obj.getClass().getName()));
+            zzo(str, "Unexpected type for debug message: ".concat(String.valueOf(obj.getClass().getName())));
             return "";
         }
     }
@@ -177,7 +233,7 @@ public final class zzb {
             if (!str2.isEmpty()) {
                 int i = OneUIUtilities.ONE_UI_4_0;
                 while (!str2.isEmpty() && i > 0) {
-                    int min = Math.min(str2.length(), Math.min(4000, i));
+                    int min = Math.min(str2.length(), Math.min((int) WearableStatusCodes.TARGET_NODE_NOT_CONNECTED, i));
                     Log.v(str, str2.substring(0, min));
                     str2 = str2.substring(min);
                     i -= min;

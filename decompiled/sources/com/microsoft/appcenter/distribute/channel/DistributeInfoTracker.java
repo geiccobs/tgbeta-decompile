@@ -2,25 +2,25 @@ package com.microsoft.appcenter.distribute.channel;
 
 import com.microsoft.appcenter.channel.AbstractChannelListener;
 import com.microsoft.appcenter.ingestion.models.Log;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DistributeInfoTracker extends AbstractChannelListener {
     private String mDistributionGroupId;
 
-    public DistributeInfoTracker(String str) {
-        this.mDistributionGroupId = str;
+    public DistributeInfoTracker(String distributionGroupId) {
+        this.mDistributionGroupId = distributionGroupId;
     }
 
     @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public synchronized void onPreparingLog(Log log, String str) {
-        String str2 = this.mDistributionGroupId;
-        if (str2 == null) {
+    public synchronized void onPreparingLog(Log log, String groupName) {
+        String str = this.mDistributionGroupId;
+        if (str == null) {
             return;
         }
-        log.setDistributionGroupId(str2);
+        log.setDistributionGroupId(str);
     }
 
-    public synchronized void updateDistributionGroupId(String str) {
-        this.mDistributionGroupId = str;
+    public synchronized void updateDistributionGroupId(String distributionGroupId) {
+        this.mDistributionGroupId = distributionGroupId;
     }
 
     public synchronized void removeDistributionGroupId() {

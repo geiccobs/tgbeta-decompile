@@ -1,18 +1,18 @@
 package org.telegram.messenger.audioinfo.mp3;
 
+import com.google.android.exoplayer2.C;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import org.telegram.messenger.audioinfo.AudioInfo;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class ID3v1Info extends AudioInfo {
-    public static boolean isID3v1StartPosition(InputStream inputStream) throws IOException {
+    public static boolean isID3v1StartPosition(InputStream input) throws IOException {
         boolean z;
-        inputStream.mark(3);
+        input.mark(3);
         try {
-            if (inputStream.read() == 84 && inputStream.read() == 65) {
-                if (inputStream.read() == 71) {
+            if (input.read() == 84 && input.read() == 65) {
+                if (input.read() == 71) {
                     z = true;
                     return z;
                 }
@@ -20,53 +20,55 @@ public class ID3v1Info extends AudioInfo {
             z = false;
             return z;
         } finally {
-            inputStream.reset();
+            input.reset();
         }
     }
 
-    public ID3v1Info(InputStream inputStream) throws IOException {
-        if (isID3v1StartPosition(inputStream)) {
+    public ID3v1Info(InputStream input) throws IOException {
+        if (isID3v1StartPosition(input)) {
             this.brand = "ID3";
-            byte[] readBytes = readBytes(inputStream, ConnectionsManager.RequestFlagNeedQuickAck);
-            this.title = extractString(readBytes, 3, 30);
-            this.artist = extractString(readBytes, 33, 30);
-            this.album = extractString(readBytes, 63, 30);
+            this.version = "1.0";
+            byte[] bytes = readBytes(input, 128);
+            this.title = extractString(bytes, 3, 30);
+            this.artist = extractString(bytes, 33, 30);
+            this.album = extractString(bytes, 63, 30);
             try {
-                this.year = Short.parseShort(extractString(readBytes, 93, 4));
-            } catch (NumberFormatException unused) {
+                this.year = Short.parseShort(extractString(bytes, 93, 4));
+            } catch (NumberFormatException e) {
                 this.year = (short) 0;
             }
-            this.comment = extractString(readBytes, 97, 30);
-            ID3v1Genre genre = ID3v1Genre.getGenre(readBytes[127]);
-            if (genre != null) {
-                this.genre = genre.getDescription();
+            this.comment = extractString(bytes, 97, 30);
+            ID3v1Genre id3v1Genre = ID3v1Genre.getGenre(bytes[127]);
+            if (id3v1Genre != null) {
+                this.genre = id3v1Genre.getDescription();
             }
-            if (readBytes[125] != 0 || readBytes[126] == 0) {
-                return;
+            if (bytes[125] == 0 && bytes[126] != 0) {
+                this.version = "1.1";
+                this.track = (short) (bytes[126] & 255);
             }
-            this.track = (short) (readBytes[126] & 255);
         }
     }
 
-    byte[] readBytes(InputStream inputStream, int i) throws IOException {
-        byte[] bArr = new byte[i];
-        int i2 = 0;
-        while (i2 < i) {
-            int read = inputStream.read(bArr, i2, i - i2);
-            if (read <= 0) {
+    byte[] readBytes(InputStream input, int len) throws IOException {
+        int total = 0;
+        byte[] bytes = new byte[len];
+        while (total < len) {
+            int current = input.read(bytes, total, len - total);
+            if (current > 0) {
+                total += current;
+            } else {
                 throw new EOFException();
             }
-            i2 += read;
         }
-        return bArr;
+        return bytes;
     }
 
-    String extractString(byte[] bArr, int i, int i2) {
+    String extractString(byte[] bytes, int offset, int length) {
         try {
-            String str = new String(bArr, i, i2, "ISO-8859-1");
-            int indexOf = str.indexOf(0);
-            return indexOf < 0 ? str : str.substring(0, indexOf);
-        } catch (Exception unused) {
+            String text = new String(bytes, offset, length, C.ISO88591_NAME);
+            int zeroIndex = text.indexOf(0);
+            return zeroIndex < 0 ? text : text.substring(0, zeroIndex);
+        } catch (Exception e) {
             return "";
         }
     }

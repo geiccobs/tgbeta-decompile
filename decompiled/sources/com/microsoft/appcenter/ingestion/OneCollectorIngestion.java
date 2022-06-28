@@ -1,6 +1,7 @@
 package com.microsoft.appcenter.ingestion;
 
 import com.microsoft.appcenter.Constants;
+import com.microsoft.appcenter.http.DefaultHttpClient;
 import com.microsoft.appcenter.http.HttpClient;
 import com.microsoft.appcenter.http.HttpUtils;
 import com.microsoft.appcenter.http.ServiceCall;
@@ -14,18 +15,26 @@ import com.microsoft.appcenter.utils.TicketCache;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class OneCollectorIngestion implements Ingestion {
+    static final String API_KEY = "apikey";
+    private static final String CLIENT_VERSION_FORMAT = "ACS-Android-Java-no-%s-no";
+    static final String CLIENT_VERSION_KEY = "Client-Version";
+    private static final String CONTENT_TYPE_VALUE = "application/x-json-stream; charset=utf-8";
+    private static final String DEFAULT_LOG_URL = "https://mobile.events.data.microsoft.com/OneCollector/1.0";
+    static final String STRICT = "Strict";
+    static final String TICKETS = "Tickets";
+    static final String UPLOAD_TIME_KEY = "Upload-Time";
     private final HttpClient mHttpClient;
     private final LogSerializer mLogSerializer;
-    private String mLogUrl = "https://mobile.events.data.microsoft.com/OneCollector/1.0";
+    private String mLogUrl = DEFAULT_LOG_URL;
 
     public OneCollectorIngestion(HttpClient httpClient, LogSerializer logSerializer) {
         this.mLogSerializer = logSerializer;
@@ -33,31 +42,30 @@ public class OneCollectorIngestion implements Ingestion {
     }
 
     @Override // com.microsoft.appcenter.ingestion.Ingestion
-    public ServiceCall sendAsync(String str, UUID uuid, LogContainer logContainer, ServiceCallback serviceCallback) throws IllegalArgumentException {
-        HashMap hashMap = new HashMap();
-        LinkedHashSet<String> linkedHashSet = new LinkedHashSet();
+    public ServiceCall sendAsync(String appSecret, UUID installId, LogContainer logContainer, ServiceCallback serviceCallback) throws IllegalArgumentException {
+        Map<String, String> headers = new HashMap<>();
+        Set<String> apiKeys = new LinkedHashSet<>();
         for (Log log : logContainer.getLogs()) {
-            linkedHashSet.addAll(log.getTransmissionTargetTokens());
+            apiKeys.addAll(log.getTransmissionTargetTokens());
         }
-        StringBuilder sb = new StringBuilder();
-        for (String str2 : linkedHashSet) {
-            sb.append(str2);
-            sb.append(",");
+        StringBuilder apiKey = new StringBuilder();
+        for (String targetToken : apiKeys) {
+            apiKey.append(targetToken);
+            apiKey.append(",");
         }
-        if (!linkedHashSet.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1);
+        if (!apiKeys.isEmpty()) {
+            apiKey.deleteCharAt(apiKey.length() - 1);
         }
-        hashMap.put("apikey", sb.toString());
-        JSONObject jSONObject = new JSONObject();
-        Iterator<Log> it = logContainer.getLogs().iterator();
-        while (it.hasNext()) {
-            List<String> ticketKeys = ((CommonSchemaLog) it.next()).getExt().getProtocol().getTicketKeys();
+        headers.put(API_KEY, apiKey.toString());
+        JSONObject tickets = new JSONObject();
+        for (Log log2 : logContainer.getLogs()) {
+            List<String> ticketKeys = ((CommonSchemaLog) log2).getExt().getProtocol().getTicketKeys();
             if (ticketKeys != null) {
-                for (String str3 : ticketKeys) {
-                    String ticket = TicketCache.getTicket(str3);
-                    if (ticket != null) {
+                for (String ticketKey : ticketKeys) {
+                    String token = TicketCache.getTicket(ticketKey);
+                    if (token != null) {
                         try {
-                            jSONObject.put(str3, ticket);
+                            tickets.put(ticketKey, token);
                         } catch (JSONException e) {
                             AppCenterLog.error("AppCenter", "Cannot serialize tickets, sending log anonymously", e);
                         }
@@ -65,21 +73,22 @@ public class OneCollectorIngestion implements Ingestion {
                 }
             }
         }
-        if (jSONObject.length() > 0) {
-            hashMap.put("Tickets", jSONObject.toString());
+        if (tickets.length() > 0) {
+            headers.put(TICKETS, tickets.toString());
             if (Constants.APPLICATION_DEBUGGABLE) {
-                hashMap.put("Strict", Boolean.TRUE.toString());
+                headers.put(STRICT, Boolean.TRUE.toString());
             }
         }
-        hashMap.put("Content-Type", "application/x-json-stream; charset=utf-8");
-        hashMap.put("Client-Version", String.format("ACS-Android-Java-no-%s-no", "3.3.1"));
-        hashMap.put("Upload-Time", String.valueOf(System.currentTimeMillis()));
-        return this.mHttpClient.callAsync(this.mLogUrl, "POST", hashMap, new IngestionCallTemplate(this.mLogSerializer, logContainer), serviceCallback);
+        headers.put(DefaultHttpClient.CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE);
+        headers.put(CLIENT_VERSION_KEY, String.format(CLIENT_VERSION_FORMAT, "3.3.1"));
+        headers.put(UPLOAD_TIME_KEY, String.valueOf(System.currentTimeMillis()));
+        HttpClient.CallTemplate callTemplate = new IngestionCallTemplate(this.mLogSerializer, logContainer);
+        return this.mHttpClient.callAsync(this.mLogUrl, DefaultHttpClient.METHOD_POST, headers, callTemplate, serviceCallback);
     }
 
     @Override // com.microsoft.appcenter.ingestion.Ingestion
-    public void setLogUrl(String str) {
-        this.mLogUrl = str;
+    public void setLogUrl(String logUrl) {
+        this.mLogUrl = logUrl;
     }
 
     @Override // com.microsoft.appcenter.ingestion.Ingestion
@@ -92,7 +101,7 @@ public class OneCollectorIngestion implements Ingestion {
         this.mHttpClient.close();
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static class IngestionCallTemplate implements HttpClient.CallTemplate {
         private final LogContainer mLogContainer;
         private final LogSerializer mLogSerializer;
@@ -104,28 +113,28 @@ public class OneCollectorIngestion implements Ingestion {
 
         @Override // com.microsoft.appcenter.http.HttpClient.CallTemplate
         public String buildRequestBody() throws JSONException {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder jsonStream = new StringBuilder();
             for (Log log : this.mLogContainer.getLogs()) {
-                sb.append(this.mLogSerializer.serializeLog(log));
-                sb.append('\n');
+                jsonStream.append(this.mLogSerializer.serializeLog(log));
+                jsonStream.append('\n');
             }
-            return sb.toString();
+            return jsonStream.toString();
         }
 
         @Override // com.microsoft.appcenter.http.HttpClient.CallTemplate
-        public void onBeforeCalling(URL url, Map<String, String> map) {
+        public void onBeforeCalling(URL url, Map<String, String> headers) {
             if (AppCenterLog.getLogLevel() <= 2) {
                 AppCenterLog.verbose("AppCenter", "Calling " + url + "...");
-                HashMap hashMap = new HashMap(map);
-                String str = (String) hashMap.get("apikey");
-                if (str != null) {
-                    hashMap.put("apikey", HttpUtils.hideApiKeys(str));
+                Map<String, String> logHeaders = new HashMap<>(headers);
+                String apiKeys = logHeaders.get(OneCollectorIngestion.API_KEY);
+                if (apiKeys != null) {
+                    logHeaders.put(OneCollectorIngestion.API_KEY, HttpUtils.hideApiKeys(apiKeys));
                 }
-                String str2 = (String) hashMap.get("Tickets");
-                if (str2 != null) {
-                    hashMap.put("Tickets", HttpUtils.hideTickets(str2));
+                String tickets = logHeaders.get(OneCollectorIngestion.TICKETS);
+                if (tickets != null) {
+                    logHeaders.put(OneCollectorIngestion.TICKETS, HttpUtils.hideTickets(tickets));
                 }
-                AppCenterLog.verbose("AppCenter", "Headers: " + hashMap);
+                AppCenterLog.verbose("AppCenter", "Headers: " + logHeaders);
             }
         }
     }

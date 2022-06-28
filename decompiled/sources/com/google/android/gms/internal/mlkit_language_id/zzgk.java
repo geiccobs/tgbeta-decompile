@@ -3,7 +3,7 @@ package com.google.android.gms.internal.mlkit_language_id;
 import j$.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzgk {
     private static final zzgk zza = new zzgk();
     private final ConcurrentMap<Class<?>, zzgp<?>> zzc = new ConcurrentHashMap();
@@ -21,7 +21,10 @@ public final class zzgk {
             zzeq.zza(cls, "messageType");
             zzeq.zza(zza2, "schema");
             zzgp<T> zzgpVar2 = (zzgp<T>) this.zzc.putIfAbsent(cls, zza2);
-            return zzgpVar2 != null ? zzgpVar2 : zza2;
+            if (zzgpVar2 != null) {
+                return zzgpVar2;
+            }
+            return zza2;
         }
         return zzgpVar;
     }

@@ -8,27 +8,29 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC$Chat;
-import org.telegram.tgnet.TLRPC$User;
-import org.telegram.tgnet.TLRPC$UserStatus;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CheckBoxBase;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class ShareDialogCell extends FrameLayout {
+    public static final int TYPE_CALL = 1;
+    public static final int TYPE_CREATE = 2;
+    public static final int TYPE_SHARE = 0;
     private CheckBox2 checkBox;
     private long currentDialog;
     private int currentType;
@@ -37,26 +39,26 @@ public class ShareDialogCell extends FrameLayout {
     private TextView nameTextView;
     private float onlineProgress;
     private final Theme.ResourcesProvider resourcesProvider;
-    private TLRPC$User user;
+    private TLRPC.User user;
     private AvatarDrawable avatarDrawable = new AvatarDrawable();
     private int currentAccount = UserConfig.selectedAccount;
 
-    public ShareDialogCell(Context context, int i, Theme.ResourcesProvider resourcesProvider) {
+    public ShareDialogCell(Context context, int type, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
         setWillNotDraw(false);
-        this.currentType = i;
+        this.currentType = type;
         BackupImageView backupImageView = new BackupImageView(context);
         this.imageView = backupImageView;
         backupImageView.setRoundRadius(AndroidUtilities.dp(28.0f));
-        if (i == 2) {
+        if (type == 2) {
             addView(this.imageView, LayoutHelper.createFrame(48, 48.0f, 49, 0.0f, 7.0f, 0.0f, 0.0f));
         } else {
             addView(this.imageView, LayoutHelper.createFrame(56, 56.0f, 49, 0.0f, 7.0f, 0.0f, 0.0f));
         }
         TextView textView = new TextView(context);
         this.nameTextView = textView;
-        textView.setTextColor(getThemedColor(i == 1 ? "voipgroup_nameText" : "dialogTextBlack"));
+        textView.setTextColor(getThemedColor(type == 1 ? Theme.key_voipgroup_nameText : Theme.key_dialogTextBlack));
         this.nameTextView.setTextSize(1, 12.0f);
         this.nameTextView.setMaxLines(2);
         this.nameTextView.setGravity(49);
@@ -65,34 +67,35 @@ public class ShareDialogCell extends FrameLayout {
         addView(this.nameTextView, LayoutHelper.createFrame(-1, -2.0f, 51, 6.0f, this.currentType == 2 ? 58.0f : 66.0f, 6.0f, 0.0f));
         CheckBox2 checkBox2 = new CheckBox2(context, 21, resourcesProvider);
         this.checkBox = checkBox2;
-        checkBox2.setColor("dialogRoundCheckBox", i == 1 ? "voipgroup_inviteMembersBackground" : "dialogBackground", "dialogRoundCheckBoxCheck");
+        checkBox2.setColor(Theme.key_dialogRoundCheckBox, type == 1 ? Theme.key_voipgroup_inviteMembersBackground : Theme.key_dialogBackground, Theme.key_dialogRoundCheckBoxCheck);
         this.checkBox.setDrawUnchecked(false);
         this.checkBox.setDrawBackgroundAsArc(4);
         this.checkBox.setProgressDelegate(new CheckBoxBase.ProgressDelegate() { // from class: org.telegram.ui.Cells.ShareDialogCell$$ExternalSyntheticLambda0
             @Override // org.telegram.ui.Components.CheckBoxBase.ProgressDelegate
             public final void setProgress(float f) {
-                ShareDialogCell.this.lambda$new$0(f);
+                ShareDialogCell.this.m1667lambda$new$0$orgtelegramuiCellsShareDialogCell(f);
             }
         });
         addView(this.checkBox, LayoutHelper.createFrame(24, 24.0f, 49, 19.0f, this.currentType == 2 ? -40.0f : 42.0f, 0.0f, 0.0f));
-        setBackground(Theme.createRadSelectorDrawable(Theme.getColor("listSelectorSDK21"), AndroidUtilities.dp(2.0f), AndroidUtilities.dp(2.0f)));
+        setBackground(Theme.createRadSelectorDrawable(Theme.getColor(Theme.key_listSelector), AndroidUtilities.dp(2.0f), AndroidUtilities.dp(2.0f)));
     }
 
-    public /* synthetic */ void lambda$new$0(float f) {
-        float progress = 1.0f - (this.checkBox.getProgress() * 0.143f);
-        this.imageView.setScaleX(progress);
-        this.imageView.setScaleY(progress);
+    /* renamed from: lambda$new$0$org-telegram-ui-Cells-ShareDialogCell */
+    public /* synthetic */ void m1667lambda$new$0$orgtelegramuiCellsShareDialogCell(float progress) {
+        float scale = 1.0f - (this.checkBox.getProgress() * 0.143f);
+        this.imageView.setScaleX(scale);
+        this.imageView.setScaleY(scale);
         invalidate();
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.currentType == 2 ? 95.0f : 103.0f), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.currentType == 2 ? 95.0f : 103.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
-    public void setDialog(long j, boolean z, CharSequence charSequence) {
-        if (DialogObject.isUserDialog(j)) {
-            TLRPC$User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(j));
+    public void setDialog(long uid, boolean checked, CharSequence name) {
+        if (DialogObject.isUserDialog(uid)) {
+            TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(uid));
             this.user = user;
             this.avatarDrawable.setInfo(user);
             if (this.currentType != 2 && UserObject.isReplyUser(this.user)) {
@@ -104,12 +107,12 @@ public class ShareDialogCell extends FrameLayout {
                 this.avatarDrawable.setAvatarType(1);
                 this.imageView.setImage((ImageLocation) null, (String) null, this.avatarDrawable, this.user);
             } else {
-                if (charSequence != null) {
-                    this.nameTextView.setText(charSequence);
+                if (name != null) {
+                    this.nameTextView.setText(name);
                 } else {
-                    TLRPC$User tLRPC$User = this.user;
-                    if (tLRPC$User != null) {
-                        this.nameTextView.setText(ContactsController.formatName(tLRPC$User.first_name, tLRPC$User.last_name));
+                    TLRPC.User user2 = this.user;
+                    if (user2 != null) {
+                        this.nameTextView.setText(ContactsController.formatName(user2.first_name, this.user.last_name));
                     } else {
                         this.nameTextView.setText("");
                     }
@@ -118,9 +121,9 @@ public class ShareDialogCell extends FrameLayout {
             }
         } else {
             this.user = null;
-            TLRPC$Chat chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(-j));
-            if (charSequence != null) {
-                this.nameTextView.setText(charSequence);
+            TLRPC.Chat chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(-uid));
+            if (name != null) {
+                this.nameTextView.setText(name);
             } else if (chat != null) {
                 this.nameTextView.setText(chat.title);
             } else {
@@ -129,58 +132,54 @@ public class ShareDialogCell extends FrameLayout {
             this.avatarDrawable.setInfo(chat);
             this.imageView.setForUserOrChat(chat, this.avatarDrawable);
         }
-        this.currentDialog = j;
-        this.checkBox.setChecked(z, false);
+        this.currentDialog = uid;
+        this.checkBox.setChecked(checked, false);
     }
 
     public long getCurrentDialog() {
         return this.currentDialog;
     }
 
-    public void setChecked(boolean z, boolean z2) {
-        this.checkBox.setChecked(z, z2);
+    public void setChecked(boolean checked, boolean animated) {
+        this.checkBox.setChecked(checked, animated);
     }
 
     @Override // android.view.ViewGroup
-    protected boolean drawChild(Canvas canvas, View view, long j) {
-        TLRPC$User tLRPC$User;
-        TLRPC$UserStatus tLRPC$UserStatus;
-        boolean drawChild = super.drawChild(canvas, view, j);
-        if (view == this.imageView && this.currentType != 2 && (tLRPC$User = this.user) != null && !MessagesController.isSupportUser(tLRPC$User)) {
-            long elapsedRealtime = SystemClock.elapsedRealtime();
-            long j2 = elapsedRealtime - this.lastUpdateTime;
-            if (j2 > 17) {
-                j2 = 17;
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        TLRPC.User user;
+        boolean result = super.drawChild(canvas, child, drawingTime);
+        if (child == this.imageView && this.currentType != 2 && (user = this.user) != null && !MessagesController.isSupportUser(user)) {
+            long newTime = SystemClock.elapsedRealtime();
+            long dt = newTime - this.lastUpdateTime;
+            if (dt > 17) {
+                dt = 17;
             }
-            this.lastUpdateTime = elapsedRealtime;
-            TLRPC$User tLRPC$User2 = this.user;
-            boolean z = !tLRPC$User2.self && !tLRPC$User2.bot && (((tLRPC$UserStatus = tLRPC$User2.status) != null && tLRPC$UserStatus.expires > ConnectionsManager.getInstance(this.currentAccount).getCurrentTime()) || MessagesController.getInstance(this.currentAccount).onlinePrivacy.containsKey(Long.valueOf(this.user.id)));
-            if (z || this.onlineProgress != 0.0f) {
-                int bottom = this.imageView.getBottom() - AndroidUtilities.dp(6.0f);
-                int right = this.imageView.getRight() - AndroidUtilities.dp(10.0f);
-                Theme.dialogs_onlineCirclePaint.setColor(getThemedColor(this.currentType == 1 ? "voipgroup_inviteMembersBackground" : "windowBackgroundWhite"));
-                float f = right;
-                float f2 = bottom;
-                canvas.drawCircle(f, f2, AndroidUtilities.dp(7.0f) * this.onlineProgress, Theme.dialogs_onlineCirclePaint);
-                Theme.dialogs_onlineCirclePaint.setColor(getThemedColor("chats_onlineCircle"));
-                canvas.drawCircle(f, f2, AndroidUtilities.dp(5.0f) * this.onlineProgress, Theme.dialogs_onlineCirclePaint);
-                if (z) {
-                    float f3 = this.onlineProgress;
-                    if (f3 < 1.0f) {
-                        float f4 = f3 + (((float) j2) / 150.0f);
-                        this.onlineProgress = f4;
-                        if (f4 > 1.0f) {
+            this.lastUpdateTime = newTime;
+            boolean isOnline = !this.user.self && !this.user.bot && ((this.user.status != null && this.user.status.expires > ConnectionsManager.getInstance(this.currentAccount).getCurrentTime()) || MessagesController.getInstance(this.currentAccount).onlinePrivacy.containsKey(Long.valueOf(this.user.id)));
+            if (isOnline || this.onlineProgress != 0.0f) {
+                int top = this.imageView.getBottom() - AndroidUtilities.dp(6.0f);
+                int left = this.imageView.getRight() - AndroidUtilities.dp(10.0f);
+                Theme.dialogs_onlineCirclePaint.setColor(getThemedColor(this.currentType == 1 ? Theme.key_voipgroup_inviteMembersBackground : Theme.key_windowBackgroundWhite));
+                canvas.drawCircle(left, top, AndroidUtilities.dp(7.0f) * this.onlineProgress, Theme.dialogs_onlineCirclePaint);
+                Theme.dialogs_onlineCirclePaint.setColor(getThemedColor(Theme.key_chats_onlineCircle));
+                canvas.drawCircle(left, top, AndroidUtilities.dp(5.0f) * this.onlineProgress, Theme.dialogs_onlineCirclePaint);
+                if (isOnline) {
+                    float f = this.onlineProgress;
+                    if (f < 1.0f) {
+                        float f2 = f + (((float) dt) / 150.0f);
+                        this.onlineProgress = f2;
+                        if (f2 > 1.0f) {
                             this.onlineProgress = 1.0f;
                         }
                         this.imageView.invalidate();
                         invalidate();
                     }
                 } else {
-                    float f5 = this.onlineProgress;
-                    if (f5 > 0.0f) {
-                        float f6 = f5 - (((float) j2) / 150.0f);
-                        this.onlineProgress = f6;
-                        if (f6 < 0.0f) {
+                    float f3 = this.onlineProgress;
+                    if (f3 > 0.0f) {
+                        float f4 = f3 - (((float) dt) / 150.0f);
+                        this.onlineProgress = f4;
+                        if (f4 < 0.0f) {
                             this.onlineProgress = 0.0f;
                         }
                         this.imageView.invalidate();
@@ -189,30 +188,30 @@ public class ShareDialogCell extends FrameLayout {
                 }
             }
         }
-        return drawChild;
+        return result;
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        int left = this.imageView.getLeft() + (this.imageView.getMeasuredWidth() / 2);
-        int top = this.imageView.getTop() + (this.imageView.getMeasuredHeight() / 2);
-        Theme.checkboxSquare_checkPaint.setColor(getThemedColor("dialogRoundCheckBox"));
+        int cx = this.imageView.getLeft() + (this.imageView.getMeasuredWidth() / 2);
+        int cy = this.imageView.getTop() + (this.imageView.getMeasuredHeight() / 2);
+        Theme.checkboxSquare_checkPaint.setColor(getThemedColor(Theme.key_dialogRoundCheckBox));
         Theme.checkboxSquare_checkPaint.setAlpha((int) (this.checkBox.getProgress() * 255.0f));
-        canvas.drawCircle(left, top, AndroidUtilities.dp(this.currentType == 2 ? 24.0f : 28.0f), Theme.checkboxSquare_checkPaint);
+        canvas.drawCircle(cx, cy, AndroidUtilities.dp(this.currentType == 2 ? 24.0f : 28.0f), Theme.checkboxSquare_checkPaint);
         super.onDraw(canvas);
     }
 
-    private int getThemedColor(String str) {
+    private int getThemedColor(String key) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
-        return color != null ? color.intValue() : Theme.getColor(str);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
+        return color != null ? color.intValue() : Theme.getColor(key);
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
         if (this.checkBox.isChecked()) {
-            accessibilityNodeInfo.setSelected(true);
+            info.setSelected(true);
         }
     }
 }

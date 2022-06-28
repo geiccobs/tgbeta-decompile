@@ -1,13 +1,13 @@
 package com.google.android.exoplayer2.ext.opus;
 
 import com.google.android.exoplayer2.audio.AudioDecoderException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class OpusDecoderException extends AudioDecoderException {
-    public OpusDecoderException(String str) {
-        super(str);
+    public OpusDecoderException(String message) {
+        super(message);
     }
 
-    public OpusDecoderException(String str, Throwable th) {
-        super(str, th);
+    public OpusDecoderException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

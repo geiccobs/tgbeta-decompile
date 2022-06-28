@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import org.telegram.ui.LaunchActivity;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public class OpenChatReceiver extends Activity {
     @Override // android.app.Activity
-    protected void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         if (intent == null) {
             finish();
@@ -16,10 +16,10 @@ public class OpenChatReceiver extends Activity {
             finish();
         } else {
             try {
-                long longExtra = intent.getLongExtra("chatId", intent.getIntExtra("chatId", 0));
-                long longExtra2 = intent.getLongExtra("userId", intent.getIntExtra("userId", 0));
-                int intExtra = intent.getIntExtra("encId", 0);
-                if (longExtra == 0 && longExtra2 == 0 && intExtra == 0) {
+                long chatId = intent.getLongExtra("chatId", intent.getIntExtra("chatId", 0));
+                long userId = intent.getLongExtra("userId", intent.getIntExtra("userId", 0));
+                int encId = intent.getIntExtra("encId", 0);
+                if (chatId == 0 && userId == 0 && encId == 0) {
                     return;
                 }
                 Intent intent2 = new Intent(this, LaunchActivity.class);
@@ -27,8 +27,8 @@ public class OpenChatReceiver extends Activity {
                 intent2.putExtras(intent);
                 startActivity(intent2);
                 finish();
-            } catch (Throwable th) {
-                FileLog.e(th);
+            } catch (Throwable e) {
+                FileLog.e(e);
             }
         }
     }

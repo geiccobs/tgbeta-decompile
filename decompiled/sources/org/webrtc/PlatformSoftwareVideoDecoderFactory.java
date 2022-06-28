@@ -3,7 +3,7 @@ package org.webrtc;
 import android.media.MediaCodecInfo;
 import org.webrtc.EglBase;
 import org.webrtc.Predicate;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class PlatformSoftwareVideoDecoderFactory extends MediaCodecVideoDecoderFactory {
     private static final Predicate<MediaCodecInfo> defaultAllowedPredicate = new Predicate<MediaCodecInfo>() { // from class: org.webrtc.PlatformSoftwareVideoDecoderFactory.1
         @Override // org.webrtc.Predicate
@@ -21,8 +21,8 @@ public class PlatformSoftwareVideoDecoderFactory extends MediaCodecVideoDecoderF
             return Predicate.CC.$default$or(this, predicate);
         }
 
-        public boolean test(MediaCodecInfo mediaCodecInfo) {
-            return MediaCodecUtils.isSoftwareOnly(mediaCodecInfo);
+        public boolean test(MediaCodecInfo arg) {
+            return MediaCodecUtils.isSoftwareOnly(arg);
         }
     };
 
@@ -36,7 +36,7 @@ public class PlatformSoftwareVideoDecoderFactory extends MediaCodecVideoDecoderF
         return super.getSupportedCodecs();
     }
 
-    public PlatformSoftwareVideoDecoderFactory(EglBase.Context context) {
-        super(context, defaultAllowedPredicate);
+    public PlatformSoftwareVideoDecoderFactory(EglBase.Context sharedContext) {
+        super(sharedContext, defaultAllowedPredicate);
     }
 }

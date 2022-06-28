@@ -1,5 +1,7 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes.dex */
+
+import com.google.android.gms.internal.clearcut.zzgw;
+/* loaded from: classes3.dex */
 final /* synthetic */ class zzq implements zzan {
     static final zzan zzax = new zzq();
 
@@ -8,6 +10,6 @@ final /* synthetic */ class zzq implements zzan {
 
     @Override // com.google.android.gms.internal.clearcut.zzan
     public final Object zzb(byte[] bArr) {
-        return zzgw$zza.zzi(bArr);
+        return zzgw.zza.zzi(bArr);
     }
 }

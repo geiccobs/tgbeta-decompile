@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzae {
     private final Map<Class<?>, ObjectEncoder<?>> zza;
     private final Map<Class<?>, ValueEncoder<?>> zzb;

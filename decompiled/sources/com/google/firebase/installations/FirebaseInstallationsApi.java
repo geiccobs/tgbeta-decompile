@@ -1,9 +1,15 @@
 package com.google.firebase.installations;
 
 import com.google.android.gms.tasks.Task;
-/* loaded from: classes.dex */
+import com.google.firebase.installations.internal.FidListener;
+import com.google.firebase.installations.internal.FidListenerHandle;
+/* loaded from: classes3.dex */
 public interface FirebaseInstallationsApi {
+    Task<Void> delete();
+
     Task<String> getId();
 
     Task<InstallationTokenResult> getToken(boolean z);
+
+    FidListenerHandle registerFidListener(FidListener fidListener);
 }

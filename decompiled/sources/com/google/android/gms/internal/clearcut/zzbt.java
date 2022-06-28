@@ -1,27 +1,28 @@
 package com.google.android.gms.internal.clearcut;
 
+import com.google.android.gms.internal.clearcut.zzcg;
 import java.util.Collections;
 import java.util.HashMap;
-/* loaded from: classes.dex */
+import java.util.Map;
+/* loaded from: classes3.dex */
 public final class zzbt {
+    private static volatile boolean zzgm = false;
+    private static final Class<?> zzgn = zzam();
     static final zzbt zzgo = new zzbt(true);
-
-    static {
-        zzam();
-    }
+    private final Map<Object, zzcg.zzf<?, ?>> zzgp;
 
     zzbt() {
-        new HashMap();
+        this.zzgp = new HashMap();
     }
 
     private zzbt(boolean z) {
-        Collections.emptyMap();
+        this.zzgp = Collections.emptyMap();
     }
 
     private static Class<?> zzam() {
         try {
             return Class.forName("com.google.protobuf.Extension");
-        } catch (ClassNotFoundException unused) {
+        } catch (ClassNotFoundException e) {
             return null;
         }
     }

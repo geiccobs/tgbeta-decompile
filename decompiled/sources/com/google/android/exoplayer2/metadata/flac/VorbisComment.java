@@ -5,26 +5,21 @@ import android.os.Parcelable;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class VorbisComment implements Metadata.Entry {
     public static final Parcelable.Creator<VorbisComment> CREATOR = new Parcelable.Creator<VorbisComment>() { // from class: com.google.android.exoplayer2.metadata.flac.VorbisComment.1
         @Override // android.os.Parcelable.Creator
-        public VorbisComment createFromParcel(Parcel parcel) {
-            return new VorbisComment(parcel);
+        public VorbisComment createFromParcel(Parcel in) {
+            return new VorbisComment(in);
         }
 
         @Override // android.os.Parcelable.Creator
-        public VorbisComment[] newArray(int i) {
-            return new VorbisComment[i];
+        public VorbisComment[] newArray(int size) {
+            return new VorbisComment[size];
         }
     };
     public final String key;
     public final String value;
-
-    @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
-    }
 
     @Override // com.google.android.exoplayer2.metadata.Metadata.Entry
     public /* synthetic */ byte[] getWrappedMetadataBytes() {
@@ -36,14 +31,14 @@ public final class VorbisComment implements Metadata.Entry {
         return Metadata.Entry.CC.$default$getWrappedMetadataFormat(this);
     }
 
-    public VorbisComment(String str, String str2) {
-        this.key = str;
-        this.value = str2;
+    public VorbisComment(String key, String value) {
+        this.key = key;
+        this.value = value;
     }
 
-    VorbisComment(Parcel parcel) {
-        this.key = (String) Util.castNonNull(parcel.readString());
-        this.value = (String) Util.castNonNull(parcel.readString());
+    VorbisComment(Parcel in) {
+        this.key = (String) Util.castNonNull(in.readString());
+        this.value = (String) Util.castNonNull(in.readString());
     }
 
     public String toString() {
@@ -54,20 +49,26 @@ public final class VorbisComment implements Metadata.Entry {
         if (this == obj) {
             return true;
         }
-        if (obj == null || VorbisComment.class != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        VorbisComment vorbisComment = (VorbisComment) obj;
-        return this.key.equals(vorbisComment.key) && this.value.equals(vorbisComment.value);
+        VorbisComment other = (VorbisComment) obj;
+        return this.key.equals(other.key) && this.value.equals(other.value);
     }
 
     public int hashCode() {
-        return ((527 + this.key.hashCode()) * 31) + this.value.hashCode();
+        int result = (17 * 31) + this.key.hashCode();
+        return (result * 31) + this.value.hashCode();
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(this.key);
-        parcel.writeString(this.value);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.key);
+        dest.writeString(this.value);
+    }
+
+    @Override // android.os.Parcelable
+    public int describeContents() {
+        return 0;
     }
 }

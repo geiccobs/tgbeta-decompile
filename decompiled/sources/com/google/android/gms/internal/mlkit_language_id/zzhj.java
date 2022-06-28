@@ -2,7 +2,7 @@ package com.google.android.gms.internal.mlkit_language_id;
 
 import java.io.IOException;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzhj extends zzhh<zzhg, zzhg> {
     @Override // com.google.android.gms.internal.mlkit_language_id.zzhh
     public final void zzb(Object obj) {
@@ -23,7 +23,10 @@ final class zzhj extends zzhh<zzhg, zzhg> {
     public final /* synthetic */ zzhg zzb(zzhg zzhgVar, zzhg zzhgVar2) {
         zzhg zzhgVar3 = zzhgVar;
         zzhg zzhgVar4 = zzhgVar2;
-        return zzhgVar4.equals(zzhg.zza()) ? zzhgVar3 : zzhg.zza(zzhgVar3, zzhgVar4);
+        if (zzhgVar4.equals(zzhg.zza())) {
+            return zzhgVar3;
+        }
+        return zzhg.zza(zzhgVar3, zzhgVar4);
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzhh

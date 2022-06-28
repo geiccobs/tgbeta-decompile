@@ -1,13 +1,13 @@
 package org.telegram.ui.Components.Paint;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class Swatch {
     public float brushWeight;
     public int color;
     public float colorLocation;
 
-    public Swatch(int i, float f, float f2) {
-        this.color = i;
-        this.colorLocation = f;
-        this.brushWeight = f2;
+    public Swatch(int color, float colorLocation, float brushWeight) {
+        this.color = color;
+        this.colorLocation = colorLocation;
+        this.brushWeight = brushWeight;
     }
 }

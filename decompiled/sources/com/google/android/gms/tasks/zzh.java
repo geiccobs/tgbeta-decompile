@@ -2,13 +2,11 @@ package com.google.android.gms.tasks;
 
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
 /* loaded from: classes.dex */
 final class zzh<TResult> implements zzr<TResult> {
     private final Executor zza;
     private final Object zzb = new Object();
-    @GuardedBy("mLock")
     @Nullable
     private OnCanceledListener zzc;
 

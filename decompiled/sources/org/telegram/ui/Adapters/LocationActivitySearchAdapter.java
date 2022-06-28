@@ -3,19 +3,14 @@ package org.telegram.ui.Adapters;
 import android.content.Context;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
-import org.telegram.tgnet.TLRPC$TL_messageMediaVenue;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Cells.LocationCell;
 import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class LocationActivitySearchAdapter extends BaseLocationAdapter {
     private FlickerLoadingView globalGradientView;
     private Context mContext;
-
-    @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-    public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
-        return true;
-    }
 
     public LocationActivitySearchAdapter(Context context) {
         this.mContext = context;
@@ -37,26 +32,40 @@ public class LocationActivitySearchAdapter extends BaseLocationAdapter {
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        return new RecyclerListView.Holder(new LocationCell(this.mContext, false, null));
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LocationCell locationCell = new LocationCell(this.mContext, false, null);
+        return new RecyclerListView.Holder(locationCell);
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        TLRPC$TL_messageMediaVenue item = getItem(i);
-        String str = (isSearching() || i < 0 || i >= this.iconUrls.size()) ? null : this.iconUrls.get(i);
-        LocationCell locationCell = (LocationCell) viewHolder.itemView;
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        TLRPC.TL_messageMediaVenue place = getItem(position);
+        String iconUrl = (isSearching() || position < 0 || position >= this.iconUrls.size()) ? null : this.iconUrls.get(position);
+        LocationCell locationCell = (LocationCell) holder.itemView;
         boolean z = true;
-        if (i == getItemCount() - 1) {
+        if (position == getItemCount() - 1) {
             z = false;
         }
-        locationCell.setLocation(item, str, i, z);
+        locationCell.setLocation(place, iconUrl, position, z);
     }
 
-    public TLRPC$TL_messageMediaVenue getItem(int i) {
+    public TLRPC.TL_messageMediaVenue getItem(int i) {
         if (!isSearching() && i >= 0 && i < this.places.size()) {
             return this.places.get(i);
         }
         return null;
+    }
+
+    @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
+    public boolean isEnabled(RecyclerView.ViewHolder holder) {
+        return true;
+    }
+
+    @Override // org.telegram.ui.Adapters.BaseLocationAdapter
+    protected void notifyStartSearch(boolean wasSearching, int oldItemCount, boolean animated) {
+        if (wasSearching) {
+            return;
+        }
+        notifyDataSetChanged();
     }
 }

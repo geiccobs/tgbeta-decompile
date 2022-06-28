@@ -1,6 +1,5 @@
 package org.telegram.messenger.support.fingerprint;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
@@ -9,33 +8,19 @@ import java.security.Signature;
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
-@TargetApi(R.styleable.MapAttrs_zOrderOnTop)
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final class FingerprintManagerCompatApi23 {
-
-    /* loaded from: classes.dex */
-    public static abstract class AuthenticationCallback {
-        public abstract void onAuthenticationError(int i, CharSequence charSequence);
-
-        public abstract void onAuthenticationFailed();
-
-        public abstract void onAuthenticationHelp(int i, CharSequence charSequence);
-
-        public abstract void onAuthenticationSucceeded(AuthenticationResultInternal authenticationResultInternal);
-    }
-
-    private static FingerprintManager getFingerprintManager(Context context) {
-        return (FingerprintManager) context.getSystemService("fingerprint");
+    private static FingerprintManager getFingerprintManager(Context ctx) {
+        return (FingerprintManager) ctx.getSystemService("fingerprint");
     }
 
     public static boolean hasEnrolledFingerprints(Context context) {
         try {
             FingerprintManager fingerprintManager = getFingerprintManager(context);
-            if (fingerprintManager != null) {
-                return fingerprintManager.hasEnrolledFingerprints();
+            if (fingerprintManager == null) {
+                return false;
             }
-            return false;
+            return fingerprintManager.hasEnrolledFingerprints();
         } catch (Exception e) {
             FileLog.e(e);
             return false;
@@ -45,19 +30,19 @@ public final class FingerprintManagerCompatApi23 {
     public static boolean isHardwareDetected(Context context) {
         try {
             FingerprintManager fingerprintManager = getFingerprintManager(context);
-            if (fingerprintManager != null) {
-                return fingerprintManager.isHardwareDetected();
+            if (fingerprintManager == null) {
+                return false;
             }
-            return false;
+            return fingerprintManager.isHardwareDetected();
         } catch (Exception e) {
             FileLog.e(e);
             return false;
         }
     }
 
-    public static void authenticate(Context context, CryptoObject cryptoObject, int i, Object obj, AuthenticationCallback authenticationCallback, Handler handler) {
+    public static void authenticate(Context context, CryptoObject crypto, int flags, Object cancel, AuthenticationCallback callback, Handler handler) {
         try {
-            getFingerprintManager(context).authenticate(wrapCryptoObject(cryptoObject), (CancellationSignal) obj, i, wrapCallback(authenticationCallback), handler);
+            getFingerprintManager(context).authenticate(wrapCryptoObject(crypto), (CancellationSignal) cancel, flags, wrapCallback(callback), handler);
         } catch (Exception e) {
             FileLog.e(e);
         }
@@ -95,31 +80,31 @@ public final class FingerprintManagerCompatApi23 {
         return new CryptoObject(cryptoObject.getMac());
     }
 
-    private static FingerprintManager.AuthenticationCallback wrapCallback(final AuthenticationCallback authenticationCallback) {
+    private static FingerprintManager.AuthenticationCallback wrapCallback(final AuthenticationCallback callback) {
         return new FingerprintManager.AuthenticationCallback() { // from class: org.telegram.messenger.support.fingerprint.FingerprintManagerCompatApi23.1
             @Override // android.hardware.fingerprint.FingerprintManager.AuthenticationCallback
-            public void onAuthenticationError(int i, CharSequence charSequence) {
-                authenticationCallback.onAuthenticationError(i, charSequence);
+            public void onAuthenticationError(int errMsgId, CharSequence errString) {
+                callback.onAuthenticationError(errMsgId, errString);
             }
 
             @Override // android.hardware.fingerprint.FingerprintManager.AuthenticationCallback
-            public void onAuthenticationHelp(int i, CharSequence charSequence) {
-                authenticationCallback.onAuthenticationHelp(i, charSequence);
+            public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+                callback.onAuthenticationHelp(helpMsgId, helpString);
             }
 
             @Override // android.hardware.fingerprint.FingerprintManager.AuthenticationCallback
-            public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult authenticationResult) {
-                authenticationCallback.onAuthenticationSucceeded(new AuthenticationResultInternal(FingerprintManagerCompatApi23.unwrapCryptoObject(authenticationResult.getCryptoObject())));
+            public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
+                callback.onAuthenticationSucceeded(new AuthenticationResultInternal(FingerprintManagerCompatApi23.unwrapCryptoObject(result.getCryptoObject())));
             }
 
             @Override // android.hardware.fingerprint.FingerprintManager.AuthenticationCallback
             public void onAuthenticationFailed() {
-                authenticationCallback.onAuthenticationFailed();
+                callback.onAuthenticationFailed();
             }
         };
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class CryptoObject {
         private final Cipher mCipher;
         private final Mac mMac;
@@ -156,16 +141,31 @@ public final class FingerprintManagerCompatApi23 {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class AuthenticationResultInternal {
         private CryptoObject mCryptoObject;
 
-        public AuthenticationResultInternal(CryptoObject cryptoObject) {
-            this.mCryptoObject = cryptoObject;
+        public AuthenticationResultInternal(CryptoObject crypto) {
+            this.mCryptoObject = crypto;
         }
 
         public CryptoObject getCryptoObject() {
             return this.mCryptoObject;
+        }
+    }
+
+    /* loaded from: classes4.dex */
+    public static abstract class AuthenticationCallback {
+        public void onAuthenticationError(int errMsgId, CharSequence errString) {
+        }
+
+        public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+        }
+
+        public void onAuthenticationSucceeded(AuthenticationResultInternal result) {
+        }
+
+        public void onAuthenticationFailed() {
         }
     }
 }

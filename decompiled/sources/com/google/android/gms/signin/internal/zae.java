@@ -6,7 +6,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.Status;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface zae extends IInterface {
     void zaa(ConnectionResult connectionResult, zaa zaaVar) throws RemoteException;
 

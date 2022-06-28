@@ -1,4 +1,7 @@
 package com.google.firebase.encoders.proto;
+
+import com.google.firebase.encoders.annotations.ExtraProperty;
+@ExtraProperty
 /* loaded from: classes.dex */
 public @interface Protobuf {
 

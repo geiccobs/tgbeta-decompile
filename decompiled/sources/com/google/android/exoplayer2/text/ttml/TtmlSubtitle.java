@@ -6,7 +6,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class TtmlSubtitle implements Subtitle {
     private final long[] eventTimesUs;
     private final Map<String, TtmlStyle> globalStyles;
@@ -14,19 +14,19 @@ final class TtmlSubtitle implements Subtitle {
     private final Map<String, TtmlRegion> regionMap;
     private final TtmlNode root;
 
-    public TtmlSubtitle(TtmlNode ttmlNode, Map<String, TtmlStyle> map, Map<String, TtmlRegion> map2, Map<String, String> map3) {
-        this.root = ttmlNode;
-        this.regionMap = map2;
-        this.imageMap = map3;
-        this.globalStyles = map != null ? Collections.unmodifiableMap(map) : Collections.emptyMap();
-        this.eventTimesUs = ttmlNode.getEventTimesUs();
+    public TtmlSubtitle(TtmlNode root, Map<String, TtmlStyle> globalStyles, Map<String, TtmlRegion> regionMap, Map<String, String> imageMap) {
+        this.root = root;
+        this.regionMap = regionMap;
+        this.imageMap = imageMap;
+        this.globalStyles = globalStyles != null ? Collections.unmodifiableMap(globalStyles) : Collections.emptyMap();
+        this.eventTimesUs = root.getEventTimesUs();
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public int getNextEventTimeIndex(long j) {
-        int binarySearchCeil = Util.binarySearchCeil(this.eventTimesUs, j, false, false);
-        if (binarySearchCeil < this.eventTimesUs.length) {
-            return binarySearchCeil;
+    public int getNextEventTimeIndex(long timeUs) {
+        int index = Util.binarySearchCeil(this.eventTimesUs, timeUs, false, false);
+        if (index < this.eventTimesUs.length) {
+            return index;
         }
         return -1;
     }
@@ -37,12 +37,20 @@ final class TtmlSubtitle implements Subtitle {
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public long getEventTime(int i) {
-        return this.eventTimesUs[i];
+    public long getEventTime(int index) {
+        return this.eventTimesUs[index];
+    }
+
+    TtmlNode getRoot() {
+        return this.root;
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public List<Cue> getCues(long j) {
-        return this.root.getCues(j, this.globalStyles, this.regionMap, this.imageMap);
+    public List<Cue> getCues(long timeUs) {
+        return this.root.getCues(timeUs, this.globalStyles, this.regionMap, this.imageMap);
+    }
+
+    Map<String, TtmlStyle> getGlobalStyles() {
+        return this.globalStyles;
     }
 }

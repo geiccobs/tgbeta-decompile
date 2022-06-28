@@ -9,7 +9,7 @@ import com.google.android.gms.common.Feature;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zze implements Parcelable.Creator<GetServiceRequest> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ GetServiceRequest[] newArray(int i) {

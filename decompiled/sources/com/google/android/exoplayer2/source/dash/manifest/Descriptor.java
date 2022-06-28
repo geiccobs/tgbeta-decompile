@@ -1,38 +1,40 @@
 package com.google.android.exoplayer2.source.dash.manifest;
 
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class Descriptor {
     public final String id;
     public final String schemeIdUri;
     public final String value;
 
-    public Descriptor(String str, String str2, String str3) {
-        this.schemeIdUri = str;
-        this.value = str2;
-        this.id = str3;
+    public Descriptor(String schemeIdUri, String value, String id) {
+        this.schemeIdUri = schemeIdUri;
+        this.value = value;
+        this.id = id;
     }
 
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null || Descriptor.class != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Descriptor descriptor = (Descriptor) obj;
-        return Util.areEqual(this.schemeIdUri, descriptor.schemeIdUri) && Util.areEqual(this.value, descriptor.value) && Util.areEqual(this.id, descriptor.id);
+        Descriptor other = (Descriptor) obj;
+        return Util.areEqual(this.schemeIdUri, other.schemeIdUri) && Util.areEqual(this.value, other.value) && Util.areEqual(this.id, other.id);
     }
 
     public int hashCode() {
-        int hashCode = this.schemeIdUri.hashCode() * 31;
+        int result = this.schemeIdUri.hashCode();
+        int i = result * 31;
         String str = this.value;
-        int i = 0;
-        int hashCode2 = (hashCode + (str != null ? str.hashCode() : 0)) * 31;
+        int i2 = 0;
+        int result2 = i + (str != null ? str.hashCode() : 0);
+        int result3 = result2 * 31;
         String str2 = this.id;
         if (str2 != null) {
-            i = str2.hashCode();
+            i2 = str2.hashCode();
         }
-        return hashCode2 + i;
+        return result3 + i2;
     }
 }

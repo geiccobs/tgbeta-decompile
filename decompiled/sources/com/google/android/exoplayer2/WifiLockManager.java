@@ -2,18 +2,37 @@ package com.google.android.exoplayer2;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
-/* loaded from: classes.dex */
+import com.google.android.exoplayer2.util.Log;
+/* loaded from: classes3.dex */
 final class WifiLockManager {
+    private static final String TAG = "WifiLockManager";
+    private static final String WIFI_LOCK_TAG = "ExoPlayer:WifiLockManager";
     private boolean enabled;
     private boolean stayAwake;
     private WifiManager.WifiLock wifiLock;
+    private final WifiManager wifiManager;
 
     public WifiLockManager(Context context) {
-        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService("wifi");
+        this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService("wifi");
     }
 
-    public void setStayAwake(boolean z) {
-        this.stayAwake = z;
+    public void setEnabled(boolean enabled) {
+        if (enabled && this.wifiLock == null) {
+            WifiManager wifiManager = this.wifiManager;
+            if (wifiManager == null) {
+                Log.w(TAG, "WifiManager is null, therefore not creating the WifiLock.");
+                return;
+            }
+            WifiManager.WifiLock createWifiLock = wifiManager.createWifiLock(3, WIFI_LOCK_TAG);
+            this.wifiLock = createWifiLock;
+            createWifiLock.setReferenceCounted(false);
+        }
+        this.enabled = enabled;
+        updateWifiLock();
+    }
+
+    public void setStayAwake(boolean stayAwake) {
+        this.stayAwake = stayAwake;
         updateWifiLock();
     }
 

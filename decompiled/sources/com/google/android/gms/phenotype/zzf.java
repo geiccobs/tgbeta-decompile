@@ -1,4 +1,6 @@
 package com.google.android.gms.phenotype;
-/* loaded from: classes.dex */
-final class zzf {
+
+import com.google.android.gms.phenotype.ExperimentTokens;
+/* loaded from: classes3.dex */
+final class zzf implements ExperimentTokens.zza {
 }

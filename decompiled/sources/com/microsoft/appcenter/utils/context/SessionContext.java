@@ -8,23 +8,33 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class SessionContext {
+    private static final String STORAGE_KEY = "sessions";
+    private static final String STORAGE_KEY_VALUE_SEPARATOR = "/";
+    private static final int STORAGE_MAX_SESSIONS = 10;
     private static SessionContext sInstance;
     private final NavigableMap<Long, SessionInfo> mSessions = new TreeMap();
     private final long mAppLaunchTimestamp = System.currentTimeMillis();
 
     private SessionContext() {
-        Set<String> stringSet = SharedPreferencesManager.getStringSet("sessions");
-        if (stringSet != null) {
-            for (String str : stringSet) {
-                String[] split = str.split("/", -1);
+        long appLaunchTimestamp;
+        Set<String> storedSessions = SharedPreferencesManager.getStringSet(STORAGE_KEY);
+        if (storedSessions != null) {
+            for (String session : storedSessions) {
+                String[] split = session.split(STORAGE_KEY_VALUE_SEPARATOR, -1);
                 try {
-                    long parseLong = Long.parseLong(split[0]);
-                    String str2 = split[1];
-                    this.mSessions.put(Long.valueOf(parseLong), new SessionInfo(parseLong, str2.isEmpty() ? null : UUID.fromString(str2), split.length > 2 ? Long.parseLong(split[2]) : parseLong));
+                    long time = Long.parseLong(split[0]);
+                    String rawSid = split[1];
+                    UUID sid = rawSid.isEmpty() ? null : UUID.fromString(rawSid);
+                    if (split.length > 2) {
+                        appLaunchTimestamp = Long.parseLong(split[2]);
+                    } else {
+                        appLaunchTimestamp = time;
+                    }
+                    this.mSessions.put(Long.valueOf(time), new SessionInfo(time, sid, appLaunchTimestamp));
                 } catch (RuntimeException e) {
-                    AppCenterLog.warn("AppCenter", "Ignore invalid session in store: " + str, e);
+                    AppCenterLog.warn("AppCenter", "Ignore invalid session in store: " + session, e);
                 }
             }
         }
@@ -43,37 +53,48 @@ public class SessionContext {
         return sessionContext;
     }
 
-    public synchronized void addSession(UUID uuid) {
-        long currentTimeMillis = System.currentTimeMillis();
-        this.mSessions.put(Long.valueOf(currentTimeMillis), new SessionInfo(currentTimeMillis, uuid, this.mAppLaunchTimestamp));
+    public static synchronized void unsetInstance() {
+        synchronized (SessionContext.class) {
+            sInstance = null;
+        }
+    }
+
+    public synchronized void addSession(UUID sessionId) {
+        long now = System.currentTimeMillis();
+        this.mSessions.put(Long.valueOf(now), new SessionInfo(now, sessionId, this.mAppLaunchTimestamp));
         if (this.mSessions.size() > 10) {
             this.mSessions.pollFirstEntry();
         }
-        LinkedHashSet linkedHashSet = new LinkedHashSet();
-        for (SessionInfo sessionInfo : this.mSessions.values()) {
-            linkedHashSet.add(sessionInfo.toString());
+        Set<String> sessionStorage = new LinkedHashSet<>();
+        for (SessionInfo session : this.mSessions.values()) {
+            sessionStorage.add(session.toString());
         }
-        SharedPreferencesManager.putStringSet("sessions", linkedHashSet);
+        SharedPreferencesManager.putStringSet(STORAGE_KEY, sessionStorage);
     }
 
-    public synchronized SessionInfo getSessionAt(long j) {
-        Map.Entry<Long, SessionInfo> floorEntry = this.mSessions.floorEntry(Long.valueOf(j));
-        if (floorEntry != null) {
-            return floorEntry.getValue();
+    public synchronized SessionInfo getSessionAt(long timestamp) {
+        Map.Entry<Long, SessionInfo> pastEntry = this.mSessions.floorEntry(Long.valueOf(timestamp));
+        if (pastEntry != null) {
+            return pastEntry.getValue();
         }
         return null;
     }
 
-    /* loaded from: classes.dex */
+    public synchronized void clearSessions() {
+        this.mSessions.clear();
+        SharedPreferencesManager.remove(STORAGE_KEY);
+    }
+
+    /* loaded from: classes3.dex */
     public static class SessionInfo {
         private final long mAppLaunchTimestamp;
         private final UUID mSessionId;
         private final long mTimestamp;
 
-        SessionInfo(long j, UUID uuid, long j2) {
-            this.mTimestamp = j;
-            this.mSessionId = uuid;
-            this.mAppLaunchTimestamp = j2;
+        SessionInfo(long timestamp, UUID sessionId, long appLaunchTimestamp) {
+            this.mTimestamp = timestamp;
+            this.mSessionId = sessionId;
+            this.mAppLaunchTimestamp = appLaunchTimestamp;
         }
 
         long getTimestamp() {
@@ -89,11 +110,11 @@ public class SessionContext {
         }
 
         public String toString() {
-            String str = getTimestamp() + "/";
+            String rawSession = getTimestamp() + SessionContext.STORAGE_KEY_VALUE_SEPARATOR;
             if (getSessionId() != null) {
-                str = str + getSessionId();
+                rawSession = rawSession + getSessionId();
             }
-            return str + "/" + getAppLaunchTimestamp();
+            return rawSession + SessionContext.STORAGE_KEY_VALUE_SEPARATOR + getAppLaunchTimestamp();
         }
     }
 }

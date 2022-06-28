@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzy {
     private static HashMap<String, String> zzcu;
     private static Object zzcz;
@@ -38,7 +38,7 @@ public class zzy {
                 long parseLong = Long.parseLong(zza);
                 l = Long.valueOf(parseLong);
                 j2 = parseLong;
-            } catch (NumberFormatException unused) {
+            } catch (NumberFormatException e) {
             }
         }
         zza(zzb, zzcx, str, l);
@@ -98,7 +98,6 @@ public class zzy {
                         if (string != null) {
                             str3 = string;
                         }
-                        query.close();
                         return str3;
                     }
                 } finally {
@@ -108,6 +107,9 @@ public class zzy {
                 }
             }
             zza(obj, str, (String) null);
+            if (query != null) {
+                query.close();
+            }
             return null;
         }
     }
@@ -174,11 +176,11 @@ public class zzy {
         String zza = zza(contentResolver, str, (String) null);
         if (zza != null && !zza.equals("")) {
             if (zzcr.matcher(zza).matches()) {
+                bool = true;
                 z = true;
-                bool = Boolean.TRUE;
             } else if (zzcs.matcher(zza).matches()) {
+                bool = false;
                 z = false;
-                bool = Boolean.FALSE;
             } else {
                 Log.w("Gservices", "attempt to read gservices key " + str + " (value \"" + zza + "\") as boolean");
             }

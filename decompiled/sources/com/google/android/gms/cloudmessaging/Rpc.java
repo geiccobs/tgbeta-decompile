@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.messaging.Constants;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,19 +26,17 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class Rpc {
-    private static int zza;
     private static PendingIntent zzb;
-    private static final Executor zzc = zzz.zza;
     private final Context zze;
     private final zzr zzf;
     private final ScheduledExecutorService zzg;
     private Messenger zzi;
     private zza zzj;
-    @GuardedBy("responseCallbacks")
+    private static int zza = 0;
+    private static final Executor zzc = zzz.zza;
     private final SimpleArrayMap<String, TaskCompletionSource<Bundle>> zzd = new SimpleArrayMap<>();
     private Messenger zzh = new Messenger(new zzy(this, Looper.getMainLooper()));
 
@@ -51,86 +50,86 @@ public class Rpc {
     }
 
     public final void zza(Message message) {
-        if (message != null) {
-            Object obj = message.obj;
-            if (obj instanceof Intent) {
-                Intent intent = (Intent) obj;
-                intent.setExtrasClassLoader(new zza.C0000zza());
-                if (intent.hasExtra("google.messenger")) {
-                    Parcelable parcelableExtra = intent.getParcelableExtra("google.messenger");
-                    if (parcelableExtra instanceof zza) {
-                        this.zzj = (zza) parcelableExtra;
-                    }
-                    if (parcelableExtra instanceof Messenger) {
-                        this.zzi = (Messenger) parcelableExtra;
-                    }
+        if (message != null && (message.obj instanceof Intent)) {
+            Intent intent = (Intent) message.obj;
+            intent.setExtrasClassLoader(new zza.C0003zza());
+            if (intent.hasExtra("google.messenger")) {
+                Parcelable parcelableExtra = intent.getParcelableExtra("google.messenger");
+                if (parcelableExtra instanceof zza) {
+                    this.zzj = (zza) parcelableExtra;
                 }
-                Intent intent2 = (Intent) message.obj;
-                String action = intent2.getAction();
-                if (!"com.google.android.c2dm.intent.REGISTRATION".equals(action)) {
-                    if (!Log.isLoggable("Rpc", 3)) {
-                        return;
-                    }
+                if (parcelableExtra instanceof Messenger) {
+                    this.zzi = (Messenger) parcelableExtra;
+                }
+            }
+            Intent intent2 = (Intent) message.obj;
+            String action = intent2.getAction();
+            if (!"com.google.android.c2dm.intent.REGISTRATION".equals(action)) {
+                if (Log.isLoggable("Rpc", 3)) {
                     String valueOf = String.valueOf(action);
                     Log.d("Rpc", valueOf.length() != 0 ? "Unexpected response action: ".concat(valueOf) : new String("Unexpected response action: "));
                     return;
                 }
-                String stringExtra = intent2.getStringExtra("registration_id");
-                if (stringExtra == null) {
-                    stringExtra = intent2.getStringExtra("unregistered");
-                }
-                if (stringExtra == null) {
-                    String stringExtra2 = intent2.getStringExtra("error");
-                    if (stringExtra2 == null) {
-                        String valueOf2 = String.valueOf(intent2.getExtras());
-                        StringBuilder sb = new StringBuilder(valueOf2.length() + 49);
-                        sb.append("Unexpected response, no error or registration id ");
-                        sb.append(valueOf2);
-                        Log.w("Rpc", sb.toString());
-                        return;
-                    }
-                    if (Log.isLoggable("Rpc", 3)) {
-                        Log.d("Rpc", stringExtra2.length() != 0 ? "Received InstanceID error ".concat(stringExtra2) : new String("Received InstanceID error "));
-                    }
-                    if (stringExtra2.startsWith("|")) {
-                        String[] split = stringExtra2.split("\\|");
-                        if (split.length <= 2 || !"ID".equals(split[1])) {
-                            Log.w("Rpc", stringExtra2.length() != 0 ? "Unexpected structured response ".concat(stringExtra2) : new String("Unexpected structured response "));
-                            return;
-                        }
-                        String str = split[2];
-                        String str2 = split[3];
-                        if (str2.startsWith(":")) {
-                            str2 = str2.substring(1);
-                        }
-                        zza(str, intent2.putExtra("error", str2).getExtras());
-                        return;
-                    }
-                    synchronized (this.zzd) {
-                        for (int i = 0; i < this.zzd.size(); i++) {
-                            zza(this.zzd.keyAt(i), intent2.getExtras());
-                        }
-                    }
+                return;
+            }
+            String stringExtra = intent2.getStringExtra("registration_id");
+            if (stringExtra == null) {
+                stringExtra = intent2.getStringExtra("unregistered");
+            }
+            if (stringExtra == null) {
+                String stringExtra2 = intent2.getStringExtra(Constants.IPC_BUNDLE_KEY_SEND_ERROR);
+                if (stringExtra2 == null) {
+                    String valueOf2 = String.valueOf(intent2.getExtras());
+                    StringBuilder sb = new StringBuilder(String.valueOf(valueOf2).length() + 49);
+                    sb.append("Unexpected response, no error or registration id ");
+                    sb.append(valueOf2);
+                    Log.w("Rpc", sb.toString());
                     return;
                 }
-                Matcher matcher = Pattern.compile("\\|ID\\|([^|]+)\\|:?+(.*)").matcher(stringExtra);
-                if (!matcher.matches()) {
-                    if (!Log.isLoggable("Rpc", 3)) {
+                if (Log.isLoggable("Rpc", 3)) {
+                    String valueOf3 = String.valueOf(stringExtra2);
+                    Log.d("Rpc", valueOf3.length() != 0 ? "Received InstanceID error ".concat(valueOf3) : new String("Received InstanceID error "));
+                }
+                if (stringExtra2.startsWith("|")) {
+                    String[] split = stringExtra2.split("\\|");
+                    if (split.length <= 2 || !"ID".equals(split[1])) {
+                        String valueOf4 = String.valueOf(stringExtra2);
+                        Log.w("Rpc", valueOf4.length() != 0 ? "Unexpected structured response ".concat(valueOf4) : new String("Unexpected structured response "));
                         return;
                     }
-                    Log.d("Rpc", stringExtra.length() != 0 ? "Unexpected response string: ".concat(stringExtra) : new String("Unexpected response string: "));
+                    String str = split[2];
+                    String str2 = split[3];
+                    if (str2.startsWith(com.microsoft.appcenter.Constants.COMMON_SCHEMA_PREFIX_SEPARATOR)) {
+                        str2 = str2.substring(1);
+                    }
+                    zza(str, intent2.putExtra(Constants.IPC_BUNDLE_KEY_SEND_ERROR, str2).getExtras());
                     return;
                 }
-                String group = matcher.group(1);
-                String group2 = matcher.group(2);
-                if (group == null) {
+                synchronized (this.zzd) {
+                    for (int i = 0; i < this.zzd.size(); i++) {
+                        zza(this.zzd.keyAt(i), intent2.getExtras());
+                    }
+                }
+                return;
+            }
+            Matcher matcher = Pattern.compile("\\|ID\\|([^|]+)\\|:?+(.*)").matcher(stringExtra);
+            if (!matcher.matches()) {
+                if (Log.isLoggable("Rpc", 3)) {
+                    String valueOf5 = String.valueOf(stringExtra);
+                    Log.d("Rpc", valueOf5.length() != 0 ? "Unexpected response string: ".concat(valueOf5) : new String("Unexpected response string: "));
                     return;
                 }
+                return;
+            }
+            String group = matcher.group(1);
+            String group2 = matcher.group(2);
+            if (group != null) {
                 Bundle extras = intent2.getExtras();
                 extras.putString("registration_id", group2);
                 zza(group, extras);
                 return;
             }
+            return;
         }
         Log.w("Rpc", "Dropping invalid message");
     }
@@ -222,7 +221,7 @@ public class Rpc {
         intent.putExtra("kid", sb.toString());
         if (Log.isLoggable("Rpc", 3)) {
             String valueOf = String.valueOf(intent.getExtras());
-            StringBuilder sb2 = new StringBuilder(valueOf.length() + 8);
+            StringBuilder sb2 = new StringBuilder(String.valueOf(valueOf).length() + 8);
             sb2.append("Sending ");
             sb2.append(valueOf);
             Log.d("Rpc", sb2.toString());
@@ -238,7 +237,7 @@ public class Rpc {
                 } else {
                     this.zzj.zza(obtain);
                 }
-            } catch (RemoteException unused) {
+            } catch (RemoteException e) {
                 if (Log.isLoggable("Rpc", 3)) {
                     Log.d("Rpc", "Messenger failed, fallback to startService");
                 }
@@ -325,7 +324,13 @@ public class Rpc {
     }
 
     public final /* synthetic */ Task zza(Bundle bundle, Task task) throws Exception {
-        return (task.isSuccessful() && zzb((Bundle) task.getResult())) ? zzc(bundle).onSuccessTask(zzc, zzw.zza) : task;
+        if (!task.isSuccessful()) {
+            return task;
+        }
+        if (!zzb((Bundle) task.getResult())) {
+            return task;
+        }
+        return zzc(bundle).onSuccessTask(zzc, zzw.zza);
     }
 
     public static final /* synthetic */ Task zza(Bundle bundle) throws Exception {
@@ -341,7 +346,7 @@ public class Rpc {
         }
         if (Log.isLoggable("Rpc", 3)) {
             String valueOf = String.valueOf(task.getException());
-            StringBuilder sb = new StringBuilder(valueOf.length() + 22);
+            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 22);
             sb.append("Error making request: ");
             sb.append(valueOf);
             Log.d("Rpc", sb.toString());

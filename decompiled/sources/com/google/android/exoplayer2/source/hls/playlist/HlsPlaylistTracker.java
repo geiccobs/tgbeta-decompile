@@ -5,22 +5,22 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.hls.HlsDataSourceFactory;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import java.io.IOException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface HlsPlaylistTracker {
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface Factory {
         HlsPlaylistTracker createTracker(HlsDataSourceFactory hlsDataSourceFactory, LoadErrorHandlingPolicy loadErrorHandlingPolicy, HlsPlaylistParserFactory hlsPlaylistParserFactory);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface PlaylistEventListener {
         void onPlaylistChanged();
 
         boolean onPlaylistError(Uri uri, long j);
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface PrimaryPlaylistListener {
         void onPrimaryPlaylistRefreshed(HlsMediaPlaylist hlsMediaPlaylist);
     }
@@ -49,15 +49,21 @@ public interface HlsPlaylistTracker {
 
     void stop();
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class PlaylistStuckException extends IOException {
-        public PlaylistStuckException(Uri uri) {
+        public final Uri url;
+
+        public PlaylistStuckException(Uri url) {
+            this.url = url;
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static final class PlaylistResetException extends IOException {
-        public PlaylistResetException(Uri uri) {
+        public final Uri url;
+
+        public PlaylistResetException(Uri url) {
+            this.url = url;
         }
     }
 }

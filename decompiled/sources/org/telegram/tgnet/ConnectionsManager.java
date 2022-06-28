@@ -1,6 +1,5 @@
 package org.telegram.tgnet;
 
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.AsyncTask;
@@ -8,9 +7,11 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -52,6 +53,7 @@ import org.telegram.messenger.StatsController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC;
 /* loaded from: classes.dex */
 public class ConnectionsManager extends BaseController {
     private static final int CORE_POOL_SIZE;
@@ -168,14 +170,14 @@ public class ConnectionsManager extends BaseController {
         CORE_POOL_SIZE = max;
         int i = (availableProcessors * 2) + 1;
         MAXIMUM_POOL_SIZE = i;
-        LinkedBlockingQueue linkedBlockingQueue = new LinkedBlockingQueue((int) RequestFlagNeedQuickAck);
+        LinkedBlockingQueue linkedBlockingQueue = new LinkedBlockingQueue(128);
         sPoolWorkQueue = linkedBlockingQueue;
         ThreadFactory threadFactory = new ThreadFactory() { // from class: org.telegram.tgnet.ConnectionsManager.1
             private final AtomicInteger mCount = new AtomicInteger(1);
 
             @Override // java.util.concurrent.ThreadFactory
-            public Thread newThread(Runnable runnable) {
-                return new Thread(runnable, "DnsAsyncTask #" + this.mCount.getAndIncrement());
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "DnsAsyncTask #" + this.mCount.getAndIncrement());
             }
         };
         sThreadFactory = threadFactory;
@@ -184,116 +186,132 @@ public class ConnectionsManager extends BaseController {
         DNS_THREAD_POOL_EXECUTOR = threadPoolExecutor;
     }
 
-    public void setForceTryIpV6(boolean z) {
-        if (this.forceTryIpV6 != z) {
-            this.forceTryIpV6 = z;
+    public void setForceTryIpV6(boolean forceTryIpV6) {
+        if (this.forceTryIpV6 != forceTryIpV6) {
+            this.forceTryIpV6 = forceTryIpV6;
             checkConnection();
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class ResolvedDomain {
         public ArrayList<String> addresses;
         long ttl;
 
-        public ResolvedDomain(ArrayList<String> arrayList, long j) {
-            this.addresses = arrayList;
-            this.ttl = j;
+        public ResolvedDomain(ArrayList<String> a, long t) {
+            this.addresses = a;
+            this.ttl = t;
         }
 
         public String getAddress() {
-            ArrayList<String> arrayList = this.addresses;
-            return arrayList.get(Utilities.random.nextInt(arrayList.size()));
+            return this.addresses.get(Utilities.random.nextInt(this.addresses.size()));
         }
     }
 
-    public static ConnectionsManager getInstance(int i) {
+    public static ConnectionsManager getInstance(int num) {
         ConnectionsManager[] connectionsManagerArr = Instance;
-        ConnectionsManager connectionsManager = connectionsManagerArr[i];
-        if (connectionsManager == null) {
+        ConnectionsManager localInstance = connectionsManagerArr[num];
+        if (localInstance == null) {
             synchronized (ConnectionsManager.class) {
-                connectionsManager = connectionsManagerArr[i];
-                if (connectionsManager == null) {
-                    connectionsManager = new ConnectionsManager(i);
-                    connectionsManagerArr[i] = connectionsManager;
+                localInstance = connectionsManagerArr[num];
+                if (localInstance == null) {
+                    ConnectionsManager connectionsManager = new ConnectionsManager(num);
+                    localInstance = connectionsManager;
+                    connectionsManagerArr[num] = connectionsManager;
                 }
             }
         }
-        return connectionsManager;
+        return localInstance;
     }
 
-    public ConnectionsManager(int i) {
-        super(i);
-        String str;
-        String str2;
-        String str3;
-        String str4;
-        String str5;
-        SharedPreferences sharedPreferences;
-        File filesDirFixed = ApplicationLoader.getFilesDirFixed();
-        if (i != 0) {
-            File file = new File(filesDirFixed, "account" + i);
-            file.mkdirs();
-            filesDirFixed = file;
-        }
-        String file2 = filesDirFixed.toString();
-        boolean isPushConnectionEnabled = isPushConnectionEnabled();
-        try {
-            str4 = LocaleController.getSystemLocaleStringIso639().toLowerCase();
-            String lowerCase = LocaleController.getLocaleStringIso639().toLowerCase();
-            str2 = Build.MANUFACTURER + Build.MODEL;
-            PackageInfo packageInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
-            String str6 = packageInfo.versionName + " (" + packageInfo.versionCode + ")";
-            if (BuildVars.DEBUG_PRIVATE_VERSION) {
-                str6 = str6 + " pbeta";
-            } else if (BuildVars.DEBUG_VERSION) {
-                str6 = str6 + " beta";
-            }
-            str5 = "SDK " + Build.VERSION.SDK_INT;
-            String str7 = str6;
-            str = lowerCase;
-            str3 = str7;
-        } catch (Exception unused) {
-            str5 = "SDK " + Build.VERSION.SDK_INT;
-            str3 = "App version unknown";
-            str2 = "Android unknown";
-            str = "";
-            str4 = "en";
-        }
-        String str8 = str4.trim().length() == 0 ? "en" : str4;
-        String str9 = str2.trim().length() == 0 ? "Android unknown" : str2;
-        str3 = str3.trim().length() == 0 ? "App version unknown" : str3;
-        String str10 = str5.trim().length() == 0 ? "SDK Unknown" : str5;
-        getUserConfig().loadConfig();
-        String regId = getRegId();
-        String certificateSHA256Fingerprint = AndroidUtilities.getCertificateSHA256Fingerprint();
-        int rawOffset = (TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings()) / 1000;
-        if (this.currentAccount == 0) {
-            sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", 0);
+    public ConnectionsManager(int instance) {
+        super(instance);
+        File config;
+        String langCode;
+        String appVersion;
+        String langCode2;
+        String systemVersion;
+        String systemLangCode;
+        String deviceModel;
+        String appVersion2;
+        String systemVersion2;
+        SharedPreferences mainPreferences;
+        File config2 = ApplicationLoader.getFilesDirFixed();
+        if (instance == 0) {
+            config = config2;
         } else {
-            sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig" + this.currentAccount, 0);
+            File config3 = new File(config2, "account" + instance);
+            config3.mkdirs();
+            config = config3;
         }
-        this.forceTryIpV6 = sharedPreferences.getBoolean("forceTryIpV6", false);
-        init(BuildVars.BUILD_VERSION, 143, BuildVars.APP_ID, str9, str10, str3, str, str8, file2, FileLog.getNetworkLogPath(), regId, certificateSHA256Fingerprint, rawOffset, getUserConfig().getClientUserId(), isPushConnectionEnabled);
+        String configPath = config.toString();
+        boolean enablePushConnection = isPushConnectionEnabled();
+        try {
+            systemLangCode = LocaleController.getSystemLocaleStringIso639().toLowerCase();
+            String langCode3 = LocaleController.getLocaleStringIso639().toLowerCase();
+            langCode2 = Build.MANUFACTURER + Build.MODEL;
+            PackageInfo pInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
+            appVersion = pInfo.versionName + " (" + pInfo.versionCode + ")";
+            if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                appVersion = appVersion + " pbeta";
+            } else if (BuildVars.DEBUG_VERSION) {
+                appVersion = appVersion + " beta";
+            }
+            systemVersion = "SDK " + Build.VERSION.SDK_INT;
+            langCode = langCode3;
+        } catch (Exception e) {
+            appVersion = "App version unknown";
+            systemVersion = "SDK " + Build.VERSION.SDK_INT;
+            systemLangCode = "en";
+            langCode = "";
+            langCode2 = "Android unknown";
+        }
+        systemLangCode = systemLangCode.trim().length() == 0 ? "en" : systemLangCode;
+        if (langCode2.trim().length() != 0) {
+            deviceModel = langCode2;
+        } else {
+            deviceModel = "Android unknown";
+        }
+        if (appVersion.trim().length() != 0) {
+            appVersion2 = appVersion;
+        } else {
+            appVersion2 = "App version unknown";
+        }
+        if (systemVersion.trim().length() != 0) {
+            systemVersion2 = systemVersion;
+        } else {
+            systemVersion2 = "SDK Unknown";
+        }
+        getUserConfig().loadConfig();
+        String pushString = getRegId();
+        String fingerprint = AndroidUtilities.getCertificateSHA256Fingerprint();
+        int timezoneOffset = (TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings()) / 1000;
+        if (this.currentAccount == 0) {
+            mainPreferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", 0);
+        } else {
+            mainPreferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig" + this.currentAccount, 0);
+        }
+        this.forceTryIpV6 = mainPreferences.getBoolean("forceTryIpV6", false);
+        init(BuildVars.BUILD_VERSION, TLRPC.LAYER, BuildVars.APP_ID, deviceModel, systemVersion2, appVersion2, langCode, systemLangCode, configPath, FileLog.getNetworkLogPath(), pushString, fingerprint, timezoneOffset, getUserConfig().getClientUserId(), enablePushConnection);
     }
 
     private String getRegId() {
-        String str = SharedConfig.pushString;
-        if (TextUtils.isEmpty(str) && !TextUtils.isEmpty(SharedConfig.pushStringStatus)) {
-            str = SharedConfig.pushStringStatus;
+        String pushString = SharedConfig.pushString;
+        if (TextUtils.isEmpty(pushString) && !TextUtils.isEmpty(SharedConfig.pushStringStatus)) {
+            pushString = SharedConfig.pushStringStatus;
         }
-        if (TextUtils.isEmpty(str)) {
-            String str2 = "__FIREBASE_GENERATING_SINCE_" + getCurrentTime() + "__";
-            SharedConfig.pushStringStatus = str2;
-            return str2;
+        if (TextUtils.isEmpty(pushString)) {
+            String pushString2 = "__FIREBASE_GENERATING_SINCE_" + getCurrentTime() + "__";
+            SharedConfig.pushStringStatus = pushString2;
+            return pushString2;
         }
-        return str;
+        return pushString;
     }
 
     public boolean isPushConnectionEnabled() {
-        SharedPreferences globalNotificationsSettings = MessagesController.getGlobalNotificationsSettings();
-        if (globalNotificationsSettings.contains("pushConnection")) {
-            return globalNotificationsSettings.getBoolean("pushConnection", true);
+        SharedPreferences preferences = MessagesController.getGlobalNotificationsSettings();
+        if (preferences.contains("pushConnection")) {
+            return preferences.getBoolean("pushConnection", true);
         }
         return MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("backgroundConnection", false);
     }
@@ -314,147 +332,215 @@ public class ConnectionsManager extends BaseController {
         return native_getTimeDifference(this.currentAccount);
     }
 
-    public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate) {
-        return sendRequest(tLObject, requestDelegate, (QuickAckDelegate) null, 0);
+    public int sendRequest(TLObject object, RequestDelegate completionBlock) {
+        return sendRequest(object, completionBlock, (QuickAckDelegate) null, 0);
     }
 
-    public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, int i) {
-        return sendRequest(tLObject, requestDelegate, null, null, null, i, DEFAULT_DATACENTER_ID, 1, true);
+    public int sendRequest(TLObject object, RequestDelegate completionBlock, int flags) {
+        return sendRequest(object, completionBlock, null, null, null, flags, Integer.MAX_VALUE, 1, true);
     }
 
-    public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, int i, int i2) {
-        return sendRequest(tLObject, requestDelegate, null, null, null, i, DEFAULT_DATACENTER_ID, i2, true);
+    public int sendRequest(TLObject object, RequestDelegate completionBlock, int flags, int connetionType) {
+        return sendRequest(object, completionBlock, null, null, null, flags, Integer.MAX_VALUE, connetionType, true);
     }
 
-    public int sendRequest(TLObject tLObject, RequestDelegateTimestamp requestDelegateTimestamp, int i, int i2, int i3) {
-        return sendRequest(tLObject, null, requestDelegateTimestamp, null, null, i, i3, i2, true);
+    public int sendRequest(TLObject object, RequestDelegateTimestamp completionBlock, int flags, int connetionType, int datacenterId) {
+        return sendRequest(object, null, completionBlock, null, null, flags, datacenterId, connetionType, true);
     }
 
-    public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, QuickAckDelegate quickAckDelegate, int i) {
-        return sendRequest(tLObject, requestDelegate, null, quickAckDelegate, null, i, DEFAULT_DATACENTER_ID, 1, true);
+    public int sendRequest(TLObject object, RequestDelegate completionBlock, QuickAckDelegate quickAckBlock, int flags) {
+        return sendRequest(object, completionBlock, null, quickAckBlock, null, flags, Integer.MAX_VALUE, 1, true);
     }
 
-    public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, QuickAckDelegate quickAckDelegate, WriteToSocketDelegate writeToSocketDelegate, int i, int i2, int i3, boolean z) {
-        return sendRequest(tLObject, requestDelegate, null, quickAckDelegate, writeToSocketDelegate, i, i2, i3, z);
+    public int sendRequest(TLObject object, RequestDelegate onComplete, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connetionType, boolean immediate) {
+        return sendRequest(object, onComplete, null, onQuickAck, onWriteToSocket, flags, datacenterId, connetionType, immediate);
     }
 
-    public int sendRequest(final TLObject tLObject, final RequestDelegate requestDelegate, final RequestDelegateTimestamp requestDelegateTimestamp, final QuickAckDelegate quickAckDelegate, final WriteToSocketDelegate writeToSocketDelegate, final int i, final int i2, final int i3, final boolean z) {
-        final int andIncrement = this.lastRequestToken.getAndIncrement();
-        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda9
+    public int sendRequest(final TLObject object, final RequestDelegate onComplete, final RequestDelegateTimestamp onCompleteTimestamp, final QuickAckDelegate onQuickAck, final WriteToSocketDelegate onWriteToSocket, final int flags, final int datacenterId, final int connetionType, final boolean immediate) {
+        final int requestToken = this.lastRequestToken.getAndIncrement();
+        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda13
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.this.lambda$sendRequest$2(tLObject, andIncrement, requestDelegate, requestDelegateTimestamp, quickAckDelegate, writeToSocketDelegate, i, i2, i3, z);
+                ConnectionsManager.this.m1369lambda$sendRequest$2$orgtelegramtgnetConnectionsManager(object, requestToken, onComplete, onCompleteTimestamp, onQuickAck, onWriteToSocket, flags, datacenterId, connetionType, immediate);
             }
         });
-        return andIncrement;
+        return requestToken;
     }
 
-    public /* synthetic */ void lambda$sendRequest$2(final TLObject tLObject, int i, final RequestDelegate requestDelegate, final RequestDelegateTimestamp requestDelegateTimestamp, QuickAckDelegate quickAckDelegate, WriteToSocketDelegate writeToSocketDelegate, int i2, int i3, int i4, boolean z) {
+    /* renamed from: lambda$sendRequest$2$org-telegram-tgnet-ConnectionsManager */
+    public /* synthetic */ void m1369lambda$sendRequest$2$orgtelegramtgnetConnectionsManager(final TLObject object, int requestToken, final RequestDelegate onComplete, final RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connetionType, boolean immediate) {
         Exception e;
-        NativeByteBuffer nativeByteBuffer;
+        NativeByteBuffer buffer;
         if (BuildVars.LOGS_ENABLED) {
-            FileLog.d("send request " + tLObject + " with token = " + i);
+            FileLog.d("send request " + object + " with token = " + requestToken);
         }
         try {
-            nativeByteBuffer = new NativeByteBuffer(tLObject.getObjectSize());
-            tLObject.serializeToStream(nativeByteBuffer);
-            tLObject.freeResources();
+            buffer = new NativeByteBuffer(object.getObjectSize());
+            object.serializeToStream(buffer);
+            object.freeResources();
         } catch (Exception e2) {
             e = e2;
         }
         try {
-            native_sendRequest(this.currentAccount, nativeByteBuffer.address, new RequestDelegateInternal() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda13
-                @Override // org.telegram.tgnet.RequestDelegateInternal
-                public final void run(long j, int i5, String str, int i6, long j2) {
-                    ConnectionsManager.lambda$sendRequest$1(TLObject.this, requestDelegate, requestDelegateTimestamp, j, i5, str, i6, j2);
-                }
-            }, quickAckDelegate, writeToSocketDelegate, i2, i3, i4, z, i);
         } catch (Exception e3) {
             e = e3;
             FileLog.e(e);
         }
-    }
-
-    public static /* synthetic */ void lambda$sendRequest$1(TLObject tLObject, final RequestDelegate requestDelegate, final RequestDelegateTimestamp requestDelegateTimestamp, long j, int i, String str, int i2, final long j2) {
-        final TLRPC$TL_error tLRPC$TL_error;
-        final TLObject tLObject2;
         try {
-            if (j != 0) {
-                NativeByteBuffer wrap = NativeByteBuffer.wrap(j);
-                wrap.reused = true;
-                tLObject2 = tLObject.deserializeResponse(wrap, wrap.readInt32(true), true);
-                tLRPC$TL_error = null;
-            } else if (str != null) {
-                TLRPC$TL_error tLRPC$TL_error2 = new TLRPC$TL_error();
-                tLRPC$TL_error2.code = i;
-                tLRPC$TL_error2.text = str;
-                if (BuildVars.LOGS_ENABLED) {
-                    FileLog.e(tLObject + " got error " + tLRPC$TL_error2.code + " " + tLRPC$TL_error2.text);
+            native_sendRequest(this.currentAccount, buffer.address, new RequestDelegateInternal() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda4
+                @Override // org.telegram.tgnet.RequestDelegateInternal
+                public final void run(long j, int i, String str, int i2, long j2) {
+                    ConnectionsManager.lambda$sendRequest$1(TLObject.this, onComplete, onCompleteTimestamp, j, i, str, i2, j2);
                 }
-                tLRPC$TL_error = tLRPC$TL_error2;
-                tLObject2 = null;
-            } else {
-                tLObject2 = null;
-                tLRPC$TL_error = null;
-            }
-            if (tLObject2 != null) {
-                tLObject2.networkType = i2;
-            }
-            if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("java received " + tLObject2 + " error = " + tLRPC$TL_error);
-            }
-            Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda11
-                @Override // java.lang.Runnable
-                public final void run() {
-                    ConnectionsManager.lambda$sendRequest$0(RequestDelegate.this, tLObject2, tLRPC$TL_error, requestDelegateTimestamp, j2);
-                }
-            });
-        } catch (Exception e) {
+            }, onQuickAck, onWriteToSocket, flags, datacenterId, connetionType, immediate, requestToken);
+        } catch (Exception e4) {
+            e = e4;
             FileLog.e(e);
         }
     }
 
-    public static /* synthetic */ void lambda$sendRequest$0(RequestDelegate requestDelegate, TLObject tLObject, TLRPC$TL_error tLRPC$TL_error, RequestDelegateTimestamp requestDelegateTimestamp, long j) {
-        if (requestDelegate != null) {
-            requestDelegate.run(tLObject, tLRPC$TL_error);
-        } else if (requestDelegateTimestamp != null) {
-            requestDelegateTimestamp.run(tLObject, tLRPC$TL_error, j);
+    /* JADX WARN: Removed duplicated region for block: B:17:0x0061  */
+    /* JADX WARN: Removed duplicated region for block: B:19:0x0066  */
+    /* JADX WARN: Removed duplicated region for block: B:22:0x006c A[Catch: Exception -> 0x009d, TryCatch #1 {Exception -> 0x009d, blocks: (B:18:0x0063, B:20:0x0068, B:22:0x006c, B:23:0x0088), top: B:30:0x0063 }] */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public static /* synthetic */ void lambda$sendRequest$1(org.telegram.tgnet.TLObject r15, final org.telegram.tgnet.RequestDelegate r16, final org.telegram.tgnet.RequestDelegateTimestamp r17, long r18, int r20, java.lang.String r21, int r22, final long r23) {
+        /*
+            r1 = r15
+            r2 = r21
+            r0 = 0
+            r3 = 0
+            r4 = 0
+            int r6 = (r18 > r4 ? 1 : (r18 == r4 ? 0 : -1))
+            if (r6 == 0) goto L25
+            org.telegram.tgnet.NativeByteBuffer r4 = org.telegram.tgnet.NativeByteBuffer.wrap(r18)     // Catch: java.lang.Exception -> L1e
+            r5 = 1
+            r4.reused = r5     // Catch: java.lang.Exception -> L1e
+            int r6 = r4.readInt32(r5)     // Catch: java.lang.Exception -> L1e
+            org.telegram.tgnet.TLObject r5 = r15.deserializeResponse(r4, r6, r5)     // Catch: java.lang.Exception -> L1e
+            r0 = r5
+            r4 = r20
+            goto L5f
+        L1e:
+            r0 = move-exception
+            r4 = r20
+        L21:
+            r5 = r22
+            goto L9e
+        L25:
+            if (r2 == 0) goto L5d
+            org.telegram.tgnet.TLRPC$TL_error r4 = new org.telegram.tgnet.TLRPC$TL_error     // Catch: java.lang.Exception -> L1e
+            r4.<init>()     // Catch: java.lang.Exception -> L1e
+            r3 = r4
+            r4 = r20
+            r3.code = r4     // Catch: java.lang.Exception -> L5b
+            r3.text = r2     // Catch: java.lang.Exception -> L5b
+            boolean r5 = org.telegram.messenger.BuildVars.LOGS_ENABLED     // Catch: java.lang.Exception -> L5b
+            if (r5 == 0) goto L5f
+            java.lang.StringBuilder r5 = new java.lang.StringBuilder     // Catch: java.lang.Exception -> L5b
+            r5.<init>()     // Catch: java.lang.Exception -> L5b
+            r5.append(r15)     // Catch: java.lang.Exception -> L5b
+            java.lang.String r6 = " got error "
+            r5.append(r6)     // Catch: java.lang.Exception -> L5b
+            int r6 = r3.code     // Catch: java.lang.Exception -> L5b
+            r5.append(r6)     // Catch: java.lang.Exception -> L5b
+            java.lang.String r6 = " "
+            r5.append(r6)     // Catch: java.lang.Exception -> L5b
+            java.lang.String r6 = r3.text     // Catch: java.lang.Exception -> L5b
+            r5.append(r6)     // Catch: java.lang.Exception -> L5b
+            java.lang.String r5 = r5.toString()     // Catch: java.lang.Exception -> L5b
+            org.telegram.messenger.FileLog.e(r5)     // Catch: java.lang.Exception -> L5b
+            goto L5f
+        L5b:
+            r0 = move-exception
+            goto L21
+        L5d:
+            r4 = r20
+        L5f:
+            if (r0 == 0) goto L66
+            r5 = r22
+            r0.networkType = r5     // Catch: java.lang.Exception -> L9d
+            goto L68
+        L66:
+            r5 = r22
+        L68:
+            boolean r6 = org.telegram.messenger.BuildVars.LOGS_ENABLED     // Catch: java.lang.Exception -> L9d
+            if (r6 == 0) goto L88
+            java.lang.StringBuilder r6 = new java.lang.StringBuilder     // Catch: java.lang.Exception -> L9d
+            r6.<init>()     // Catch: java.lang.Exception -> L9d
+            java.lang.String r7 = "java received "
+            r6.append(r7)     // Catch: java.lang.Exception -> L9d
+            r6.append(r0)     // Catch: java.lang.Exception -> L9d
+            java.lang.String r7 = " error = "
+            r6.append(r7)     // Catch: java.lang.Exception -> L9d
+            r6.append(r3)     // Catch: java.lang.Exception -> L9d
+            java.lang.String r6 = r6.toString()     // Catch: java.lang.Exception -> L9d
+            org.telegram.messenger.FileLog.d(r6)     // Catch: java.lang.Exception -> L9d
+        L88:
+            r8 = r0
+            r9 = r3
+            org.telegram.messenger.DispatchQueue r13 = org.telegram.messenger.Utilities.stageQueue     // Catch: java.lang.Exception -> L9d
+            org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda2 r14 = new org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda2     // Catch: java.lang.Exception -> L9d
+            r6 = r14
+            r7 = r16
+            r10 = r17
+            r11 = r23
+            r6.<init>()     // Catch: java.lang.Exception -> L9d
+            r13.postRunnable(r14)     // Catch: java.lang.Exception -> L9d
+            goto La1
+        L9d:
+            r0 = move-exception
+        L9e:
+            org.telegram.messenger.FileLog.e(r0)
+        La1:
+            return
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.tgnet.ConnectionsManager.lambda$sendRequest$1(org.telegram.tgnet.TLObject, org.telegram.tgnet.RequestDelegate, org.telegram.tgnet.RequestDelegateTimestamp, long, int, java.lang.String, int, long):void");
+    }
+
+    public static /* synthetic */ void lambda$sendRequest$0(RequestDelegate onComplete, TLObject finalResponse, TLRPC.TL_error finalError, RequestDelegateTimestamp onCompleteTimestamp, long timestamp) {
+        if (onComplete != null) {
+            onComplete.run(finalResponse, finalError);
+        } else if (onCompleteTimestamp != null) {
+            onCompleteTimestamp.run(finalResponse, finalError, timestamp);
         }
-        if (tLObject != null) {
-            tLObject.freeResources();
+        if (finalResponse != null) {
+            finalResponse.freeResources();
         }
     }
 
-    public void cancelRequest(int i, boolean z) {
-        native_cancelRequest(this.currentAccount, i, z);
+    public void cancelRequest(int token, boolean notifyServer) {
+        native_cancelRequest(this.currentAccount, token, notifyServer);
     }
 
-    public void cleanup(boolean z) {
-        native_cleanUp(this.currentAccount, z);
+    public void cleanup(boolean resetKeys) {
+        native_cleanUp(this.currentAccount, resetKeys);
     }
 
-    public void cancelRequestsForGuid(int i) {
-        native_cancelRequestsForGuid(this.currentAccount, i);
+    public void cancelRequestsForGuid(int guid) {
+        native_cancelRequestsForGuid(this.currentAccount, guid);
     }
 
-    public void bindRequestToGuid(int i, int i2) {
-        native_bindRequestToGuid(this.currentAccount, i, i2);
+    public void bindRequestToGuid(int requestToken, int guid) {
+        native_bindRequestToGuid(this.currentAccount, requestToken, guid);
     }
 
-    public void applyDatacenterAddress(int i, String str, int i2) {
-        native_applyDatacenterAddress(this.currentAccount, i, str, i2);
+    public void applyDatacenterAddress(int datacenterId, String ipAddress, int port) {
+        native_applyDatacenterAddress(this.currentAccount, datacenterId, ipAddress, port);
     }
 
     public int getConnectionState() {
         int i = this.connectionState;
-        if (i != 3 || !this.isUpdating) {
-            return i;
+        if (i == 3 && this.isUpdating) {
+            return 5;
         }
-        return 5;
+        return i;
     }
 
-    public void setUserId(long j) {
-        native_setUserId(this.currentAccount, j);
+    public void setUserId(long id) {
+        native_setUserId(this.currentAccount, id);
     }
 
     public void checkConnection() {
@@ -462,67 +548,73 @@ public class ConnectionsManager extends BaseController {
         native_setNetworkAvailable(this.currentAccount, ApplicationLoader.isNetworkOnline(), ApplicationLoader.getCurrentNetworkType(), ApplicationLoader.isConnectionSlow());
     }
 
-    public void setPushConnectionEnabled(boolean z) {
-        native_setPushConnectionEnabled(this.currentAccount, z);
+    public void setPushConnectionEnabled(boolean value) {
+        native_setPushConnectionEnabled(this.currentAccount, value);
     }
 
-    public void init(int i, int i2, int i3, String str, String str2, String str3, String str4, String str5, String str6, String str7, String str8, String str9, int i4, long j, boolean z) {
-        String str10;
-        String str11;
-        SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", 0);
-        String string = sharedPreferences.getString("proxy_ip", "");
-        String string2 = sharedPreferences.getString("proxy_user", "");
-        String string3 = sharedPreferences.getString("proxy_pass", "");
-        String string4 = sharedPreferences.getString("proxy_secret", "");
-        int i5 = sharedPreferences.getInt("proxy_port", 1080);
-        if (sharedPreferences.getBoolean("proxy_enabled", false) && !TextUtils.isEmpty(string)) {
-            native_setProxySettings(this.currentAccount, string, i5, string2, string3, string4);
+    public void init(int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, int timezoneOffset, long userId, boolean enablePushConnection) {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", 0);
+        String proxyAddress = preferences.getString("proxy_ip", "");
+        String proxyUsername = preferences.getString("proxy_user", "");
+        String proxyPassword = preferences.getString("proxy_pass", "");
+        String proxySecret = preferences.getString("proxy_secret", "");
+        int proxyPort = preferences.getInt("proxy_port", 1080);
+        if (preferences.getBoolean("proxy_enabled", false) && !TextUtils.isEmpty(proxyAddress)) {
+            native_setProxySettings(this.currentAccount, proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
         }
+        String installer = "";
         try {
-            str10 = ApplicationLoader.applicationContext.getPackageManager().getInstallerPackageName(ApplicationLoader.applicationContext.getPackageName());
-        } catch (Throwable unused) {
-            str10 = "";
+            installer = ApplicationLoader.applicationContext.getPackageManager().getInstallerPackageName(ApplicationLoader.applicationContext.getPackageName());
+        } catch (Throwable th) {
         }
-        String str12 = str10 == null ? "" : str10;
+        if (installer == null) {
+            installer = "";
+        }
+        String packageId = "";
         try {
-            str11 = ApplicationLoader.applicationContext.getPackageName();
-        } catch (Throwable unused2) {
-            str11 = "";
+            packageId = ApplicationLoader.applicationContext.getPackageName();
+        } catch (Throwable th2) {
         }
-        native_init(this.currentAccount, i, i2, i3, str, str2, str3, str4, str5, str6, str7, str8, str9, str12, str11 == null ? "" : str11, i4, j, z, ApplicationLoader.isNetworkOnline(), ApplicationLoader.getCurrentNetworkType());
+        if (packageId == null) {
+            packageId = "";
+        }
+        native_init(this.currentAccount, version, layer, apiId, deviceModel, systemVersion, appVersion, langCode, systemLangCode, configPath, logPath, regId, cFingerprint, installer, packageId, timezoneOffset, userId, enablePushConnection, ApplicationLoader.isNetworkOnline(), ApplicationLoader.getCurrentNetworkType());
         checkConnection();
     }
 
-    public static void setLangCode(String str) {
-        String lowerCase = str.replace('_', '-').toLowerCase();
-        for (int i = 0; i < 4; i++) {
-            native_setLangCode(i, lowerCase);
+    public static void setLangCode(String langCode) {
+        String langCode2 = langCode.replace('_', '-').toLowerCase();
+        for (int a = 0; a < 4; a++) {
+            native_setLangCode(a, langCode2);
         }
     }
 
-    public static void setRegId(String str, String str2) {
-        if (TextUtils.isEmpty(str) && !TextUtils.isEmpty(str2)) {
-            str = str2;
+    public static void setRegId(String regId, String status) {
+        String pushString = regId;
+        if (TextUtils.isEmpty(pushString) && !TextUtils.isEmpty(status)) {
+            pushString = status;
         }
-        if (TextUtils.isEmpty(str)) {
-            str = "__FIREBASE_GENERATING_SINCE_" + getInstance(0).getCurrentTime() + "__";
+        if (TextUtils.isEmpty(pushString)) {
+            String str = "__FIREBASE_GENERATING_SINCE_" + getInstance(0).getCurrentTime() + "__";
             SharedConfig.pushStringStatus = str;
+            pushString = str;
         }
-        for (int i = 0; i < 4; i++) {
-            native_setRegId(i, str);
-        }
-    }
-
-    public static void setSystemLangCode(String str) {
-        String lowerCase = str.replace('_', '-').toLowerCase();
-        for (int i = 0; i < 4; i++) {
-            native_setSystemLangCode(i, lowerCase);
+        for (int a = 0; a < 4; a++) {
+            native_setRegId(a, pushString);
         }
     }
 
-    public void switchBackend(boolean z) {
-        MessagesController.getGlobalMainSettings().edit().remove("language_showed2").commit();
-        native_switchBackend(this.currentAccount, z);
+    public static void setSystemLangCode(String langCode) {
+        String langCode2 = langCode.replace('_', '-').toLowerCase();
+        for (int a = 0; a < 4; a++) {
+            native_setSystemLangCode(a, langCode2);
+        }
+    }
+
+    public void switchBackend(boolean restart) {
+        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+        preferences.edit().remove("language_showed2").commit();
+        native_switchBackend(this.currentAccount, restart);
     }
 
     public boolean isTestBackend() {
@@ -541,20 +633,32 @@ public class ConnectionsManager extends BaseController {
         return this.lastPauseTime;
     }
 
-    public long checkProxy(String str, int i, String str2, String str3, String str4, RequestTimeDelegate requestTimeDelegate) {
-        if (TextUtils.isEmpty(str)) {
+    public long checkProxy(String address, int port, String username, String password, String secret, RequestTimeDelegate requestTimeDelegate) {
+        if (TextUtils.isEmpty(address)) {
             return 0L;
         }
-        return native_checkProxy(this.currentAccount, str == null ? "" : str, i, str2 == null ? "" : str2, str3 == null ? "" : str3, str4 == null ? "" : str4, requestTimeDelegate);
+        if (address == null) {
+            address = "";
+        }
+        if (username == null) {
+            username = "";
+        }
+        if (password == null) {
+            password = "";
+        }
+        if (secret == null) {
+            secret = "";
+        }
+        return native_checkProxy(this.currentAccount, address, port, username, password, secret, requestTimeDelegate);
     }
 
-    public void setAppPaused(boolean z, boolean z2) {
-        if (!z2) {
-            this.appPaused = z;
+    public void setAppPaused(boolean value, boolean byScreenState) {
+        if (!byScreenState) {
+            this.appPaused = value;
             if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("app paused = " + z);
+                FileLog.d("app paused = " + value);
             }
-            if (z) {
+            if (value) {
                 this.appResumeCount--;
             } else {
                 this.appResumeCount++;
@@ -576,7 +680,7 @@ public class ConnectionsManager extends BaseController {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("reset app pause time");
             }
-            if (this.lastPauseTime != 0 && System.currentTimeMillis() - this.lastPauseTime > 5000) {
+            if (this.lastPauseTime != 0 && System.currentTimeMillis() - this.lastPauseTime > DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS) {
                 getContactsController().checkContacts();
             }
             this.lastPauseTime = 0L;
@@ -584,87 +688,74 @@ public class ConnectionsManager extends BaseController {
         }
     }
 
-    public static void onUnparsedMessageReceived(long j, final int i) {
+    public static void onUnparsedMessageReceived(long address, final int currentAccount) {
         try {
-            NativeByteBuffer wrap = NativeByteBuffer.wrap(j);
-            wrap.reused = true;
-            int readInt32 = wrap.readInt32(true);
-            final TLObject TLdeserialize = TLClassStore.Instance().TLdeserialize(wrap, readInt32, true);
-            if (TLdeserialize instanceof TLRPC$Updates) {
+            NativeByteBuffer buff = NativeByteBuffer.wrap(address);
+            buff.reused = true;
+            int constructor = buff.readInt32(true);
+            final TLObject message = TLClassStore.Instance().TLdeserialize(buff, constructor, true);
+            if (message instanceof TLRPC.Updates) {
                 if (BuildVars.LOGS_ENABLED) {
-                    FileLog.d("java received " + TLdeserialize);
+                    FileLog.d("java received " + message);
                 }
                 KeepAliveJob.finishJob();
-                Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda5
+                Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda9
                     @Override // java.lang.Runnable
                     public final void run() {
-                        ConnectionsManager.lambda$onUnparsedMessageReceived$3(i, TLdeserialize);
+                        AccountInstance.getInstance(currentAccount).getMessagesController().processUpdates((TLRPC.Updates) message, false);
                     }
                 });
-            } else if (!BuildVars.LOGS_ENABLED) {
-            } else {
-                FileLog.d(String.format("java received unknown constructor 0x%x", Integer.valueOf(readInt32)));
+            } else if (BuildVars.LOGS_ENABLED) {
+                FileLog.d(String.format("java received unknown constructor 0x%x", Integer.valueOf(constructor)));
             }
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public static /* synthetic */ void lambda$onUnparsedMessageReceived$3(int i, TLObject tLObject) {
-        AccountInstance.getInstance(i).getMessagesController().processUpdates((TLRPC$Updates) tLObject, false);
-    }
-
-    public static /* synthetic */ void lambda$onUpdate$4(int i) {
-        AccountInstance.getInstance(i).getMessagesController().updateTimerProc();
-    }
-
-    public static void onUpdate(final int i) {
-        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda1
+    public static void onUpdate(final int currentAccount) {
+        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda6
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$onUpdate$4(i);
+                AccountInstance.getInstance(currentAccount).getMessagesController().updateTimerProc();
             }
         });
     }
 
-    public static /* synthetic */ void lambda$onSessionCreated$5(int i) {
-        AccountInstance.getInstance(i).getMessagesController().getDifference();
-    }
-
-    public static void onSessionCreated(final int i) {
-        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda2
+    public static void onSessionCreated(final int currentAccount) {
+        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda5
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$onSessionCreated$5(i);
+                AccountInstance.getInstance(currentAccount).getMessagesController().getDifference();
             }
         });
     }
 
-    public static void onConnectionStateChanged(final int i, final int i2) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda3
+    public static void onConnectionStateChanged(final int state, final int currentAccount) {
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda7
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$onConnectionStateChanged$6(i2, i);
+                ConnectionsManager.lambda$onConnectionStateChanged$6(currentAccount, state);
             }
         });
     }
 
-    public static /* synthetic */ void lambda$onConnectionStateChanged$6(int i, int i2) {
-        getInstance(i).connectionState = i2;
-        AccountInstance.getInstance(i).getNotificationCenter().postNotificationName(NotificationCenter.didUpdateConnectionState, new Object[0]);
+    public static /* synthetic */ void lambda$onConnectionStateChanged$6(int currentAccount, int state) {
+        getInstance(currentAccount).connectionState = state;
+        AccountInstance.getInstance(currentAccount).getNotificationCenter().postNotificationName(NotificationCenter.didUpdateConnectionState, new Object[0]);
     }
 
-    public static void onLogout(final int i) {
+    public static void onLogout(final int currentAccount) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$onLogout$7(i);
+                ConnectionsManager.lambda$onLogout$7(currentAccount);
             }
         });
     }
 
-    public static /* synthetic */ void lambda$onLogout$7(int i) {
-        AccountInstance accountInstance = AccountInstance.getInstance(i);
+    public static /* synthetic */ void lambda$onLogout$7(int currentAccount) {
+        AccountInstance accountInstance = AccountInstance.getInstance(currentAccount);
         if (accountInstance.getUserConfig().getClientUserId() != 0) {
             accountInstance.getUserConfig().clearConfig();
             accountInstance.getMessagesController().performLogout(0);
@@ -672,175 +763,168 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static int getInitFlags() {
-        if (EmuDetector.with(ApplicationLoader.applicationContext).detect()) {
-            if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("detected emu");
-            }
-            return 1024;
+        EmuDetector detector = EmuDetector.with(ApplicationLoader.applicationContext);
+        if (!detector.detect()) {
+            return 0;
         }
-        return 0;
+        if (BuildVars.LOGS_ENABLED) {
+            FileLog.d("detected emu");
+        }
+        int flags = 0 | 1024;
+        return flags;
     }
 
-    public static void onBytesSent(int i, int i2, int i3) {
+    public static void onBytesSent(int amount, int networkType, int currentAccount) {
         try {
-            AccountInstance.getInstance(i3).getStatsController().incrementSentBytesCount(i2, 6, i);
+            AccountInstance.getInstance(currentAccount).getStatsController().incrementSentBytesCount(networkType, 6, amount);
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public static void onRequestNewServerIpAndPort(final int i, final int i2) {
-        Utilities.globalQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda4
+    public static void onRequestNewServerIpAndPort(final int second, final int currentAccount) {
+        Utilities.globalQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda8
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$onRequestNewServerIpAndPort$9(i, i2);
+                ConnectionsManager.lambda$onRequestNewServerIpAndPort$9(second, currentAccount);
             }
         });
     }
 
-    public static /* synthetic */ void lambda$onRequestNewServerIpAndPort$9(final int i, final int i2) {
-        final boolean isNetworkOnline = ApplicationLoader.isNetworkOnline();
-        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda7
+    public static /* synthetic */ void lambda$onRequestNewServerIpAndPort$9(final int second, final int currentAccount) {
+        final boolean networkOnline = ApplicationLoader.isNetworkOnline();
+        Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda11
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$onRequestNewServerIpAndPort$8(i, isNetworkOnline, i2);
+                ConnectionsManager.lambda$onRequestNewServerIpAndPort$8(second, networkOnline, currentAccount);
             }
         });
     }
 
-    public static /* synthetic */ void lambda$onRequestNewServerIpAndPort$8(int i, boolean z, int i2) {
-        if (currentTask != null || ((i == 0 && Math.abs(lastDnsRequestTime - System.currentTimeMillis()) < 10000) || !z)) {
-            if (!BuildVars.LOGS_ENABLED) {
+    public static /* synthetic */ void lambda$onRequestNewServerIpAndPort$8(int second, boolean networkOnline, int currentAccount) {
+        if (currentTask != null || ((second == 0 && Math.abs(lastDnsRequestTime - System.currentTimeMillis()) < 10000) || !networkOnline)) {
+            if (BuildVars.LOGS_ENABLED) {
+                FileLog.d("don't start task, current task = " + currentTask + " next task = " + second + " time diff = " + Math.abs(lastDnsRequestTime - System.currentTimeMillis()) + " network = " + ApplicationLoader.isNetworkOnline());
                 return;
             }
-            FileLog.d("don't start task, current task = " + currentTask + " next task = " + i + " time diff = " + Math.abs(lastDnsRequestTime - System.currentTimeMillis()) + " network = " + ApplicationLoader.isNetworkOnline());
             return;
         }
         lastDnsRequestTime = System.currentTimeMillis();
-        if (i == 3) {
+        if (second == 3) {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("start mozilla txt task");
             }
-            MozillaDnsLoadTask mozillaDnsLoadTask = new MozillaDnsLoadTask(i2);
-            mozillaDnsLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            currentTask = mozillaDnsLoadTask;
-        } else if (i == 2) {
+            MozillaDnsLoadTask task = new MozillaDnsLoadTask(currentAccount);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            currentTask = task;
+        } else if (second == 2) {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("start google txt task");
             }
-            GoogleDnsLoadTask googleDnsLoadTask = new GoogleDnsLoadTask(i2);
-            googleDnsLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            currentTask = googleDnsLoadTask;
-        } else if (i == 1) {
+            GoogleDnsLoadTask task2 = new GoogleDnsLoadTask(currentAccount);
+            task2.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            currentTask = task2;
+        } else if (second == 1) {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("start dns txt task");
             }
-            DnsTxtLoadTask dnsTxtLoadTask = new DnsTxtLoadTask(i2);
-            dnsTxtLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            currentTask = dnsTxtLoadTask;
+            DnsTxtLoadTask task3 = new DnsTxtLoadTask(currentAccount);
+            task3.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            currentTask = task3;
         } else {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("start firebase task");
             }
-            FirebaseTask firebaseTask = new FirebaseTask(i2);
-            firebaseTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            currentTask = firebaseTask;
+            FirebaseTask task4 = new FirebaseTask(currentAccount);
+            task4.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            currentTask = task4;
         }
     }
 
-    public static /* synthetic */ void lambda$onProxyError$10() {
-        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needShowAlert, 3);
-    }
-
     public static void onProxyError() {
-        AndroidUtilities.runOnUIThread(ConnectionsManager$$ExternalSyntheticLambda12.INSTANCE);
+        AndroidUtilities.runOnUIThread(ConnectionsManager$$ExternalSyntheticLambda3.INSTANCE);
     }
 
-    public static void getHostByName(final String str, final long j) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda8
+    public static void getHostByName(final String hostName, final long address) {
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda12
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.lambda$getHostByName$11(str, j);
+                ConnectionsManager.lambda$getHostByName$11(hostName, address);
             }
         });
     }
 
-    public static /* synthetic */ void lambda$getHostByName$11(String str, long j) {
-        ResolvedDomain resolvedDomain = dnsCache.get(str);
+    public static /* synthetic */ void lambda$getHostByName$11(String hostName, long address) {
+        ResolvedDomain resolvedDomain = dnsCache.get(hostName);
         if (resolvedDomain != null && SystemClock.elapsedRealtime() - resolvedDomain.ttl < 300000) {
-            native_onHostNameResolved(str, j, resolvedDomain.getAddress());
+            native_onHostNameResolved(hostName, address, resolvedDomain.getAddress());
             return;
         }
-        ResolveHostByNameTask resolveHostByNameTask = resolvingHostnameTasks.get(str);
-        if (resolveHostByNameTask == null) {
-            resolveHostByNameTask = new ResolveHostByNameTask(str);
+        ResolveHostByNameTask task = resolvingHostnameTasks.get(hostName);
+        if (task == null) {
+            task = new ResolveHostByNameTask(hostName);
             try {
-                resolveHostByNameTask.executeOnExecutor(DNS_THREAD_POOL_EXECUTOR, null, null, null);
-                resolvingHostnameTasks.put(str, resolveHostByNameTask);
-            } catch (Throwable th) {
-                FileLog.e(th);
-                native_onHostNameResolved(str, j, "");
+                task.executeOnExecutor(DNS_THREAD_POOL_EXECUTOR, null, null, null);
+                resolvingHostnameTasks.put(hostName, task);
+            } catch (Throwable e) {
+                FileLog.e(e);
+                native_onHostNameResolved(hostName, address, "");
                 return;
             }
         }
-        resolveHostByNameTask.addAddress(j);
+        task.addAddress(address);
     }
 
-    public static void onBytesReceived(int i, int i2, int i3) {
+    public static void onBytesReceived(int amount, int networkType, int currentAccount) {
         try {
-            StatsController.getInstance(i3).incrementReceivedBytesCount(i2, 6, i);
+            StatsController.getInstance(currentAccount).incrementReceivedBytesCount(networkType, 6, amount);
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public static void onUpdateConfig(long j, final int i) {
+    public static void onUpdateConfig(long address, final int currentAccount) {
         try {
-            NativeByteBuffer wrap = NativeByteBuffer.wrap(j);
-            wrap.reused = true;
-            final TLRPC$TL_config TLdeserialize = TLRPC$TL_config.TLdeserialize(wrap, wrap.readInt32(true), true);
-            if (TLdeserialize == null) {
-                return;
+            NativeByteBuffer buff = NativeByteBuffer.wrap(address);
+            buff.reused = true;
+            final TLRPC.TL_config message = TLRPC.TL_config.TLdeserialize(buff, buff.readInt32(true), true);
+            if (message != null) {
+                Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda10
+                    @Override // java.lang.Runnable
+                    public final void run() {
+                        AccountInstance.getInstance(currentAccount).getMessagesController().updateConfig(message);
+                    }
+                });
             }
-            Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda6
-                @Override // java.lang.Runnable
-                public final void run() {
-                    ConnectionsManager.lambda$onUpdateConfig$12(i, TLdeserialize);
-                }
-            });
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public static /* synthetic */ void lambda$onUpdateConfig$12(int i, TLRPC$TL_config tLRPC$TL_config) {
-        AccountInstance.getInstance(i).getMessagesController().updateConfig(tLRPC$TL_config);
-    }
-
-    public static void onInternalPushReceived(int i) {
+    public static void onInternalPushReceived(int currentAccount) {
         KeepAliveJob.startJob();
     }
 
-    public static void setProxySettings(boolean z, String str, int i, String str2, String str3, String str4) {
-        if (str == null) {
-            str = "";
+    public static void setProxySettings(boolean enabled, String address, int port, String username, String password, String secret) {
+        if (address == null) {
+            address = "";
         }
-        if (str2 == null) {
-            str2 = "";
+        if (username == null) {
+            username = "";
         }
-        if (str3 == null) {
-            str3 = "";
+        if (password == null) {
+            password = "";
         }
-        if (str4 == null) {
-            str4 = "";
+        if (secret == null) {
+            secret = "";
         }
-        for (int i2 = 0; i2 < 4; i2++) {
-            if (z && !TextUtils.isEmpty(str)) {
-                native_setProxySettings(i2, str, i, str2, str3, str4);
+        for (int a = 0; a < 4; a++) {
+            if (enabled && !TextUtils.isEmpty(address)) {
+                native_setProxySettings(a, address, port, username, password, secret);
             } else {
-                native_setProxySettings(i2, "", 1080, "", "", "");
+                native_setProxySettings(a, "", 1080, "", "", "");
             }
-            AccountInstance accountInstance = AccountInstance.getInstance(i2);
+            AccountInstance accountInstance = AccountInstance.getInstance(a);
             if (accountInstance.getUserConfig().isClientActivated()) {
                 accountInstance.getMessagesController().checkPromoInfo(true);
             }
@@ -853,27 +937,26 @@ public class ConnectionsManager extends BaseController {
         return i;
     }
 
-    public void setIsUpdating(final boolean z) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda10
+    public void setIsUpdating(final boolean value) {
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                ConnectionsManager.this.lambda$setIsUpdating$13(z);
+                ConnectionsManager.this.m1370lambda$setIsUpdating$13$orgtelegramtgnetConnectionsManager(value);
             }
         });
     }
 
-    public /* synthetic */ void lambda$setIsUpdating$13(boolean z) {
-        if (this.isUpdating == z) {
+    /* renamed from: lambda$setIsUpdating$13$org-telegram-tgnet-ConnectionsManager */
+    public /* synthetic */ void m1370lambda$setIsUpdating$13$orgtelegramtgnetConnectionsManager(boolean value) {
+        if (this.isUpdating == value) {
             return;
         }
-        this.isUpdating = z;
-        if (this.connectionState != 3) {
-            return;
+        this.isUpdating = value;
+        if (this.connectionState == 3) {
+            AccountInstance.getInstance(this.currentAccount).getNotificationCenter().postNotificationName(NotificationCenter.didUpdateConnectionState, new Object[0]);
         }
-        AccountInstance.getInstance(this.currentAccount).getNotificationCenter().postNotificationName(NotificationCenter.didUpdateConnectionState, new Object[0]);
     }
 
-    @SuppressLint({"NewApi"})
     protected byte getIpStrategy() {
         if (Build.VERSION.SDK_INT < 19) {
             return (byte) 0;
@@ -882,623 +965,709 @@ public class ConnectionsManager extends BaseController {
             try {
                 Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
                 while (networkInterfaces.hasMoreElements()) {
-                    NetworkInterface nextElement = networkInterfaces.nextElement();
-                    if (nextElement.isUp() && !nextElement.isLoopback() && !nextElement.getInterfaceAddresses().isEmpty()) {
+                    NetworkInterface networkInterface = networkInterfaces.nextElement();
+                    if (networkInterface.isUp() && !networkInterface.isLoopback() && !networkInterface.getInterfaceAddresses().isEmpty()) {
                         if (BuildVars.LOGS_ENABLED) {
-                            FileLog.d("valid interface: " + nextElement);
+                            FileLog.d("valid interface: " + networkInterface);
                         }
-                        List<InterfaceAddress> interfaceAddresses = nextElement.getInterfaceAddresses();
-                        for (int i = 0; i < interfaceAddresses.size(); i++) {
-                            InetAddress address = interfaceAddresses.get(i).getAddress();
+                        List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
+                        for (int a = 0; a < interfaceAddresses.size(); a++) {
+                            InterfaceAddress address = interfaceAddresses.get(a);
+                            InetAddress inetAddress = address.getAddress();
                             if (BuildVars.LOGS_ENABLED) {
-                                FileLog.d("address: " + address.getHostAddress());
+                                FileLog.d("address: " + inetAddress.getHostAddress());
                             }
-                            if (!address.isLinkLocalAddress() && !address.isLoopbackAddress() && !address.isMulticastAddress() && BuildVars.LOGS_ENABLED) {
+                            if (!inetAddress.isLinkLocalAddress() && !inetAddress.isLoopbackAddress() && !inetAddress.isMulticastAddress() && BuildVars.LOGS_ENABLED) {
                                 FileLog.d("address is good");
                             }
                         }
                     }
                 }
-            } catch (Throwable th) {
-                FileLog.e(th);
+            } catch (Throwable e) {
+                FileLog.e(e);
             }
         }
         try {
             Enumeration<NetworkInterface> networkInterfaces2 = NetworkInterface.getNetworkInterfaces();
-            boolean z = false;
-            boolean z2 = false;
-            boolean z3 = false;
+            boolean hasIpv4 = false;
+            boolean hasIpv6 = false;
+            boolean hasStrangeIpv4 = false;
             while (networkInterfaces2.hasMoreElements()) {
-                NetworkInterface nextElement2 = networkInterfaces2.nextElement();
-                if (nextElement2.isUp() && !nextElement2.isLoopback()) {
-                    List<InterfaceAddress> interfaceAddresses2 = nextElement2.getInterfaceAddresses();
-                    for (int i2 = 0; i2 < interfaceAddresses2.size(); i2++) {
-                        InetAddress address2 = interfaceAddresses2.get(i2).getAddress();
-                        if (!address2.isLinkLocalAddress() && !address2.isLoopbackAddress() && !address2.isMulticastAddress()) {
-                            if (address2 instanceof Inet6Address) {
-                                z = true;
-                            } else if (address2 instanceof Inet4Address) {
-                                if (!address2.getHostAddress().startsWith("192.0.0.")) {
-                                    z3 = true;
+                NetworkInterface networkInterface2 = networkInterfaces2.nextElement();
+                if (networkInterface2.isUp() && !networkInterface2.isLoopback()) {
+                    List<InterfaceAddress> interfaceAddresses2 = networkInterface2.getInterfaceAddresses();
+                    for (int a2 = 0; a2 < interfaceAddresses2.size(); a2++) {
+                        InterfaceAddress address2 = interfaceAddresses2.get(a2);
+                        InetAddress inetAddress2 = address2.getAddress();
+                        if (!inetAddress2.isLinkLocalAddress() && !inetAddress2.isLoopbackAddress() && !inetAddress2.isMulticastAddress()) {
+                            if (inetAddress2 instanceof Inet6Address) {
+                                hasIpv6 = true;
+                            } else if (inetAddress2 instanceof Inet4Address) {
+                                String addrr = inetAddress2.getHostAddress();
+                                if (!addrr.startsWith("192.0.0.")) {
+                                    hasIpv4 = true;
                                 } else {
-                                    z2 = true;
+                                    hasStrangeIpv4 = true;
                                 }
                             }
                         }
                     }
                 }
             }
-            if (z) {
+            if (hasIpv6) {
                 if (this.forceTryIpV6) {
                     return (byte) 1;
                 }
-                if (z2) {
+                if (hasStrangeIpv4) {
                     return (byte) 2;
                 }
-                if (!z3) {
+                if (!hasIpv4) {
                     return (byte) 1;
                 }
             }
-        } catch (Throwable th2) {
-            FileLog.e(th2);
+        } catch (Throwable e2) {
+            FileLog.e(e2);
         }
         return (byte) 0;
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class ResolveHostByNameTask extends AsyncTask<Void, Void, ResolvedDomain> {
         private ArrayList<Long> addresses = new ArrayList<>();
         private String currentHostName;
 
-        public ResolveHostByNameTask(String str) {
-            this.currentHostName = str;
+        public ResolveHostByNameTask(String hostName) {
+            this.currentHostName = hostName;
         }
 
-        public void addAddress(long j) {
-            if (this.addresses.contains(Long.valueOf(j))) {
+        public void addAddress(long address) {
+            if (this.addresses.contains(Long.valueOf(address))) {
                 return;
             }
-            this.addresses.add(Long.valueOf(j));
+            this.addresses.add(Long.valueOf(address));
         }
 
-        /* JADX WARN: Removed duplicated region for block: B:74:0x00ce A[EXC_TOP_SPLITTER, SYNTHETIC] */
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        public org.telegram.tgnet.ConnectionsManager.ResolvedDomain doInBackground(java.lang.Void... r11) {
-            /*
-                Method dump skipped, instructions count: 258
-                To view this dump add '--comments-level debug' option
-            */
-            throw new UnsupportedOperationException("Method not decompiled: org.telegram.tgnet.ConnectionsManager.ResolveHostByNameTask.doInBackground(java.lang.Void[]):org.telegram.tgnet.ConnectionsManager$ResolvedDomain");
+        public ResolvedDomain doInBackground(Void... voids) {
+            InputStream httpConnectionStream;
+            ByteArrayOutputStream outbuf;
+            JSONObject jsonObject;
+            JSONArray array;
+            int len;
+            boolean done = false;
+            try {
+                URL downloadUrl = new URL("https://www.google.com/resolve?name=" + this.currentHostName + "&type=A");
+                URLConnection httpConnection = downloadUrl.openConnection();
+                httpConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
+                httpConnection.addRequestProperty("Host", "dns.google.com");
+                httpConnection.setConnectTimeout(1000);
+                httpConnection.setReadTimeout(2000);
+                httpConnection.connect();
+                httpConnectionStream = httpConnection.getInputStream();
+                outbuf = new ByteArrayOutputStream();
+                byte[] data = new byte[32768];
+                while (true) {
+                    int read = httpConnectionStream.read(data);
+                    if (read <= 0) {
+                        break;
+                    }
+                    outbuf.write(data, 0, read);
+                }
+                jsonObject = new JSONObject(new String(outbuf.toByteArray()));
+            } catch (Exception e) {
+            }
+            if (jsonObject.has("Answer") && (len = (array = jsonObject.getJSONArray("Answer")).length()) > 0) {
+                ArrayList<String> addresses = new ArrayList<>(len);
+                for (int a = 0; a < len; a++) {
+                    addresses.add(array.getJSONObject(a).getString("data"));
+                }
+                ResolvedDomain resolvedDomain = new ResolvedDomain(addresses, SystemClock.elapsedRealtime());
+                if (httpConnectionStream != null) {
+                    try {
+                        httpConnectionStream.close();
+                    } catch (Throwable e2) {
+                        FileLog.e(e2, false);
+                    }
+                }
+                try {
+                    outbuf.close();
+                } catch (Exception e3) {
+                }
+                return resolvedDomain;
+            }
+            done = true;
+            if (httpConnectionStream != null) {
+                try {
+                    httpConnectionStream.close();
+                } catch (Throwable e4) {
+                    FileLog.e(e4, false);
+                }
+            }
+            outbuf.close();
+            if (done) {
+                return null;
+            }
+            try {
+                InetAddress address = InetAddress.getByName(this.currentHostName);
+                ArrayList<String> addresses2 = new ArrayList<>(1);
+                addresses2.add(address.getHostAddress());
+                return new ResolvedDomain(addresses2, SystemClock.elapsedRealtime());
+            } catch (Exception e5) {
+                FileLog.e((Throwable) e5, false);
+                return null;
+            }
         }
 
-        public void onPostExecute(ResolvedDomain resolvedDomain) {
-            int i = 0;
-            if (resolvedDomain != null) {
-                ConnectionsManager.dnsCache.put(this.currentHostName, resolvedDomain);
-                int size = this.addresses.size();
-                while (i < size) {
-                    ConnectionsManager.native_onHostNameResolved(this.currentHostName, this.addresses.get(i).longValue(), resolvedDomain.getAddress());
-                    i++;
+        public void onPostExecute(ResolvedDomain result) {
+            if (result != null) {
+                ConnectionsManager.dnsCache.put(this.currentHostName, result);
+                int N = this.addresses.size();
+                for (int a = 0; a < N; a++) {
+                    ConnectionsManager.native_onHostNameResolved(this.currentHostName, this.addresses.get(a).longValue(), result.getAddress());
                 }
             } else {
-                int size2 = this.addresses.size();
-                while (i < size2) {
-                    ConnectionsManager.native_onHostNameResolved(this.currentHostName, this.addresses.get(i).longValue(), "");
-                    i++;
+                int N2 = this.addresses.size();
+                for (int a2 = 0; a2 < N2; a2++) {
+                    ConnectionsManager.native_onHostNameResolved(this.currentHostName, this.addresses.get(a2).longValue(), "");
                 }
             }
             ConnectionsManager.resolvingHostnameTasks.remove(this.currentHostName);
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class DnsTxtLoadTask extends AsyncTask<Void, Void, NativeByteBuffer> {
         private int currentAccount;
         private int responseDate;
 
-        public DnsTxtLoadTask(int i) {
-            this.currentAccount = i;
+        public DnsTxtLoadTask(int instance) {
+            this.currentAccount = instance;
         }
 
-        public NativeByteBuffer doInBackground(Void... voidArr) {
-            Throwable th;
+        public NativeByteBuffer doInBackground(Void... voids) {
+            String googleDomain;
+            String str;
+            Throwable e;
+            ArrayList<String> arrayList;
             int read;
-            ByteArrayOutputStream byteArrayOutputStream = null;
-            InputStream inputStream = null;
+            DnsTxtLoadTask dnsTxtLoadTask = this;
+            String str2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             int i = 0;
+            InputStream httpConnectionStream = null;
+            ByteArrayOutputStream outbuf = null;
             while (i < 3) {
-                String str = i == 0 ? "www.google.com" : i == 1 ? "www.google.ru" : "google.com";
+                if (i == 0) {
+                    googleDomain = "www.google.com";
+                } else if (i == 1) {
+                    googleDomain = "www.google.ru";
+                } else {
+                    googleDomain = "google.com";
+                }
                 try {
-                    String str2 = ConnectionsManager.native_isTestBackend(this.currentAccount) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(this.currentAccount).getMessagesController().dcDomainName;
-                    int nextInt = Utilities.random.nextInt(116) + 13;
-                    StringBuilder sb = new StringBuilder(nextInt);
-                    for (int i2 = 0; i2 < nextInt; i2++) {
-                        sb.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(Utilities.random.nextInt(62)));
+                    String domain = ConnectionsManager.native_isTestBackend(dnsTxtLoadTask.currentAccount) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(dnsTxtLoadTask.currentAccount).getMessagesController().dcDomainName;
+                    int len = Utilities.random.nextInt(116) + 13;
+                    StringBuilder padding = new StringBuilder(len);
+                    for (int a = 0; a < len; a++) {
+                        padding.append(str2.charAt(Utilities.random.nextInt(str2.length())));
                     }
-                    URLConnection openConnection = new URL("https://" + str + "/resolve?name=" + str2 + "&type=ANY&random_padding=" + ((Object) sb)).openConnection();
-                    openConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
-                    openConnection.addRequestProperty("Host", "dns.google.com");
-                    openConnection.setConnectTimeout(5000);
-                    openConnection.setReadTimeout(5000);
-                    openConnection.connect();
-                    inputStream = openConnection.getInputStream();
-                    this.responseDate = (int) (openConnection.getDate() / 1000);
-                    ByteArrayOutputStream byteArrayOutputStream2 = new ByteArrayOutputStream();
-                    try {
-                        byte[] bArr = new byte[32768];
-                        while (!isCancelled() && (read = inputStream.read(bArr)) > 0) {
-                            byteArrayOutputStream2.write(bArr, 0, read);
-                        }
-                        JSONArray jSONArray = new JSONObject(new String(byteArrayOutputStream2.toByteArray())).getJSONArray("Answer");
-                        int length = jSONArray.length();
-                        ArrayList arrayList = new ArrayList(length);
-                        for (int i3 = 0; i3 < length; i3++) {
-                            JSONObject jSONObject = jSONArray.getJSONObject(i3);
-                            if (jSONObject.getInt("type") == 16) {
-                                arrayList.add(jSONObject.getString("data"));
+                    URL downloadUrl = new URL("https://" + googleDomain + "/resolve?name=" + domain + "&type=ANY&random_padding=" + ((Object) padding));
+                    URLConnection httpConnection = downloadUrl.openConnection();
+                    httpConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
+                    httpConnection.addRequestProperty("Host", "dns.google.com");
+                    httpConnection.setConnectTimeout(5000);
+                    httpConnection.setReadTimeout(5000);
+                    httpConnection.connect();
+                    httpConnectionStream = httpConnection.getInputStream();
+                    dnsTxtLoadTask.responseDate = (int) (httpConnection.getDate() / 1000);
+                    outbuf = new ByteArrayOutputStream();
+                    byte[] data = new byte[32768];
+                    while (!isCancelled() && (read = httpConnectionStream.read(data)) > 0) {
+                        outbuf.write(data, 0, read);
+                    }
+                    JSONObject jsonObject = new JSONObject(new String(outbuf.toByteArray()));
+                    JSONArray array = jsonObject.getJSONArray("Answer");
+                    int len2 = array.length();
+                    ArrayList<String> arrayList2 = new ArrayList<>(len2);
+                    int a2 = 0;
+                    while (a2 < len2) {
+                        JSONObject object = array.getJSONObject(a2);
+                        str = str2;
+                        try {
+                            int type = object.getInt(CommonProperties.TYPE);
+                            JSONObject jsonObject2 = jsonObject;
+                            if (type != 16) {
+                                arrayList = arrayList2;
+                            } else {
+                                arrayList = arrayList2;
+                                arrayList.add(object.getString("data"));
                             }
-                        }
-                        Collections.sort(arrayList, ConnectionsManager$DnsTxtLoadTask$$ExternalSyntheticLambda1.INSTANCE);
-                        StringBuilder sb2 = new StringBuilder();
-                        for (int i4 = 0; i4 < arrayList.size(); i4++) {
-                            sb2.append(((String) arrayList.get(i4)).replace("\"", ""));
-                        }
-                        byte[] decode = Base64.decode(sb2.toString(), 0);
-                        NativeByteBuffer nativeByteBuffer = new NativeByteBuffer(decode.length);
-                        nativeByteBuffer.writeBytes(decode);
-                        if (inputStream != null) {
+                            a2++;
+                            arrayList2 = arrayList;
+                            str2 = str;
+                            jsonObject = jsonObject2;
+                        } catch (Throwable th) {
+                            e = th;
                             try {
-                                inputStream.close();
+                                FileLog.e(e, false);
+                                if (httpConnectionStream != null) {
+                                    try {
+                                        httpConnectionStream.close();
+                                    } catch (Throwable e2) {
+                                        FileLog.e(e2, false);
+                                    }
+                                }
+                                if (outbuf != null) {
+                                    try {
+                                        outbuf.close();
+                                    } catch (Exception e3) {
+                                    }
+                                }
+                                i++;
+                                dnsTxtLoadTask = this;
+                                str2 = str;
                             } catch (Throwable th2) {
-                                FileLog.e(th2, false);
-                            }
-                        }
-                        try {
-                            byteArrayOutputStream2.close();
-                        } catch (Exception unused) {
-                        }
-                        return nativeByteBuffer;
-                    } catch (Throwable th3) {
-                        th = th3;
-                        byteArrayOutputStream = byteArrayOutputStream2;
-                        try {
-                            FileLog.e(th, false);
-                            if (byteArrayOutputStream != null) {
-                                try {
-                                    byteArrayOutputStream.close();
-                                } catch (Exception unused2) {
+                                if (httpConnectionStream != null) {
+                                    try {
+                                        httpConnectionStream.close();
+                                    } catch (Throwable e4) {
+                                        FileLog.e(e4, false);
+                                    }
                                 }
-                            }
-                            i++;
-                        } finally {
-                            if (inputStream != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (Throwable th4) {
-                                    FileLog.e(th4, false);
+                                if (outbuf != null) {
+                                    try {
+                                        outbuf.close();
+                                    } catch (Exception e5) {
+                                    }
                                 }
-                            }
-                            if (byteArrayOutputStream != null) {
-                                try {
-                                    byteArrayOutputStream.close();
-                                } catch (Exception unused3) {
-                                }
+                                throw th2;
                             }
                         }
                     }
-                } catch (Throwable th5) {
-                    th = th5;
+                    str = str2;
+                    ArrayList<String> arrayList3 = arrayList2;
+                    Collections.sort(arrayList3, ConnectionsManager$DnsTxtLoadTask$$ExternalSyntheticLambda1.INSTANCE);
+                    StringBuilder builder = new StringBuilder();
+                    int a3 = 0;
+                    while (a3 < arrayList3.size()) {
+                        builder.append(arrayList3.get(a3).replace("\"", ""));
+                        a3++;
+                        arrayList3 = arrayList3;
+                        googleDomain = googleDomain;
+                    }
+                    byte[] bytes = Base64.decode(builder.toString(), 0);
+                    NativeByteBuffer buffer = new NativeByteBuffer(bytes.length);
+                    buffer.writeBytes(bytes);
+                    if (httpConnectionStream != null) {
+                        try {
+                            httpConnectionStream.close();
+                        } catch (Throwable e6) {
+                            FileLog.e(e6, false);
+                        }
+                    }
+                    try {
+                        outbuf.close();
+                    } catch (Exception e7) {
+                    }
+                    return buffer;
+                } catch (Throwable th3) {
+                    e = th3;
+                    str = str2;
                 }
             }
             return null;
         }
 
-        public static /* synthetic */ int lambda$doInBackground$0(String str, String str2) {
-            int length = str.length();
-            int length2 = str2.length();
-            if (length > length2) {
+        public static /* synthetic */ int lambda$doInBackground$0(String o1, String o2) {
+            int l1 = o1.length();
+            int l2 = o2.length();
+            if (l1 > l2) {
                 return -1;
             }
-            return length < length2 ? 1 : 0;
+            if (l1 < l2) {
+                return 1;
+            }
+            return 0;
         }
 
-        public void onPostExecute(final NativeByteBuffer nativeByteBuffer) {
+        public void onPostExecute(final NativeByteBuffer result) {
             Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$DnsTxtLoadTask$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ConnectionsManager.DnsTxtLoadTask.this.lambda$onPostExecute$1(nativeByteBuffer);
+                    ConnectionsManager.DnsTxtLoadTask.this.m1371xfe7b2956(result);
                 }
             });
         }
 
-        public /* synthetic */ void lambda$onPostExecute$1(NativeByteBuffer nativeByteBuffer) {
+        /* renamed from: lambda$onPostExecute$1$org-telegram-tgnet-ConnectionsManager$DnsTxtLoadTask */
+        public /* synthetic */ void m1371xfe7b2956(NativeByteBuffer result) {
             AsyncTask unused = ConnectionsManager.currentTask = null;
-            if (nativeByteBuffer != null) {
-                int i = this.currentAccount;
-                ConnectionsManager.native_applyDnsConfig(i, nativeByteBuffer.address, AccountInstance.getInstance(i).getUserConfig().getClientPhone(), this.responseDate);
+            if (result != null) {
+                ConnectionsManager.native_applyDnsConfig(this.currentAccount, result.address, AccountInstance.getInstance(this.currentAccount).getUserConfig().getClientPhone(), this.responseDate);
                 return;
             }
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("failed to get dns txt result");
                 FileLog.d("start google task");
             }
-            GoogleDnsLoadTask googleDnsLoadTask = new GoogleDnsLoadTask(this.currentAccount);
-            googleDnsLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            AsyncTask unused2 = ConnectionsManager.currentTask = googleDnsLoadTask;
+            GoogleDnsLoadTask task = new GoogleDnsLoadTask(this.currentAccount);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            AsyncTask unused2 = ConnectionsManager.currentTask = task;
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class GoogleDnsLoadTask extends AsyncTask<Void, Void, NativeByteBuffer> {
         private int currentAccount;
         private int responseDate;
 
-        public GoogleDnsLoadTask(int i) {
-            this.currentAccount = i;
+        public GoogleDnsLoadTask(int instance) {
+            this.currentAccount = instance;
         }
 
-        public NativeByteBuffer doInBackground(Void... voidArr) {
-            InputStream inputStream;
-            ByteArrayOutputStream byteArrayOutputStream;
-            Throwable th;
-            InputStream inputStream2;
-            ByteArrayOutputStream byteArrayOutputStream2;
+        public NativeByteBuffer doInBackground(Void... voids) {
             int read;
+            ByteArrayOutputStream outbuf = null;
+            InputStream httpConnectionStream = null;
             try {
-                String str = ConnectionsManager.native_isTestBackend(this.currentAccount) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(this.currentAccount).getMessagesController().dcDomainName;
-                int nextInt = Utilities.random.nextInt(116) + 13;
-                StringBuilder sb = new StringBuilder(nextInt);
-                for (int i = 0; i < nextInt; i++) {
-                    sb.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(Utilities.random.nextInt(62)));
+                String domain = ConnectionsManager.native_isTestBackend(this.currentAccount) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(this.currentAccount).getMessagesController().dcDomainName;
+                int len = Utilities.random.nextInt(116) + 13;
+                StringBuilder padding = new StringBuilder(len);
+                for (int a = 0; a < len; a++) {
+                    padding.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(Utilities.random.nextInt("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".length())));
                 }
-                URLConnection openConnection = new URL("https://dns.google.com/resolve?name=" + str + "&type=ANY&random_padding=" + ((Object) sb)).openConnection();
-                openConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
-                openConnection.setConnectTimeout(5000);
-                openConnection.setReadTimeout(5000);
-                openConnection.connect();
-                inputStream2 = openConnection.getInputStream();
-                try {
-                    this.responseDate = (int) (openConnection.getDate() / 1000);
-                    byteArrayOutputStream2 = new ByteArrayOutputStream();
-                } catch (Throwable th2) {
-                    th = th2;
-                    inputStream = inputStream2;
-                    byteArrayOutputStream = null;
+                URL downloadUrl = new URL("https://dns.google.com/resolve?name=" + domain + "&type=ANY&random_padding=" + ((Object) padding));
+                URLConnection httpConnection = downloadUrl.openConnection();
+                httpConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
+                httpConnection.setConnectTimeout(5000);
+                httpConnection.setReadTimeout(5000);
+                httpConnection.connect();
+                httpConnectionStream = httpConnection.getInputStream();
+                this.responseDate = (int) (httpConnection.getDate() / 1000);
+                outbuf = new ByteArrayOutputStream();
+                byte[] data = new byte[32768];
+                while (!isCancelled() && (read = httpConnectionStream.read(data)) > 0) {
+                    outbuf.write(data, 0, read);
                 }
-            } catch (Throwable th3) {
-                th = th3;
-                byteArrayOutputStream = null;
-                inputStream = null;
-            }
-            try {
-                byte[] bArr = new byte[32768];
-                while (!isCancelled() && (read = inputStream2.read(bArr)) > 0) {
-                    byteArrayOutputStream2.write(bArr, 0, read);
-                }
-                JSONArray jSONArray = new JSONObject(new String(byteArrayOutputStream2.toByteArray())).getJSONArray("Answer");
-                int length = jSONArray.length();
-                ArrayList arrayList = new ArrayList(length);
-                for (int i2 = 0; i2 < length; i2++) {
-                    JSONObject jSONObject = jSONArray.getJSONObject(i2);
-                    if (jSONObject.getInt("type") == 16) {
-                        arrayList.add(jSONObject.getString("data"));
+                JSONObject jsonObject = new JSONObject(new String(outbuf.toByteArray()));
+                JSONArray array = jsonObject.getJSONArray("Answer");
+                int len2 = array.length();
+                ArrayList<String> arrayList = new ArrayList<>(len2);
+                for (int a2 = 0; a2 < len2; a2++) {
+                    JSONObject object = array.getJSONObject(a2);
+                    int type = object.getInt(CommonProperties.TYPE);
+                    if (type == 16) {
+                        arrayList.add(object.getString("data"));
                     }
                 }
                 Collections.sort(arrayList, ConnectionsManager$GoogleDnsLoadTask$$ExternalSyntheticLambda1.INSTANCE);
-                StringBuilder sb2 = new StringBuilder();
-                for (int i3 = 0; i3 < arrayList.size(); i3++) {
-                    sb2.append(((String) arrayList.get(i3)).replace("\"", ""));
+                StringBuilder builder = new StringBuilder();
+                int a3 = 0;
+                while (a3 < arrayList.size()) {
+                    builder.append(arrayList.get(a3).replace("\"", ""));
+                    a3++;
+                    domain = domain;
                 }
-                byte[] decode = Base64.decode(sb2.toString(), 0);
-                NativeByteBuffer nativeByteBuffer = new NativeByteBuffer(decode.length);
-                nativeByteBuffer.writeBytes(decode);
-                if (inputStream2 != null) {
+                byte[] bytes = Base64.decode(builder.toString(), 0);
+                NativeByteBuffer buffer = new NativeByteBuffer(bytes.length);
+                buffer.writeBytes(bytes);
+                if (httpConnectionStream != null) {
                     try {
-                        inputStream2.close();
-                    } catch (Throwable th4) {
-                        FileLog.e(th4);
+                        httpConnectionStream.close();
+                    } catch (Throwable e) {
+                        FileLog.e(e);
                     }
                 }
                 try {
-                    byteArrayOutputStream2.close();
-                } catch (Exception unused) {
+                    outbuf.close();
+                } catch (Exception e2) {
                 }
-                return nativeByteBuffer;
-            } catch (Throwable th5) {
-                byteArrayOutputStream = byteArrayOutputStream2;
-                th = th5;
-                inputStream = inputStream2;
+                return buffer;
+            } catch (Throwable e3) {
                 try {
-                    FileLog.e(th);
-                    if (inputStream != null) {
+                    FileLog.e(e3);
+                    if (httpConnectionStream != null) {
                         try {
-                            inputStream.close();
-                        } catch (Throwable th6) {
-                            FileLog.e(th6);
+                            httpConnectionStream.close();
+                        } catch (Throwable e4) {
+                            FileLog.e(e4);
                         }
                     }
-                    if (byteArrayOutputStream != null) {
+                    if (outbuf != null) {
                         try {
-                            byteArrayOutputStream.close();
-                        } catch (Exception unused2) {
+                            outbuf.close();
+                            return null;
+                        } catch (Exception e5) {
+                            return null;
                         }
                     }
                     return null;
-                } catch (Throwable th7) {
-                    if (inputStream != null) {
+                } catch (Throwable th) {
+                    if (httpConnectionStream != null) {
                         try {
-                            inputStream.close();
-                        } catch (Throwable th8) {
-                            FileLog.e(th8);
+                            httpConnectionStream.close();
+                        } catch (Throwable e6) {
+                            FileLog.e(e6);
                         }
                     }
-                    if (byteArrayOutputStream != null) {
+                    if (outbuf != null) {
                         try {
-                            byteArrayOutputStream.close();
-                        } catch (Exception unused3) {
+                            outbuf.close();
+                        } catch (Exception e7) {
                         }
                     }
-                    throw th7;
+                    throw th;
                 }
             }
         }
 
-        public static /* synthetic */ int lambda$doInBackground$0(String str, String str2) {
-            int length = str.length();
-            int length2 = str2.length();
-            if (length > length2) {
+        public static /* synthetic */ int lambda$doInBackground$0(String o1, String o2) {
+            int l1 = o1.length();
+            int l2 = o2.length();
+            if (l1 > l2) {
                 return -1;
             }
-            return length < length2 ? 1 : 0;
+            if (l1 < l2) {
+                return 1;
+            }
+            return 0;
         }
 
-        public void onPostExecute(final NativeByteBuffer nativeByteBuffer) {
+        public void onPostExecute(final NativeByteBuffer result) {
             Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$GoogleDnsLoadTask$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ConnectionsManager.GoogleDnsLoadTask.this.lambda$onPostExecute$1(nativeByteBuffer);
+                    ConnectionsManager.GoogleDnsLoadTask.this.m1376x742a8d37(result);
                 }
             });
         }
 
-        public /* synthetic */ void lambda$onPostExecute$1(NativeByteBuffer nativeByteBuffer) {
+        /* renamed from: lambda$onPostExecute$1$org-telegram-tgnet-ConnectionsManager$GoogleDnsLoadTask */
+        public /* synthetic */ void m1376x742a8d37(NativeByteBuffer result) {
             AsyncTask unused = ConnectionsManager.currentTask = null;
-            if (nativeByteBuffer != null) {
-                int i = this.currentAccount;
-                ConnectionsManager.native_applyDnsConfig(i, nativeByteBuffer.address, AccountInstance.getInstance(i).getUserConfig().getClientPhone(), this.responseDate);
+            if (result != null) {
+                ConnectionsManager.native_applyDnsConfig(this.currentAccount, result.address, AccountInstance.getInstance(this.currentAccount).getUserConfig().getClientPhone(), this.responseDate);
                 return;
             }
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("failed to get google result");
                 FileLog.d("start mozilla task");
             }
-            MozillaDnsLoadTask mozillaDnsLoadTask = new MozillaDnsLoadTask(this.currentAccount);
-            mozillaDnsLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            AsyncTask unused2 = ConnectionsManager.currentTask = mozillaDnsLoadTask;
+            MozillaDnsLoadTask task = new MozillaDnsLoadTask(this.currentAccount);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            AsyncTask unused2 = ConnectionsManager.currentTask = task;
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class MozillaDnsLoadTask extends AsyncTask<Void, Void, NativeByteBuffer> {
         private int currentAccount;
         private int responseDate;
 
-        public MozillaDnsLoadTask(int i) {
-            this.currentAccount = i;
+        public MozillaDnsLoadTask(int instance) {
+            this.currentAccount = instance;
         }
 
-        public NativeByteBuffer doInBackground(Void... voidArr) {
-            InputStream inputStream;
-            ByteArrayOutputStream byteArrayOutputStream;
-            Throwable th;
+        public NativeByteBuffer doInBackground(Void... voids) {
             int read;
+            ByteArrayOutputStream outbuf = null;
+            InputStream httpConnectionStream = null;
             try {
-                String str = ConnectionsManager.native_isTestBackend(this.currentAccount) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(this.currentAccount).getMessagesController().dcDomainName;
-                int nextInt = Utilities.random.nextInt(116) + 13;
-                StringBuilder sb = new StringBuilder(nextInt);
-                for (int i = 0; i < nextInt; i++) {
-                    sb.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(Utilities.random.nextInt(62)));
+                String domain = ConnectionsManager.native_isTestBackend(this.currentAccount) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(this.currentAccount).getMessagesController().dcDomainName;
+                int len = Utilities.random.nextInt(116) + 13;
+                StringBuilder padding = new StringBuilder(len);
+                for (int a = 0; a < len; a++) {
+                    padding.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(Utilities.random.nextInt("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".length())));
                 }
-                URLConnection openConnection = new URL("https://mozilla.cloudflare-dns.com/dns-query?name=" + str + "&type=TXT&random_padding=" + ((Object) sb)).openConnection();
-                openConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
-                openConnection.addRequestProperty("accept", "application/dns-json");
-                openConnection.setConnectTimeout(5000);
-                openConnection.setReadTimeout(5000);
-                openConnection.connect();
-                InputStream inputStream2 = openConnection.getInputStream();
-                try {
-                    this.responseDate = (int) (openConnection.getDate() / 1000);
-                    ByteArrayOutputStream byteArrayOutputStream2 = new ByteArrayOutputStream();
+                URL downloadUrl = new URL("https://mozilla.cloudflare-dns.com/dns-query?name=" + domain + "&type=TXT&random_padding=" + ((Object) padding));
+                URLConnection httpConnection = downloadUrl.openConnection();
+                httpConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
+                httpConnection.addRequestProperty("accept", "application/dns-json");
+                httpConnection.setConnectTimeout(5000);
+                httpConnection.setReadTimeout(5000);
+                httpConnection.connect();
+                httpConnectionStream = httpConnection.getInputStream();
+                this.responseDate = (int) (httpConnection.getDate() / 1000);
+                outbuf = new ByteArrayOutputStream();
+                byte[] data = new byte[32768];
+                while (!isCancelled() && (read = httpConnectionStream.read(data)) > 0) {
+                    outbuf.write(data, 0, read);
+                }
+                JSONObject jsonObject = new JSONObject(new String(outbuf.toByteArray()));
+                JSONArray array = jsonObject.getJSONArray("Answer");
+                int len2 = array.length();
+                ArrayList<String> arrayList = new ArrayList<>(len2);
+                for (int a2 = 0; a2 < len2; a2++) {
+                    JSONObject object = array.getJSONObject(a2);
+                    int type = object.getInt(CommonProperties.TYPE);
+                    if (type == 16) {
+                        arrayList.add(object.getString("data"));
+                    }
+                }
+                Collections.sort(arrayList, ConnectionsManager$MozillaDnsLoadTask$$ExternalSyntheticLambda1.INSTANCE);
+                StringBuilder builder = new StringBuilder();
+                int a3 = 0;
+                while (a3 < arrayList.size()) {
+                    builder.append(arrayList.get(a3).replace("\"", ""));
+                    a3++;
+                    domain = domain;
+                }
+                byte[] bytes = Base64.decode(builder.toString(), 0);
+                NativeByteBuffer buffer = new NativeByteBuffer(bytes.length);
+                buffer.writeBytes(bytes);
+                if (httpConnectionStream != null) {
                     try {
-                        byte[] bArr = new byte[32768];
-                        while (!isCancelled() && (read = inputStream2.read(bArr)) > 0) {
-                            byteArrayOutputStream2.write(bArr, 0, read);
-                        }
-                        JSONArray jSONArray = new JSONObject(new String(byteArrayOutputStream2.toByteArray())).getJSONArray("Answer");
-                        int length = jSONArray.length();
-                        ArrayList arrayList = new ArrayList(length);
-                        for (int i2 = 0; i2 < length; i2++) {
-                            JSONObject jSONObject = jSONArray.getJSONObject(i2);
-                            if (jSONObject.getInt("type") == 16) {
-                                arrayList.add(jSONObject.getString("data"));
-                            }
-                        }
-                        Collections.sort(arrayList, ConnectionsManager$MozillaDnsLoadTask$$ExternalSyntheticLambda1.INSTANCE);
-                        StringBuilder sb2 = new StringBuilder();
-                        for (int i3 = 0; i3 < arrayList.size(); i3++) {
-                            sb2.append(((String) arrayList.get(i3)).replace("\"", ""));
-                        }
-                        byte[] decode = Base64.decode(sb2.toString(), 0);
-                        NativeByteBuffer nativeByteBuffer = new NativeByteBuffer(decode.length);
-                        nativeByteBuffer.writeBytes(decode);
-                        if (inputStream2 != null) {
-                            try {
-                                inputStream2.close();
-                            } catch (Throwable th2) {
-                                FileLog.e(th2);
-                            }
-                        }
+                        httpConnectionStream.close();
+                    } catch (Throwable e) {
+                        FileLog.e(e);
+                    }
+                }
+                try {
+                    outbuf.close();
+                } catch (Exception e2) {
+                }
+                return buffer;
+            } catch (Throwable e3) {
+                try {
+                    FileLog.e(e3);
+                    if (httpConnectionStream != null) {
                         try {
-                            byteArrayOutputStream2.close();
-                        } catch (Exception unused) {
-                        }
-                        return nativeByteBuffer;
-                    } catch (Throwable th3) {
-                        byteArrayOutputStream = byteArrayOutputStream2;
-                        th = th3;
-                        inputStream = inputStream2;
-                        try {
-                            FileLog.e(th);
-                            if (inputStream != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (Throwable th4) {
-                                    FileLog.e(th4);
-                                }
-                            }
-                            if (byteArrayOutputStream != null) {
-                                try {
-                                    byteArrayOutputStream.close();
-                                } catch (Exception unused2) {
-                                }
-                            }
-                            return null;
-                        } catch (Throwable th5) {
-                            if (inputStream != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (Throwable th6) {
-                                    FileLog.e(th6);
-                                }
-                            }
-                            if (byteArrayOutputStream != null) {
-                                try {
-                                    byteArrayOutputStream.close();
-                                } catch (Exception unused3) {
-                                }
-                            }
-                            throw th5;
+                            httpConnectionStream.close();
+                        } catch (Throwable e4) {
+                            FileLog.e(e4);
                         }
                     }
-                } catch (Throwable th7) {
-                    th = th7;
-                    inputStream = inputStream2;
-                    byteArrayOutputStream = null;
+                    if (outbuf != null) {
+                        try {
+                            outbuf.close();
+                            return null;
+                        } catch (Exception e5) {
+                            return null;
+                        }
+                    }
+                    return null;
+                } catch (Throwable th) {
+                    if (httpConnectionStream != null) {
+                        try {
+                            httpConnectionStream.close();
+                        } catch (Throwable e6) {
+                            FileLog.e(e6);
+                        }
+                    }
+                    if (outbuf != null) {
+                        try {
+                            outbuf.close();
+                        } catch (Exception e7) {
+                        }
+                    }
+                    throw th;
                 }
-            } catch (Throwable th8) {
-                th = th8;
-                byteArrayOutputStream = null;
-                inputStream = null;
             }
         }
 
-        public static /* synthetic */ int lambda$doInBackground$0(String str, String str2) {
-            int length = str.length();
-            int length2 = str2.length();
-            if (length > length2) {
+        public static /* synthetic */ int lambda$doInBackground$0(String o1, String o2) {
+            int l1 = o1.length();
+            int l2 = o2.length();
+            if (l1 > l2) {
                 return -1;
             }
-            return length < length2 ? 1 : 0;
+            if (l1 < l2) {
+                return 1;
+            }
+            return 0;
         }
 
-        public void onPostExecute(final NativeByteBuffer nativeByteBuffer) {
+        public void onPostExecute(final NativeByteBuffer result) {
             Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$MozillaDnsLoadTask$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ConnectionsManager.MozillaDnsLoadTask.this.lambda$onPostExecute$1(nativeByteBuffer);
+                    ConnectionsManager.MozillaDnsLoadTask.this.m1377x8645eae8(result);
                 }
             });
         }
 
-        public /* synthetic */ void lambda$onPostExecute$1(NativeByteBuffer nativeByteBuffer) {
+        /* renamed from: lambda$onPostExecute$1$org-telegram-tgnet-ConnectionsManager$MozillaDnsLoadTask */
+        public /* synthetic */ void m1377x8645eae8(NativeByteBuffer result) {
             AsyncTask unused = ConnectionsManager.currentTask = null;
-            if (nativeByteBuffer != null) {
-                int i = this.currentAccount;
-                ConnectionsManager.native_applyDnsConfig(i, nativeByteBuffer.address, AccountInstance.getInstance(i).getUserConfig().getClientPhone(), this.responseDate);
-            } else if (!BuildVars.LOGS_ENABLED) {
-            } else {
+            if (result != null) {
+                ConnectionsManager.native_applyDnsConfig(this.currentAccount, result.address, AccountInstance.getInstance(this.currentAccount).getUserConfig().getClientPhone(), this.responseDate);
+            } else if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("failed to get mozilla txt result");
             }
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static class FirebaseTask extends AsyncTask<Void, Void, NativeByteBuffer> {
         private int currentAccount;
         private FirebaseRemoteConfig firebaseRemoteConfig;
 
-        public void onPostExecute(NativeByteBuffer nativeByteBuffer) {
+        public FirebaseTask(int instance) {
+            this.currentAccount = instance;
         }
 
-        public FirebaseTask(int i) {
-            this.currentAccount = i;
-        }
-
-        public NativeByteBuffer doInBackground(Void... voidArr) {
+        public NativeByteBuffer doInBackground(Void... voids) {
             try {
                 if (ConnectionsManager.native_isTestBackend(this.currentAccount) != 0) {
                     throw new Exception("test backend");
                 }
                 FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
                 this.firebaseRemoteConfig = firebaseRemoteConfig;
-                String string = firebaseRemoteConfig.getString("ipconfigv3");
+                String currentValue = firebaseRemoteConfig.getString("ipconfigv3");
                 if (BuildVars.LOGS_ENABLED) {
-                    FileLog.d("current firebase value = " + string);
+                    FileLog.d("current firebase value = " + currentValue);
                 }
                 this.firebaseRemoteConfig.fetch(0L).addOnCompleteListener(new OnCompleteListener() { // from class: org.telegram.tgnet.ConnectionsManager$FirebaseTask$$ExternalSyntheticLambda1
                     @Override // com.google.android.gms.tasks.OnCompleteListener
                     public final void onComplete(Task task) {
-                        ConnectionsManager.FirebaseTask.this.lambda$doInBackground$2(task);
+                        ConnectionsManager.FirebaseTask.this.m1374xe0d4db4d(task);
                     }
                 });
                 return null;
-            } catch (Throwable th) {
+            } catch (Throwable e) {
                 Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$FirebaseTask$$ExternalSyntheticLambda2
                     @Override // java.lang.Runnable
                     public final void run() {
-                        ConnectionsManager.FirebaseTask.this.lambda$doInBackground$3();
+                        ConnectionsManager.FirebaseTask.this.m1375xead75ac();
                     }
                 });
-                FileLog.e(th);
+                FileLog.e(e);
                 return null;
             }
         }
 
-        public /* synthetic */ void lambda$doInBackground$2(Task task) {
-            final boolean isSuccessful = task.isSuccessful();
+        /* renamed from: lambda$doInBackground$2$org-telegram-tgnet-ConnectionsManager$FirebaseTask */
+        public /* synthetic */ void m1374xe0d4db4d(Task finishedTask) {
+            final boolean success = finishedTask.isSuccessful();
             Utilities.stageQueue.postRunnable(new Runnable() { // from class: org.telegram.tgnet.ConnectionsManager$FirebaseTask$$ExternalSyntheticLambda3
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ConnectionsManager.FirebaseTask.this.lambda$doInBackground$1(isSuccessful);
+                    ConnectionsManager.FirebaseTask.this.m1373xb2fc40ee(success);
                 }
             });
         }
 
-        public /* synthetic */ void lambda$doInBackground$1(boolean z) {
-            if (z) {
+        /* renamed from: lambda$doInBackground$1$org-telegram-tgnet-ConnectionsManager$FirebaseTask */
+        public /* synthetic */ void m1373xb2fc40ee(boolean success) {
+            if (success) {
                 this.firebaseRemoteConfig.activate().addOnCompleteListener(new OnCompleteListener() { // from class: org.telegram.tgnet.ConnectionsManager$FirebaseTask$$ExternalSyntheticLambda0
                     @Override // com.google.android.gms.tasks.OnCompleteListener
                     public final void onComplete(Task task) {
-                        ConnectionsManager.FirebaseTask.this.lambda$doInBackground$0(task);
+                        ConnectionsManager.FirebaseTask.this.m1372x8523a68f(task);
                     }
                 });
             }
         }
 
-        public /* synthetic */ void lambda$doInBackground$0(Task task) {
+        /* renamed from: lambda$doInBackground$0$org-telegram-tgnet-ConnectionsManager$FirebaseTask */
+        public /* synthetic */ void m1372x8523a68f(Task finishedTask2) {
             AsyncTask unused = ConnectionsManager.currentTask = null;
-            String string = this.firebaseRemoteConfig.getString("ipconfigv3");
-            if (!TextUtils.isEmpty(string)) {
-                byte[] decode = Base64.decode(string, 0);
+            String config = this.firebaseRemoteConfig.getString("ipconfigv3");
+            if (!TextUtils.isEmpty(config)) {
+                byte[] bytes = Base64.decode(config, 0);
                 try {
-                    NativeByteBuffer nativeByteBuffer = new NativeByteBuffer(decode.length);
-                    nativeByteBuffer.writeBytes(decode);
-                    int fetchTimeMillis = (int) (this.firebaseRemoteConfig.getInfo().getFetchTimeMillis() / 1000);
-                    int i = this.currentAccount;
-                    ConnectionsManager.native_applyDnsConfig(i, nativeByteBuffer.address, AccountInstance.getInstance(i).getUserConfig().getClientPhone(), fetchTimeMillis);
+                    NativeByteBuffer buffer = new NativeByteBuffer(bytes.length);
+                    buffer.writeBytes(bytes);
+                    int date = (int) (this.firebaseRemoteConfig.getInfo().getFetchTimeMillis() / 1000);
+                    ConnectionsManager.native_applyDnsConfig(this.currentAccount, buffer.address, AccountInstance.getInstance(this.currentAccount).getUserConfig().getClientPhone(), date);
                     return;
                 } catch (Exception e) {
                     FileLog.e(e);
@@ -1509,19 +1678,23 @@ public class ConnectionsManager extends BaseController {
                 FileLog.d("failed to get firebase result");
                 FileLog.d("start dns txt task");
             }
-            DnsTxtLoadTask dnsTxtLoadTask = new DnsTxtLoadTask(this.currentAccount);
-            dnsTxtLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            AsyncTask unused2 = ConnectionsManager.currentTask = dnsTxtLoadTask;
+            DnsTxtLoadTask task = new DnsTxtLoadTask(this.currentAccount);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            AsyncTask unused2 = ConnectionsManager.currentTask = task;
         }
 
-        public /* synthetic */ void lambda$doInBackground$3() {
+        /* renamed from: lambda$doInBackground$3$org-telegram-tgnet-ConnectionsManager$FirebaseTask */
+        public /* synthetic */ void m1375xead75ac() {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("failed to get firebase result");
                 FileLog.d("start dns txt task");
             }
-            DnsTxtLoadTask dnsTxtLoadTask = new DnsTxtLoadTask(this.currentAccount);
-            dnsTxtLoadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
-            AsyncTask unused = ConnectionsManager.currentTask = dnsTxtLoadTask;
+            DnsTxtLoadTask task = new DnsTxtLoadTask(this.currentAccount);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
+            AsyncTask unused = ConnectionsManager.currentTask = task;
+        }
+
+        public void onPostExecute(NativeByteBuffer result) {
         }
     }
 }

@@ -1,11 +1,11 @@
 package com.google.firebase.encoders;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class EncodingException extends RuntimeException {
-    public EncodingException(String str) {
-        super(str);
+    public EncodingException(String message) {
+        super(message);
     }
 
-    public EncodingException(String str, Exception exc) {
-        super(str, exc);
+    public EncodingException(String message, Exception cause) {
+        super(message, cause);
     }
 }

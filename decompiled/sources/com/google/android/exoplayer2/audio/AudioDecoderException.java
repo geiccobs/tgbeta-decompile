@@ -1,11 +1,11 @@
 package com.google.android.exoplayer2.audio;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class AudioDecoderException extends Exception {
-    public AudioDecoderException(String str) {
-        super(str);
+    public AudioDecoderException(String message) {
+        super(message);
     }
 
-    public AudioDecoderException(String str, Throwable th) {
-        super(str, th);
+    public AudioDecoderException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

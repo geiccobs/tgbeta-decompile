@@ -1,12 +1,12 @@
 package com.google.android.gms.internal.vision;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
+import java.util.RandomAccess;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
-final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
+/* loaded from: classes3.dex */
+final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw, RandomAccess {
+    private static final zzin zza;
     private double[] zzb;
     private int zzc;
 
@@ -28,7 +28,7 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
         double[] dArr = this.zzb;
         System.arraycopy(dArr, i2, dArr, i, this.zzc - i2);
         this.zzc -= i2 - i;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.Collection, java.util.List
@@ -114,7 +114,7 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
             return false;
         }
         int i2 = this.zzc;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -124,7 +124,7 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
         }
         System.arraycopy(zzinVar.zzb, 0, this.zzb, this.zzc, zzinVar.zzc);
         this.zzc = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -144,7 +144,7 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         double doubleValue = ((Double) obj).doubleValue();
         zzc();
@@ -166,11 +166,11 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
             System.arraycopy(dArr, i + 1, dArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Double.valueOf(d);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         int i2;
         double doubleValue = ((Double) obj).doubleValue();
@@ -189,7 +189,7 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
         }
         this.zzb[i] = doubleValue;
         this.zzc++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List
@@ -213,6 +213,8 @@ final class zzin extends zzhj<Double> implements zzjl<Double>, zzkw {
     }
 
     static {
-        new zzin(new double[0], 0).zzb();
+        zzin zzinVar = new zzin(new double[0], 0);
+        zza = zzinVar;
+        zzinVar.zzb();
     }
 }

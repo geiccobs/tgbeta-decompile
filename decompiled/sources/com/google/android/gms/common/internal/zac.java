@@ -7,33 +7,30 @@ import android.text.TextUtils;
 import android.util.Log;
 import androidx.collection.SimpleArrayMap;
 import androidx.core.os.ConfigurationCompat;
-import com.google.android.gms.base.R$string;
+import com.google.android.gms.base.R;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.util.DeviceProperties;
 import com.google.android.gms.common.wrappers.Wrappers;
+import com.microsoft.appcenter.ingestion.models.properties.StringTypedProperty;
 import java.util.Locale;
-import javax.annotation.concurrent.GuardedBy;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zac {
-    @GuardedBy("sCache")
     private static final SimpleArrayMap<String, String> zaa = new SimpleArrayMap<>();
-    @GuardedBy("sCache")
     private static Locale zab;
 
     public static String zaa(Context context, int i) {
         Resources resources = context.getResources();
         switch (i) {
             case 1:
-                return resources.getString(R$string.common_google_play_services_install_title);
+                return resources.getString(R.string.common_google_play_services_install_title);
             case 2:
-                return resources.getString(R$string.common_google_play_services_update_title);
+                return resources.getString(R.string.common_google_play_services_update_title);
             case 3:
-                return resources.getString(R$string.common_google_play_services_enable_title);
+                return resources.getString(R.string.common_google_play_services_enable_title);
             case 4:
             case 6:
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return null;
             case 5:
                 Log.e("GoogleApiAvailability", "An invalid account was specified when connecting. Please provide a valid account.");
@@ -57,7 +54,7 @@ public final class zac {
             case 13:
             case 14:
             case 15:
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
             default:
                 StringBuilder sb = new StringBuilder(33);
                 sb.append("Unexpected error code ");
@@ -70,7 +67,7 @@ public final class zac {
             case 17:
                 Log.e("GoogleApiAvailability", "The specified account could not be signed in.");
                 return zaa(context, "common_google_play_services_sign_in_failed_title");
-            case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+            case 20:
                 Log.e("GoogleApiAvailability", "The current user profile is restricted and could not use authenticated features.");
                 return zaa(context, "common_google_play_services_restricted_profile_title");
         }
@@ -83,43 +80,39 @@ public final class zac {
         } else {
             str = zaa(context, i);
         }
-        return str == null ? context.getResources().getString(R$string.common_google_play_services_notification_ticker) : str;
+        if (str == null) {
+            return context.getResources().getString(R.string.common_google_play_services_notification_ticker);
+        }
+        return str;
     }
 
     public static String zac(Context context, int i) {
         Resources resources = context.getResources();
         String zab2 = zab(context);
-        if (i != 1) {
-            if (i == 2) {
-                return DeviceProperties.isWearableWithoutPlayStore(context) ? resources.getString(R$string.common_google_play_services_wear_update_text) : resources.getString(R$string.common_google_play_services_update_text, zab2);
-            } else if (i == 3) {
-                return resources.getString(R$string.common_google_play_services_enable_text, zab2);
-            } else {
-                if (i == 5) {
-                    return zaa(context, "common_google_play_services_invalid_account_text", zab2);
-                }
-                if (i == 7) {
-                    return zaa(context, "common_google_play_services_network_error_text", zab2);
-                }
-                if (i == 9) {
-                    return resources.getString(R$string.common_google_play_services_unsupported_text, zab2);
-                }
-                if (i != 20) {
-                    switch (i) {
-                        case 16:
-                            return zaa(context, "common_google_play_services_api_unavailable_text", zab2);
-                        case 17:
-                            return zaa(context, "common_google_play_services_sign_in_failed_text", zab2);
-                        case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
-                            return resources.getString(R$string.common_google_play_services_updating_text, zab2);
-                        default:
-                            return resources.getString(com.google.android.gms.common.R$string.common_google_play_services_unknown_issue, zab2);
-                    }
-                }
+        switch (i) {
+            case 1:
+                return resources.getString(R.string.common_google_play_services_install_text, zab2);
+            case 2:
+                return DeviceProperties.isWearableWithoutPlayStore(context) ? resources.getString(R.string.common_google_play_services_wear_update_text) : resources.getString(R.string.common_google_play_services_update_text, zab2);
+            case 3:
+                return resources.getString(R.string.common_google_play_services_enable_text, zab2);
+            case 5:
+                return zaa(context, "common_google_play_services_invalid_account_text", zab2);
+            case 7:
+                return zaa(context, "common_google_play_services_network_error_text", zab2);
+            case 9:
+                return resources.getString(R.string.common_google_play_services_unsupported_text, zab2);
+            case 16:
+                return zaa(context, "common_google_play_services_api_unavailable_text", zab2);
+            case 17:
+                return zaa(context, "common_google_play_services_sign_in_failed_text", zab2);
+            case 18:
+                return resources.getString(R.string.common_google_play_services_updating_text, zab2);
+            case 20:
                 return zaa(context, "common_google_play_services_restricted_profile_text", zab2);
-            }
+            default:
+                return resources.getString(com.google.android.gms.common.R.string.common_google_play_services_unknown_issue, zab2);
         }
-        return resources.getString(R$string.common_google_play_services_install_text, zab2);
     }
 
     public static String zad(Context context, int i) {
@@ -131,25 +124,28 @@ public final class zac {
 
     public static String zae(Context context, int i) {
         Resources resources = context.getResources();
-        if (i != 1) {
-            if (i == 2) {
-                return resources.getString(R$string.common_google_play_services_update_button);
-            }
-            if (i == 3) {
-                return resources.getString(R$string.common_google_play_services_enable_button);
-            }
-            return resources.getString(17039370);
+        switch (i) {
+            case 1:
+                return resources.getString(R.string.common_google_play_services_install_button);
+            case 2:
+                return resources.getString(R.string.common_google_play_services_update_button);
+            case 3:
+                return resources.getString(R.string.common_google_play_services_enable_button);
+            default:
+                return resources.getString(17039370);
         }
-        return resources.getString(R$string.common_google_play_services_install_button);
     }
 
     private static String zab(Context context) {
         String packageName = context.getPackageName();
         try {
             return Wrappers.packageManager(context).getApplicationLabel(packageName).toString();
-        } catch (PackageManager.NameNotFoundException | NullPointerException unused) {
+        } catch (PackageManager.NameNotFoundException | NullPointerException e) {
             String str = context.getApplicationInfo().name;
-            return TextUtils.isEmpty(str) ? packageName : str;
+            if (TextUtils.isEmpty(str)) {
+                return packageName;
+            }
+            return str;
         }
     }
 
@@ -157,7 +153,7 @@ public final class zac {
         Resources resources = context.getResources();
         String zaa2 = zaa(context, str);
         if (zaa2 == null) {
-            zaa2 = resources.getString(com.google.android.gms.common.R$string.common_google_play_services_unknown_issue);
+            zaa2 = resources.getString(com.google.android.gms.common.R.string.common_google_play_services_unknown_issue);
         }
         return String.format(resources.getConfiguration().locale, zaa2, str2);
     }
@@ -178,7 +174,7 @@ public final class zac {
             if (remoteResource == null) {
                 return null;
             }
-            int identifier = remoteResource.getIdentifier(str, "string", "com.google.android.gms");
+            int identifier = remoteResource.getIdentifier(str, StringTypedProperty.TYPE, "com.google.android.gms");
             if (identifier == 0) {
                 String valueOf = String.valueOf(str);
                 Log.w("GoogleApiAvailability", valueOf.length() != 0 ? "Missing resource: ".concat(valueOf) : new String("Missing resource: "));
@@ -196,6 +192,6 @@ public final class zac {
     }
 
     public static String zaa(Context context) {
-        return context.getResources().getString(R$string.common_google_play_services_notification_channel_name);
+        return context.getResources().getString(R.string.common_google_play_services_notification_channel_name);
     }
 }

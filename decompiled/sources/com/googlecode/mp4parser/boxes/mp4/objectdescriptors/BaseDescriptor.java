@@ -4,13 +4,18 @@ import com.coremedia.iso.IsoTypeReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 @Descriptor(tags = {0})
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseDescriptor {
+    static final /* synthetic */ boolean $assertionsDisabled = false;
     int sizeBytes;
     int sizeOfInstance;
     int tag;
 
     public abstract void parseDetail(ByteBuffer byteBuffer) throws IOException;
+
+    public int getTag() {
+        return this.tag;
+    }
 
     public int getSize() {
         return this.sizeOfInstance + 1 + this.sizeBytes;
@@ -24,21 +29,24 @@ public abstract class BaseDescriptor {
         return this.sizeBytes;
     }
 
-    public final void parse(int i, ByteBuffer byteBuffer) throws IOException {
-        this.tag = i;
-        int readUInt8 = IsoTypeReader.readUInt8(byteBuffer);
-        this.sizeOfInstance = readUInt8 & 127;
-        int i2 = 1;
-        while ((readUInt8 >>> 7) == 1) {
-            readUInt8 = IsoTypeReader.readUInt8(byteBuffer);
-            i2++;
-            this.sizeOfInstance = (this.sizeOfInstance << 7) | (readUInt8 & 127);
+    public final void parse(int tag, ByteBuffer bb) throws IOException {
+        this.tag = tag;
+        int tmp = IsoTypeReader.readUInt8(bb);
+        int i = 0 + 1;
+        this.sizeOfInstance = tmp & 127;
+        while ((tmp >>> 7) == 1) {
+            tmp = IsoTypeReader.readUInt8(bb);
+            i++;
+            this.sizeOfInstance = (this.sizeOfInstance << 7) | (tmp & 127);
         }
-        this.sizeBytes = i2;
-        ByteBuffer slice = byteBuffer.slice();
-        slice.limit(this.sizeOfInstance);
-        parseDetail(slice);
-        byteBuffer.position(byteBuffer.position() + this.sizeOfInstance);
+        this.sizeBytes = i;
+        ByteBuffer detailSource = bb.slice();
+        detailSource.limit(this.sizeOfInstance);
+        parseDetail(detailSource);
+        if (detailSource.remaining() != 0) {
+            throw new AssertionError(String.valueOf(getClass().getSimpleName()) + " has not been fully parsed");
+        }
+        bb.position(bb.position() + this.sizeOfInstance);
     }
 
     public String toString() {

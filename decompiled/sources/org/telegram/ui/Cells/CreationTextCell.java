@@ -6,11 +6,12 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class CreationTextCell extends FrameLayout {
     boolean divider;
     private ImageView imageView;
@@ -28,8 +29,8 @@ public class CreationTextCell extends FrameLayout {
         this.textView = simpleTextView;
         simpleTextView.setTextSize(16);
         this.textView.setGravity(LocaleController.isRTL ? 5 : 3);
-        this.textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlueText2", resourcesProvider));
-        this.textView.setTag("windowBackgroundWhiteBlueText2");
+        this.textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText2, resourcesProvider));
+        this.textView.setTag(Theme.key_windowBackgroundWhiteBlueText2);
         addView(this.textView);
         ImageView imageView = new ImageView(context);
         this.imageView = imageView;
@@ -39,29 +40,30 @@ public class CreationTextCell extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        int size = View.MeasureSpec.getSize(i);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = View.MeasureSpec.getSize(widthMeasureSpec);
         AndroidUtilities.dp(48.0f);
-        this.textView.measure(View.MeasureSpec.makeMeasureSpec(size - AndroidUtilities.dp(94.0f), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20.0f), 1073741824));
-        this.imageView.measure(View.MeasureSpec.makeMeasureSpec(size, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824));
-        setMeasuredDimension(size, AndroidUtilities.dp(50.0f));
+        this.textView.measure(View.MeasureSpec.makeMeasureSpec(width - AndroidUtilities.dp(94.0f), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20.0f), C.BUFFER_FLAG_ENCRYPTED));
+        this.imageView.measure(View.MeasureSpec.makeMeasureSpec(width, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED));
+        setMeasuredDimension(width, AndroidUtilities.dp(50.0f));
     }
 
     @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        int i5;
-        int i6 = i3 - i;
-        int textHeight = ((i4 - i2) - this.textView.getTextHeight()) / 2;
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int viewLeft;
+        int height = bottom - top;
+        int width = right - left;
+        int viewTop = (height - this.textView.getTextHeight()) / 2;
         if (LocaleController.isRTL) {
-            i5 = (getMeasuredWidth() - this.textView.getMeasuredWidth()) - AndroidUtilities.dp(this.imageView.getVisibility() == 0 ? this.startPadding : 25.0f);
+            viewLeft = (getMeasuredWidth() - this.textView.getMeasuredWidth()) - AndroidUtilities.dp(this.imageView.getVisibility() == 0 ? this.startPadding : 25.0f);
         } else {
-            i5 = AndroidUtilities.dp(this.imageView.getVisibility() == 0 ? this.startPadding : 25.0f);
+            viewLeft = AndroidUtilities.dp(this.imageView.getVisibility() == 0 ? this.startPadding : 25.0f);
         }
         SimpleTextView simpleTextView = this.textView;
-        simpleTextView.layout(i5, textHeight, simpleTextView.getMeasuredWidth() + i5, this.textView.getMeasuredHeight() + textHeight);
-        int dp = !LocaleController.isRTL ? (AndroidUtilities.dp(this.startPadding) - this.imageView.getMeasuredWidth()) / 2 : (i6 - this.imageView.getMeasuredWidth()) - AndroidUtilities.dp(25.0f);
+        simpleTextView.layout(viewLeft, viewTop, simpleTextView.getMeasuredWidth() + viewLeft, this.textView.getMeasuredHeight() + viewTop);
+        int viewLeft2 = !LocaleController.isRTL ? (AndroidUtilities.dp(this.startPadding) - this.imageView.getMeasuredWidth()) / 2 : (width - this.imageView.getMeasuredWidth()) - AndroidUtilities.dp(25.0f);
         ImageView imageView = this.imageView;
-        imageView.layout(dp, 0, imageView.getMeasuredWidth() + dp, this.imageView.getMeasuredHeight());
+        imageView.layout(viewLeft2, 0, imageView.getMeasuredWidth() + viewLeft2, this.imageView.getMeasuredHeight());
     }
 
     @Override // android.view.View
@@ -72,9 +74,9 @@ public class CreationTextCell extends FrameLayout {
         }
     }
 
-    public void setTextAndIcon(String str, Drawable drawable, boolean z) {
-        this.textView.setText(str);
-        this.imageView.setImageDrawable(drawable);
-        this.divider = z;
+    public void setTextAndIcon(String text, Drawable icon, boolean divider) {
+        this.textView.setText(text);
+        this.imageView.setImageDrawable(icon);
+        this.divider = divider;
     }
 }

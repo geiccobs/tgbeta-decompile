@@ -1,5 +1,5 @@
 package com.google.firebase.components;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public interface ComponentFactory<T> {
     T create(ComponentContainer componentContainer);
 }

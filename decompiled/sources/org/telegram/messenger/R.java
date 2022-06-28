@@ -1,8 +1,8 @@
 package org.telegram.messenger;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final class R {
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class anim {
         public static final int alpha_in = 0x7f010000;
         public static final int alpha_out = 0x7f010001;
@@ -36,7 +36,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class array {
         public static final int android_wear_capabilities = 0x7f020000;
 
@@ -44,7 +44,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class attr {
         public static final int allowShortcuts = 0x7f030000;
         public static final int alpha = 0x7f030001;
@@ -163,7 +163,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class bool {
         public static final int isTablet = 0x7f040000;
         public static final int useHardwareAcceleration = 0x7f040001;
@@ -172,7 +172,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class color {
         public static final int androidx_core_ripple_material_light = 0x7f050000;
         public static final int androidx_core_secondary_text_default_material_light = 0x7f050001;
@@ -215,7 +215,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class dimen {
         public static final int app_widget_background_corner_radius = 0x7f060000;
         public static final int compat_button_inset_horizontal_material = 0x7f060001;
@@ -246,7 +246,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class drawable {
         public static final int ab_progress = 0x7f070043;
         public static final int account_check = 0x7f070044;
@@ -1247,79 +1247,12 @@ public final class R {
         public static final int zoom_round_b = 0x7f070427;
         public static final int zoom_slide = 0x7f070428;
         public static final int zoom_slide_a = 0x7f070429;
-        public static final int res_0x7f070000_avd_flip__0 = 0x7f070000;
-        public static final int res_0x7f070001_avd_flip__1 = 0x7f070001;
-        public static final int res_0x7f070002_avd_flip__2 = 0x7f070002;
-        public static final int res_0x7f070003_avd_flip__3 = 0x7f070003;
-        public static final int res_0x7f070004_avd_flip__4 = 0x7f070004;
-        public static final int res_0x7f070005_fingerprint_dialog_error_to_fp__0 = 0x7f070005;
-        public static final int res_0x7f070006_fingerprint_dialog_error_to_fp__1 = 0x7f070006;
-        public static final int res_0x7f070007_fingerprint_dialog_error_to_fp__10 = 0x7f070007;
-        public static final int res_0x7f070008_fingerprint_dialog_error_to_fp__11 = 0x7f070008;
-        public static final int res_0x7f070009_fingerprint_dialog_error_to_fp__12 = 0x7f070009;
-        public static final int res_0x7f07000a_fingerprint_dialog_error_to_fp__13 = 0x7f07000a;
-        public static final int res_0x7f07000b_fingerprint_dialog_error_to_fp__14 = 0x7f07000b;
-        public static final int res_0x7f07000c_fingerprint_dialog_error_to_fp__15 = 0x7f07000c;
-        public static final int res_0x7f07000d_fingerprint_dialog_error_to_fp__16 = 0x7f07000d;
-        public static final int res_0x7f07000e_fingerprint_dialog_error_to_fp__17 = 0x7f07000e;
-        public static final int res_0x7f07000f_fingerprint_dialog_error_to_fp__18 = 0x7f07000f;
-        public static final int res_0x7f070010_fingerprint_dialog_error_to_fp__19 = 0x7f070010;
-        public static final int res_0x7f070011_fingerprint_dialog_error_to_fp__2 = 0x7f070011;
-        public static final int res_0x7f070012_fingerprint_dialog_error_to_fp__20 = 0x7f070012;
-        public static final int res_0x7f070013_fingerprint_dialog_error_to_fp__21 = 0x7f070013;
-        public static final int res_0x7f070014_fingerprint_dialog_error_to_fp__22 = 0x7f070014;
-        public static final int res_0x7f070015_fingerprint_dialog_error_to_fp__23 = 0x7f070015;
-        public static final int res_0x7f070016_fingerprint_dialog_error_to_fp__24 = 0x7f070016;
-        public static final int res_0x7f070017_fingerprint_dialog_error_to_fp__25 = 0x7f070017;
-        public static final int res_0x7f070018_fingerprint_dialog_error_to_fp__26 = 0x7f070018;
-        public static final int res_0x7f070019_fingerprint_dialog_error_to_fp__27 = 0x7f070019;
-        public static final int res_0x7f07001a_fingerprint_dialog_error_to_fp__28 = 0x7f07001a;
-        public static final int res_0x7f07001b_fingerprint_dialog_error_to_fp__29 = 0x7f07001b;
-        public static final int res_0x7f07001c_fingerprint_dialog_error_to_fp__3 = 0x7f07001c;
-        public static final int res_0x7f07001d_fingerprint_dialog_error_to_fp__4 = 0x7f07001d;
-        public static final int res_0x7f07001e_fingerprint_dialog_error_to_fp__5 = 0x7f07001e;
-        public static final int res_0x7f07001f_fingerprint_dialog_error_to_fp__6 = 0x7f07001f;
-        public static final int res_0x7f070020_fingerprint_dialog_error_to_fp__7 = 0x7f070020;
-        public static final int res_0x7f070021_fingerprint_dialog_error_to_fp__8 = 0x7f070021;
-        public static final int res_0x7f070022_fingerprint_dialog_error_to_fp__9 = 0x7f070022;
-        public static final int res_0x7f070023_fingerprint_dialog_fp_to_error__0 = 0x7f070023;
-        public static final int res_0x7f070024_fingerprint_dialog_fp_to_error__1 = 0x7f070024;
-        public static final int res_0x7f070025_fingerprint_dialog_fp_to_error__10 = 0x7f070025;
-        public static final int res_0x7f070026_fingerprint_dialog_fp_to_error__11 = 0x7f070026;
-        public static final int res_0x7f070027_fingerprint_dialog_fp_to_error__12 = 0x7f070027;
-        public static final int res_0x7f070028_fingerprint_dialog_fp_to_error__13 = 0x7f070028;
-        public static final int res_0x7f070029_fingerprint_dialog_fp_to_error__14 = 0x7f070029;
-        public static final int res_0x7f07002a_fingerprint_dialog_fp_to_error__15 = 0x7f07002a;
-        public static final int res_0x7f07002b_fingerprint_dialog_fp_to_error__16 = 0x7f07002b;
-        public static final int res_0x7f07002c_fingerprint_dialog_fp_to_error__17 = 0x7f07002c;
-        public static final int res_0x7f07002d_fingerprint_dialog_fp_to_error__18 = 0x7f07002d;
-        public static final int res_0x7f07002e_fingerprint_dialog_fp_to_error__19 = 0x7f07002e;
-        public static final int res_0x7f07002f_fingerprint_dialog_fp_to_error__2 = 0x7f07002f;
-        public static final int res_0x7f070030_fingerprint_dialog_fp_to_error__20 = 0x7f070030;
-        public static final int res_0x7f070031_fingerprint_dialog_fp_to_error__21 = 0x7f070031;
-        public static final int res_0x7f070032_fingerprint_dialog_fp_to_error__22 = 0x7f070032;
-        public static final int res_0x7f070033_fingerprint_dialog_fp_to_error__23 = 0x7f070033;
-        public static final int res_0x7f070034_fingerprint_dialog_fp_to_error__24 = 0x7f070034;
-        public static final int res_0x7f070035_fingerprint_dialog_fp_to_error__25 = 0x7f070035;
-        public static final int res_0x7f070036_fingerprint_dialog_fp_to_error__26 = 0x7f070036;
-        public static final int res_0x7f070037_fingerprint_dialog_fp_to_error__27 = 0x7f070037;
-        public static final int res_0x7f070038_fingerprint_dialog_fp_to_error__3 = 0x7f070038;
-        public static final int res_0x7f070039_fingerprint_dialog_fp_to_error__4 = 0x7f070039;
-        public static final int res_0x7f07003a_fingerprint_dialog_fp_to_error__5 = 0x7f07003a;
-        public static final int res_0x7f07003b_fingerprint_dialog_fp_to_error__6 = 0x7f07003b;
-        public static final int res_0x7f07003c_fingerprint_dialog_fp_to_error__7 = 0x7f07003c;
-        public static final int res_0x7f07003d_fingerprint_dialog_fp_to_error__8 = 0x7f07003d;
-        public static final int res_0x7f07003e_fingerprint_dialog_fp_to_error__9 = 0x7f07003e;
-        public static final int res_0x7f07003f_tg_splash_320__0 = 0x7f07003f;
-        public static final int res_0x7f070040_tg_splash_320__1 = 0x7f070040;
-        public static final int res_0x7f070041_tg_splash_320__2 = 0x7f070041;
-        public static final int res_0x7f070042_tg_splash_320__3 = 0x7f070042;
 
         private drawable() {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class id {
         public static final int acc_action_chat_preview = 0x7f080000;
         public static final int acc_action_msg_options = 0x7f080001;
@@ -1562,7 +1495,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class integer {
         public static final int google_play_services_version = 0x7f090000;
         public static final int splash_screen_duration = 0x7f090001;
@@ -1572,7 +1505,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class interpolator {
         public static final int ft_avd_toarrow_animation_interpolator_1 = 0x7f0a0000;
         public static final int ft_avd_toarrow_animation_interpolator_2 = 0x7f0a0001;
@@ -1582,7 +1515,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class layout {
         public static final int call_notification = 0x7f0b0000;
         public static final int call_notification_rtl = 0x7f0b0001;
@@ -1619,7 +1552,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class mipmap {
         public static final int ic_launcher = 0x7f0c0000;
         public static final int ic_launcher_round = 0x7f0c0001;
@@ -1656,7 +1589,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class raw {
         public static final int addone_icon = 0x7f0d0000;
         public static final int android_30 = 0x7f0d0001;
@@ -1868,7 +1801,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class string {
         public static final int ALongTimeAgo = 0x7f0e0000;
         public static final int Abort = 0x7f0e0001;
@@ -7309,7 +7242,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class style {
         public static final int ActionBar_Transparent_TMessages_Item = 0x7f0f0000;
         public static final int ActionBar_Transparent_TMessages_Start = 0x7f0f0001;
@@ -7364,7 +7297,7 @@ public final class R {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class styleable {
         public static final int Capability_queryPatterns = 0x00000000;
         public static final int Capability_shortcutMatchRequired = 0x00000001;
@@ -7493,34 +7426,34 @@ public final class R {
         public static final int WalletFragmentStyle_maskedWalletDetailsLogoTextColor = 0x00000009;
         public static final int WalletFragmentStyle_maskedWalletDetailsTextAppearance = 0x0000000a;
         public static final int[] AppDataSearch = new int[0];
-        public static final int[] Capability = {R.attr.queryPatterns, R.attr.shortcutMatchRequired};
-        public static final int[] ColorStateListItem = {16843173, 16843551, R.attr.alpha};
-        public static final int[] CoordinatorLayout = {R.attr.keylines, R.attr.statusBarBackground};
-        public static final int[] CoordinatorLayout_Layout = {16842931, R.attr.layout_anchor, R.attr.layout_anchorGravity, R.attr.layout_behavior, R.attr.layout_dodgeInsetEdges, R.attr.layout_insetEdge, R.attr.layout_keyline};
-        public static final int[] Corpus = {R.attr.contentProviderUri, R.attr.corpusId, R.attr.corpusVersion, R.attr.documentMaxAgeSecs, R.attr.perAccountTemplate, R.attr.schemaOrgType, R.attr.semanticallySearchable, R.attr.trimmable};
-        public static final int[] CustomWalletTheme = {R.attr.customThemeStyle, R.attr.toolbarTextColorStyle, R.attr.windowTransitionStyle};
-        public static final int[] FeatureParam = {R.attr.paramName, R.attr.paramValue};
-        public static final int[] FontFamily = {R.attr.fontProviderAuthority, R.attr.fontProviderCerts, R.attr.fontProviderFetchStrategy, R.attr.fontProviderFetchTimeout, R.attr.fontProviderPackage, R.attr.fontProviderQuery, R.attr.fontProviderSystemFontFamily};
-        public static final int[] FontFamilyFont = {16844082, 16844083, 16844095, 16844143, 16844144, R.attr.font, R.attr.fontStyle, R.attr.fontVariationSettings, R.attr.fontWeight, R.attr.ttcIndex};
-        public static final int[] GlobalSearch = {R.attr.defaultIntentAction, R.attr.defaultIntentActivity, R.attr.defaultIntentData, R.attr.searchEnabled, R.attr.searchLabel, R.attr.settingsDescription};
-        public static final int[] GlobalSearchCorpus = {R.attr.allowShortcuts};
-        public static final int[] GlobalSearchSection = {R.attr.sectionContent, R.attr.sectionType};
+        public static final int[] Capability = {org.telegram.messenger.beta.R.attr.queryPatterns, org.telegram.messenger.beta.R.attr.shortcutMatchRequired};
+        public static final int[] ColorStateListItem = {16843173, 16843551, org.telegram.messenger.beta.R.attr.alpha};
+        public static final int[] CoordinatorLayout = {org.telegram.messenger.beta.R.attr.keylines, org.telegram.messenger.beta.R.attr.statusBarBackground};
+        public static final int[] CoordinatorLayout_Layout = {16842931, org.telegram.messenger.beta.R.attr.layout_anchor, org.telegram.messenger.beta.R.attr.layout_anchorGravity, org.telegram.messenger.beta.R.attr.layout_behavior, org.telegram.messenger.beta.R.attr.layout_dodgeInsetEdges, org.telegram.messenger.beta.R.attr.layout_insetEdge, org.telegram.messenger.beta.R.attr.layout_keyline};
+        public static final int[] Corpus = {org.telegram.messenger.beta.R.attr.contentProviderUri, org.telegram.messenger.beta.R.attr.corpusId, org.telegram.messenger.beta.R.attr.corpusVersion, org.telegram.messenger.beta.R.attr.documentMaxAgeSecs, org.telegram.messenger.beta.R.attr.perAccountTemplate, org.telegram.messenger.beta.R.attr.schemaOrgType, org.telegram.messenger.beta.R.attr.semanticallySearchable, org.telegram.messenger.beta.R.attr.trimmable};
+        public static final int[] CustomWalletTheme = {org.telegram.messenger.beta.R.attr.customThemeStyle, org.telegram.messenger.beta.R.attr.toolbarTextColorStyle, org.telegram.messenger.beta.R.attr.windowTransitionStyle};
+        public static final int[] FeatureParam = {org.telegram.messenger.beta.R.attr.paramName, org.telegram.messenger.beta.R.attr.paramValue};
+        public static final int[] FontFamily = {org.telegram.messenger.beta.R.attr.fontProviderAuthority, org.telegram.messenger.beta.R.attr.fontProviderCerts, org.telegram.messenger.beta.R.attr.fontProviderFetchStrategy, org.telegram.messenger.beta.R.attr.fontProviderFetchTimeout, org.telegram.messenger.beta.R.attr.fontProviderPackage, org.telegram.messenger.beta.R.attr.fontProviderQuery, org.telegram.messenger.beta.R.attr.fontProviderSystemFontFamily};
+        public static final int[] FontFamilyFont = {16844082, 16844083, 16844095, 16844143, 16844144, org.telegram.messenger.beta.R.attr.font, org.telegram.messenger.beta.R.attr.fontStyle, org.telegram.messenger.beta.R.attr.fontVariationSettings, org.telegram.messenger.beta.R.attr.fontWeight, org.telegram.messenger.beta.R.attr.ttcIndex};
+        public static final int[] GlobalSearch = {org.telegram.messenger.beta.R.attr.defaultIntentAction, org.telegram.messenger.beta.R.attr.defaultIntentActivity, org.telegram.messenger.beta.R.attr.defaultIntentData, org.telegram.messenger.beta.R.attr.searchEnabled, org.telegram.messenger.beta.R.attr.searchLabel, org.telegram.messenger.beta.R.attr.settingsDescription};
+        public static final int[] GlobalSearchCorpus = {org.telegram.messenger.beta.R.attr.allowShortcuts};
+        public static final int[] GlobalSearchSection = {org.telegram.messenger.beta.R.attr.sectionContent, org.telegram.messenger.beta.R.attr.sectionType};
         public static final int[] GradientColor = {16843165, 16843166, 16843169, 16843170, 16843171, 16843172, 16843265, 16843275, 16844048, 16844049, 16844050, 16844051};
         public static final int[] GradientColorItem = {16843173, 16844052};
-        public static final int[] IMECorpus = {R.attr.inputEnabled, R.attr.sourceClass, R.attr.toAddressesSection, R.attr.userInputSection, R.attr.userInputTag, R.attr.userInputValue};
-        public static final int[] LoadingImageView = {R.attr.circleCrop, R.attr.imageAspectRatio, R.attr.imageAspectRatioAdjust};
-        public static final int[] MapAttrs = {R.attr.ambientEnabled, R.attr.cameraBearing, R.attr.cameraMaxZoomPreference, R.attr.cameraMinZoomPreference, R.attr.cameraTargetLat, R.attr.cameraTargetLng, R.attr.cameraTilt, R.attr.cameraZoom, R.attr.latLngBoundsNorthEastLatitude, R.attr.latLngBoundsNorthEastLongitude, R.attr.latLngBoundsSouthWestLatitude, R.attr.latLngBoundsSouthWestLongitude, R.attr.liteMode, R.attr.mapType, R.attr.uiCompass, R.attr.uiMapToolbar, R.attr.uiRotateGestures, R.attr.uiScrollGestures, R.attr.uiScrollGesturesDuringRotateOrZoom, R.attr.uiTiltGestures, R.attr.uiZoomControls, R.attr.uiZoomGestures, R.attr.useViewLifecycle, R.attr.zOrderOnTop};
-        public static final int[] Section = {R.attr.indexPrefixes, R.attr.noIndex, R.attr.schemaOrgProperty, R.attr.sectionFormat, R.attr.sectionId, R.attr.sectionWeight, R.attr.subsectionSeparator};
-        public static final int[] SectionFeature = {R.attr.featureType};
-        public static final int[] SignInButton = {R.attr.buttonSize, R.attr.colorScheme, R.attr.scopeUris};
-        public static final int[] WalletFragmentOptions = {R.attr.appTheme, R.attr.environment, R.attr.fragmentMode, R.attr.fragmentStyle};
-        public static final int[] WalletFragmentStyle = {R.attr.buyButtonAppearance, R.attr.buyButtonHeight, R.attr.buyButtonText, R.attr.buyButtonWidth, R.attr.maskedWalletDetailsBackground, R.attr.maskedWalletDetailsButtonBackground, R.attr.maskedWalletDetailsButtonTextAppearance, R.attr.maskedWalletDetailsHeaderTextAppearance, R.attr.maskedWalletDetailsLogoImageType, R.attr.maskedWalletDetailsLogoTextColor, R.attr.maskedWalletDetailsTextAppearance};
+        public static final int[] IMECorpus = {org.telegram.messenger.beta.R.attr.inputEnabled, org.telegram.messenger.beta.R.attr.sourceClass, org.telegram.messenger.beta.R.attr.toAddressesSection, org.telegram.messenger.beta.R.attr.userInputSection, org.telegram.messenger.beta.R.attr.userInputTag, org.telegram.messenger.beta.R.attr.userInputValue};
+        public static final int[] LoadingImageView = {org.telegram.messenger.beta.R.attr.circleCrop, org.telegram.messenger.beta.R.attr.imageAspectRatio, org.telegram.messenger.beta.R.attr.imageAspectRatioAdjust};
+        public static final int[] MapAttrs = {org.telegram.messenger.beta.R.attr.ambientEnabled, org.telegram.messenger.beta.R.attr.cameraBearing, org.telegram.messenger.beta.R.attr.cameraMaxZoomPreference, org.telegram.messenger.beta.R.attr.cameraMinZoomPreference, org.telegram.messenger.beta.R.attr.cameraTargetLat, org.telegram.messenger.beta.R.attr.cameraTargetLng, org.telegram.messenger.beta.R.attr.cameraTilt, org.telegram.messenger.beta.R.attr.cameraZoom, org.telegram.messenger.beta.R.attr.latLngBoundsNorthEastLatitude, org.telegram.messenger.beta.R.attr.latLngBoundsNorthEastLongitude, org.telegram.messenger.beta.R.attr.latLngBoundsSouthWestLatitude, org.telegram.messenger.beta.R.attr.latLngBoundsSouthWestLongitude, org.telegram.messenger.beta.R.attr.liteMode, org.telegram.messenger.beta.R.attr.mapType, org.telegram.messenger.beta.R.attr.uiCompass, org.telegram.messenger.beta.R.attr.uiMapToolbar, org.telegram.messenger.beta.R.attr.uiRotateGestures, org.telegram.messenger.beta.R.attr.uiScrollGestures, org.telegram.messenger.beta.R.attr.uiScrollGesturesDuringRotateOrZoom, org.telegram.messenger.beta.R.attr.uiTiltGestures, org.telegram.messenger.beta.R.attr.uiZoomControls, org.telegram.messenger.beta.R.attr.uiZoomGestures, org.telegram.messenger.beta.R.attr.useViewLifecycle, org.telegram.messenger.beta.R.attr.zOrderOnTop};
+        public static final int[] Section = {org.telegram.messenger.beta.R.attr.indexPrefixes, org.telegram.messenger.beta.R.attr.noIndex, org.telegram.messenger.beta.R.attr.schemaOrgProperty, org.telegram.messenger.beta.R.attr.sectionFormat, org.telegram.messenger.beta.R.attr.sectionId, org.telegram.messenger.beta.R.attr.sectionWeight, org.telegram.messenger.beta.R.attr.subsectionSeparator};
+        public static final int[] SectionFeature = {org.telegram.messenger.beta.R.attr.featureType};
+        public static final int[] SignInButton = {org.telegram.messenger.beta.R.attr.buttonSize, org.telegram.messenger.beta.R.attr.colorScheme, org.telegram.messenger.beta.R.attr.scopeUris};
+        public static final int[] WalletFragmentOptions = {org.telegram.messenger.beta.R.attr.appTheme, org.telegram.messenger.beta.R.attr.environment, org.telegram.messenger.beta.R.attr.fragmentMode, org.telegram.messenger.beta.R.attr.fragmentStyle};
+        public static final int[] WalletFragmentStyle = {org.telegram.messenger.beta.R.attr.buyButtonAppearance, org.telegram.messenger.beta.R.attr.buyButtonHeight, org.telegram.messenger.beta.R.attr.buyButtonText, org.telegram.messenger.beta.R.attr.buyButtonWidth, org.telegram.messenger.beta.R.attr.maskedWalletDetailsBackground, org.telegram.messenger.beta.R.attr.maskedWalletDetailsButtonBackground, org.telegram.messenger.beta.R.attr.maskedWalletDetailsButtonTextAppearance, org.telegram.messenger.beta.R.attr.maskedWalletDetailsHeaderTextAppearance, org.telegram.messenger.beta.R.attr.maskedWalletDetailsLogoImageType, org.telegram.messenger.beta.R.attr.maskedWalletDetailsLogoTextColor, org.telegram.messenger.beta.R.attr.maskedWalletDetailsTextAppearance};
 
         private styleable() {
         }
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes4.dex */
     public static final class xml {
         public static final int actions = 0x7f110000;
         public static final int auth = 0x7f110001;

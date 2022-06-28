@@ -3,35 +3,38 @@ package com.google.android.exoplayer2.extractor.mkv;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.IOException;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class Sniffer {
+    private static final int ID_EBML = 440786851;
+    private static final int SEARCH_LENGTH = 1024;
     private int peekLength;
     private final ParsableByteArray scratch = new ParsableByteArray(8);
 
-    /* JADX WARN: Code restructure failed: missing block: B:32:0x009c, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:34:0x00a9, code lost:
         return false;
      */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public boolean sniff(com.google.android.exoplayer2.extractor.ExtractorInput r18) throws java.io.IOException, java.lang.InterruptedException {
+    public boolean sniff(com.google.android.exoplayer2.extractor.ExtractorInput r25) throws java.io.IOException, java.lang.InterruptedException {
         /*
-            r17 = this;
-            r0 = r17
-            r1 = r18
-            long r2 = r18.getLength()
+            r24 = this;
+            r0 = r24
+            r1 = r25
+            long r2 = r25.getLength()
             r4 = 1024(0x400, double:5.06E-321)
             r6 = -1
             int r8 = (r2 > r6 ? 1 : (r2 == r6 ? 0 : -1))
-            if (r8 == 0) goto L16
+            if (r8 == 0) goto L17
             int r8 = (r2 > r4 ? 1 : (r2 == r4 ? 0 : -1))
             if (r8 <= 0) goto L15
-            goto L16
+            goto L17
         L15:
             r4 = r2
-        L16:
+            goto L18
+        L17:
+        L18:
             int r5 = (int) r4
             com.google.android.exoplayer2.util.ParsableByteArray r4 = r0.scratch
             byte[] r4 = r4.data
@@ -41,24 +44,24 @@ final class Sniffer {
             com.google.android.exoplayer2.util.ParsableByteArray r4 = r0.scratch
             long r10 = r4.readUnsignedInt()
             r0.peekLength = r9
-        L28:
+        L2a:
             r12 = 440786851(0x1a45dfa3, double:2.1777764E-315)
             r4 = 1
             int r9 = (r10 > r12 ? 1 : (r10 == r12 ? 0 : -1))
-            if (r9 == 0) goto L52
+            if (r9 == 0) goto L55
             int r9 = r0.peekLength
             int r9 = r9 + r4
             r0.peekLength = r9
-            if (r9 != r5) goto L38
+            if (r9 != r5) goto L3a
             return r8
-        L38:
+        L3a:
             com.google.android.exoplayer2.util.ParsableByteArray r9 = r0.scratch
             byte[] r9 = r9.data
             r1.peekFully(r9, r8, r4)
             r4 = 8
-            long r9 = r10 << r4
-            r11 = -256(0xffffffffffffff00, double:NaN)
-            long r9 = r9 & r11
+            long r12 = r10 << r4
+            r14 = -256(0xffffffffffffff00, double:NaN)
+            long r9 = r12 & r14
             com.google.android.exoplayer2.util.ParsableByteArray r4 = r0.scratch
             byte[] r4 = r4.data
             r4 = r4[r8]
@@ -66,81 +69,95 @@ final class Sniffer {
             long r11 = (long) r4
             long r9 = r9 | r11
             r10 = r9
-            goto L28
-        L52:
-            long r9 = r17.readUint(r18)
-            int r5 = r0.peekLength
-            long r11 = (long) r5
-            r13 = -9223372036854775808
-            int r5 = (r9 > r13 ? 1 : (r9 == r13 ? 0 : -1))
-            if (r5 == 0) goto La3
-            int r5 = (r2 > r6 ? 1 : (r2 == r6 ? 0 : -1))
-            if (r5 == 0) goto L6a
-            long r5 = r11 + r9
-            int r7 = (r5 > r2 ? 1 : (r5 == r2 ? 0 : -1))
-            if (r7 < 0) goto L6a
-            goto La3
-        L6a:
-            int r2 = r0.peekLength
-            long r5 = (long) r2
-            long r15 = r11 + r9
-            int r3 = (r5 > r15 ? 1 : (r5 == r15 ? 0 : -1))
-            if (r3 >= 0) goto L9d
-            long r2 = r17.readUint(r18)
-            int r5 = (r2 > r13 ? 1 : (r2 == r13 ? 0 : -1))
-            if (r5 != 0) goto L7c
+            goto L2a
+        L55:
+            long r12 = r24.readUint(r25)
+            int r9 = r0.peekLength
+            long r14 = (long) r9
+            r16 = -9223372036854775808
+            int r9 = (r12 > r16 ? 1 : (r12 == r16 ? 0 : -1))
+            if (r9 == 0) goto Lb5
+            int r9 = (r2 > r6 ? 1 : (r2 == r6 ? 0 : -1))
+            if (r9 == 0) goto L70
+            long r6 = r14 + r12
+            int r9 = (r6 > r2 ? 1 : (r6 == r2 ? 0 : -1))
+            if (r9 < 0) goto L70
+            r7 = r5
+            r18 = r10
+            goto Lb8
+        L70:
+            int r6 = r0.peekLength
+            r7 = r5
+            long r4 = (long) r6
+            long r18 = r14 + r12
+            int r20 = (r4 > r18 ? 1 : (r4 == r18 ? 0 : -1))
+            if (r20 >= 0) goto Laa
+            long r4 = r24.readUint(r25)
+            int r6 = (r4 > r16 ? 1 : (r4 == r16 ? 0 : -1))
+            if (r6 != 0) goto L83
             return r8
-        L7c:
-            long r2 = r17.readUint(r18)
-            r5 = 0
-            int r7 = (r2 > r5 ? 1 : (r2 == r5 ? 0 : -1))
-            if (r7 < 0) goto L9c
-            r15 = 2147483647(0x7fffffff, double:1.060997895E-314)
-            int r7 = (r2 > r15 ? 1 : (r2 == r15 ? 0 : -1))
-            if (r7 <= 0) goto L8e
-            goto L9c
-        L8e:
-            int r7 = (r2 > r5 ? 1 : (r2 == r5 ? 0 : -1))
-            if (r7 == 0) goto L6a
-            int r3 = (int) r2
-            r1.advancePeekPosition(r3)
-            int r2 = r0.peekLength
-            int r2 = r2 + r3
-            r0.peekLength = r2
-            goto L6a
-        L9c:
+        L83:
+            r18 = r10
+            long r9 = r24.readUint(r25)
+            r20 = 0
+            int r6 = (r9 > r20 ? 1 : (r9 == r20 ? 0 : -1))
+            if (r6 < 0) goto La9
+            r22 = 2147483647(0x7fffffff, double:1.060997895E-314)
+            int r6 = (r9 > r22 ? 1 : (r9 == r22 ? 0 : -1))
+            if (r6 <= 0) goto L97
+            goto La9
+        L97:
+            int r6 = (r9 > r20 ? 1 : (r9 == r20 ? 0 : -1))
+            if (r6 == 0) goto La4
+            int r6 = (int) r9
+            r1.advancePeekPosition(r6)
+            int r11 = r0.peekLength
+            int r11 = r11 + r6
+            r0.peekLength = r11
+        La4:
+            r5 = r7
+            r10 = r18
+            r4 = 1
+            goto L70
+        La9:
             return r8
-        L9d:
-            long r1 = (long) r2
-            int r3 = (r1 > r15 ? 1 : (r1 == r15 ? 0 : -1))
-            if (r3 != 0) goto La3
+        Laa:
+            r18 = r10
+            long r4 = (long) r6
+            long r9 = r14 + r12
+            int r6 = (r4 > r9 ? 1 : (r4 == r9 ? 0 : -1))
+            if (r6 != 0) goto Lb4
             r8 = 1
-        La3:
+        Lb4:
+            return r8
+        Lb5:
+            r7 = r5
+            r18 = r10
+        Lb8:
             return r8
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.exoplayer2.extractor.mkv.Sniffer.sniff(com.google.android.exoplayer2.extractor.ExtractorInput):boolean");
     }
 
-    private long readUint(ExtractorInput extractorInput) throws IOException, InterruptedException {
-        int i = 0;
-        extractorInput.peekFully(this.scratch.data, 0, 1);
-        int i2 = this.scratch.data[0] & 255;
-        if (i2 == 0) {
+    private long readUint(ExtractorInput input) throws IOException, InterruptedException {
+        input.peekFully(this.scratch.data, 0, 1);
+        int value = this.scratch.data[0] & 255;
+        if (value == 0) {
             return Long.MIN_VALUE;
         }
-        int i3 = ConnectionsManager.RequestFlagNeedQuickAck;
-        int i4 = 0;
-        while ((i2 & i3) == 0) {
-            i3 >>= 1;
-            i4++;
+        int mask = 128;
+        int length = 0;
+        while ((value & mask) == 0) {
+            mask >>= 1;
+            length++;
         }
-        int i5 = i2 & (i3 ^ (-1));
-        extractorInput.peekFully(this.scratch.data, 1, i4);
-        while (i < i4) {
-            i++;
-            i5 = (this.scratch.data[i] & 255) + (i5 << 8);
+        int value2 = value & (mask ^ (-1));
+        input.peekFully(this.scratch.data, 1, length);
+        for (int i = 0; i < length; i++) {
+            value2 = (value2 << 8) + (this.scratch.data[i + 1] & 255);
         }
-        this.peekLength += i4 + 1;
-        return i5;
+        int i2 = this.peekLength;
+        this.peekLength = i2 + length + 1;
+        return value2;
     }
 }

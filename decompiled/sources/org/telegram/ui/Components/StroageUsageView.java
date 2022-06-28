@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.view.View;
@@ -13,13 +12,14 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.graphics.ColorUtils;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class StroageUsageView extends FrameLayout {
     private boolean calculating;
     float calculatingProgress;
@@ -36,6 +36,9 @@ public class StroageUsageView extends FrameLayout {
     TextView telegramCacheTextView;
     TextView telegramDatabaseTextView;
     TextSettingsCell textSettingsCell;
+    private long totalDeviceFreeSize;
+    private long totalDeviceSize;
+    private long totalSize;
     TextView totlaSizeTextView;
     ValueAnimator valueAnimator;
     ValueAnimator valueAnimator2;
@@ -64,40 +67,41 @@ public class StroageUsageView extends FrameLayout {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(1);
         addView(linearLayout, LayoutHelper.createFrame(-1, -2.0f));
-        FrameLayout frameLayout = new FrameLayout(this, context) { // from class: org.telegram.ui.Components.StroageUsageView.1
+        FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.Components.StroageUsageView.1
             @Override // android.widget.FrameLayout, android.view.View
-            protected void onMeasure(int i, int i2) {
-                super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), i2);
-                int childCount = getChildCount();
-                int i3 = 0;
-                int i4 = 0;
-                int i5 = 0;
-                for (int i6 = 0; i6 < childCount; i6++) {
-                    if (getChildAt(i6).getVisibility() != 8) {
-                        if (getChildAt(i6).getMeasuredWidth() + i4 > View.MeasureSpec.getSize(i)) {
-                            i5 += getChildAt(i6).getMeasuredHeight() + AndroidUtilities.dp(8.0f);
-                            i4 = 0;
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), heightMeasureSpec);
+                int currentW = 0;
+                int currentH = 0;
+                int n = getChildCount();
+                int lastChildH = 0;
+                for (int i = 0; i < n; i++) {
+                    if (getChildAt(i).getVisibility() != 8) {
+                        if (getChildAt(i).getMeasuredWidth() + currentW > View.MeasureSpec.getSize(widthMeasureSpec)) {
+                            currentW = 0;
+                            currentH += getChildAt(i).getMeasuredHeight() + AndroidUtilities.dp(8.0f);
                         }
-                        i4 += getChildAt(i6).getMeasuredWidth() + AndroidUtilities.dp(16.0f);
-                        i3 = getChildAt(i6).getMeasuredHeight() + i5;
+                        currentW += getChildAt(i).getMeasuredWidth() + AndroidUtilities.dp(16.0f);
+                        lastChildH = getChildAt(i).getMeasuredHeight() + currentH;
                     }
                 }
-                setMeasuredDimension(getMeasuredWidth(), i3);
+                int i2 = getMeasuredWidth();
+                setMeasuredDimension(i2, lastChildH);
             }
 
             @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-            protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
-                int childCount = getChildCount();
-                int i5 = 0;
-                int i6 = 0;
-                for (int i7 = 0; i7 < childCount; i7++) {
-                    if (getChildAt(i7).getVisibility() != 8) {
-                        if (getChildAt(i7).getMeasuredWidth() + i5 > getMeasuredWidth()) {
-                            i6 += getChildAt(i7).getMeasuredHeight() + AndroidUtilities.dp(8.0f);
-                            i5 = 0;
+            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+                int currentW = 0;
+                int currentH = 0;
+                int n = getChildCount();
+                for (int i = 0; i < n; i++) {
+                    if (getChildAt(i).getVisibility() != 8) {
+                        if (getChildAt(i).getMeasuredWidth() + currentW > getMeasuredWidth()) {
+                            currentW = 0;
+                            currentH += getChildAt(i).getMeasuredHeight() + AndroidUtilities.dp(8.0f);
                         }
-                        getChildAt(i7).layout(i5, i6, getChildAt(i7).getMeasuredWidth() + i5, getChildAt(i7).getMeasuredHeight() + i6);
-                        i5 += getChildAt(i7).getMeasuredWidth() + AndroidUtilities.dp(16.0f);
+                        getChildAt(i).layout(currentW, currentH, getChildAt(i).getMeasuredWidth() + currentW, getChildAt(i).getMeasuredHeight() + currentH);
+                        currentW += getChildAt(i).getMeasuredWidth() + AndroidUtilities.dp(16.0f);
                     }
                 }
             }
@@ -106,35 +110,35 @@ public class StroageUsageView extends FrameLayout {
         linearLayout.addView(frameLayout, LayoutHelper.createLinear(-1, -2, 21.0f, 40.0f, 21.0f, 16.0f));
         TextView textView = new TextView(context);
         this.calculatingTextView = textView;
-        textView.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
-        String string = LocaleController.getString("CalculatingSize", R.string.CalculatingSize);
-        int indexOf = string.indexOf("...");
-        if (indexOf >= 0) {
-            SpannableString spannableString = new SpannableString(string);
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+        String calculatingString = LocaleController.getString("CalculatingSize", R.string.CalculatingSize);
+        int indexOfDots = calculatingString.indexOf("...");
+        if (indexOfDots >= 0) {
+            SpannableString spannableString = new SpannableString(calculatingString);
             EllipsizeSpanAnimator ellipsizeSpanAnimator = new EllipsizeSpanAnimator(this.calculatingTextView);
             this.ellipsizeSpanAnimator = ellipsizeSpanAnimator;
-            ellipsizeSpanAnimator.wrap(spannableString, indexOf);
+            ellipsizeSpanAnimator.wrap(spannableString, indexOfDots);
             this.calculatingTextView.setText(spannableString);
         } else {
-            this.calculatingTextView.setText(string);
+            this.calculatingTextView.setText(calculatingString);
         }
         TextView textView2 = new TextView(context);
         this.telegramCacheTextView = textView2;
         textView2.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
-        this.telegramCacheTextView.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
+        this.telegramCacheTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         TextView textView3 = new TextView(context);
         this.telegramDatabaseTextView = textView3;
         textView3.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
-        this.telegramDatabaseTextView.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
+        this.telegramDatabaseTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         TextView textView4 = new TextView(context);
         this.freeSizeTextView = textView4;
         textView4.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
-        this.freeSizeTextView.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
+        this.freeSizeTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         TextView textView5 = new TextView(context);
         this.totlaSizeTextView = textView5;
         textView5.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
-        this.totlaSizeTextView.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
-        this.lastProgressColor = Theme.getColor("player_progress");
+        this.totlaSizeTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+        this.lastProgressColor = Theme.getColor(Theme.key_player_progress);
         this.telegramCacheTextView.setCompoundDrawablesWithIntrinsicBounds(Theme.createCircleDrawable(AndroidUtilities.dp(10.0f), this.lastProgressColor), (Drawable) null, (Drawable) null, (Drawable) null);
         this.telegramCacheTextView.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
         this.freeSizeTextView.setCompoundDrawablesWithIntrinsicBounds(Theme.createCircleDrawable(AndroidUtilities.dp(10.0f), ColorUtils.setAlphaComponent(this.lastProgressColor, 64)), (Drawable) null, (Drawable) null, (Drawable) null);
@@ -152,18 +156,20 @@ public class StroageUsageView extends FrameLayout {
         this.divider = view;
         linearLayout.addView(view, LayoutHelper.createLinear(-1, -2, 0, 21, 0, 0, 0));
         this.divider.getLayoutParams().height = 1;
-        this.divider.setBackgroundColor(Theme.getColor("divider"));
+        this.divider.setBackgroundColor(Theme.getColor(Theme.key_divider));
         TextSettingsCell textSettingsCell = new TextSettingsCell(getContext());
         this.textSettingsCell = textSettingsCell;
         linearLayout.addView(textSettingsCell, LayoutHelper.createLinear(-1, -2));
     }
 
-    public void setStorageUsage(boolean z, long j, long j2, long j3, long j4) {
-        this.calculating = z;
-        this.freeSizeTextView.setText(LocaleController.formatString("TotalDeviceFreeSize", R.string.TotalDeviceFreeSize, AndroidUtilities.formatFileSize(j3)));
-        long j5 = j4 - j3;
-        this.totlaSizeTextView.setText(LocaleController.formatString("TotalDeviceSize", R.string.TotalDeviceSize, AndroidUtilities.formatFileSize(j5)));
-        if (z) {
+    public void setStorageUsage(boolean calculating, long database, long totalSize, long totalDeviceFreeSize, long totalDeviceSize) {
+        this.calculating = calculating;
+        this.totalSize = totalSize;
+        this.totalDeviceFreeSize = totalDeviceFreeSize;
+        this.totalDeviceSize = totalDeviceSize;
+        this.freeSizeTextView.setText(LocaleController.formatString("TotalDeviceFreeSize", R.string.TotalDeviceFreeSize, AndroidUtilities.formatFileSize(totalDeviceFreeSize)));
+        this.totlaSizeTextView.setText(LocaleController.formatString("TotalDeviceSize", R.string.TotalDeviceSize, AndroidUtilities.formatFileSize(totalDeviceSize - totalDeviceFreeSize)));
+        if (calculating) {
             this.calculatingTextView.setVisibility(0);
             this.telegramCacheTextView.setVisibility(8);
             this.freeSizeTextView.setVisibility(8);
@@ -183,67 +189,68 @@ public class StroageUsageView extends FrameLayout {
                 ellipsizeSpanAnimator2.removeView(this.calculatingTextView);
             }
             this.calculatingTextView.setVisibility(8);
-            if (j2 > 0) {
+            if (totalSize <= 0) {
+                this.telegramCacheTextView.setVisibility(8);
+                this.telegramDatabaseTextView.setVisibility(0);
+                this.telegramDatabaseTextView.setText(LocaleController.formatString("LocalDatabaseSize", R.string.LocalDatabaseSize, AndroidUtilities.formatFileSize(database)));
+                this.divider.setVisibility(8);
+                this.textSettingsCell.setVisibility(8);
+            } else {
                 this.divider.setVisibility(0);
                 this.textSettingsCell.setVisibility(0);
                 this.telegramCacheTextView.setVisibility(0);
                 this.telegramDatabaseTextView.setVisibility(8);
                 this.textSettingsCell.setText(LocaleController.getString("ClearTelegramCache", R.string.ClearTelegramCache), false);
-                this.telegramCacheTextView.setText(LocaleController.formatString("TelegramCacheSize", R.string.TelegramCacheSize, AndroidUtilities.formatFileSize(j2 + j)));
-            } else {
-                this.telegramCacheTextView.setVisibility(8);
-                this.telegramDatabaseTextView.setVisibility(0);
-                this.telegramDatabaseTextView.setText(LocaleController.formatString("LocalDatabaseSize", R.string.LocalDatabaseSize, AndroidUtilities.formatFileSize(j)));
-                this.divider.setVisibility(8);
-                this.textSettingsCell.setVisibility(8);
+                this.telegramCacheTextView.setText(LocaleController.formatString("TelegramCacheSize", R.string.TelegramCacheSize, AndroidUtilities.formatFileSize(totalSize + database)));
             }
             this.freeSizeTextView.setVisibility(0);
             this.totlaSizeTextView.setVisibility(0);
-            float f = (float) j4;
-            float f2 = ((float) (j2 + j)) / f;
-            float f3 = ((float) j5) / f;
-            if (this.progress != f2) {
+            float p = ((float) (totalSize + database)) / ((float) totalDeviceSize);
+            float p2 = ((float) (totalDeviceSize - totalDeviceFreeSize)) / ((float) totalDeviceSize);
+            if (this.progress != p) {
                 ValueAnimator valueAnimator = this.valueAnimator;
                 if (valueAnimator != null) {
                     valueAnimator.cancel();
                 }
-                ValueAnimator ofFloat = ValueAnimator.ofFloat(this.progress, f2);
+                ValueAnimator ofFloat = ValueAnimator.ofFloat(this.progress, p);
                 this.valueAnimator = ofFloat;
                 ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.StroageUsageView$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                        StroageUsageView.this.lambda$setStorageUsage$0(valueAnimator2);
+                        StroageUsageView.this.m3115xb842a2b9(valueAnimator2);
                     }
                 });
                 this.valueAnimator.start();
             }
-            if (this.progress2 != f3) {
+            if (this.progress2 != p2) {
                 ValueAnimator valueAnimator2 = this.valueAnimator2;
                 if (valueAnimator2 != null) {
                     valueAnimator2.cancel();
                 }
-                ValueAnimator ofFloat2 = ValueAnimator.ofFloat(this.progress2, f3);
+                ValueAnimator ofFloat2 = ValueAnimator.ofFloat(this.progress2, p2);
                 this.valueAnimator2 = ofFloat2;
                 ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.StroageUsageView$$ExternalSyntheticLambda1
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator3) {
-                        StroageUsageView.this.lambda$setStorageUsage$1(valueAnimator3);
+                        StroageUsageView.this.m3116x52e3653a(valueAnimator3);
                     }
                 });
                 this.valueAnimator2.start();
             }
         }
-        this.textSettingsCell.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        this.textSettingsCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         requestLayout();
     }
 
-    public /* synthetic */ void lambda$setStorageUsage$0(ValueAnimator valueAnimator) {
-        this.progress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$setStorageUsage$0$org-telegram-ui-Components-StroageUsageView */
+    public /* synthetic */ void m3115xb842a2b9(ValueAnimator animation) {
+        this.progress = ((Float) animation.getAnimatedValue()).floatValue();
         invalidate();
     }
 
-    public /* synthetic */ void lambda$setStorageUsage$1(ValueAnimator valueAnimator) {
-        this.progress2 = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+    /* renamed from: lambda$setStorageUsage$1$org-telegram-ui-Components-StroageUsageView */
+    public /* synthetic */ void m3116x52e3653a(ValueAnimator animation) {
+        this.progress2 = ((Float) animation.getAnimatedValue()).floatValue();
         invalidate();
     }
 
@@ -251,8 +258,8 @@ public class StroageUsageView extends FrameLayout {
     public void invalidate() {
         super.invalidate();
         this.progressView.invalidate();
-        if (this.lastProgressColor != Theme.getColor("player_progress")) {
-            this.lastProgressColor = Theme.getColor("player_progress");
+        if (this.lastProgressColor != Theme.getColor(Theme.key_player_progress)) {
+            this.lastProgressColor = Theme.getColor(Theme.key_player_progress);
             this.telegramCacheTextView.setCompoundDrawablesWithIntrinsicBounds(Theme.createCircleDrawable(AndroidUtilities.dp(10.0f), this.lastProgressColor), (Drawable) null, (Drawable) null, (Drawable) null);
             this.telegramCacheTextView.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
             this.telegramDatabaseTextView.setCompoundDrawablesWithIntrinsicBounds(Theme.createCircleDrawable(AndroidUtilities.dp(10.0f), this.lastProgressColor), (Drawable) null, (Drawable) null, (Drawable) null);
@@ -262,11 +269,11 @@ public class StroageUsageView extends FrameLayout {
             this.totlaSizeTextView.setCompoundDrawablesWithIntrinsicBounds(Theme.createCircleDrawable(AndroidUtilities.dp(10.0f), ColorUtils.setAlphaComponent(this.lastProgressColor, 127)), (Drawable) null, (Drawable) null, (Drawable) null);
             this.totlaSizeTextView.setCompoundDrawablePadding(AndroidUtilities.dp(6.0f));
         }
-        this.textSettingsCell.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
-        this.divider.setBackgroundColor(Theme.getColor("divider"));
+        this.textSettingsCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        this.divider.setBackgroundColor(Theme.getColor(Theme.key_divider));
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public class ProgressView extends View {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public ProgressView(Context context) {
@@ -275,69 +282,63 @@ public class StroageUsageView extends FrameLayout {
         }
 
         @Override // android.view.View
-        protected void onMeasure(int i, int i2) {
-            super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(40.0f), 1073741824));
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(40.0f), C.BUFFER_FLAG_ENCRYPTED));
         }
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            int color = Theme.getColor("player_progress");
+            int color = Theme.getColor(Theme.key_player_progress);
             StroageUsageView.this.paintFill.setColor(color);
             StroageUsageView.this.paintProgress.setColor(color);
             StroageUsageView.this.paintProgress2.setColor(color);
             StroageUsageView.this.paintProgress.setAlpha(255);
             StroageUsageView.this.paintProgress2.setAlpha(82);
             StroageUsageView.this.paintFill.setAlpha(46);
-            StroageUsageView.this.bgPaint.setColor(Theme.getColor("windowBackgroundWhite"));
+            StroageUsageView.this.bgPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhite));
             canvas.drawLine(AndroidUtilities.dp(24.0f), AndroidUtilities.dp(20.0f), getMeasuredWidth() - AndroidUtilities.dp(24.0f), AndroidUtilities.dp(20.0f), StroageUsageView.this.paintFill);
             if (StroageUsageView.this.calculating || StroageUsageView.this.calculatingProgress != 0.0f) {
                 if (StroageUsageView.this.calculating) {
-                    StroageUsageView stroageUsageView = StroageUsageView.this;
-                    if (stroageUsageView.calculatingProgressIncrement) {
-                        float f = stroageUsageView.calculatingProgress + 0.024615385f;
-                        stroageUsageView.calculatingProgress = f;
-                        if (f > 1.0f) {
-                            stroageUsageView.calculatingProgress = 1.0f;
-                            stroageUsageView.calculatingProgressIncrement = false;
+                    if (StroageUsageView.this.calculatingProgressIncrement) {
+                        StroageUsageView.this.calculatingProgress += 0.024615385f;
+                        if (StroageUsageView.this.calculatingProgress > 1.0f) {
+                            StroageUsageView.this.calculatingProgress = 1.0f;
+                            StroageUsageView.this.calculatingProgressIncrement = false;
                         }
                     } else {
-                        float f2 = stroageUsageView.calculatingProgress - 0.024615385f;
-                        stroageUsageView.calculatingProgress = f2;
-                        if (f2 < 0.0f) {
-                            stroageUsageView.calculatingProgress = 0.0f;
-                            stroageUsageView.calculatingProgressIncrement = true;
+                        StroageUsageView.this.calculatingProgress -= 0.024615385f;
+                        if (StroageUsageView.this.calculatingProgress < 0.0f) {
+                            StroageUsageView.this.calculatingProgress = 0.0f;
+                            StroageUsageView.this.calculatingProgressIncrement = true;
                         }
                     }
                 } else {
-                    StroageUsageView stroageUsageView2 = StroageUsageView.this;
-                    float f3 = stroageUsageView2.calculatingProgress - 0.10666667f;
-                    stroageUsageView2.calculatingProgress = f3;
-                    if (f3 < 0.0f) {
-                        stroageUsageView2.calculatingProgress = 0.0f;
+                    StroageUsageView.this.calculatingProgress -= 0.10666667f;
+                    if (StroageUsageView.this.calculatingProgress < 0.0f) {
+                        StroageUsageView.this.calculatingProgress = 0.0f;
                     }
                 }
                 invalidate();
-                RectF rectF = AndroidUtilities.rectTmp;
-                rectF.set(AndroidUtilities.dp(24.0f), AndroidUtilities.dp(17.0f), getMeasuredWidth() - AndroidUtilities.dp(24.0f), AndroidUtilities.dp(23.0f));
+                AndroidUtilities.rectTmp.set(AndroidUtilities.dp(24.0f), AndroidUtilities.dp(17.0f), getMeasuredWidth() - AndroidUtilities.dp(24.0f), AndroidUtilities.dp(23.0f));
                 StroageUsageView.this.cellFlickerDrawable.setParentWidth(getMeasuredWidth());
-                StroageUsageView.this.cellFlickerDrawable.draw(canvas, rectF, AndroidUtilities.dp(3.0f), null);
+                StroageUsageView.this.cellFlickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(3.0f), null);
             }
-            int dp = AndroidUtilities.dp(24.0f);
+            int currentP = AndroidUtilities.dp(24.0f);
             if (!StroageUsageView.this.calculating) {
-                int measuredWidth = (int) ((getMeasuredWidth() - (AndroidUtilities.dp(24.0f) * 2)) * StroageUsageView.this.progress2);
-                int dp2 = AndroidUtilities.dp(24.0f) + measuredWidth;
-                canvas.drawLine(dp, AndroidUtilities.dp(20.0f), AndroidUtilities.dp(24.0f) + measuredWidth, AndroidUtilities.dp(20.0f), StroageUsageView.this.paintProgress2);
-                canvas.drawRect(dp2, AndroidUtilities.dp(20.0f) - AndroidUtilities.dp(3.0f), dp2 + AndroidUtilities.dp(3.0f), AndroidUtilities.dp(20.0f) + AndroidUtilities.dp(3.0f), StroageUsageView.this.bgPaint);
+                int progressWidth = (int) ((getMeasuredWidth() - (AndroidUtilities.dp(24.0f) * 2)) * StroageUsageView.this.progress2);
+                int left = AndroidUtilities.dp(24.0f) + progressWidth;
+                canvas.drawLine(currentP, AndroidUtilities.dp(20.0f), AndroidUtilities.dp(24.0f) + progressWidth, AndroidUtilities.dp(20.0f), StroageUsageView.this.paintProgress2);
+                canvas.drawRect(left, AndroidUtilities.dp(20.0f) - AndroidUtilities.dp(3.0f), AndroidUtilities.dp(3.0f) + left, AndroidUtilities.dp(20.0f) + AndroidUtilities.dp(3.0f), StroageUsageView.this.bgPaint);
             }
             if (!StroageUsageView.this.calculating) {
-                int measuredWidth2 = (int) ((getMeasuredWidth() - (AndroidUtilities.dp(24.0f) * 2)) * StroageUsageView.this.progress);
-                if (measuredWidth2 < AndroidUtilities.dp(1.0f)) {
-                    measuredWidth2 = AndroidUtilities.dp(1.0f);
+                int progressWidth2 = (int) ((getMeasuredWidth() - (AndroidUtilities.dp(24.0f) * 2)) * StroageUsageView.this.progress);
+                if (progressWidth2 < AndroidUtilities.dp(1.0f)) {
+                    progressWidth2 = AndroidUtilities.dp(1.0f);
                 }
-                int dp3 = AndroidUtilities.dp(24.0f) + measuredWidth2;
-                canvas.drawLine(dp, AndroidUtilities.dp(20.0f), AndroidUtilities.dp(24.0f) + measuredWidth2, AndroidUtilities.dp(20.0f), StroageUsageView.this.paintProgress);
-                canvas.drawRect(dp3, AndroidUtilities.dp(20.0f) - AndroidUtilities.dp(3.0f), dp3 + AndroidUtilities.dp(3.0f), AndroidUtilities.dp(20.0f) + AndroidUtilities.dp(3.0f), StroageUsageView.this.bgPaint);
+                int left2 = AndroidUtilities.dp(24.0f) + progressWidth2;
+                canvas.drawLine(currentP, AndroidUtilities.dp(20.0f), AndroidUtilities.dp(24.0f) + progressWidth2, AndroidUtilities.dp(20.0f), StroageUsageView.this.paintProgress);
+                canvas.drawRect(left2, AndroidUtilities.dp(20.0f) - AndroidUtilities.dp(3.0f), AndroidUtilities.dp(3.0f) + left2, AndroidUtilities.dp(20.0f) + AndroidUtilities.dp(3.0f), StroageUsageView.this.bgPaint);
             }
         }
     }

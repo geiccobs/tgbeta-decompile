@@ -1,13 +1,13 @@
 package androidx.lifecycle;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class MutableLiveData<T> extends LiveData<T> {
     @Override // androidx.lifecycle.LiveData
-    public void postValue(T t) {
-        super.postValue(t);
+    public void postValue(T value) {
+        super.postValue(value);
     }
 
     @Override // androidx.lifecycle.LiveData
-    public void setValue(T t) {
-        super.setValue(t);
+    public void setValue(T value) {
+        super.setValue(value);
     }
 }

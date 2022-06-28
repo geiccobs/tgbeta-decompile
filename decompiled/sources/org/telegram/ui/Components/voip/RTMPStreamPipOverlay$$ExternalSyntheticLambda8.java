@@ -1,7 +1,7 @@
 package org.telegram.ui.Components.voip;
 
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class RTMPStreamPipOverlay$$ExternalSyntheticLambda8 implements SimpleFloatPropertyCompat.Setter {
     public static final /* synthetic */ RTMPStreamPipOverlay$$ExternalSyntheticLambda8 INSTANCE = new RTMPStreamPipOverlay$$ExternalSyntheticLambda8();
 
@@ -10,6 +10,6 @@ public final /* synthetic */ class RTMPStreamPipOverlay$$ExternalSyntheticLambda
 
     @Override // org.telegram.ui.Components.SimpleFloatPropertyCompat.Setter
     public final void set(Object obj, float f) {
-        RTMPStreamPipOverlay.lambda$static$1((RTMPStreamPipOverlay) obj, f);
+        RTMPStreamPipOverlay.lambda$static$3((RTMPStreamPipOverlay) obj, f);
     }
 }

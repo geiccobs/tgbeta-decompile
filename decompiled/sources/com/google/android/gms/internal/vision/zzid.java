@@ -3,17 +3,15 @@ package com.google.android.gms.internal.vision;
 import java.io.IOException;
 import java.nio.charset.Charset;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zzid extends zzia {
     protected final byte[] zzb;
 
     public zzid(byte[] bArr) {
-        bArr.getClass();
+        if (bArr == null) {
+            throw new NullPointerException();
+        }
         this.zzb = bArr;
-    }
-
-    protected int zze() {
-        return 0;
     }
 
     @Override // com.google.android.gms.internal.vision.zzht
@@ -33,11 +31,16 @@ public class zzid extends zzia {
 
     @Override // com.google.android.gms.internal.vision.zzht
     public final zzht zza(int i, int i2) {
-        int zzb = zzht.zzb(0, i2, zza());
+        int zzb = zzb(0, i2, zza());
         if (zzb == 0) {
             return zzht.zza;
         }
         return new zzhw(this.zzb, zze(), zzb);
+    }
+
+    @Override // com.google.android.gms.internal.vision.zzht
+    public void zza(byte[] bArr, int i, int i2, int i3) {
+        System.arraycopy(this.zzb, 0, bArr, 0, i3);
     }
 
     @Override // com.google.android.gms.internal.vision.zzht
@@ -120,5 +123,9 @@ public class zzid extends zzia {
     @Override // com.google.android.gms.internal.vision.zzht
     protected final int zza(int i, int i2, int i3) {
         return zzjf.zza(i, this.zzb, zze(), i3);
+    }
+
+    public int zze() {
+        return 0;
     }
 }

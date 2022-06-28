@@ -9,36 +9,35 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class WebvttSubtitle implements Subtitle {
     private final long[] cueTimesUs;
     private final List<WebvttCue> cues;
     private final int numCues;
     private final long[] sortedCueTimesUs;
 
-    public WebvttSubtitle(List<WebvttCue> list) {
-        this.cues = list;
-        int size = list.size();
+    public WebvttSubtitle(List<WebvttCue> cues) {
+        this.cues = cues;
+        int size = cues.size();
         this.numCues = size;
         this.cueTimesUs = new long[size * 2];
-        for (int i = 0; i < this.numCues; i++) {
-            WebvttCue webvttCue = list.get(i);
-            int i2 = i * 2;
-            long[] jArr = this.cueTimesUs;
-            jArr[i2] = webvttCue.startTime;
-            jArr[i2 + 1] = webvttCue.endTime;
+        for (int cueIndex = 0; cueIndex < this.numCues; cueIndex++) {
+            WebvttCue cue = cues.get(cueIndex);
+            int arrayIndex = cueIndex * 2;
+            this.cueTimesUs[arrayIndex] = cue.startTime;
+            this.cueTimesUs[arrayIndex + 1] = cue.endTime;
         }
-        long[] jArr2 = this.cueTimesUs;
-        long[] copyOf = Arrays.copyOf(jArr2, jArr2.length);
+        long[] jArr = this.cueTimesUs;
+        long[] copyOf = Arrays.copyOf(jArr, jArr.length);
         this.sortedCueTimesUs = copyOf;
         Arrays.sort(copyOf);
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public int getNextEventTimeIndex(long j) {
-        int binarySearchCeil = Util.binarySearchCeil(this.sortedCueTimesUs, j, false, false);
-        if (binarySearchCeil < this.sortedCueTimesUs.length) {
-            return binarySearchCeil;
+    public int getNextEventTimeIndex(long timeUs) {
+        int index = Util.binarySearchCeil(this.sortedCueTimesUs, timeUs, false, false);
+        if (index < this.sortedCueTimesUs.length) {
+            return index;
         }
         return -1;
     }
@@ -49,43 +48,44 @@ final class WebvttSubtitle implements Subtitle {
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public long getEventTime(int i) {
+    public long getEventTime(int index) {
         boolean z = true;
-        Assertions.checkArgument(i >= 0);
-        if (i >= this.sortedCueTimesUs.length) {
+        Assertions.checkArgument(index >= 0);
+        if (index >= this.sortedCueTimesUs.length) {
             z = false;
         }
         Assertions.checkArgument(z);
-        return this.sortedCueTimesUs[i];
+        return this.sortedCueTimesUs[index];
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public List<Cue> getCues(long j) {
-        ArrayList arrayList = new ArrayList();
-        SpannableStringBuilder spannableStringBuilder = null;
-        WebvttCue webvttCue = null;
+    public List<Cue> getCues(long timeUs) {
+        List<Cue> list = new ArrayList<>();
+        WebvttCue firstNormalCue = null;
+        SpannableStringBuilder normalCueTextBuilder = null;
         for (int i = 0; i < this.numCues; i++) {
             long[] jArr = this.cueTimesUs;
-            int i2 = i * 2;
-            if (jArr[i2] <= j && j < jArr[i2 + 1]) {
-                WebvttCue webvttCue2 = this.cues.get(i);
-                if (!webvttCue2.isNormalCue()) {
-                    arrayList.add(webvttCue2);
-                } else if (webvttCue == null) {
-                    webvttCue = webvttCue2;
-                } else if (spannableStringBuilder == null) {
-                    spannableStringBuilder = new SpannableStringBuilder();
-                    spannableStringBuilder.append((CharSequence) Assertions.checkNotNull(webvttCue.text)).append((CharSequence) "\n").append((CharSequence) Assertions.checkNotNull(webvttCue2.text));
+            if (jArr[i * 2] <= timeUs && timeUs < jArr[(i * 2) + 1]) {
+                WebvttCue cue = this.cues.get(i);
+                if (cue.isNormalCue()) {
+                    if (firstNormalCue == null) {
+                        firstNormalCue = cue;
+                    } else if (normalCueTextBuilder == null) {
+                        normalCueTextBuilder = new SpannableStringBuilder();
+                        normalCueTextBuilder.append((CharSequence) Assertions.checkNotNull(firstNormalCue.text)).append((CharSequence) "\n").append((CharSequence) Assertions.checkNotNull(cue.text));
+                    } else {
+                        normalCueTextBuilder.append((CharSequence) "\n").append((CharSequence) Assertions.checkNotNull(cue.text));
+                    }
                 } else {
-                    spannableStringBuilder.append((CharSequence) "\n").append((CharSequence) Assertions.checkNotNull(webvttCue2.text));
+                    list.add(cue);
                 }
             }
         }
-        if (spannableStringBuilder != null) {
-            arrayList.add(new WebvttCue.Builder().setText(spannableStringBuilder).build());
-        } else if (webvttCue != null) {
-            arrayList.add(webvttCue);
+        if (normalCueTextBuilder != null) {
+            list.add(new WebvttCue.Builder().setText(normalCueTextBuilder).build());
+        } else if (firstNormalCue != null) {
+            list.add(firstNormalCue);
         }
-        return arrayList;
+        return list;
     }
 }

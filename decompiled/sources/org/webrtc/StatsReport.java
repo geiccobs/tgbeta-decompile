@@ -1,20 +1,19 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class StatsReport {
     public final String id;
     public final double timestamp;
     public final String type;
     public final Value[] values;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class Value {
         public final String name;
         public final String value;
 
-        @CalledByNative("Value")
-        public Value(String str, String str2) {
-            this.name = str;
-            this.value = str2;
+        public Value(String name, String value) {
+            this.name = name;
+            this.value = value;
         }
 
         public String toString() {
@@ -22,32 +21,31 @@ public class StatsReport {
         }
     }
 
-    @CalledByNative
-    public StatsReport(String str, String str2, double d, Value[] valueArr) {
-        this.id = str;
-        this.type = str2;
-        this.timestamp = d;
-        this.values = valueArr;
+    public StatsReport(String id, String type, double timestamp, Value[] values) {
+        this.id = id;
+        this.type = type;
+        this.timestamp = timestamp;
+        this.values = values;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("id: ");
-        sb.append(this.id);
-        sb.append(", type: ");
-        sb.append(this.type);
-        sb.append(", timestamp: ");
-        sb.append(this.timestamp);
-        sb.append(", values: ");
+        StringBuilder builder = new StringBuilder();
+        builder.append("id: ");
+        builder.append(this.id);
+        builder.append(", type: ");
+        builder.append(this.type);
+        builder.append(", timestamp: ");
+        builder.append(this.timestamp);
+        builder.append(", values: ");
         int i = 0;
         while (true) {
             Value[] valueArr = this.values;
             if (i < valueArr.length) {
-                sb.append(valueArr[i].toString());
-                sb.append(", ");
+                builder.append(valueArr[i].toString());
+                builder.append(", ");
                 i++;
             } else {
-                return sb.toString();
+                return builder.toString();
             }
         }
     }

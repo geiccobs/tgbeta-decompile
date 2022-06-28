@@ -2,17 +2,20 @@ package org.telegram.ui.Components;
 
 import java.util.ArrayList;
 import org.telegram.ui.ActionBar.ThemeDescription;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class SimpleThemeDescription {
-    public static ThemeDescription createThemeDescription(ThemeDescription.ThemeDescriptionDelegate themeDescriptionDelegate, String str) {
-        return new ThemeDescription(null, 0, null, null, null, themeDescriptionDelegate, str);
+    private SimpleThemeDescription() {
     }
 
-    public static ArrayList<ThemeDescription> createThemeDescriptions(ThemeDescription.ThemeDescriptionDelegate themeDescriptionDelegate, String... strArr) {
-        ArrayList<ThemeDescription> arrayList = new ArrayList<>(strArr.length);
-        for (String str : strArr) {
-            arrayList.add(createThemeDescription(themeDescriptionDelegate, str));
+    public static ThemeDescription createThemeDescription(ThemeDescription.ThemeDescriptionDelegate del, String key) {
+        return new ThemeDescription(null, 0, null, null, null, del, key);
+    }
+
+    public static ArrayList<ThemeDescription> createThemeDescriptions(ThemeDescription.ThemeDescriptionDelegate del, String... keys) {
+        ArrayList<ThemeDescription> l = new ArrayList<>(keys.length);
+        for (String k : keys) {
+            l.add(createThemeDescription(del, k));
         }
-        return arrayList;
+        return l;
     }
 }

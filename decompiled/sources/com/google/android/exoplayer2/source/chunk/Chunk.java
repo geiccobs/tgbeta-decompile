@@ -9,7 +9,7 @@ import com.google.android.exoplayer2.upstream.StatsDataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class Chunk implements Loader.Loadable {
     protected final StatsDataSource dataSource;
     public final DataSpec dataSpec;
@@ -20,15 +20,15 @@ public abstract class Chunk implements Loader.Loadable {
     public final int trackSelectionReason;
     public final int type;
 
-    public Chunk(DataSource dataSource, DataSpec dataSpec, int i, Format format, int i2, Object obj, long j, long j2) {
+    public Chunk(DataSource dataSource, DataSpec dataSpec, int type, Format trackFormat, int trackSelectionReason, Object trackSelectionData, long startTimeUs, long endTimeUs) {
         this.dataSource = new StatsDataSource(dataSource);
         this.dataSpec = (DataSpec) Assertions.checkNotNull(dataSpec);
-        this.type = i;
-        this.trackFormat = format;
-        this.trackSelectionReason = i2;
-        this.trackSelectionData = obj;
-        this.startTimeUs = j;
-        this.endTimeUs = j2;
+        this.type = type;
+        this.trackFormat = trackFormat;
+        this.trackSelectionReason = trackSelectionReason;
+        this.trackSelectionData = trackSelectionData;
+        this.startTimeUs = startTimeUs;
+        this.endTimeUs = endTimeUs;
     }
 
     public final long getDurationUs() {

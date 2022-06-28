@@ -7,6 +7,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.SuccessContinuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -16,33 +17,34 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ConfigCacheClient {
+    static final long DISK_READ_TIMEOUT_IN_SECONDS = 5;
     private Task<ConfigContainer> cachedContainerTask = null;
     private final ExecutorService executorService;
     private final ConfigStorageClient storageClient;
     private static final Map<String, ConfigCacheClient> clientInstances = new HashMap();
     private static final Executor DIRECT_EXECUTOR = ConfigCacheClient$$ExternalSyntheticLambda3.INSTANCE;
 
-    private ConfigCacheClient(ExecutorService executorService, ConfigStorageClient configStorageClient) {
+    private ConfigCacheClient(ExecutorService executorService, ConfigStorageClient storageClient) {
         this.executorService = executorService;
-        this.storageClient = configStorageClient;
+        this.storageClient = storageClient;
     }
 
     public ConfigContainer getBlocking() {
-        return getBlocking(5L);
+        return getBlocking(DISK_READ_TIMEOUT_IN_SECONDS);
     }
 
-    ConfigContainer getBlocking(long j) {
+    ConfigContainer getBlocking(long diskReadTimeoutInSeconds) {
         synchronized (this) {
             Task<ConfigContainer> task = this.cachedContainerTask;
             if (task != null && task.isSuccessful()) {
                 return this.cachedContainerTask.getResult();
             }
             try {
-                return (ConfigContainer) await(get(), j, TimeUnit.SECONDS);
+                return (ConfigContainer) await(get(), diskReadTimeoutInSeconds, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                Log.d("FirebaseRemoteConfig", "Reading from storage file failed.", e);
+                Log.d(FirebaseRemoteConfig.TAG, "Reading from storage file failed.", e);
                 return null;
             }
         }
@@ -52,30 +54,28 @@ public class ConfigCacheClient {
         return put(configContainer, true);
     }
 
-    public /* synthetic */ Void lambda$put$0(ConfigContainer configContainer) throws Exception {
+    /* renamed from: lambda$put$0$com-google-firebase-remoteconfig-internal-ConfigCacheClient */
+    public /* synthetic */ Void m97xddaae01c(ConfigContainer configContainer) throws Exception {
         return this.storageClient.write(configContainer);
     }
 
-    public Task<ConfigContainer> put(final ConfigContainer configContainer, final boolean z) {
+    public Task<ConfigContainer> put(final ConfigContainer configContainer, final boolean shouldUpdateInMemoryContainer) {
         return Tasks.call(this.executorService, new Callable() { // from class: com.google.firebase.remoteconfig.internal.ConfigCacheClient$$ExternalSyntheticLambda1
             @Override // java.util.concurrent.Callable
             public final Object call() {
-                Void lambda$put$0;
-                lambda$put$0 = ConfigCacheClient.this.lambda$put$0(configContainer);
-                return lambda$put$0;
+                return ConfigCacheClient.this.m97xddaae01c(configContainer);
             }
         }).onSuccessTask(this.executorService, new SuccessContinuation() { // from class: com.google.firebase.remoteconfig.internal.ConfigCacheClient$$ExternalSyntheticLambda0
             @Override // com.google.android.gms.tasks.SuccessContinuation
             public final Task then(Object obj) {
-                Task lambda$put$1;
-                lambda$put$1 = ConfigCacheClient.this.lambda$put$1(z, configContainer, (Void) obj);
-                return lambda$put$1;
+                return ConfigCacheClient.this.m98x9820809d(shouldUpdateInMemoryContainer, configContainer, (Void) obj);
             }
         });
     }
 
-    public /* synthetic */ Task lambda$put$1(boolean z, ConfigContainer configContainer, Void r3) throws Exception {
-        if (z) {
+    /* renamed from: lambda$put$1$com-google-firebase-remoteconfig-internal-ConfigCacheClient */
+    public /* synthetic */ Task m98x9820809d(boolean shouldUpdateInMemoryContainer, ConfigContainer configContainer, Void unusedVoid) throws Exception {
+        if (shouldUpdateInMemoryContainer) {
             updateInMemoryConfigContainer(configContainer);
         }
         return Tasks.forResult(configContainer);
@@ -108,26 +108,36 @@ public class ConfigCacheClient {
         this.cachedContainerTask = Tasks.forResult(configContainer);
     }
 
-    public static synchronized ConfigCacheClient getInstance(ExecutorService executorService, ConfigStorageClient configStorageClient) {
+    synchronized Task<ConfigContainer> getCachedContainerTask() {
+        return this.cachedContainerTask;
+    }
+
+    public static synchronized ConfigCacheClient getInstance(ExecutorService executorService, ConfigStorageClient storageClient) {
         ConfigCacheClient configCacheClient;
         synchronized (ConfigCacheClient.class) {
-            String fileName = configStorageClient.getFileName();
+            String fileName = storageClient.getFileName();
             Map<String, ConfigCacheClient> map = clientInstances;
             if (!map.containsKey(fileName)) {
-                map.put(fileName, new ConfigCacheClient(executorService, configStorageClient));
+                map.put(fileName, new ConfigCacheClient(executorService, storageClient));
             }
             configCacheClient = map.get(fileName);
         }
         return configCacheClient;
     }
 
-    private static <TResult> TResult await(Task<TResult> task, long j, TimeUnit timeUnit) throws ExecutionException, InterruptedException, TimeoutException {
-        AwaitListener awaitListener = new AwaitListener();
+    public static synchronized void clearInstancesForTest() {
+        synchronized (ConfigCacheClient.class) {
+            clientInstances.clear();
+        }
+    }
+
+    private static <TResult> TResult await(Task<TResult> task, long timeout, TimeUnit unit) throws ExecutionException, InterruptedException, TimeoutException {
+        AwaitListener<TResult> waiter = new AwaitListener<>();
         Executor executor = DIRECT_EXECUTOR;
-        task.addOnSuccessListener(executor, awaitListener);
-        task.addOnFailureListener(executor, awaitListener);
-        task.addOnCanceledListener(executor, awaitListener);
-        if (!awaitListener.await(j, timeUnit)) {
+        task.addOnSuccessListener(executor, waiter);
+        task.addOnFailureListener(executor, waiter);
+        task.addOnCanceledListener(executor, waiter);
+        if (!waiter.await(timeout, unit)) {
             throw new TimeoutException("Task await timed out.");
         }
         if (task.isSuccessful()) {
@@ -136,7 +146,7 @@ public class ConfigCacheClient {
         throw new ExecutionException(task.getException());
     }
 
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class AwaitListener<TResult> implements OnSuccessListener<TResult>, OnFailureListener, OnCanceledListener {
         private final CountDownLatch latch;
 
@@ -145,12 +155,12 @@ public class ConfigCacheClient {
         }
 
         @Override // com.google.android.gms.tasks.OnSuccessListener
-        public void onSuccess(TResult tresult) {
+        public void onSuccess(TResult o) {
             this.latch.countDown();
         }
 
         @Override // com.google.android.gms.tasks.OnFailureListener
-        public void onFailure(Exception exc) {
+        public void onFailure(Exception e) {
             this.latch.countDown();
         }
 
@@ -159,8 +169,12 @@ public class ConfigCacheClient {
             this.latch.countDown();
         }
 
-        public boolean await(long j, TimeUnit timeUnit) throws InterruptedException {
-            return this.latch.await(j, timeUnit);
+        public void await() throws InterruptedException {
+            this.latch.await();
+        }
+
+        public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+            return this.latch.await(timeout, unit);
         }
     }
 }

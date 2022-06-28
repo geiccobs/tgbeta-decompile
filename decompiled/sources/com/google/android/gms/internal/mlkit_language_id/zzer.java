@@ -1,12 +1,11 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
+import java.util.RandomAccess;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
-final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
+/* loaded from: classes3.dex */
+public final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi, RandomAccess {
     private static final zzer zza;
     private int[] zzb;
     private int zzc;
@@ -33,7 +32,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
         int[] iArr = this.zzb;
         System.arraycopy(iArr, i2, iArr, i, this.zzc - i2);
         this.zzc -= i2 - i;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.Collection, java.util.List
@@ -109,7 +108,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
             return false;
         }
         int i2 = this.zzc;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -119,7 +118,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
         }
         System.arraycopy(zzerVar.zzb, 0, this.zzb, this.zzc, zzerVar.zzc);
         this.zzc = i3;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return true;
     }
 
@@ -131,7 +130,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
                 int[] iArr = this.zzb;
                 System.arraycopy(iArr, i + 1, iArr, i, (this.zzc - i) - 1);
                 this.zzc--;
-                ((AbstractList) this).modCount++;
+                this.modCount++;
                 return true;
             }
         }
@@ -154,7 +153,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
         return sb.toString();
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         int intValue = ((Integer) obj).intValue();
         zzc();
@@ -165,7 +164,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
         return Integer.valueOf(i2);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         int i2;
         zzc();
@@ -176,11 +175,11 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
             System.arraycopy(iArr, i + 1, iArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
         return Integer.valueOf(i3);
     }
 
-    @Override // java.util.AbstractList, java.util.List
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         int i2;
         int intValue = ((Integer) obj).intValue();
@@ -199,7 +198,7 @@ final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
         }
         this.zzb[i] = intValue;
         this.zzc++;
-        ((AbstractList) this).modCount++;
+        this.modCount++;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List

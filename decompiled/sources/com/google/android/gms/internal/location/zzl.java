@@ -6,22 +6,20 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import com.google.android.gms.location.zzaw;
-import com.google.android.gms.location.zzax;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzl extends AbstractSafeParcelable {
     public static final Parcelable.Creator<zzl> CREATOR = new zzm();
     final int zza;
     final zzj zzb;
-    final zzax zzc;
+    final com.google.android.gms.location.zzax zzc;
     final zzai zzd;
 
     public zzl(int i, zzj zzjVar, IBinder iBinder, IBinder iBinder2) {
         this.zza = i;
         this.zzb = zzjVar;
         zzai zzaiVar = null;
-        this.zzc = iBinder == null ? null : zzaw.zzb(iBinder);
+        this.zzc = iBinder == null ? null : com.google.android.gms.location.zzaw.zzb(iBinder);
         if (iBinder2 != null) {
             IInterface queryLocalInterface = iBinder2.queryLocalInterface("com.google.android.gms.location.internal.IFusedLocationProviderCallback");
             if (queryLocalInterface instanceof zzai) {
@@ -38,7 +36,7 @@ public final class zzl extends AbstractSafeParcelable {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zza);
         SafeParcelWriter.writeParcelable(parcel, 2, this.zzb, i, false);
-        zzax zzaxVar = this.zzc;
+        com.google.android.gms.location.zzax zzaxVar = this.zzc;
         IBinder iBinder = null;
         SafeParcelWriter.writeIBinder(parcel, 3, zzaxVar == null ? null : zzaxVar.asBinder(), false);
         zzai zzaiVar = this.zzd;

@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class ExperimentTokens extends AbstractSafeParcelable {
-    public static final Parcelable.Creator<ExperimentTokens> CREATOR = new zzh();
     private static final byte[][] zzn;
+    private static final ExperimentTokens zzo;
     private final String zzp;
     private final byte[] zzq;
     private final byte[][] zzr;
@@ -21,15 +21,20 @@ public class ExperimentTokens extends AbstractSafeParcelable {
     private final byte[][] zzu;
     private final int[] zzv;
     private final byte[][] zzw;
+    public static final Parcelable.Creator<ExperimentTokens> CREATOR = new zzh();
+    private static final zza zzx = new zzd();
+    private static final zza zzy = new zze();
+    private static final zza zzz = new zzf();
+    private static final zza zzaa = new zzg();
+
+    /* loaded from: classes3.dex */
+    public interface zza {
+    }
 
     static {
         byte[][] bArr = new byte[0];
         zzn = bArr;
-        new ExperimentTokens("", null, bArr, bArr, bArr, bArr, null, null);
-        new zzd();
-        new zze();
-        new zzf();
-        new zzg();
+        zzo = new ExperimentTokens("", null, bArr, bArr, bArr, bArr, null, null);
     }
 
     public ExperimentTokens(String str, byte[] bArr, byte[][] bArr2, byte[][] bArr3, byte[][] bArr4, byte[][] bArr5, int[] iArr, byte[][] bArr6) {

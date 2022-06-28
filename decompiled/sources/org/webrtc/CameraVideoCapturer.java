@@ -1,10 +1,11 @@
 package org.webrtc;
 
 import android.media.MediaRecorder;
-/* loaded from: classes3.dex */
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+/* loaded from: classes5.dex */
 public interface CameraVideoCapturer extends VideoCapturer {
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface CameraEventsHandler {
         void onCameraClosed();
 
@@ -19,7 +20,7 @@ public interface CameraVideoCapturer extends VideoCapturer {
         void onFirstFrameAvailable();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface CameraSwitchHandler {
         void onCameraSwitchDone(boolean z);
 
@@ -27,7 +28,7 @@ public interface CameraVideoCapturer extends VideoCapturer {
     }
 
     @Deprecated
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface MediaRecorderHandler {
         void onMediaRecorderError(String str);
 
@@ -45,20 +46,20 @@ public interface CameraVideoCapturer extends VideoCapturer {
     void switchCamera(CameraSwitchHandler cameraSwitchHandler, String str);
 
     /* renamed from: org.webrtc.CameraVideoCapturer$-CC */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public final /* synthetic */ class CC {
         @Deprecated
-        public static void $default$addMediaRecorderToCamera(CameraVideoCapturer _this, MediaRecorder mediaRecorder, MediaRecorderHandler mediaRecorderHandler) {
+        public static void $default$addMediaRecorderToCamera(CameraVideoCapturer _this, MediaRecorder mediaRecorder, MediaRecorderHandler resultHandler) {
             throw new UnsupportedOperationException("Deprecated and not implemented.");
         }
 
         @Deprecated
-        public static void $default$removeMediaRecorderFromCamera(CameraVideoCapturer _this, MediaRecorderHandler mediaRecorderHandler) {
+        public static void $default$removeMediaRecorderFromCamera(CameraVideoCapturer _this, MediaRecorderHandler resultHandler) {
             throw new UnsupportedOperationException("Deprecated and not implemented.");
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class CameraStatistics {
         private static final int CAMERA_FREEZE_REPORT_TIMOUT_MS = 4000;
         private static final int CAMERA_OBSERVER_PERIOD_MS = 2000;
@@ -69,23 +70,23 @@ public interface CameraVideoCapturer extends VideoCapturer {
         private int freezePeriodCount;
         private final SurfaceTextureHelper surfaceTextureHelper;
 
-        static /* synthetic */ int access$104(CameraStatistics cameraStatistics) {
-            int i = cameraStatistics.freezePeriodCount + 1;
-            cameraStatistics.freezePeriodCount = i;
+        static /* synthetic */ int access$104(CameraStatistics x0) {
+            int i = x0.freezePeriodCount + 1;
+            x0.freezePeriodCount = i;
             return i;
         }
 
-        public CameraStatistics(SurfaceTextureHelper surfaceTextureHelper, CameraEventsHandler cameraEventsHandler) {
+        public CameraStatistics(SurfaceTextureHelper surfaceTextureHelper, CameraEventsHandler eventsHandler) {
             Runnable runnable = new Runnable() { // from class: org.webrtc.CameraVideoCapturer.CameraStatistics.1
                 @Override // java.lang.Runnable
                 public void run() {
-                    int round = Math.round((CameraStatistics.this.frameCount * 1000.0f) / 2000.0f);
-                    Logging.d(CameraStatistics.TAG, "Camera fps: " + round + ".");
+                    int cameraFps = Math.round((CameraStatistics.this.frameCount * 1000.0f) / 2000.0f);
+                    Logging.d(CameraStatistics.TAG, "Camera fps: " + cameraFps + ".");
                     if (CameraStatistics.this.frameCount != 0) {
                         CameraStatistics.this.freezePeriodCount = 0;
                     } else {
                         CameraStatistics.access$104(CameraStatistics.this);
-                        if (CameraStatistics.this.freezePeriodCount * CameraStatistics.CAMERA_OBSERVER_PERIOD_MS >= CameraStatistics.CAMERA_FREEZE_REPORT_TIMOUT_MS && CameraStatistics.this.eventsHandler != null) {
+                        if (CameraStatistics.this.freezePeriodCount * 2000 >= 4000 && CameraStatistics.this.eventsHandler != null) {
                             Logging.e(CameraStatistics.TAG, "Camera freezed.");
                             if (CameraStatistics.this.surfaceTextureHelper.isTextureInUse()) {
                                 CameraStatistics.this.eventsHandler.onCameraFreezed("Camera failure. Client must return video buffers.");
@@ -97,7 +98,7 @@ public interface CameraVideoCapturer extends VideoCapturer {
                         }
                     }
                     CameraStatistics.this.frameCount = 0;
-                    CameraStatistics.this.surfaceTextureHelper.getHandler().postDelayed(this, 2000L);
+                    CameraStatistics.this.surfaceTextureHelper.getHandler().postDelayed(this, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS);
                 }
             };
             this.cameraObserver = runnable;
@@ -105,17 +106,16 @@ public interface CameraVideoCapturer extends VideoCapturer {
                 throw new IllegalArgumentException("SurfaceTextureHelper is null");
             }
             this.surfaceTextureHelper = surfaceTextureHelper;
-            this.eventsHandler = cameraEventsHandler;
+            this.eventsHandler = eventsHandler;
             this.frameCount = 0;
             this.freezePeriodCount = 0;
-            surfaceTextureHelper.getHandler().postDelayed(runnable, 2000L);
+            surfaceTextureHelper.getHandler().postDelayed(runnable, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS);
         }
 
         private void checkThread() {
-            if (Thread.currentThread() == this.surfaceTextureHelper.getHandler().getLooper().getThread()) {
-                return;
+            if (Thread.currentThread() != this.surfaceTextureHelper.getHandler().getLooper().getThread()) {
+                throw new IllegalStateException("Wrong thread");
             }
-            throw new IllegalStateException("Wrong thread");
         }
 
         public void addFrame() {

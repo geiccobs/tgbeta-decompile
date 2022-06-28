@@ -2,7 +2,7 @@ package com.google.android.datatransport.runtime.scheduling.persistence;
 
 import android.database.sqlite.SQLiteDatabase;
 import com.google.android.datatransport.runtime.scheduling.persistence.SchemaManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class SchemaManager$$ExternalSyntheticLambda4 implements SchemaManager.Migration {
     public static final /* synthetic */ SchemaManager$$ExternalSyntheticLambda4 INSTANCE = new SchemaManager$$ExternalSyntheticLambda4();
 

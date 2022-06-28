@@ -3,30 +3,42 @@ package com.google.firebase.abt;
 import android.content.Context;
 import com.google.firebase.analytics.connector.AnalyticsConnector;
 import com.google.firebase.inject.Provider;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class FirebaseABTesting {
+    static final String ABT_PREFERENCES = "com.google.firebase.abt";
+    static final String ORIGIN_LAST_KNOWN_START_TIME_KEY_FORMAT = "%s_lastKnownExperimentStartTime";
     private final Provider<AnalyticsConnector> analyticsConnector;
     private Integer maxUserProperties = null;
     private final String originService;
 
-    public FirebaseABTesting(Context context, Provider<AnalyticsConnector> provider, String str) {
-        this.analyticsConnector = provider;
-        this.originService = str;
+    @Retention(RetentionPolicy.SOURCE)
+    /* loaded from: classes.dex */
+    public @interface OriginService {
+        public static final String INAPP_MESSAGING = "fiam";
+        public static final String REMOTE_CONFIG = "frc";
     }
 
-    public void replaceAllExperiments(List<Map<String, String>> list) throws AbtException {
+    public FirebaseABTesting(Context unusedAppContext, Provider<AnalyticsConnector> analyticsConnector, String originService) {
+        this.analyticsConnector = analyticsConnector;
+        this.originService = originService;
+    }
+
+    public void replaceAllExperiments(List<Map<String, String>> replacementExperiments) throws AbtException {
         throwAbtExceptionIfAnalyticsIsNull();
-        if (list == null) {
+        if (replacementExperiments == null) {
             throw new IllegalArgumentException("The replacementExperiments list is null.");
         }
-        replaceAllExperimentsWith(convertMapsToExperimentInfos(list));
+        replaceAllExperimentsWith(convertMapsToExperimentInfos(replacementExperiments));
     }
 
     public void removeAllExperiments() throws AbtException {
@@ -34,84 +46,115 @@ public class FirebaseABTesting {
         removeExperiments(getAllExperimentsInAnalytics());
     }
 
-    private void replaceAllExperimentsWith(List<AbtExperimentInfo> list) throws AbtException {
-        if (list.isEmpty()) {
+    public List<AbtExperimentInfo> getAllExperiments() throws AbtException {
+        throwAbtExceptionIfAnalyticsIsNull();
+        List<AnalyticsConnector.ConditionalUserProperty> experimentsInAnalytics = getAllExperimentsInAnalytics();
+        List<AbtExperimentInfo> experimentInfos = new ArrayList<>();
+        for (AnalyticsConnector.ConditionalUserProperty experimentInAnalytics : experimentsInAnalytics) {
+            experimentInfos.add(AbtExperimentInfo.fromConditionalUserProperty(experimentInAnalytics));
+        }
+        return experimentInfos;
+    }
+
+    public void reportActiveExperiment(AbtExperimentInfo activeExperiment) throws AbtException {
+        throwAbtExceptionIfAnalyticsIsNull();
+        AbtExperimentInfo.validateAbtExperimentInfo(activeExperiment);
+        ArrayList<AbtExperimentInfo> activeExperimentList = new ArrayList<>();
+        Map<String, String> activeExperimentMap = activeExperiment.toStringMap();
+        activeExperimentMap.remove("triggerEvent");
+        activeExperimentList.add(AbtExperimentInfo.fromMap(activeExperimentMap));
+        addExperiments(activeExperimentList);
+    }
+
+    public void validateRunningExperiments(List<AbtExperimentInfo> runningExperiments) throws AbtException {
+        throwAbtExceptionIfAnalyticsIsNull();
+        Set<String> runningExperimentIds = new HashSet<>();
+        for (AbtExperimentInfo runningExperiment : runningExperiments) {
+            runningExperimentIds.add(runningExperiment.getExperimentId());
+        }
+        List<AnalyticsConnector.ConditionalUserProperty> experimentsToRemove = getExperimentsToRemove(getAllExperimentsInAnalytics(), runningExperimentIds);
+        removeExperiments(experimentsToRemove);
+    }
+
+    private void replaceAllExperimentsWith(List<AbtExperimentInfo> replacementExperiments) throws AbtException {
+        if (replacementExperiments.isEmpty()) {
             removeAllExperiments();
             return;
         }
-        HashSet hashSet = new HashSet();
-        for (AbtExperimentInfo abtExperimentInfo : list) {
-            hashSet.add(abtExperimentInfo.getExperimentId());
+        Set<String> replacementExperimentIds = new HashSet<>();
+        for (AbtExperimentInfo replacementExperiment : replacementExperiments) {
+            replacementExperimentIds.add(replacementExperiment.getExperimentId());
         }
-        List<AnalyticsConnector.ConditionalUserProperty> allExperimentsInAnalytics = getAllExperimentsInAnalytics();
-        HashSet hashSet2 = new HashSet();
-        for (AnalyticsConnector.ConditionalUserProperty conditionalUserProperty : allExperimentsInAnalytics) {
-            hashSet2.add(conditionalUserProperty.name);
+        List<AnalyticsConnector.ConditionalUserProperty> experimentsInAnalytics = getAllExperimentsInAnalytics();
+        Set<String> idsOfExperimentsInAnalytics = new HashSet<>();
+        for (AnalyticsConnector.ConditionalUserProperty experimentInAnalytics : experimentsInAnalytics) {
+            idsOfExperimentsInAnalytics.add(experimentInAnalytics.name);
         }
-        removeExperiments(getExperimentsToRemove(allExperimentsInAnalytics, hashSet));
-        addExperiments(getExperimentsToAdd(list, hashSet2));
+        List<AnalyticsConnector.ConditionalUserProperty> experimentsToRemove = getExperimentsToRemove(experimentsInAnalytics, replacementExperimentIds);
+        removeExperiments(experimentsToRemove);
+        List<AbtExperimentInfo> experimentsToAdd = getExperimentsToAdd(replacementExperiments, idsOfExperimentsInAnalytics);
+        addExperiments(experimentsToAdd);
     }
 
-    private ArrayList<AnalyticsConnector.ConditionalUserProperty> getExperimentsToRemove(List<AnalyticsConnector.ConditionalUserProperty> list, Set<String> set) {
-        ArrayList<AnalyticsConnector.ConditionalUserProperty> arrayList = new ArrayList<>();
-        for (AnalyticsConnector.ConditionalUserProperty conditionalUserProperty : list) {
-            if (!set.contains(conditionalUserProperty.name)) {
-                arrayList.add(conditionalUserProperty);
+    private ArrayList<AnalyticsConnector.ConditionalUserProperty> getExperimentsToRemove(List<AnalyticsConnector.ConditionalUserProperty> experimentsInAnalytics, Set<String> replacementExperimentIds) {
+        ArrayList<AnalyticsConnector.ConditionalUserProperty> experimentsToRemove = new ArrayList<>();
+        for (AnalyticsConnector.ConditionalUserProperty experimentInAnalytics : experimentsInAnalytics) {
+            if (!replacementExperimentIds.contains(experimentInAnalytics.name)) {
+                experimentsToRemove.add(experimentInAnalytics);
             }
         }
-        return arrayList;
+        return experimentsToRemove;
     }
 
-    private ArrayList<AbtExperimentInfo> getExperimentsToAdd(List<AbtExperimentInfo> list, Set<String> set) {
-        ArrayList<AbtExperimentInfo> arrayList = new ArrayList<>();
-        for (AbtExperimentInfo abtExperimentInfo : list) {
-            if (!set.contains(abtExperimentInfo.getExperimentId())) {
-                arrayList.add(abtExperimentInfo);
+    private ArrayList<AbtExperimentInfo> getExperimentsToAdd(List<AbtExperimentInfo> replacementExperiments, Set<String> idsOfExperimentsInAnalytics) {
+        ArrayList<AbtExperimentInfo> experimentsToAdd = new ArrayList<>();
+        for (AbtExperimentInfo replacementExperiment : replacementExperiments) {
+            if (!idsOfExperimentsInAnalytics.contains(replacementExperiment.getExperimentId())) {
+                experimentsToAdd.add(replacementExperiment);
             }
         }
-        return arrayList;
+        return experimentsToAdd;
     }
 
-    private void addExperiments(List<AbtExperimentInfo> list) {
-        ArrayDeque arrayDeque = new ArrayDeque(getAllExperimentsInAnalytics());
-        int maxUserPropertiesInAnalytics = getMaxUserPropertiesInAnalytics();
-        for (AbtExperimentInfo abtExperimentInfo : list) {
-            while (arrayDeque.size() >= maxUserPropertiesInAnalytics) {
-                removeExperimentFromAnalytics(((AnalyticsConnector.ConditionalUserProperty) arrayDeque.pollFirst()).name);
+    private void addExperiments(List<AbtExperimentInfo> experimentsToAdd) {
+        Deque<AnalyticsConnector.ConditionalUserProperty> dequeOfExperimentsInAnalytics = new ArrayDeque<>(getAllExperimentsInAnalytics());
+        int fetchedMaxUserProperties = getMaxUserPropertiesInAnalytics();
+        for (AbtExperimentInfo experimentToAdd : experimentsToAdd) {
+            while (dequeOfExperimentsInAnalytics.size() >= fetchedMaxUserProperties) {
+                removeExperimentFromAnalytics(dequeOfExperimentsInAnalytics.pollFirst().name);
             }
-            AnalyticsConnector.ConditionalUserProperty conditionalUserProperty = abtExperimentInfo.toConditionalUserProperty(this.originService);
-            addExperimentToAnalytics(conditionalUserProperty);
-            arrayDeque.offer(conditionalUserProperty);
+            AnalyticsConnector.ConditionalUserProperty experiment = experimentToAdd.toConditionalUserProperty(this.originService);
+            addExperimentToAnalytics(experiment);
+            dequeOfExperimentsInAnalytics.offer(experiment);
         }
     }
 
-    private void removeExperiments(Collection<AnalyticsConnector.ConditionalUserProperty> collection) {
-        for (AnalyticsConnector.ConditionalUserProperty conditionalUserProperty : collection) {
-            removeExperimentFromAnalytics(conditionalUserProperty.name);
+    private void removeExperiments(Collection<AnalyticsConnector.ConditionalUserProperty> experiments) {
+        for (AnalyticsConnector.ConditionalUserProperty experiment : experiments) {
+            removeExperimentFromAnalytics(experiment.name);
         }
     }
 
-    private static List<AbtExperimentInfo> convertMapsToExperimentInfos(List<Map<String, String>> list) throws AbtException {
-        ArrayList arrayList = new ArrayList();
-        for (Map<String, String> map : list) {
-            arrayList.add(AbtExperimentInfo.fromMap(map));
+    private static List<AbtExperimentInfo> convertMapsToExperimentInfos(List<Map<String, String>> replacementExperimentsMaps) throws AbtException {
+        List<AbtExperimentInfo> replacementExperimentInfos = new ArrayList<>();
+        for (Map<String, String> replacementExperimentMap : replacementExperimentsMaps) {
+            replacementExperimentInfos.add(AbtExperimentInfo.fromMap(replacementExperimentMap));
         }
-        return arrayList;
+        return replacementExperimentInfos;
     }
 
-    private void addExperimentToAnalytics(AnalyticsConnector.ConditionalUserProperty conditionalUserProperty) {
-        this.analyticsConnector.get().setConditionalUserProperty(conditionalUserProperty);
+    private void addExperimentToAnalytics(AnalyticsConnector.ConditionalUserProperty experiment) {
+        this.analyticsConnector.get().setConditionalUserProperty(experiment);
     }
 
     private void throwAbtExceptionIfAnalyticsIsNull() throws AbtException {
-        if (this.analyticsConnector.get() != null) {
-            return;
+        if (this.analyticsConnector.get() == null) {
+            throw new AbtException("The Analytics SDK is not available. Please check that the Analytics SDK is included in your app dependencies.");
         }
-        throw new AbtException("The Analytics SDK is not available. Please check that the Analytics SDK is included in your app dependencies.");
     }
 
-    private void removeExperimentFromAnalytics(String str) {
-        this.analyticsConnector.get().clearConditionalUserProperty(str, null, null);
+    private void removeExperimentFromAnalytics(String experimentId) {
+        this.analyticsConnector.get().clearConditionalUserProperty(experimentId, null, null);
     }
 
     private int getMaxUserPropertiesInAnalytics() {

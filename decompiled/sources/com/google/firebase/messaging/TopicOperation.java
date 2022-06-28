@@ -2,10 +2,11 @@ package com.google.firebase.messaging;
 
 import android.text.TextUtils;
 import android.util.Log;
+import androidx.exifinterface.media.ExifInterface;
 import com.google.android.gms.common.internal.Objects;
 import java.util.regex.Pattern;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class TopicOperation {
     private static final Pattern TOPIC_NAME_REGEXP = Pattern.compile("[a-zA-Z0-9-_.~%]{1,900}");
     private final String operation;
@@ -35,13 +36,21 @@ final class TopicOperation {
 
     private static String normalizeTopicOrThrow(String str, String str2) {
         if (str != null && str.startsWith("/topics/")) {
-            Log.w("FirebaseMessaging", String.format("Format /topics/topic-name is deprecated. Only 'topic-name' should be used in %s.", str2));
+            Log.w(Constants.TAG, String.format("Format /topics/topic-name is deprecated. Only 'topic-name' should be used in %s.", str2));
             str = str.substring(8);
         }
         if (str == null || !TOPIC_NAME_REGEXP.matcher(str).matches()) {
             throw new IllegalArgumentException(String.format("Invalid topic name: %s does not match the allowed format %s.", str, "[a-zA-Z0-9-_.~%]{1,900}"));
         }
         return str;
+    }
+
+    public static TopicOperation subscribe(String str) {
+        return new TopicOperation(ExifInterface.LATITUDE_SOUTH, str);
+    }
+
+    public static TopicOperation unsubscribe(String str) {
+        return new TopicOperation("U", str);
     }
 
     public boolean equals(Object obj) {

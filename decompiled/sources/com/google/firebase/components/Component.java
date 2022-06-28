@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class Component<T> {
     private final Set<Dependency> dependencies;
     private final ComponentFactory<T> factory;
@@ -13,21 +13,13 @@ public final class Component<T> {
     private final Set<Class<?>> publishedEvents;
     private final int type;
 
-    public static /* synthetic */ Object lambda$intoSet$2(Object obj, ComponentContainer componentContainer) {
-        return obj;
-    }
-
-    public static /* synthetic */ Object lambda$of$1(Object obj, ComponentContainer componentContainer) {
-        return obj;
-    }
-
-    private Component(Set<Class<? super T>> set, Set<Dependency> set2, int i, int i2, ComponentFactory<T> componentFactory, Set<Class<?>> set3) {
-        this.providedInterfaces = Collections.unmodifiableSet(set);
-        this.dependencies = Collections.unmodifiableSet(set2);
-        this.instantiation = i;
-        this.type = i2;
-        this.factory = componentFactory;
-        this.publishedEvents = Collections.unmodifiableSet(set3);
+    private Component(Set<Class<? super T>> providedInterfaces, Set<Dependency> dependencies, int instantiation, int type, ComponentFactory<T> factory, Set<Class<?>> publishedEvents) {
+        this.providedInterfaces = Collections.unmodifiableSet(providedInterfaces);
+        this.dependencies = Collections.unmodifiableSet(dependencies);
+        this.instantiation = instantiation;
+        this.type = type;
+        this.factory = factory;
+        this.publishedEvents = Collections.unmodifiableSet(publishedEvents);
     }
 
     public Set<Class<? super T>> getProvidedInterfaces() {
@@ -46,6 +38,10 @@ public final class Component<T> {
         return this.publishedEvents;
     }
 
+    public boolean isLazy() {
+        return this.instantiation == 0;
+    }
+
     public boolean isAlwaysEager() {
         return this.instantiation == 1;
     }
@@ -59,46 +55,73 @@ public final class Component<T> {
     }
 
     public String toString() {
-        return "Component<" + Arrays.toString(this.providedInterfaces.toArray()) + ">{" + this.instantiation + ", type=" + this.type + ", deps=" + Arrays.toString(this.dependencies.toArray()) + "}";
+        StringBuilder sb = new StringBuilder("Component<");
+        sb.append(Arrays.toString(this.providedInterfaces.toArray()));
+        sb.append(">{");
+        sb.append(this.instantiation);
+        sb.append(", type=");
+        sb.append(this.type);
+        sb.append(", deps=");
+        sb.append(Arrays.toString(this.dependencies.toArray()));
+        StringBuilder sb2 = sb.append("}");
+        return sb2.toString();
     }
 
-    public static <T> Builder<T> builder(Class<T> cls) {
-        return new Builder<>(cls, new Class[0]);
+    public static <T> Builder<T> builder(Class<T> anInterface) {
+        return new Builder<>(anInterface, new Class[0]);
     }
 
     @SafeVarargs
-    public static <T> Builder<T> builder(Class<T> cls, Class<? super T>... clsArr) {
-        return new Builder<>(cls, clsArr);
+    public static <T> Builder<T> builder(Class<T> anInterface, Class<? super T>... additionalInterfaces) {
+        return new Builder<>(anInterface, additionalInterfaces);
     }
 
-    @SafeVarargs
-    public static <T> Component<T> of(final T t, Class<T> cls, Class<? super T>... clsArr) {
-        return builder(cls, clsArr).factory(new ComponentFactory() { // from class: com.google.firebase.components.Component$$ExternalSyntheticLambda1
+    public static /* synthetic */ Object lambda$of$0(Object value, ComponentContainer args) {
+        return value;
+    }
+
+    @Deprecated
+    public static <T> Component<T> of(Class<T> anInterface, final T value) {
+        return builder(anInterface).factory(new ComponentFactory() { // from class: com.google.firebase.components.Component$$ExternalSyntheticLambda1
             @Override // com.google.firebase.components.ComponentFactory
             public final Object create(ComponentContainer componentContainer) {
-                Object lambda$of$1;
-                lambda$of$1 = Component.lambda$of$1(t, componentContainer);
-                return lambda$of$1;
+                return Component.lambda$of$0(value, componentContainer);
             }
         }).build();
     }
 
-    public static <T> Builder<T> intoSetBuilder(Class<T> cls) {
-        return builder(cls).intoSet();
+    public static /* synthetic */ Object lambda$of$1(Object value, ComponentContainer args) {
+        return value;
     }
 
-    public static <T> Component<T> intoSet(final T t, Class<T> cls) {
-        return intoSetBuilder(cls).factory(new ComponentFactory() { // from class: com.google.firebase.components.Component$$ExternalSyntheticLambda0
+    @SafeVarargs
+    public static <T> Component<T> of(final T value, Class<T> anInterface, Class<? super T>... additionalInterfaces) {
+        return builder(anInterface, additionalInterfaces).factory(new ComponentFactory() { // from class: com.google.firebase.components.Component$$ExternalSyntheticLambda2
             @Override // com.google.firebase.components.ComponentFactory
             public final Object create(ComponentContainer componentContainer) {
-                Object lambda$intoSet$2;
-                lambda$intoSet$2 = Component.lambda$intoSet$2(t, componentContainer);
-                return lambda$intoSet$2;
+                return Component.lambda$of$1(value, componentContainer);
             }
         }).build();
     }
 
-    /* loaded from: classes.dex */
+    public static <T> Builder<T> intoSetBuilder(Class<T> anInterface) {
+        return builder(anInterface).intoSet();
+    }
+
+    public static <T> Component<T> intoSet(final T value, Class<T> anInterface) {
+        return intoSetBuilder(anInterface).factory(new ComponentFactory() { // from class: com.google.firebase.components.Component$$ExternalSyntheticLambda0
+            @Override // com.google.firebase.components.ComponentFactory
+            public final Object create(ComponentContainer componentContainer) {
+                return Component.lambda$intoSet$2(value, componentContainer);
+            }
+        }).build();
+    }
+
+    public static /* synthetic */ Object lambda$intoSet$2(Object value, ComponentContainer c) {
+        return value;
+    }
+
+    /* loaded from: classes3.dex */
     public static class Builder<T> {
         private final Set<Dependency> dependencies;
         private ComponentFactory<T> factory;
@@ -108,19 +131,19 @@ public final class Component<T> {
         private int type;
 
         @SafeVarargs
-        private Builder(Class<T> cls, Class<? super T>... clsArr) {
+        private Builder(Class<T> anInterface, Class<? super T>... additionalInterfaces) {
             HashSet hashSet = new HashSet();
             this.providedInterfaces = hashSet;
             this.dependencies = new HashSet();
             this.instantiation = 0;
             this.type = 0;
             this.publishedEvents = new HashSet();
-            Preconditions.checkNotNull(cls, "Null interface");
-            hashSet.add(cls);
-            for (Class<? super T> cls2 : clsArr) {
-                Preconditions.checkNotNull(cls2, "Null interface");
+            Preconditions.checkNotNull(anInterface, "Null interface");
+            hashSet.add(anInterface);
+            for (Class<? super T> iface : additionalInterfaces) {
+                Preconditions.checkNotNull(iface, "Null interface");
             }
-            Collections.addAll(this.providedInterfaces, clsArr);
+            Collections.addAll(this.providedInterfaces, additionalInterfaces);
         }
 
         public Builder<T> add(Dependency dependency) {
@@ -138,18 +161,23 @@ public final class Component<T> {
             return setInstantiation(2);
         }
 
-        private Builder<T> setInstantiation(int i) {
-            Preconditions.checkState(this.instantiation == 0, "Instantiation type has already been set.");
-            this.instantiation = i;
+        public Builder<T> publishes(Class<?> eventType) {
+            this.publishedEvents.add(eventType);
             return this;
         }
 
-        private void validateInterface(Class<?> cls) {
-            Preconditions.checkArgument(!this.providedInterfaces.contains(cls), "Components are not allowed to depend on interfaces they themselves provide.");
+        private Builder<T> setInstantiation(int instantiation) {
+            Preconditions.checkState(this.instantiation == 0, "Instantiation type has already been set.");
+            this.instantiation = instantiation;
+            return this;
         }
 
-        public Builder<T> factory(ComponentFactory<T> componentFactory) {
-            this.factory = (ComponentFactory) Preconditions.checkNotNull(componentFactory, "Null factory");
+        private void validateInterface(Class<?> anInterface) {
+            Preconditions.checkArgument(!this.providedInterfaces.contains(anInterface), "Components are not allowed to depend on interfaces they themselves provide.");
+        }
+
+        public Builder<T> factory(ComponentFactory<T> value) {
+            this.factory = (ComponentFactory) Preconditions.checkNotNull(value, "Null factory");
             return this;
         }
 

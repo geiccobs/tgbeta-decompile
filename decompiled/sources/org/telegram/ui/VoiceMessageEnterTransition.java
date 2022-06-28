@@ -19,7 +19,7 @@ import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.MessageEnterTransitionContainer;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class VoiceMessageEnterTransition implements MessageEnterTransitionContainer.Transition {
     private final ValueAnimator animator;
     MessageEnterTransitionContainer container;
@@ -37,13 +37,13 @@ public class VoiceMessageEnterTransition implements MessageEnterTransitionContai
     final Paint circlePaint = new Paint(1);
     private final Matrix gradientMatrix = new Matrix();
 
-    public VoiceMessageEnterTransition(final ChatMessageCell chatMessageCell, ChatActivityEnterView chatActivityEnterView, RecyclerListView recyclerListView, final MessageEnterTransitionContainer messageEnterTransitionContainer, Theme.ResourcesProvider resourcesProvider) {
+    public VoiceMessageEnterTransition(final ChatMessageCell messageView, ChatActivityEnterView chatActivityEnterView, RecyclerListView listView, final MessageEnterTransitionContainer container, Theme.ResourcesProvider resourcesProvider) {
         this.resourcesProvider = resourcesProvider;
-        this.messageView = chatMessageCell;
-        this.container = messageEnterTransitionContainer;
-        this.listView = recyclerListView;
+        this.messageView = messageView;
+        this.container = container;
+        this.listView = listView;
         this.fromRadius = chatActivityEnterView.getRecordCicle().drawingCircleRadius;
-        chatMessageCell.setEnterTransitionInProgress(true);
+        messageView.setEnterTransitionInProgress(true);
         ChatActivityEnterView.RecordCircle recordCicle = chatActivityEnterView.getRecordCicle();
         this.recordCircle = recordCicle;
         recordCicle.voiceEnterTransitionInProgress = true;
@@ -54,34 +54,35 @@ public class VoiceMessageEnterTransition implements MessageEnterTransitionContai
         LinearGradient linearGradient = new LinearGradient(0.0f, AndroidUtilities.dp(12.0f), 0.0f, 0.0f, 0, -16777216, Shader.TileMode.CLAMP);
         this.gradientShader = linearGradient;
         paint.setShader(linearGradient);
-        this.messageId = chatMessageCell.getMessageObject().stableId;
-        messageEnterTransitionContainer.addTransition(this);
+        this.messageId = messageView.getMessageObject().stableId;
+        container.addTransition(this);
         ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
         this.animator = ofFloat;
         ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.VoiceMessageEnterTransition$$ExternalSyntheticLambda0
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                VoiceMessageEnterTransition.this.lambda$new$0(messageEnterTransitionContainer, valueAnimator);
+                VoiceMessageEnterTransition.this.m4799lambda$new$0$orgtelegramuiVoiceMessageEnterTransition(container, valueAnimator);
             }
         });
         ofFloat.setInterpolator(new LinearInterpolator());
         ofFloat.setDuration(220L);
         ofFloat.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.VoiceMessageEnterTransition.1
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                chatMessageCell.setEnterTransitionInProgress(false);
-                messageEnterTransitionContainer.removeTransition(VoiceMessageEnterTransition.this);
+            public void onAnimationEnd(Animator animation) {
+                messageView.setEnterTransitionInProgress(false);
+                container.removeTransition(VoiceMessageEnterTransition.this);
                 VoiceMessageEnterTransition.this.recordCircle.skipDraw = false;
             }
         });
-        if (chatMessageCell.getSeekBarWaveform() != null) {
-            chatMessageCell.getSeekBarWaveform().setSent();
+        if (messageView.getSeekBarWaveform() != null) {
+            messageView.getSeekBarWaveform().setSent();
         }
     }
 
-    public /* synthetic */ void lambda$new$0(MessageEnterTransitionContainer messageEnterTransitionContainer, ValueAnimator valueAnimator) {
+    /* renamed from: lambda$new$0$org-telegram-ui-VoiceMessageEnterTransition */
+    public /* synthetic */ void m4799lambda$new$0$orgtelegramuiVoiceMessageEnterTransition(MessageEnterTransitionContainer container, ValueAnimator valueAnimator) {
         this.progress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-        messageEnterTransitionContainer.invalidate();
+        container.invalidate();
     }
 
     public void start() {
@@ -90,73 +91,78 @@ public class VoiceMessageEnterTransition implements MessageEnterTransitionContai
 
     @Override // org.telegram.ui.MessageEnterTransitionContainer.Transition
     public void onDraw(Canvas canvas) {
-        float f;
-        float f2;
-        float f3;
-        float f4;
-        int i;
-        float f5 = this.progress;
-        float f6 = f5 > 0.6f ? 1.0f : f5 / 0.6f;
-        ChatActivityEnterView.RecordCircle recordCircle = this.recordCircle;
-        float x = (recordCircle.drawingCx + recordCircle.getX()) - this.container.getX();
-        ChatActivityEnterView.RecordCircle recordCircle2 = this.recordCircle;
-        float y = (recordCircle2.drawingCy + recordCircle2.getY()) - this.container.getY();
-        if (this.messageView.getMessageObject().stableId != this.messageId) {
-            f2 = this.lastToCx;
-            f = this.lastToCy;
+        float toCx;
+        float toCy;
+        float progress;
+        float cy;
+        float radius;
+        float cx;
+        int clipBottom;
+        float moveProgress = this.progress;
+        float f = this.progress;
+        float hideWavesProgress = f > 0.6f ? 1.0f : f / 0.6f;
+        float fromCx = (this.recordCircle.drawingCx + this.recordCircle.getX()) - this.container.getX();
+        float fromCy = (this.recordCircle.drawingCy + this.recordCircle.getY()) - this.container.getY();
+        if (this.messageView.getMessageObject().stableId == this.messageId) {
+            float toCy2 = ((this.messageView.getRadialProgress().getProgressRect().centerY() + this.messageView.getY()) + this.listView.getY()) - this.container.getY();
+            toCx = ((this.messageView.getRadialProgress().getProgressRect().centerX() + this.messageView.getX()) + this.listView.getX()) - this.container.getX();
+            toCy = toCy2;
         } else {
-            f = ((this.messageView.getRadialProgress().getProgressRect().centerY() + this.messageView.getY()) + this.listView.getY()) - this.container.getY();
-            f2 = ((this.messageView.getRadialProgress().getProgressRect().centerX() + this.messageView.getX()) + this.listView.getX()) - this.container.getX();
+            toCx = this.lastToCx;
+            toCy = this.lastToCy;
         }
-        this.lastToCx = f2;
-        this.lastToCy = f;
-        float interpolation = CubicBezierInterpolator.DEFAULT.getInterpolation(f5);
-        float interpolation2 = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(f5);
-        float f7 = ((1.0f - interpolation2) * x) + (f2 * interpolation2);
-        float f8 = 1.0f - interpolation;
-        float f9 = (y * f8) + (f * interpolation);
-        float height = this.messageView.getRadialProgress().getProgressRect().height() / 2.0f;
-        float f10 = (this.fromRadius * f8) + (height * interpolation);
-        float y2 = (this.listView.getY() - this.container.getY()) + this.listView.getMeasuredHeight();
+        this.lastToCx = toCx;
+        this.lastToCy = toCy;
+        float progress2 = CubicBezierInterpolator.DEFAULT.getInterpolation(moveProgress);
+        float xProgress = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(moveProgress);
+        float cx2 = ((1.0f - xProgress) * fromCx) + (toCx * xProgress);
+        float cy2 = ((1.0f - progress2) * fromCy) + (toCy * progress2);
+        float toRadius = this.messageView.getRadialProgress().getProgressRect().height() / 2.0f;
+        float radius2 = (this.fromRadius * (1.0f - progress2)) + (toRadius * progress2);
+        float listViewBottom = (this.listView.getY() - this.container.getY()) + this.listView.getMeasuredHeight();
         if (this.container.getMeasuredHeight() > 0) {
-            f4 = f10;
-            f3 = f9;
+            radius = radius2;
+            cy = cy2;
+            cx = cx2;
+            progress = progress2;
             canvas.saveLayerAlpha(0.0f, this.container.getMeasuredHeight() - AndroidUtilities.dp(400.0f), this.container.getMeasuredWidth(), this.container.getMeasuredHeight(), 255, 31);
-            i = (int) ((this.container.getMeasuredHeight() * f8) + (y2 * interpolation));
+            clipBottom = (int) ((this.container.getMeasuredHeight() * (1.0f - progress2)) + (listViewBottom * progress2));
         } else {
-            f4 = f10;
-            f3 = f9;
+            radius = radius2;
+            cy = cy2;
+            cx = cx2;
+            progress = progress2;
             canvas.save();
-            i = 0;
+            clipBottom = 0;
         }
-        this.circlePaint.setColor(ColorUtils.blendARGB(getThemedColor("chat_messagePanelVoiceBackground"), getThemedColor(this.messageView.getRadialProgress().getCircleColorKey()), interpolation));
-        float f11 = f3;
-        this.recordCircle.drawWaves(canvas, f7, f11, 1.0f - f6);
-        float f12 = f4;
-        canvas.drawCircle(f7, f11, f12, this.circlePaint);
+        float progress3 = progress;
+        this.circlePaint.setColor(ColorUtils.blendARGB(getThemedColor(Theme.key_chat_messagePanelVoiceBackground), getThemedColor(this.messageView.getRadialProgress().getCircleColorKey()), progress3));
+        float cy3 = cy;
+        this.recordCircle.drawWaves(canvas, cx, cy3, 1.0f - hideWavesProgress);
+        float radius3 = radius;
+        canvas.drawCircle(cx, cy3, radius3, this.circlePaint);
         canvas.save();
-        float f13 = f12 / height;
-        canvas.scale(f13, f13, f7, f11);
-        canvas.translate(f7 - this.messageView.getRadialProgress().getProgressRect().centerX(), f11 - this.messageView.getRadialProgress().getProgressRect().centerY());
-        this.messageView.getRadialProgress().setOverrideAlpha(interpolation);
+        float scale = radius3 / toRadius;
+        canvas.scale(scale, scale, cx, cy3);
+        canvas.translate(cx - this.messageView.getRadialProgress().getProgressRect().centerX(), cy3 - this.messageView.getRadialProgress().getProgressRect().centerY());
+        this.messageView.getRadialProgress().setOverrideAlpha(progress3);
         this.messageView.getRadialProgress().setDrawBackground(false);
         this.messageView.getRadialProgress().draw(canvas);
         this.messageView.getRadialProgress().setDrawBackground(true);
         this.messageView.getRadialProgress().setOverrideAlpha(1.0f);
         canvas.restore();
         if (this.container.getMeasuredHeight() > 0) {
-            float f14 = i;
-            this.gradientMatrix.setTranslate(0.0f, f14);
+            this.gradientMatrix.setTranslate(0.0f, clipBottom);
             this.gradientShader.setLocalMatrix(this.gradientMatrix);
-            canvas.drawRect(0.0f, f14, this.container.getMeasuredWidth(), this.container.getMeasuredHeight(), this.gradientPaint);
+            canvas.drawRect(0.0f, clipBottom, this.container.getMeasuredWidth(), this.container.getMeasuredHeight(), this.gradientPaint);
         }
         canvas.restore();
-        this.recordCircle.drawIcon(canvas, (int) x, (int) y, 1.0f - f5);
+        this.recordCircle.drawIcon(canvas, (int) fromCx, (int) fromCy, 1.0f - moveProgress);
     }
 
-    private int getThemedColor(String str) {
+    private int getThemedColor(String key) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
-        return color != null ? color.intValue() : Theme.getColor(str);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
+        return color != null ? color.intValue() : Theme.getColor(key);
     }
 }

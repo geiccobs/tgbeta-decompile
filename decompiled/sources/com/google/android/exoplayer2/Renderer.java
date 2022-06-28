@@ -4,14 +4,19 @@ import com.google.android.exoplayer2.PlayerMessage;
 import com.google.android.exoplayer2.source.SampleStream;
 import com.google.android.exoplayer2.util.MediaClock;
 import java.io.IOException;
-/* loaded from: classes.dex */
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+/* loaded from: classes3.dex */
 public interface Renderer extends PlayerMessage.Target {
+    public static final int STATE_DISABLED = 0;
+    public static final int STATE_ENABLED = 1;
+    public static final int STATE_STARTED = 2;
 
-    /* renamed from: com.google.android.exoplayer2.Renderer$-CC */
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
     /* loaded from: classes.dex */
-    public final /* synthetic */ class CC {
-        public static void $default$setOperatingRate(Renderer renderer, float f) throws ExoPlaybackException {
-        }
+    public @interface State {
     }
 
     void disable();
@@ -57,4 +62,11 @@ public interface Renderer extends PlayerMessage.Target {
     void start() throws ExoPlaybackException;
 
     void stop() throws ExoPlaybackException;
+
+    /* renamed from: com.google.android.exoplayer2.Renderer$-CC */
+    /* loaded from: classes3.dex */
+    public final /* synthetic */ class CC {
+        public static void $default$setOperatingRate(Renderer _this, float operatingRate) throws ExoPlaybackException {
+        }
+    }
 }

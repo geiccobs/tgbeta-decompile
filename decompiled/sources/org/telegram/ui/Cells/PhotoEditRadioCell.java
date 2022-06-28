@@ -6,10 +6,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RadioButton;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class PhotoEditRadioCell extends FrameLayout {
     private int currentColor;
     private int currentType;
@@ -33,27 +34,28 @@ public class PhotoEditRadioCell extends FrameLayout {
         LinearLayout linearLayout = new LinearLayout(context);
         this.tintButtonsContainer = linearLayout;
         linearLayout.setOrientation(0);
-        for (int i = 0; i < this.tintShadowColors.length; i++) {
+        for (int a = 0; a < this.tintShadowColors.length; a++) {
             RadioButton radioButton = new RadioButton(context);
             radioButton.setSize(AndroidUtilities.dp(20.0f));
-            radioButton.setTag(Integer.valueOf(i));
+            radioButton.setTag(Integer.valueOf(a));
             this.tintButtonsContainer.addView(radioButton, LayoutHelper.createLinear(0, -1, 1.0f / this.tintShadowColors.length));
             radioButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.PhotoEditRadioCell$$ExternalSyntheticLambda0
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    PhotoEditRadioCell.this.lambda$new$0(view);
+                    PhotoEditRadioCell.this.m1661lambda$new$0$orgtelegramuiCellsPhotoEditRadioCell(view);
                 }
             });
         }
         addView(this.tintButtonsContainer, LayoutHelper.createFrame(-1, 40.0f, 51, 96.0f, 0.0f, 24.0f, 0.0f));
     }
 
-    public /* synthetic */ void lambda$new$0(View view) {
-        RadioButton radioButton = (RadioButton) view;
+    /* renamed from: lambda$new$0$org-telegram-ui-Cells-PhotoEditRadioCell */
+    public /* synthetic */ void m1661lambda$new$0$orgtelegramuiCellsPhotoEditRadioCell(View v) {
+        RadioButton radioButton1 = (RadioButton) v;
         if (this.currentType == 0) {
-            this.currentColor = this.tintShadowColors[((Integer) radioButton.getTag()).intValue()];
+            this.currentColor = this.tintShadowColors[((Integer) radioButton1.getTag()).intValue()];
         } else {
-            this.currentColor = this.tintHighlighsColors[((Integer) radioButton.getTag()).intValue()];
+            this.currentColor = this.tintHighlighsColors[((Integer) radioButton1.getTag()).intValue()];
         }
         updateSelectedTintButton(true);
         this.onClickListener.onClick(this);
@@ -63,44 +65,40 @@ public class PhotoEditRadioCell extends FrameLayout {
         return this.currentColor;
     }
 
-    private void updateSelectedTintButton(boolean z) {
-        int i;
+    private void updateSelectedTintButton(boolean animated) {
         int childCount = this.tintButtonsContainer.getChildCount();
-        for (int i2 = 0; i2 < childCount; i2++) {
-            View childAt = this.tintButtonsContainer.getChildAt(i2);
-            if (childAt instanceof RadioButton) {
-                RadioButton radioButton = (RadioButton) childAt;
-                int intValue = ((Integer) radioButton.getTag()).intValue();
-                radioButton.setChecked(this.currentColor == (this.currentType == 0 ? this.tintShadowColors[intValue] : this.tintHighlighsColors[intValue]), z);
-                int i3 = -1;
-                if (intValue == 0) {
-                    i = -1;
-                } else {
-                    i = this.currentType == 0 ? this.tintShadowColors[intValue] : this.tintHighlighsColors[intValue];
+        for (int a = 0; a < childCount; a++) {
+            View child = this.tintButtonsContainer.getChildAt(a);
+            if (child instanceof RadioButton) {
+                RadioButton radioButton = (RadioButton) child;
+                int num = ((Integer) radioButton.getTag()).intValue();
+                int color2 = this.currentType == 0 ? this.tintShadowColors[num] : this.tintHighlighsColors[num];
+                radioButton.setChecked(this.currentColor == color2, animated);
+                int i = -1;
+                int i2 = num == 0 ? -1 : this.currentType == 0 ? this.tintShadowColors[num] : this.tintHighlighsColors[num];
+                if (num != 0) {
+                    i = this.currentType == 0 ? this.tintShadowColors[num] : this.tintHighlighsColors[num];
                 }
-                if (intValue != 0) {
-                    i3 = this.currentType == 0 ? this.tintShadowColors[intValue] : this.tintHighlighsColors[intValue];
-                }
-                radioButton.setColor(i, i3);
+                radioButton.setColor(i2, i);
             }
         }
     }
 
     @Override // android.view.View
-    public void setOnClickListener(View.OnClickListener onClickListener) {
-        this.onClickListener = onClickListener;
+    public void setOnClickListener(View.OnClickListener l) {
+        this.onClickListener = l;
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int i, int i2) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(40.0f), 1073741824));
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(40.0f), C.BUFFER_FLAG_ENCRYPTED));
     }
 
-    public void setIconAndTextAndValue(String str, int i, int i2) {
-        this.currentType = i;
-        this.currentColor = i2;
+    public void setIconAndTextAndValue(String text, int type, int value) {
+        this.currentType = type;
+        this.currentColor = value;
         TextView textView = this.nameTextView;
-        textView.setText(str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase());
+        textView.setText(text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase());
         updateSelectedTintButton(false);
     }
 }

@@ -1,7 +1,7 @@
 package com.google.firebase.components;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class DependencyException extends RuntimeException {
-    public DependencyException(String str) {
-        super(str);
+    public DependencyException(String msg) {
+        super(msg);
     }
 }

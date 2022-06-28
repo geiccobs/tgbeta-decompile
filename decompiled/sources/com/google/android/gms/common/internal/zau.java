@@ -8,7 +8,7 @@ import com.google.android.gms.common.internal.IAccountAccessor;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zau extends AbstractSafeParcelable {
     public static final Parcelable.Creator<zau> CREATOR = new zax();
     private final int zaa;
@@ -67,6 +67,9 @@ public final class zau extends AbstractSafeParcelable {
             return false;
         }
         zau zauVar = (zau) obj;
-        return this.zac.equals(zauVar.zac) && Objects.equal(zaa(), zauVar.zaa());
+        if (!this.zac.equals(zauVar.zac) || !Objects.equal(zaa(), zauVar.zaa())) {
+            return false;
+        }
+        return true;
     }
 }

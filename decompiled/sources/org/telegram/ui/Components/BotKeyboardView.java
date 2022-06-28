@@ -10,16 +10,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.R;
-import org.telegram.tgnet.TLRPC$KeyboardButton;
-import org.telegram.tgnet.TLRPC$TL_keyboardButtonRow;
-import org.telegram.tgnet.TLRPC$TL_keyboardButtonSimpleWebView;
-import org.telegram.tgnet.TLRPC$TL_keyboardButtonWebView;
-import org.telegram.tgnet.TLRPC$TL_replyKeyboardMarkup;
+import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class BotKeyboardView extends LinearLayout {
-    private TLRPC$TL_replyKeyboardMarkup botButtons;
+    private TLRPC.TL_replyKeyboardMarkup botButtons;
     private int buttonHeight;
     private LinearLayout container;
     private BotKeyboardViewDelegate delegate;
@@ -30,9 +26,9 @@ public class BotKeyboardView extends LinearLayout {
     private ArrayList<TextView> buttonViews = new ArrayList<>();
     private ArrayList<ImageView> buttonIcons = new ArrayList<>();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface BotKeyboardViewDelegate {
-        void didPressedButton(TLRPC$KeyboardButton tLRPC$KeyboardButton);
+        void didPressedButton(TLRPC.KeyboardButton keyboardButton);
     }
 
     public BotKeyboardView(Context context, Theme.ResourcesProvider resourcesProvider) {
@@ -50,12 +46,12 @@ public class BotKeyboardView extends LinearLayout {
     }
 
     public void updateColors() {
-        AndroidUtilities.setScrollViewEdgeEffectColor(this.scrollView, getThemedColor("chat_emojiPanelBackground"));
-        setBackgroundColor(getThemedColor("chat_emojiPanelBackground"));
+        AndroidUtilities.setScrollViewEdgeEffectColor(this.scrollView, getThemedColor(Theme.key_chat_emojiPanelBackground));
+        setBackgroundColor(getThemedColor(Theme.key_chat_emojiPanelBackground));
         for (int i = 0; i < this.buttonViews.size(); i++) {
-            this.buttonViews.get(i).setTextColor(getThemedColor("chat_botKeyboardButtonText"));
-            this.buttonViews.get(i).setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4.0f), getThemedColor("chat_botKeyboardButtonBackground"), getThemedColor("chat_botKeyboardButtonBackgroundPressed")));
-            this.buttonIcons.get(i).setColorFilter(getThemedColor("chat_botKeyboardButtonText"));
+            this.buttonViews.get(i).setTextColor(getThemedColor(Theme.key_chat_botKeyboardButtonText));
+            this.buttonViews.get(i).setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4.0f), getThemedColor(Theme.key_chat_botKeyboardButtonBackground), getThemedColor(Theme.key_chat_botKeyboardButtonBackgroundPressed)));
+            this.buttonIcons.get(i).setColorFilter(getThemedColor(Theme.key_chat_botKeyboardButtonText));
         }
         invalidate();
     }
@@ -64,29 +60,28 @@ public class BotKeyboardView extends LinearLayout {
         this.delegate = botKeyboardViewDelegate;
     }
 
-    public void setPanelHeight(int i) {
-        TLRPC$TL_replyKeyboardMarkup tLRPC$TL_replyKeyboardMarkup;
-        this.panelHeight = i;
-        if (!this.isFullSize || (tLRPC$TL_replyKeyboardMarkup = this.botButtons) == null || tLRPC$TL_replyKeyboardMarkup.rows.size() == 0) {
-            return;
-        }
-        this.buttonHeight = !this.isFullSize ? 42 : (int) Math.max(42.0f, (((this.panelHeight - AndroidUtilities.dp(30.0f)) - ((this.botButtons.rows.size() - 1) * AndroidUtilities.dp(10.0f))) / this.botButtons.rows.size()) / AndroidUtilities.density);
-        int childCount = this.container.getChildCount();
-        int dp = AndroidUtilities.dp(this.buttonHeight);
-        for (int i2 = 0; i2 < childCount; i2++) {
-            View childAt = this.container.getChildAt(i2);
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) childAt.getLayoutParams();
-            if (layoutParams.height != dp) {
-                layoutParams.height = dp;
-                childAt.setLayoutParams(layoutParams);
+    public void setPanelHeight(int height) {
+        TLRPC.TL_replyKeyboardMarkup tL_replyKeyboardMarkup;
+        this.panelHeight = height;
+        if (this.isFullSize && (tL_replyKeyboardMarkup = this.botButtons) != null && tL_replyKeyboardMarkup.rows.size() != 0) {
+            this.buttonHeight = !this.isFullSize ? 42 : (int) Math.max(42.0f, (((this.panelHeight - AndroidUtilities.dp(30.0f)) - ((this.botButtons.rows.size() - 1) * AndroidUtilities.dp(10.0f))) / this.botButtons.rows.size()) / AndroidUtilities.density);
+            int count = this.container.getChildCount();
+            int newHeight = AndroidUtilities.dp(this.buttonHeight);
+            for (int a = 0; a < count; a++) {
+                View v = this.container.getChildAt(a);
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) v.getLayoutParams();
+                if (layoutParams.height != newHeight) {
+                    layoutParams.height = newHeight;
+                    v.setLayoutParams(layoutParams);
+                }
             }
         }
     }
 
     public void invalidateViews() {
-        for (int i = 0; i < this.buttonViews.size(); i++) {
-            this.buttonViews.get(i).invalidate();
-            this.buttonIcons.get(i).invalidate();
+        for (int a = 0; a < this.buttonViews.size(); a++) {
+            this.buttonViews.get(a).invalidate();
+            this.buttonIcons.get(a).invalidate();
         }
     }
 
@@ -98,87 +93,87 @@ public class BotKeyboardView extends LinearLayout {
     /* JADX WARN: Type inference failed for: r3v12 */
     /* JADX WARN: Type inference failed for: r3v19 */
     /* JADX WARN: Type inference failed for: r3v2, types: [int, boolean] */
-    public void setButtons(TLRPC$TL_replyKeyboardMarkup tLRPC$TL_replyKeyboardMarkup) {
-        this.botButtons = tLRPC$TL_replyKeyboardMarkup;
+    public void setButtons(TLRPC.TL_replyKeyboardMarkup buttons) {
+        this.botButtons = buttons;
         this.container.removeAllViews();
         this.buttonViews.clear();
         this.buttonIcons.clear();
         boolean z = false;
         this.scrollView.scrollTo(0, 0);
-        if (tLRPC$TL_replyKeyboardMarkup == null || this.botButtons.rows.size() == 0) {
-            return;
-        }
-        int i = 1;
-        boolean z2 = !tLRPC$TL_replyKeyboardMarkup.resize;
-        this.isFullSize = z2;
-        this.buttonHeight = !z2 ? 42 : (int) Math.max(42.0f, (((this.panelHeight - AndroidUtilities.dp(30.0f)) - ((this.botButtons.rows.size() - 1) * AndroidUtilities.dp(10.0f))) / this.botButtons.rows.size()) / AndroidUtilities.density);
-        int i2 = 0;
-        while (i2 < tLRPC$TL_replyKeyboardMarkup.rows.size()) {
-            TLRPC$TL_keyboardButtonRow tLRPC$TL_keyboardButtonRow = tLRPC$TL_replyKeyboardMarkup.rows.get(i2);
-            LinearLayout linearLayout = new LinearLayout(getContext());
-            int i3 = z ? 1 : 0;
-            int i4 = z ? 1 : 0;
-            int i5 = z ? 1 : 0;
-            linearLayout.setOrientation(i3);
-            this.container.addView(linearLayout, LayoutHelper.createLinear(-1, this.buttonHeight, 15.0f, i2 == 0 ? 15.0f : 10.0f, 15.0f, i2 == tLRPC$TL_replyKeyboardMarkup.rows.size() - i ? 15.0f : 0.0f));
-            float size = 1.0f / tLRPC$TL_keyboardButtonRow.buttons.size();
-            int i6 = 0;
-            ?? r3 = z;
-            while (i6 < tLRPC$TL_keyboardButtonRow.buttons.size()) {
-                TLRPC$KeyboardButton tLRPC$KeyboardButton = tLRPC$TL_keyboardButtonRow.buttons.get(i6);
-                TextView textView = new TextView(getContext());
-                textView.setTag(tLRPC$KeyboardButton);
-                textView.setTextColor(getThemedColor("chat_botKeyboardButtonText"));
-                textView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4.0f), getThemedColor("chat_botKeyboardButtonBackground"), getThemedColor("chat_botKeyboardButtonBackgroundPressed")));
-                textView.setTextSize(i, 16.0f);
-                textView.setGravity(17);
-                FrameLayout frameLayout = new FrameLayout(getContext());
-                frameLayout.addView(textView, LayoutHelper.createFrame(-1, -1.0f));
-                textView.setPadding(AndroidUtilities.dp(4.0f), r3 == true ? 1 : 0, AndroidUtilities.dp(4.0f), r3);
-                textView.setText(Emoji.replaceEmoji(tLRPC$KeyboardButton.text, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(16.0f), r3));
-                linearLayout.addView(frameLayout, LayoutHelper.createLinear(0, -1, size, 0, 0, i6 != tLRPC$TL_keyboardButtonRow.buttons.size() + (-1) ? 10 : 0, 0));
-                textView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.BotKeyboardView$$ExternalSyntheticLambda0
-                    @Override // android.view.View.OnClickListener
-                    public final void onClick(View view) {
-                        BotKeyboardView.this.lambda$setButtons$0(view);
+        if (buttons != null && this.botButtons.rows.size() != 0) {
+            int i = 1;
+            boolean z2 = !buttons.resize;
+            this.isFullSize = z2;
+            this.buttonHeight = !z2 ? 42 : (int) Math.max(42.0f, (((this.panelHeight - AndroidUtilities.dp(30.0f)) - ((this.botButtons.rows.size() - 1) * AndroidUtilities.dp(10.0f))) / this.botButtons.rows.size()) / AndroidUtilities.density);
+            int a = 0;
+            while (a < buttons.rows.size()) {
+                TLRPC.TL_keyboardButtonRow row = buttons.rows.get(a);
+                LinearLayout layout = new LinearLayout(getContext());
+                int i2 = z ? 1 : 0;
+                int i3 = z ? 1 : 0;
+                int i4 = z ? 1 : 0;
+                layout.setOrientation(i2);
+                this.container.addView(layout, LayoutHelper.createLinear(-1, this.buttonHeight, 15.0f, a == 0 ? 15.0f : 10.0f, 15.0f, a == buttons.rows.size() - i ? 15.0f : 0.0f));
+                float weight = 1.0f / row.buttons.size();
+                int b = 0;
+                ?? r3 = z;
+                while (b < row.buttons.size()) {
+                    TLRPC.KeyboardButton button = row.buttons.get(b);
+                    TextView textView = new TextView(getContext());
+                    textView.setTag(button);
+                    textView.setTextColor(getThemedColor(Theme.key_chat_botKeyboardButtonText));
+                    textView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4.0f), getThemedColor(Theme.key_chat_botKeyboardButtonBackground), getThemedColor(Theme.key_chat_botKeyboardButtonBackgroundPressed)));
+                    textView.setTextSize(i, 16.0f);
+                    textView.setGravity(17);
+                    FrameLayout frame = new FrameLayout(getContext());
+                    frame.addView(textView, LayoutHelper.createFrame(-1, -1.0f));
+                    textView.setPadding(AndroidUtilities.dp(4.0f), r3 == true ? 1 : 0, AndroidUtilities.dp(4.0f), r3);
+                    textView.setText(Emoji.replaceEmoji(button.text, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(16.0f), r3));
+                    layout.addView(frame, LayoutHelper.createLinear(0, -1, weight, 0, 0, b != row.buttons.size() + (-1) ? 10 : 0, 0));
+                    textView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.BotKeyboardView$$ExternalSyntheticLambda0
+                        @Override // android.view.View.OnClickListener
+                        public final void onClick(View view) {
+                            BotKeyboardView.this.m2226lambda$setButtons$0$orgtelegramuiComponentsBotKeyboardView(view);
+                        }
+                    });
+                    this.buttonViews.add(textView);
+                    ImageView icon = new ImageView(getContext());
+                    icon.setColorFilter(getThemedColor(Theme.key_chat_botKeyboardButtonText));
+                    if ((button instanceof TLRPC.TL_keyboardButtonWebView) || (button instanceof TLRPC.TL_keyboardButtonSimpleWebView)) {
+                        icon.setImageResource(R.drawable.bot_webview);
+                        icon.setVisibility(0);
+                    } else {
+                        icon.setVisibility(8);
                     }
-                });
-                this.buttonViews.add(textView);
-                ImageView imageView = new ImageView(getContext());
-                imageView.setColorFilter(getThemedColor("chat_botKeyboardButtonText"));
-                if ((tLRPC$KeyboardButton instanceof TLRPC$TL_keyboardButtonWebView) || (tLRPC$KeyboardButton instanceof TLRPC$TL_keyboardButtonSimpleWebView)) {
-                    imageView.setImageResource(R.drawable.bot_webview);
-                    imageView.setVisibility(0);
-                } else {
-                    imageView.setVisibility(8);
+                    this.buttonIcons.add(icon);
+                    frame.addView(icon, LayoutHelper.createFrame(12, 12.0f, 53, 0.0f, 8.0f, 8.0f, 0.0f));
+                    b++;
+                    r3 = 0;
+                    i = 1;
                 }
-                this.buttonIcons.add(imageView);
-                frameLayout.addView(imageView, LayoutHelper.createFrame(12, 12.0f, 53, 0.0f, 8.0f, 8.0f, 0.0f));
-                i6++;
-                r3 = 0;
+                a++;
+                z = false;
                 i = 1;
             }
-            i2++;
-            z = false;
-            i = 1;
         }
     }
 
-    public /* synthetic */ void lambda$setButtons$0(View view) {
-        this.delegate.didPressedButton((TLRPC$KeyboardButton) view.getTag());
+    /* renamed from: lambda$setButtons$0$org-telegram-ui-Components-BotKeyboardView */
+    public /* synthetic */ void m2226lambda$setButtons$0$orgtelegramuiComponentsBotKeyboardView(View v) {
+        this.delegate.didPressedButton((TLRPC.KeyboardButton) v.getTag());
     }
 
     public int getKeyboardHeight() {
-        TLRPC$TL_replyKeyboardMarkup tLRPC$TL_replyKeyboardMarkup = this.botButtons;
-        if (tLRPC$TL_replyKeyboardMarkup == null) {
+        TLRPC.TL_replyKeyboardMarkup tL_replyKeyboardMarkup = this.botButtons;
+        if (tL_replyKeyboardMarkup == null) {
             return 0;
         }
-        return this.isFullSize ? this.panelHeight : (tLRPC$TL_replyKeyboardMarkup.rows.size() * AndroidUtilities.dp(this.buttonHeight)) + AndroidUtilities.dp(30.0f) + ((this.botButtons.rows.size() - 1) * AndroidUtilities.dp(10.0f));
+        return this.isFullSize ? this.panelHeight : (tL_replyKeyboardMarkup.rows.size() * AndroidUtilities.dp(this.buttonHeight)) + AndroidUtilities.dp(30.0f) + ((this.botButtons.rows.size() - 1) * AndroidUtilities.dp(10.0f));
     }
 
-    private int getThemedColor(String str) {
+    private int getThemedColor(String key) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
-        return color != null ? color.intValue() : Theme.getColor(str);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
+        return color != null ? color.intValue() : Theme.getColor(key);
     }
 }

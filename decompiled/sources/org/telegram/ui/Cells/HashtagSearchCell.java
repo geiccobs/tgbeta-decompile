@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes4.dex */
 public class HashtagSearchCell extends TextView {
     private boolean needDivider;
 
@@ -15,16 +15,16 @@ public class HashtagSearchCell extends TextView {
         setGravity(16);
         setPadding(AndroidUtilities.dp(16.0f), 0, AndroidUtilities.dp(16.0f), 0);
         setTextSize(1, 17.0f);
-        setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
     }
 
-    public void setNeedDivider(boolean z) {
-        this.needDivider = z;
+    public void setNeedDivider(boolean value) {
+        this.needDivider = value;
     }
 
     @Override // android.widget.TextView, android.view.View
-    protected void onMeasure(int i, int i2) {
-        setMeasuredDimension(View.MeasureSpec.getSize(i), AndroidUtilities.dp(48.0f) + 1);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), AndroidUtilities.dp(48.0f) + 1);
     }
 
     @Override // android.widget.TextView, android.view.View

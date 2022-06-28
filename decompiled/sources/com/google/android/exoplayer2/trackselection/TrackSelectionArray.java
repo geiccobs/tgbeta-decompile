@@ -1,19 +1,19 @@
 package com.google.android.exoplayer2.trackselection;
 
 import java.util.Arrays;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class TrackSelectionArray {
     private int hashCode;
     public final int length;
     private final TrackSelection[] trackSelections;
 
-    public TrackSelectionArray(TrackSelection... trackSelectionArr) {
-        this.trackSelections = trackSelectionArr;
-        this.length = trackSelectionArr.length;
+    public TrackSelectionArray(TrackSelection... trackSelections) {
+        this.trackSelections = trackSelections;
+        this.length = trackSelections.length;
     }
 
-    public TrackSelection get(int i) {
-        return this.trackSelections[i];
+    public TrackSelection get(int index) {
+        return this.trackSelections[index];
     }
 
     public TrackSelection[] getAll() {
@@ -22,7 +22,8 @@ public final class TrackSelectionArray {
 
     public int hashCode() {
         if (this.hashCode == 0) {
-            this.hashCode = 527 + Arrays.hashCode(this.trackSelections);
+            int result = (17 * 31) + Arrays.hashCode(this.trackSelections);
+            this.hashCode = result;
         }
         return this.hashCode;
     }
@@ -31,9 +32,10 @@ public final class TrackSelectionArray {
         if (this == obj) {
             return true;
         }
-        if (obj != null && TrackSelectionArray.class == obj.getClass()) {
-            return Arrays.equals(this.trackSelections, ((TrackSelectionArray) obj).trackSelections);
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
         }
-        return false;
+        TrackSelectionArray other = (TrackSelectionArray) obj;
+        return Arrays.equals(this.trackSelections, other.trackSelections);
     }
 }

@@ -3,18 +3,16 @@ package com.google.android.gms.internal.vision;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Locale;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class zzht implements Serializable, Iterable<Byte> {
     public static final zzht zza = new zzid(zzjf.zzb);
     private static final zzhz zzb;
+    private static final Comparator<zzht> zzd;
     private int zzc = 0;
-
-    public static int zzb(byte b) {
-        return b & 255;
-    }
 
     public abstract boolean equals(Object obj);
 
@@ -30,13 +28,27 @@ public abstract class zzht implements Serializable, Iterable<Byte> {
 
     public abstract void zza(zzhq zzhqVar) throws IOException;
 
+    public abstract void zza(byte[] bArr, int i, int i2, int i3);
+
     public abstract byte zzb(int i);
 
     public abstract boolean zzc();
 
+    public static int zzb(byte b) {
+        return b & 255;
+    }
+
     public static zzht zza(byte[] bArr, int i, int i2) {
         zzb(i, i + i2, bArr.length);
         return new zzid(zzb.zza(bArr, i, i2));
+    }
+
+    public static zzht zza(byte[] bArr) {
+        return new zzid(bArr);
+    }
+
+    public static zzht zzb(byte[] bArr, int i, int i2) {
+        return new zzhw(bArr, i, i2);
     }
 
     public static zzht zza(String str) {
@@ -112,6 +124,6 @@ public abstract class zzht implements Serializable, Iterable<Byte> {
 
     static {
         zzb = zzhi.zza() ? new zzic(null) : new zzhx(null);
-        new zzhv();
+        zzd = new zzhv();
     }
 }

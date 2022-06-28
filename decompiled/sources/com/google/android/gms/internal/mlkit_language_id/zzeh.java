@@ -4,7 +4,7 @@ import com.google.android.gms.internal.mlkit_language_id.zzeo;
 import java.io.IOException;
 import java.util.Map;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final class zzeh extends zzee<zzeo.zzf> {
     @Override // com.google.android.gms.internal.mlkit_language_id.zzee
     public final boolean zza(zzfz zzfzVar) {

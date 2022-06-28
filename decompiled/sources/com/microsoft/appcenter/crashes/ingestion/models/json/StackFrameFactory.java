@@ -4,7 +4,7 @@ import com.microsoft.appcenter.crashes.ingestion.models.StackFrame;
 import com.microsoft.appcenter.ingestion.models.json.ModelFactory;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class StackFrameFactory implements ModelFactory<StackFrame> {
     private static final StackFrameFactory sInstance = new StackFrameFactory();
 
@@ -21,7 +21,7 @@ public class StackFrameFactory implements ModelFactory<StackFrame> {
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.json.ModelFactory
-    public List<StackFrame> createList(int i) {
-        return new ArrayList(i);
+    public List<StackFrame> createList(int capacity) {
+        return new ArrayList(capacity);
     }
 }

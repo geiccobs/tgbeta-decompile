@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class StatsDataSource implements DataSource {
     private long bytesRead;
     private final DataSource dataSource;
@@ -42,19 +42,19 @@ public final class StatsDataSource implements DataSource {
     public long open(DataSpec dataSpec) throws IOException {
         this.lastOpenedUri = dataSpec.uri;
         this.lastResponseHeaders = Collections.emptyMap();
-        long open = this.dataSource.open(dataSpec);
+        long availableBytes = this.dataSource.open(dataSpec);
         this.lastOpenedUri = (Uri) Assertions.checkNotNull(getUri());
         this.lastResponseHeaders = getResponseHeaders();
-        return open;
+        return availableBytes;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] bArr, int i, int i2) throws IOException {
-        int read = this.dataSource.read(bArr, i, i2);
-        if (read != -1) {
-            this.bytesRead += read;
+    public int read(byte[] buffer, int offset, int readLength) throws IOException {
+        int bytesRead = this.dataSource.read(buffer, offset, readLength);
+        if (bytesRead != -1) {
+            this.bytesRead += bytesRead;
         }
-        return read;
+        return bytesRead;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource

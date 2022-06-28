@@ -2,7 +2,7 @@ package org.telegram.ui.Components;
 
 import org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout;
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class ChatAttachAlertBotWebViewLayout$WebProgressView$$ExternalSyntheticLambda1 implements SimpleFloatPropertyCompat.Setter {
     public static final /* synthetic */ ChatAttachAlertBotWebViewLayout$WebProgressView$$ExternalSyntheticLambda1 INSTANCE = new ChatAttachAlertBotWebViewLayout$WebProgressView$$ExternalSyntheticLambda1();
 

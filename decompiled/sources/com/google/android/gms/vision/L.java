@@ -1,52 +1,81 @@
 package com.google.android.gms.vision;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
-import androidx.annotation.RecentlyNonNull;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class L {
-    public static int v(@RecentlyNonNull String str, @RecentlyNonNull Object... objArr) {
-        if (Log.isLoggable("Vision", 2)) {
-            return Log.v("Vision", String.format(str, objArr));
+    public static final String TAG = "Vision";
+
+    public static int v(String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 2)) {
+            return Log.v(TAG, String.format(str, objArr));
         }
         return 0;
     }
 
-    public static int d(@RecentlyNonNull String str, @RecentlyNonNull Object... objArr) {
-        if (Log.isLoggable("Vision", 3)) {
-            return Log.d("Vision", String.format(str, objArr));
+    public static int d(String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 3)) {
+            return Log.d(TAG, String.format(str, objArr));
         }
         return 0;
     }
 
-    public static int i(@RecentlyNonNull String str, @RecentlyNonNull Object... objArr) {
-        if (Log.isLoggable("Vision", 4)) {
-            return Log.i("Vision", String.format(str, objArr));
+    public static int d(Throwable th, String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 3)) {
+            return Log.d(TAG, String.format(str, objArr), th);
         }
         return 0;
     }
 
-    public static int e(@RecentlyNonNull String str, @RecentlyNonNull Object... objArr) {
-        if (Log.isLoggable("Vision", 6)) {
-            return Log.e("Vision", String.format(str, objArr));
+    public static int i(String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 4)) {
+            return Log.i(TAG, String.format(str, objArr));
         }
         return 0;
     }
 
-    @SuppressLint({"LogTagMismatch"})
-    public static int e(@RecentlyNonNull Throwable th, @RecentlyNonNull String str, @RecentlyNonNull Object... objArr) {
-        if (Log.isLoggable("Vision", 6)) {
-            if (Log.isLoggable("Vision", 3)) {
-                return Log.e("Vision", String.format(str, objArr), th);
+    public static int e(String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 6)) {
+            return Log.e(TAG, String.format(str, objArr));
+        }
+        return 0;
+    }
+
+    public static int e(Throwable th, String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 6)) {
+            if (Log.isLoggable(TAG, 3)) {
+                return Log.e(TAG, String.format(str, objArr), th);
             }
             String format = String.format(str, objArr);
             String valueOf = String.valueOf(th);
-            StringBuilder sb = new StringBuilder(String.valueOf(format).length() + 2 + valueOf.length());
+            StringBuilder sb = new StringBuilder(String.valueOf(format).length() + 2 + String.valueOf(valueOf).length());
             sb.append(format);
             sb.append(": ");
             sb.append(valueOf);
-            return Log.e("Vision", sb.toString());
+            return Log.e(TAG, sb.toString());
+        }
+        return 0;
+    }
+
+    public static int w(String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 5)) {
+            return Log.w(TAG, String.format(str, objArr));
+        }
+        return 0;
+    }
+
+    public static int w(Throwable th, String str, Object... objArr) {
+        if (Log.isLoggable(TAG, 5)) {
+            if (Log.isLoggable(TAG, 3)) {
+                return Log.w(TAG, String.format(str, objArr), th);
+            }
+            String format = String.format(str, objArr);
+            String valueOf = String.valueOf(th);
+            StringBuilder sb = new StringBuilder(String.valueOf(format).length() + 2 + String.valueOf(valueOf).length());
+            sb.append(format);
+            sb.append(": ");
+            sb.append(valueOf);
+            return Log.w(TAG, sb.toString());
         }
         return 0;
     }

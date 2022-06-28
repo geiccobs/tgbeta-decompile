@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.mediacodec;
 
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class MediaCodecUtil$$ExternalSyntheticLambda2 implements MediaCodecUtil.ScoreProvider {
     public static final /* synthetic */ MediaCodecUtil$$ExternalSyntheticLambda2 INSTANCE = new MediaCodecUtil$$ExternalSyntheticLambda2();
 
@@ -10,8 +10,6 @@ public final /* synthetic */ class MediaCodecUtil$$ExternalSyntheticLambda2 impl
 
     @Override // com.google.android.exoplayer2.mediacodec.MediaCodecUtil.ScoreProvider
     public final int getScore(Object obj) {
-        int lambda$applyWorkarounds$2;
-        lambda$applyWorkarounds$2 = MediaCodecUtil.lambda$applyWorkarounds$2((MediaCodecInfo) obj);
-        return lambda$applyWorkarounds$2;
+        return MediaCodecUtil.lambda$applyWorkarounds$2((MediaCodecInfo) obj);
     }
 }

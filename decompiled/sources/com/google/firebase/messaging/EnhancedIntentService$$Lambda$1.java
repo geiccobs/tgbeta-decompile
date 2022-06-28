@@ -2,7 +2,7 @@ package com.google.firebase.messaging;
 
 import java.util.concurrent.Executor;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 final /* synthetic */ class EnhancedIntentService$$Lambda$1 implements Executor {
     static final Executor $instance = new EnhancedIntentService$$Lambda$1();
 

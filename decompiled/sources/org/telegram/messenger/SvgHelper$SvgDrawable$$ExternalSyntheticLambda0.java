@@ -1,7 +1,7 @@
 package org.telegram.messenger;
 
 import org.telegram.messenger.SvgHelper;
-/* loaded from: classes.dex */
+/* loaded from: classes4.dex */
 public final /* synthetic */ class SvgHelper$SvgDrawable$$ExternalSyntheticLambda0 implements Runnable {
     public static final /* synthetic */ SvgHelper$SvgDrawable$$ExternalSyntheticLambda0 INSTANCE = new SvgHelper$SvgDrawable$$ExternalSyntheticLambda0();
 

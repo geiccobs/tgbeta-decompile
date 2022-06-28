@@ -2,7 +2,7 @@ package androidx.fragment.app;
 
 import android.view.View;
 import android.view.ViewTreeObserver;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListener, View.OnAttachStateChangeListener {
     private final Runnable mRunnable;
     private final View mView;
@@ -15,10 +15,10 @@ class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListener, View
     }
 
     public static OneShotPreDrawListener add(View view, Runnable runnable) {
-        OneShotPreDrawListener oneShotPreDrawListener = new OneShotPreDrawListener(view, runnable);
-        view.getViewTreeObserver().addOnPreDrawListener(oneShotPreDrawListener);
-        view.addOnAttachStateChangeListener(oneShotPreDrawListener);
-        return oneShotPreDrawListener;
+        OneShotPreDrawListener listener = new OneShotPreDrawListener(view, runnable);
+        view.getViewTreeObserver().addOnPreDrawListener(listener);
+        view.addOnAttachStateChangeListener(listener);
+        return listener;
     }
 
     @Override // android.view.ViewTreeObserver.OnPreDrawListener
@@ -38,12 +38,12 @@ class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListener, View
     }
 
     @Override // android.view.View.OnAttachStateChangeListener
-    public void onViewAttachedToWindow(View view) {
-        this.mViewTreeObserver = view.getViewTreeObserver();
+    public void onViewAttachedToWindow(View v) {
+        this.mViewTreeObserver = v.getViewTreeObserver();
     }
 
     @Override // android.view.View.OnAttachStateChangeListener
-    public void onViewDetachedFromWindow(View view) {
+    public void onViewDetachedFromWindow(View v) {
         removeListener();
     }
 }

@@ -16,7 +16,7 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 import java.nio.ByteBuffer;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzb extends zzt<zzh> {
     private final zzf zza;
 
@@ -61,6 +61,18 @@ public final class zzb extends zzt<zzh> {
                 Log.e("FaceNativeHandle", "Could not call native face detector", e);
                 return new Face[0];
             }
+        }
+    }
+
+    public final boolean zza(int i) {
+        if (!zzb()) {
+            return false;
+        }
+        try {
+            return ((zzh) Preconditions.checkNotNull(zzd())).zza(i);
+        } catch (RemoteException e) {
+            Log.e("FaceNativeHandle", "Could not call native face detector", e);
+            return false;
         }
     }
 

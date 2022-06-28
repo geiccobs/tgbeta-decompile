@@ -1,20 +1,17 @@
 package org.webrtc;
 
 import java.nio.ByteBuffer;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public class DataChannel {
     private long nativeDataChannel;
     private long nativeObserver;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public interface Observer {
-        @CalledByNative("Observer")
         void onBufferedAmountChange(long j);
 
-        @CalledByNative("Observer")
         void onMessage(Buffer buffer);
 
-        @CalledByNative("Observer")
         void onStateChange();
     }
 
@@ -34,7 +31,7 @@ public class DataChannel {
 
     private native void nativeUnregisterObserver(long j);
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class Init {
         public boolean negotiated;
         public boolean ordered = true;
@@ -43,65 +40,56 @@ public class DataChannel {
         public String protocol = "";
         public int id = -1;
 
-        @CalledByNative("Init")
         boolean getOrdered() {
             return this.ordered;
         }
 
-        @CalledByNative("Init")
         int getMaxRetransmitTimeMs() {
             return this.maxRetransmitTimeMs;
         }
 
-        @CalledByNative("Init")
         int getMaxRetransmits() {
             return this.maxRetransmits;
         }
 
-        @CalledByNative("Init")
         String getProtocol() {
             return this.protocol;
         }
 
-        @CalledByNative("Init")
         boolean getNegotiated() {
             return this.negotiated;
         }
 
-        @CalledByNative("Init")
         int getId() {
             return this.id;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public static class Buffer {
         public final boolean binary;
         public final ByteBuffer data;
 
-        @CalledByNative("Buffer")
-        public Buffer(ByteBuffer byteBuffer, boolean z) {
-            this.data = byteBuffer;
-            this.binary = z;
+        public Buffer(ByteBuffer data, boolean binary) {
+            this.data = data;
+            this.binary = binary;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes5.dex */
     public enum State {
         CONNECTING,
         OPEN,
         CLOSING,
         CLOSED;
 
-        @CalledByNative("State")
-        static State fromNativeIndex(int i) {
-            return values()[i];
+        static State fromNativeIndex(int nativeIndex) {
+            return values()[nativeIndex];
         }
     }
 
-    @CalledByNative
-    public DataChannel(long j) {
-        this.nativeDataChannel = j;
+    public DataChannel(long nativeDataChannel) {
+        this.nativeDataChannel = nativeDataChannel;
     }
 
     public void registerObserver(Observer observer) {
@@ -145,9 +133,9 @@ public class DataChannel {
 
     public boolean send(Buffer buffer) {
         checkDataChannelExists();
-        byte[] bArr = new byte[buffer.data.remaining()];
-        buffer.data.get(bArr);
-        return nativeSend(bArr, buffer.binary);
+        byte[] data = new byte[buffer.data.remaining()];
+        buffer.data.get(data);
+        return nativeSend(data, buffer.binary);
     }
 
     public void dispose() {
@@ -156,15 +144,13 @@ public class DataChannel {
         this.nativeDataChannel = 0L;
     }
 
-    @CalledByNative
     long getNativeDataChannel() {
         return this.nativeDataChannel;
     }
 
     private void checkDataChannelExists() {
-        if (this.nativeDataChannel != 0) {
-            return;
+        if (this.nativeDataChannel == 0) {
+            throw new IllegalStateException("DataChannel has been disposed.");
         }
-        throw new IllegalStateException("DataChannel has been disposed.");
     }
 }

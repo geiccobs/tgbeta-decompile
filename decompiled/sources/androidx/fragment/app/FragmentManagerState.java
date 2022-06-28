@@ -3,17 +3,17 @@ package androidx.fragment.app;
 import android.os.Parcel;
 import android.os.Parcelable;
 /* compiled from: FragmentManager.java */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class FragmentManagerState implements Parcelable {
     public static final Parcelable.Creator<FragmentManagerState> CREATOR = new Parcelable.Creator<FragmentManagerState>() { // from class: androidx.fragment.app.FragmentManagerState.1
         @Override // android.os.Parcelable.Creator
-        public FragmentManagerState createFromParcel(Parcel parcel) {
-            return new FragmentManagerState(parcel);
+        public FragmentManagerState createFromParcel(Parcel in) {
+            return new FragmentManagerState(in);
         }
 
         @Override // android.os.Parcelable.Creator
-        public FragmentManagerState[] newArray(int i) {
-            return new FragmentManagerState[i];
+        public FragmentManagerState[] newArray(int size) {
+            return new FragmentManagerState[size];
         }
     };
     FragmentState[] mActive;
@@ -22,30 +22,30 @@ public final class FragmentManagerState implements Parcelable {
     int mNextFragmentIndex;
     int mPrimaryNavActiveIndex;
 
+    public FragmentManagerState() {
+        this.mPrimaryNavActiveIndex = -1;
+    }
+
+    public FragmentManagerState(Parcel in) {
+        this.mPrimaryNavActiveIndex = -1;
+        this.mActive = (FragmentState[]) in.createTypedArray(FragmentState.CREATOR);
+        this.mAdded = in.createIntArray();
+        this.mBackStack = (BackStackState[]) in.createTypedArray(BackStackState.CREATOR);
+        this.mPrimaryNavActiveIndex = in.readInt();
+        this.mNextFragmentIndex = in.readInt();
+    }
+
     @Override // android.os.Parcelable
     public int describeContents() {
         return 0;
     }
 
-    public FragmentManagerState() {
-        this.mPrimaryNavActiveIndex = -1;
-    }
-
-    public FragmentManagerState(Parcel parcel) {
-        this.mPrimaryNavActiveIndex = -1;
-        this.mActive = (FragmentState[]) parcel.createTypedArray(FragmentState.CREATOR);
-        this.mAdded = parcel.createIntArray();
-        this.mBackStack = (BackStackState[]) parcel.createTypedArray(BackStackState.CREATOR);
-        this.mPrimaryNavActiveIndex = parcel.readInt();
-        this.mNextFragmentIndex = parcel.readInt();
-    }
-
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeTypedArray(this.mActive, i);
-        parcel.writeIntArray(this.mAdded);
-        parcel.writeTypedArray(this.mBackStack, i);
-        parcel.writeInt(this.mPrimaryNavActiveIndex);
-        parcel.writeInt(this.mNextFragmentIndex);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedArray(this.mActive, flags);
+        dest.writeIntArray(this.mAdded);
+        dest.writeTypedArray(this.mBackStack, flags);
+        dest.writeInt(this.mPrimaryNavActiveIndex);
+        dest.writeInt(this.mNextFragmentIndex);
     }
 }

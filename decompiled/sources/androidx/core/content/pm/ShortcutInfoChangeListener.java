@@ -1,18 +1,18 @@
 package androidx.core.content.pm;
 
 import java.util.List;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public abstract class ShortcutInfoChangeListener {
-    public void onAllShortcutsRemoved() {
+    public void onShortcutAdded(List<ShortcutInfoCompat> shortcuts) {
     }
 
-    public void onShortcutAdded(List<ShortcutInfoCompat> shortcuts) {
+    public void onShortcutUpdated(List<ShortcutInfoCompat> shortcuts) {
     }
 
     public void onShortcutRemoved(List<String> shortcutIds) {
     }
 
-    public void onShortcutUpdated(List<ShortcutInfoCompat> shortcuts) {
+    public void onAllShortcutsRemoved() {
     }
 
     public void onShortcutUsageReported(List<String> shortcutIds) {

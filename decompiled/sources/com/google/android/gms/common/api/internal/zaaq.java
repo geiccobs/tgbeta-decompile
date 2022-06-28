@@ -2,7 +2,7 @@ package com.google.android.gms.common.api.internal;
 
 import android.os.Bundle;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zaaq implements com.google.android.gms.common.internal.zak {
     private final /* synthetic */ zaar zaa;
 
@@ -11,12 +11,12 @@ public final class zaaq implements com.google.android.gms.common.internal.zak {
     }
 
     @Override // com.google.android.gms.common.internal.zak
-    public final Bundle getConnectionHint() {
-        return null;
+    public final boolean isConnected() {
+        return this.zaa.isConnected();
     }
 
     @Override // com.google.android.gms.common.internal.zak
-    public final boolean isConnected() {
-        return this.zaa.isConnected();
+    public final Bundle getConnectionHint() {
+        return null;
     }
 }

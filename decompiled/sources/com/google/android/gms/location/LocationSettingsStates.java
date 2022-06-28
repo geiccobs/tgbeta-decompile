@@ -1,14 +1,14 @@
 package com.google.android.gms.location;
 
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
+import com.google.android.gms.common.internal.safeparcel.SafeParcelableSerializer;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class LocationSettingsStates extends AbstractSafeParcelable {
-    @RecentlyNonNull
     public static final Parcelable.Creator<LocationSettingsStates> CREATOR = new zzbn();
     private final boolean zza;
     private final boolean zzb;
@@ -24,6 +24,10 @@ public final class LocationSettingsStates extends AbstractSafeParcelable {
         this.zzd = z4;
         this.zze = z5;
         this.zzf = z6;
+    }
+
+    public static LocationSettingsStates fromIntent(Intent intent) {
+        return (LocationSettingsStates) SafeParcelableSerializer.deserializeFromIntentExtra(intent, "com.google.android.gms.location.LOCATION_SETTINGS_STATES", CREATOR);
     }
 
     public boolean isBlePresent() {
@@ -42,6 +46,14 @@ public final class LocationSettingsStates extends AbstractSafeParcelable {
         return this.zza;
     }
 
+    public boolean isLocationPresent() {
+        return this.zzd || this.zze;
+    }
+
+    public boolean isLocationUsable() {
+        return this.zza || this.zzb;
+    }
+
     public boolean isNetworkLocationPresent() {
         return this.zze;
     }
@@ -51,7 +63,7 @@ public final class LocationSettingsStates extends AbstractSafeParcelable {
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+    public void writeToParcel(Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeBoolean(parcel, 1, isGpsUsable());
         SafeParcelWriter.writeBoolean(parcel, 2, isNetworkLocationUsable());

@@ -1,7 +1,7 @@
 package com.stripe.android.exception;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class APIException extends StripeException {
-    public APIException(String str, String str2, Integer num, Throwable th) {
-        super(str, str2, num, th);
+    public APIException(String message, String requestId, Integer statusCode, Throwable e) {
+        super(message, requestId, statusCode, e);
     }
 }

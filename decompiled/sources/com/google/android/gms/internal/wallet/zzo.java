@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzo extends AbstractSafeParcelable {
     public static final Parcelable.Creator<zzo> CREATOR = new zzp();
     final PendingIntent zza;

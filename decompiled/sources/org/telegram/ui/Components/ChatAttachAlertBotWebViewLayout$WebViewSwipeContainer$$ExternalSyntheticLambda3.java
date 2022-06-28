@@ -1,7 +1,8 @@
 package org.telegram.ui.Components;
 
 import org.telegram.messenger.GenericProvider;
-/* loaded from: classes3.dex */
+import org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout;
+/* loaded from: classes5.dex */
 public final /* synthetic */ class ChatAttachAlertBotWebViewLayout$WebViewSwipeContainer$$ExternalSyntheticLambda3 implements GenericProvider {
     public static final /* synthetic */ ChatAttachAlertBotWebViewLayout$WebViewSwipeContainer$$ExternalSyntheticLambda3 INSTANCE = new ChatAttachAlertBotWebViewLayout$WebViewSwipeContainer$$ExternalSyntheticLambda3();
 
@@ -10,9 +11,6 @@ public final /* synthetic */ class ChatAttachAlertBotWebViewLayout$WebViewSwipeC
 
     @Override // org.telegram.messenger.GenericProvider
     public final Object provide(Object obj) {
-        Boolean bool;
-        Void r1 = (Void) obj;
-        bool = Boolean.FALSE;
-        return bool;
+        return ChatAttachAlertBotWebViewLayout.WebViewSwipeContainer.lambda$new$0((Void) obj);
     }
 }

@@ -1,78 +1,105 @@
 package com.google.android.exoplayer2.extractor.ogg;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.ogg.StreamReader;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-/* loaded from: classes.dex */
-final class OpusReader extends StreamReader {
+/* JADX INFO: Access modifiers changed from: package-private */
+/* loaded from: classes3.dex */
+public final class OpusReader extends StreamReader {
+    private static final int DEFAULT_SEEK_PRE_ROLL_SAMPLES = 3840;
+    private static final int OPUS_CODE = 1332770163;
     private static final byte[] OPUS_SIGNATURE = {79, 112, 117, 115, 72, 101, 97, 100};
+    private static final int SAMPLE_RATE = 48000;
     private boolean headerRead;
 
-    public static boolean verifyBitstreamType(ParsableByteArray parsableByteArray) {
-        int bytesLeft = parsableByteArray.bytesLeft();
+    public static boolean verifyBitstreamType(ParsableByteArray data) {
+        int bytesLeft = data.bytesLeft();
         byte[] bArr = OPUS_SIGNATURE;
         if (bytesLeft < bArr.length) {
             return false;
         }
-        byte[] bArr2 = new byte[bArr.length];
-        parsableByteArray.readBytes(bArr2, 0, bArr.length);
-        return Arrays.equals(bArr2, bArr);
+        byte[] header = new byte[bArr.length];
+        data.readBytes(header, 0, bArr.length);
+        return Arrays.equals(header, bArr);
     }
 
+    /* JADX INFO: Access modifiers changed from: protected */
     @Override // com.google.android.exoplayer2.extractor.ogg.StreamReader
-    public void reset(boolean z) {
-        super.reset(z);
-        if (z) {
+    public void reset(boolean headerData) {
+        super.reset(headerData);
+        if (headerData) {
             this.headerRead = false;
         }
     }
 
     @Override // com.google.android.exoplayer2.extractor.ogg.StreamReader
-    protected long preparePayload(ParsableByteArray parsableByteArray) {
-        return convertTimeToGranule(getPacketDurationUs(parsableByteArray.data));
+    protected long preparePayload(ParsableByteArray packet) {
+        return convertTimeToGranule(getPacketDurationUs(packet.data));
     }
 
     @Override // com.google.android.exoplayer2.extractor.ogg.StreamReader
-    protected boolean readHeaders(ParsableByteArray parsableByteArray, long j, StreamReader.SetupData setupData) {
+    protected boolean readHeaders(ParsableByteArray packet, long position, StreamReader.SetupData setupData) {
         boolean z = true;
         if (!this.headerRead) {
-            byte[] copyOf = Arrays.copyOf(parsableByteArray.data, parsableByteArray.limit());
-            int i = copyOf[9] & 255;
-            ArrayList arrayList = new ArrayList(3);
-            arrayList.add(copyOf);
-            putNativeOrderLong(arrayList, ((copyOf[11] & 255) << 8) | (copyOf[10] & 255));
-            putNativeOrderLong(arrayList, 3840);
-            setupData.format = Format.createAudioSampleFormat(null, "audio/opus", null, -1, -1, i, 48000, arrayList, null, 0, null);
+            byte[] metadata = Arrays.copyOf(packet.data, packet.limit());
+            int channelCount = metadata[9] & 255;
+            int preskip = ((metadata[11] & 255) << 8) | (metadata[10] & 255);
+            List<byte[]> initializationData = new ArrayList<>(3);
+            initializationData.add(metadata);
+            putNativeOrderLong(initializationData, preskip);
+            putNativeOrderLong(initializationData, DEFAULT_SEEK_PRE_ROLL_SAMPLES);
+            setupData.format = Format.createAudioSampleFormat(null, MimeTypes.AUDIO_OPUS, null, -1, -1, channelCount, SAMPLE_RATE, initializationData, null, 0, null);
             this.headerRead = true;
             return true;
         }
-        if (parsableByteArray.readInt() != 1332770163) {
+        if (packet.readInt() != 1332770163) {
             z = false;
         }
-        parsableByteArray.setPosition(0);
-        return z;
+        boolean headerPacket = z;
+        packet.setPosition(0);
+        return headerPacket;
     }
 
-    private void putNativeOrderLong(List<byte[]> list, int i) {
-        list.add(ByteBuffer.allocate(8).order(ByteOrder.nativeOrder()).putLong((i * 1000000000) / 48000).array());
+    private void putNativeOrderLong(List<byte[]> initializationData, int samples) {
+        long ns = (samples * C.NANOS_PER_SECOND) / 48000;
+        byte[] array = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder()).putLong(ns).array();
+        initializationData.add(array);
     }
 
-    private long getPacketDurationUs(byte[] bArr) {
-        int i = bArr[0] & 255;
-        int i2 = i & 3;
-        int i3 = 2;
-        if (i2 == 0) {
-            i3 = 1;
-        } else if (i2 != 1 && i2 != 2) {
-            i3 = bArr[1] & 63;
+    private long getPacketDurationUs(byte[] packet) {
+        int frames;
+        int length;
+        int toc = packet[0] & 255;
+        switch (toc & 3) {
+            case 0:
+                frames = 1;
+                break;
+            case 1:
+            case 2:
+                frames = 2;
+                break;
+            default:
+                frames = packet[1] & 63;
+                break;
         }
-        int i4 = i >> 3;
-        int i5 = i4 & 3;
-        return i3 * (i4 >= 16 ? 2500 << i5 : i4 >= 12 ? 10000 << (i5 & 1) : i5 == 3 ? 60000 : 10000 << i5);
+        int config = toc >> 3;
+        int length2 = config & 3;
+        if (config >= 16) {
+            length = 2500 << length2;
+        } else if (config >= 12) {
+            length = 10000 << (length2 & 1);
+        } else if (length2 == 3) {
+            length = 60000;
+        } else {
+            length = 10000 << length2;
+        }
+        return frames * length;
     }
 }

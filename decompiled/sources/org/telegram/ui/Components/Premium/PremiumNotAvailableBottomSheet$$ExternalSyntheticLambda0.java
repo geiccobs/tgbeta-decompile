@@ -1,7 +1,7 @@
 package org.telegram.ui.Components.Premium;
 
 import android.view.View;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 public final /* synthetic */ class PremiumNotAvailableBottomSheet$$ExternalSyntheticLambda0 implements View.OnClickListener {
     public static final /* synthetic */ PremiumNotAvailableBottomSheet$$ExternalSyntheticLambda0 INSTANCE = new PremiumNotAvailableBottomSheet$$ExternalSyntheticLambda0();
 

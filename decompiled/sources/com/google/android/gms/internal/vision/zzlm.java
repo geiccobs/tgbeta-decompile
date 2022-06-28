@@ -2,7 +2,7 @@ package com.google.android.gms.internal.vision;
 
 import java.util.Map;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzlm implements Comparable<zzlm>, Map.Entry<K, V> {
     private final Comparable zza;
     private V zzb;
@@ -59,7 +59,7 @@ public final class zzlm implements Comparable<zzlm>, Map.Entry<K, V> {
     public final String toString() {
         String valueOf = String.valueOf(this.zza);
         String valueOf2 = String.valueOf(this.zzb);
-        StringBuilder sb = new StringBuilder(valueOf.length() + 1 + valueOf2.length());
+        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 1 + String.valueOf(valueOf2).length());
         sb.append(valueOf);
         sb.append("=");
         sb.append(valueOf2);
@@ -67,10 +67,7 @@ public final class zzlm implements Comparable<zzlm>, Map.Entry<K, V> {
     }
 
     private static boolean zza(Object obj, Object obj2) {
-        if (obj == null) {
-            return obj2 == null;
-        }
-        return obj.equals(obj2);
+        return obj == null ? obj2 == null : obj.equals(obj2);
     }
 
     @Override // java.util.Map.Entry

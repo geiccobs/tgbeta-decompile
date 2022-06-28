@@ -4,43 +4,45 @@ import com.google.android.datatransport.runtime.TransportContext;
 import com.google.android.datatransport.runtime.scheduling.persistence.EventStore;
 import com.google.android.datatransport.runtime.synchronization.SynchronizationGuard;
 import java.util.concurrent.Executor;
-/* loaded from: classes.dex */
+import javax.inject.Inject;
+/* loaded from: classes3.dex */
 public class WorkInitializer {
     private final Executor executor;
     private final SynchronizationGuard guard;
     private final WorkScheduler scheduler;
     private final EventStore store;
 
-    public WorkInitializer(Executor executor, EventStore eventStore, WorkScheduler workScheduler, SynchronizationGuard synchronizationGuard) {
+    @Inject
+    public WorkInitializer(Executor executor, EventStore store, WorkScheduler scheduler, SynchronizationGuard guard) {
         this.executor = executor;
-        this.store = eventStore;
-        this.scheduler = workScheduler;
-        this.guard = synchronizationGuard;
+        this.store = store;
+        this.scheduler = scheduler;
+        this.guard = guard;
     }
 
     public void ensureContextsScheduled() {
         this.executor.execute(new Runnable() { // from class: com.google.android.datatransport.runtime.scheduling.jobscheduling.WorkInitializer$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                WorkInitializer.this.lambda$ensureContextsScheduled$1();
+                WorkInitializer.this.m18xb85b87dc();
             }
         });
     }
 
-    public /* synthetic */ void lambda$ensureContextsScheduled$1() {
+    /* renamed from: lambda$ensureContextsScheduled$1$com-google-android-datatransport-runtime-scheduling-jobscheduling-WorkInitializer */
+    public /* synthetic */ void m18xb85b87dc() {
         this.guard.runCriticalSection(new SynchronizationGuard.CriticalSection() { // from class: com.google.android.datatransport.runtime.scheduling.jobscheduling.WorkInitializer$$ExternalSyntheticLambda0
             @Override // com.google.android.datatransport.runtime.synchronization.SynchronizationGuard.CriticalSection
             public final Object execute() {
-                Object lambda$ensureContextsScheduled$0;
-                lambda$ensureContextsScheduled$0 = WorkInitializer.this.lambda$ensureContextsScheduled$0();
-                return lambda$ensureContextsScheduled$0;
+                return WorkInitializer.this.m17x10dfae1b();
             }
         });
     }
 
-    public /* synthetic */ Object lambda$ensureContextsScheduled$0() {
-        for (TransportContext transportContext : this.store.loadActiveContexts()) {
-            this.scheduler.schedule(transportContext, 1);
+    /* renamed from: lambda$ensureContextsScheduled$0$com-google-android-datatransport-runtime-scheduling-jobscheduling-WorkInitializer */
+    public /* synthetic */ Object m17x10dfae1b() {
+        for (TransportContext context : this.store.loadActiveContexts()) {
+            this.scheduler.schedule(context, 1);
         }
         return null;
     }

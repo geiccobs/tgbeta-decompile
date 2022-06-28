@@ -4,20 +4,26 @@ import com.coremedia.iso.IsoFile;
 import com.coremedia.iso.IsoTypeReader;
 import com.coremedia.iso.IsoTypeWriter;
 import com.coremedia.iso.Utf8;
+import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
 import com.googlecode.mp4parser.AbstractFullBox;
 import com.googlecode.mp4parser.RequiresParseDetailAspect;
+import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.runtime.reflect.Factory;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class HandlerBox extends AbstractFullBox {
+    public static final String TYPE = "hdlr";
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_0 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_1 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_2 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_3 = null;
+    private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_4 = null;
     private static final /* synthetic */ JoinPoint.StaticPart ajc$tjp_5 = null;
+    public static final Map<String, String> readableTypes;
     private long a;
     private long b;
     private long c;
@@ -28,37 +34,37 @@ public class HandlerBox extends AbstractFullBox {
 
     private static /* synthetic */ void ajc$preClinit() {
         Factory factory = new Factory("HandlerBox.java", HandlerBox.class);
-        ajc$tjp_0 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getHandlerType", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 78);
-        ajc$tjp_1 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setName", "com.coremedia.iso.boxes.HandlerBox", "java.lang.String", "name", "", "void"), 87);
-        ajc$tjp_2 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "setHandlerType", "com.coremedia.iso.boxes.HandlerBox", "java.lang.String", "handlerType", "", "void"), 91);
-        ajc$tjp_3 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "getName", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 95);
-        factory.makeSJP("method-execution", factory.makeMethodSig("1", "getHumanReadableTrackType", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 99);
-        ajc$tjp_5 = factory.makeSJP("method-execution", factory.makeMethodSig("1", "toString", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 149);
+        ajc$tjp_0 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getHandlerType", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 78);
+        ajc$tjp_1 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setName", "com.coremedia.iso.boxes.HandlerBox", "java.lang.String", CommonProperties.NAME, "", "void"), 87);
+        ajc$tjp_2 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "setHandlerType", "com.coremedia.iso.boxes.HandlerBox", "java.lang.String", "handlerType", "", "void"), 91);
+        ajc$tjp_3 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getName", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 95);
+        ajc$tjp_4 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "getHumanReadableTrackType", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 99);
+        ajc$tjp_5 = factory.makeSJP(JoinPoint.METHOD_EXECUTION, factory.makeMethodSig(IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE, "toString", "com.coremedia.iso.boxes.HandlerBox", "", "", "", "java.lang.String"), 149);
     }
 
     static {
         ajc$preClinit();
-        HashMap hashMap = new HashMap();
-        hashMap.put("odsm", "ObjectDescriptorStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("crsm", "ClockReferenceStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("sdsm", "SceneDescriptionStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("m7sm", "MPEG7Stream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("ocsm", "ObjectContentInfoStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("ipsm", "IPMP Stream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("mjsm", "MPEG-J Stream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        hashMap.put("mdir", "Apple Meta Data iTunes Reader");
-        hashMap.put("mp7b", "MPEG-7 binary XML");
-        hashMap.put("mp7t", "MPEG-7 XML");
-        hashMap.put("vide", "Video Track");
-        hashMap.put("soun", "Sound Track");
-        hashMap.put("hint", "Hint Track");
-        hashMap.put("appl", "Apple specific");
-        hashMap.put("meta", "Timed Metadata track - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
-        Collections.unmodifiableMap(hashMap);
+        HashMap hm = new HashMap();
+        hm.put("odsm", "ObjectDescriptorStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("crsm", "ClockReferenceStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("sdsm", "SceneDescriptionStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("m7sm", "MPEG7Stream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("ocsm", "ObjectContentInfoStream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("ipsm", "IPMP Stream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("mjsm", "MPEG-J Stream - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        hm.put("mdir", "Apple Meta Data iTunes Reader");
+        hm.put("mp7b", "MPEG-7 binary XML");
+        hm.put("mp7t", "MPEG-7 XML");
+        hm.put("vide", "Video Track");
+        hm.put("soun", "Sound Track");
+        hm.put(TrackReferenceTypeBox.TYPE1, "Hint Track");
+        hm.put("appl", "Apple specific");
+        hm.put(MetaBox.TYPE, "Timed Metadata track - defined in ISO/IEC JTC1/SC29/WG11 - CODING OF MOVING PICTURES AND AUDIO");
+        readableTypes = Collections.unmodifiableMap(hm);
     }
 
     public HandlerBox() {
-        super("hdlr");
+        super(TYPE);
     }
 
     public String getHandlerType() {
@@ -66,14 +72,14 @@ public class HandlerBox extends AbstractFullBox {
         return this.handlerType;
     }
 
-    public void setName(String str) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_1, this, this, str));
-        this.name = str;
+    public void setName(String name) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_1, this, this, name));
+        this.name = name;
     }
 
-    public void setHandlerType(String str) {
-        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_2, this, this, str));
-        this.handlerType = str;
+    public void setHandlerType(String handlerType) {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_2, this, this, handlerType));
+        this.handlerType = handlerType;
     }
 
     public String getName() {
@@ -81,27 +87,30 @@ public class HandlerBox extends AbstractFullBox {
         return this.name;
     }
 
-    @Override // com.googlecode.mp4parser.AbstractBox
-    protected long getContentSize() {
-        int utf8StringLengthInBytes;
-        if (this.zeroTerm) {
-            utf8StringLengthInBytes = Utf8.utf8StringLengthInBytes(this.name) + 25;
-        } else {
-            utf8StringLengthInBytes = Utf8.utf8StringLengthInBytes(this.name) + 24;
-        }
-        return utf8StringLengthInBytes;
+    public String getHumanReadableTrackType() {
+        RequiresParseDetailAspect.aspectOf().before(Factory.makeJP(ajc$tjp_4, this, this));
+        Map<String, String> map = readableTypes;
+        return map.get(this.handlerType) != null ? map.get(this.handlerType) : "Unknown Handler Type";
     }
 
     @Override // com.googlecode.mp4parser.AbstractBox
-    public void _parseDetails(ByteBuffer byteBuffer) {
-        parseVersionAndFlags(byteBuffer);
-        this.shouldBeZeroButAppleWritesHereSomeValue = IsoTypeReader.readUInt32(byteBuffer);
-        this.handlerType = IsoTypeReader.read4cc(byteBuffer);
-        this.a = IsoTypeReader.readUInt32(byteBuffer);
-        this.b = IsoTypeReader.readUInt32(byteBuffer);
-        this.c = IsoTypeReader.readUInt32(byteBuffer);
-        if (byteBuffer.remaining() > 0) {
-            String readString = IsoTypeReader.readString(byteBuffer, byteBuffer.remaining());
+    protected long getContentSize() {
+        if (this.zeroTerm) {
+            return Utf8.utf8StringLengthInBytes(this.name) + 25;
+        }
+        return Utf8.utf8StringLengthInBytes(this.name) + 24;
+    }
+
+    @Override // com.googlecode.mp4parser.AbstractBox
+    public void _parseDetails(ByteBuffer content) {
+        parseVersionAndFlags(content);
+        this.shouldBeZeroButAppleWritesHereSomeValue = IsoTypeReader.readUInt32(content);
+        this.handlerType = IsoTypeReader.read4cc(content);
+        this.a = IsoTypeReader.readUInt32(content);
+        this.b = IsoTypeReader.readUInt32(content);
+        this.c = IsoTypeReader.readUInt32(content);
+        if (content.remaining() > 0) {
+            String readString = IsoTypeReader.readString(content, content.remaining());
             this.name = readString;
             if (readString.endsWith("\u0000")) {
                 String str = this.name;

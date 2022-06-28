@@ -9,18 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
-import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzu<TResult> extends Task<TResult> {
     private final Object zza = new Object();
     private final zzq<TResult> zzb = new zzq<>();
-    @GuardedBy("mLock")
     private boolean zzc;
     private volatile boolean zzd;
-    @GuardedBy("mLock")
     private TResult zze;
-    @GuardedBy("mLock")
     private Exception zzf;
 
     @Override // com.google.android.gms.tasks.Task
@@ -33,14 +29,17 @@ public final class zzu<TResult> extends Task<TResult> {
     }
 
     /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     private static class zza extends LifecycleCallback {
         private final List<WeakReference<zzr<?>>> zza = new ArrayList();
 
         public static zza zza(Activity activity) {
-            LifecycleFragment fragment = LifecycleCallback.getFragment(activity);
+            LifecycleFragment fragment = getFragment(activity);
             zza zzaVar = (zza) fragment.getCallbackOrNull("TaskOnStopCallback", zza.class);
-            return zzaVar == null ? new zza(fragment) : zzaVar;
+            if (zzaVar == null) {
+                return new zza(fragment);
+            }
+            return zzaVar;
         }
 
         private zza(LifecycleFragment lifecycleFragment) {
@@ -135,6 +134,15 @@ public final class zzu<TResult> extends Task<TResult> {
     }
 
     @Override // com.google.android.gms.tasks.Task
+    public final Task<TResult> addOnSuccessListener(Activity activity, OnSuccessListener<? super TResult> onSuccessListener) {
+        zzm zzmVar = new zzm(zzv.zza(TaskExecutors.MAIN_THREAD), onSuccessListener);
+        this.zzb.zza(zzmVar);
+        zza.zza(activity).zza(zzmVar);
+        zze();
+        return this;
+    }
+
+    @Override // com.google.android.gms.tasks.Task
     public final Task<TResult> addOnFailureListener(OnFailureListener onFailureListener) {
         return addOnFailureListener(TaskExecutors.MAIN_THREAD, onFailureListener);
     }
@@ -142,6 +150,15 @@ public final class zzu<TResult> extends Task<TResult> {
     @Override // com.google.android.gms.tasks.Task
     public final Task<TResult> addOnFailureListener(Executor executor, OnFailureListener onFailureListener) {
         this.zzb.zza(new zzl(zzv.zza(executor), onFailureListener));
+        zze();
+        return this;
+    }
+
+    @Override // com.google.android.gms.tasks.Task
+    public final Task<TResult> addOnFailureListener(Activity activity, OnFailureListener onFailureListener) {
+        zzl zzlVar = new zzl(zzv.zza(TaskExecutors.MAIN_THREAD), onFailureListener);
+        this.zzb.zza(zzlVar);
+        zza.zza(activity).zza(zzlVar);
         zze();
         return this;
     }
@@ -168,6 +185,11 @@ public final class zzu<TResult> extends Task<TResult> {
     }
 
     @Override // com.google.android.gms.tasks.Task
+    public final <TContinuationResult> Task<TContinuationResult> continueWith(Continuation<TResult, TContinuationResult> continuation) {
+        return continueWith(TaskExecutors.MAIN_THREAD, continuation);
+    }
+
+    @Override // com.google.android.gms.tasks.Task
     public final <TContinuationResult> Task<TContinuationResult> continueWith(Executor executor, Continuation<TResult, TContinuationResult> continuation) {
         zzu zzuVar = new zzu();
         this.zzb.zza(new zzc(zzv.zza(executor), continuation, zzuVar));
@@ -181,8 +203,22 @@ public final class zzu<TResult> extends Task<TResult> {
     }
 
     @Override // com.google.android.gms.tasks.Task
+    public final Task<TResult> addOnCanceledListener(OnCanceledListener onCanceledListener) {
+        return addOnCanceledListener(TaskExecutors.MAIN_THREAD, onCanceledListener);
+    }
+
+    @Override // com.google.android.gms.tasks.Task
     public final Task<TResult> addOnCanceledListener(Executor executor, OnCanceledListener onCanceledListener) {
         this.zzb.zza(new zzh(zzv.zza(executor), onCanceledListener));
+        zze();
+        return this;
+    }
+
+    @Override // com.google.android.gms.tasks.Task
+    public final Task<TResult> addOnCanceledListener(Activity activity, OnCanceledListener onCanceledListener) {
+        zzh zzhVar = new zzh(zzv.zza(TaskExecutors.MAIN_THREAD), onCanceledListener);
+        this.zzb.zza(zzhVar);
+        zza.zza(activity).zza(zzhVar);
         zze();
         return this;
     }
@@ -264,25 +300,20 @@ public final class zzu<TResult> extends Task<TResult> {
         }
     }
 
-    @GuardedBy("mLock")
     private final void zzb() {
         Preconditions.checkState(this.zzc, "Task is not yet complete");
     }
 
-    @GuardedBy("mLock")
     private final void zzc() {
-        if (!this.zzc) {
-            return;
+        if (this.zzc) {
+            throw DuplicateTaskCompletionException.of(this);
         }
-        throw DuplicateTaskCompletionException.of(this);
     }
 
-    @GuardedBy("mLock")
     private final void zzd() {
-        if (!this.zzd) {
-            return;
+        if (this.zzd) {
+            throw new CancellationException("Task is already canceled.");
         }
-        throw new CancellationException("Task is already canceled.");
     }
 
     private final void zze() {

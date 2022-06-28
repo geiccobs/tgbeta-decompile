@@ -1,6 +1,5 @@
 package com.google.firebase.messaging;
 
-import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -13,7 +12,6 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.messaging.WithinAppServiceBinder;
 import java.util.concurrent.ExecutorService;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-@SuppressLint({"UnwrappedWakefulBroadcastReceiver"})
 /* loaded from: classes.dex */
 public abstract class EnhancedIntentService extends Service {
     private Binder binder;
@@ -60,7 +58,9 @@ public abstract class EnhancedIntentService extends Service {
         return taskCompletionSource.getTask();
     }
 
-    protected abstract Intent getStartCommandIntent(Intent intent);
+    protected Intent getStartCommandIntent(Intent intent) {
+        return intent;
+    }
 
     public abstract void handleIntent(Intent intent);
 
@@ -103,29 +103,29 @@ public abstract class EnhancedIntentService extends Service {
     }
 
     @Override // android.app.Service
-    public final int onStartCommand(Intent intent, int i, int i2) {
+    public final int onStartCommand(Intent originalIntent, int i, int startId) {
         synchronized (this.lock) {
-            this.lastStartId = i2;
+            this.lastStartId = startId;
             this.runningTasks++;
         }
-        Intent startCommandIntent = getStartCommandIntent(intent);
+        Intent startCommandIntent = getStartCommandIntent(originalIntent);
         if (startCommandIntent == null) {
-            finishTask(intent);
+            finishTask(originalIntent);
             return 2;
         }
         Task<Void> processIntent = processIntent(startCommandIntent);
         if (processIntent.isComplete()) {
-            finishTask(intent);
+            finishTask(originalIntent);
             return 2;
         }
-        processIntent.addOnCompleteListener(EnhancedIntentService$$Lambda$1.$instance, new OnCompleteListener(this, intent) { // from class: com.google.firebase.messaging.EnhancedIntentService$$Lambda$2
+        processIntent.addOnCompleteListener(EnhancedIntentService$$Lambda$1.$instance, new OnCompleteListener(this, originalIntent) { // from class: com.google.firebase.messaging.EnhancedIntentService$$Lambda$2
             private final EnhancedIntentService arg$1;
             private final Intent arg$2;
 
             /* JADX INFO: Access modifiers changed from: package-private */
             {
                 this.arg$1 = this;
-                this.arg$2 = intent;
+                this.arg$2 = originalIntent;
             }
 
             @Override // com.google.android.gms.tasks.OnCompleteListener

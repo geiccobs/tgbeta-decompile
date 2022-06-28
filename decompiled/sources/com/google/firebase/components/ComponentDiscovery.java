@@ -12,118 +12,121 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.telegram.tgnet.ConnectionsManager;
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class ComponentDiscovery<T> {
+    private static final String COMPONENT_KEY_PREFIX = "com.google.firebase.components:";
+    private static final String COMPONENT_SENTINEL_VALUE = "com.google.firebase.components.ComponentRegistrar";
+    static final String TAG = "ComponentDiscovery";
     private final T context;
     private final RegistrarNameRetriever<T> retriever;
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public interface RegistrarNameRetriever<T> {
         List<String> retrieve(T t);
     }
 
-    public static ComponentDiscovery<Context> forContext(Context context, Class<? extends Service> cls) {
-        return new ComponentDiscovery<>(context, new MetadataRegistrarNameRetriever(cls));
+    public static ComponentDiscovery<Context> forContext(Context context, Class<? extends Service> discoveryService) {
+        return new ComponentDiscovery<>(context, new MetadataRegistrarNameRetriever(discoveryService));
     }
 
-    ComponentDiscovery(T t, RegistrarNameRetriever<T> registrarNameRetriever) {
-        this.context = t;
-        this.retriever = registrarNameRetriever;
+    ComponentDiscovery(T context, RegistrarNameRetriever<T> retriever) {
+        this.context = context;
+        this.retriever = retriever;
     }
 
     @Deprecated
     public List<ComponentRegistrar> discover() {
-        ArrayList arrayList = new ArrayList();
-        for (String str : this.retriever.retrieve(this.context)) {
+        List<ComponentRegistrar> result = new ArrayList<>();
+        for (String registrarName : this.retriever.retrieve(this.context)) {
             try {
-                ComponentRegistrar instantiate = instantiate(str);
-                if (instantiate != null) {
-                    arrayList.add(instantiate);
+                ComponentRegistrar registrar = instantiate(registrarName);
+                if (registrar != null) {
+                    result.add(registrar);
                 }
-            } catch (InvalidRegistrarException e) {
-                Log.w("ComponentDiscovery", "Invalid component registrar.", e);
+            } catch (InvalidRegistrarException ex) {
+                Log.w(TAG, "Invalid component registrar.", ex);
             }
         }
-        return arrayList;
+        return result;
     }
 
     public List<Provider<ComponentRegistrar>> discoverLazy() {
-        ArrayList arrayList = new ArrayList();
-        for (final String str : this.retriever.retrieve(this.context)) {
-            arrayList.add(new Provider() { // from class: com.google.firebase.components.ComponentDiscovery$$ExternalSyntheticLambda0
+        List<Provider<ComponentRegistrar>> result = new ArrayList<>();
+        for (final String registrarName : this.retriever.retrieve(this.context)) {
+            result.add(new Provider() { // from class: com.google.firebase.components.ComponentDiscovery$$ExternalSyntheticLambda0
                 @Override // com.google.firebase.inject.Provider
                 public final Object get() {
                     ComponentRegistrar instantiate;
-                    instantiate = ComponentDiscovery.instantiate(str);
+                    instantiate = ComponentDiscovery.instantiate(registrarName);
                     return instantiate;
                 }
             });
         }
-        return arrayList;
+        return result;
     }
 
-    public static ComponentRegistrar instantiate(String str) {
+    public static ComponentRegistrar instantiate(String registrarName) {
         try {
-            Class<?> cls = Class.forName(str);
-            if (!ComponentRegistrar.class.isAssignableFrom(cls)) {
-                throw new InvalidRegistrarException(String.format("Class %s is not an instance of %s", str, "com.google.firebase.components.ComponentRegistrar"));
+            Class<?> loadedClass = Class.forName(registrarName);
+            if (!ComponentRegistrar.class.isAssignableFrom(loadedClass)) {
+                throw new InvalidRegistrarException(String.format("Class %s is not an instance of %s", registrarName, COMPONENT_SENTINEL_VALUE));
             }
-            return (ComponentRegistrar) cls.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-        } catch (ClassNotFoundException unused) {
-            Log.w("ComponentDiscovery", String.format("Class %s is not an found.", str));
+            return (ComponentRegistrar) loadedClass.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
+        } catch (ClassNotFoundException e) {
+            Log.w(TAG, String.format("Class %s is not an found.", registrarName));
             return null;
-        } catch (IllegalAccessException e) {
-            throw new InvalidRegistrarException(String.format("Could not instantiate %s.", str), e);
-        } catch (InstantiationException e2) {
-            throw new InvalidRegistrarException(String.format("Could not instantiate %s.", str), e2);
-        } catch (NoSuchMethodException e3) {
-            throw new InvalidRegistrarException(String.format("Could not instantiate %s", str), e3);
-        } catch (InvocationTargetException e4) {
-            throw new InvalidRegistrarException(String.format("Could not instantiate %s", str), e4);
+        } catch (IllegalAccessException e2) {
+            throw new InvalidRegistrarException(String.format("Could not instantiate %s.", registrarName), e2);
+        } catch (InstantiationException e3) {
+            throw new InvalidRegistrarException(String.format("Could not instantiate %s.", registrarName), e3);
+        } catch (NoSuchMethodException e4) {
+            throw new InvalidRegistrarException(String.format("Could not instantiate %s", registrarName), e4);
+        } catch (InvocationTargetException e5) {
+            throw new InvalidRegistrarException(String.format("Could not instantiate %s", registrarName), e5);
         }
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes.dex */
+    /* loaded from: classes3.dex */
     public static class MetadataRegistrarNameRetriever implements RegistrarNameRetriever<Context> {
         private final Class<? extends Service> discoveryService;
 
-        private MetadataRegistrarNameRetriever(Class<? extends Service> cls) {
-            this.discoveryService = cls;
+        private MetadataRegistrarNameRetriever(Class<? extends Service> discoveryService) {
+            this.discoveryService = discoveryService;
         }
 
-        public List<String> retrieve(Context context) {
-            Bundle metadata = getMetadata(context);
+        public List<String> retrieve(Context ctx) {
+            Bundle metadata = getMetadata(ctx);
             if (metadata == null) {
-                Log.w("ComponentDiscovery", "Could not retrieve metadata, returning empty list of registrars.");
+                Log.w(ComponentDiscovery.TAG, "Could not retrieve metadata, returning empty list of registrars.");
                 return Collections.emptyList();
             }
-            ArrayList arrayList = new ArrayList();
-            for (String str : metadata.keySet()) {
-                if ("com.google.firebase.components.ComponentRegistrar".equals(metadata.get(str)) && str.startsWith("com.google.firebase.components:")) {
-                    arrayList.add(str.substring(31));
+            List<String> registrarNames = new ArrayList<>();
+            for (String key : metadata.keySet()) {
+                Object rawValue = metadata.get(key);
+                if (ComponentDiscovery.COMPONENT_SENTINEL_VALUE.equals(rawValue) && key.startsWith(ComponentDiscovery.COMPONENT_KEY_PREFIX)) {
+                    registrarNames.add(key.substring(ComponentDiscovery.COMPONENT_KEY_PREFIX.length()));
                 }
             }
-            return arrayList;
+            return registrarNames;
         }
 
         private Bundle getMetadata(Context context) {
             try {
-                PackageManager packageManager = context.getPackageManager();
-                if (packageManager == null) {
-                    Log.w("ComponentDiscovery", "Context has no PackageManager.");
+                PackageManager manager = context.getPackageManager();
+                if (manager == null) {
+                    Log.w(ComponentDiscovery.TAG, "Context has no PackageManager.");
                     return null;
                 }
-                ServiceInfo serviceInfo = packageManager.getServiceInfo(new ComponentName(context, this.discoveryService), ConnectionsManager.RequestFlagNeedQuickAck);
-                if (serviceInfo == null) {
-                    Log.w("ComponentDiscovery", this.discoveryService + " has no service info.");
+                ServiceInfo info = manager.getServiceInfo(new ComponentName(context, this.discoveryService), 128);
+                if (info == null) {
+                    Log.w(ComponentDiscovery.TAG, this.discoveryService + " has no service info.");
                     return null;
                 }
-                return serviceInfo.metaData;
-            } catch (PackageManager.NameNotFoundException unused) {
-                Log.w("ComponentDiscovery", "Application info not found.");
+                return info.metaData;
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(ComponentDiscovery.TAG, "Application info not found.");
                 return null;
             }
         }

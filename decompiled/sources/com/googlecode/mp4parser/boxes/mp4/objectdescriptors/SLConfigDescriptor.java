@@ -5,29 +5,33 @@ import com.coremedia.iso.IsoTypeWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 @Descriptor(tags = {6})
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class SLConfigDescriptor extends BaseDescriptor {
     int predefined;
+
+    public int getPredefined() {
+        return this.predefined;
+    }
+
+    public void setPredefined(int predefined) {
+        this.predefined = predefined;
+    }
+
+    @Override // com.googlecode.mp4parser.boxes.mp4.objectdescriptors.BaseDescriptor
+    public void parseDetail(ByteBuffer bb) throws IOException {
+        this.predefined = IsoTypeReader.readUInt8(bb);
+    }
 
     public int serializedSize() {
         return 3;
     }
 
-    public void setPredefined(int i) {
-        this.predefined = i;
-    }
-
-    @Override // com.googlecode.mp4parser.boxes.mp4.objectdescriptors.BaseDescriptor
-    public void parseDetail(ByteBuffer byteBuffer) throws IOException {
-        this.predefined = IsoTypeReader.readUInt8(byteBuffer);
-    }
-
     public ByteBuffer serialize() {
-        ByteBuffer allocate = ByteBuffer.allocate(3);
-        IsoTypeWriter.writeUInt8(allocate, 6);
-        IsoTypeWriter.writeUInt8(allocate, 1);
-        IsoTypeWriter.writeUInt8(allocate, this.predefined);
-        return allocate;
+        ByteBuffer out = ByteBuffer.allocate(3);
+        IsoTypeWriter.writeUInt8(out, 6);
+        IsoTypeWriter.writeUInt8(out, 1);
+        IsoTypeWriter.writeUInt8(out, this.predefined);
+        return out;
     }
 
     @Override // com.googlecode.mp4parser.boxes.mp4.objectdescriptors.BaseDescriptor
@@ -35,11 +39,18 @@ public class SLConfigDescriptor extends BaseDescriptor {
         return "SLConfigDescriptor{predefined=" + this.predefined + '}';
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        return obj != null && SLConfigDescriptor.class == obj.getClass() && this.predefined == ((SLConfigDescriptor) obj).predefined;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SLConfigDescriptor that = (SLConfigDescriptor) o;
+        if (this.predefined == that.predefined) {
+            return true;
+        }
+        return false;
     }
 
     public int hashCode() {

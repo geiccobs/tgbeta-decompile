@@ -1,15 +1,14 @@
 package org.webrtc;
-/* loaded from: classes3.dex */
+/* loaded from: classes5.dex */
 class WebRtcClassLoader {
     WebRtcClassLoader() {
     }
 
-    @CalledByNative
     static Object getClassLoader() {
-        ClassLoader classLoader = WebRtcClassLoader.class.getClassLoader();
-        if (classLoader != null) {
-            return classLoader;
+        Object loader = WebRtcClassLoader.class.getClassLoader();
+        if (loader == null) {
+            throw new RuntimeException("Failed to get WebRTC class loader.");
         }
-        throw new RuntimeException("Failed to get WebRTC class loader.");
+        return loader;
     }
 }

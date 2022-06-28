@@ -7,7 +7,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
 /* renamed from: com.google.android.gms.internal.auth-api.zbb */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public class zbb extends Binder implements IInterface {
     public zbb(String str) {
         attachInterface(this, str);

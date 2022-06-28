@@ -3,15 +3,14 @@ package com.google.android.gms.wallet;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.SparseArray;
-import com.google.android.gms.internal.wallet.zzh;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolvableResult;
 import java.util.concurrent.atomic.AtomicInteger;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes.dex */
+/* loaded from: classes3.dex */
 public final class zzc<TResult extends AutoResolvableResult> implements OnCompleteListener<TResult>, Runnable {
-    static final Handler zza = new zzh(Looper.getMainLooper());
+    static final Handler zza = new com.google.android.gms.internal.wallet.zzh(Looper.getMainLooper());
     static final SparseArray<zzc<?>> zzb = new SparseArray<>(2);
     private static final AtomicInteger zzd = new AtomicInteger();
     int zzc;
