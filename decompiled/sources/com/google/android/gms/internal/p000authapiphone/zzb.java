@@ -6,10 +6,8 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 /* renamed from: com.google.android.gms.internal.auth-api-phone.zzb */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzb extends Binder implements IInterface {
-    private static zzd zzc = null;
-
     public zzb(String str) {
         attachInterface(this, str);
     }
@@ -20,7 +18,7 @@ public class zzb extends Binder implements IInterface {
     }
 
     protected boolean dispatchTransaction(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-        return false;
+        throw null;
     }
 
     @Override // android.os.Binder

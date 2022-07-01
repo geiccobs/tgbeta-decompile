@@ -1,38 +1,27 @@
 package com.coremedia.iso;
-
-import java.io.ByteArrayOutputStream;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Hex {
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-    public static String encodeHex(byte[] data) {
-        return encodeHex(data, 0);
+    public static String encodeHex(byte[] bArr) {
+        return encodeHex(bArr, 0);
     }
 
-    public static String encodeHex(byte[] data, int group) {
-        int l = data.length;
-        char[] out = new char[(l << 1) + (group > 0 ? l / group : 0)];
-        int j = 0;
-        for (int i = 0; i < l; i++) {
-            if (group > 0 && i % group == 0 && j > 0) {
-                out[j] = '-';
-                j++;
+    public static String encodeHex(byte[] bArr, int i) {
+        int length = bArr.length;
+        char[] cArr = new char[(length << 1) + (i > 0 ? length / i : 0)];
+        int i2 = 0;
+        for (int i3 = 0; i3 < length; i3++) {
+            if (i > 0 && i3 % i == 0 && i2 > 0) {
+                cArr[i2] = '-';
+                i2++;
             }
-            int j2 = j + 1;
-            char[] cArr = DIGITS;
-            out[j] = cArr[(data[i] & 240) >>> 4];
-            j = j2 + 1;
-            out[j2] = cArr[data[i] & 15];
+            int i4 = i2 + 1;
+            char[] cArr2 = DIGITS;
+            cArr[i2] = cArr2[(bArr[i3] & 240) >>> 4];
+            i2 = i4 + 1;
+            cArr[i4] = cArr2[bArr[i3] & 15];
         }
-        return new String(out);
-    }
-
-    public static byte[] decodeHex(String hexString) {
-        ByteArrayOutputStream bas = new ByteArrayOutputStream();
-        for (int i = 0; i < hexString.length(); i += 2) {
-            int b = Integer.parseInt(hexString.substring(i, i + 2), 16);
-            bas.write(b);
-        }
-        return bas.toByteArray();
+        return new String(cArr);
     }
 }

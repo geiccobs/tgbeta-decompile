@@ -1,5 +1,6 @@
 package com.google.android.gms.maps.internal;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -12,10 +13,11 @@ import com.google.android.gms.dynamic.ObjectWrapper;
 import com.google.android.gms.dynamite.DynamiteModule;
 import com.google.android.gms.maps.model.RuntimeRemoteException;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzca {
-    private static final String zza = zzca.class.getSimpleName();
-    private static Context zzb = null;
+    private static final String zza = "zzca";
+    @SuppressLint({"StaticFieldLeak"})
+    private static Context zzb;
     private static zzf zzc;
 
     public static zzf zza(Context context) throws GooglePlayServicesNotAvailableException {
@@ -24,34 +26,32 @@ public final class zzca {
         zzf zzfVar2 = zzc;
         if (zzfVar2 == null) {
             int isGooglePlayServicesAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context, 13400000);
-            switch (isGooglePlayServicesAvailable) {
-                case 0:
-                    Log.i(zza, "Making Creator dynamically");
-                    try {
-                        IBinder iBinder = (IBinder) zzc(((ClassLoader) Preconditions.checkNotNull(zzb(context).getClassLoader())).loadClass("com.google.android.gms.maps.internal.CreatorImpl"));
-                        if (iBinder == null) {
-                            zzfVar = null;
+            if (isGooglePlayServicesAvailable == 0) {
+                Log.i(zza, "Making Creator dynamically");
+                try {
+                    IBinder iBinder = (IBinder) zzc(((ClassLoader) Preconditions.checkNotNull(zzb(context).getClassLoader())).loadClass("com.google.android.gms.maps.internal.CreatorImpl"));
+                    if (iBinder == null) {
+                        zzfVar = null;
+                    } else {
+                        IInterface queryLocalInterface = iBinder.queryLocalInterface("com.google.android.gms.maps.internal.ICreator");
+                        if (queryLocalInterface instanceof zzf) {
+                            zzfVar = (zzf) queryLocalInterface;
                         } else {
-                            IInterface queryLocalInterface = iBinder.queryLocalInterface("com.google.android.gms.maps.internal.ICreator");
-                            if (queryLocalInterface instanceof zzf) {
-                                zzfVar = (zzf) queryLocalInterface;
-                            } else {
-                                zzfVar = new zze(iBinder);
-                            }
+                            zzfVar = new zze(iBinder);
                         }
-                        zzc = zzfVar;
-                        try {
-                            zzfVar.zzh(ObjectWrapper.wrap(zzb(context).getResources()), GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE);
-                            return zzc;
-                        } catch (RemoteException e) {
-                            throw new RuntimeRemoteException(e);
-                        }
-                    } catch (ClassNotFoundException e2) {
-                        throw new IllegalStateException("Unable to find dynamic class com.google.android.gms.maps.internal.CreatorImpl");
                     }
-                default:
-                    throw new GooglePlayServicesNotAvailableException(isGooglePlayServicesAvailable);
+                    zzc = zzfVar;
+                    try {
+                        zzfVar.zzh(ObjectWrapper.wrap(zzb(context).getResources()), GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE);
+                        return zzc;
+                    } catch (RemoteException e) {
+                        throw new RuntimeRemoteException(e);
+                    }
+                } catch (ClassNotFoundException unused) {
+                    throw new IllegalStateException("Unable to find dynamic class com.google.android.gms.maps.internal.CreatorImpl");
+                }
             }
+            throw new GooglePlayServicesNotAvailableException(isGooglePlayServicesAvailable);
         }
         return zzfVar2;
     }
@@ -75,12 +75,12 @@ public final class zzca {
     private static <T> T zzc(Class cls) {
         try {
             return (T) cls.newInstance();
-        } catch (IllegalAccessException e) {
-            String valueOf = String.valueOf(cls.getName());
-            throw new IllegalStateException(valueOf.length() != 0 ? "Unable to call the default constructor of ".concat(valueOf) : new String("Unable to call the default constructor of "));
-        } catch (InstantiationException e2) {
-            String valueOf2 = String.valueOf(cls.getName());
-            throw new IllegalStateException(valueOf2.length() != 0 ? "Unable to instantiate the dynamic class ".concat(valueOf2) : new String("Unable to instantiate the dynamic class "));
+        } catch (IllegalAccessException unused) {
+            String name = cls.getName();
+            throw new IllegalStateException(name.length() != 0 ? "Unable to call the default constructor of ".concat(name) : new String("Unable to call the default constructor of "));
+        } catch (InstantiationException unused2) {
+            String name2 = cls.getName();
+            throw new IllegalStateException(name2.length() != 0 ? "Unable to instantiate the dynamic class ".concat(name2) : new String("Unable to instantiate the dynamic class "));
         }
     }
 }

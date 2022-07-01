@@ -4,9 +4,11 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzc {
-    private static final ClassLoader zza = zzc.class.getClassLoader();
+    static {
+        zzc.class.getClassLoader();
+    }
 
     private zzc() {
     }

@@ -1,5 +1,5 @@
 package com.google.android.datatransport.runtime;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface Destination {
     byte[] getExtras();
 

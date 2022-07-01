@@ -10,7 +10,6 @@ import com.google.firebase.encoders.config.Configurator;
 import com.google.firebase.encoders.config.EncoderConfig;
 import j$.util.DesugarTimeZone;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,7 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class JsonDataEncoderBuilder implements EncoderConfig<JsonDataEncoderBuilder> {
     private static final ObjectEncoder<Object> DEFAULT_FALLBACK_ENCODER = JsonDataEncoderBuilder$$ExternalSyntheticLambda0.INSTANCE;
     private static final ValueEncoder<String> STRING_ENCODER = JsonDataEncoderBuilder$$ExternalSyntheticLambda2.INSTANCE;
@@ -29,12 +28,12 @@ public final class JsonDataEncoderBuilder implements EncoderConfig<JsonDataEncod
     private ObjectEncoder<Object> fallbackEncoder = DEFAULT_FALLBACK_ENCODER;
     private boolean ignoreNullValues = false;
 
-    public static /* synthetic */ void lambda$static$0(Object o, ObjectEncoderContext ctx) throws IOException {
-        throw new EncodingException("Couldn't find encoder for type " + o.getClass().getCanonicalName());
+    public static /* synthetic */ void lambda$static$0(Object obj, ObjectEncoderContext objectEncoderContext) throws IOException {
+        throw new EncodingException("Couldn't find encoder for type " + obj.getClass().getCanonicalName());
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class TimestampEncoder implements ValueEncoder<Date> {
         private static final DateFormat rfc339;
 
@@ -47,63 +46,51 @@ public final class JsonDataEncoderBuilder implements EncoderConfig<JsonDataEncod
             simpleDateFormat.setTimeZone(DesugarTimeZone.getTimeZone("UTC"));
         }
 
-        public void encode(Date o, ValueEncoderContext ctx) throws IOException {
-            ctx.add(rfc339.format(o));
+        public void encode(Date date, ValueEncoderContext valueEncoderContext) throws IOException {
+            valueEncoderContext.add(rfc339.format(date));
         }
     }
 
+    public static /* synthetic */ void lambda$static$2(Boolean bool, ValueEncoderContext valueEncoderContext) throws IOException {
+        valueEncoderContext.add(bool.booleanValue());
+    }
+
     public JsonDataEncoderBuilder() {
-        registerEncoder(String.class, (ValueEncoder) STRING_ENCODER);
-        registerEncoder(Boolean.class, (ValueEncoder) BOOLEAN_ENCODER);
-        registerEncoder(Date.class, (ValueEncoder) TIMESTAMP_ENCODER);
+        registerEncoder(String.class, STRING_ENCODER);
+        registerEncoder(Boolean.class, BOOLEAN_ENCODER);
+        registerEncoder(Date.class, TIMESTAMP_ENCODER);
     }
 
     @Override // com.google.firebase.encoders.config.EncoderConfig
-    public <T> JsonDataEncoderBuilder registerEncoder(Class<T> clazz, ObjectEncoder<? super T> objectEncoder) {
-        this.objectEncoders.put(clazz, objectEncoder);
-        this.valueEncoders.remove(clazz);
+    public <T> JsonDataEncoderBuilder registerEncoder(Class<T> cls, ObjectEncoder<? super T> objectEncoder) {
+        this.objectEncoders.put(cls, objectEncoder);
+        this.valueEncoders.remove(cls);
         return this;
     }
 
-    @Override // com.google.firebase.encoders.config.EncoderConfig
-    public <T> JsonDataEncoderBuilder registerEncoder(Class<T> clazz, ValueEncoder<? super T> encoder) {
-        this.valueEncoders.put(clazz, encoder);
-        this.objectEncoders.remove(clazz);
+    public <T> JsonDataEncoderBuilder registerEncoder(Class<T> cls, ValueEncoder<? super T> valueEncoder) {
+        this.valueEncoders.put(cls, valueEncoder);
+        this.objectEncoders.remove(cls);
         return this;
     }
 
-    public JsonDataEncoderBuilder registerFallbackEncoder(ObjectEncoder<Object> fallbackEncoder) {
-        this.fallbackEncoder = fallbackEncoder;
+    public JsonDataEncoderBuilder configureWith(Configurator configurator) {
+        configurator.configure(this);
         return this;
     }
 
-    public JsonDataEncoderBuilder configureWith(Configurator config) {
-        config.configure(this);
-        return this;
-    }
-
-    public JsonDataEncoderBuilder ignoreNullValues(boolean ignore) {
-        this.ignoreNullValues = ignore;
+    public JsonDataEncoderBuilder ignoreNullValues(boolean z) {
+        this.ignoreNullValues = z;
         return this;
     }
 
     public DataEncoder build() {
         return new DataEncoder() { // from class: com.google.firebase.encoders.json.JsonDataEncoderBuilder.1
             @Override // com.google.firebase.encoders.DataEncoder
-            public void encode(Object o, Writer writer) throws IOException {
-                JsonValueObjectEncoderContext encoderContext = new JsonValueObjectEncoderContext(writer, JsonDataEncoderBuilder.this.objectEncoders, JsonDataEncoderBuilder.this.valueEncoders, JsonDataEncoderBuilder.this.fallbackEncoder, JsonDataEncoderBuilder.this.ignoreNullValues);
-                encoderContext.add(o, false);
-                encoderContext.close();
-            }
-
-            @Override // com.google.firebase.encoders.DataEncoder
-            public String encode(Object o) {
-                StringWriter stringWriter = new StringWriter();
-                try {
-                    encode(o, stringWriter);
-                } catch (IOException e) {
-                }
-                return stringWriter.toString();
+            public void encode(Object obj, Writer writer) throws IOException {
+                JsonValueObjectEncoderContext jsonValueObjectEncoderContext = new JsonValueObjectEncoderContext(writer, JsonDataEncoderBuilder.this.objectEncoders, JsonDataEncoderBuilder.this.valueEncoders, JsonDataEncoderBuilder.this.fallbackEncoder, JsonDataEncoderBuilder.this.ignoreNullValues);
+                jsonValueObjectEncoderContext.add(obj, false);
+                jsonValueObjectEncoderContext.close();
             }
         };
     }

@@ -10,70 +10,67 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.tgnet.TLRPC;
-/* loaded from: classes5.dex */
+import org.telegram.tgnet.TLRPC$Document;
+/* loaded from: classes3.dex */
 public class TextPaintImageReceiverSpan extends ReplacementSpan {
     private boolean alignTop;
     private int height;
     private ImageReceiver imageReceiver;
     private int width;
 
-    public TextPaintImageReceiverSpan(View parentView, TLRPC.Document document, Object parentObject, int w, int h, boolean top, boolean invert) {
-        String filter = String.format(Locale.US, "%d_%d_i", Integer.valueOf(w), Integer.valueOf(h));
-        this.width = w;
-        this.height = h;
-        ImageReceiver imageReceiver = new ImageReceiver(parentView);
+    public TextPaintImageReceiverSpan(View view, TLRPC$Document tLRPC$Document, Object obj, int i, int i2, boolean z, boolean z2) {
+        String format = String.format(Locale.US, "%d_%d_i", Integer.valueOf(i), Integer.valueOf(i2));
+        this.width = i;
+        this.height = i2;
+        ImageReceiver imageReceiver = new ImageReceiver(view);
         this.imageReceiver = imageReceiver;
         imageReceiver.setInvalidateAll(true);
-        if (invert) {
+        if (z2) {
             this.imageReceiver.setDelegate(TextPaintImageReceiverSpan$$ExternalSyntheticLambda0.INSTANCE);
         }
-        TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 90);
-        this.imageReceiver.setImage(ImageLocation.getForDocument(document), filter, ImageLocation.getForDocument(thumb, document), filter, -1L, null, parentObject, 1);
-        this.alignTop = top;
+        this.imageReceiver.setImage(ImageLocation.getForDocument(tLRPC$Document), format, ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(tLRPC$Document.thumbs, 90), tLRPC$Document), format, -1L, null, obj, 1);
+        this.alignTop = z;
     }
 
-    public static /* synthetic */ void lambda$new$0(ImageReceiver imageReceiver, boolean set, boolean thumb, boolean memCache) {
+    public static /* synthetic */ void lambda$new$0(ImageReceiver imageReceiver, boolean z, boolean z2, boolean z3) {
         if (!imageReceiver.canInvertBitmap()) {
             return;
         }
-        float[] NEGATIVE = {-1.0f, 0.0f, 0.0f, 0.0f, 255.0f, 0.0f, -1.0f, 0.0f, 0.0f, 255.0f, 0.0f, 0.0f, -1.0f, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-        imageReceiver.setColorFilter(new ColorMatrixColorFilter(NEGATIVE));
+        imageReceiver.setColorFilter(new ColorMatrixColorFilter(new float[]{-1.0f, 0.0f, 0.0f, 0.0f, 255.0f, 0.0f, -1.0f, 0.0f, 0.0f, 255.0f, 0.0f, 0.0f, -1.0f, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f}));
     }
 
     @Override // android.text.style.ReplacementSpan
-    public int getSize(Paint paint, CharSequence text, int start, int end, Paint.FontMetricsInt fm) {
-        if (fm != null) {
+    public int getSize(Paint paint, CharSequence charSequence, int i, int i2, Paint.FontMetricsInt fontMetricsInt) {
+        if (fontMetricsInt != null) {
             if (this.alignTop) {
-                int h = (fm.descent - fm.ascent) - AndroidUtilities.dp(4.0f);
-                int i = this.height - h;
-                fm.descent = i;
-                fm.bottom = i;
-                int i2 = 0 - h;
-                fm.ascent = i2;
-                fm.top = i2;
+                int dp = (fontMetricsInt.descent - fontMetricsInt.ascent) - AndroidUtilities.dp(4.0f);
+                int i3 = this.height - dp;
+                fontMetricsInt.descent = i3;
+                fontMetricsInt.bottom = i3;
+                int i4 = 0 - dp;
+                fontMetricsInt.ascent = i4;
+                fontMetricsInt.top = i4;
             } else {
-                int dp = ((-this.height) / 2) - AndroidUtilities.dp(4.0f);
-                fm.ascent = dp;
-                fm.top = dp;
-                int i3 = this.height;
-                int dp2 = (i3 - (i3 / 2)) - AndroidUtilities.dp(4.0f);
-                fm.descent = dp2;
-                fm.bottom = dp2;
+                int dp2 = ((-this.height) / 2) - AndroidUtilities.dp(4.0f);
+                fontMetricsInt.ascent = dp2;
+                fontMetricsInt.top = dp2;
+                int i5 = this.height;
+                int dp3 = (i5 - (i5 / 2)) - AndroidUtilities.dp(4.0f);
+                fontMetricsInt.descent = dp3;
+                fontMetricsInt.bottom = dp3;
             }
         }
         return this.width;
     }
 
     @Override // android.text.style.ReplacementSpan
-    public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
+    public void draw(Canvas canvas, CharSequence charSequence, int i, int i2, float f, int i3, int i4, int i5, Paint paint) {
         canvas.save();
         if (this.alignTop) {
-            this.imageReceiver.setImageCoords((int) x, top - 1, this.width, this.height);
+            this.imageReceiver.setImageCoords((int) f, i3 - 1, this.width, this.height);
         } else {
-            int h = (bottom - AndroidUtilities.dp(4.0f)) - top;
-            int i = this.height;
-            this.imageReceiver.setImageCoords((int) x, ((h - i) / 2) + top, this.width, i);
+            int i6 = this.height;
+            this.imageReceiver.setImageCoords((int) f, i3 + ((((i5 - AndroidUtilities.dp(4.0f)) - i3) - i6) / 2), this.width, i6);
         }
         this.imageReceiver.draw(canvas);
         canvas.restore();

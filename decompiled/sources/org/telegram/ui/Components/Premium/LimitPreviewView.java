@@ -3,12 +3,14 @@ package org.telegram.ui.Components.Premium;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
+import android.graphics.RectF;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
@@ -22,9 +24,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -32,7 +34,7 @@ import org.telegram.ui.Components.EmptyStubSpan;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.LimitPreviewView;
 import org.telegram.ui.Components.Premium.PremiumGradient;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class LimitPreviewView extends LinearLayout {
     boolean animationCanPlay = true;
     TextView defaultCount;
@@ -51,16 +53,17 @@ public class LimitPreviewView extends LinearLayout {
     boolean wasAnimation;
     boolean wasHaptic;
 
-    public LimitPreviewView(Context context, int icon, int currentValue, int premiumLimit) {
+    @SuppressLint({"SetTextI18n"})
+    public LimitPreviewView(Context context, int i, int i2, int i3) {
         super(context);
-        this.icon = icon;
+        this.icon = i;
         setOrientation(1);
         setClipChildren(false);
         setClipToPadding(false);
-        if (icon != 0) {
+        if (i != 0) {
             setPadding(0, AndroidUtilities.dp(16.0f), 0, 0);
             this.limitIcon = new CounterView(context);
-            setIconValue(currentValue);
+            setIconValue(i2);
             this.limitIcon.setPadding(AndroidUtilities.dp(24.0f), AndroidUtilities.dp(6.0f), AndroidUtilities.dp(24.0f), AndroidUtilities.dp(14.0f));
             addView(this.limitIcon, LayoutHelper.createLinear(-2, -2, 0.0f, 3));
         }
@@ -69,28 +72,31 @@ public class LimitPreviewView extends LinearLayout {
 
             @Override // android.view.ViewGroup, android.view.View
             protected void dispatchDraw(Canvas canvas) {
-                this.grayPaint.setColor(Theme.getColor(Theme.key_windowBackgroundGray));
-                AndroidUtilities.rectTmp.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f), this.grayPaint);
+                this.grayPaint.setColor(Theme.getColor("windowBackgroundGray"));
+                RectF rectF = AndroidUtilities.rectTmp;
+                float f = 0.0f;
+                rectF.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
+                canvas.drawRoundRect(rectF, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f), this.grayPaint);
                 canvas.save();
                 canvas.clipRect(getMeasuredWidth() / 2.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
-                Paint paint = PremiumGradient.getInstance().getMainGradientPaint();
+                Paint mainGradientPaint = PremiumGradient.getInstance().getMainGradientPaint();
                 if (LimitPreviewView.this.parentVideForGradient != null) {
-                    View parent = LimitPreviewView.this.parentVideForGradient;
-                    if (LimitPreviewView.this.staticGradient != null) {
-                        paint = LimitPreviewView.this.staticGradient.paint;
-                        LimitPreviewView.this.staticGradient.gradientMatrixLinear(LimitPreviewView.this.gradientTotalHeight, -LimitPreviewView.this.gradientYOffset);
-                    } else {
-                        float y = 0.0f;
-                        for (View child = this; child != parent; child = (View) child.getParent()) {
-                            y += child.getY();
+                    View view = LimitPreviewView.this.parentVideForGradient;
+                    LimitPreviewView limitPreviewView = LimitPreviewView.this;
+                    PremiumGradient.GradientTools gradientTools = limitPreviewView.staticGradient;
+                    if (gradientTools == null) {
+                        for (View view2 = this; view2 != view; view2 = (View) view2.getParent()) {
+                            f += view2.getY();
                         }
-                        PremiumGradient.getInstance().updateMainGradientMatrix(0, 0, parent.getMeasuredWidth(), parent.getMeasuredHeight(), LimitPreviewView.this.getGlobalXOffset() - getLeft(), -y);
+                        PremiumGradient.getInstance().updateMainGradientMatrix(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight(), LimitPreviewView.this.getGlobalXOffset() - getLeft(), -f);
+                    } else {
+                        mainGradientPaint = gradientTools.paint;
+                        gradientTools.gradientMatrixLinear(limitPreviewView.gradientTotalHeight, -limitPreviewView.gradientYOffset);
                     }
                 } else {
                     PremiumGradient.getInstance().updateMainGradientMatrix(0, 0, LimitPreviewView.this.getMeasuredWidth(), LimitPreviewView.this.getMeasuredHeight(), LimitPreviewView.this.getGlobalXOffset() - getLeft(), -getTop());
                 }
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f), paint);
+                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f), mainGradientPaint);
                 canvas.restore();
                 if (LimitPreviewView.this.staticGradient == null) {
                     invalidate();
@@ -100,45 +106,45 @@ public class LimitPreviewView extends LinearLayout {
         };
         this.limitsContainer = linearLayout;
         linearLayout.setOrientation(0);
-        FrameLayout limitLayout = new FrameLayout(context);
-        TextView freeTextView = new TextView(context);
-        freeTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        freeTextView.setText(LocaleController.getString("LimitFree", R.string.LimitFree));
-        freeTextView.setGravity(16);
-        freeTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-        freeTextView.setPadding(AndroidUtilities.dp(12.0f), 0, 0, 0);
+        FrameLayout frameLayout = new FrameLayout(context);
         TextView textView = new TextView(context);
-        this.defaultCount = textView;
         textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        this.defaultCount.setText(Integer.toString(premiumLimit));
-        this.defaultCount.setGravity(16);
-        this.defaultCount.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-        limitLayout.addView(freeTextView, LayoutHelper.createFrame(-1, 30.0f, 3, 0.0f, 0.0f, 36.0f, 0.0f));
-        limitLayout.addView(this.defaultCount, LayoutHelper.createFrame(-2, 30.0f, 5, 0.0f, 0.0f, 12.0f, 0.0f));
-        this.limitsContainer.addView(limitLayout, LayoutHelper.createLinear(0, 30, 1.0f));
-        FrameLayout limitLayout2 = new FrameLayout(context);
-        TextView limitTextView = new TextView(context);
-        limitTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        limitTextView.setText(LocaleController.getString("LimitPremium", R.string.LimitPremium));
-        limitTextView.setGravity(16);
-        limitTextView.setTextColor(-1);
-        limitTextView.setPadding(AndroidUtilities.dp(12.0f), 0, 0, 0);
+        textView.setText(LocaleController.getString("LimitFree", R.string.LimitFree));
+        textView.setGravity(16);
+        textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        textView.setPadding(AndroidUtilities.dp(12.0f), 0, 0, 0);
         TextView textView2 = new TextView(context);
-        this.premiumCount = textView2;
+        this.defaultCount = textView2;
         textView2.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        this.premiumCount.setText(Integer.toString(premiumLimit));
+        this.defaultCount.setText(Integer.toString(i3));
+        this.defaultCount.setGravity(16);
+        this.defaultCount.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
+        frameLayout.addView(textView, LayoutHelper.createFrame(-1, 30.0f, 3, 0.0f, 0.0f, 36.0f, 0.0f));
+        frameLayout.addView(this.defaultCount, LayoutHelper.createFrame(-2, 30.0f, 5, 0.0f, 0.0f, 12.0f, 0.0f));
+        this.limitsContainer.addView(frameLayout, LayoutHelper.createLinear(0, 30, 1.0f));
+        FrameLayout frameLayout2 = new FrameLayout(context);
+        TextView textView3 = new TextView(context);
+        textView3.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        textView3.setText(LocaleController.getString("LimitPremium", R.string.LimitPremium));
+        textView3.setGravity(16);
+        textView3.setTextColor(-1);
+        textView3.setPadding(AndroidUtilities.dp(12.0f), 0, 0, 0);
+        TextView textView4 = new TextView(context);
+        this.premiumCount = textView4;
+        textView4.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        this.premiumCount.setText(Integer.toString(i3));
         this.premiumCount.setGravity(16);
         this.premiumCount.setTextColor(-1);
-        limitLayout2.addView(limitTextView, LayoutHelper.createFrame(-1, 30.0f, 3, 0.0f, 0.0f, 36.0f, 0.0f));
-        limitLayout2.addView(this.premiumCount, LayoutHelper.createFrame(-2, 30.0f, 5, 0.0f, 0.0f, 12.0f, 0.0f));
-        this.limitsContainer.addView(limitLayout2, LayoutHelper.createLinear(0, 30, 1.0f));
-        addView(this.limitsContainer, LayoutHelper.createLinear(-1, -2, 0.0f, 0, 14, icon == 0 ? 0 : 12, 14, 0));
+        frameLayout2.addView(textView3, LayoutHelper.createFrame(-1, 30.0f, 3, 0.0f, 0.0f, 36.0f, 0.0f));
+        frameLayout2.addView(this.premiumCount, LayoutHelper.createFrame(-2, 30.0f, 5, 0.0f, 0.0f, 12.0f, 0.0f));
+        this.limitsContainer.addView(frameLayout2, LayoutHelper.createLinear(0, 30, 1.0f));
+        addView(this.limitsContainer, LayoutHelper.createLinear(-1, -2, 0.0f, 0, 14, i == 0 ? 0 : 12, 14, 0));
     }
 
-    public void setIconValue(int currentValue) {
+    public void setIconValue(int i) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
         spannableStringBuilder.append((CharSequence) "d ").setSpan(new ColoredImageSpan(this.icon), 0, 1, 0);
-        spannableStringBuilder.append((CharSequence) Integer.toString(currentValue));
+        spannableStringBuilder.append((CharSequence) Integer.toString(i));
         this.limitIcon.setText(spannableStringBuilder);
     }
 
@@ -168,97 +174,94 @@ public class LimitPreviewView extends LinearLayout {
     }
 
     @Override // android.widget.LinearLayout, android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int padding;
-        float toProgressCenter;
-        float toX;
+    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+        int dp;
+        float f;
+        float f2;
         CounterView counterView;
         CounterView counterView2;
-        super.onLayout(changed, l, t, r, b);
-        if (this.wasAnimation || this.limitIcon == null || !this.animationCanPlay || this.premiumLocked) {
-            if (this.premiumLocked) {
-                float toX2 = (AndroidUtilities.dp(14.0f) + ((getMeasuredWidth() - (padding * 2)) * 0.5f)) - (this.limitIcon.getMeasuredWidth() / 2.0f);
-                boolean z = this.wasAnimation;
-                if (!z && this.animationCanPlay) {
-                    this.wasAnimation = true;
-                    this.limitIcon.animate().alpha(1.0f).scaleX(1.0f).scaleY(1.0f).setDuration(200L).setInterpolator(new OvershootInterpolator()).start();
-                } else if (!z) {
-                    this.limitIcon.setAlpha(0.0f);
-                    this.limitIcon.setScaleX(0.0f);
-                    this.limitIcon.setScaleY(0.0f);
-                } else {
-                    this.limitIcon.setAlpha(1.0f);
-                    this.limitIcon.setScaleX(1.0f);
-                    this.limitIcon.setScaleY(1.0f);
+        super.onLayout(z, i, i2, i3, i4);
+        if (!this.wasAnimation && this.limitIcon != null && this.animationCanPlay && !this.premiumLocked) {
+            int dp2 = AndroidUtilities.dp(14.0f);
+            float measuredWidth = (dp2 + ((getMeasuredWidth() - (dp2 * 2)) * this.position)) - (this.limitIcon.getMeasuredWidth() / 2.0f);
+            if (measuredWidth > (getMeasuredWidth() - dp2) - this.limitIcon.getMeasuredWidth()) {
+                f2 = (getMeasuredWidth() - dp2) - this.limitIcon.getMeasuredWidth();
+                f = 1.0f;
+            } else {
+                f2 = measuredWidth;
+                f = 0.5f;
+            }
+            this.limitIcon.setAlpha(1.0f);
+            this.limitIcon.setTranslationX(0.0f);
+            this.limitIcon.setPivotX(counterView.getMeasuredWidth() / 2.0f);
+            this.limitIcon.setPivotY(counterView2.getMeasuredHeight());
+            this.limitIcon.setScaleX(0.0f);
+            this.limitIcon.setScaleY(0.0f);
+            this.limitIcon.createAnimationLayouts();
+            ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
+            final float f3 = f2;
+            final float f4 = f;
+            ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.Premium.LimitPreviewView$$ExternalSyntheticLambda0
+                @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                public final void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    LimitPreviewView.this.lambda$onLayout$0(r2, f3, r4, f4, valueAnimator);
                 }
-                this.limitIcon.setTranslationX(toX2);
-                return;
+            });
+            ofFloat.setInterpolator(new OvershootInterpolator());
+            ofFloat.setDuration(1000L);
+            ofFloat.setStartDelay(200L);
+            ofFloat.start();
+            this.wasAnimation = true;
+        } else if (this.premiumLocked) {
+            float dp3 = (AndroidUtilities.dp(14.0f) + ((getMeasuredWidth() - (dp * 2)) * 0.5f)) - (this.limitIcon.getMeasuredWidth() / 2.0f);
+            boolean z2 = this.wasAnimation;
+            if (!z2 && this.animationCanPlay) {
+                this.wasAnimation = true;
+                this.limitIcon.animate().alpha(1.0f).scaleX(1.0f).scaleY(1.0f).setDuration(200L).setInterpolator(new OvershootInterpolator()).start();
+            } else if (!z2) {
+                this.limitIcon.setAlpha(0.0f);
+                this.limitIcon.setScaleX(0.0f);
+                this.limitIcon.setScaleY(0.0f);
+            } else {
+                this.limitIcon.setAlpha(1.0f);
+                this.limitIcon.setScaleX(1.0f);
+                this.limitIcon.setScaleY(1.0f);
             }
-            CounterView counterView3 = this.limitIcon;
-            if (counterView3 != null) {
-                counterView3.setAlpha(0.0f);
-                return;
-            }
-            return;
-        }
-        int padding2 = AndroidUtilities.dp(14.0f);
-        float toX3 = (padding2 + ((getMeasuredWidth() - (padding2 * 2)) * this.position)) - (this.limitIcon.getMeasuredWidth() / 2.0f);
-        if (toX3 > (getMeasuredWidth() - padding2) - this.limitIcon.getMeasuredWidth()) {
-            float toX4 = (getMeasuredWidth() - padding2) - this.limitIcon.getMeasuredWidth();
-            toX = toX4;
-            toProgressCenter = 1.0f;
+            this.limitIcon.setTranslationX(dp3);
         } else {
-            toX = toX3;
-            toProgressCenter = 0.5f;
-        }
-        this.limitIcon.setAlpha(1.0f);
-        this.limitIcon.setTranslationX(0.0f);
-        this.limitIcon.setPivotX(counterView.getMeasuredWidth() / 2.0f);
-        this.limitIcon.setPivotY(counterView2.getMeasuredHeight());
-        this.limitIcon.setScaleX(0.0f);
-        this.limitIcon.setScaleY(0.0f);
-        this.limitIcon.createAnimationLayouts();
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
-        final float finalToX = toX;
-        final float finalToProgressCenter = toProgressCenter;
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.Premium.LimitPreviewView$$ExternalSyntheticLambda0
-            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-            public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                LimitPreviewView.this.m2887xfbb0c7b7(r2, finalToX, r4, finalToProgressCenter, valueAnimator2);
+            CounterView counterView3 = this.limitIcon;
+            if (counterView3 == null) {
+                return;
             }
-        });
-        valueAnimator.setInterpolator(new OvershootInterpolator());
-        valueAnimator.setDuration(1000L);
-        valueAnimator.setStartDelay(200L);
-        valueAnimator.start();
-        this.wasAnimation = true;
+            counterView3.setAlpha(0.0f);
+        }
     }
 
-    /* renamed from: lambda$onLayout$0$org-telegram-ui-Components-Premium-LimitPreviewView */
-    public /* synthetic */ void m2887xfbb0c7b7(float fromX, float finalToX, float fromProgressCenter, float finalToProgressCenter, ValueAnimator animation) {
-        float v = ((Float) animation.getAnimatedValue()).floatValue();
-        float moveValue = Math.min(1.0f, v);
-        if (v > 1.0f) {
+    public /* synthetic */ void lambda$onLayout$0(float f, float f2, float f3, float f4, ValueAnimator valueAnimator) {
+        float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+        float min = Math.min(1.0f, floatValue);
+        if (floatValue > 1.0f) {
             if (!this.wasHaptic) {
                 this.wasHaptic = true;
                 this.limitIcon.performHapticFeedback(3);
             }
-            this.limitIcon.setRotation((v - 1.0f) * 60.0f);
+            this.limitIcon.setRotation((floatValue - 1.0f) * 60.0f);
         } else {
             this.limitIcon.setRotation(0.0f);
         }
-        this.limitIcon.setTranslationX(((1.0f - moveValue) * fromX) + (finalToX * moveValue));
-        float arrowCenter = ((1.0f - moveValue) * fromProgressCenter) + (finalToProgressCenter * moveValue);
-        this.limitIcon.setArrowCenter(arrowCenter);
-        float scale = Math.min(1.0f, 2.0f * moveValue);
-        this.limitIcon.setScaleX(scale);
-        this.limitIcon.setScaleY(scale);
+        float f5 = 1.0f - min;
+        this.limitIcon.setTranslationX((f * f5) + (f2 * min));
+        float f6 = (f3 * f5) + (f4 * min);
+        this.limitIcon.setArrowCenter(f6);
+        float min2 = Math.min(1.0f, min * 2.0f);
+        this.limitIcon.setScaleX(min2);
+        this.limitIcon.setScaleY(min2);
         CounterView counterView = this.limitIcon;
-        counterView.setPivotX(counterView.getMeasuredWidth() * arrowCenter);
+        counterView.setPivotX(counterView.getMeasuredWidth() * f6);
     }
 
-    public void setType(int type) {
-        if (type == 6) {
+    public void setType(int i) {
+        if (i == 6) {
             if (this.limitIcon != null) {
                 SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
                 spannableStringBuilder.append((CharSequence) "d ").setSpan(new ColoredImageSpan(this.icon), 0, 1, 0);
@@ -269,12 +272,12 @@ public class LimitPreviewView extends LinearLayout {
         }
     }
 
-    public void setBagePosition(float position) {
-        this.position = position;
+    public void setBagePosition(float f) {
+        this.position = f;
     }
 
-    public void setParentViewForGradien(ViewGroup containerView) {
-        this.parentVideForGradient = containerView;
+    public void setParentViewForGradien(ViewGroup viewGroup) {
+        this.parentVideForGradient = viewGroup;
     }
 
     public void setStaticGradinet(PremiumGradient.GradientTools gradientTools) {
@@ -296,16 +299,7 @@ public class LimitPreviewView extends LinearLayout {
         this.premiumLocked = true;
     }
 
-    /* loaded from: classes5.dex */
-    private class LimitTextView extends LinearLayout {
-        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        public LimitTextView(Context context) {
-            super(context);
-            LimitPreviewView.this = r1;
-        }
-    }
-
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class CounterView extends View {
         StaticLayout animatedStableLayout;
         boolean animationInProgress;
@@ -322,78 +316,85 @@ public class LimitPreviewView extends LinearLayout {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public CounterView(Context context) {
             super(context);
-            LimitPreviewView.this = r2;
+            LimitPreviewView.this = r1;
             this.textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
             this.textPaint.setTextSize(AndroidUtilities.dp(22.0f));
             this.textPaint.setColor(-1);
         }
 
         @Override // android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        protected void onMeasure(int i, int i2) {
             TextPaint textPaint = this.textPaint;
             CharSequence charSequence = this.text;
             this.textWidth = textPaint.measureText(charSequence, 0, charSequence.length());
-            this.textLayout = new StaticLayout(this.text, this.textPaint, AndroidUtilities.dp(12.0f) + ((int) this.textWidth), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            this.textLayout = new StaticLayout(this.text, this.textPaint, ((int) this.textWidth) + AndroidUtilities.dp(12.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             setMeasuredDimension((int) (this.textWidth + getPaddingRight() + getPaddingLeft()), AndroidUtilities.dp(44.0f) + AndroidUtilities.dp(8.0f));
             updatePath();
         }
 
         private void updatePath() {
-            int h = getMeasuredHeight() - AndroidUtilities.dp(8.0f);
-            float widthHalf = getMeasuredWidth() * this.arrowCenter;
-            float x2 = Utilities.clamp(AndroidUtilities.dp(8.0f) + widthHalf, getMeasuredWidth(), 0.0f);
-            float x3 = Utilities.clamp(AndroidUtilities.dp(10.0f) + widthHalf, getMeasuredWidth(), 0.0f);
+            int measuredHeight = getMeasuredHeight() - AndroidUtilities.dp(8.0f);
+            float measuredWidth = getMeasuredWidth() * this.arrowCenter;
+            float clamp = Utilities.clamp(AndroidUtilities.dp(8.0f) + measuredWidth, getMeasuredWidth(), 0.0f);
+            float clamp2 = Utilities.clamp(AndroidUtilities.dp(10.0f) + measuredWidth, getMeasuredWidth(), 0.0f);
             this.path.rewind();
-            this.path.moveTo(widthHalf - AndroidUtilities.dp(24.0f), (h - (h / 2.0f)) - AndroidUtilities.dp(2.0f));
-            this.path.lineTo(widthHalf - AndroidUtilities.dp(24.0f), h);
-            this.path.lineTo(widthHalf - AndroidUtilities.dp(8.0f), h);
-            this.path.lineTo(widthHalf, AndroidUtilities.dp(8.0f) + h);
+            float f = measuredHeight;
+            float f2 = f - (f / 2.0f);
+            this.path.moveTo(measuredWidth - AndroidUtilities.dp(24.0f), f2 - AndroidUtilities.dp(2.0f));
+            this.path.lineTo(measuredWidth - AndroidUtilities.dp(24.0f), f);
+            this.path.lineTo(measuredWidth - AndroidUtilities.dp(8.0f), f);
+            this.path.lineTo(measuredWidth, measuredHeight + AndroidUtilities.dp(8.0f));
             if (this.arrowCenter < 0.7f) {
-                this.path.lineTo(x2, h);
+                this.path.lineTo(clamp, f);
             }
-            this.path.lineTo(x3, h);
-            this.path.lineTo(x3, (h - (h / 2.0f)) - AndroidUtilities.dp(2.0f));
+            this.path.lineTo(clamp2, f);
+            this.path.lineTo(clamp2, f2 - AndroidUtilities.dp(2.0f));
             this.path.close();
         }
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
-            int h = getMeasuredHeight() - AndroidUtilities.dp(8.0f);
+            int measuredHeight = getMeasuredHeight() - AndroidUtilities.dp(8.0f);
             if (LimitPreviewView.this.premiumLocked) {
-                h = getMeasuredHeight();
+                measuredHeight = getMeasuredHeight();
                 PremiumGradient.getInstance().updateMainGradientMatrix(0, 0, LimitPreviewView.this.getMeasuredWidth(), LimitPreviewView.this.getMeasuredHeight(), LimitPreviewView.this.getGlobalXOffset() - getX(), -getTop());
-                AndroidUtilities.rectTmp.set(0.0f, AndroidUtilities.dp(3.0f), getMeasuredWidth(), h - AndroidUtilities.dp(3.0f));
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, h / 2.0f, h / 2.0f, PremiumGradient.getInstance().getMainGradientPaint());
+                RectF rectF = AndroidUtilities.rectTmp;
+                rectF.set(0.0f, AndroidUtilities.dp(3.0f), getMeasuredWidth(), measuredHeight - AndroidUtilities.dp(3.0f));
+                float f = measuredHeight / 2.0f;
+                canvas.drawRoundRect(rectF, f, f, PremiumGradient.getInstance().getMainGradientPaint());
             } else {
                 if (this.invalidatePath) {
                     this.invalidatePath = false;
                     updatePath();
                 }
                 PremiumGradient.getInstance().updateMainGradientMatrix(0, 0, LimitPreviewView.this.getMeasuredWidth(), LimitPreviewView.this.getMeasuredHeight(), LimitPreviewView.this.getGlobalXOffset() - getX(), -getTop());
-                AndroidUtilities.rectTmp.set(0.0f, 0.0f, getMeasuredWidth(), h);
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, h / 2.0f, h / 2.0f, PremiumGradient.getInstance().getMainGradientPaint());
+                RectF rectF2 = AndroidUtilities.rectTmp;
+                float f2 = measuredHeight;
+                rectF2.set(0.0f, 0.0f, getMeasuredWidth(), f2);
+                float f3 = f2 / 2.0f;
+                canvas.drawRoundRect(rectF2, f3, f3, PremiumGradient.getInstance().getMainGradientPaint());
                 PremiumGradient.getInstance().getMainGradientPaint().setPathEffect(this.pathEffect);
                 canvas.drawPath(this.path, PremiumGradient.getInstance().getMainGradientPaint());
                 PremiumGradient.getInstance().getMainGradientPaint().setPathEffect(null);
                 invalidate();
             }
-            float x = (getMeasuredWidth() - this.textLayout.getWidth()) / 2.0f;
-            float y = (h - this.textLayout.getHeight()) / 2.0f;
+            float measuredWidth = (getMeasuredWidth() - this.textLayout.getWidth()) / 2.0f;
+            float height = (measuredHeight - this.textLayout.getHeight()) / 2.0f;
             if (!this.animationInProgress) {
-                if (this.textLayout != null) {
-                    canvas.save();
-                    canvas.translate(x, y);
-                    this.textLayout.draw(canvas);
-                    canvas.restore();
+                if (this.textLayout == null) {
                     return;
                 }
+                canvas.save();
+                canvas.translate(measuredWidth, height);
+                this.textLayout.draw(canvas);
+                canvas.restore();
                 return;
             }
             canvas.save();
             canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight() - AndroidUtilities.dp(8.0f));
             if (this.animatedStableLayout != null) {
                 canvas.save();
-                canvas.translate(x, y);
+                canvas.translate(measuredWidth, height);
                 this.animatedStableLayout.draw(canvas);
                 canvas.restore();
             }
@@ -401,16 +402,16 @@ public class LimitPreviewView extends LinearLayout {
                 AnimatedLayout animatedLayout = this.animatedLayouts.get(i);
                 canvas.save();
                 if (animatedLayout.direction) {
-                    canvas.translate(animatedLayout.x + x, (y - ((h * 10) * animatedLayout.progress)) + ((10 - animatedLayout.staticLayouts.size()) * h));
-                    for (int j = 0; j < animatedLayout.staticLayouts.size(); j++) {
-                        canvas.translate(0.0f, h);
-                        animatedLayout.staticLayouts.get(j).draw(canvas);
+                    canvas.translate(animatedLayout.x + measuredWidth, (height - ((measuredHeight * 10) * animatedLayout.progress)) + ((10 - animatedLayout.staticLayouts.size()) * measuredHeight));
+                    for (int i2 = 0; i2 < animatedLayout.staticLayouts.size(); i2++) {
+                        canvas.translate(0.0f, measuredHeight);
+                        animatedLayout.staticLayouts.get(i2).draw(canvas);
                     }
                 } else {
-                    canvas.translate(animatedLayout.x + x, (((h * 10) * animatedLayout.progress) + y) - ((10 - animatedLayout.staticLayouts.size()) * h));
-                    for (int j2 = 0; j2 < animatedLayout.staticLayouts.size(); j2++) {
-                        canvas.translate(0.0f, -h);
-                        animatedLayout.staticLayouts.get(j2).draw(canvas);
+                    canvas.translate(animatedLayout.x + measuredWidth, (((measuredHeight * 10) * animatedLayout.progress) + height) - ((10 - animatedLayout.staticLayouts.size()) * measuredHeight));
+                    for (int i3 = 0; i3 < animatedLayout.staticLayouts.size(); i3++) {
+                        canvas.translate(0.0f, -measuredHeight);
+                        animatedLayout.staticLayouts.get(i3).draw(canvas);
                     }
                 }
                 canvas.restore();
@@ -419,9 +420,9 @@ public class LimitPreviewView extends LinearLayout {
         }
 
         @Override // android.view.View
-        public void setTranslationX(float translationX) {
-            if (translationX != getTranslationX()) {
-                super.setTranslationX(translationX);
+        public void setTranslationX(float f) {
+            if (f != getTranslationX()) {
+                super.setTranslationX(f);
                 invalidate();
             }
         }
@@ -429,63 +430,59 @@ public class LimitPreviewView extends LinearLayout {
         void createAnimationLayouts() {
             this.animatedLayouts.clear();
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(this.text);
-            boolean direction = true;
-            int directionCount = 0;
-            for (int i = 0; i < this.text.length(); i++) {
-                if (Character.isDigit(this.text.charAt(i))) {
+            boolean z = true;
+            int i = 0;
+            for (int i2 = 0; i2 < this.text.length(); i2++) {
+                if (Character.isDigit(this.text.charAt(i2))) {
                     AnimatedLayout animatedLayout = new AnimatedLayout();
                     this.animatedLayouts.add(animatedLayout);
-                    animatedLayout.x = this.textLayout.getSecondaryHorizontal(i);
-                    animatedLayout.direction = direction;
-                    if (directionCount >= 1) {
-                        direction = !direction;
-                        directionCount = 0;
+                    animatedLayout.x = this.textLayout.getSecondaryHorizontal(i2);
+                    animatedLayout.direction = z;
+                    if (i >= 1) {
+                        z = !z;
+                        i = 0;
                     }
-                    directionCount++;
-                    int digit = this.text.charAt(i) - '0';
-                    if (digit == 0) {
-                        digit = 10;
+                    i++;
+                    int charAt = this.text.charAt(i2) - '0';
+                    if (charAt == 0) {
+                        charAt = 10;
                     }
-                    for (int j = 1; j <= digit; j++) {
-                        int k = j;
-                        if (k == 10) {
-                            k = 0;
-                        }
-                        String str = "" + k;
-                        StaticLayout staticLayout = new StaticLayout(str, this.textPaint, (int) this.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-                        animatedLayout.staticLayouts.add(staticLayout);
+                    int i3 = 1;
+                    while (i3 <= charAt) {
+                        animatedLayout.staticLayouts.add(new StaticLayout("" + (i3 == 10 ? 0 : i3), this.textPaint, (int) this.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false));
+                        i3++;
                     }
-                    spannableStringBuilder.setSpan(new EmptyStubSpan(), i, i + 1, 0);
+                    spannableStringBuilder.setSpan(new EmptyStubSpan(), i2, i2 + 1, 0);
                 }
             }
-            this.animatedStableLayout = new StaticLayout(spannableStringBuilder, this.textPaint, ((int) this.textWidth) + AndroidUtilities.dp(12.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-            for (int i2 = 0; i2 < this.animatedLayouts.size(); i2++) {
+            this.animatedStableLayout = new StaticLayout(spannableStringBuilder, this.textPaint, AndroidUtilities.dp(12.0f) + ((int) this.textWidth), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            for (int i4 = 0; i4 < this.animatedLayouts.size(); i4++) {
                 this.animationInProgress = true;
-                final AnimatedLayout layout = this.animatedLayouts.get(i2);
-                layout.valueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
-                layout.valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.Premium.LimitPreviewView$CounterView$$ExternalSyntheticLambda0
+                final AnimatedLayout animatedLayout2 = this.animatedLayouts.get(i4);
+                ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
+                animatedLayout2.valueAnimator = ofFloat;
+                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.Premium.LimitPreviewView$CounterView$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        LimitPreviewView.CounterView.this.m2888x1ef3fe0c(layout, valueAnimator);
+                        LimitPreviewView.CounterView.this.lambda$createAnimationLayouts$0(animatedLayout2, valueAnimator);
                     }
                 });
-                layout.valueAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.Premium.LimitPreviewView.CounterView.1
+                animatedLayout2.valueAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.Premium.LimitPreviewView.CounterView.1
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
-                        layout.valueAnimator = null;
+                    public void onAnimationEnd(Animator animator) {
+                        animatedLayout2.valueAnimator = null;
                         CounterView.this.checkAnimationComplete();
                     }
                 });
-                layout.valueAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT);
-                layout.valueAnimator.setDuration(750L);
-                layout.valueAnimator.setStartDelay(((this.animatedLayouts.size() - 1) - i2) * 60);
-                layout.valueAnimator.start();
+                animatedLayout2.valueAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT);
+                animatedLayout2.valueAnimator.setDuration(750L);
+                animatedLayout2.valueAnimator.setStartDelay(((this.animatedLayouts.size() - 1) - i4) * 60);
+                animatedLayout2.valueAnimator.start();
             }
         }
 
-        /* renamed from: lambda$createAnimationLayouts$0$org-telegram-ui-Components-Premium-LimitPreviewView$CounterView */
-        public /* synthetic */ void m2888x1ef3fe0c(AnimatedLayout layout, ValueAnimator animation) {
-            layout.progress = ((Float) animation.getAnimatedValue()).floatValue();
+        public /* synthetic */ void lambda$createAnimationLayouts$0(AnimatedLayout animatedLayout, ValueAnimator valueAnimator) {
+            animatedLayout.progress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
             invalidate();
         }
 
@@ -500,19 +497,19 @@ public class LimitPreviewView extends LinearLayout {
             invalidate();
         }
 
-        public void setText(CharSequence text) {
-            this.text = text;
+        public void setText(CharSequence charSequence) {
+            this.text = charSequence;
         }
 
-        public void setArrowCenter(float v) {
-            if (this.arrowCenter != v) {
-                this.arrowCenter = v;
+        public void setArrowCenter(float f) {
+            if (this.arrowCenter != f) {
+                this.arrowCenter = f;
                 this.invalidatePath = true;
                 invalidate();
             }
         }
 
-        /* loaded from: classes5.dex */
+        /* loaded from: classes3.dex */
         public class AnimatedLayout {
             public boolean direction;
             float progress;
@@ -520,8 +517,7 @@ public class LimitPreviewView extends LinearLayout {
             ValueAnimator valueAnimator;
             float x;
 
-            private AnimatedLayout() {
-                CounterView.this = r1;
+            private AnimatedLayout(CounterView counterView) {
                 this.staticLayouts = new ArrayList<>();
             }
         }

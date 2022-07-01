@@ -2,10 +2,8 @@ package com.google.android.exoplayer2.extractor.mkv;
 
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class VarintReader {
-    private static final int STATE_BEGIN_READING = 0;
-    private static final int STATE_READ_CONTENTS = 1;
     private static final long[] VARINT_LENGTH_MASKS = {128, 64, 32, 16, 8, 4, 2, 1};
     private int length;
     private final byte[] scratch = new byte[8];
@@ -16,9 +14,9 @@ final class VarintReader {
         this.length = 0;
     }
 
-    public long readUnsignedVarint(ExtractorInput input, boolean allowEndOfInput, boolean removeLengthMask, int maximumAllowedLength) throws IOException, InterruptedException {
+    public long readUnsignedVarint(ExtractorInput extractorInput, boolean z, boolean z2, int i) throws IOException, InterruptedException {
         if (this.state == 0) {
-            if (!input.readFully(this.scratch, 0, 1, allowEndOfInput)) {
+            if (!extractorInput.readFully(this.scratch, 0, 1, z)) {
                 return -1L;
             }
             int parseUnsignedVarintLength = parseUnsignedVarintLength(this.scratch[0] & 255);
@@ -28,46 +26,45 @@ final class VarintReader {
             }
             this.state = 1;
         }
-        int firstByte = this.length;
-        if (firstByte > maximumAllowedLength) {
+        int i2 = this.length;
+        if (i2 > i) {
             this.state = 0;
             return -2L;
         }
-        if (firstByte != 1) {
-            input.readFully(this.scratch, 1, firstByte - 1);
+        if (i2 != 1) {
+            extractorInput.readFully(this.scratch, 1, i2 - 1);
         }
         this.state = 0;
-        return assembleVarint(this.scratch, this.length, removeLengthMask);
+        return assembleVarint(this.scratch, this.length, z2);
     }
 
     public int getLastLength() {
         return this.length;
     }
 
-    public static int parseUnsignedVarintLength(int firstByte) {
-        int i = 0;
+    public static int parseUnsignedVarintLength(int i) {
+        int i2 = 0;
         while (true) {
             long[] jArr = VARINT_LENGTH_MASKS;
-            if (i >= jArr.length) {
-                return -1;
-            }
-            if ((jArr[i] & firstByte) == 0) {
-                i++;
+            if (i2 < jArr.length) {
+                if ((jArr[i2] & i) != 0) {
+                    return i2 + 1;
+                }
+                i2++;
             } else {
-                int varIntLength = i + 1;
-                return varIntLength;
+                return -1;
             }
         }
     }
 
-    public static long assembleVarint(byte[] varintBytes, int varintLength, boolean removeLengthMask) {
-        long varint = varintBytes[0] & 255;
-        if (removeLengthMask) {
-            varint &= VARINT_LENGTH_MASKS[varintLength - 1] ^ (-1);
+    public static long assembleVarint(byte[] bArr, int i, boolean z) {
+        long j = bArr[0] & 255;
+        if (z) {
+            j &= VARINT_LENGTH_MASKS[i - 1] ^ (-1);
         }
-        for (int i = 1; i < varintLength; i++) {
-            varint = (varint << 8) | (varintBytes[i] & 255);
+        for (int i2 = 1; i2 < i; i2++) {
+            j = (j << 8) | (bArr[i2] & 255);
         }
-        return varint;
+        return j;
     }
 }

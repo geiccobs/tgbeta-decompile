@@ -1,8 +1,11 @@
 package com.google.android.datatransport.runtime.backends;
-/* loaded from: classes3.dex */
+
+import com.google.auto.value.AutoValue;
+@AutoValue
+/* loaded from: classes.dex */
 public abstract class BackendResponse {
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum Status {
         OK,
         TRANSIENT_ERROR,
@@ -26,7 +29,7 @@ public abstract class BackendResponse {
         return new AutoValue_BackendResponse(Status.INVALID_PAYLOAD, -1L);
     }
 
-    public static BackendResponse ok(long nextRequestWaitMillis) {
-        return new AutoValue_BackendResponse(Status.OK, nextRequestWaitMillis);
+    public static BackendResponse ok(long j) {
+        return new AutoValue_BackendResponse(Status.OK, j);
     }
 }

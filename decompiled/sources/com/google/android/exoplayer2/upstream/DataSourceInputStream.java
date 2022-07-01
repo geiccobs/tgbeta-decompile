@@ -3,7 +3,7 @@ package com.google.android.exoplayer2.upstream;
 import com.google.android.exoplayer2.util.Assertions;
 import java.io.IOException;
 import java.io.InputStream;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class DataSourceInputStream extends InputStream {
     private final DataSource dataSource;
     private final DataSpec dataSpec;
@@ -17,38 +17,33 @@ public final class DataSourceInputStream extends InputStream {
         this.dataSpec = dataSpec;
     }
 
-    public long bytesRead() {
-        return this.totalBytesRead;
-    }
-
     public void open() throws IOException {
         checkOpened();
     }
 
     @Override // java.io.InputStream
     public int read() throws IOException {
-        int length = read(this.singleByteArray);
-        if (length == -1) {
+        if (read(this.singleByteArray) == -1) {
             return -1;
         }
         return this.singleByteArray[0] & 255;
     }
 
     @Override // java.io.InputStream
-    public int read(byte[] buffer) throws IOException {
-        return read(buffer, 0, buffer.length);
+    public int read(byte[] bArr) throws IOException {
+        return read(bArr, 0, bArr.length);
     }
 
     @Override // java.io.InputStream
-    public int read(byte[] buffer, int offset, int length) throws IOException {
+    public int read(byte[] bArr, int i, int i2) throws IOException {
         Assertions.checkState(!this.closed);
         checkOpened();
-        int bytesRead = this.dataSource.read(buffer, offset, length);
-        if (bytesRead == -1) {
+        int read = this.dataSource.read(bArr, i, i2);
+        if (read == -1) {
             return -1;
         }
-        this.totalBytesRead += bytesRead;
-        return bytesRead;
+        this.totalBytesRead += read;
+        return read;
     }
 
     @Override // java.io.InputStream, java.io.Closeable, java.lang.AutoCloseable

@@ -1,38 +1,38 @@
 package com.google.android.datatransport.runtime.firebase.transport;
 
-import com.google.firebase.encoders.annotations.Encodable;
+import com.google.firebase.encoders.proto.Protobuf;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class LogSourceMetrics {
-    private static final LogSourceMetrics DEFAULT_INSTANCE = new Builder().build();
     private final List<LogEventDropped> log_event_dropped_;
     private final String log_source_;
 
-    LogSourceMetrics(String log_source_, List<LogEventDropped> log_event_dropped_) {
-        this.log_source_ = log_source_;
-        this.log_event_dropped_ = log_event_dropped_;
+    static {
+        new Builder().build();
+    }
+
+    LogSourceMetrics(String str, List<LogEventDropped> list) {
+        this.log_source_ = str;
+        this.log_event_dropped_ = list;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    @Protobuf(tag = 1)
     public String getLogSource() {
         return this.log_source_;
     }
 
-    @Encodable.Field(name = "logEventDropped")
+    @Protobuf(tag = 2)
     public List<LogEventDropped> getLogEventDroppedList() {
         return this.log_event_dropped_;
     }
 
-    public static LogSourceMetrics getDefaultInstance() {
-        return DEFAULT_INSTANCE;
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder {
         private String log_source_ = "";
         private List<LogEventDropped> log_event_dropped_ = new ArrayList();
@@ -44,18 +44,13 @@ public final class LogSourceMetrics {
             return new LogSourceMetrics(this.log_source_, Collections.unmodifiableList(this.log_event_dropped_));
         }
 
-        public Builder setLogSource(String log_source_) {
-            this.log_source_ = log_source_;
+        public Builder setLogSource(String str) {
+            this.log_source_ = str;
             return this;
         }
 
-        public Builder addLogEventDropped(LogEventDropped log_event_dropped_) {
-            this.log_event_dropped_.add(log_event_dropped_);
-            return this;
-        }
-
-        public Builder setLogEventDroppedList(List<LogEventDropped> log_event_dropped_) {
-            this.log_event_dropped_ = log_event_dropped_;
+        public Builder setLogEventDroppedList(List<LogEventDropped> list) {
+            this.log_event_dropped_ = list;
             return this;
         }
     }

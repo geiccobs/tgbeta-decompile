@@ -1,29 +1,35 @@
 package org.telegram.ui;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import java.util.ArrayList;
+import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.R;
 import org.telegram.messenger.voip.VoIPService;
+import org.telegram.tgnet.TLRPC$PhoneCall;
 import org.telegram.ui.Components.voip.VoIPHelper;
-/* loaded from: classes4.dex */
+@TargetApi(R.styleable.MapAttrs_zOrderOnTop)
+/* loaded from: classes3.dex */
 public class VoIPPermissionActivity extends Activity {
     @Override // android.app.Activity
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        VoIPService service = VoIPService.getSharedInstance();
-        boolean isVideoCall = (service == null || service.privateCall == null || !service.privateCall.video) ? false : true;
-        ArrayList<String> permissions = new ArrayList<>();
+    protected void onCreate(Bundle bundle) {
+        TLRPC$PhoneCall tLRPC$PhoneCall;
+        super.onCreate(bundle);
+        VoIPService sharedInstance = VoIPService.getSharedInstance();
+        boolean z = (sharedInstance == null || (tLRPC$PhoneCall = sharedInstance.privateCall) == null || !tLRPC$PhoneCall.video) ? false : true;
+        ArrayList arrayList = new ArrayList();
         if (checkSelfPermission("android.permission.RECORD_AUDIO") != 0) {
-            permissions.add("android.permission.RECORD_AUDIO");
+            arrayList.add("android.permission.RECORD_AUDIO");
         }
-        if (isVideoCall && checkSelfPermission("android.permission.CAMERA") != 0) {
-            permissions.add("android.permission.CAMERA");
+        if (z && checkSelfPermission("android.permission.CAMERA") != 0) {
+            arrayList.add("android.permission.CAMERA");
         }
-        if (!permissions.isEmpty()) {
+        if (!arrayList.isEmpty()) {
             try {
-                requestPermissions((String[]) permissions.toArray(new String[0]), isVideoCall ? 102 : 101);
+                requestPermissions((String[]) arrayList.toArray(new String[0]), z ? 102 : FileLoader.MEDIA_DIR_VIDEO_PUBLIC);
             } catch (Exception e) {
                 FileLog.e(e);
             }
@@ -31,22 +37,21 @@ public class VoIPPermissionActivity extends Activity {
     }
 
     @Override // android.app.Activity
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == 101 || requestCode == 102) {
-            boolean allGranted = true;
-            int a = 0;
+    public void onRequestPermissionsResult(int i, String[] strArr, int[] iArr) {
+        if (i == 101 || i == 102) {
+            boolean z = false;
+            int i2 = 0;
             while (true) {
-                if (a >= grantResults.length) {
+                if (i2 >= iArr.length) {
+                    z = true;
                     break;
-                } else if (grantResults[a] == 0) {
-                    a++;
+                } else if (iArr[i2] != 0) {
+                    break;
                 } else {
-                    allGranted = false;
-                    break;
+                    i2++;
                 }
             }
-            int a2 = grantResults.length;
-            if (a2 > 0 && allGranted) {
+            if (iArr.length > 0 && z) {
                 if (VoIPService.getSharedInstance() != null) {
                     VoIPService.getSharedInstance().acceptIncomingCall();
                 }
@@ -61,7 +66,7 @@ public class VoIPPermissionActivity extends Activity {
                     public final void run() {
                         VoIPPermissionActivity.this.finish();
                     }
-                }, requestCode);
+                }, i);
             } else {
                 finish();
             }

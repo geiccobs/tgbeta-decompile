@@ -5,7 +5,7 @@ import com.google.android.exoplayer2.decoder.OutputBuffer;
 import com.google.android.exoplayer2.util.Assertions;
 import java.lang.Exception;
 import java.util.ArrayDeque;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends OutputBuffer, E extends Exception> implements Decoder<I, O, E> {
     private int availableInputBufferCount;
     private final I[] availableInputBuffers;
@@ -35,14 +35,14 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         queueInputBuffer((SimpleDecoder<I, O, E>) ((DecoderInputBuffer) obj));
     }
 
-    public SimpleDecoder(I[] inputBuffers, O[] outputBuffers) {
-        this.availableInputBuffers = inputBuffers;
-        this.availableInputBufferCount = inputBuffers.length;
+    public SimpleDecoder(I[] iArr, O[] oArr) {
+        this.availableInputBuffers = iArr;
+        this.availableInputBufferCount = iArr.length;
         for (int i = 0; i < this.availableInputBufferCount; i++) {
             this.availableInputBuffers[i] = createInputBuffer();
         }
-        this.availableOutputBuffers = outputBuffers;
-        this.availableOutputBufferCount = outputBuffers.length;
+        this.availableOutputBuffers = oArr;
+        this.availableOutputBufferCount = oArr.length;
         for (int i2 = 0; i2 < this.availableOutputBufferCount; i2++) {
             this.availableOutputBuffers[i2] = createOutputBuffer();
         }
@@ -56,11 +56,10 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         thread.start();
     }
 
-    public final void setInitialInputBufferSize(int size) {
-        I[] iArr;
+    public final void setInitialInputBufferSize(int i) {
         Assertions.checkState(this.availableInputBufferCount == this.availableInputBuffers.length);
-        for (I inputBuffer : this.availableInputBuffers) {
-            inputBuffer.ensureSpaceForWrite(size);
+        for (I i2 : this.availableInputBuffers) {
+            i2.ensureSpaceForWrite(i);
         }
     }
 
@@ -84,11 +83,11 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         return i;
     }
 
-    public final void queueInputBuffer(I inputBuffer) throws Exception {
+    public final void queueInputBuffer(I i) throws Exception {
         synchronized (this.lock) {
             maybeThrowException();
-            Assertions.checkArgument(inputBuffer == this.dequeuedInputBuffer);
-            this.queuedInputBuffers.addLast(inputBuffer);
+            Assertions.checkArgument(i == this.dequeuedInputBuffer);
+            this.queuedInputBuffers.addLast(i);
             maybeNotifyDecodeLoop();
             this.dequeuedInputBuffer = null;
         }
@@ -105,9 +104,9 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         }
     }
 
-    public void releaseOutputBuffer(O outputBuffer) {
+    public void releaseOutputBuffer(O o) {
         synchronized (this.lock) {
-            releaseOutputBufferInternal(outputBuffer);
+            releaseOutputBufferInternal(o);
             maybeNotifyDecodeLoop();
         }
     }
@@ -140,16 +139,17 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         }
         try {
             this.decodeThread.join();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException unused) {
             Thread.currentThread().interrupt();
         }
     }
 
     private void maybeThrowException() throws Exception {
         E e = this.exception;
-        if (e != null) {
-            throw e;
+        if (e == null) {
+            return;
         }
+        throw e;
     }
 
     private void maybeNotifyDecodeLoop() {
@@ -167,9 +167,8 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         } while (decode());
     }
 
-    /* JADX WARN: Multi-variable type inference failed */
     private boolean decode() throws InterruptedException {
-        E exception;
+        E e;
         synchronized (this.lock) {
             while (!this.released && !canDecodeBuffer()) {
                 this.lock.wait();
@@ -177,45 +176,45 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
             if (this.released) {
                 return false;
             }
-            I inputBuffer = this.queuedInputBuffers.removeFirst();
+            I removeFirst = this.queuedInputBuffers.removeFirst();
             O[] oArr = this.availableOutputBuffers;
             int i = this.availableOutputBufferCount - 1;
             this.availableOutputBufferCount = i;
-            O outputBuffer = oArr[i];
-            boolean resetDecoder = this.flushed;
+            O o = oArr[i];
+            boolean z = this.flushed;
             this.flushed = false;
-            if (inputBuffer.isEndOfStream()) {
-                outputBuffer.addFlag(4);
+            if (removeFirst.isEndOfStream()) {
+                o.addFlag(4);
             } else {
-                if (inputBuffer.isDecodeOnly()) {
-                    outputBuffer.addFlag(Integer.MIN_VALUE);
+                if (removeFirst.isDecodeOnly()) {
+                    o.addFlag(Integer.MIN_VALUE);
                 }
                 try {
-                    exception = decode(inputBuffer, outputBuffer, resetDecoder);
-                } catch (OutOfMemoryError e) {
-                    exception = createUnexpectedDecodeException(e);
-                } catch (RuntimeException e2) {
-                    exception = createUnexpectedDecodeException(e2);
+                    e = decode(removeFirst, o, z);
+                } catch (OutOfMemoryError e2) {
+                    e = createUnexpectedDecodeException(e2);
+                } catch (RuntimeException e3) {
+                    e = createUnexpectedDecodeException(e3);
                 }
-                if (exception != null) {
+                if (e != null) {
                     synchronized (this.lock) {
-                        this.exception = exception;
+                        this.exception = e;
                     }
                     return false;
                 }
             }
             synchronized (this.lock) {
                 if (this.flushed) {
-                    outputBuffer.release();
-                } else if (outputBuffer.isDecodeOnly()) {
+                    o.release();
+                } else if (o.isDecodeOnly()) {
                     this.skippedOutputBufferCount++;
-                    outputBuffer.release();
+                    o.release();
                 } else {
-                    outputBuffer.skippedOutputBufferCount = this.skippedOutputBufferCount;
+                    o.skippedOutputBufferCount = this.skippedOutputBufferCount;
                     this.skippedOutputBufferCount = 0;
-                    this.queuedOutputBuffers.addLast(outputBuffer);
+                    this.queuedOutputBuffers.addLast(o);
                 }
-                releaseInputBufferInternal(inputBuffer);
+                releaseInputBufferInternal(removeFirst);
             }
             return true;
         }
@@ -225,19 +224,19 @@ public abstract class SimpleDecoder<I extends DecoderInputBuffer, O extends Outp
         return !this.queuedInputBuffers.isEmpty() && this.availableOutputBufferCount > 0;
     }
 
-    private void releaseInputBufferInternal(I inputBuffer) {
-        inputBuffer.clear();
+    private void releaseInputBufferInternal(I i) {
+        i.clear();
         I[] iArr = this.availableInputBuffers;
-        int i = this.availableInputBufferCount;
-        this.availableInputBufferCount = i + 1;
-        iArr[i] = inputBuffer;
+        int i2 = this.availableInputBufferCount;
+        this.availableInputBufferCount = i2 + 1;
+        iArr[i2] = i;
     }
 
-    private void releaseOutputBufferInternal(O outputBuffer) {
-        outputBuffer.clear();
+    private void releaseOutputBufferInternal(O o) {
+        o.clear();
         O[] oArr = this.availableOutputBuffers;
         int i = this.availableOutputBufferCount;
         this.availableOutputBufferCount = i + 1;
-        oArr[i] = outputBuffer;
+        oArr[i] = o;
     }
 }

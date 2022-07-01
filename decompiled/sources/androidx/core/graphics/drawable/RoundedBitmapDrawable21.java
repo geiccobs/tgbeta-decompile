@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.Gravity;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class RoundedBitmapDrawable21 extends RoundedBitmapDrawable {
     public RoundedBitmapDrawable21(Resources res, Bitmap bitmap) {
         super(res, bitmap);
@@ -15,19 +15,6 @@ class RoundedBitmapDrawable21 extends RoundedBitmapDrawable {
     public void getOutline(Outline outline) {
         updateDstRect();
         outline.setRoundRect(this.mDstRect, getCornerRadius());
-    }
-
-    @Override // androidx.core.graphics.drawable.RoundedBitmapDrawable
-    public void setMipMap(boolean mipMap) {
-        if (this.mBitmap != null) {
-            this.mBitmap.setHasMipMap(mipMap);
-            invalidateSelf();
-        }
-    }
-
-    @Override // androidx.core.graphics.drawable.RoundedBitmapDrawable
-    public boolean hasMipMap() {
-        return this.mBitmap != null && this.mBitmap.hasMipMap();
     }
 
     @Override // androidx.core.graphics.drawable.RoundedBitmapDrawable

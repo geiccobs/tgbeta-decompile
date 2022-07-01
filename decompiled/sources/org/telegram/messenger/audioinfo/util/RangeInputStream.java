@@ -2,13 +2,13 @@ package org.telegram.messenger.audioinfo.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class RangeInputStream extends PositionInputStream {
     private final long endPosition;
 
-    public RangeInputStream(InputStream delegate, long position, long length) throws IOException {
-        super(delegate, position);
-        this.endPosition = position + length;
+    public RangeInputStream(InputStream inputStream, long j, long j2) throws IOException {
+        super(inputStream, j);
+        this.endPosition = j + j2;
     }
 
     public long getRemainingLength() {
@@ -24,21 +24,21 @@ public class RangeInputStream extends PositionInputStream {
     }
 
     @Override // org.telegram.messenger.audioinfo.util.PositionInputStream, java.io.FilterInputStream, java.io.InputStream
-    public int read(byte[] b, int off, int len) throws IOException {
-        long position = getPosition() + len;
+    public int read(byte[] bArr, int i, int i2) throws IOException {
+        long position = getPosition() + i2;
         long j = this.endPosition;
-        if (position > j && (len = (int) (j - getPosition())) == 0) {
-            return -1;
+        if (position <= j || (i2 = (int) (j - getPosition())) != 0) {
+            return super.read(bArr, i, i2);
         }
-        return super.read(b, off, len);
+        return -1;
     }
 
     @Override // org.telegram.messenger.audioinfo.util.PositionInputStream, java.io.FilterInputStream, java.io.InputStream
-    public long skip(long n) throws IOException {
-        long j = this.endPosition;
-        if (getPosition() + n > j) {
-            n = (int) (j - getPosition());
+    public long skip(long j) throws IOException {
+        long j2 = this.endPosition;
+        if (getPosition() + j > j2) {
+            j = (int) (j2 - getPosition());
         }
-        return super.skip(n);
+        return super.skip(j);
     }
 }

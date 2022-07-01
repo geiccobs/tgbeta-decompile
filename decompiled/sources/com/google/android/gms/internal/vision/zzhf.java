@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zzhf<MessageType extends zzhf<MessageType, BuilderType>, BuilderType extends zzhe<MessageType, BuilderType>> implements zzkk {
     protected int zza = 0;
 
@@ -19,7 +19,7 @@ public abstract class zzhf<MessageType extends zzhf<MessageType, BuilderType>, B
             return zzc.zza();
         } catch (IOException e) {
             String name = getClass().getName();
-            StringBuilder sb = new StringBuilder(String.valueOf(name).length() + 62 + String.valueOf("ByteString").length());
+            StringBuilder sb = new StringBuilder(name.length() + 62 + "ByteString".length());
             sb.append("Serializing ");
             sb.append(name);
             sb.append(" to a ");
@@ -38,7 +38,7 @@ public abstract class zzhf<MessageType extends zzhf<MessageType, BuilderType>, B
             return bArr;
         } catch (IOException e) {
             String name = getClass().getName();
-            StringBuilder sb = new StringBuilder(String.valueOf(name).length() + 62 + String.valueOf("byte array").length());
+            StringBuilder sb = new StringBuilder(name.length() + 62 + "byte array".length());
             sb.append("Serializing ");
             sb.append(name);
             sb.append(" to a ");

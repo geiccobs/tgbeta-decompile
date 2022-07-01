@@ -6,10 +6,17 @@ import com.google.android.exoplayer2.source.chunk.MediaChunk;
 import com.google.android.exoplayer2.source.chunk.MediaChunkIterator;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface TrackSelection {
 
-    /* loaded from: classes3.dex */
+    /* renamed from: com.google.android.exoplayer2.trackselection.TrackSelection$-CC */
+    /* loaded from: classes.dex */
+    public final /* synthetic */ class CC {
+        public static void $default$onDiscontinuity(TrackSelection trackSelection) {
+        }
+    }
+
+    /* loaded from: classes.dex */
     public interface Factory {
         TrackSelection[] createTrackSelections(Definition[] definitionArr, BandwidthMeter bandwidthMeter);
     }
@@ -50,29 +57,22 @@ public interface TrackSelection {
 
     void updateSelectedTrack(long j, long j2, long j3, List<? extends MediaChunk> list, MediaChunkIterator[] mediaChunkIteratorArr);
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Definition {
         public final Object data;
         public final TrackGroup group;
         public final int reason;
         public final int[] tracks;
 
-        public Definition(TrackGroup group, int... tracks) {
-            this(group, tracks, 0, null);
+        public Definition(TrackGroup trackGroup, int... iArr) {
+            this(trackGroup, iArr, 0, null);
         }
 
-        public Definition(TrackGroup group, int[] tracks, int reason, Object data) {
-            this.group = group;
-            this.tracks = tracks;
-            this.reason = reason;
-            this.data = data;
-        }
-    }
-
-    /* renamed from: com.google.android.exoplayer2.trackselection.TrackSelection$-CC */
-    /* loaded from: classes3.dex */
-    public final /* synthetic */ class CC {
-        public static void $default$onDiscontinuity(TrackSelection _this) {
+        public Definition(TrackGroup trackGroup, int[] iArr, int i, Object obj) {
+            this.group = trackGroup;
+            this.tracks = iArr;
+            this.reason = i;
+            this.data = obj;
         }
     }
 }

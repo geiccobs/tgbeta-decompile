@@ -3,15 +3,17 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.io.IOException;
 import java.nio.charset.Charset;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzdx extends zzdu {
     protected final byte[] zzb;
 
     public zzdx(byte[] bArr) {
-        if (bArr == null) {
-            throw new NullPointerException();
-        }
+        bArr.getClass();
         this.zzb = bArr;
+    }
+
+    protected int zze() {
+        return 0;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzdn
@@ -31,7 +33,7 @@ public class zzdx extends zzdu {
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzdn
     public final zzdn zza(int i, int i2) {
-        int zzb = zzb(0, i2, zza());
+        int zzb = zzdn.zzb(0, i2, zza());
         if (zzb == 0) {
             return zzdn.zza;
         }
@@ -118,9 +120,5 @@ public class zzdx extends zzdu {
     @Override // com.google.android.gms.internal.mlkit_language_id.zzdn
     protected final int zza(int i, int i2, int i3) {
         return zzeq.zza(i, this.zzb, zze(), i3);
-    }
-
-    protected int zze() {
-        return 0;
     }
 }

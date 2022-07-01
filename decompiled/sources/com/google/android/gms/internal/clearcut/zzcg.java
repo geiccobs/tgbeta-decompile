@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, BuilderType extends zza<MessageType, BuilderType>> extends zzas<MessageType, BuilderType> {
     private static Map<Object, zzcg<?, ?>> zzjr = new ConcurrentHashMap();
     protected zzey zzjp = zzey.zzea();
     private int zzjq = -1;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static abstract class zza<MessageType extends zzcg<MessageType, BuilderType>, BuilderType extends zza<MessageType, BuilderType>> extends zzat<MessageType, BuilderType> {
         private final MessageType zzjs;
         protected MessageType zzjt;
@@ -29,16 +29,10 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
         }
 
         /* JADX WARN: Multi-variable type inference failed */
-        @Override // com.google.android.gms.internal.clearcut.zzat
         public /* synthetic */ Object clone() throws CloneNotSupportedException {
             zza zzaVar = (zza) this.zzjs.zza(zzg.zzkh, null, null);
             zzaVar.zza((zza) ((zzcg) zzbi()));
             return zzaVar;
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzdq
-        public final boolean isInitialized() {
-            return zzcg.zza(this.zzjt, false);
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -80,7 +74,6 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
 
         public final MessageType zzbh() {
             MessageType messagetype = (MessageType) zzbi();
-            boolean booleanValue = Boolean.TRUE.booleanValue();
             byte byteValue = ((Byte) messagetype.zza(zzg.zzkd, null, null)).byteValue();
             boolean z = true;
             if (byteValue != 1) {
@@ -88,9 +81,7 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
                     z = false;
                 } else {
                     z = zzea.zzcm().zzp(messagetype).zzo(messagetype);
-                    if (booleanValue) {
-                        messagetype.zza(zzg.zzke, z ? messagetype : null, null);
-                    }
+                    messagetype.zza(zzg.zzke, z ? messagetype : null, null);
                 }
             }
             if (z) {
@@ -102,7 +93,6 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
         @Override // com.google.android.gms.internal.clearcut.zzdp
         public final /* synthetic */ zzdo zzbj() {
             zzcg zzcgVar = (zzcg) zzbi();
-            boolean booleanValue = Boolean.TRUE.booleanValue();
             byte byteValue = ((Byte) zzcgVar.zza(zzg.zzkd, (Object) null, (Object) null)).byteValue();
             boolean z = true;
             if (byteValue != 1) {
@@ -110,9 +100,7 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
                     z = false;
                 } else {
                     z = zzea.zzcm().zzp(zzcgVar).zzo(zzcgVar);
-                    if (booleanValue) {
-                        zzcgVar.zza(zzg.zzke, z ? zzcgVar : null, (Object) null);
-                    }
+                    zzcgVar.zza(zzg.zzke, z ? zzcgVar : null, (Object) null);
                 }
             }
             if (z) {
@@ -120,72 +108,24 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
             }
             throw new zzew(zzcgVar);
         }
-
-        @Override // com.google.android.gms.internal.clearcut.zzat
-        public final /* synthetic */ zzat zzt() {
-            return (zza) clone();
-        }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class zzb<T extends zzcg<T, ?>> extends zzau<T> {
-        private T zzjs;
-
         public zzb(T t) {
-            this.zzjs = t;
         }
     }
 
-    /* loaded from: classes3.dex */
-    public static abstract class zzc<MessageType extends zzd<MessageType, BuilderType>, BuilderType extends zzc<MessageType, BuilderType>> extends zza<MessageType, BuilderType> implements zzdq {
-        public zzc(MessageType messagetype) {
-            super(messagetype);
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzcg.zza
-        public final void zzbf() {
-            if (!this.zzju) {
-                return;
-            }
-            super.zzbf();
-            ((zzd) this.zzjt).zzjv = (zzby) ((zzd) this.zzjt).zzjv.clone();
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzcg.zza
-        public final /* synthetic */ zzcg zzbg() {
-            return (zzd) zzbi();
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzcg.zza, com.google.android.gms.internal.clearcut.zzdp
-        public final /* synthetic */ zzdo zzbi() {
-            MessageType messagetype;
-            if (this.zzju) {
-                messagetype = this.zzjt;
-            } else {
-                ((zzd) this.zzjt).zzjv.zzv();
-                messagetype = (MessageType) super.zzbi();
-            }
-            return (zzd) messagetype;
-        }
-    }
-
-    /* loaded from: classes3.dex */
-    public static abstract class zzd<MessageType extends zzd<MessageType, BuilderType>, BuilderType extends zzc<MessageType, BuilderType>> extends zzcg<MessageType, BuilderType> implements zzdq {
+    /* loaded from: classes.dex */
+    public static abstract class zzd<MessageType extends zzd<MessageType, BuilderType>, BuilderType> extends zzcg<MessageType, BuilderType> implements zzdq {
         protected zzby<zze> zzjv = zzby.zzar();
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zze implements zzca<zze> {
+        final int number;
         final zzfl zzjx;
-        private final zzck<?> zzjw = null;
-        final int number = 66321687;
-        final boolean zzjy = false;
-        final boolean zzjz = false;
-
-        zze(zzck<?> zzckVar, int i, zzfl zzflVar, boolean z, boolean z2) {
-            this.zzjx = zzflVar;
-        }
 
         @Override // java.lang.Comparable
         public final /* synthetic */ int compareTo(Object obj) {
@@ -229,29 +169,7 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
         }
     }
 
-    /* loaded from: classes3.dex */
-    public static class zzf<ContainingType extends zzdo, Type> extends zzbr<ContainingType, Type> {
-        private final Type zzdu;
-        private final ContainingType zzka;
-        private final zzdo zzkb;
-        private final zze zzkc;
-
-        zzf(ContainingType containingtype, Type type, zzdo zzdoVar, zze zzeVar, Class cls) {
-            if (containingtype != null) {
-                if (zzeVar.zzjx == zzfl.MESSAGE && zzdoVar == null) {
-                    throw new IllegalArgumentException("Null messageDefaultInstance");
-                }
-                this.zzka = containingtype;
-                this.zzdu = type;
-                this.zzkb = zzdoVar;
-                this.zzkc = zzeVar;
-                return;
-            }
-            throw new IllegalArgumentException("Null containingTypeDefaultInstance");
-        }
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zzg {
         public static final int zzkd = 1;
         public static final int zzke = 2;
@@ -263,18 +181,12 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
         private static final /* synthetic */ int[] zzkk = {1, 2, 3, 4, 5, 6, 7};
         public static final int zzkl = 1;
         public static final int zzkm = 2;
-        private static final /* synthetic */ int[] zzkn = {1, 2};
         public static final int zzko = 1;
         public static final int zzkp = 2;
-        private static final /* synthetic */ int[] zzkq = {1, 2};
 
         public static int[] values$50KLMJ33DTMIUPRFDTJMOP9FE1P6UT3FC9QMCBQ7CLN6ASJ1EHIM8JB5EDPM2PR59HKN8P949LIN8Q3FCHA6UIBEEPNMMP9R0() {
             return (int[]) zzkk.clone();
         }
-    }
-
-    public static <ContainingType extends zzdo, Type> zzf<ContainingType, Type> zza(ContainingType containingtype, Type type, zzdo zzdoVar, zzck<?> zzckVar, int i, zzfl zzflVar, Class cls) {
-        return new zzf<>(containingtype, type, zzdoVar, new zze(null, 66321687, zzflVar, false, false), cls);
     }
 
     private static <T extends zzcg<T, ?>> T zza(T t, byte[] bArr) throws zzco {
@@ -291,7 +203,7 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
                 throw new zzco(e.getMessage()).zzg(t2);
             }
             throw ((zzco) e.getCause());
-        } catch (IndexOutOfBoundsException e2) {
+        } catch (IndexOutOfBoundsException unused) {
             throw zzco.zzbl().zzg(t2);
         }
     }
@@ -321,26 +233,9 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
         zzjr.put(cls, t);
     }
 
-    protected static final <T extends zzcg<T, ?>> boolean zza(T t, boolean z) {
-        byte byteValue = ((Byte) t.zza(zzg.zzkd, null, null)).byteValue();
-        if (byteValue == 1) {
-            return true;
-        }
-        if (byteValue != 0) {
-            return zzea.zzcm().zzp(t).zzo(t);
-        }
-        return false;
-    }
-
-    /* JADX WARN: Type inference failed for: r0v0, types: [com.google.android.gms.internal.clearcut.zzch, com.google.android.gms.internal.clearcut.zzcl] */
-    public static zzcl zzaz() {
-        return zzch.zzbk();
-    }
-
     public static <T extends zzcg<T, ?>> T zzb(T t, byte[] bArr) throws zzco {
         T t2 = (T) zza(t, bArr);
         if (t2 != null) {
-            boolean booleanValue = Boolean.TRUE.booleanValue();
             byte byteValue = ((Byte) t2.zza(zzg.zzkd, null, null)).byteValue();
             boolean z = true;
             if (byteValue != 1) {
@@ -348,9 +243,7 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
                     z = false;
                 } else {
                     z = zzea.zzcm().zzp(t2).zzo(t2);
-                    if (booleanValue) {
-                        t2.zza(zzg.zzke, z ? t2 : null, null);
-                    }
+                    t2.zza(zzg.zzke, z ? t2 : null, null);
                 }
             }
             if (!z) {
@@ -358,11 +251,6 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
             }
         }
         return t2;
-    }
-
-    /* JADX WARN: Type inference failed for: r0v0, types: [com.google.android.gms.internal.clearcut.zzcm, com.google.android.gms.internal.clearcut.zzdc] */
-    public static zzcm zzba() {
-        return zzdc.zzbx();
     }
 
     public static <E> zzcn<E> zzbb() {
@@ -380,8 +268,8 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
             }
         }
         if (t == null) {
-            String valueOf = String.valueOf(cls.getName());
-            throw new IllegalStateException(valueOf.length() != 0 ? "Unable to get default instance for: ".concat(valueOf) : new String("Unable to get default instance for: "));
+            String name = cls.getName();
+            throw new IllegalStateException(name.length() != 0 ? "Unable to get default instance for: ".concat(name) : new String("Unable to get default instance for: "));
         }
         return t;
     }
@@ -397,16 +285,17 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
     }
 
     public int hashCode() {
-        if (this.zzex != 0) {
-            return this.zzex;
+        int i = this.zzex;
+        if (i != 0) {
+            return i;
         }
-        this.zzex = zzea.zzcm().zzp(this).hashCode(this);
-        return this.zzex;
+        int hashCode = zzea.zzcm().zzp(this).hashCode(this);
+        this.zzex = hashCode;
+        return hashCode;
     }
 
     @Override // com.google.android.gms.internal.clearcut.zzdq
     public final boolean isInitialized() {
-        boolean booleanValue = Boolean.TRUE.booleanValue();
         byte byteValue = ((Byte) zza(zzg.zzkd, (Object) null, (Object) null)).byteValue();
         if (byteValue == 1) {
             return true;
@@ -415,9 +304,7 @@ public abstract class zzcg<MessageType extends zzcg<MessageType, BuilderType>, B
             return false;
         }
         boolean zzo = zzea.zzcm().zzp(this).zzo(this);
-        if (booleanValue) {
-            zza(zzg.zzke, zzo ? this : null, (Object) null);
-        }
+        zza(zzg.zzke, zzo ? this : null, (Object) null);
         return zzo;
     }
 

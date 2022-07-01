@@ -5,7 +5,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import androidx.collection.ArraySet;
+import androidx.annotation.RecentlyNonNull;
+import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.ReflectedParcelable;
@@ -16,7 +17,6 @@ import com.google.android.gms.common.util.DefaultClock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,8 +24,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class GoogleSignInAccount extends AbstractSafeParcelable implements ReflectedParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<GoogleSignInAccount> CREATOR = new zab();
     private static Clock zaa = DefaultClock.getInstance();
     private final int zab;
@@ -42,19 +43,15 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
     private String zam;
     private Set<Scope> zan = new HashSet();
 
+    @RecentlyNullable
     public static GoogleSignInAccount zaa(String str) throws JSONException {
-        Uri uri;
         String str2 = null;
         if (TextUtils.isEmpty(str)) {
             return null;
         }
         JSONObject jSONObject = new JSONObject(str);
         String optString = jSONObject.optString("photoUrl");
-        if (TextUtils.isEmpty(optString)) {
-            uri = null;
-        } else {
-            uri = Uri.parse(optString);
-        }
+        Uri parse = !TextUtils.isEmpty(optString) ? Uri.parse(optString) : null;
         long parseLong = Long.parseLong(jSONObject.getString("expirationTime"));
         HashSet hashSet = new HashSet();
         JSONArray jSONArray = jSONObject.getJSONArray("grantedScopes");
@@ -62,7 +59,7 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
         for (int i = 0; i < length; i++) {
             hashSet.add(new Scope(jSONArray.getString(i)));
         }
-        GoogleSignInAccount zaa2 = zaa(jSONObject.optString("id"), jSONObject.has("tokenId") ? jSONObject.optString("tokenId") : null, jSONObject.has("email") ? jSONObject.optString("email") : null, jSONObject.has("displayName") ? jSONObject.optString("displayName") : null, jSONObject.has("givenName") ? jSONObject.optString("givenName") : null, jSONObject.has("familyName") ? jSONObject.optString("familyName") : null, uri, Long.valueOf(parseLong), jSONObject.getString("obfuscatedIdentifier"), hashSet);
+        GoogleSignInAccount zaa2 = zaa(jSONObject.optString("id"), jSONObject.has("tokenId") ? jSONObject.optString("tokenId") : null, jSONObject.has("email") ? jSONObject.optString("email") : null, jSONObject.has("displayName") ? jSONObject.optString("displayName") : null, jSONObject.has("givenName") ? jSONObject.optString("givenName") : null, jSONObject.has("familyName") ? jSONObject.optString("familyName") : null, parse, Long.valueOf(parseLong), jSONObject.getString("obfuscatedIdentifier"), hashSet);
         if (jSONObject.has("serverAuthCode")) {
             str2 = jSONObject.optString("serverAuthCode");
         }
@@ -71,25 +68,7 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
     }
 
     private static GoogleSignInAccount zaa(String str, String str2, String str3, String str4, String str5, String str6, Uri uri, Long l, String str7, Set<Scope> set) {
-        Long l2;
-        if (l != null) {
-            l2 = l;
-        } else {
-            l2 = Long.valueOf(zaa.currentTimeMillis() / 1000);
-        }
-        return new GoogleSignInAccount(3, str, str2, str3, str4, uri, null, l2.longValue(), Preconditions.checkNotEmpty(str7), new ArrayList((Collection) Preconditions.checkNotNull(set)), str5, str6);
-    }
-
-    public static GoogleSignInAccount fromAccount(Account account) {
-        return zaa(account, new ArraySet());
-    }
-
-    public static GoogleSignInAccount createDefault() {
-        return zaa(new Account("<<default account>>", "com.google"), new HashSet());
-    }
-
-    private static GoogleSignInAccount zaa(Account account, Set<Scope> set) {
-        return zaa(null, null, account.name, null, null, null, null, 0L, account.name, set);
+        return new GoogleSignInAccount(3, str, str2, str3, str4, uri, null, (l == null ? Long.valueOf(zaa.currentTimeMillis() / 1000) : l).longValue(), Preconditions.checkNotEmpty(str7), new ArrayList((Collection) Preconditions.checkNotNull(set)), str5, str6);
     }
 
     public GoogleSignInAccount(int i, String str, String str2, String str3, String str4, Uri uri, String str5, long j, String str6, List<Scope> list, String str7, String str8) {
@@ -107,18 +86,22 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
         this.zam = str8;
     }
 
+    @RecentlyNullable
     public String getId() {
         return this.zac;
     }
 
+    @RecentlyNullable
     public String getIdToken() {
         return this.zad;
     }
 
+    @RecentlyNullable
     public String getEmail() {
         return this.zae;
     }
 
+    @RecentlyNullable
     public Account getAccount() {
         if (this.zae == null) {
             return null;
@@ -126,43 +109,33 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
         return new Account(this.zae, "com.google");
     }
 
+    @RecentlyNullable
     public String getDisplayName() {
         return this.zaf;
     }
 
+    @RecentlyNullable
     public String getGivenName() {
         return this.zal;
     }
 
+    @RecentlyNullable
     public String getFamilyName() {
         return this.zam;
     }
 
+    @RecentlyNullable
     public Uri getPhotoUrl() {
         return this.zag;
     }
 
-    public GoogleSignInAccount requestExtraScopes(Scope... scopeArr) {
-        if (scopeArr != null) {
-            Collections.addAll(this.zan, scopeArr);
-        }
-        return this;
-    }
-
+    @RecentlyNullable
     public String getServerAuthCode() {
         return this.zah;
     }
 
-    public boolean isExpired() {
-        return zaa.currentTimeMillis() / 1000 >= this.zai - 300;
-    }
-
     public final String zaa() {
         return this.zaj;
-    }
-
-    public Set<Scope> getGrantedScopes() {
-        return new HashSet(this.zak);
     }
 
     public Set<Scope> getRequestedScopes() {
@@ -172,7 +145,7 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zab);
         SafeParcelWriter.writeString(parcel, 2, getId(), false);
@@ -204,12 +177,10 @@ public class GoogleSignInAccount extends AbstractSafeParcelable implements Refle
             return false;
         }
         GoogleSignInAccount googleSignInAccount = (GoogleSignInAccount) obj;
-        if (!googleSignInAccount.zaj.equals(this.zaj) || !googleSignInAccount.getRequestedScopes().equals(getRequestedScopes())) {
-            return false;
-        }
-        return true;
+        return googleSignInAccount.zaj.equals(this.zaj) && googleSignInAccount.getRequestedScopes().equals(getRequestedScopes());
     }
 
+    @RecentlyNonNull
     public final String zab() {
         JSONObject zac = zac();
         zac.remove("serverAuthCode");

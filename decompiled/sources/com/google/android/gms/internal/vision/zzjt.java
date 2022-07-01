@@ -1,11 +1,13 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzjt {
-    private static final zzio zza = zzio.zzb();
-    private zzht zzb;
     private volatile zzkk zzc;
     private volatile zzht zzd;
+
+    public int hashCode() {
+        return 1;
+    }
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -29,10 +31,6 @@ public class zzjt {
         return zzb(zzkkVar2.zzr()).equals(zzkkVar2);
     }
 
-    public int hashCode() {
-        return 1;
-    }
-
     private final zzkk zzb(zzkk zzkkVar) {
         if (this.zzc == null) {
             synchronized (this) {
@@ -40,7 +38,7 @@ public class zzjt {
                     try {
                         this.zzc = zzkkVar;
                         this.zzd = zzht.zza;
-                    } catch (zzjk e) {
+                    } catch (zzjk unused) {
                         this.zzc = zzkkVar;
                         this.zzd = zzht.zza;
                     }
@@ -52,7 +50,6 @@ public class zzjt {
 
     public final zzkk zza(zzkk zzkkVar) {
         zzkk zzkkVar2 = this.zzc;
-        this.zzb = null;
         this.zzd = null;
         this.zzc = zzkkVar;
         return zzkkVar2;
@@ -62,10 +59,10 @@ public class zzjt {
         if (this.zzd != null) {
             return this.zzd.zza();
         }
-        if (this.zzc != null) {
-            return this.zzc.zzm();
+        if (this.zzc == null) {
+            return 0;
         }
-        return 0;
+        return this.zzc.zzm();
     }
 
     public final zzht zzc() {
@@ -83,5 +80,9 @@ public class zzjt {
             }
             return this.zzd;
         }
+    }
+
+    static {
+        zzio.zzb();
     }
 }

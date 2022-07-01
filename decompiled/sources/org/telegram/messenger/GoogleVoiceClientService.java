@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import com.google.android.search.verification.client.SearchActionVerificationClientService;
-import org.telegram.tgnet.TLRPC;
-/* loaded from: classes4.dex */
+import org.telegram.tgnet.TLRPC$User;
+/* loaded from: classes.dex */
 public class GoogleVoiceClientService extends SearchActionVerificationClientService {
     @Override // com.google.android.search.verification.client.SearchActionVerificationClientService
-    public void performAction(final Intent intent, boolean isVerified, Bundle options) {
-        if (!isVerified) {
+    public void performAction(final Intent intent, boolean z, Bundle bundle) {
+        if (!z) {
             return;
         }
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.GoogleVoiceClientService$$ExternalSyntheticLambda0
@@ -21,31 +21,25 @@ public class GoogleVoiceClientService extends SearchActionVerificationClientServ
     }
 
     public static /* synthetic */ void lambda$performAction$0(Intent intent) {
-        TLRPC.User user;
         try {
-            int currentAccount = UserConfig.selectedAccount;
+            int i = UserConfig.selectedAccount;
             ApplicationLoader.postInitApplication();
             if (!AndroidUtilities.needShowPasscode() && !SharedConfig.isWaitingForPasscodeEnter) {
-                String text = intent.getStringExtra("android.intent.extra.TEXT");
-                if (!TextUtils.isEmpty(text)) {
-                    String contactUri = intent.getStringExtra("com.google.android.voicesearch.extra.RECIPIENT_CONTACT_URI");
-                    String id = intent.getStringExtra("com.google.android.voicesearch.extra.RECIPIENT_CONTACT_CHAT_ID");
-                    long uid = Long.parseLong(id);
-                    TLRPC.User user2 = MessagesController.getInstance(currentAccount).getUser(Long.valueOf(uid));
-                    if (user2 != null) {
-                        user = user2;
-                    } else {
-                        TLRPC.User user3 = MessagesStorage.getInstance(currentAccount).getUserSync(uid);
-                        if (user3 != null) {
-                            MessagesController.getInstance(currentAccount).putUser(user3, true);
-                        }
-                        user = user3;
-                    }
-                    if (user != null) {
-                        ContactsController.getInstance(currentAccount).markAsContacted(contactUri);
-                        SendMessagesHelper.getInstance(currentAccount).sendMessage(text, user.id, null, null, null, true, null, null, null, true, 0, null);
-                    }
+                String stringExtra = intent.getStringExtra("android.intent.extra.TEXT");
+                if (TextUtils.isEmpty(stringExtra)) {
+                    return;
                 }
+                String stringExtra2 = intent.getStringExtra("com.google.android.voicesearch.extra.RECIPIENT_CONTACT_URI");
+                long parseLong = Long.parseLong(intent.getStringExtra("com.google.android.voicesearch.extra.RECIPIENT_CONTACT_CHAT_ID"));
+                TLRPC$User user = MessagesController.getInstance(i).getUser(Long.valueOf(parseLong));
+                if (user == null && (user = MessagesStorage.getInstance(i).getUserSync(parseLong)) != null) {
+                    MessagesController.getInstance(i).putUser(user, true);
+                }
+                if (user == null) {
+                    return;
+                }
+                ContactsController.getInstance(i).markAsContacted(stringExtra2);
+                SendMessagesHelper.getInstance(i).sendMessage(stringExtra, user.id, null, null, null, true, null, null, null, true, 0, null);
             }
         } catch (Exception e) {
             FileLog.e(e);

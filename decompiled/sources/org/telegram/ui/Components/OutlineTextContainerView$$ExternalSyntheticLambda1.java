@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class OutlineTextContainerView$$ExternalSyntheticLambda1 implements SimpleFloatPropertyCompat.Getter {
     public static final /* synthetic */ OutlineTextContainerView$$ExternalSyntheticLambda1 INSTANCE = new OutlineTextContainerView$$ExternalSyntheticLambda1();
 

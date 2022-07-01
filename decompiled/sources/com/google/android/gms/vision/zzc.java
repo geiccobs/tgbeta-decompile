@@ -1,12 +1,16 @@
 package com.google.android.gms.vision;
 
 import android.util.SparseIntArray;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzc {
     private static final Object zza = new Object();
-    private static int zzb = 0;
+    @GuardedBy("lock")
+    private static int zzb;
+    @GuardedBy("lock")
     private final SparseIntArray zzc = new SparseIntArray();
+    @GuardedBy("lock")
     private final SparseIntArray zzd = new SparseIntArray();
 
     public final int zza(int i) {
@@ -21,13 +25,5 @@ public final class zzc {
             this.zzd.append(i3, i);
             return i3;
         }
-    }
-
-    public final int zzb(int i) {
-        int i2;
-        synchronized (zza) {
-            i2 = this.zzd.get(i);
-        }
-        return i2;
     }
 }

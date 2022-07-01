@@ -1,18 +1,18 @@
 package com.google.android.datatransport.cct;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class StringMerger {
-    public static String mergeStrings(String part1, String part2) {
-        int sizeDiff = part1.length() - part2.length();
-        if (sizeDiff < 0 || sizeDiff > 1) {
+    public static String mergeStrings(String str, String str2) {
+        int length = str.length() - str2.length();
+        if (length < 0 || length > 1) {
             throw new IllegalArgumentException("Invalid input received");
         }
-        StringBuilder url = new StringBuilder(part1.length() + part2.length());
-        for (int i = 0; i < part1.length(); i++) {
-            url.append(part1.charAt(i));
-            if (part2.length() > i) {
-                url.append(part2.charAt(i));
+        StringBuilder sb = new StringBuilder(str.length() + str2.length());
+        for (int i = 0; i < str.length(); i++) {
+            sb.append(str.charAt(i));
+            if (str2.length() > i) {
+                sb.append(str2.charAt(i));
             }
         }
-        return url.toString();
+        return sb.toString();
     }
 }

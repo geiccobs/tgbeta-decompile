@@ -6,15 +6,13 @@ import com.google.android.exoplayer2.source.dash.DashSegmentIndex;
 import com.google.android.exoplayer2.source.dash.manifest.SegmentBase;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class Representation {
-    public static final long REVISION_ID_DEFAULT = -1;
     public final String baseUrl;
     public final Format format;
     public final List<Descriptor> inbandEventStreams;
     private final RangedUri initializationUri;
     public final long presentationTimeOffsetUs;
-    public final long revisionId;
 
     public abstract String getCacheKey();
 
@@ -22,35 +20,30 @@ public abstract class Representation {
 
     public abstract RangedUri getIndexUri();
 
-    public static Representation newInstance(long revisionId, Format format, String baseUrl, SegmentBase segmentBase) {
-        return newInstance(revisionId, format, baseUrl, segmentBase, null);
+    public static Representation newInstance(long j, Format format, String str, SegmentBase segmentBase, List<Descriptor> list) {
+        return newInstance(j, format, str, segmentBase, list, null);
     }
 
-    public static Representation newInstance(long revisionId, Format format, String baseUrl, SegmentBase segmentBase, List<Descriptor> inbandEventStreams) {
-        return newInstance(revisionId, format, baseUrl, segmentBase, inbandEventStreams, null);
-    }
-
-    public static Representation newInstance(long revisionId, Format format, String baseUrl, SegmentBase segmentBase, List<Descriptor> inbandEventStreams, String cacheKey) {
+    public static Representation newInstance(long j, Format format, String str, SegmentBase segmentBase, List<Descriptor> list, String str2) {
         if (segmentBase instanceof SegmentBase.SingleSegmentBase) {
-            return new SingleSegmentRepresentation(revisionId, format, baseUrl, (SegmentBase.SingleSegmentBase) segmentBase, inbandEventStreams, cacheKey, -1L);
+            return new SingleSegmentRepresentation(j, format, str, (SegmentBase.SingleSegmentBase) segmentBase, list, str2, -1L);
         }
         if (segmentBase instanceof SegmentBase.MultiSegmentBase) {
-            return new MultiSegmentRepresentation(revisionId, format, baseUrl, (SegmentBase.MultiSegmentBase) segmentBase, inbandEventStreams);
+            return new MultiSegmentRepresentation(j, format, str, (SegmentBase.MultiSegmentBase) segmentBase, list);
         }
         throw new IllegalArgumentException("segmentBase must be of type SingleSegmentBase or MultiSegmentBase");
     }
 
-    private Representation(long revisionId, Format format, String baseUrl, SegmentBase segmentBase, List<Descriptor> inbandEventStreams) {
-        List<Descriptor> list;
-        this.revisionId = revisionId;
+    private Representation(long j, Format format, String str, SegmentBase segmentBase, List<Descriptor> list) {
+        List<Descriptor> list2;
         this.format = format;
-        this.baseUrl = baseUrl;
-        if (inbandEventStreams == null) {
-            list = Collections.emptyList();
+        this.baseUrl = str;
+        if (list == null) {
+            list2 = Collections.emptyList();
         } else {
-            list = Collections.unmodifiableList(inbandEventStreams);
+            list2 = Collections.unmodifiableList(list);
         }
-        this.inbandEventStreams = list;
+        this.inbandEventStreams = list2;
         this.initializationUri = segmentBase.getInitialization(this);
         this.presentationTimeOffsetUs = segmentBase.getPresentationTimeOffsetUs();
     }
@@ -59,28 +52,19 @@ public abstract class Representation {
         return this.initializationUri;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class SingleSegmentRepresentation extends Representation {
         private final String cacheKey;
-        public final long contentLength;
         private final RangedUri indexUri;
         private final SingleSegmentIndex segmentIndex;
-        public final Uri uri;
 
-        public static SingleSegmentRepresentation newInstance(long revisionId, Format format, String uri, long initializationStart, long initializationEnd, long indexStart, long indexEnd, List<Descriptor> inbandEventStreams, String cacheKey, long contentLength) {
-            RangedUri rangedUri = new RangedUri(null, initializationStart, (initializationEnd - initializationStart) + 1);
-            SegmentBase.SingleSegmentBase segmentBase = new SegmentBase.SingleSegmentBase(rangedUri, 1L, 0L, indexStart, (indexEnd - indexStart) + 1);
-            return new SingleSegmentRepresentation(revisionId, format, uri, segmentBase, inbandEventStreams, cacheKey, contentLength);
-        }
-
-        public SingleSegmentRepresentation(long revisionId, Format format, String baseUrl, SegmentBase.SingleSegmentBase segmentBase, List<Descriptor> inbandEventStreams, String cacheKey, long contentLength) {
-            super(revisionId, format, baseUrl, segmentBase, inbandEventStreams);
-            this.uri = Uri.parse(baseUrl);
-            RangedUri index = segmentBase.getIndex();
+        public SingleSegmentRepresentation(long j, Format format, String str, SegmentBase.SingleSegmentBase singleSegmentBase, List<Descriptor> list, String str2, long j2) {
+            super(j, format, str, singleSegmentBase, list);
+            Uri.parse(str);
+            RangedUri index = singleSegmentBase.getIndex();
             this.indexUri = index;
-            this.cacheKey = cacheKey;
-            this.contentLength = contentLength;
-            this.segmentIndex = index != null ? null : new SingleSegmentIndex(new RangedUri(null, 0L, contentLength));
+            this.cacheKey = str2;
+            this.segmentIndex = index != null ? null : new SingleSegmentIndex(new RangedUri(null, 0L, j2));
         }
 
         @Override // com.google.android.exoplayer2.source.dash.manifest.Representation
@@ -99,17 +83,12 @@ public abstract class Representation {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class MultiSegmentRepresentation extends Representation implements DashSegmentIndex {
         private final SegmentBase.MultiSegmentBase segmentBase;
 
-        public MultiSegmentRepresentation(long revisionId, Format format, String baseUrl, SegmentBase.MultiSegmentBase segmentBase, List<Descriptor> inbandEventStreams) {
-            super(revisionId, format, baseUrl, segmentBase, inbandEventStreams);
-            this.segmentBase = segmentBase;
-        }
-
         @Override // com.google.android.exoplayer2.source.dash.manifest.Representation
-        public RangedUri getIndexUri() {
+        public String getCacheKey() {
             return null;
         }
 
@@ -119,28 +98,33 @@ public abstract class Representation {
         }
 
         @Override // com.google.android.exoplayer2.source.dash.manifest.Representation
-        public String getCacheKey() {
+        public RangedUri getIndexUri() {
             return null;
         }
 
-        @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
-        public RangedUri getSegmentUrl(long segmentIndex) {
-            return this.segmentBase.getSegmentUrl(this, segmentIndex);
+        public MultiSegmentRepresentation(long j, Format format, String str, SegmentBase.MultiSegmentBase multiSegmentBase, List<Descriptor> list) {
+            super(j, format, str, multiSegmentBase, list);
+            this.segmentBase = multiSegmentBase;
         }
 
         @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
-        public long getSegmentNum(long timeUs, long periodDurationUs) {
-            return this.segmentBase.getSegmentNum(timeUs, periodDurationUs);
+        public RangedUri getSegmentUrl(long j) {
+            return this.segmentBase.getSegmentUrl(this, j);
         }
 
         @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
-        public long getTimeUs(long segmentIndex) {
-            return this.segmentBase.getSegmentTimeUs(segmentIndex);
+        public long getSegmentNum(long j, long j2) {
+            return this.segmentBase.getSegmentNum(j, j2);
         }
 
         @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
-        public long getDurationUs(long segmentIndex, long periodDurationUs) {
-            return this.segmentBase.getSegmentDurationUs(segmentIndex, periodDurationUs);
+        public long getTimeUs(long j) {
+            return this.segmentBase.getSegmentTimeUs(j);
+        }
+
+        @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
+        public long getDurationUs(long j, long j2) {
+            return this.segmentBase.getSegmentDurationUs(j, j2);
         }
 
         @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
@@ -149,8 +133,8 @@ public abstract class Representation {
         }
 
         @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex
-        public int getSegmentCount(long periodDurationUs) {
-            return this.segmentBase.getSegmentCount(periodDurationUs);
+        public int getSegmentCount(long j) {
+            return this.segmentBase.getSegmentCount(j);
         }
 
         @Override // com.google.android.exoplayer2.source.dash.DashSegmentIndex

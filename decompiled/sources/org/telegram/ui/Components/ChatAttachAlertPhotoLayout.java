@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -14,6 +13,7 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.provider.Settings;
@@ -21,7 +21,6 @@ import android.text.TextUtils;
 import android.util.Property;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -31,21 +30,18 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.Keep;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.microsoft.appcenter.Constants;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -58,18 +54,20 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.messenger.camera.CameraSession;
 import org.telegram.messenger.camera.CameraView;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC$Chat;
+import org.telegram.tgnet.TLRPC$FileLocation;
 import org.telegram.ui.ActionBar.ActionBar;
-import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.PhotoAttachCameraCell;
 import org.telegram.ui.Cells.PhotoAttachPermissionCell;
@@ -83,17 +81,12 @@ import org.telegram.ui.Components.RecyclerViewItemRangeSelector;
 import org.telegram.ui.Components.ShutterButton;
 import org.telegram.ui.Components.ZoomControlView;
 import org.telegram.ui.PhotoViewer;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayout implements NotificationCenter.NotificationCenterDelegate {
-    public static final int compress = 1;
-    public static final int group = 0;
-    private static boolean mediaFromExternalCamera = false;
-    public static final int open_in = 2;
-    public static final int preview = 3;
+    private static boolean mediaFromExternalCamera;
     private PhotoAttachAdapter adapter;
     float additionCloseCameraY;
     private int alertOnlyOnce;
-    private int animateToPadding;
     float animationClipBottom;
     float animationClipLeft;
     float animationClipRight;
@@ -146,7 +139,6 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     private boolean mediaEnabled;
     private boolean noCameraPermissions;
     private boolean noGalleryPermissions;
-    ValueAnimator paddingAnimator;
     private float pinchStartDistance;
     private boolean pressed;
     private EmptyTextProgressView progressView;
@@ -180,6 +172,11 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     private int animationIndex = -1;
     private PhotoViewer.PhotoViewerProvider photoViewerProvider = new BasePhotoProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.1
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
+        public boolean cancelButtonPressed() {
+            return false;
+        }
+
+        @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
         public void onOpen() {
             ChatAttachAlertPhotoLayout.this.pauseCameraPreview();
         }
@@ -190,140 +187,138 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public PhotoViewer.PlaceProviderObject getPlaceForPhoto(MessageObject messageObject, TLRPC.FileLocation fileLocation, int index, boolean needPreview) {
-            PhotoAttachPhotoCell cell = ChatAttachAlertPhotoLayout.this.getCellForIndex(index);
-            if (cell != null) {
-                int[] coords = new int[2];
-                cell.getImageView().getLocationInWindow(coords);
+        public PhotoViewer.PlaceProviderObject getPlaceForPhoto(MessageObject messageObject, TLRPC$FileLocation tLRPC$FileLocation, int i, boolean z) {
+            PhotoAttachPhotoCell cellForIndex = ChatAttachAlertPhotoLayout.this.getCellForIndex(i);
+            if (cellForIndex != null) {
+                int[] iArr = new int[2];
+                cellForIndex.getImageView().getLocationInWindow(iArr);
                 if (Build.VERSION.SDK_INT < 26) {
-                    coords[0] = coords[0] - ChatAttachAlertPhotoLayout.this.parentAlert.getLeftInset();
+                    iArr[0] = iArr[0] - ChatAttachAlertPhotoLayout.this.parentAlert.getLeftInset();
                 }
-                PhotoViewer.PlaceProviderObject object = new PhotoViewer.PlaceProviderObject();
-                object.viewX = coords[0];
-                object.viewY = coords[1];
-                object.parentView = ChatAttachAlertPhotoLayout.this.gridView;
-                object.imageReceiver = cell.getImageView().getImageReceiver();
-                object.thumb = object.imageReceiver.getBitmapSafe();
-                object.scale = cell.getScale();
-                object.clipBottomAddition = (int) ChatAttachAlertPhotoLayout.this.parentAlert.getClipLayoutBottom();
-                cell.showCheck(false);
-                return object;
+                PhotoViewer.PlaceProviderObject placeProviderObject = new PhotoViewer.PlaceProviderObject();
+                placeProviderObject.viewX = iArr[0];
+                placeProviderObject.viewY = iArr[1];
+                placeProviderObject.parentView = ChatAttachAlertPhotoLayout.this.gridView;
+                ImageReceiver imageReceiver = cellForIndex.getImageView().getImageReceiver();
+                placeProviderObject.imageReceiver = imageReceiver;
+                placeProviderObject.thumb = imageReceiver.getBitmapSafe();
+                placeProviderObject.scale = cellForIndex.getScale();
+                placeProviderObject.clipBottomAddition = (int) ChatAttachAlertPhotoLayout.this.parentAlert.getClipLayoutBottom();
+                cellForIndex.showCheck(false);
+                return placeProviderObject;
             }
             return null;
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public void updatePhotoAtIndex(int index) {
-            PhotoAttachPhotoCell cell = ChatAttachAlertPhotoLayout.this.getCellForIndex(index);
-            if (cell != null) {
-                cell.getImageView().setOrientation(0, true);
-                MediaController.PhotoEntry photoEntry = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(index);
-                if (photoEntry == null) {
+        public void updatePhotoAtIndex(int i) {
+            PhotoAttachPhotoCell cellForIndex = ChatAttachAlertPhotoLayout.this.getCellForIndex(i);
+            if (cellForIndex != null) {
+                cellForIndex.getImageView().setOrientation(0, true);
+                MediaController.PhotoEntry photoEntryAtPosition = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i);
+                if (photoEntryAtPosition == null) {
                     return;
                 }
-                if (photoEntry.thumbPath != null) {
-                    cell.getImageView().setImage(photoEntry.thumbPath, null, Theme.chat_attachEmptyDrawable);
-                } else if (photoEntry.path != null) {
-                    cell.getImageView().setOrientation(photoEntry.orientation, true);
-                    if (photoEntry.isVideo) {
-                        BackupImageView imageView = cell.getImageView();
-                        imageView.setImage("vthumb://" + photoEntry.imageId + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + photoEntry.path, null, Theme.chat_attachEmptyDrawable);
+                if (photoEntryAtPosition.thumbPath != null) {
+                    cellForIndex.getImageView().setImage(photoEntryAtPosition.thumbPath, null, Theme.chat_attachEmptyDrawable);
+                } else if (photoEntryAtPosition.path != null) {
+                    cellForIndex.getImageView().setOrientation(photoEntryAtPosition.orientation, true);
+                    if (photoEntryAtPosition.isVideo) {
+                        BackupImageView imageView = cellForIndex.getImageView();
+                        imageView.setImage("vthumb://" + photoEntryAtPosition.imageId + ":" + photoEntryAtPosition.path, null, Theme.chat_attachEmptyDrawable);
                         return;
                     }
-                    BackupImageView imageView2 = cell.getImageView();
-                    imageView2.setImage("thumb://" + photoEntry.imageId + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + photoEntry.path, null, Theme.chat_attachEmptyDrawable);
+                    BackupImageView imageView2 = cellForIndex.getImageView();
+                    imageView2.setImage("thumb://" + photoEntryAtPosition.imageId + ":" + photoEntryAtPosition.path, null, Theme.chat_attachEmptyDrawable);
                 } else {
-                    cell.getImageView().setImageDrawable(Theme.chat_attachEmptyDrawable);
+                    cellForIndex.getImageView().setImageDrawable(Theme.chat_attachEmptyDrawable);
                 }
             }
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public ImageReceiver.BitmapHolder getThumbForPhoto(MessageObject messageObject, TLRPC.FileLocation fileLocation, int index) {
-            PhotoAttachPhotoCell cell = ChatAttachAlertPhotoLayout.this.getCellForIndex(index);
-            if (cell != null) {
-                return cell.getImageView().getImageReceiver().getBitmapSafe();
+        public ImageReceiver.BitmapHolder getThumbForPhoto(MessageObject messageObject, TLRPC$FileLocation tLRPC$FileLocation, int i) {
+            PhotoAttachPhotoCell cellForIndex = ChatAttachAlertPhotoLayout.this.getCellForIndex(i);
+            if (cellForIndex != null) {
+                return cellForIndex.getImageView().getImageReceiver().getBitmapSafe();
             }
             return null;
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public void willSwitchFromPhoto(MessageObject messageObject, TLRPC.FileLocation fileLocation, int index) {
-            PhotoAttachPhotoCell cell = ChatAttachAlertPhotoLayout.this.getCellForIndex(index);
-            if (cell != null) {
-                cell.showCheck(true);
+        public void willSwitchFromPhoto(MessageObject messageObject, TLRPC$FileLocation tLRPC$FileLocation, int i) {
+            PhotoAttachPhotoCell cellForIndex = ChatAttachAlertPhotoLayout.this.getCellForIndex(i);
+            if (cellForIndex != null) {
+                cellForIndex.showCheck(true);
             }
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
         public void willHidePhotoViewer() {
-            int count = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
-            for (int a = 0; a < count; a++) {
-                View view = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(a);
-                if (view instanceof PhotoAttachPhotoCell) {
-                    PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) view;
-                    cell.showCheck(true);
+            int childCount = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View childAt = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(i);
+                if (childAt instanceof PhotoAttachPhotoCell) {
+                    ((PhotoAttachPhotoCell) childAt).showCheck(true);
                 }
             }
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public void onApplyCaption(CharSequence caption) {
-            if (ChatAttachAlertPhotoLayout.selectedPhotos.size() > 0 && ChatAttachAlertPhotoLayout.selectedPhotosOrder.size() > 0) {
-                Object o = ChatAttachAlertPhotoLayout.selectedPhotos.get(ChatAttachAlertPhotoLayout.selectedPhotosOrder.get(0));
-                CharSequence firstPhotoCaption = null;
-                if (o instanceof MediaController.PhotoEntry) {
-                    MediaController.PhotoEntry photoEntry1 = (MediaController.PhotoEntry) o;
-                    firstPhotoCaption = photoEntry1.caption;
-                }
-                if (o instanceof MediaController.SearchImage) {
-                    MediaController.SearchImage photoEntry12 = (MediaController.SearchImage) o;
-                    firstPhotoCaption = photoEntry12.caption;
-                }
-                ChatAttachAlertPhotoLayout.this.parentAlert.commentTextView.setText(firstPhotoCaption);
+        public void onApplyCaption(CharSequence charSequence) {
+            if (ChatAttachAlertPhotoLayout.selectedPhotos.size() <= 0 || ChatAttachAlertPhotoLayout.selectedPhotosOrder.size() <= 0) {
+                return;
             }
+            Object obj = ChatAttachAlertPhotoLayout.selectedPhotos.get(ChatAttachAlertPhotoLayout.selectedPhotosOrder.get(0));
+            CharSequence charSequence2 = null;
+            if (obj instanceof MediaController.PhotoEntry) {
+                charSequence2 = ((MediaController.PhotoEntry) obj).caption;
+            }
+            if (obj instanceof MediaController.SearchImage) {
+                charSequence2 = ((MediaController.SearchImage) obj).caption;
+            }
+            ChatAttachAlertPhotoLayout.this.parentAlert.commentTextView.setText(charSequence2);
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public boolean cancelButtonPressed() {
-            return false;
-        }
-
-        @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, boolean forceDocument) {
-            MediaController.PhotoEntry photoEntry = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(index);
-            if (photoEntry != null) {
-                photoEntry.editedInfo = videoEditedInfo;
+        public void sendButtonPressed(int i, VideoEditedInfo videoEditedInfo, boolean z, int i2, boolean z2) {
+            MediaController.PhotoEntry photoEntryAtPosition = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i);
+            if (photoEntryAtPosition != null) {
+                photoEntryAtPosition.editedInfo = videoEditedInfo;
             }
-            if (ChatAttachAlertPhotoLayout.selectedPhotos.isEmpty() && photoEntry != null) {
-                ChatAttachAlertPhotoLayout.this.addToSelectedPhotos(photoEntry, -1);
+            if (ChatAttachAlertPhotoLayout.selectedPhotos.isEmpty() && photoEntryAtPosition != null) {
+                ChatAttachAlertPhotoLayout.this.addToSelectedPhotos(photoEntryAtPosition, -1);
             }
             ChatAttachAlertPhotoLayout.this.parentAlert.applyCaption();
             if (PhotoViewer.getInstance().hasCaptionForAllMedia) {
                 HashMap<Object, Object> selectedPhotos2 = getSelectedPhotos();
                 ArrayList<Object> selectedPhotosOrder2 = getSelectedPhotosOrder();
                 if (!selectedPhotos2.isEmpty()) {
-                    for (int a = 0; a < selectedPhotosOrder2.size(); a++) {
-                        Object o = selectedPhotos2.get(selectedPhotosOrder2.get(a));
-                        if (o instanceof MediaController.PhotoEntry) {
-                            MediaController.PhotoEntry photoEntry1 = (MediaController.PhotoEntry) o;
-                            if (a == 0) {
-                                photoEntry1.caption = PhotoViewer.getInstance().captionForAllMedia;
+                    for (int i3 = 0; i3 < selectedPhotosOrder2.size(); i3++) {
+                        Object obj = selectedPhotos2.get(selectedPhotosOrder2.get(i3));
+                        if (obj instanceof MediaController.PhotoEntry) {
+                            MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) obj;
+                            if (i3 == 0) {
+                                photoEntry.caption = PhotoViewer.getInstance().captionForAllMedia;
                             } else {
-                                photoEntry1.caption = null;
+                                photoEntry.caption = null;
                             }
                         }
                     }
                 }
             }
-            ChatAttachAlertPhotoLayout.this.parentAlert.delegate.didPressedButton(7, true, notify, scheduleDate, forceDocument);
+            ChatAttachAlertPhotoLayout.this.parentAlert.delegate.didPressedButton(7, true, z, i2, z2);
         }
     };
-    public int currentItemTop = 0;
 
-    static /* synthetic */ int access$2408(ChatAttachAlertPhotoLayout x0) {
-        int i = x0.videoRecordTime;
-        x0.videoRecordTime = i + 1;
+    @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
+    int needsActionBar() {
+        return 1;
+    }
+
+    static /* synthetic */ int access$2408(ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout) {
+        int i = chatAttachAlertPhotoLayout.videoRecordTime;
+        chatAttachAlertPhotoLayout.videoRecordTime = i + 1;
         return i;
     }
 
@@ -334,72 +329,75 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class BasePhotoProvider extends PhotoViewer.EmptyPhotoViewerProvider {
         private BasePhotoProvider() {
             ChatAttachAlertPhotoLayout.this = r1;
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public boolean isPhotoChecked(int index) {
-            MediaController.PhotoEntry photoEntry = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(index);
-            return photoEntry != null && ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId));
+        public boolean isPhotoChecked(int i) {
+            MediaController.PhotoEntry photoEntryAtPosition = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i);
+            return photoEntryAtPosition != null && ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntryAtPosition.imageId));
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public int setPhotoChecked(int index, VideoEditedInfo videoEditedInfo) {
-            MediaController.PhotoEntry photoEntry;
-            if ((ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos < 0 || ChatAttachAlertPhotoLayout.selectedPhotos.size() < ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos || isPhotoChecked(index)) && (photoEntry = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(index)) != null) {
-                boolean add = true;
-                int addToSelectedPhotos = ChatAttachAlertPhotoLayout.this.addToSelectedPhotos(photoEntry, -1);
-                int num = addToSelectedPhotos;
+        public int setPhotoChecked(int i, VideoEditedInfo videoEditedInfo) {
+            MediaController.PhotoEntry photoEntryAtPosition;
+            boolean z;
+            if ((ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos < 0 || ChatAttachAlertPhotoLayout.selectedPhotos.size() < ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos || isPhotoChecked(i)) && (photoEntryAtPosition = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i)) != null) {
+                int addToSelectedPhotos = ChatAttachAlertPhotoLayout.this.addToSelectedPhotos(photoEntryAtPosition, -1);
+                int i2 = 1;
                 if (addToSelectedPhotos == -1) {
-                    num = ChatAttachAlertPhotoLayout.selectedPhotosOrder.indexOf(Integer.valueOf(photoEntry.imageId));
+                    addToSelectedPhotos = ChatAttachAlertPhotoLayout.selectedPhotosOrder.indexOf(Integer.valueOf(photoEntryAtPosition.imageId));
+                    z = true;
                 } else {
-                    add = false;
-                    photoEntry.editedInfo = null;
+                    photoEntryAtPosition.editedInfo = null;
+                    z = false;
                 }
-                photoEntry.editedInfo = videoEditedInfo;
-                int count = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
-                int a = 0;
+                photoEntryAtPosition.editedInfo = videoEditedInfo;
+                int childCount = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
+                int i3 = 0;
                 while (true) {
-                    if (a >= count) {
+                    if (i3 >= childCount) {
                         break;
                     }
-                    View view = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(a);
-                    if (view instanceof PhotoAttachPhotoCell) {
-                        int tag = ((Integer) view.getTag()).intValue();
-                        if (tag == index) {
-                            if ((ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) && ChatAttachAlertPhotoLayout.this.parentAlert.allowOrder) {
-                                ((PhotoAttachPhotoCell) view).setChecked(num, add, false);
-                            } else {
-                                ((PhotoAttachPhotoCell) view).setChecked(-1, add, false);
-                            }
+                    View childAt = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(i3);
+                    if (!(childAt instanceof PhotoAttachPhotoCell) || ((Integer) childAt.getTag()).intValue() != i) {
+                        i3++;
+                    } else {
+                        ChatAttachAlert chatAttachAlert = ChatAttachAlertPhotoLayout.this.parentAlert;
+                        if ((chatAttachAlert.baseFragment instanceof ChatActivity) && chatAttachAlert.allowOrder) {
+                            ((PhotoAttachPhotoCell) childAt).setChecked(addToSelectedPhotos, z, false);
+                        } else {
+                            ((PhotoAttachPhotoCell) childAt).setChecked(-1, z, false);
                         }
                     }
-                    a++;
                 }
-                int count2 = ChatAttachAlertPhotoLayout.this.cameraPhotoRecyclerView.getChildCount();
-                int a2 = 0;
+                int childCount2 = ChatAttachAlertPhotoLayout.this.cameraPhotoRecyclerView.getChildCount();
+                int i4 = 0;
                 while (true) {
-                    if (a2 >= count2) {
+                    if (i4 >= childCount2) {
                         break;
                     }
-                    View view2 = ChatAttachAlertPhotoLayout.this.cameraPhotoRecyclerView.getChildAt(a2);
-                    if (view2 instanceof PhotoAttachPhotoCell) {
-                        int tag2 = ((Integer) view2.getTag()).intValue();
-                        if (tag2 == index) {
-                            if ((ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) && ChatAttachAlertPhotoLayout.this.parentAlert.allowOrder) {
-                                ((PhotoAttachPhotoCell) view2).setChecked(num, add, false);
-                            } else {
-                                ((PhotoAttachPhotoCell) view2).setChecked(-1, add, false);
-                            }
+                    View childAt2 = ChatAttachAlertPhotoLayout.this.cameraPhotoRecyclerView.getChildAt(i4);
+                    if (!(childAt2 instanceof PhotoAttachPhotoCell) || ((Integer) childAt2.getTag()).intValue() != i) {
+                        i4++;
+                    } else {
+                        ChatAttachAlert chatAttachAlert2 = ChatAttachAlertPhotoLayout.this.parentAlert;
+                        if ((chatAttachAlert2.baseFragment instanceof ChatActivity) && chatAttachAlert2.allowOrder) {
+                            ((PhotoAttachPhotoCell) childAt2).setChecked(addToSelectedPhotos, z, false);
+                        } else {
+                            ((PhotoAttachPhotoCell) childAt2).setChecked(-1, z, false);
                         }
                     }
-                    a2++;
                 }
-                ChatAttachAlertPhotoLayout.this.parentAlert.updateCountButton(add ? 1 : 2);
-                return num;
+                ChatAttachAlert chatAttachAlert3 = ChatAttachAlertPhotoLayout.this.parentAlert;
+                if (!z) {
+                    i2 = 2;
+                }
+                chatAttachAlert3.updateCountButton(i2);
+                return addToSelectedPhotos;
             }
             return -1;
         }
@@ -420,12 +418,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public int getPhotoIndex(int index) {
-            MediaController.PhotoEntry photoEntry = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(index);
-            if (photoEntry != null) {
-                return ChatAttachAlertPhotoLayout.selectedPhotosOrder.indexOf(Integer.valueOf(photoEntry.imageId));
+        public int getPhotoIndex(int i) {
+            MediaController.PhotoEntry photoEntryAtPosition = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i);
+            if (photoEntryAtPosition == null) {
+                return -1;
             }
-            return -1;
+            return ChatAttachAlertPhotoLayout.selectedPhotosOrder.indexOf(Integer.valueOf(photoEntryAtPosition.imageId));
         }
     }
 
@@ -433,43 +431,43 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         if (!(this.parentAlert.baseFragment instanceof ChatActivity)) {
             return;
         }
-        int count = this.gridView.getChildCount();
-        for (int a = 0; a < count; a++) {
-            View view = this.gridView.getChildAt(a);
-            if (view instanceof PhotoAttachPhotoCell) {
-                PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) view;
-                MediaController.PhotoEntry photoEntry = getPhotoEntryAtPosition(((Integer) cell.getTag()).intValue());
-                if (photoEntry != null) {
-                    cell.setNum(selectedPhotosOrder.indexOf(Integer.valueOf(photoEntry.imageId)));
+        int childCount = this.gridView.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View childAt = this.gridView.getChildAt(i);
+            if (childAt instanceof PhotoAttachPhotoCell) {
+                PhotoAttachPhotoCell photoAttachPhotoCell = (PhotoAttachPhotoCell) childAt;
+                MediaController.PhotoEntry photoEntryAtPosition = getPhotoEntryAtPosition(((Integer) photoAttachPhotoCell.getTag()).intValue());
+                if (photoEntryAtPosition != null) {
+                    photoAttachPhotoCell.setNum(selectedPhotosOrder.indexOf(Integer.valueOf(photoEntryAtPosition.imageId)));
                 }
             }
         }
-        int count2 = this.cameraPhotoRecyclerView.getChildCount();
-        for (int a2 = 0; a2 < count2; a2++) {
-            View view2 = this.cameraPhotoRecyclerView.getChildAt(a2);
-            if (view2 instanceof PhotoAttachPhotoCell) {
-                PhotoAttachPhotoCell cell2 = (PhotoAttachPhotoCell) view2;
-                MediaController.PhotoEntry photoEntry2 = getPhotoEntryAtPosition(((Integer) cell2.getTag()).intValue());
-                if (photoEntry2 != null) {
-                    cell2.setNum(selectedPhotosOrder.indexOf(Integer.valueOf(photoEntry2.imageId)));
+        int childCount2 = this.cameraPhotoRecyclerView.getChildCount();
+        for (int i2 = 0; i2 < childCount2; i2++) {
+            View childAt2 = this.cameraPhotoRecyclerView.getChildAt(i2);
+            if (childAt2 instanceof PhotoAttachPhotoCell) {
+                PhotoAttachPhotoCell photoAttachPhotoCell2 = (PhotoAttachPhotoCell) childAt2;
+                MediaController.PhotoEntry photoEntryAtPosition2 = getPhotoEntryAtPosition(((Integer) photoAttachPhotoCell2.getTag()).intValue());
+                if (photoEntryAtPosition2 != null) {
+                    photoAttachPhotoCell2.setNum(selectedPhotosOrder.indexOf(Integer.valueOf(photoEntryAtPosition2.imageId)));
                 }
             }
         }
     }
 
-    public MediaController.PhotoEntry getPhotoEntryAtPosition(int position) {
-        if (position < 0) {
+    public MediaController.PhotoEntry getPhotoEntryAtPosition(int i) {
+        if (i < 0) {
             return null;
         }
-        int cameraCount = cameraPhotos.size();
-        if (position < cameraCount) {
-            return (MediaController.PhotoEntry) cameraPhotos.get(position);
+        int size = cameraPhotos.size();
+        if (i < size) {
+            return (MediaController.PhotoEntry) cameraPhotos.get(i);
         }
-        int position2 = position - cameraCount;
-        if (position2 >= this.selectedAlbumEntry.photos.size()) {
+        int i2 = i - size;
+        if (i2 >= this.selectedAlbumEntry.photos.size()) {
             return null;
         }
-        return this.selectedAlbumEntry.photos.get(position2);
+        return this.selectedAlbumEntry.photos.get(i2);
     }
 
     protected ArrayList<Object> getAllPhotosArray() {
@@ -480,43 +478,38 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 arrayList.addAll(this.selectedAlbumEntry.photos);
                 return arrayList;
             }
-            ArrayList<Object> arrayList2 = this.selectedAlbumEntry.photos;
-            return arrayList2;
+            return this.selectedAlbumEntry.photos;
+        } else if (!cameraPhotos.isEmpty()) {
+            return cameraPhotos;
+        } else {
+            return new ArrayList<>(0);
         }
-        ArrayList<Object> arrayList3 = cameraPhotos;
-        if (!arrayList3.isEmpty()) {
-            ArrayList<Object> arrayList4 = cameraPhotos;
-            return arrayList4;
-        }
-        ArrayList<Object> arrayList5 = new ArrayList<>(0);
-        return arrayList5;
     }
 
-    public ChatAttachAlertPhotoLayout(ChatAttachAlert alert, Context context, boolean forceDarkTheme, final Theme.ResourcesProvider resourcesProvider) {
-        super(alert, context, resourcesProvider);
+    public ChatAttachAlertPhotoLayout(ChatAttachAlert chatAttachAlert, Context context, boolean z, final Theme.ResourcesProvider resourcesProvider) {
+        super(chatAttachAlert, context, resourcesProvider);
         int dp = AndroidUtilities.dp(80.0f);
         this.itemSize = dp;
         this.lastItemSize = dp;
-        this.forceDarkTheme = forceDarkTheme;
+        this.forceDarkTheme = z;
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.albumsDidLoad);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.cameraInitied);
-        FrameLayout container = alert.getContainer();
+        FrameLayout container = chatAttachAlert.getContainer();
         this.cameraDrawable = context.getResources().getDrawable(R.drawable.instant_camera).mutate();
-        ActionBarMenu menu = this.parentAlert.actionBar.createMenu();
-        ActionBarMenuItem actionBarMenuItem = new ActionBarMenuItem(context, menu, 0, 0, resourcesProvider) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.2
+        ActionBarMenuItem actionBarMenuItem = new ActionBarMenuItem(context, this.parentAlert.actionBar.createMenu(), 0, 0, resourcesProvider) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.2
             @Override // org.telegram.ui.ActionBar.ActionBarMenuItem, android.view.View
-            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-                super.onInitializeAccessibilityNodeInfo(info);
-                info.setText(ChatAttachAlertPhotoLayout.this.dropDown.getText());
+            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+                super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+                accessibilityNodeInfo.setText(ChatAttachAlertPhotoLayout.this.dropDown.getText());
             }
         };
         this.dropDownContainer = actionBarMenuItem;
         actionBarMenuItem.setSubMenuOpenSide(1);
         this.parentAlert.actionBar.addView(this.dropDownContainer, 0, LayoutHelper.createFrame(-2, -1.0f, 51, AndroidUtilities.isTablet() ? 64.0f : 56.0f, 0.0f, 40.0f, 0.0f));
-        this.dropDownContainer.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda0
+        this.dropDownContainer.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda2
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                ChatAttachAlertPhotoLayout.this.m2478x62c70849(view);
+                ChatAttachAlertPhotoLayout.this.lambda$new$0(view);
             }
         });
         TextView textView = new TextView(context);
@@ -527,12 +520,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.dropDown.setLines(1);
         this.dropDown.setMaxLines(1);
         this.dropDown.setEllipsize(TextUtils.TruncateAt.END);
-        this.dropDown.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
+        this.dropDown.setTextColor(getThemedColor("dialogTextBlack"));
         this.dropDown.setText(LocaleController.getString("ChatGallery", R.string.ChatGallery));
         this.dropDown.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         Drawable mutate = context.getResources().getDrawable(R.drawable.ic_arrow_drop_down).mutate();
         this.dropDownDrawable = mutate;
-        mutate.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_dialogTextBlack), PorterDuff.Mode.MULTIPLY));
+        mutate.setColorFilter(new PorterDuffColorFilter(getThemedColor("dialogTextBlack"), PorterDuff.Mode.MULTIPLY));
         this.dropDown.setCompoundDrawablePadding(AndroidUtilities.dp(4.0f));
         this.dropDown.setPadding(0, 0, AndroidUtilities.dp(10.0f), 0);
         this.dropDownContainer.addView(this.dropDown, LayoutHelper.createFrame(-2, -2.0f, 16, 16.0f, 0.0f, 0.0f, 0.0f));
@@ -543,24 +536,24 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.parentAlert.selectedMenuItem.addSubItem(3, LocaleController.getString("AttachMediaPreviewButton", R.string.AttachMediaPreviewButton));
         RecyclerListView recyclerListView = new RecyclerListView(context, resourcesProvider) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.3
             @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.View
-            public boolean onTouchEvent(MotionEvent e) {
-                if (e.getAction() != 0 || e.getY() >= ChatAttachAlertPhotoLayout.this.parentAlert.scrollOffsetY[0] - AndroidUtilities.dp(80.0f)) {
-                    return super.onTouchEvent(e);
+            public boolean onTouchEvent(MotionEvent motionEvent) {
+                if (motionEvent.getAction() != 0 || motionEvent.getY() >= ChatAttachAlertPhotoLayout.this.parentAlert.scrollOffsetY[0] - AndroidUtilities.dp(80.0f)) {
+                    return super.onTouchEvent(motionEvent);
                 }
                 return false;
             }
 
             @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
-            public boolean onInterceptTouchEvent(MotionEvent e) {
-                if (e.getAction() != 0 || e.getY() >= ChatAttachAlertPhotoLayout.this.parentAlert.scrollOffsetY[0] - AndroidUtilities.dp(80.0f)) {
-                    return super.onInterceptTouchEvent(e);
+            public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+                if (motionEvent.getAction() != 0 || motionEvent.getY() >= ChatAttachAlertPhotoLayout.this.parentAlert.scrollOffsetY[0] - AndroidUtilities.dp(80.0f)) {
+                    return super.onInterceptTouchEvent(motionEvent);
                 }
                 return false;
             }
 
             @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup, android.view.View
-            public void onLayout(boolean changed, int l, int t, int r, int b) {
-                super.onLayout(changed, l, t, r, b);
+            public void onLayout(boolean z2, int i, int i2, int i3, int i4) {
+                super.onLayout(z2, i, i2, i3, i4);
                 PhotoViewer.getInstance().checkCurrentImageVisibility();
             }
         };
@@ -573,30 +566,34 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.gridView.setItemAnimator(null);
         this.gridView.setLayoutAnimation(null);
         this.gridView.setVerticalScrollBarEnabled(false);
-        this.gridView.setGlowColor(getThemedColor(Theme.key_dialogScrollGlow));
+        this.gridView.setGlowColor(getThemedColor("dialogScrollGlow"));
         addView(this.gridView, LayoutHelper.createFrame(-1, -1.0f));
         this.gridView.setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.4
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(RecyclerView recyclerView, int i, int i2) {
                 if (ChatAttachAlertPhotoLayout.this.gridView.getChildCount() <= 0) {
                     return;
                 }
-                ChatAttachAlertPhotoLayout.this.parentAlert.updateLayout(ChatAttachAlertPhotoLayout.this, true, dy);
-                if (dy != 0) {
-                    ChatAttachAlertPhotoLayout.this.checkCameraViewPosition();
+                ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                chatAttachAlertPhotoLayout.parentAlert.updateLayout(chatAttachAlertPhotoLayout, true, i2);
+                if (i2 == 0) {
+                    return;
                 }
+                ChatAttachAlertPhotoLayout.this.checkCameraViewPosition();
             }
 
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(RecyclerView recyclerView, int i) {
                 RecyclerListView.Holder holder;
-                if (newState == 0) {
-                    int offset = AndroidUtilities.dp(13.0f) + (ChatAttachAlertPhotoLayout.this.parentAlert.selectedMenuItem != null ? AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.selectedMenuItem.getAlpha() * 26.0f) : 0);
+                if (i == 0) {
+                    int dp2 = AndroidUtilities.dp(13.0f);
+                    ActionBarMenuItem actionBarMenuItem2 = ChatAttachAlertPhotoLayout.this.parentAlert.selectedMenuItem;
+                    int dp3 = dp2 + (actionBarMenuItem2 != null ? AndroidUtilities.dp(actionBarMenuItem2.getAlpha() * 26.0f) : 0);
                     int backgroundPaddingTop = ChatAttachAlertPhotoLayout.this.parentAlert.getBackgroundPaddingTop();
-                    int top = (ChatAttachAlertPhotoLayout.this.parentAlert.scrollOffsetY[0] - backgroundPaddingTop) - offset;
-                    if (top + backgroundPaddingTop < ActionBar.getCurrentActionBarHeight() && (holder = (RecyclerListView.Holder) ChatAttachAlertPhotoLayout.this.gridView.findViewHolderForAdapterPosition(0)) != null && holder.itemView.getTop() > AndroidUtilities.dp(7.0f)) {
-                        ChatAttachAlertPhotoLayout.this.gridView.smoothScrollBy(0, holder.itemView.getTop() - AndroidUtilities.dp(7.0f));
+                    if (((ChatAttachAlertPhotoLayout.this.parentAlert.scrollOffsetY[0] - backgroundPaddingTop) - dp3) + backgroundPaddingTop >= ActionBar.getCurrentActionBarHeight() || (holder = (RecyclerListView.Holder) ChatAttachAlertPhotoLayout.this.gridView.findViewHolderForAdapterPosition(0)) == null || holder.itemView.getTop() <= AndroidUtilities.dp(7.0f)) {
+                        return;
                     }
+                    ChatAttachAlertPhotoLayout.this.gridView.smoothScrollBy(0, holder.itemView.getTop() - AndroidUtilities.dp(7.0f));
                 }
             }
         });
@@ -607,75 +604,70 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
 
             @Override // androidx.recyclerview.widget.LinearLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
-            public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+            public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int i) {
                 LinearSmoothScroller linearSmoothScroller = new LinearSmoothScroller(recyclerView.getContext()) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.5.1
                     @Override // androidx.recyclerview.widget.LinearSmoothScroller
-                    public int calculateDyToMakeVisible(View view, int snapPreference) {
-                        int dy = super.calculateDyToMakeVisible(view, snapPreference);
-                        return dy - (ChatAttachAlertPhotoLayout.this.gridView.getPaddingTop() - AndroidUtilities.dp(7.0f));
+                    public int calculateDyToMakeVisible(View view, int i2) {
+                        return super.calculateDyToMakeVisible(view, i2) - (ChatAttachAlertPhotoLayout.this.gridView.getPaddingTop() - AndroidUtilities.dp(7.0f));
                     }
 
                     @Override // androidx.recyclerview.widget.LinearSmoothScroller
-                    public int calculateTimeForDeceleration(int dx) {
-                        return super.calculateTimeForDeceleration(dx) * 2;
+                    public int calculateTimeForDeceleration(int i2) {
+                        return super.calculateTimeForDeceleration(i2) * 2;
                     }
                 };
-                linearSmoothScroller.setTargetPosition(position);
+                linearSmoothScroller.setTargetPosition(i);
                 startSmoothScroll(linearSmoothScroller);
             }
         };
         this.layoutManager = gridLayoutManager;
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.6
             @Override // androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
-            public int getSpanSize(int position) {
-                if (position == ChatAttachAlertPhotoLayout.this.adapter.itemsCount - 1) {
+            public int getSpanSize(int i) {
+                if (i == ChatAttachAlertPhotoLayout.this.adapter.itemsCount - 1) {
                     return ChatAttachAlertPhotoLayout.this.layoutManager.getSpanCount();
                 }
-                return ChatAttachAlertPhotoLayout.this.itemSize + (position % ChatAttachAlertPhotoLayout.this.itemsPerRow != ChatAttachAlertPhotoLayout.this.itemsPerRow + (-1) ? AndroidUtilities.dp(5.0f) : 0);
+                return ChatAttachAlertPhotoLayout.this.itemSize + (i % ChatAttachAlertPhotoLayout.this.itemsPerRow != ChatAttachAlertPhotoLayout.this.itemsPerRow + (-1) ? AndroidUtilities.dp(5.0f) : 0);
             }
         });
         this.gridView.setLayoutManager(this.layoutManager);
-        this.gridView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda6
+        this.gridView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda15
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
             public final void onItemClick(View view, int i) {
-                ChatAttachAlertPhotoLayout.this.m2479x8c1b5d8a(resourcesProvider, view, i);
+                ChatAttachAlertPhotoLayout.this.lambda$new$1(resourcesProvider, view, i);
             }
         });
-        this.gridView.setOnItemLongClickListener(new RecyclerListView.OnItemLongClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda8
+        this.gridView.setOnItemLongClickListener(new RecyclerListView.OnItemLongClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda17
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListener
             public final boolean onItemClick(View view, int i) {
-                return ChatAttachAlertPhotoLayout.this.m2480xb56fb2cb(view, i);
+                boolean lambda$new$2;
+                lambda$new$2 = ChatAttachAlertPhotoLayout.this.lambda$new$2(view, i);
+                return lambda$new$2;
             }
         });
         RecyclerViewItemRangeSelector recyclerViewItemRangeSelector = new RecyclerViewItemRangeSelector(new RecyclerViewItemRangeSelector.RecyclerViewItemRangeSelectorDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.7
             @Override // org.telegram.ui.Components.RecyclerViewItemRangeSelector.RecyclerViewItemRangeSelectorDelegate
-            public int getItemCount() {
-                return ChatAttachAlertPhotoLayout.this.adapter.getItemCount();
-            }
-
-            @Override // org.telegram.ui.Components.RecyclerViewItemRangeSelector.RecyclerViewItemRangeSelectorDelegate
-            public void setSelected(View view, int index, boolean selected) {
-                if (selected != ChatAttachAlertPhotoLayout.this.shouldSelect || !(view instanceof PhotoAttachPhotoCell)) {
+            public void setSelected(View view, int i, boolean z2) {
+                if (z2 != ChatAttachAlertPhotoLayout.this.shouldSelect || !(view instanceof PhotoAttachPhotoCell)) {
                     return;
                 }
-                PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) view;
-                cell.callDelegate();
+                ((PhotoAttachPhotoCell) view).callDelegate();
             }
 
             @Override // org.telegram.ui.Components.RecyclerViewItemRangeSelector.RecyclerViewItemRangeSelectorDelegate
-            public boolean isSelected(int index) {
-                MediaController.PhotoEntry entry = ChatAttachAlertPhotoLayout.this.adapter.getPhoto(index);
-                return entry != null && ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(entry.imageId));
+            public boolean isSelected(int i) {
+                MediaController.PhotoEntry photo = ChatAttachAlertPhotoLayout.this.adapter.getPhoto(i);
+                return photo != null && ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photo.imageId));
             }
 
             @Override // org.telegram.ui.Components.RecyclerViewItemRangeSelector.RecyclerViewItemRangeSelectorDelegate
-            public boolean isIndexSelectable(int index) {
-                return ChatAttachAlertPhotoLayout.this.adapter.getItemViewType(index) == 0;
+            public boolean isIndexSelectable(int i) {
+                return ChatAttachAlertPhotoLayout.this.adapter.getItemViewType(i) == 0;
             }
 
             @Override // org.telegram.ui.Components.RecyclerViewItemRangeSelector.RecyclerViewItemRangeSelectorDelegate
-            public void onStartStopSelection(boolean start) {
-                ChatAttachAlertPhotoLayout.this.alertOnlyOnce = start ? 1 : 0;
+            public void onStartStopSelection(boolean z2) {
+                ChatAttachAlertPhotoLayout.this.alertOnlyOnce = z2 ? 1 : 0;
                 ChatAttachAlertPhotoLayout.this.gridView.hideSelector(true);
             }
         });
@@ -692,15 +684,15 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         } else {
             this.progressView.showTextView();
         }
-        final Paint recordPaint = new Paint(1);
-        recordPaint.setColor(-2468275);
-        TextView textView2 = new TextView(context) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.8
+        final Paint paint = new Paint(1);
+        paint.setColor(-2468275);
+        TextView textView2 = new TextView(this, context) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.8
             float alpha = 0.0f;
             boolean isIncr;
 
             @Override // android.widget.TextView, android.view.View
             protected void onDraw(Canvas canvas) {
-                recordPaint.setAlpha((int) ((this.alpha * 130.0f) + 125.0f));
+                paint.setAlpha((int) ((this.alpha * 130.0f) + 125.0f));
                 if (!this.isIncr) {
                     float f = this.alpha - 0.026666667f;
                     this.alpha = f;
@@ -717,7 +709,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     }
                 }
                 super.onDraw(canvas);
-                canvas.drawCircle(AndroidUtilities.dp(14.0f), getMeasuredHeight() / 2, AndroidUtilities.dp(4.0f), recordPaint);
+                canvas.drawCircle(AndroidUtilities.dp(14.0f), getMeasuredHeight() / 2, AndroidUtilities.dp(4.0f), paint);
                 invalidate();
             }
         };
@@ -733,40 +725,40 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         container.addView(this.recordTime, LayoutHelper.createFrame(-2, -2.0f, 49, 0.0f, 16.0f, 0.0f, 0.0f));
         FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.9
             @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-                int cy3;
-                int cy2;
-                int cx2;
-                int cy22;
-                int cy;
-                int cx;
+            protected void onLayout(boolean z2, int i, int i2, int i3, int i4) {
+                int i5;
+                int i6;
+                int i7;
+                int i8;
+                int i9;
+                int i10;
                 if (getMeasuredWidth() == AndroidUtilities.dp(126.0f)) {
-                    cx = getMeasuredWidth() / 2;
-                    cy = getMeasuredHeight() / 2;
-                    cy22 = getMeasuredWidth() / 2;
-                    cx2 = cy22;
-                    cy2 = (cy / 2) + cy + AndroidUtilities.dp(17.0f);
-                    cy3 = (cy / 2) - AndroidUtilities.dp(17.0f);
+                    i7 = getMeasuredWidth() / 2;
+                    i6 = getMeasuredHeight() / 2;
+                    i10 = getMeasuredWidth() / 2;
+                    int i11 = i6 / 2;
+                    i8 = i6 + i11 + AndroidUtilities.dp(17.0f);
+                    i9 = i11 - AndroidUtilities.dp(17.0f);
+                    i5 = i10;
                 } else {
-                    cx = getMeasuredWidth() / 2;
-                    cy = (getMeasuredHeight() / 2) - AndroidUtilities.dp(13.0f);
-                    cx2 = (cx / 2) + cx + AndroidUtilities.dp(17.0f);
-                    int cx3 = (cx / 2) - AndroidUtilities.dp(17.0f);
-                    cy2 = (getMeasuredHeight() / 2) - AndroidUtilities.dp(13.0f);
-                    cy3 = cy2;
-                    cy22 = cx3;
+                    i7 = getMeasuredWidth() / 2;
+                    i6 = (getMeasuredHeight() / 2) - AndroidUtilities.dp(13.0f);
+                    int i12 = i7 / 2;
+                    i5 = i12 - AndroidUtilities.dp(17.0f);
+                    i9 = (getMeasuredHeight() / 2) - AndroidUtilities.dp(13.0f);
+                    i10 = i7 + i12 + AndroidUtilities.dp(17.0f);
+                    i8 = i9;
                 }
-                int cx32 = getMeasuredHeight();
-                int y = (cx32 - ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredHeight()) - AndroidUtilities.dp(12.0f);
+                int measuredHeight = (getMeasuredHeight() - ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredHeight()) - AndroidUtilities.dp(12.0f);
                 if (getMeasuredWidth() == AndroidUtilities.dp(126.0f)) {
-                    ChatAttachAlertPhotoLayout.this.tooltipTextView.layout(cx - (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2), getMeasuredHeight(), (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2) + cx, getMeasuredHeight() + ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredHeight());
+                    ChatAttachAlertPhotoLayout.this.tooltipTextView.layout(i7 - (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2), getMeasuredHeight(), (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2) + i7, getMeasuredHeight() + ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredHeight());
                 } else {
-                    ChatAttachAlertPhotoLayout.this.tooltipTextView.layout(cx - (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2), y, (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2) + cx, ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredHeight() + y);
+                    ChatAttachAlertPhotoLayout.this.tooltipTextView.layout(i7 - (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2), measuredHeight, (ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredWidth() / 2) + i7, ChatAttachAlertPhotoLayout.this.tooltipTextView.getMeasuredHeight() + measuredHeight);
                 }
-                ChatAttachAlertPhotoLayout.this.shutterButton.layout(cx - (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredWidth() / 2), cy - (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredHeight() / 2), (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredWidth() / 2) + cx, (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredHeight() / 2) + cy);
-                ChatAttachAlertPhotoLayout.this.switchCameraButton.layout(cx2 - (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredWidth() / 2), cy2 - (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredHeight() / 2), (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredWidth() / 2) + cx2, (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredHeight() / 2) + cy2);
-                for (int a = 0; a < 2; a++) {
-                    ChatAttachAlertPhotoLayout.this.flashModeButton[a].layout(cy22 - (ChatAttachAlertPhotoLayout.this.flashModeButton[a].getMeasuredWidth() / 2), cy3 - (ChatAttachAlertPhotoLayout.this.flashModeButton[a].getMeasuredHeight() / 2), (ChatAttachAlertPhotoLayout.this.flashModeButton[a].getMeasuredWidth() / 2) + cy22, (ChatAttachAlertPhotoLayout.this.flashModeButton[a].getMeasuredHeight() / 2) + cy3);
+                ChatAttachAlertPhotoLayout.this.shutterButton.layout(i7 - (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredWidth() / 2), i6 - (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredHeight() / 2), i7 + (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredWidth() / 2), i6 + (ChatAttachAlertPhotoLayout.this.shutterButton.getMeasuredHeight() / 2));
+                ChatAttachAlertPhotoLayout.this.switchCameraButton.layout(i10 - (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredWidth() / 2), i8 - (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredHeight() / 2), i10 + (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredWidth() / 2), i8 + (ChatAttachAlertPhotoLayout.this.switchCameraButton.getMeasuredHeight() / 2));
+                for (int i13 = 0; i13 < 2; i13++) {
+                    ChatAttachAlertPhotoLayout.this.flashModeButton[i13].layout(i5 - (ChatAttachAlertPhotoLayout.this.flashModeButton[i13].getMeasuredWidth() / 2), i9 - (ChatAttachAlertPhotoLayout.this.flashModeButton[i13].getMeasuredHeight() / 2), (ChatAttachAlertPhotoLayout.this.flashModeButton[i13].getMeasuredWidth() / 2) + i5, (ChatAttachAlertPhotoLayout.this.flashModeButton[i13].getMeasuredHeight() / 2) + i9);
                 }
             }
         };
@@ -787,10 +779,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.counterTextView.setCompoundDrawablePadding(AndroidUtilities.dp(4.0f));
         this.counterTextView.setPadding(AndroidUtilities.dp(16.0f), 0, AndroidUtilities.dp(16.0f), 0);
         container.addView(this.counterTextView, LayoutHelper.createFrame(-2, 38.0f, 51, 0.0f, 0.0f, 0.0f, 116.0f));
-        this.counterTextView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda10
+        this.counterTextView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda0
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                ChatAttachAlertPhotoLayout.this.m2481xdec4080c(view);
+                ChatAttachAlertPhotoLayout.this.lambda$new$3(view);
             }
         });
         ZoomControlView zoomControlView = new ZoomControlView(context);
@@ -798,10 +790,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         zoomControlView.setVisibility(8);
         this.zoomControlView.setAlpha(0.0f);
         container.addView(this.zoomControlView, LayoutHelper.createFrame(-2, 50.0f, 51, 0.0f, 0.0f, 0.0f, 116.0f));
-        this.zoomControlView.setDelegate(new ZoomControlView.ZoomControlViewDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda9
+        this.zoomControlView.setDelegate(new ZoomControlView.ZoomControlViewDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda18
             @Override // org.telegram.ui.Components.ZoomControlView.ZoomControlViewDelegate
             public final void didSetZoom(float f) {
-                ChatAttachAlertPhotoLayout.this.m2482x8185d4d(f);
+                ChatAttachAlertPhotoLayout.this.lambda$new$4(f);
             }
         });
         ShutterButton shutterButton = new ShutterButton(context);
@@ -814,26 +806,26 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.switchCameraButton = imageView;
         imageView.setScaleType(ImageView.ScaleType.CENTER);
         this.cameraPanel.addView(this.switchCameraButton, LayoutHelper.createFrame(48, 48, 21));
-        this.switchCameraButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda11
+        this.switchCameraButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda1
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                ChatAttachAlertPhotoLayout.this.m2483x316cb28e(view);
+                ChatAttachAlertPhotoLayout.this.lambda$new$5(view);
             }
         });
         this.switchCameraButton.setContentDescription(LocaleController.getString("AccDescrSwitchCamera", R.string.AccDescrSwitchCamera));
-        for (int a = 0; a < 2; a++) {
-            this.flashModeButton[a] = new ImageView(context);
-            this.flashModeButton[a].setScaleType(ImageView.ScaleType.CENTER);
-            this.flashModeButton[a].setVisibility(4);
-            this.cameraPanel.addView(this.flashModeButton[a], LayoutHelper.createFrame(48, 48, 51));
-            this.flashModeButton[a].setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda12
+        for (int i = 0; i < 2; i++) {
+            this.flashModeButton[i] = new ImageView(context);
+            this.flashModeButton[i].setScaleType(ImageView.ScaleType.CENTER);
+            this.flashModeButton[i].setVisibility(4);
+            this.cameraPanel.addView(this.flashModeButton[i], LayoutHelper.createFrame(48, 48, 51));
+            this.flashModeButton[i].setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda3
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    ChatAttachAlertPhotoLayout.this.m2484x5ac107cf(view);
+                    ChatAttachAlertPhotoLayout.this.lambda$new$6(view);
                 }
             });
-            ImageView imageView2 = this.flashModeButton[a];
-            imageView2.setContentDescription("flash mode " + a);
+            ImageView imageView2 = this.flashModeButton[i];
+            imageView2.setContentDescription("flash mode " + i);
         }
         TextView textView4 = new TextView(context);
         this.tooltipTextView = textView4;
@@ -867,7 +859,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.cameraPhotoRecyclerView.setVisibility(4);
         this.cameraPhotoRecyclerView.setAlpha(0.0f);
         container.addView(this.cameraPhotoRecyclerView, LayoutHelper.createFrame(-1, 80.0f));
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, 0, false) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.14
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, context, 0, false) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.14
             @Override // androidx.recyclerview.widget.LinearLayoutManager, androidx.recyclerview.widget.RecyclerView.LayoutManager
             public boolean supportsPredictiveItemAnimations() {
                 return false;
@@ -875,106 +867,113 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         };
         this.cameraPhotoLayoutManager = linearLayoutManager;
         this.cameraPhotoRecyclerView.setLayoutManager(linearLayoutManager);
-        this.cameraPhotoRecyclerView.setOnItemClickListener(ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda7.INSTANCE);
+        this.cameraPhotoRecyclerView.setOnItemClickListener(ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda16.INSTANCE);
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2478x62c70849(View view) {
+    public /* synthetic */ void lambda$new$0(View view) {
         this.dropDownContainer.toggleSubMenu();
     }
 
-    /* renamed from: lambda$new$1$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2479x8c1b5d8a(Theme.ResourcesProvider resourcesProvider, View view, int position) {
-        int type;
+    public /* synthetic */ void lambda$new$1(Theme.ResourcesProvider resourcesProvider, View view, int i) {
+        BaseFragment baseFragment;
         ChatActivity chatActivity;
-        if (!this.mediaEnabled || this.parentAlert.baseFragment == null || this.parentAlert.baseFragment.getParentActivity() == null) {
+        int i2;
+        if (!this.mediaEnabled || (baseFragment = this.parentAlert.baseFragment) == null || baseFragment.getParentActivity() == null) {
             return;
         }
         if (Build.VERSION.SDK_INT >= 23) {
-            if (this.adapter.needCamera && this.selectedAlbumEntry == this.galleryAlbumEntry && position == 0 && this.noCameraPermissions) {
+            if (this.adapter.needCamera && this.selectedAlbumEntry == this.galleryAlbumEntry && i == 0 && this.noCameraPermissions) {
                 try {
                     this.parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{"android.permission.CAMERA"}, 18);
                     return;
-                } catch (Exception e) {
+                } catch (Exception unused) {
                     return;
                 }
             } else if (this.noGalleryPermissions) {
                 try {
                     this.parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE"}, 4);
                     return;
-                } catch (Exception e2) {
+                } catch (Exception unused2) {
                     return;
                 }
             }
         }
-        if (position != 0 || this.selectedAlbumEntry != this.galleryAlbumEntry) {
+        if (i != 0 || this.selectedAlbumEntry != this.galleryAlbumEntry) {
             if (this.selectedAlbumEntry == this.galleryAlbumEntry) {
-                position--;
+                i--;
             }
-            ArrayList<Object> arrayList = getAllPhotosArray();
-            if (position < 0 || position >= arrayList.size()) {
+            int i3 = i;
+            ArrayList<Object> allPhotosArray = getAllPhotosArray();
+            if (i3 < 0 || i3 >= allPhotosArray.size()) {
                 return;
             }
             PhotoViewer.getInstance().setParentActivity(this.parentAlert.baseFragment.getParentActivity(), resourcesProvider);
             PhotoViewer.getInstance().setParentAlert(this.parentAlert);
-            PhotoViewer.getInstance().setMaxSelectedPhotos(this.parentAlert.maxSelectedPhotos, this.parentAlert.allowOrder);
-            if (this.parentAlert.avatarPicker != 0) {
+            PhotoViewer photoViewer = PhotoViewer.getInstance();
+            ChatAttachAlert chatAttachAlert = this.parentAlert;
+            photoViewer.setMaxSelectedPhotos(chatAttachAlert.maxSelectedPhotos, chatAttachAlert.allowOrder);
+            ChatAttachAlert chatAttachAlert2 = this.parentAlert;
+            if (chatAttachAlert2.avatarPicker != 0) {
                 chatActivity = null;
-                type = 1;
-            } else if (this.parentAlert.baseFragment instanceof ChatActivity) {
-                chatActivity = (ChatActivity) this.parentAlert.baseFragment;
-                type = 0;
+                i2 = 1;
             } else {
-                chatActivity = null;
-                type = 4;
+                BaseFragment baseFragment2 = chatAttachAlert2.baseFragment;
+                if (baseFragment2 instanceof ChatActivity) {
+                    chatActivity = (ChatActivity) baseFragment2;
+                    i2 = 0;
+                } else {
+                    chatActivity = null;
+                    i2 = 4;
+                }
             }
-            if (!this.parentAlert.delegate.needEnterComment()) {
+            if (!chatAttachAlert2.delegate.needEnterComment()) {
                 AndroidUtilities.hideKeyboard(this.parentAlert.baseFragment.getFragmentView().findFocus());
                 AndroidUtilities.hideKeyboard(this.parentAlert.getContainer().findFocus());
             }
             if (selectedPhotos.size() > 0 && selectedPhotosOrder.size() > 0) {
-                Object o = selectedPhotos.get(selectedPhotosOrder.get(0));
-                if (o instanceof MediaController.PhotoEntry) {
-                    MediaController.PhotoEntry photoEntry1 = (MediaController.PhotoEntry) o;
-                    photoEntry1.caption = this.parentAlert.getCommentTextView().getText();
+                Object obj = selectedPhotos.get(selectedPhotosOrder.get(0));
+                if (obj instanceof MediaController.PhotoEntry) {
+                    ((MediaController.PhotoEntry) obj).caption = this.parentAlert.getCommentTextView().getText();
                 }
-                if (o instanceof MediaController.SearchImage) {
-                    MediaController.SearchImage photoEntry12 = (MediaController.SearchImage) o;
-                    photoEntry12.caption = this.parentAlert.getCommentTextView().getText();
+                if (obj instanceof MediaController.SearchImage) {
+                    ((MediaController.SearchImage) obj).caption = this.parentAlert.getCommentTextView().getText();
                 }
             }
-            PhotoViewer.getInstance().openPhotoForSelect(arrayList, position, type, false, this.photoViewerProvider, chatActivity);
-            if (captionForAllMedia()) {
-                PhotoViewer.getInstance().setCaption(this.parentAlert.getCommentTextView().getText());
+            PhotoViewer.getInstance().openPhotoForSelect(allPhotosArray, i3, i2, false, this.photoViewerProvider, chatActivity);
+            if (!captionForAllMedia()) {
+                return;
             }
+            PhotoViewer.getInstance().setCaption(this.parentAlert.getCommentTextView().getText());
         } else if (SharedConfig.inappCamera) {
             openCamera(true);
-        } else if (this.parentAlert.delegate != null) {
-            this.parentAlert.delegate.didPressedButton(0, false, true, 0, false);
+        } else {
+            ChatAttachAlert.ChatAttachViewDelegate chatAttachViewDelegate = this.parentAlert.delegate;
+            if (chatAttachViewDelegate == null) {
+                return;
+            }
+            chatAttachViewDelegate.didPressedButton(0, false, true, 0, false);
         }
     }
 
-    /* renamed from: lambda$new$2$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ boolean m2480xb56fb2cb(View view, int position) {
-        if (position == 0 && this.selectedAlbumEntry == this.galleryAlbumEntry) {
-            if (this.parentAlert.delegate != null) {
-                this.parentAlert.delegate.didPressedButton(0, false, true, 0, false);
+    public /* synthetic */ boolean lambda$new$2(View view, int i) {
+        if (i == 0 && this.selectedAlbumEntry == this.galleryAlbumEntry) {
+            ChatAttachAlert.ChatAttachViewDelegate chatAttachViewDelegate = this.parentAlert.delegate;
+            if (chatAttachViewDelegate != null) {
+                chatAttachViewDelegate.didPressedButton(0, false, true, 0, false);
             }
             return true;
-        } else if (view instanceof PhotoAttachPhotoCell) {
-            PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) view;
-            RecyclerViewItemRangeSelector recyclerViewItemRangeSelector = this.itemRangeSelector;
-            boolean z = !cell.isChecked();
-            this.shouldSelect = z;
-            recyclerViewItemRangeSelector.setIsActive(view, true, position, z);
+        } else if (!(view instanceof PhotoAttachPhotoCell)) {
             return false;
         } else {
+            RecyclerViewItemRangeSelector recyclerViewItemRangeSelector = this.itemRangeSelector;
+            boolean z = !((PhotoAttachPhotoCell) view).isChecked();
+            this.shouldSelect = z;
+            recyclerViewItemRangeSelector.setIsActive(view, true, i, z);
             return false;
         }
     }
 
-    /* renamed from: lambda$new$3$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2481xdec4080c(View v) {
+    public /* synthetic */ void lambda$new$3(View view) {
         if (this.cameraView == null) {
             return;
         }
@@ -982,72 +981,79 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         CameraController.getInstance().stopPreview(this.cameraView.getCameraSession());
     }
 
-    /* renamed from: lambda$new$4$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2482x8185d4d(float zoom) {
+    public /* synthetic */ void lambda$new$4(float f) {
         CameraView cameraView = this.cameraView;
         if (cameraView != null) {
-            this.cameraZoom = zoom;
-            cameraView.setZoom(zoom);
+            this.cameraZoom = f;
+            cameraView.setZoom(f);
         }
         showZoomControls(true, true);
     }
 
     /* renamed from: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10 */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass10 implements ShutterButton.ShutterButtonDelegate {
         private File outputFile;
         final /* synthetic */ FrameLayout val$container;
         private boolean zoomingWas;
 
         AnonymousClass10(FrameLayout frameLayout) {
-            ChatAttachAlertPhotoLayout.this = this$0;
+            ChatAttachAlertPhotoLayout.this = r1;
             this.val$container = frameLayout;
         }
 
         @Override // org.telegram.ui.Components.ShutterButton.ShutterButtonDelegate
         public boolean shutterLongPressed() {
-            if ((ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 2 && !(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity)) || ChatAttachAlertPhotoLayout.this.takingPhoto || ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment == null || ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity() == null || ChatAttachAlertPhotoLayout.this.cameraView == null) {
-                return false;
-            }
-            if (Build.VERSION.SDK_INT >= 23 && ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.RECORD_AUDIO") != 0) {
-                ChatAttachAlertPhotoLayout.this.requestingPermissions = true;
-                ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{"android.permission.RECORD_AUDIO"}, 21);
-                return false;
-            }
-            for (int a = 0; a < 2; a++) {
-                ChatAttachAlertPhotoLayout.this.flashModeButton[a].animate().alpha(0.0f).translationX(AndroidUtilities.dp(30.0f)).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            }
-            ChatAttachAlertPhotoLayout.this.switchCameraButton.animate().alpha(0.0f).translationX(-AndroidUtilities.dp(30.0f)).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            ChatAttachAlertPhotoLayout.this.tooltipTextView.animate().alpha(0.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            this.outputFile = AndroidUtilities.generateVideoPath((ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) && ((ChatActivity) ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment).isSecretChat());
-            AndroidUtilities.updateViewVisibilityAnimated(ChatAttachAlertPhotoLayout.this.recordTime, true);
-            ChatAttachAlertPhotoLayout.this.recordTime.setText(AndroidUtilities.formatLongDuration(0));
-            ChatAttachAlertPhotoLayout.this.videoRecordTime = 0;
-            ChatAttachAlertPhotoLayout.this.videoRecordRunnable = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda0
-                @Override // java.lang.Runnable
-                public final void run() {
-                    ChatAttachAlertPhotoLayout.AnonymousClass10.this.m2492xddcde7e7();
+            BaseFragment baseFragment;
+            ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+            ChatAttachAlert chatAttachAlert = chatAttachAlertPhotoLayout.parentAlert;
+            if ((chatAttachAlert.avatarPicker == 2 || (chatAttachAlert.baseFragment instanceof ChatActivity)) && !chatAttachAlertPhotoLayout.takingPhoto && (baseFragment = ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment) != null && baseFragment.getParentActivity() != null) {
+                ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout2 = ChatAttachAlertPhotoLayout.this;
+                if (chatAttachAlertPhotoLayout2.cameraView != null) {
+                    if (Build.VERSION.SDK_INT < 23 || chatAttachAlertPhotoLayout2.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.RECORD_AUDIO") == 0) {
+                        for (int i = 0; i < 2; i++) {
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i].animate().alpha(0.0f).translationX(AndroidUtilities.dp(30.0f)).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+                        }
+                        ViewPropertyAnimator duration = ChatAttachAlertPhotoLayout.this.switchCameraButton.animate().alpha(0.0f).translationX(-AndroidUtilities.dp(30.0f)).setDuration(150L);
+                        CubicBezierInterpolator cubicBezierInterpolator = CubicBezierInterpolator.DEFAULT;
+                        duration.setInterpolator(cubicBezierInterpolator).start();
+                        ChatAttachAlertPhotoLayout.this.tooltipTextView.animate().alpha(0.0f).setDuration(150L).setInterpolator(cubicBezierInterpolator).start();
+                        BaseFragment baseFragment2 = ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment;
+                        this.outputFile = AndroidUtilities.generateVideoPath((baseFragment2 instanceof ChatActivity) && ((ChatActivity) baseFragment2).isSecretChat());
+                        AndroidUtilities.updateViewVisibilityAnimated(ChatAttachAlertPhotoLayout.this.recordTime, true);
+                        ChatAttachAlertPhotoLayout.this.recordTime.setText(AndroidUtilities.formatLongDuration(0));
+                        ChatAttachAlertPhotoLayout.this.videoRecordTime = 0;
+                        ChatAttachAlertPhotoLayout.this.videoRecordRunnable = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda0
+                            @Override // java.lang.Runnable
+                            public final void run() {
+                                ChatAttachAlertPhotoLayout.AnonymousClass10.this.lambda$shutterLongPressed$0();
+                            }
+                        };
+                        AndroidUtilities.lockOrientation(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity());
+                        CameraController.getInstance().recordVideo(ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession(), this.outputFile, ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 0, new CameraController.VideoTakeCallback() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda3
+                            @Override // org.telegram.messenger.camera.CameraController.VideoTakeCallback
+                            public final void onFinishVideoRecording(String str, long j) {
+                                ChatAttachAlertPhotoLayout.AnonymousClass10.this.lambda$shutterLongPressed$1(str, j);
+                            }
+                        }, new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda1
+                            @Override // java.lang.Runnable
+                            public final void run() {
+                                ChatAttachAlertPhotoLayout.AnonymousClass10.this.lambda$shutterLongPressed$2();
+                            }
+                        }, ChatAttachAlertPhotoLayout.this.cameraView);
+                        ChatAttachAlertPhotoLayout.this.shutterButton.setState(ShutterButton.State.RECORDING, true);
+                        ChatAttachAlertPhotoLayout.this.cameraView.runHaptic();
+                        return true;
+                    }
+                    ChatAttachAlertPhotoLayout.this.requestingPermissions = true;
+                    ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{"android.permission.RECORD_AUDIO"}, 21);
+                    return false;
                 }
-            };
-            AndroidUtilities.lockOrientation(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity());
-            CameraController.getInstance().recordVideo(ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession(), this.outputFile, ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 0, new CameraController.VideoTakeCallback() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda3
-                @Override // org.telegram.messenger.camera.CameraController.VideoTakeCallback
-                public final void onFinishVideoRecording(String str, long j) {
-                    ChatAttachAlertPhotoLayout.AnonymousClass10.this.m2493x6abaff06(str, j);
-                }
-            }, new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda1
-                @Override // java.lang.Runnable
-                public final void run() {
-                    ChatAttachAlertPhotoLayout.AnonymousClass10.this.m2494xf7a81625();
-                }
-            }, ChatAttachAlertPhotoLayout.this.cameraView);
-            ChatAttachAlertPhotoLayout.this.shutterButton.setState(ShutterButton.State.RECORDING, true);
-            ChatAttachAlertPhotoLayout.this.cameraView.runHaptic();
-            return true;
+            }
+            return false;
         }
 
-        /* renamed from: lambda$shutterLongPressed$0$org-telegram-ui-Components-ChatAttachAlertPhotoLayout$10 */
-        public /* synthetic */ void m2492xddcde7e7() {
+        public /* synthetic */ void lambda$shutterLongPressed$0() {
             if (ChatAttachAlertPhotoLayout.this.videoRecordRunnable == null) {
                 return;
             }
@@ -1056,37 +1062,61 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             AndroidUtilities.runOnUIThread(ChatAttachAlertPhotoLayout.this.videoRecordRunnable, 1000L);
         }
 
-        /* renamed from: lambda$shutterLongPressed$1$org-telegram-ui-Components-ChatAttachAlertPhotoLayout$10 */
-        public /* synthetic */ void m2493x6abaff06(String thumbPath, long duration) {
-            if (this.outputFile != null && ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment != null) {
-                if (ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                    boolean unused = ChatAttachAlertPhotoLayout.mediaFromExternalCamera = false;
-                    int width = 0;
-                    int height = 0;
-                    try {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inJustDecodeBounds = true;
-                        BitmapFactory.decodeFile(new File(thumbPath).getAbsolutePath(), options);
-                        width = options.outWidth;
-                        height = options.outHeight;
-                    } catch (Exception e) {
-                    }
-                    MediaController.PhotoEntry photoEntry = new MediaController.PhotoEntry(0, ChatAttachAlertPhotoLayout.access$3010(), 0L, this.outputFile.getAbsolutePath(), 0, true, width, height, 0L);
-                    photoEntry.duration = (int) duration;
-                    photoEntry.thumbPath = thumbPath;
-                    if (ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 0 && ChatAttachAlertPhotoLayout.this.cameraView.isFrontface()) {
-                        photoEntry.cropState = new MediaController.CropState();
-                        photoEntry.cropState.mirrored = true;
-                        photoEntry.cropState.freeform = false;
-                        photoEntry.cropState.lockedAspectRatio = 1.0f;
-                    }
-                    ChatAttachAlertPhotoLayout.this.openPhotoViewer(photoEntry, false, false);
+        public /* synthetic */ void lambda$shutterLongPressed$1(String str, long j) {
+            int i;
+            int i2;
+            MediaController.PhotoEntry photoEntry;
+            ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout;
+            int i3;
+            if (this.outputFile != null) {
+                ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout2 = ChatAttachAlertPhotoLayout.this;
+                if (chatAttachAlertPhotoLayout2.parentAlert.baseFragment == null || chatAttachAlertPhotoLayout2.cameraView == null) {
+                    return;
                 }
+                boolean unused = ChatAttachAlertPhotoLayout.mediaFromExternalCamera = false;
+                try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(new File(str).getAbsolutePath(), options);
+                    i3 = options.outWidth;
+                    try {
+                        i = options.outHeight;
+                        i2 = i3;
+                    } catch (Exception unused2) {
+                        i2 = i3;
+                        i = 0;
+                        photoEntry = new MediaController.PhotoEntry(0, ChatAttachAlertPhotoLayout.access$3010(), 0L, this.outputFile.getAbsolutePath(), 0, true, i2, i, 0L);
+                        photoEntry.duration = (int) j;
+                        photoEntry.thumbPath = str;
+                        chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                        if (chatAttachAlertPhotoLayout.parentAlert.avatarPicker != 0) {
+                            MediaController.CropState cropState = new MediaController.CropState();
+                            photoEntry.cropState = cropState;
+                            cropState.mirrored = true;
+                            cropState.freeform = false;
+                            cropState.lockedAspectRatio = 1.0f;
+                        }
+                        ChatAttachAlertPhotoLayout.this.openPhotoViewer(photoEntry, false, false);
+                    }
+                } catch (Exception unused3) {
+                    i3 = 0;
+                }
+                photoEntry = new MediaController.PhotoEntry(0, ChatAttachAlertPhotoLayout.access$3010(), 0L, this.outputFile.getAbsolutePath(), 0, true, i2, i, 0L);
+                photoEntry.duration = (int) j;
+                photoEntry.thumbPath = str;
+                chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                if (chatAttachAlertPhotoLayout.parentAlert.avatarPicker != 0 && chatAttachAlertPhotoLayout.cameraView.isFrontface()) {
+                    MediaController.CropState cropState2 = new MediaController.CropState();
+                    photoEntry.cropState = cropState2;
+                    cropState2.mirrored = true;
+                    cropState2.freeform = false;
+                    cropState2.lockedAspectRatio = 1.0f;
+                }
+                ChatAttachAlertPhotoLayout.this.openPhotoViewer(photoEntry, false, false);
             }
         }
 
-        /* renamed from: lambda$shutterLongPressed$2$org-telegram-ui-Components-ChatAttachAlertPhotoLayout$10 */
-        public /* synthetic */ void m2494xf7a81625() {
+        public /* synthetic */ void lambda$shutterLongPressed$2() {
             AndroidUtilities.runOnUIThread(ChatAttachAlertPhotoLayout.this.videoRecordRunnable, 1000L);
         }
 
@@ -1103,99 +1133,104 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
         @Override // org.telegram.ui.Components.ShutterButton.ShutterButtonDelegate
         public void shutterReleased() {
-            if (!ChatAttachAlertPhotoLayout.this.takingPhoto && ChatAttachAlertPhotoLayout.this.cameraView != null && ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession() != null) {
-                boolean z = true;
-                if (ChatAttachAlertPhotoLayout.this.shutterButton.getState() == ShutterButton.State.RECORDING) {
-                    ChatAttachAlertPhotoLayout.this.resetRecordState();
-                    CameraController.getInstance().stopVideoRecording(ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession(), false);
-                    ChatAttachAlertPhotoLayout.this.shutterButton.setState(ShutterButton.State.DEFAULT, true);
-                    return;
-                }
-                final File cameraFile = AndroidUtilities.generatePicturePath((ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) && ((ChatActivity) ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment).isSecretChat(), null);
-                final boolean sameTakePictureOrientation = ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().isSameTakePictureOrientation();
-                CameraSession cameraSession = ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession();
-                if (!(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) && ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 2) {
-                    z = false;
-                }
-                cameraSession.setFlipFront(z);
-                ChatAttachAlertPhotoLayout.this.takingPhoto = CameraController.getInstance().takePicture(cameraFile, ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession(), new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda2
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        ChatAttachAlertPhotoLayout.AnonymousClass10.this.m2495x47b7454d(cameraFile, sameTakePictureOrientation);
-                    }
-                });
-                ChatAttachAlertPhotoLayout.this.cameraView.startTakePictureAnimation();
+            CameraView cameraView;
+            if (ChatAttachAlertPhotoLayout.this.takingPhoto || (cameraView = ChatAttachAlertPhotoLayout.this.cameraView) == null || cameraView.getCameraSession() == null) {
+                return;
             }
+            boolean z = true;
+            if (ChatAttachAlertPhotoLayout.this.shutterButton.getState() == ShutterButton.State.RECORDING) {
+                ChatAttachAlertPhotoLayout.this.resetRecordState();
+                CameraController.getInstance().stopVideoRecording(ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession(), false);
+                ChatAttachAlertPhotoLayout.this.shutterButton.setState(ShutterButton.State.DEFAULT, true);
+                return;
+            }
+            BaseFragment baseFragment = ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment;
+            final File generatePicturePath = AndroidUtilities.generatePicturePath((baseFragment instanceof ChatActivity) && ((ChatActivity) baseFragment).isSecretChat(), null);
+            final boolean isSameTakePictureOrientation = ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().isSameTakePictureOrientation();
+            CameraSession cameraSession = ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession();
+            ChatAttachAlert chatAttachAlert = ChatAttachAlertPhotoLayout.this.parentAlert;
+            if (!(chatAttachAlert.baseFragment instanceof ChatActivity) && chatAttachAlert.avatarPicker != 2) {
+                z = false;
+            }
+            cameraSession.setFlipFront(z);
+            ChatAttachAlertPhotoLayout.this.takingPhoto = CameraController.getInstance().takePicture(generatePicturePath, ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession(), new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$10$$ExternalSyntheticLambda2
+                @Override // java.lang.Runnable
+                public final void run() {
+                    ChatAttachAlertPhotoLayout.AnonymousClass10.this.lambda$shutterReleased$3(generatePicturePath, isSameTakePictureOrientation);
+                }
+            });
+            ChatAttachAlertPhotoLayout.this.cameraView.startTakePictureAnimation();
         }
 
-        /* renamed from: lambda$shutterReleased$3$org-telegram-ui-Components-ChatAttachAlertPhotoLayout$10 */
-        public /* synthetic */ void m2495x47b7454d(File cameraFile, boolean sameTakePictureOrientation) {
+        public /* synthetic */ void lambda$shutterReleased$3(File file, boolean z) {
+            int i;
+            int i2;
+            int i3;
+            int i4;
+            BitmapFactory.Options options;
             ChatAttachAlertPhotoLayout.this.takingPhoto = false;
-            if (cameraFile != null && ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment != null) {
-                int orientation = 0;
-                try {
-                    ExifInterface ei = new ExifInterface(cameraFile.getAbsolutePath());
-                    int exif = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-                    switch (exif) {
-                        case 3:
-                            orientation = 180;
-                            break;
-                        case 6:
-                            orientation = 90;
-                            break;
-                        case 8:
-                            orientation = 270;
-                            break;
-                    }
-                } catch (Exception e) {
-                    FileLog.e(e);
-                }
-                boolean unused = ChatAttachAlertPhotoLayout.mediaFromExternalCamera = false;
-                int width = 0;
-                int height = 0;
-                try {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(new File(cameraFile.getAbsolutePath()).getAbsolutePath(), options);
-                    width = options.outWidth;
-                    height = options.outHeight;
-                } catch (Exception e2) {
-                }
-                MediaController.PhotoEntry photoEntry = new MediaController.PhotoEntry(0, ChatAttachAlertPhotoLayout.access$3010(), 0L, cameraFile.getAbsolutePath(), orientation, false, width, height, 0L);
-                photoEntry.canDeleteAfter = true;
-                ChatAttachAlertPhotoLayout.this.openPhotoViewer(photoEntry, sameTakePictureOrientation, false);
+            if (file == null || ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment == null) {
+                return;
             }
+            try {
+                int attributeInt = new ExifInterface(file.getAbsolutePath()).getAttributeInt("Orientation", 1);
+                i = attributeInt != 3 ? attributeInt != 6 ? attributeInt != 8 ? 0 : 270 : 90 : 180;
+            } catch (Exception e) {
+                FileLog.e(e);
+                i = 0;
+            }
+            boolean unused = ChatAttachAlertPhotoLayout.mediaFromExternalCamera = false;
+            try {
+                options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(new File(file.getAbsolutePath()).getAbsolutePath(), options);
+                i4 = options.outWidth;
+            } catch (Exception unused2) {
+                i4 = 0;
+            }
+            try {
+                i2 = options.outHeight;
+                i3 = i4;
+            } catch (Exception unused3) {
+                i3 = i4;
+                i2 = 0;
+                MediaController.PhotoEntry photoEntry = new MediaController.PhotoEntry(0, ChatAttachAlertPhotoLayout.access$3010(), 0L, file.getAbsolutePath(), i, false, i3, i2, 0L);
+                photoEntry.canDeleteAfter = true;
+                ChatAttachAlertPhotoLayout.this.openPhotoViewer(photoEntry, z, false);
+            }
+            MediaController.PhotoEntry photoEntry2 = new MediaController.PhotoEntry(0, ChatAttachAlertPhotoLayout.access$3010(), 0L, file.getAbsolutePath(), i, false, i3, i2, 0L);
+            photoEntry2.canDeleteAfter = true;
+            ChatAttachAlertPhotoLayout.this.openPhotoViewer(photoEntry2, z, false);
         }
 
         @Override // org.telegram.ui.Components.ShutterButton.ShutterButtonDelegate
-        public boolean onTranslationChanged(float x, float y) {
-            boolean isPortrait = this.val$container.getWidth() < this.val$container.getHeight();
-            float val1 = isPortrait ? x : y;
-            float val2 = isPortrait ? y : x;
-            if (!this.zoomingWas && Math.abs(val1) > Math.abs(val2)) {
+        public boolean onTranslationChanged(float f, float f2) {
+            boolean z = this.val$container.getWidth() < this.val$container.getHeight();
+            float f3 = z ? f : f2;
+            float f4 = z ? f2 : f;
+            if (!this.zoomingWas && Math.abs(f3) > Math.abs(f4)) {
                 return ChatAttachAlertPhotoLayout.this.zoomControlView.getTag() == null;
-            } else if (val2 < 0.0f) {
+            } else if (f4 < 0.0f) {
                 ChatAttachAlertPhotoLayout.this.showZoomControls(true, true);
-                ChatAttachAlertPhotoLayout.this.zoomControlView.setZoom((-val2) / AndroidUtilities.dp(200.0f), true);
+                ChatAttachAlertPhotoLayout.this.zoomControlView.setZoom((-f4) / AndroidUtilities.dp(200.0f), true);
                 this.zoomingWas = true;
                 return false;
             } else {
                 if (this.zoomingWas) {
                     ChatAttachAlertPhotoLayout.this.zoomControlView.setZoom(0.0f, true);
                 }
-                if (x == 0.0f && y == 0.0f) {
+                if (f == 0.0f && f2 == 0.0f) {
                     this.zoomingWas = false;
                 }
                 if (this.zoomingWas) {
                     return false;
                 }
-                return (x == 0.0f && y == 0.0f) ? false : true;
+                return (f == 0.0f && f2 == 0.0f) ? false : true;
             }
         }
     }
 
-    /* renamed from: lambda$new$5$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2483x316cb28e(View v) {
+    public /* synthetic */ void lambda$new$5(View view) {
         CameraView cameraView;
         if (this.takingPhoto || (cameraView = this.cameraView) == null || !cameraView.isInited()) {
             return;
@@ -1203,73 +1238,74 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.canSaveCameraPreview = false;
         this.cameraView.switchCamera();
         this.cameraView.startSwitchingAnimation();
-        ObjectAnimator animator = ObjectAnimator.ofFloat(this.switchCameraButton, View.SCALE_X, 0.0f).setDuration(100L);
-        animator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.11
+        ObjectAnimator duration = ObjectAnimator.ofFloat(this.switchCameraButton, View.SCALE_X, 0.0f).setDuration(100L);
+        duration.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.11
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator2) {
-                ChatAttachAlertPhotoLayout.this.switchCameraButton.setImageResource((ChatAttachAlertPhotoLayout.this.cameraView == null || !ChatAttachAlertPhotoLayout.this.cameraView.isFrontface()) ? R.drawable.camera_revert2 : R.drawable.camera_revert1);
+            public void onAnimationEnd(Animator animator) {
+                ImageView imageView = ChatAttachAlertPhotoLayout.this.switchCameraButton;
+                CameraView cameraView2 = ChatAttachAlertPhotoLayout.this.cameraView;
+                imageView.setImageResource((cameraView2 == null || !cameraView2.isFrontface()) ? R.drawable.camera_revert2 : R.drawable.camera_revert1);
                 ObjectAnimator.ofFloat(ChatAttachAlertPhotoLayout.this.switchCameraButton, View.SCALE_X, 1.0f).setDuration(100L).start();
             }
         });
-        animator.start();
+        duration.start();
     }
 
-    /* renamed from: lambda$new$6$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2484x5ac107cf(final View currentImage) {
+    public /* synthetic */ void lambda$new$6(final View view) {
         CameraView cameraView;
         if (this.flashAnimationInProgress || (cameraView = this.cameraView) == null || !cameraView.isInited() || !this.cameraOpened) {
             return;
         }
-        String current = this.cameraView.getCameraSession().getCurrentFlashMode();
-        String next = this.cameraView.getCameraSession().getNextFlashMode();
-        if (current.equals(next)) {
+        String currentFlashMode = this.cameraView.getCameraSession().getCurrentFlashMode();
+        String nextFlashMode = this.cameraView.getCameraSession().getNextFlashMode();
+        if (currentFlashMode.equals(nextFlashMode)) {
             return;
         }
-        this.cameraView.getCameraSession().setCurrentFlashMode(next);
+        this.cameraView.getCameraSession().setCurrentFlashMode(nextFlashMode);
         this.flashAnimationInProgress = true;
         ImageView[] imageViewArr = this.flashModeButton;
-        final ImageView nextImage = imageViewArr[0] == currentImage ? imageViewArr[1] : imageViewArr[0];
-        nextImage.setVisibility(0);
-        setCameraFlashModeIcon(nextImage, next);
+        final ImageView imageView = imageViewArr[0] == view ? imageViewArr[1] : imageViewArr[0];
+        imageView.setVisibility(0);
+        setCameraFlashModeIcon(imageView, nextFlashMode);
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(ObjectAnimator.ofFloat(currentImage, View.TRANSLATION_Y, 0.0f, AndroidUtilities.dp(48.0f)), ObjectAnimator.ofFloat(nextImage, View.TRANSLATION_Y, -AndroidUtilities.dp(48.0f), 0.0f), ObjectAnimator.ofFloat(currentImage, View.ALPHA, 1.0f, 0.0f), ObjectAnimator.ofFloat(nextImage, View.ALPHA, 0.0f, 1.0f));
+        animatorSet.playTogether(ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 0.0f, AndroidUtilities.dp(48.0f)), ObjectAnimator.ofFloat(imageView, View.TRANSLATION_Y, -AndroidUtilities.dp(48.0f), 0.0f), ObjectAnimator.ofFloat(view, View.ALPHA, 1.0f, 0.0f), ObjectAnimator.ofFloat(imageView, View.ALPHA, 0.0f, 1.0f));
         animatorSet.setDuration(220L);
         animatorSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
         animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.12
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
             public void onAnimationEnd(Animator animator) {
                 ChatAttachAlertPhotoLayout.this.flashAnimationInProgress = false;
-                currentImage.setVisibility(4);
-                nextImage.sendAccessibilityEvent(8);
+                view.setVisibility(4);
+                imageView.sendAccessibilityEvent(8);
             }
         });
         animatorSet.start();
     }
 
-    public static /* synthetic */ void lambda$new$7(View view, int position) {
+    public static /* synthetic */ void lambda$new$7(View view, int i) {
         if (view instanceof PhotoAttachPhotoCell) {
             ((PhotoAttachPhotoCell) view).callDelegate();
         }
     }
 
-    public int addToSelectedPhotos(MediaController.PhotoEntry object, int index) {
-        Object key = Integer.valueOf(object.imageId);
-        if (selectedPhotos.containsKey(key)) {
-            selectedPhotos.remove(key);
-            int position = selectedPhotosOrder.indexOf(key);
-            if (position >= 0) {
-                selectedPhotosOrder.remove(position);
+    public int addToSelectedPhotos(MediaController.PhotoEntry photoEntry, int i) {
+        Integer valueOf = Integer.valueOf(photoEntry.imageId);
+        if (selectedPhotos.containsKey(valueOf)) {
+            selectedPhotos.remove(valueOf);
+            int indexOf = selectedPhotosOrder.indexOf(valueOf);
+            if (indexOf >= 0) {
+                selectedPhotosOrder.remove(indexOf);
             }
             updatePhotosCounter(false);
             updateCheckedPhotoIndices();
-            if (index >= 0) {
-                object.reset();
-                this.photoViewerProvider.updatePhotoAtIndex(index);
+            if (i >= 0) {
+                photoEntry.reset();
+                this.photoViewerProvider.updatePhotoAtIndex(i);
             }
-            return position;
+            return indexOf;
         }
-        selectedPhotos.put(key, object);
-        selectedPhotosOrder.add(key);
+        selectedPhotos.put(valueOf, photoEntry);
+        selectedPhotosOrder.add(valueOf);
         updatePhotosCounter(true);
         return -1;
     }
@@ -1284,8 +1320,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
         if (!cameraPhotos.isEmpty()) {
             int size = cameraPhotos.size();
-            for (int a = 0; a < size; a++) {
-                MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) cameraPhotos.get(a);
+            for (int i = 0; i < size; i++) {
+                MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) cameraPhotos.get(i);
                 new File(photoEntry.path).delete();
                 if (photoEntry.imagePath != null) {
                     new File(photoEntry.imagePath).delete();
@@ -1301,20 +1337,23 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     private void updateAlbumsDropDown() {
-        final ArrayList<MediaController.AlbumEntry> albums;
+        final ArrayList<MediaController.AlbumEntry> arrayList;
         this.dropDownContainer.removeAllSubItems();
         if (this.mediaEnabled) {
-            if ((this.parentAlert.baseFragment instanceof ChatActivity) || this.parentAlert.avatarPicker == 2) {
-                albums = MediaController.allMediaAlbums;
+            ChatAttachAlert chatAttachAlert = this.parentAlert;
+            if ((chatAttachAlert.baseFragment instanceof ChatActivity) || chatAttachAlert.avatarPicker == 2) {
+                arrayList = MediaController.allMediaAlbums;
             } else {
-                albums = MediaController.allPhotoAlbums;
+                arrayList = MediaController.allPhotoAlbums;
             }
-            ArrayList<MediaController.AlbumEntry> arrayList = new ArrayList<>(albums);
-            this.dropDownAlbums = arrayList;
-            Collections.sort(arrayList, new Comparator() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda3
+            ArrayList<MediaController.AlbumEntry> arrayList2 = new ArrayList<>(arrayList);
+            this.dropDownAlbums = arrayList2;
+            Collections.sort(arrayList2, new Comparator() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda12
                 @Override // java.util.Comparator
                 public final int compare(Object obj, Object obj2) {
-                    return ChatAttachAlertPhotoLayout.lambda$updateAlbumsDropDown$8(albums, (MediaController.AlbumEntry) obj, (MediaController.AlbumEntry) obj2);
+                    int lambda$updateAlbumsDropDown$8;
+                    lambda$updateAlbumsDropDown$8 = ChatAttachAlertPhotoLayout.lambda$updateAlbumsDropDown$8(arrayList, (MediaController.AlbumEntry) obj, (MediaController.AlbumEntry) obj2);
+                    return lambda$updateAlbumsDropDown$8;
                 }
             });
         } else {
@@ -1325,63 +1364,63 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return;
         }
         this.dropDown.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, (Drawable) null, this.dropDownDrawable, (Drawable) null);
-        int N = this.dropDownAlbums.size();
-        for (int a = 0; a < N; a++) {
-            this.dropDownContainer.addSubItem(a + 10, this.dropDownAlbums.get(a).bucketName);
+        int size = this.dropDownAlbums.size();
+        for (int i = 0; i < size; i++) {
+            this.dropDownContainer.addSubItem(i + 10, this.dropDownAlbums.get(i).bucketName);
         }
     }
 
-    public static /* synthetic */ int lambda$updateAlbumsDropDown$8(ArrayList albums, MediaController.AlbumEntry o1, MediaController.AlbumEntry o2) {
-        int index1;
-        int index2;
-        if (o1.bucketId != 0 || o2.bucketId == 0) {
-            if ((o1.bucketId != 0 && o2.bucketId == 0) || (index1 = albums.indexOf(o1)) > (index2 = albums.indexOf(o2))) {
+    public static /* synthetic */ int lambda$updateAlbumsDropDown$8(ArrayList arrayList, MediaController.AlbumEntry albumEntry, MediaController.AlbumEntry albumEntry2) {
+        int indexOf;
+        int indexOf2;
+        int i = albumEntry.bucketId;
+        if (i != 0 || albumEntry2.bucketId == 0) {
+            if ((i != 0 && albumEntry2.bucketId == 0) || (indexOf = arrayList.indexOf(albumEntry)) > (indexOf2 = arrayList.indexOf(albumEntry2))) {
                 return 1;
             }
-            return index1 < index2 ? -1 : 0;
+            return indexOf < indexOf2 ? -1 : 0;
         }
         return -1;
     }
 
-    private boolean processTouchEvent(MotionEvent event) {
+    private boolean processTouchEvent(MotionEvent motionEvent) {
         CameraView cameraView;
-        if (event == null) {
+        if (motionEvent == null) {
             return false;
         }
-        if ((!this.pressed && event.getActionMasked() == 0) || event.getActionMasked() == 5) {
+        if ((!this.pressed && motionEvent.getActionMasked() == 0) || motionEvent.getActionMasked() == 5) {
             this.zoomControlView.getHitRect(this.hitRect);
-            if (this.zoomControlView.getTag() != null && this.hitRect.contains((int) event.getX(), (int) event.getY())) {
+            if (this.zoomControlView.getTag() != null && this.hitRect.contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                 return false;
             }
             if (!this.takingPhoto && !this.dragging) {
-                if (event.getPointerCount() == 2) {
-                    this.pinchStartDistance = (float) Math.hypot(event.getX(1) - event.getX(0), event.getY(1) - event.getY(0));
+                if (motionEvent.getPointerCount() == 2) {
+                    this.pinchStartDistance = (float) Math.hypot(motionEvent.getX(1) - motionEvent.getX(0), motionEvent.getY(1) - motionEvent.getY(0));
                     this.zooming = true;
                 } else {
                     this.maybeStartDraging = true;
-                    this.lastY = event.getY();
+                    this.lastY = motionEvent.getY();
                     this.zooming = false;
                 }
                 this.zoomWas = false;
                 this.pressed = true;
             }
         } else if (this.pressed) {
-            if (event.getActionMasked() == 2) {
-                if (this.zooming && event.getPointerCount() == 2 && !this.dragging) {
-                    float newDistance = (float) Math.hypot(event.getX(1) - event.getX(0), event.getY(1) - event.getY(0));
+            if (motionEvent.getActionMasked() == 2) {
+                if (this.zooming && motionEvent.getPointerCount() == 2 && !this.dragging) {
+                    float hypot = (float) Math.hypot(motionEvent.getX(1) - motionEvent.getX(0), motionEvent.getY(1) - motionEvent.getY(0));
                     if (!this.zoomWas) {
-                        if (Math.abs(newDistance - this.pinchStartDistance) >= AndroidUtilities.getPixelsInCM(0.4f, false)) {
-                            this.pinchStartDistance = newDistance;
+                        if (Math.abs(hypot - this.pinchStartDistance) >= AndroidUtilities.getPixelsInCM(0.4f, false)) {
+                            this.pinchStartDistance = hypot;
                             this.zoomWas = true;
                         }
                     } else if (this.cameraView != null) {
-                        float diff = (newDistance - this.pinchStartDistance) / AndroidUtilities.dp(100.0f);
-                        this.pinchStartDistance = newDistance;
-                        float f = this.cameraZoom + diff;
-                        this.cameraZoom = f;
-                        if (f < 0.0f) {
+                        this.pinchStartDistance = hypot;
+                        float dp = this.cameraZoom + ((hypot - this.pinchStartDistance) / AndroidUtilities.dp(100.0f));
+                        this.cameraZoom = dp;
+                        if (dp < 0.0f) {
                             this.cameraZoom = 0.0f;
-                        } else if (f > 1.0f) {
+                        } else if (dp > 1.0f) {
                             this.cameraZoom = 1.0f;
                         }
                         this.zoomControlView.setZoom(this.cameraZoom, false);
@@ -1390,16 +1429,16 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                         showZoomControls(true, true);
                     }
                 } else {
-                    float newY = event.getY();
-                    float dy = newY - this.lastY;
+                    float y = motionEvent.getY();
+                    float f = y - this.lastY;
                     if (this.maybeStartDraging) {
-                        if (Math.abs(dy) > AndroidUtilities.getPixelsInCM(0.4f, false)) {
+                        if (Math.abs(f) > AndroidUtilities.getPixelsInCM(0.4f, false)) {
                             this.maybeStartDraging = false;
                             this.dragging = true;
                         }
                     } else if (this.dragging && (cameraView = this.cameraView) != null) {
-                        cameraView.setTranslationY(cameraView.getTranslationY() + dy);
-                        this.lastY = newY;
+                        cameraView.setTranslationY(cameraView.getTranslationY() + f);
+                        this.lastY = y;
                         this.zoomControlView.setTag(null);
                         Runnable runnable = this.zoomControlHideRunnable;
                         if (runnable != null) {
@@ -1416,7 +1455,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                         }
                     }
                 }
-            } else if (event.getActionMasked() == 3 || event.getActionMasked() == 1 || event.getActionMasked() == 6) {
+            } else if (motionEvent.getActionMasked() == 3 || motionEvent.getActionMasked() == 1 || motionEvent.getActionMasked() == 6) {
                 this.pressed = false;
                 this.zooming = false;
                 if (this.dragging) {
@@ -1438,9 +1477,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     CameraView cameraView3 = this.cameraView;
                     if (cameraView3 != null && !this.zoomWas) {
                         cameraView3.getLocationOnScreen(this.viewPosition);
-                        float viewX = event.getRawX() - this.viewPosition[0];
-                        float viewY = event.getRawY() - this.viewPosition[1];
-                        this.cameraView.focusToPoint((int) viewX, (int) viewY);
+                        this.cameraView.focusToPoint((int) (motionEvent.getRawX() - this.viewPosition[0]), (int) (motionEvent.getRawY() - this.viewPosition[1]));
                     }
                 }
             }
@@ -1452,76 +1489,96 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         if (this.parentAlert.baseFragment == null) {
             return;
         }
-        for (int a = 0; a < 2; a++) {
-            this.flashModeButton[a].animate().alpha(1.0f).translationX(0.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+        for (int i = 0; i < 2; i++) {
+            this.flashModeButton[i].animate().alpha(1.0f).translationX(0.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         }
-        this.switchCameraButton.animate().alpha(1.0f).translationX(0.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-        this.tooltipTextView.animate().alpha(1.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+        ViewPropertyAnimator duration = this.switchCameraButton.animate().alpha(1.0f).translationX(0.0f).setDuration(150L);
+        CubicBezierInterpolator cubicBezierInterpolator = CubicBezierInterpolator.DEFAULT;
+        duration.setInterpolator(cubicBezierInterpolator).start();
+        this.tooltipTextView.animate().alpha(1.0f).setDuration(150L).setInterpolator(cubicBezierInterpolator).start();
         AndroidUtilities.updateViewVisibilityAnimated(this.recordTime, false);
         AndroidUtilities.cancelRunOnUIThread(this.videoRecordRunnable);
         this.videoRecordRunnable = null;
         AndroidUtilities.unlockOrientation(this.parentAlert.baseFragment.getParentActivity());
     }
 
-    protected void openPhotoViewer(MediaController.PhotoEntry entry, boolean sameTakePictureOrientation, boolean external) {
+    protected void openPhotoViewer(MediaController.PhotoEntry photoEntry, boolean z, boolean z2) {
         ChatActivity chatActivity;
-        int type;
-        int index;
+        int i;
+        int i2;
         ArrayList<Object> arrayList;
-        if (entry != null) {
-            cameraPhotos.add(entry);
-            selectedPhotos.put(Integer.valueOf(entry.imageId), entry);
-            selectedPhotosOrder.add(Integer.valueOf(entry.imageId));
+        if (photoEntry != null) {
+            cameraPhotos.add(photoEntry);
+            selectedPhotos.put(Integer.valueOf(photoEntry.imageId), photoEntry);
+            selectedPhotosOrder.add(Integer.valueOf(photoEntry.imageId));
             this.parentAlert.updateCountButton(0);
             this.adapter.notifyDataSetChanged();
             this.cameraAttachAdapter.notifyDataSetChanged();
         }
-        if (entry != null && !external && cameraPhotos.size() > 1) {
+        if (photoEntry != null && !z2 && cameraPhotos.size() > 1) {
             updatePhotosCounter(false);
-            if (this.cameraView != null) {
-                this.zoomControlView.setZoom(0.0f, false);
-                this.cameraZoom = 0.0f;
-                this.cameraView.setZoom(0.0f);
-                CameraController.getInstance().startPreview(this.cameraView.getCameraSession());
+            if (this.cameraView == null) {
+                return;
             }
+            this.zoomControlView.setZoom(0.0f, false);
+            this.cameraZoom = 0.0f;
+            this.cameraView.setZoom(0.0f);
+            CameraController.getInstance().startPreview(this.cameraView.getCameraSession());
         } else if (cameraPhotos.isEmpty()) {
         } else {
             this.cancelTakingPhotos = true;
             PhotoViewer.getInstance().setParentActivity(this.parentAlert.baseFragment.getParentActivity(), this.resourcesProvider);
             PhotoViewer.getInstance().setParentAlert(this.parentAlert);
-            PhotoViewer.getInstance().setMaxSelectedPhotos(this.parentAlert.maxSelectedPhotos, this.parentAlert.allowOrder);
-            if (this.parentAlert.avatarPicker != 0) {
-                type = 1;
+            PhotoViewer photoViewer = PhotoViewer.getInstance();
+            ChatAttachAlert chatAttachAlert = this.parentAlert;
+            photoViewer.setMaxSelectedPhotos(chatAttachAlert.maxSelectedPhotos, chatAttachAlert.allowOrder);
+            ChatAttachAlert chatAttachAlert2 = this.parentAlert;
+            int i3 = chatAttachAlert2.avatarPicker;
+            if (i3 != 0) {
                 chatActivity = null;
-            } else if (this.parentAlert.baseFragment instanceof ChatActivity) {
-                chatActivity = (ChatActivity) this.parentAlert.baseFragment;
-                type = 2;
+                i = 1;
             } else {
-                chatActivity = null;
-                type = 5;
+                BaseFragment baseFragment = chatAttachAlert2.baseFragment;
+                if (baseFragment instanceof ChatActivity) {
+                    chatActivity = (ChatActivity) baseFragment;
+                    i = 2;
+                } else {
+                    chatActivity = null;
+                    i = 5;
+                }
             }
-            if (this.parentAlert.avatarPicker != 0) {
-                arrayList = new ArrayList<>();
-                arrayList.add(entry);
-                index = 0;
-            } else {
-                ArrayList<Object> arrayList2 = getAllPhotosArray();
-                index = cameraPhotos.size() - 1;
+            if (i3 != 0) {
+                ArrayList<Object> arrayList2 = new ArrayList<>();
+                arrayList2.add(photoEntry);
                 arrayList = arrayList2;
+                i2 = 0;
+            } else {
+                arrayList = getAllPhotosArray();
+                i2 = cameraPhotos.size() - 1;
             }
-            PhotoViewer.getInstance().openPhotoForSelect(arrayList, index, type, false, new AnonymousClass15(sameTakePictureOrientation), chatActivity);
+            PhotoViewer.getInstance().openPhotoForSelect(arrayList, i2, i, false, new AnonymousClass15(z), chatActivity);
         }
     }
 
     /* renamed from: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$15 */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass15 extends BasePhotoProvider {
         final /* synthetic */ boolean val$sameTakePictureOrientation;
+
+        @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
+        public boolean canScrollAway() {
+            return false;
+        }
+
+        @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
+        public ImageReceiver.BitmapHolder getThumbForPhoto(MessageObject messageObject, TLRPC$FileLocation tLRPC$FileLocation, int i) {
+            return null;
+        }
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         AnonymousClass15(boolean z) {
             super();
-            ChatAttachAlertPhotoLayout.this = this$0;
+            ChatAttachAlertPhotoLayout.this = r1;
             this.val$sameTakePictureOrientation = z;
         }
 
@@ -1536,17 +1593,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public ImageReceiver.BitmapHolder getThumbForPhoto(MessageObject messageObject, TLRPC.FileLocation fileLocation, int index) {
-            return null;
-        }
-
-        @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
         public boolean cancelButtonPressed() {
             if (ChatAttachAlertPhotoLayout.this.cameraOpened && ChatAttachAlertPhotoLayout.this.cameraView != null) {
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$15$$ExternalSyntheticLambda0
                     @Override // java.lang.Runnable
                     public final void run() {
-                        ChatAttachAlertPhotoLayout.AnonymousClass15.this.m2496xf7e45609();
+                        ChatAttachAlertPhotoLayout.AnonymousClass15.this.lambda$cancelButtonPressed$0();
                     }
                 }, 1000L);
                 ChatAttachAlertPhotoLayout.this.zoomControlView.setZoom(0.0f, false);
@@ -1556,8 +1608,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
             if (ChatAttachAlertPhotoLayout.this.cancelTakingPhotos && ChatAttachAlertPhotoLayout.cameraPhotos.size() == 1) {
                 int size = ChatAttachAlertPhotoLayout.cameraPhotos.size();
-                for (int a = 0; a < size; a++) {
-                    MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) ChatAttachAlertPhotoLayout.cameraPhotos.get(a);
+                for (int i = 0; i < size; i++) {
+                    MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) ChatAttachAlertPhotoLayout.cameraPhotos.get(i);
                     new File(photoEntry.path).delete();
                     if (photoEntry.imagePath != null) {
                         new File(photoEntry.imagePath).delete();
@@ -1578,11 +1630,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return true;
         }
 
-        /* renamed from: lambda$cancelButtonPressed$0$org-telegram-ui-Components-ChatAttachAlertPhotoLayout$15 */
-        public /* synthetic */ void m2496xf7e45609() {
-            if (ChatAttachAlertPhotoLayout.this.cameraView != null && !ChatAttachAlertPhotoLayout.this.parentAlert.isDismissed() && Build.VERSION.SDK_INT >= 21) {
-                ChatAttachAlertPhotoLayout.this.cameraView.setSystemUiVisibility(1028);
+        public /* synthetic */ void lambda$cancelButtonPressed$0() {
+            ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+            if (chatAttachAlertPhotoLayout.cameraView == null || chatAttachAlertPhotoLayout.parentAlert.isDismissed() || Build.VERSION.SDK_INT < 21) {
+                return;
             }
+            ChatAttachAlertPhotoLayout.this.cameraView.setSystemUiVisibility(1028);
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
@@ -1602,23 +1655,23 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, boolean forceDocument) {
+        public void sendButtonPressed(int i, VideoEditedInfo videoEditedInfo, boolean z, int i2, boolean z2) {
             if (ChatAttachAlertPhotoLayout.cameraPhotos.isEmpty() || ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment == null) {
                 return;
             }
-            if (videoEditedInfo != null && index >= 0 && index < ChatAttachAlertPhotoLayout.cameraPhotos.size()) {
-                MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) ChatAttachAlertPhotoLayout.cameraPhotos.get(index);
-                photoEntry.editedInfo = videoEditedInfo;
+            if (videoEditedInfo != null && i >= 0 && i < ChatAttachAlertPhotoLayout.cameraPhotos.size()) {
+                ((MediaController.PhotoEntry) ChatAttachAlertPhotoLayout.cameraPhotos.get(i)).editedInfo = videoEditedInfo;
             }
-            if (!(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) || !((ChatActivity) ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment).isSecretChat()) {
+            BaseFragment baseFragment = ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment;
+            if (!(baseFragment instanceof ChatActivity) || !((ChatActivity) baseFragment).isSecretChat()) {
                 int size = ChatAttachAlertPhotoLayout.cameraPhotos.size();
-                for (int a = 0; a < size; a++) {
-                    AndroidUtilities.addMediaToGallery(((MediaController.PhotoEntry) ChatAttachAlertPhotoLayout.cameraPhotos.get(a)).path);
+                for (int i3 = 0; i3 < size; i3++) {
+                    AndroidUtilities.addMediaToGallery(((MediaController.PhotoEntry) ChatAttachAlertPhotoLayout.cameraPhotos.get(i3)).path);
                 }
             }
             ChatAttachAlertPhotoLayout.this.parentAlert.applyCaption();
             ChatAttachAlertPhotoLayout.this.closeCamera(false);
-            ChatAttachAlertPhotoLayout.this.parentAlert.delegate.didPressedButton(forceDocument ? 4 : 8, true, notify, scheduleDate, forceDocument);
+            ChatAttachAlertPhotoLayout.this.parentAlert.delegate.didPressedButton(z2 ? 4 : 8, true, z, i2, z2);
             ChatAttachAlertPhotoLayout.cameraPhotos.clear();
             ChatAttachAlertPhotoLayout.selectedPhotosOrder.clear();
             ChatAttachAlertPhotoLayout.selectedPhotos.clear();
@@ -1629,29 +1682,24 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
         public boolean scaleToFill() {
-            if (ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment == null || ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity() == null) {
+            BaseFragment baseFragment = ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment;
+            if (baseFragment == null || baseFragment.getParentActivity() == null) {
                 return false;
             }
-            int locked = Settings.System.getInt(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity().getContentResolver(), "accelerometer_rotation", 0);
-            return this.val$sameTakePictureOrientation || locked == 1;
+            return this.val$sameTakePictureOrientation || Settings.System.getInt(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment.getParentActivity().getContentResolver(), "accelerometer_rotation", 0) == 1;
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
         public void willHidePhotoViewer() {
-            int count = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
-            for (int a = 0; a < count; a++) {
-                View view = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(a);
-                if (view instanceof PhotoAttachPhotoCell) {
-                    PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) view;
-                    cell.showImage();
-                    cell.showCheck(true);
+            int childCount = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View childAt = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(i);
+                if (childAt instanceof PhotoAttachPhotoCell) {
+                    PhotoAttachPhotoCell photoAttachPhotoCell = (PhotoAttachPhotoCell) childAt;
+                    photoAttachPhotoCell.showImage();
+                    photoAttachPhotoCell.showCheck(true);
                 }
             }
-        }
-
-        @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
-        public boolean canScrollAway() {
-            return false;
         }
 
         @Override // org.telegram.ui.PhotoViewer.EmptyPhotoViewerProvider, org.telegram.ui.PhotoViewer.PhotoViewerProvider
@@ -1660,30 +1708,30 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
     }
 
-    public void showZoomControls(boolean show, boolean animated) {
-        if ((this.zoomControlView.getTag() != null && show) || (this.zoomControlView.getTag() == null && !show)) {
-            if (show) {
-                Runnable runnable = this.zoomControlHideRunnable;
-                if (runnable != null) {
-                    AndroidUtilities.cancelRunOnUIThread(runnable);
-                }
-                Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda17
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        ChatAttachAlertPhotoLayout.this.m2491x6cfb1ad2();
-                    }
-                };
-                this.zoomControlHideRunnable = runnable2;
-                AndroidUtilities.runOnUIThread(runnable2, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS);
+    public void showZoomControls(boolean z, boolean z2) {
+        if ((this.zoomControlView.getTag() != null && z) || (this.zoomControlView.getTag() == null && !z)) {
+            if (!z) {
                 return;
             }
+            Runnable runnable = this.zoomControlHideRunnable;
+            if (runnable != null) {
+                AndroidUtilities.cancelRunOnUIThread(runnable);
+            }
+            Runnable runnable2 = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda8
+                @Override // java.lang.Runnable
+                public final void run() {
+                    ChatAttachAlertPhotoLayout.this.lambda$showZoomControls$9();
+                }
+            };
+            this.zoomControlHideRunnable = runnable2;
+            AndroidUtilities.runOnUIThread(runnable2, 2000L);
             return;
         }
         AnimatorSet animatorSet = this.zoomControlAnimation;
         if (animatorSet != null) {
             animatorSet.cancel();
         }
-        this.zoomControlView.setTag(show ? 1 : null);
+        this.zoomControlView.setTag(z ? 1 : null);
         AnimatorSet animatorSet2 = new AnimatorSet();
         this.zoomControlAnimation = animatorSet2;
         animatorSet2.setDuration(180L);
@@ -1692,134 +1740,126 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         ZoomControlView zoomControlView = this.zoomControlView;
         Property property = View.ALPHA;
         float[] fArr = new float[1];
-        fArr[0] = show ? 1.0f : 0.0f;
+        fArr[0] = z ? 1.0f : 0.0f;
         animatorArr[0] = ObjectAnimator.ofFloat(zoomControlView, property, fArr);
         animatorSet3.playTogether(animatorArr);
         this.zoomControlAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.16
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animator) {
                 ChatAttachAlertPhotoLayout.this.zoomControlAnimation = null;
             }
         });
         this.zoomControlAnimation.start();
-        if (show) {
-            Runnable runnable3 = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda16
-                @Override // java.lang.Runnable
-                public final void run() {
-                    ChatAttachAlertPhotoLayout.this.m2490x9d102a5a();
-                }
-            };
-            this.zoomControlHideRunnable = runnable3;
-            AndroidUtilities.runOnUIThread(runnable3, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS);
+        if (!z) {
+            return;
         }
+        Runnable runnable3 = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda4
+            @Override // java.lang.Runnable
+            public final void run() {
+                ChatAttachAlertPhotoLayout.this.lambda$showZoomControls$10();
+            }
+        };
+        this.zoomControlHideRunnable = runnable3;
+        AndroidUtilities.runOnUIThread(runnable3, 2000L);
     }
 
-    /* renamed from: lambda$showZoomControls$9$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2491x6cfb1ad2() {
+    public /* synthetic */ void lambda$showZoomControls$9() {
         showZoomControls(false, true);
         this.zoomControlHideRunnable = null;
     }
 
-    /* renamed from: lambda$showZoomControls$10$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2490x9d102a5a() {
+    public /* synthetic */ void lambda$showZoomControls$10() {
         showZoomControls(false, true);
         this.zoomControlHideRunnable = null;
     }
 
-    protected void updatePhotosCounter(boolean added) {
+    protected void updatePhotosCounter(boolean z) {
         if (this.counterTextView == null || this.parentAlert.avatarPicker != 0) {
             return;
         }
-        boolean hasVideo = false;
-        boolean hasPhotos = false;
+        boolean z2 = false;
+        boolean z3 = false;
+        boolean z4 = false;
         for (Map.Entry<Object, Object> entry : selectedPhotos.entrySet()) {
-            MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) entry.getValue();
-            if (photoEntry.isVideo) {
-                hasVideo = true;
+            if (((MediaController.PhotoEntry) entry.getValue()).isVideo) {
+                z3 = true;
             } else {
-                hasPhotos = true;
+                z4 = true;
             }
-            if (hasVideo && hasPhotos) {
+            if (z3 && z4) {
                 break;
             }
         }
-        boolean z = true;
-        int newSelectedCount = Math.max(1, selectedPhotos.size());
-        if (hasVideo && hasPhotos) {
+        int max = Math.max(1, selectedPhotos.size());
+        if (z3 && z4) {
             this.counterTextView.setText(LocaleController.formatPluralString("Media", selectedPhotos.size(), new Object[0]).toUpperCase());
-            if (newSelectedCount != this.currentSelectedCount || added) {
-                this.parentAlert.selectedTextView.setText(LocaleController.formatPluralString("MediaSelected", newSelectedCount, new Object[0]));
+            if (max != this.currentSelectedCount || z) {
+                this.parentAlert.selectedTextView.setText(LocaleController.formatPluralString("MediaSelected", max, new Object[0]));
             }
-        } else if (hasVideo) {
+        } else if (z3) {
             this.counterTextView.setText(LocaleController.formatPluralString("Videos", selectedPhotos.size(), new Object[0]).toUpperCase());
-            if (newSelectedCount != this.currentSelectedCount || added) {
-                this.parentAlert.selectedTextView.setText(LocaleController.formatPluralString("VideosSelected", newSelectedCount, new Object[0]));
+            if (max != this.currentSelectedCount || z) {
+                this.parentAlert.selectedTextView.setText(LocaleController.formatPluralString("VideosSelected", max, new Object[0]));
             }
         } else {
             this.counterTextView.setText(LocaleController.formatPluralString("Photos", selectedPhotos.size(), new Object[0]).toUpperCase());
-            if (newSelectedCount != this.currentSelectedCount || added) {
-                this.parentAlert.selectedTextView.setText(LocaleController.formatPluralString("PhotosSelected", newSelectedCount, new Object[0]));
+            if (max != this.currentSelectedCount || z) {
+                this.parentAlert.selectedTextView.setText(LocaleController.formatPluralString("PhotosSelected", max, new Object[0]));
             }
         }
         ChatAttachAlert chatAttachAlert = this.parentAlert;
-        if (newSelectedCount <= 1) {
-            z = false;
+        if (max > 1) {
+            z2 = true;
         }
-        chatAttachAlert.setCanOpenPreview(z);
-        this.currentSelectedCount = newSelectedCount;
+        chatAttachAlert.setCanOpenPreview(z2);
+        this.currentSelectedCount = max;
     }
 
-    public PhotoAttachPhotoCell getCellForIndex(int index) {
-        int count = this.gridView.getChildCount();
-        for (int a = 0; a < count; a++) {
-            View view = this.gridView.getChildAt(a);
-            if (view.getTop() < this.gridView.getMeasuredHeight() - this.parentAlert.getClipLayoutBottom() && (view instanceof PhotoAttachPhotoCell)) {
-                PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) view;
-                if (((Integer) cell.getImageView().getTag()).intValue() == index) {
-                    return cell;
+    public PhotoAttachPhotoCell getCellForIndex(int i) {
+        int childCount = this.gridView.getChildCount();
+        for (int i2 = 0; i2 < childCount; i2++) {
+            View childAt = this.gridView.getChildAt(i2);
+            if (childAt.getTop() < this.gridView.getMeasuredHeight() - this.parentAlert.getClipLayoutBottom() && (childAt instanceof PhotoAttachPhotoCell)) {
+                PhotoAttachPhotoCell photoAttachPhotoCell = (PhotoAttachPhotoCell) childAt;
+                if (((Integer) photoAttachPhotoCell.getImageView().getTag()).intValue() == i) {
+                    return photoAttachPhotoCell;
                 }
             }
         }
         return null;
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    public void setCameraFlashModeIcon(ImageView imageView, String mode) {
-        char c;
-        switch (mode.hashCode()) {
+    public void setCameraFlashModeIcon(ImageView imageView, String str) {
+        str.hashCode();
+        char c = 65535;
+        switch (str.hashCode()) {
             case 3551:
-                if (mode.equals("on")) {
-                    c = 1;
-                    break;
-                }
-                c = 65535;
-                break;
-            case 109935:
-                if (mode.equals("off")) {
+                if (str.equals("on")) {
                     c = 0;
                     break;
                 }
-                c = 65535;
+                break;
+            case 109935:
+                if (str.equals("off")) {
+                    c = 1;
+                    break;
+                }
                 break;
             case 3005871:
-                if (mode.equals("auto")) {
+                if (str.equals("auto")) {
                     c = 2;
                     break;
                 }
-                c = 65535;
-                break;
-            default:
-                c = 65535;
                 break;
         }
         switch (c) {
             case 0:
-                imageView.setImageResource(R.drawable.flash_off);
-                imageView.setContentDescription(LocaleController.getString("AccDescrCameraFlashOff", R.string.AccDescrCameraFlashOff));
-                return;
-            case 1:
                 imageView.setImageResource(R.drawable.flash_on);
                 imageView.setContentDescription(LocaleController.getString("AccDescrCameraFlashOn", R.string.AccDescrCameraFlashOn));
+                return;
+            case 1:
+                imageView.setImageResource(R.drawable.flash_off);
+                imageView.setContentDescription(LocaleController.getString("AccDescrCameraFlashOff", R.string.AccDescrCameraFlashOff));
                 return;
             case 2:
                 imageView.setImageResource(R.drawable.flash_auto);
@@ -1830,52 +1870,60 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
     }
 
-    public void checkCamera(boolean request) {
+    public void checkCamera(boolean z) {
         PhotoAttachAdapter photoAttachAdapter;
-        if (this.parentAlert.baseFragment == null || this.parentAlert.baseFragment.getParentActivity() == null) {
+        BaseFragment baseFragment = this.parentAlert.baseFragment;
+        if (baseFragment == null || baseFragment.getParentActivity() == null) {
             return;
         }
-        boolean old = this.deviceHasGoodCamera;
-        boolean old2 = this.noCameraPermissions;
+        boolean z2 = this.deviceHasGoodCamera;
+        boolean z3 = this.noCameraPermissions;
         if (!SharedConfig.inappCamera) {
             this.deviceHasGoodCamera = false;
         } else if (Build.VERSION.SDK_INT >= 23) {
-            boolean z = this.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.CAMERA") != 0;
-            this.noCameraPermissions = z;
-            if (z) {
-                if (request) {
+            boolean z4 = this.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.CAMERA") != 0;
+            this.noCameraPermissions = z4;
+            if (z4) {
+                if (z) {
                     try {
                         this.parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{"android.permission.CAMERA", "android.permission.READ_EXTERNAL_STORAGE"}, 17);
-                    } catch (Exception e) {
+                    } catch (Exception unused) {
                     }
                 }
                 this.deviceHasGoodCamera = false;
             } else {
-                if (request || SharedConfig.hasCameraCache) {
+                if (z || SharedConfig.hasCameraCache) {
                     CameraController.getInstance().initCamera(null);
                 }
                 this.deviceHasGoodCamera = CameraController.getInstance().isCameraInitied();
             }
         } else {
-            if (request || SharedConfig.hasCameraCache) {
+            if (z || SharedConfig.hasCameraCache) {
                 CameraController.getInstance().initCamera(null);
             }
             this.deviceHasGoodCamera = CameraController.getInstance().isCameraInitied();
         }
-        if ((old != this.deviceHasGoodCamera || old2 != this.noCameraPermissions) && (photoAttachAdapter = this.adapter) != null) {
+        if ((z2 != this.deviceHasGoodCamera || z3 != this.noCameraPermissions) && (photoAttachAdapter = this.adapter) != null) {
             photoAttachAdapter.notifyDataSetChanged();
         }
-        if (this.parentAlert.isShowing() && this.deviceHasGoodCamera && this.parentAlert.baseFragment != null && this.parentAlert.getBackDrawable().getAlpha() != 0 && !this.cameraOpened) {
-            showCamera();
+        if (!this.parentAlert.isShowing() || !this.deviceHasGoodCamera) {
+            return;
         }
+        ChatAttachAlert chatAttachAlert = this.parentAlert;
+        if (chatAttachAlert.baseFragment == null || chatAttachAlert.getBackDrawable().getAlpha() == 0 || this.cameraOpened) {
+            return;
+        }
+        showCamera();
     }
 
-    public void openCamera(boolean animated) {
+    public void openCamera(boolean z) {
         CameraView cameraView = this.cameraView;
         if (cameraView == null || this.cameraInitAnimation != null || !cameraView.isInited() || this.parentAlert.isDismissed()) {
             return;
         }
-        if (this.parentAlert.avatarPicker == 2 || (this.parentAlert.baseFragment instanceof ChatActivity)) {
+        ChatAttachAlert chatAttachAlert = this.parentAlert;
+        int i = 0;
+        if (chatAttachAlert.avatarPicker == 2 || (chatAttachAlert.baseFragment instanceof ChatActivity)) {
             this.tooltipTextView.setVisibility(0);
         } else {
             this.tooltipTextView.setVisibility(8);
@@ -1896,54 +1944,61 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.cameraPanel.setTag(null);
         int[] iArr = this.animateCameraValues;
         iArr[0] = 0;
-        int i = this.itemSize;
-        iArr[1] = i;
-        iArr[2] = i;
+        int i2 = this.itemSize;
+        iArr[1] = i2;
+        iArr[2] = i2;
         this.additionCloseCameraY = 0.0f;
         this.cameraExpanded = true;
         this.cameraView.setFpsLimit(-1);
         AndroidUtilities.hideKeyboard(this);
         AndroidUtilities.setLightNavigationBar(this.parentAlert.getWindow(), false);
-        if (animated) {
+        if (z) {
             setCameraOpenProgress(0.0f);
             this.cameraAnimationInProgress = true;
             this.animationIndex = NotificationCenter.getInstance(this.parentAlert.currentAccount).setAnimationInProgress(this.animationIndex, null);
-            ArrayList<Animator> animators = new ArrayList<>();
-            animators.add(ObjectAnimator.ofFloat(this, "cameraOpenProgress", 0.0f, 1.0f));
-            animators.add(ObjectAnimator.ofFloat(this.cameraPanel, View.ALPHA, 1.0f));
-            animators.add(ObjectAnimator.ofFloat(this.counterTextView, View.ALPHA, 1.0f));
-            animators.add(ObjectAnimator.ofFloat(this.cameraPhotoRecyclerView, View.ALPHA, 1.0f));
-            int a = 0;
+            ArrayList arrayList = new ArrayList();
+            arrayList.add(ObjectAnimator.ofFloat(this, "cameraOpenProgress", 0.0f, 1.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.cameraPanel, View.ALPHA, 1.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.counterTextView, View.ALPHA, 1.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.cameraPhotoRecyclerView, View.ALPHA, 1.0f));
+            int i3 = 0;
             while (true) {
-                if (a >= 2) {
+                if (i3 >= 2) {
                     break;
-                } else if (this.flashModeButton[a].getVisibility() == 0) {
-                    animators.add(ObjectAnimator.ofFloat(this.flashModeButton[a], View.ALPHA, 1.0f));
+                } else if (this.flashModeButton[i3].getVisibility() == 0) {
+                    arrayList.add(ObjectAnimator.ofFloat(this.flashModeButton[i3], View.ALPHA, 1.0f));
                     break;
                 } else {
-                    a++;
+                    i3++;
                 }
             }
             AnimatorSet animatorSet = new AnimatorSet();
-            animatorSet.playTogether(animators);
+            animatorSet.playTogether(arrayList);
             animatorSet.setDuration(350L);
             animatorSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
             animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.17
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
                 public void onAnimationEnd(Animator animator) {
+                    CameraView cameraView2;
+                    CameraView cameraView3;
                     NotificationCenter.getInstance(ChatAttachAlertPhotoLayout.this.parentAlert.currentAccount).onAnimationFinish(ChatAttachAlertPhotoLayout.this.animationIndex);
                     ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress = false;
-                    if (Build.VERSION.SDK_INT >= 21 && ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                        ChatAttachAlertPhotoLayout.this.cameraView.invalidateOutline();
-                    } else if (ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                        ChatAttachAlertPhotoLayout.this.cameraView.invalidate();
+                    int i4 = Build.VERSION.SDK_INT;
+                    if (i4 >= 21 && (cameraView3 = ChatAttachAlertPhotoLayout.this.cameraView) != null) {
+                        cameraView3.invalidateOutline();
+                    } else {
+                        CameraView cameraView4 = ChatAttachAlertPhotoLayout.this.cameraView;
+                        if (cameraView4 != null) {
+                            cameraView4.invalidate();
+                        }
                     }
                     if (ChatAttachAlertPhotoLayout.this.cameraOpened) {
                         ChatAttachAlertPhotoLayout.this.parentAlert.delegate.onCameraOpened();
                     }
-                    if (Build.VERSION.SDK_INT >= 21 && ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                        ChatAttachAlertPhotoLayout.this.cameraView.setSystemUiVisibility(1028);
+                    if (i4 < 21 || (cameraView2 = ChatAttachAlertPhotoLayout.this.cameraView) == null) {
+                        return;
                     }
+                    cameraView2.setSystemUiVisibility(1028);
                 }
             });
             animatorSet.start();
@@ -1952,15 +2007,14 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             this.cameraPanel.setAlpha(1.0f);
             this.counterTextView.setAlpha(1.0f);
             this.cameraPhotoRecyclerView.setAlpha(1.0f);
-            int a2 = 0;
             while (true) {
-                if (a2 >= 2) {
+                if (i >= 2) {
                     break;
-                } else if (this.flashModeButton[a2].getVisibility() == 0) {
-                    this.flashModeButton[a2].setAlpha(1.0f);
+                } else if (this.flashModeButton[i].getVisibility() == 0) {
+                    this.flashModeButton[i].setAlpha(1.0f);
                     break;
                 } else {
-                    a2++;
+                    i++;
                 }
             }
             this.parentAlert.delegate.onCameraOpened();
@@ -1970,38 +2024,50 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
         this.cameraOpened = true;
         this.cameraView.setImportantForAccessibility(2);
-        if (Build.VERSION.SDK_INT >= 19) {
-            this.gridView.setImportantForAccessibility(4);
+        if (Build.VERSION.SDK_INT < 19) {
+            return;
         }
+        this.gridView.setImportantForAccessibility(4);
     }
 
     public void loadGalleryPhotos() {
         MediaController.AlbumEntry albumEntry;
-        if ((this.parentAlert.baseFragment instanceof ChatActivity) || this.parentAlert.avatarPicker == 2) {
+        ChatAttachAlert chatAttachAlert = this.parentAlert;
+        if ((chatAttachAlert.baseFragment instanceof ChatActivity) || chatAttachAlert.avatarPicker == 2) {
             albumEntry = MediaController.allMediaAlbumEntry;
         } else {
             albumEntry = MediaController.allPhotosAlbumEntry;
         }
-        if (albumEntry == null && Build.VERSION.SDK_INT >= 21) {
-            MediaController.loadGalleryPhotosAlbums(0);
+        if (albumEntry != null || Build.VERSION.SDK_INT < 21) {
+            return;
         }
+        MediaController.loadGalleryPhotosAlbums(0);
     }
 
     public void showCamera() {
-        if (this.parentAlert.paused || !this.mediaEnabled) {
+        ChatAttachAlert chatAttachAlert = this.parentAlert;
+        if (chatAttachAlert.paused || !this.mediaEnabled) {
             return;
         }
         if (this.cameraView == null) {
-            CameraView cameraView = new CameraView(this.parentAlert.baseFragment.getParentActivity(), this.parentAlert.openWithFrontFaceCamera) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.18
+            CameraView cameraView = new CameraView(chatAttachAlert.baseFragment.getParentActivity(), this.parentAlert.openWithFrontFaceCamera) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.18
                 @Override // org.telegram.messenger.camera.CameraView, android.view.ViewGroup, android.view.View
                 public void dispatchDraw(Canvas canvas) {
                     if (Build.VERSION.SDK_INT < 21) {
-                        if (ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress) {
-                            AndroidUtilities.rectTmp.set(ChatAttachAlertPhotoLayout.this.animationClipLeft + (ChatAttachAlertPhotoLayout.this.cameraViewOffsetX * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress)), ChatAttachAlertPhotoLayout.this.animationClipTop + (ChatAttachAlertPhotoLayout.this.cameraViewOffsetY * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress)), ChatAttachAlertPhotoLayout.this.animationClipRight, ChatAttachAlertPhotoLayout.this.animationClipBottom);
-                        } else if (!ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress && !ChatAttachAlertPhotoLayout.this.cameraOpened) {
-                            AndroidUtilities.rectTmp.set(ChatAttachAlertPhotoLayout.this.cameraViewOffsetX, ChatAttachAlertPhotoLayout.this.cameraViewOffsetY, getMeasuredWidth(), getMeasuredHeight());
+                        if (!ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress) {
+                            if (!ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress && !ChatAttachAlertPhotoLayout.this.cameraOpened) {
+                                AndroidUtilities.rectTmp.set(ChatAttachAlertPhotoLayout.this.cameraViewOffsetX, ChatAttachAlertPhotoLayout.this.cameraViewOffsetY, getMeasuredWidth(), getMeasuredHeight());
+                            } else {
+                                AndroidUtilities.rectTmp.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
+                            }
                         } else {
-                            AndroidUtilities.rectTmp.set(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight());
+                            RectF rectF = AndroidUtilities.rectTmp;
+                            ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                            float f = chatAttachAlertPhotoLayout.animationClipLeft + (chatAttachAlertPhotoLayout.cameraViewOffsetX * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress));
+                            ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout2 = ChatAttachAlertPhotoLayout.this;
+                            float f2 = chatAttachAlertPhotoLayout2.animationClipTop + (chatAttachAlertPhotoLayout2.cameraViewOffsetY * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress));
+                            ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout3 = ChatAttachAlertPhotoLayout.this;
+                            rectF.set(f, f2, chatAttachAlertPhotoLayout3.animationClipRight, chatAttachAlertPhotoLayout3.animationClipBottom);
                         }
                         canvas.save();
                         canvas.clipRect(AndroidUtilities.rectTmp);
@@ -2013,22 +2079,31 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 }
             };
             this.cameraView = cameraView;
-            cameraView.setRecordFile(AndroidUtilities.generateVideoPath((this.parentAlert.baseFragment instanceof ChatActivity) && ((ChatActivity) this.parentAlert.baseFragment).isSecretChat()));
+            BaseFragment baseFragment = this.parentAlert.baseFragment;
+            cameraView.setRecordFile(AndroidUtilities.generateVideoPath((baseFragment instanceof ChatActivity) && ((ChatActivity) baseFragment).isSecretChat()));
             this.cameraView.setFocusable(true);
             this.cameraView.setFpsLimit(30);
             if (Build.VERSION.SDK_INT >= 21) {
                 this.cameraView.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.19
                     @Override // android.view.ViewOutlineProvider
                     public void getOutline(View view, Outline outline) {
-                        if (ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress) {
-                            AndroidUtilities.rectTmp.set(ChatAttachAlertPhotoLayout.this.animationClipLeft + (ChatAttachAlertPhotoLayout.this.cameraViewOffsetX * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress)), ChatAttachAlertPhotoLayout.this.animationClipTop + (ChatAttachAlertPhotoLayout.this.cameraViewOffsetY * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress)), ChatAttachAlertPhotoLayout.this.animationClipRight, ChatAttachAlertPhotoLayout.this.animationClipBottom);
-                            outline.setRect((int) AndroidUtilities.rectTmp.left, (int) AndroidUtilities.rectTmp.top, (int) AndroidUtilities.rectTmp.right, (int) AndroidUtilities.rectTmp.bottom);
-                        } else if (!ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress && !ChatAttachAlertPhotoLayout.this.cameraOpened) {
-                            int rad = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
-                            outline.setRoundRect((int) ChatAttachAlertPhotoLayout.this.cameraViewOffsetX, (int) ChatAttachAlertPhotoLayout.this.cameraViewOffsetY, view.getMeasuredWidth() + rad, view.getMeasuredHeight() + rad, rad);
-                        } else {
+                        if (!ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress) {
+                            if (!ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress && !ChatAttachAlertPhotoLayout.this.cameraOpened) {
+                                int dp = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
+                                outline.setRoundRect((int) ChatAttachAlertPhotoLayout.this.cameraViewOffsetX, (int) ChatAttachAlertPhotoLayout.this.cameraViewOffsetY, view.getMeasuredWidth() + dp, view.getMeasuredHeight() + dp, dp);
+                                return;
+                            }
                             outline.setRect(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+                            return;
                         }
+                        RectF rectF = AndroidUtilities.rectTmp;
+                        ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                        float f = chatAttachAlertPhotoLayout.animationClipLeft + (chatAttachAlertPhotoLayout.cameraViewOffsetX * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress));
+                        ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout2 = ChatAttachAlertPhotoLayout.this;
+                        float f2 = chatAttachAlertPhotoLayout2.animationClipTop + (chatAttachAlertPhotoLayout2.cameraViewOffsetY * (1.0f - ChatAttachAlertPhotoLayout.this.cameraOpenProgress));
+                        ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout3 = ChatAttachAlertPhotoLayout.this;
+                        rectF.set(f, f2, chatAttachAlertPhotoLayout3.animationClipRight, chatAttachAlertPhotoLayout3.animationClipBottom);
+                        outline.setRect((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom);
                     }
                 });
                 this.cameraView.setClipToOutline(true);
@@ -2041,24 +2116,22 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             this.cameraView.setDelegate(new CameraView.CameraViewDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.20
                 @Override // org.telegram.messenger.camera.CameraView.CameraViewDelegate
                 public void onCameraInit() {
-                    String current = ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().getCurrentFlashMode();
-                    String next = ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().getNextFlashMode();
                     int i2 = 4;
-                    if (current.equals(next)) {
-                        for (int a = 0; a < 2; a++) {
-                            ChatAttachAlertPhotoLayout.this.flashModeButton[a].setVisibility(4);
-                            ChatAttachAlertPhotoLayout.this.flashModeButton[a].setAlpha(0.0f);
-                            ChatAttachAlertPhotoLayout.this.flashModeButton[a].setTranslationY(0.0f);
+                    if (ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().getCurrentFlashMode().equals(ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().getNextFlashMode())) {
+                        for (int i3 = 0; i3 < 2; i3++) {
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i3].setVisibility(4);
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i3].setAlpha(0.0f);
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i3].setTranslationY(0.0f);
                         }
                     } else {
                         ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
                         chatAttachAlertPhotoLayout.setCameraFlashModeIcon(chatAttachAlertPhotoLayout.flashModeButton[0], ChatAttachAlertPhotoLayout.this.cameraView.getCameraSession().getCurrentFlashMode());
-                        int a2 = 0;
-                        while (a2 < 2) {
-                            ChatAttachAlertPhotoLayout.this.flashModeButton[a2].setVisibility(a2 == 0 ? 0 : 4);
-                            ChatAttachAlertPhotoLayout.this.flashModeButton[a2].setAlpha((a2 != 0 || !ChatAttachAlertPhotoLayout.this.cameraOpened) ? 0.0f : 1.0f);
-                            ChatAttachAlertPhotoLayout.this.flashModeButton[a2].setTranslationY(0.0f);
-                            a2++;
+                        int i4 = 0;
+                        while (i4 < 2) {
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i4].setVisibility(i4 == 0 ? 0 : 4);
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i4].setAlpha((i4 != 0 || !ChatAttachAlertPhotoLayout.this.cameraOpened) ? 0.0f : 1.0f);
+                            ChatAttachAlertPhotoLayout.this.flashModeButton[i4].setTranslationY(0.0f);
+                            i4++;
                         }
                     }
                     ChatAttachAlertPhotoLayout.this.switchCameraButton.setImageResource(ChatAttachAlertPhotoLayout.this.cameraView.isFrontface() ? R.drawable.camera_revert1 : R.drawable.camera_revert2);
@@ -2073,25 +2146,26 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                         ChatAttachAlertPhotoLayout.this.cameraInitAnimation.setDuration(180L);
                         ChatAttachAlertPhotoLayout.this.cameraInitAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.20.1
                             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                            public void onAnimationEnd(Animator animation) {
-                                if (animation.equals(ChatAttachAlertPhotoLayout.this.cameraInitAnimation)) {
+                            public void onAnimationEnd(Animator animator) {
+                                if (animator.equals(ChatAttachAlertPhotoLayout.this.cameraInitAnimation)) {
                                     ChatAttachAlertPhotoLayout.this.canSaveCameraPreview = true;
                                     ChatAttachAlertPhotoLayout.this.cameraInitAnimation = null;
-                                    if (!ChatAttachAlertPhotoLayout.this.isHidden) {
-                                        int count = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
-                                        for (int a3 = 0; a3 < count; a3++) {
-                                            View child = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(a3);
-                                            if (child instanceof PhotoAttachCameraCell) {
-                                                child.setVisibility(4);
-                                                return;
-                                            }
+                                    if (ChatAttachAlertPhotoLayout.this.isHidden) {
+                                        return;
+                                    }
+                                    int childCount = ChatAttachAlertPhotoLayout.this.gridView.getChildCount();
+                                    for (int i5 = 0; i5 < childCount; i5++) {
+                                        View childAt = ChatAttachAlertPhotoLayout.this.gridView.getChildAt(i5);
+                                        if (childAt instanceof PhotoAttachCameraCell) {
+                                            childAt.setVisibility(4);
+                                            return;
                                         }
                                     }
                                 }
                             }
 
                             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                            public void onAnimationCancel(Animator animation) {
+                            public void onAnimationCancel(Animator animator) {
                                 ChatAttachAlertPhotoLayout.this.cameraInitAnimation = null;
                             }
                         });
@@ -2103,14 +2177,14 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 FrameLayout frameLayout = new FrameLayout(this.parentAlert.baseFragment.getParentActivity()) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.21
                     @Override // android.view.View
                     protected void onDraw(Canvas canvas) {
-                        int w = ChatAttachAlertPhotoLayout.this.cameraDrawable.getIntrinsicWidth();
-                        int h = ChatAttachAlertPhotoLayout.this.cameraDrawable.getIntrinsicHeight();
-                        int x = (ChatAttachAlertPhotoLayout.this.itemSize - w) / 2;
-                        int y = (ChatAttachAlertPhotoLayout.this.itemSize - h) / 2;
+                        int intrinsicWidth = ChatAttachAlertPhotoLayout.this.cameraDrawable.getIntrinsicWidth();
+                        int intrinsicHeight = ChatAttachAlertPhotoLayout.this.cameraDrawable.getIntrinsicHeight();
+                        int i2 = (ChatAttachAlertPhotoLayout.this.itemSize - intrinsicWidth) / 2;
+                        int i3 = (ChatAttachAlertPhotoLayout.this.itemSize - intrinsicHeight) / 2;
                         if (ChatAttachAlertPhotoLayout.this.cameraViewOffsetY != 0.0f) {
-                            y = (int) (y - ChatAttachAlertPhotoLayout.this.cameraViewOffsetY);
+                            i3 = (int) (i3 - ChatAttachAlertPhotoLayout.this.cameraViewOffsetY);
                         }
-                        ChatAttachAlertPhotoLayout.this.cameraDrawable.setBounds(x, y, x + w, y + h);
+                        ChatAttachAlertPhotoLayout.this.cameraDrawable.setBounds(i2, i3, intrinsicWidth + i2, intrinsicHeight + i3);
                         ChatAttachAlertPhotoLayout.this.cameraDrawable.draw(canvas);
                     }
                 };
@@ -2149,43 +2223,41 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         this.cameraIcon.setTranslationY(this.cameraViewLocation[1] + this.cameraViewOffsetY + this.currentPanTranslationY);
     }
 
-    public void hideCamera(boolean async) {
+    public void hideCamera(boolean z) {
         if (!this.deviceHasGoodCamera || this.cameraView == null) {
             return;
         }
         saveLastCameraBitmap();
-        int count = this.gridView.getChildCount();
-        int a = 0;
+        int childCount = this.gridView.getChildCount();
+        int i = 0;
         while (true) {
-            if (a >= count) {
+            if (i >= childCount) {
                 break;
             }
-            View child = this.gridView.getChildAt(a);
-            if (!(child instanceof PhotoAttachCameraCell)) {
-                a++;
-            } else {
-                child.setVisibility(0);
-                ((PhotoAttachCameraCell) child).updateBitmap();
+            View childAt = this.gridView.getChildAt(i);
+            if (childAt instanceof PhotoAttachCameraCell) {
+                childAt.setVisibility(0);
+                ((PhotoAttachCameraCell) childAt).updateBitmap();
                 break;
             }
+            i++;
         }
-        this.cameraView.destroy(async, null);
+        this.cameraView.destroy(z, null);
         AnimatorSet animatorSet = this.cameraInitAnimation;
         if (animatorSet != null) {
             animatorSet.cancel();
             this.cameraInitAnimation = null;
         }
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda13
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda6
             @Override // java.lang.Runnable
             public final void run() {
-                ChatAttachAlertPhotoLayout.this.m2477x2e5b293a();
+                ChatAttachAlertPhotoLayout.this.lambda$hideCamera$11();
             }
         }, 300L);
         this.canSaveCameraPreview = false;
     }
 
-    /* renamed from: lambda$hideCamera$11$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2477x2e5b293a() {
+    public /* synthetic */ void lambda$hideCamera$11() {
         this.parentAlert.getContainer().removeView(this.cameraView);
         this.parentAlert.getContainer().removeView(this.cameraIcon);
         this.cameraView = null;
@@ -2197,66 +2269,51 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return;
         }
         try {
-            TextureView textureView = this.cameraView.getTextureView();
-            Bitmap bitmap = textureView.getBitmap();
-            if (bitmap != null) {
-                Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), this.cameraView.getMatrix(), true);
-                bitmap.recycle();
-                Bitmap lastBitmap = Bitmap.createScaledBitmap(newBitmap, 80, (int) (newBitmap.getHeight() / (newBitmap.getWidth() / 80.0f)), true);
-                if (lastBitmap != null) {
-                    if (lastBitmap != newBitmap) {
-                        newBitmap.recycle();
-                    }
-                    Utilities.blurBitmap(lastBitmap, 7, 1, lastBitmap.getWidth(), lastBitmap.getHeight(), lastBitmap.getRowBytes());
-                    File file = new File(ApplicationLoader.getFilesDirFixed(), "cthumb.jpg");
-                    FileOutputStream stream = new FileOutputStream(file);
-                    lastBitmap.compress(Bitmap.CompressFormat.JPEG, 87, stream);
-                    lastBitmap.recycle();
-                }
+            Bitmap bitmap = this.cameraView.getTextureView().getBitmap();
+            if (bitmap == null) {
+                return;
             }
-        } catch (Throwable th) {
+            Bitmap createBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), this.cameraView.getMatrix(), true);
+            bitmap.recycle();
+            Bitmap createScaledBitmap = Bitmap.createScaledBitmap(createBitmap, 80, (int) (createBitmap.getHeight() / (createBitmap.getWidth() / 80.0f)), true);
+            if (createScaledBitmap == null) {
+                return;
+            }
+            if (createScaledBitmap != createBitmap) {
+                createBitmap.recycle();
+            }
+            Utilities.blurBitmap(createScaledBitmap, 7, 1, createScaledBitmap.getWidth(), createScaledBitmap.getHeight(), createScaledBitmap.getRowBytes());
+            createScaledBitmap.compress(Bitmap.CompressFormat.JPEG, 87, new FileOutputStream(new File(ApplicationLoader.getFilesDirFixed(), "cthumb.jpg")));
+            createScaledBitmap.recycle();
+        } catch (Throwable unused) {
         }
     }
 
-    /* JADX WARN: Can't wrap try/catch for region: R(18:25|(1:27)(1:28)|(1:34)(1:33)|(5:36|(5:38|(1:40)|41|(1:43)|(1:47))(1:48)|49|(1:53)|54)|(2:57|(13:59|61|92|90|62|(2:64|65)|66|91|75|94|76|79|103))|60|61|92|90|62|(0)|66|91|75|94|76|79|103) */
-    /* JADX WARN: Code restructure failed: missing block: B:67:0x018c, code lost:
+    /* JADX WARN: Can't wrap try/catch for region: R(15:31|(1:33)|34|(1:40)(1:39)|(6:42|(5:44|(1:46)|47|(1:49)|(1:51))|53|54|(1:58)|59)(1:60)|(1:65)|66|(3:111|99|67)|(4:113|68|(2:70|71)|72)|110|85|105|86|89|117) */
+    /* JADX WARN: Code restructure failed: missing block: B:52:0x0115, code lost:
+        if (new java.io.File(r0).exists() != false) goto L54;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:87:0x01b3, code lost:
         r0 = move-exception;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:68:0x018d, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:88:0x01b4, code lost:
         org.telegram.messenger.FileLog.e(r0);
      */
-    /* JADX WARN: Code restructure failed: missing block: B:71:0x0197, code lost:
-        r0 = move-exception;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:72:0x0198, code lost:
-        org.telegram.messenger.FileLog.e(r0);
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:73:0x019b, code lost:
-        if (r7 != null) goto L74;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:74:0x019d, code lost:
-        r7.release();
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:77:0x01d8, code lost:
-        r0 = move-exception;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:78:0x01d9, code lost:
-        org.telegram.messenger.FileLog.e(r0);
-     */
-    /* JADX WARN: Removed duplicated region for block: B:64:0x0178 A[Catch: all -> 0x0193, Exception -> 0x0197, TRY_LEAVE, TryCatch #3 {Exception -> 0x0197, blocks: (B:62:0x0167, B:64:0x0178), top: B:90:0x0167, outer: #0 }] */
+    /* JADX WARN: Multi-variable type inference failed */
+    /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:74:0x0165 -> B:110:0x017e). Please submit an issue!!! */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void onActivityResultFragment(int r29, android.content.Intent r30, java.lang.String r31) {
         /*
-            Method dump skipped, instructions count: 562
+            Method dump skipped, instructions count: 501
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.onActivityResultFragment(int, android.content.Intent, java.lang.String):void");
     }
 
-    public void closeCamera(boolean animated) {
+    public void closeCamera(boolean z) {
         if (this.takingPhoto || this.cameraView == null) {
             return;
         }
@@ -2269,43 +2326,49 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             AndroidUtilities.cancelRunOnUIThread(runnable);
             this.zoomControlHideRunnable = null;
         }
-        AndroidUtilities.setLightNavigationBar(this.parentAlert.getWindow(), ((double) AndroidUtilities.computePerceivedBrightness(getThemedColor(Theme.key_windowBackgroundGray))) > 0.721d);
-        if (animated) {
+        AndroidUtilities.setLightNavigationBar(this.parentAlert.getWindow(), ((double) AndroidUtilities.computePerceivedBrightness(getThemedColor("windowBackgroundGray"))) > 0.721d);
+        if (z) {
             this.additionCloseCameraY = this.cameraView.getTranslationY();
             this.cameraAnimationInProgress = true;
-            ArrayList<Animator> animators = new ArrayList<>();
-            animators.add(ObjectAnimator.ofFloat(this, "cameraOpenProgress", 0.0f));
-            animators.add(ObjectAnimator.ofFloat(this.cameraPanel, View.ALPHA, 0.0f));
-            animators.add(ObjectAnimator.ofFloat(this.zoomControlView, View.ALPHA, 0.0f));
-            animators.add(ObjectAnimator.ofFloat(this.counterTextView, View.ALPHA, 0.0f));
-            animators.add(ObjectAnimator.ofFloat(this.cameraPhotoRecyclerView, View.ALPHA, 0.0f));
-            int a = 0;
+            ArrayList arrayList = new ArrayList();
+            arrayList.add(ObjectAnimator.ofFloat(this, "cameraOpenProgress", 0.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.cameraPanel, View.ALPHA, 0.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.zoomControlView, View.ALPHA, 0.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.counterTextView, View.ALPHA, 0.0f));
+            arrayList.add(ObjectAnimator.ofFloat(this.cameraPhotoRecyclerView, View.ALPHA, 0.0f));
+            int i2 = 0;
             while (true) {
-                if (a >= 2) {
+                if (i2 >= 2) {
                     break;
-                } else if (this.flashModeButton[a].getVisibility() == 0) {
-                    animators.add(ObjectAnimator.ofFloat(this.flashModeButton[a], View.ALPHA, 0.0f));
+                } else if (this.flashModeButton[i2].getVisibility() == 0) {
+                    arrayList.add(ObjectAnimator.ofFloat(this.flashModeButton[i2], View.ALPHA, 0.0f));
                     break;
                 } else {
-                    a++;
+                    i2++;
                 }
             }
             this.animationIndex = NotificationCenter.getInstance(this.parentAlert.currentAccount).setAnimationInProgress(this.animationIndex, null);
             AnimatorSet animatorSet = new AnimatorSet();
-            animatorSet.playTogether(animators);
+            animatorSet.playTogether(arrayList);
             animatorSet.setDuration(220L);
             animatorSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
             animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.22
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
                 public void onAnimationEnd(Animator animator) {
+                    CameraView cameraView;
                     NotificationCenter.getInstance(ChatAttachAlertPhotoLayout.this.parentAlert.currentAccount).onAnimationFinish(ChatAttachAlertPhotoLayout.this.animationIndex);
-                    ChatAttachAlertPhotoLayout.this.cameraExpanded = false;
-                    ChatAttachAlertPhotoLayout.this.setCameraOpenProgress(0.0f);
+                    ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                    chatAttachAlertPhotoLayout.cameraExpanded = false;
+                    chatAttachAlertPhotoLayout.setCameraOpenProgress(0.0f);
                     ChatAttachAlertPhotoLayout.this.cameraAnimationInProgress = false;
-                    if (Build.VERSION.SDK_INT >= 21 && ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                        ChatAttachAlertPhotoLayout.this.cameraView.invalidateOutline();
-                    } else if (ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                        ChatAttachAlertPhotoLayout.this.cameraView.invalidate();
+                    int i3 = Build.VERSION.SDK_INT;
+                    if (i3 >= 21 && (cameraView = ChatAttachAlertPhotoLayout.this.cameraView) != null) {
+                        cameraView.invalidateOutline();
+                    } else {
+                        CameraView cameraView2 = ChatAttachAlertPhotoLayout.this.cameraView;
+                        if (cameraView2 != null) {
+                            cameraView2.invalidate();
+                        }
                     }
                     ChatAttachAlertPhotoLayout.this.cameraOpened = false;
                     if (ChatAttachAlertPhotoLayout.this.cameraPanel != null) {
@@ -2318,11 +2381,13 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     if (ChatAttachAlertPhotoLayout.this.cameraPhotoRecyclerView != null) {
                         ChatAttachAlertPhotoLayout.this.cameraPhotoRecyclerView.setVisibility(8);
                     }
-                    if (ChatAttachAlertPhotoLayout.this.cameraView != null) {
-                        ChatAttachAlertPhotoLayout.this.cameraView.setFpsLimit(30);
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            ChatAttachAlertPhotoLayout.this.cameraView.setSystemUiVisibility(1024);
+                    CameraView cameraView3 = ChatAttachAlertPhotoLayout.this.cameraView;
+                    if (cameraView3 != null) {
+                        cameraView3.setFpsLimit(30);
+                        if (i3 < 21) {
+                            return;
                         }
+                        ChatAttachAlertPhotoLayout.this.cameraView.setSystemUiVisibility(1024);
                     }
                 }
             });
@@ -2340,15 +2405,15 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             this.cameraPhotoRecyclerView.setAlpha(0.0f);
             this.counterTextView.setAlpha(0.0f);
             this.cameraPhotoRecyclerView.setVisibility(8);
-            int a2 = 0;
+            int i3 = 0;
             while (true) {
-                if (a2 >= 2) {
+                if (i3 >= 2) {
                     break;
-                } else if (this.flashModeButton[a2].getVisibility() == 0) {
-                    this.flashModeButton[a2].setAlpha(0.0f);
+                } else if (this.flashModeButton[i3].getVisibility() == 0) {
+                    this.flashModeButton[i3].setAlpha(0.0f);
                     break;
                 } else {
-                    a2++;
+                    i3++;
                 }
             }
             this.cameraOpened = false;
@@ -2358,74 +2423,75 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
         }
         this.cameraView.setImportantForAccessibility(0);
-        if (Build.VERSION.SDK_INT >= 19) {
-            this.gridView.setImportantForAccessibility(0);
+        if (Build.VERSION.SDK_INT < 19) {
+            return;
         }
+        this.gridView.setImportantForAccessibility(0);
     }
 
-    public void setCameraOpenProgress(float value) {
-        int cameraViewW;
-        int cameraViewH;
+    @Keep
+    public void setCameraOpenProgress(float f) {
+        int i;
+        int i2;
         if (this.cameraView == null) {
             return;
         }
-        this.cameraOpenProgress = value;
+        this.cameraOpenProgress = f;
         int[] iArr = this.animateCameraValues;
-        float startWidth = iArr[1];
-        float startHeight = iArr[2];
-        boolean isPortrait = AndroidUtilities.displaySize.x < AndroidUtilities.displaySize.y;
-        float endWidth = (this.parentAlert.getContainer().getWidth() - this.parentAlert.getLeftInset()) - this.parentAlert.getRightInset();
-        float endHeight = this.parentAlert.getContainer().getHeight();
+        float f2 = iArr[1];
+        float f3 = iArr[2];
+        android.graphics.Point point = AndroidUtilities.displaySize;
+        int i3 = point.x;
+        int i4 = point.y;
+        float width = (this.parentAlert.getContainer().getWidth() - this.parentAlert.getLeftInset()) - this.parentAlert.getRightInset();
+        float height = this.parentAlert.getContainer().getHeight();
         float[] fArr = this.cameraViewLocation;
-        float fromX = fArr[0];
-        float fromY = fArr[1];
-        float toY = this.additionCloseCameraY;
-        if (value == 0.0f) {
+        float f4 = fArr[0];
+        float f5 = fArr[1];
+        float f6 = this.additionCloseCameraY;
+        if (f == 0.0f) {
             this.cameraIcon.setTranslationX(fArr[0]);
             this.cameraIcon.setTranslationY(this.cameraViewLocation[1] + this.cameraViewOffsetY);
         }
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.cameraView.getLayoutParams();
-        float textureStartHeight = this.cameraView.getTextureHeight(startWidth, startHeight);
-        float textureEndHeight = this.cameraView.getTextureHeight(endWidth, endHeight);
-        float fromScale = textureStartHeight / textureEndHeight;
-        float fromScaleY = startHeight / endHeight;
-        float fromScaleX = startWidth / endWidth;
+        float textureHeight = this.cameraView.getTextureHeight(f2, f3) / this.cameraView.getTextureHeight(width, height);
+        float f7 = f3 / height;
+        float f8 = f2 / width;
         if (this.cameraExpanded) {
-            cameraViewW = (int) endWidth;
-            float s = ((1.0f - value) * fromScale) + value;
-            this.cameraView.getTextureView().setScaleX(s);
-            this.cameraView.getTextureView().setScaleY(s);
-            float sX = ((1.0f - value) * fromScaleX) + value;
-            float sY = ((1.0f - value) * fromScaleY) + value;
-            float scaleOffsetY = ((1.0f - sY) * endHeight) / 2.0f;
-            float scaleOffsetX = ((1.0f - sX) * endWidth) / 2.0f;
-            this.cameraView.setTranslationX((((1.0f - value) * fromX) + (0.0f * value)) - scaleOffsetX);
-            this.cameraView.setTranslationY((((1.0f - value) * fromY) + (toY * value)) - scaleOffsetY);
-            this.animationClipTop = ((1.0f - value) * fromY) - this.cameraView.getTranslationY();
-            this.animationClipBottom = (((fromY + startHeight) * (1.0f - value)) - this.cameraView.getTranslationY()) + (endHeight * value);
-            this.animationClipLeft = ((1.0f - value) * fromX) - this.cameraView.getTranslationX();
-            this.animationClipRight = (((fromX + startWidth) * (1.0f - value)) - this.cameraView.getTranslationX()) + (endWidth * value);
-            cameraViewH = (int) endHeight;
+            i = (int) width;
+            i2 = (int) height;
+            float f9 = 1.0f - f;
+            float f10 = (textureHeight * f9) + f;
+            this.cameraView.getTextureView().setScaleX(f10);
+            this.cameraView.getTextureView().setScaleY(f10);
+            float f11 = f4 * f9;
+            this.cameraView.setTranslationX((f11 + (f * 0.0f)) - (((1.0f - ((f8 * f9) + f)) * width) / 2.0f));
+            float f12 = f5 * f9;
+            this.cameraView.setTranslationY(((f6 * f) + f12) - (((1.0f - ((f7 * f9) + f)) * height) / 2.0f));
+            this.animationClipTop = f12 - this.cameraView.getTranslationY();
+            this.animationClipBottom = (((f5 + f3) * f9) - this.cameraView.getTranslationY()) + (height * f);
+            this.animationClipLeft = f11 - this.cameraView.getTranslationX();
+            this.animationClipRight = (((f4 + f2) * f9) - this.cameraView.getTranslationX()) + (width * f);
         } else {
-            cameraViewW = (int) startWidth;
-            cameraViewH = (int) startHeight;
+            i = (int) f2;
+            i2 = (int) f3;
             this.cameraView.getTextureView().setScaleX(1.0f);
             this.cameraView.getTextureView().setScaleY(1.0f);
             this.animationClipTop = 0.0f;
-            this.animationClipBottom = endHeight;
+            this.animationClipBottom = height;
             this.animationClipLeft = 0.0f;
-            this.animationClipRight = endWidth;
-            this.cameraView.setTranslationX(fromX);
-            this.cameraView.setTranslationY(fromY);
+            this.animationClipRight = width;
+            this.cameraView.setTranslationX(f4);
+            this.cameraView.setTranslationY(f5);
         }
-        if (value <= 0.5f) {
-            this.cameraIcon.setAlpha(1.0f - (value / 0.5f));
+        if (f <= 0.5f) {
+            this.cameraIcon.setAlpha(1.0f - (f / 0.5f));
         } else {
             this.cameraIcon.setAlpha(0.0f);
         }
-        if (layoutParams.width != cameraViewW || layoutParams.height != cameraViewH) {
-            layoutParams.width = cameraViewW;
-            layoutParams.height = cameraViewH;
+        if (layoutParams.width != i || layoutParams.height != i2) {
+            layoutParams.width = i;
+            layoutParams.height = i2;
             this.cameraView.requestLayout();
         }
         if (Build.VERSION.SDK_INT >= 21) {
@@ -2435,96 +2501,96 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
     }
 
+    @Keep
     public float getCameraOpenProgress() {
         return this.cameraOpenProgress;
     }
 
     protected void checkCameraViewPosition() {
-        float newCameraViewOffsetY;
         TextView textView;
-        RecyclerView.ViewHolder holder;
-        if (Build.VERSION.SDK_INT >= 21) {
+        RecyclerView.ViewHolder findViewHolderForAdapterPosition;
+        int i = Build.VERSION.SDK_INT;
+        if (i >= 21) {
             CameraView cameraView = this.cameraView;
             if (cameraView != null) {
                 cameraView.invalidateOutline();
             }
-            RecyclerView.ViewHolder holder2 = this.gridView.findViewHolderForAdapterPosition(this.itemsPerRow - 1);
-            if (holder2 != null) {
-                holder2.itemView.invalidateOutline();
+            RecyclerView.ViewHolder findViewHolderForAdapterPosition2 = this.gridView.findViewHolderForAdapterPosition(this.itemsPerRow - 1);
+            if (findViewHolderForAdapterPosition2 != null) {
+                findViewHolderForAdapterPosition2.itemView.invalidateOutline();
             }
-            if ((!this.adapter.needCamera || !this.deviceHasGoodCamera || this.selectedAlbumEntry != this.galleryAlbumEntry) && (holder = this.gridView.findViewHolderForAdapterPosition(0)) != null) {
-                holder.itemView.invalidateOutline();
+            if ((!this.adapter.needCamera || !this.deviceHasGoodCamera || this.selectedAlbumEntry != this.galleryAlbumEntry) && (findViewHolderForAdapterPosition = this.gridView.findViewHolderForAdapterPosition(0)) != null) {
+                findViewHolderForAdapterPosition.itemView.invalidateOutline();
             }
         }
         CameraView cameraView2 = this.cameraView;
         if (cameraView2 != null) {
             cameraView2.invalidate();
         }
-        if (Build.VERSION.SDK_INT >= 23 && (textView = this.recordTime) != null) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textView.getLayoutParams();
-            params.topMargin = getRootWindowInsets() == null ? AndroidUtilities.dp(16.0f) : getRootWindowInsets().getSystemWindowInsetTop() + AndroidUtilities.dp(2.0f);
+        if (i >= 23 && (textView = this.recordTime) != null) {
+            ((ViewGroup.MarginLayoutParams) textView.getLayoutParams()).topMargin = getRootWindowInsets() == null ? AndroidUtilities.dp(16.0f) : getRootWindowInsets().getSystemWindowInsetTop() + AndroidUtilities.dp(2.0f);
         }
         if (!this.deviceHasGoodCamera) {
             return;
         }
-        int count = this.gridView.getChildCount();
-        int a = 0;
+        int childCount = this.gridView.getChildCount();
+        int i2 = 0;
         while (true) {
-            if (a >= count) {
+            if (i2 >= childCount) {
                 break;
             }
-            View child = this.gridView.getChildAt(a);
-            if (!(child instanceof PhotoAttachCameraCell)) {
-                a++;
-            } else if (Build.VERSION.SDK_INT < 19 || child.isAttachedToWindow()) {
-                float topLocal = child.getY() + this.gridView.getY() + getY();
-                float top = this.parentAlert.getSheetContainer().getY() + topLocal;
-                float left = child.getX() + this.gridView.getX() + getX() + this.parentAlert.getSheetContainer().getX();
-                if (Build.VERSION.SDK_INT >= 23) {
-                    left -= getRootWindowInsets().getSystemWindowInsetLeft();
-                }
-                float maxY = ((Build.VERSION.SDK_INT < 21 || this.parentAlert.inBubbleMode) ? 0 : AndroidUtilities.statusBarHeight) + ActionBar.getCurrentActionBarHeight();
-                if (topLocal < maxY) {
-                    newCameraViewOffsetY = maxY - topLocal;
-                } else {
-                    newCameraViewOffsetY = 0.0f;
-                }
-                if (newCameraViewOffsetY != this.cameraViewOffsetY) {
-                    this.cameraViewOffsetY = newCameraViewOffsetY;
-                    if (this.cameraView != null) {
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            this.cameraView.invalidateOutline();
-                        } else {
-                            this.cameraView.invalidate();
+            View childAt = this.gridView.getChildAt(i2);
+            if (childAt instanceof PhotoAttachCameraCell) {
+                int i3 = Build.VERSION.SDK_INT;
+                if (i3 < 19 || childAt.isAttachedToWindow()) {
+                    float y = childAt.getY() + this.gridView.getY() + getY();
+                    float y2 = this.parentAlert.getSheetContainer().getY() + y;
+                    float x = childAt.getX() + this.gridView.getX() + getX() + this.parentAlert.getSheetContainer().getX();
+                    if (i3 >= 23) {
+                        x -= getRootWindowInsets().getSystemWindowInsetLeft();
+                    }
+                    float currentActionBarHeight = ((i3 < 21 || this.parentAlert.inBubbleMode) ? 0 : AndroidUtilities.statusBarHeight) + ActionBar.getCurrentActionBarHeight();
+                    float f = y < currentActionBarHeight ? currentActionBarHeight - y : 0.0f;
+                    if (f != this.cameraViewOffsetY) {
+                        this.cameraViewOffsetY = f;
+                        CameraView cameraView3 = this.cameraView;
+                        if (cameraView3 != null) {
+                            if (i3 >= 21) {
+                                cameraView3.invalidateOutline();
+                            } else {
+                                cameraView3.invalidate();
+                            }
+                        }
+                        FrameLayout frameLayout = this.cameraIcon;
+                        if (frameLayout != null) {
+                            frameLayout.invalidate();
                         }
                     }
-                    FrameLayout frameLayout = this.cameraIcon;
-                    if (frameLayout != null) {
-                        frameLayout.invalidate();
+                    float measuredHeight = (int) ((this.parentAlert.getSheetContainer().getMeasuredHeight() - this.parentAlert.buttonsRecyclerView.getMeasuredHeight()) + this.parentAlert.buttonsRecyclerView.getTranslationY());
+                    if (childAt.getMeasuredHeight() + y > measuredHeight) {
+                        this.cameraViewOffsetBottomY = (y + childAt.getMeasuredHeight()) - measuredHeight;
+                    } else {
+                        this.cameraViewOffsetBottomY = 0.0f;
                     }
+                    float[] fArr = this.cameraViewLocation;
+                    fArr[0] = x;
+                    fArr[1] = y2;
+                    applyCameraViewPosition();
+                    return;
                 }
-                int containerHeight = this.parentAlert.getSheetContainer().getMeasuredHeight();
-                float maxY2 = (int) ((containerHeight - this.parentAlert.buttonsRecyclerView.getMeasuredHeight()) + this.parentAlert.buttonsRecyclerView.getTranslationY());
-                if (child.getMeasuredHeight() + topLocal > maxY2) {
-                    this.cameraViewOffsetBottomY = (child.getMeasuredHeight() + topLocal) - maxY2;
-                } else {
-                    this.cameraViewOffsetBottomY = 0.0f;
-                }
-                float[] fArr = this.cameraViewLocation;
-                fArr[0] = left;
-                fArr[1] = top;
-                applyCameraViewPosition();
-                return;
+            } else {
+                i2++;
             }
         }
         if (this.cameraViewOffsetY != 0.0f || this.cameraViewOffsetX != 0.0f) {
             this.cameraViewOffsetX = 0.0f;
             this.cameraViewOffsetY = 0.0f;
-            if (this.cameraView != null) {
+            CameraView cameraView4 = this.cameraView;
+            if (cameraView4 != null) {
                 if (Build.VERSION.SDK_INT >= 21) {
-                    this.cameraView.invalidateOutline();
+                    cameraView4.invalidateOutline();
                 } else {
-                    this.cameraView.invalidate();
+                    cameraView4.invalidate();
                 }
             }
             FrameLayout frameLayout2 = this.cameraIcon;
@@ -2546,55 +2612,53 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
             this.cameraIcon.setTranslationX(this.cameraViewLocation[0]);
             this.cameraIcon.setTranslationY(this.cameraViewLocation[1] + this.cameraViewOffsetY + this.currentPanTranslationY);
-            int finalWidth = this.itemSize;
-            int finalHeight = this.itemSize;
+            int i = this.itemSize;
             if (!this.cameraOpened) {
                 this.cameraView.setClipTop((int) this.cameraViewOffsetY);
                 this.cameraView.setClipBottom((int) this.cameraViewOffsetBottomY);
                 final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.cameraView.getLayoutParams();
-                if (layoutParams.height != finalHeight || layoutParams.width != finalWidth) {
-                    layoutParams.width = finalWidth;
-                    layoutParams.height = finalHeight;
+                if (layoutParams.height != i || layoutParams.width != i) {
+                    layoutParams.width = i;
+                    layoutParams.height = i;
                     this.cameraView.setLayoutParams(layoutParams);
-                    AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda18
+                    AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda10
                         @Override // java.lang.Runnable
                         public final void run() {
-                            ChatAttachAlertPhotoLayout.this.m2475x2e05399b(layoutParams);
+                            ChatAttachAlertPhotoLayout.this.lambda$applyCameraViewPosition$12(layoutParams);
                         }
                     });
                 }
             }
-            int i = this.itemSize;
-            int finalWidth2 = (int) (i - this.cameraViewOffsetX);
-            int finalHeight2 = (int) ((i - this.cameraViewOffsetY) - this.cameraViewOffsetBottomY);
+            int i2 = this.itemSize;
+            int i3 = (int) (i2 - this.cameraViewOffsetX);
+            int i4 = (int) ((i2 - this.cameraViewOffsetY) - this.cameraViewOffsetBottomY);
             final FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) this.cameraIcon.getLayoutParams();
-            if (layoutParams2.height != finalHeight2 || layoutParams2.width != finalWidth2) {
-                layoutParams2.width = finalWidth2;
-                layoutParams2.height = finalHeight2;
-                this.cameraIcon.setLayoutParams(layoutParams2);
-                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda1
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        ChatAttachAlertPhotoLayout.this.m2476x57598edc(layoutParams2);
-                    }
-                });
+            if (layoutParams2.height == i4 && layoutParams2.width == i3) {
+                return;
             }
+            layoutParams2.width = i3;
+            layoutParams2.height = i4;
+            this.cameraIcon.setLayoutParams(layoutParams2);
+            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda9
+                @Override // java.lang.Runnable
+                public final void run() {
+                    ChatAttachAlertPhotoLayout.this.lambda$applyCameraViewPosition$13(layoutParams2);
+                }
+            });
         }
     }
 
-    /* renamed from: lambda$applyCameraViewPosition$12$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2475x2e05399b(FrameLayout.LayoutParams layoutParamsFinal) {
+    public /* synthetic */ void lambda$applyCameraViewPosition$12(FrameLayout.LayoutParams layoutParams) {
         CameraView cameraView = this.cameraView;
         if (cameraView != null) {
-            cameraView.setLayoutParams(layoutParamsFinal);
+            cameraView.setLayoutParams(layoutParams);
         }
     }
 
-    /* renamed from: lambda$applyCameraViewPosition$13$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2476x57598edc(FrameLayout.LayoutParams layoutParamsFinal) {
+    public /* synthetic */ void lambda$applyCameraViewPosition$13(FrameLayout.LayoutParams layoutParams) {
         FrameLayout frameLayout = this.cameraIcon;
         if (frameLayout != null) {
-            frameLayout.setLayoutParams(layoutParamsFinal);
+            frameLayout.setLayoutParams(layoutParams);
         }
     }
 
@@ -2606,38 +2670,39 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         return selectedPhotosOrder;
     }
 
-    public void updateSelected(HashMap<Object, Object> newSelectedPhotos, ArrayList<Object> newPhotosOrder, boolean updateLayout) {
+    public void updateSelected(HashMap<Object, Object> hashMap, ArrayList<Object> arrayList, boolean z) {
         selectedPhotos.clear();
-        selectedPhotos.putAll(newSelectedPhotos);
+        selectedPhotos.putAll(hashMap);
         selectedPhotosOrder.clear();
-        selectedPhotosOrder.addAll(newPhotosOrder);
-        if (updateLayout) {
+        selectedPhotosOrder.addAll(arrayList);
+        if (z) {
             updatePhotosCounter(false);
             updateCheckedPhotoIndices();
-            int count = this.gridView.getChildCount();
-            for (int i = 0; i < count; i++) {
-                View child = this.gridView.getChildAt(i);
-                if (child instanceof PhotoAttachPhotoCell) {
-                    int position = this.gridView.getChildAdapterPosition(child);
+            int childCount = this.gridView.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View childAt = this.gridView.getChildAt(i);
+                if (childAt instanceof PhotoAttachPhotoCell) {
+                    int childAdapterPosition = this.gridView.getChildAdapterPosition(childAt);
                     if (this.adapter.needCamera && this.selectedAlbumEntry == this.galleryAlbumEntry) {
-                        position--;
+                        childAdapterPosition--;
                     }
-                    PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) child;
+                    PhotoAttachPhotoCell photoAttachPhotoCell = (PhotoAttachPhotoCell) childAt;
                     if (this.parentAlert.avatarPicker != 0) {
-                        cell.getCheckBox().setVisibility(8);
+                        photoAttachPhotoCell.getCheckBox().setVisibility(8);
                     }
-                    MediaController.PhotoEntry photoEntry = getPhotoEntryAtPosition(position);
-                    if (photoEntry != null) {
-                        boolean z = true;
-                        boolean z2 = this.adapter.needCamera && this.selectedAlbumEntry == this.galleryAlbumEntry;
-                        if (position != this.adapter.getItemCount() - 1) {
-                            z = false;
+                    MediaController.PhotoEntry photoEntryAtPosition = getPhotoEntryAtPosition(childAdapterPosition);
+                    if (photoEntryAtPosition != null) {
+                        boolean z2 = true;
+                        boolean z3 = this.adapter.needCamera && this.selectedAlbumEntry == this.galleryAlbumEntry;
+                        if (childAdapterPosition != this.adapter.getItemCount() - 1) {
+                            z2 = false;
                         }
-                        cell.setPhotoEntry(photoEntry, z2, z);
-                        if (!(this.parentAlert.baseFragment instanceof ChatActivity) || !this.parentAlert.allowOrder) {
-                            cell.setChecked(-1, selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId)), false);
+                        photoAttachPhotoCell.setPhotoEntry(photoEntryAtPosition, z3, z2);
+                        ChatAttachAlert chatAttachAlert = this.parentAlert;
+                        if ((chatAttachAlert.baseFragment instanceof ChatActivity) && chatAttachAlert.allowOrder) {
+                            photoAttachPhotoCell.setChecked(selectedPhotosOrder.indexOf(Integer.valueOf(photoEntryAtPosition.imageId)), selectedPhotos.containsKey(Integer.valueOf(photoEntryAtPosition.imageId)), false);
                         } else {
-                            cell.setChecked(selectedPhotosOrder.indexOf(Integer.valueOf(photoEntry.imageId)), selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId)), false);
+                            photoAttachPhotoCell.setChecked(-1, selectedPhotos.containsKey(Integer.valueOf(photoEntryAtPosition.imageId)), false);
                         }
                     }
                 }
@@ -2646,15 +2711,16 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     public void checkStorage() {
-        if (this.noGalleryPermissions && Build.VERSION.SDK_INT >= 23) {
-            boolean z = this.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0;
-            this.noGalleryPermissions = z;
-            if (!z) {
-                loadGalleryPhotos();
-            }
-            this.adapter.notifyDataSetChanged();
-            this.cameraAttachAdapter.notifyDataSetChanged();
+        if (!this.noGalleryPermissions || Build.VERSION.SDK_INT < 23) {
+            return;
         }
+        boolean z = this.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0;
+        this.noGalleryPermissions = z;
+        if (!z) {
+            loadGalleryPhotos();
+        }
+        this.adapter.notifyDataSetChanged();
+        this.cameraAttachAdapter.notifyDataSetChanged();
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -2663,99 +2729,106 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    int needsActionBar() {
-        return 1;
-    }
-
-    @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public void onMenuItemClick(int id) {
-        if ((id == 0 || id == 1) && this.parentAlert.maxSelectedPhotos > 0 && selectedPhotosOrder.size() > 1 && (this.parentAlert.baseFragment instanceof ChatActivity)) {
-            ChatActivity chatActivity = (ChatActivity) this.parentAlert.baseFragment;
-            TLRPC.Chat chat = chatActivity.getCurrentChat();
-            if (chat != null && !ChatObject.hasAdminRights(chat) && chat.slowmode_enabled) {
+    public void onMenuItemClick(int i) {
+        TLRPC$Chat currentChat;
+        if ((i == 0 || i == 1) && this.parentAlert.maxSelectedPhotos > 0 && selectedPhotosOrder.size() > 1) {
+            BaseFragment baseFragment = this.parentAlert.baseFragment;
+            if ((baseFragment instanceof ChatActivity) && (currentChat = ((ChatActivity) baseFragment).getCurrentChat()) != null && !ChatObject.hasAdminRights(currentChat) && currentChat.slowmode_enabled) {
                 AlertsCreator.createSimpleAlert(getContext(), LocaleController.getString("Slowmode", R.string.Slowmode), LocaleController.getString("SlowmodeSendError", R.string.SlowmodeSendError), this.resourcesProvider).show();
                 return;
             }
         }
-        if (id == 0) {
-            if (this.parentAlert.editingMessageObject == null && (this.parentAlert.baseFragment instanceof ChatActivity) && ((ChatActivity) this.parentAlert.baseFragment).isInScheduleMode()) {
-                AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) this.parentAlert.baseFragment).getDialogId(), new AlertsCreator.ScheduleDatePickerDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda4
-                    @Override // org.telegram.ui.Components.AlertsCreator.ScheduleDatePickerDelegate
-                    public final void didSelectDate(boolean z, int i) {
-                        ChatAttachAlertPhotoLayout.this.m2486x320ee4a7(z, i);
-                    }
-                }, this.resourcesProvider);
-                return;
+        if (i == 0) {
+            ChatAttachAlert chatAttachAlert = this.parentAlert;
+            if (chatAttachAlert.editingMessageObject == null) {
+                BaseFragment baseFragment2 = chatAttachAlert.baseFragment;
+                if ((baseFragment2 instanceof ChatActivity) && ((ChatActivity) baseFragment2).isInScheduleMode()) {
+                    AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) this.parentAlert.baseFragment).getDialogId(), new AlertsCreator.ScheduleDatePickerDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda13
+                        @Override // org.telegram.ui.Components.AlertsCreator.ScheduleDatePickerDelegate
+                        public final void didSelectDate(boolean z, int i2) {
+                            ChatAttachAlertPhotoLayout.this.lambda$onMenuItemClick$14(z, i2);
+                        }
+                    }, this.resourcesProvider);
+                    return;
+                }
             }
             this.parentAlert.applyCaption();
             this.parentAlert.delegate.didPressedButton(7, false, true, 0, false);
-        } else if (id == 1) {
-            if (this.parentAlert.editingMessageObject == null && (this.parentAlert.baseFragment instanceof ChatActivity) && ((ChatActivity) this.parentAlert.baseFragment).isInScheduleMode()) {
-                AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) this.parentAlert.baseFragment).getDialogId(), new AlertsCreator.ScheduleDatePickerDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda5
-                    @Override // org.telegram.ui.Components.AlertsCreator.ScheduleDatePickerDelegate
-                    public final void didSelectDate(boolean z, int i) {
-                        ChatAttachAlertPhotoLayout.this.m2487x5b6339e8(z, i);
-                    }
-                }, this.resourcesProvider);
-                return;
+        } else if (i == 1) {
+            ChatAttachAlert chatAttachAlert2 = this.parentAlert;
+            if (chatAttachAlert2.editingMessageObject == null) {
+                BaseFragment baseFragment3 = chatAttachAlert2.baseFragment;
+                if ((baseFragment3 instanceof ChatActivity) && ((ChatActivity) baseFragment3).isInScheduleMode()) {
+                    AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) this.parentAlert.baseFragment).getDialogId(), new AlertsCreator.ScheduleDatePickerDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda14
+                        @Override // org.telegram.ui.Components.AlertsCreator.ScheduleDatePickerDelegate
+                        public final void didSelectDate(boolean z, int i2) {
+                            ChatAttachAlertPhotoLayout.this.lambda$onMenuItemClick$15(z, i2);
+                        }
+                    }, this.resourcesProvider);
+                    return;
+                }
             }
             this.parentAlert.applyCaption();
             this.parentAlert.delegate.didPressedButton(4, true, true, 0, false);
-        } else if (id == 2) {
+        } else if (i != 2) {
+            if (i == 3) {
+                this.parentAlert.updatePhotoPreview(true);
+            } else if (i < 10) {
+            } else {
+                MediaController.AlbumEntry albumEntry = this.dropDownAlbums.get(i - 10);
+                this.selectedAlbumEntry = albumEntry;
+                if (albumEntry == this.galleryAlbumEntry) {
+                    this.dropDown.setText(LocaleController.getString("ChatGallery", R.string.ChatGallery));
+                } else {
+                    this.dropDown.setText(albumEntry.bucketName);
+                }
+                this.adapter.notifyDataSetChanged();
+                this.cameraAttachAdapter.notifyDataSetChanged();
+                this.layoutManager.scrollToPositionWithOffset(0, (-this.gridView.getPaddingTop()) + AndroidUtilities.dp(7.0f));
+            }
+        } else {
             try {
-                if (!(this.parentAlert.baseFragment instanceof ChatActivity) && this.parentAlert.avatarPicker != 2) {
-                    Intent photoPickerIntent = new Intent("android.intent.action.PICK");
-                    photoPickerIntent.setType("image/*");
-                    if (this.parentAlert.avatarPicker == 0) {
-                        this.parentAlert.baseFragment.startActivityForResult(photoPickerIntent, 1);
+                ChatAttachAlert chatAttachAlert3 = this.parentAlert;
+                if (!(chatAttachAlert3.baseFragment instanceof ChatActivity) && chatAttachAlert3.avatarPicker != 2) {
+                    Intent intent = new Intent("android.intent.action.PICK");
+                    intent.setType("image/*");
+                    ChatAttachAlert chatAttachAlert4 = this.parentAlert;
+                    if (chatAttachAlert4.avatarPicker != 0) {
+                        chatAttachAlert4.baseFragment.startActivityForResult(intent, 14);
                     } else {
-                        this.parentAlert.baseFragment.startActivityForResult(photoPickerIntent, 14);
+                        chatAttachAlert4.baseFragment.startActivityForResult(intent, 1);
                     }
                     this.parentAlert.dismiss(true);
                 }
-                Intent videoPickerIntent = new Intent();
-                videoPickerIntent.setType("video/*");
-                videoPickerIntent.setAction("android.intent.action.GET_CONTENT");
-                videoPickerIntent.putExtra("android.intent.extra.sizeLimit", FileLoader.DEFAULT_MAX_FILE_SIZE);
-                Intent photoPickerIntent2 = new Intent("android.intent.action.PICK");
-                photoPickerIntent2.setType("image/*");
-                Intent chooserIntent = Intent.createChooser(photoPickerIntent2, null);
-                chooserIntent.putExtra("android.intent.extra.INITIAL_INTENTS", new Intent[]{videoPickerIntent});
-                if (this.parentAlert.avatarPicker == 0) {
-                    this.parentAlert.baseFragment.startActivityForResult(chooserIntent, 1);
+                Intent intent2 = new Intent();
+                intent2.setType("video/*");
+                intent2.setAction("android.intent.action.GET_CONTENT");
+                intent2.putExtra("android.intent.extra.sizeLimit", FileLoader.DEFAULT_MAX_FILE_SIZE);
+                Intent intent3 = new Intent("android.intent.action.PICK");
+                intent3.setType("image/*");
+                Intent createChooser = Intent.createChooser(intent3, null);
+                createChooser.putExtra("android.intent.extra.INITIAL_INTENTS", new Intent[]{intent2});
+                ChatAttachAlert chatAttachAlert5 = this.parentAlert;
+                if (chatAttachAlert5.avatarPicker != 0) {
+                    chatAttachAlert5.baseFragment.startActivityForResult(createChooser, 14);
                 } else {
-                    this.parentAlert.baseFragment.startActivityForResult(chooserIntent, 14);
+                    chatAttachAlert5.baseFragment.startActivityForResult(createChooser, 1);
                 }
                 this.parentAlert.dismiss(true);
             } catch (Exception e) {
                 FileLog.e(e);
             }
-        } else if (id == 3) {
-            this.parentAlert.updatePhotoPreview(true);
-        } else if (id >= 10) {
-            MediaController.AlbumEntry albumEntry = this.dropDownAlbums.get(id - 10);
-            this.selectedAlbumEntry = albumEntry;
-            if (albumEntry == this.galleryAlbumEntry) {
-                this.dropDown.setText(LocaleController.getString("ChatGallery", R.string.ChatGallery));
-            } else {
-                this.dropDown.setText(albumEntry.bucketName);
-            }
-            this.adapter.notifyDataSetChanged();
-            this.cameraAttachAdapter.notifyDataSetChanged();
-            this.layoutManager.scrollToPositionWithOffset(0, (-this.gridView.getPaddingTop()) + AndroidUtilities.dp(7.0f));
         }
     }
 
-    /* renamed from: lambda$onMenuItemClick$14$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2486x320ee4a7(boolean notify, int scheduleDate) {
+    public /* synthetic */ void lambda$onMenuItemClick$14(boolean z, int i) {
         this.parentAlert.applyCaption();
-        this.parentAlert.delegate.didPressedButton(7, false, notify, scheduleDate, false);
+        this.parentAlert.delegate.didPressedButton(7, false, z, i, false);
     }
 
-    /* renamed from: lambda$onMenuItemClick$15$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2487x5b6339e8(boolean notify, int scheduleDate) {
+    public /* synthetic */ void lambda$onMenuItemClick$15(boolean z, int i) {
         this.parentAlert.applyCaption();
-        this.parentAlert.delegate.didPressedButton(4, true, notify, scheduleDate, false);
+        this.parentAlert.delegate.didPressedButton(4, true, z, i, false);
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -2763,64 +2836,100 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         return selectedPhotosOrder.size();
     }
 
+    /* JADX WARN: Removed duplicated region for block: B:12:0x0033  */
+    /* JADX WARN: Removed duplicated region for block: B:15:0x003d  */
+    /* JADX WARN: Removed duplicated region for block: B:16:0x0045  */
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    void onSelectedItemsCountChanged(int count) {
-        if (count <= 1 || this.parentAlert.editingMessageObject != null) {
-            this.parentAlert.selectedMenuItem.hideSubItem(0);
-            if (count == 0) {
-                this.parentAlert.selectedMenuItem.showSubItem(2);
-                this.parentAlert.selectedMenuItem.hideSubItem(1);
-            } else {
-                this.parentAlert.selectedMenuItem.showSubItem(1);
-            }
-        } else {
-            this.parentAlert.selectedMenuItem.showSubItem(0);
-        }
-        if (count != 0) {
-            this.parentAlert.selectedMenuItem.hideSubItem(2);
-        }
-        if (count > 1) {
-            this.parentAlert.selectedMenuItem.showSubItem(3);
-        } else {
-            this.parentAlert.selectedMenuItem.hideSubItem(3);
-        }
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    void onSelectedItemsCountChanged(int r6) {
+        /*
+            r5 = this;
+            r0 = 2
+            r1 = 0
+            r2 = 1
+            if (r6 <= r2) goto L12
+            org.telegram.ui.Components.ChatAttachAlert r3 = r5.parentAlert
+            org.telegram.messenger.MessageObject r4 = r3.editingMessageObject
+            if (r4 == 0) goto Lc
+            goto L12
+        Lc:
+            org.telegram.ui.ActionBar.ActionBarMenuItem r3 = r3.selectedMenuItem
+            r3.showSubItem(r1)
+            goto L31
+        L12:
+            org.telegram.ui.Components.ChatAttachAlert r3 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r3 = r3.selectedMenuItem
+            r3.hideSubItem(r1)
+            if (r6 != 0) goto L2a
+            org.telegram.ui.Components.ChatAttachAlert r1 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r1 = r1.selectedMenuItem
+            r1.showSubItem(r0)
+            org.telegram.ui.Components.ChatAttachAlert r1 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r1 = r1.selectedMenuItem
+            r1.hideSubItem(r2)
+            goto L31
+        L2a:
+            org.telegram.ui.Components.ChatAttachAlert r1 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r1 = r1.selectedMenuItem
+            r1.showSubItem(r2)
+        L31:
+            if (r6 == 0) goto L3a
+            org.telegram.ui.Components.ChatAttachAlert r1 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r1 = r1.selectedMenuItem
+            r1.hideSubItem(r0)
+        L3a:
+            r0 = 3
+            if (r6 <= r2) goto L45
+            org.telegram.ui.Components.ChatAttachAlert r6 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r6 = r6.selectedMenuItem
+            r6.showSubItem(r0)
+            goto L4c
+        L45:
+            org.telegram.ui.Components.ChatAttachAlert r6 = r5.parentAlert
+            org.telegram.ui.ActionBar.ActionBarMenuItem r6 = r6.selectedMenuItem
+            r6.hideSubItem(r0)
+        L4c:
+            return
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.onSelectedItemsCountChanged(int):void");
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public void applyCaption(CharSequence text) {
-        for (int a = 0; a < selectedPhotosOrder.size(); a++) {
-            if (a == 0) {
-                Object o = selectedPhotos.get(selectedPhotosOrder.get(a));
-                if (o instanceof MediaController.PhotoEntry) {
-                    MediaController.PhotoEntry photoEntry1 = (MediaController.PhotoEntry) o;
-                    photoEntry1.caption = text;
-                    photoEntry1.entities = MediaDataController.getInstance(UserConfig.selectedAccount).getEntities(new CharSequence[]{text}, false);
-                } else if (o instanceof MediaController.SearchImage) {
-                    MediaController.SearchImage photoEntry12 = (MediaController.SearchImage) o;
-                    photoEntry12.caption = text;
-                    photoEntry12.entities = MediaDataController.getInstance(UserConfig.selectedAccount).getEntities(new CharSequence[]{text}, false);
+    public void applyCaption(CharSequence charSequence) {
+        for (int i = 0; i < selectedPhotosOrder.size(); i++) {
+            if (i == 0) {
+                Object obj = selectedPhotos.get(selectedPhotosOrder.get(i));
+                if (obj instanceof MediaController.PhotoEntry) {
+                    MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) obj;
+                    photoEntry.caption = charSequence;
+                    photoEntry.entities = MediaDataController.getInstance(UserConfig.selectedAccount).getEntities(new CharSequence[]{charSequence}, false);
+                } else if (obj instanceof MediaController.SearchImage) {
+                    MediaController.SearchImage searchImage = (MediaController.SearchImage) obj;
+                    searchImage.caption = charSequence;
+                    searchImage.entities = MediaDataController.getInstance(UserConfig.selectedAccount).getEntities(new CharSequence[]{charSequence}, false);
                 }
             }
         }
     }
 
     public boolean captionForAllMedia() {
-        int captionCount = 0;
-        for (int a = 0; a < selectedPhotosOrder.size(); a++) {
-            Object o = selectedPhotos.get(selectedPhotosOrder.get(a));
-            CharSequence caption = null;
-            if (o instanceof MediaController.PhotoEntry) {
-                MediaController.PhotoEntry photoEntry1 = (MediaController.PhotoEntry) o;
-                caption = photoEntry1.caption;
-            } else if (o instanceof MediaController.SearchImage) {
-                MediaController.SearchImage photoEntry12 = (MediaController.SearchImage) o;
-                caption = photoEntry12.caption;
+        int i = 0;
+        for (int i2 = 0; i2 < selectedPhotosOrder.size(); i2++) {
+            Object obj = selectedPhotos.get(selectedPhotosOrder.get(i2));
+            CharSequence charSequence = null;
+            if (obj instanceof MediaController.PhotoEntry) {
+                charSequence = ((MediaController.PhotoEntry) obj).caption;
+            } else if (obj instanceof MediaController.SearchImage) {
+                charSequence = ((MediaController.SearchImage) obj).caption;
             }
-            if (!TextUtils.isEmpty(caption)) {
-                captionCount++;
+            if (!TextUtils.isEmpty(charSequence)) {
+                i++;
             }
         }
-        return captionCount <= 1;
+        return i <= 1;
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -2855,9 +2964,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
     public void onResume() {
-        if (this.parentAlert.isShowing() && !this.parentAlert.isDismissed()) {
-            checkCamera(false);
+        if (!this.parentAlert.isShowing() || this.parentAlert.isDismissed()) {
+            return;
         }
+        checkCamera(false);
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -2869,23 +2979,20 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     public int getCurrentItemTop() {
         if (this.gridView.getChildCount() <= 0) {
             RecyclerListView recyclerListView = this.gridView;
-            int paddingTop = recyclerListView.getPaddingTop();
-            this.currentItemTop = paddingTop;
-            recyclerListView.setTopGlowOffset(paddingTop);
+            recyclerListView.setTopGlowOffset(recyclerListView.getPaddingTop());
             this.progressView.setTranslationY(0.0f);
-            return Integer.MAX_VALUE;
+            return ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
-        View child = this.gridView.getChildAt(0);
-        RecyclerListView.Holder holder = (RecyclerListView.Holder) this.gridView.findContainingViewHolder(child);
-        int top = child.getTop();
-        int newOffset = AndroidUtilities.dp(7.0f);
-        if (top >= AndroidUtilities.dp(7.0f) && holder != null && holder.getAdapterPosition() == 0) {
-            newOffset = top;
+        View childAt = this.gridView.getChildAt(0);
+        RecyclerListView.Holder holder = (RecyclerListView.Holder) this.gridView.findContainingViewHolder(childAt);
+        int top = childAt.getTop();
+        int dp = AndroidUtilities.dp(7.0f);
+        if (top < AndroidUtilities.dp(7.0f) || holder == null || holder.getAdapterPosition() != 0) {
+            top = dp;
         }
-        this.progressView.setTranslationY(((((getMeasuredHeight() - newOffset) - AndroidUtilities.dp(50.0f)) - this.progressView.getMeasuredHeight()) / 2) + newOffset);
-        this.gridView.setTopGlowOffset(newOffset);
-        this.currentItemTop = newOffset;
-        return newOffset;
+        this.progressView.setTranslationY(((((getMeasuredHeight() - top) - AndroidUtilities.dp(50.0f)) - this.progressView.getMeasuredHeight()) / 2) + top);
+        this.gridView.setTopGlowOffset(top);
+        return top;
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -2899,34 +3006,35 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         if (frameLayout != null) {
             frameLayout.invalidate();
         }
-        boolean z = this.forceDarkTheme;
-        String str = Theme.key_voipgroup_actionBarItems;
-        String textColor = z ? str : Theme.key_dialogTextBlack;
-        Theme.setDrawableColor(this.cameraDrawable, getThemedColor(Theme.key_dialogCameraIcon));
-        this.progressView.setTextColor(getThemedColor(Theme.key_emptyListPlaceholder));
-        this.gridView.setGlowColor(getThemedColor(Theme.key_dialogScrollGlow));
-        RecyclerView.ViewHolder holder = this.gridView.findViewHolderForAdapterPosition(0);
-        if (holder != null && (holder.itemView instanceof PhotoAttachCameraCell)) {
-            ((PhotoAttachCameraCell) holder.itemView).getImageView().setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_dialogCameraIcon), PorterDuff.Mode.MULTIPLY));
+        String str = "voipgroup_actionBarItems";
+        String str2 = this.forceDarkTheme ? str : "dialogTextBlack";
+        Theme.setDrawableColor(this.cameraDrawable, getThemedColor("dialogCameraIcon"));
+        this.progressView.setTextColor(getThemedColor("emptyListPlaceholder"));
+        this.gridView.setGlowColor(getThemedColor("dialogScrollGlow"));
+        RecyclerView.ViewHolder findViewHolderForAdapterPosition = this.gridView.findViewHolderForAdapterPosition(0);
+        if (findViewHolderForAdapterPosition != null) {
+            View view = findViewHolderForAdapterPosition.itemView;
+            if (view instanceof PhotoAttachCameraCell) {
+                ((PhotoAttachCameraCell) view).getImageView().setColorFilter(new PorterDuffColorFilter(getThemedColor("dialogCameraIcon"), PorterDuff.Mode.MULTIPLY));
+            }
         }
-        this.dropDown.setTextColor(getThemedColor(textColor));
-        this.dropDownContainer.setPopupItemsColor(getThemedColor(this.forceDarkTheme ? str : Theme.key_actionBarDefaultSubmenuItem), false);
+        this.dropDown.setTextColor(getThemedColor(str2));
+        this.dropDownContainer.setPopupItemsColor(getThemedColor(this.forceDarkTheme ? str : "actionBarDefaultSubmenuItem"), false);
         ActionBarMenuItem actionBarMenuItem = this.dropDownContainer;
         if (!this.forceDarkTheme) {
-            str = Theme.key_actionBarDefaultSubmenuItem;
+            str = "actionBarDefaultSubmenuItem";
         }
         actionBarMenuItem.setPopupItemsColor(getThemedColor(str), true);
-        this.dropDownContainer.redrawPopup(getThemedColor(this.forceDarkTheme ? Theme.key_voipgroup_actionBarUnscrolled : Theme.key_actionBarDefaultSubmenuBackground));
-        Theme.setDrawableColor(this.dropDownDrawable, getThemedColor(textColor));
+        this.dropDownContainer.redrawPopup(getThemedColor(this.forceDarkTheme ? "voipgroup_actionBarUnscrolled" : "actionBarDefaultSubmenuBackground"));
+        Theme.setDrawableColor(this.dropDownDrawable, getThemedColor(str2));
     }
 
-    @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public void onInit(boolean hasMedia) {
-        this.mediaEnabled = hasMedia;
+    public void onInit(boolean z) {
+        this.mediaEnabled = z;
         CameraView cameraView = this.cameraView;
         float f = 1.0f;
         if (cameraView != null) {
-            cameraView.setAlpha(hasMedia ? 1.0f : 0.2f);
+            cameraView.setAlpha(z ? 1.0f : 0.2f);
             this.cameraView.setEnabled(this.mediaEnabled);
         }
         FrameLayout frameLayout = this.cameraIcon;
@@ -2937,38 +3045,39 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             frameLayout.setAlpha(f);
             this.cameraIcon.setEnabled(this.mediaEnabled);
         }
-        boolean z = true;
-        if ((this.parentAlert.baseFragment instanceof ChatActivity) && this.parentAlert.avatarPicker == 0) {
+        ChatAttachAlert chatAttachAlert = this.parentAlert;
+        BaseFragment baseFragment = chatAttachAlert.baseFragment;
+        boolean z2 = true;
+        if ((baseFragment instanceof ChatActivity) && chatAttachAlert.avatarPicker == 0) {
             this.galleryAlbumEntry = MediaController.allMediaAlbumEntry;
             if (this.mediaEnabled) {
                 this.progressView.setText(LocaleController.getString("NoPhotos", R.string.NoPhotos));
                 this.progressView.setLottie(0, 0, 0);
             } else {
-                TLRPC.Chat chat = ((ChatActivity) this.parentAlert.baseFragment).getCurrentChat();
-                this.progressView.setLottie(R.raw.media_forbidden, 150, 150);
-                if (ChatObject.isActionBannedByDefault(chat, 7)) {
+                TLRPC$Chat currentChat = ((ChatActivity) baseFragment).getCurrentChat();
+                this.progressView.setLottie(R.raw.media_forbidden, ImageReceiver.DEFAULT_CROSSFADE_DURATION, ImageReceiver.DEFAULT_CROSSFADE_DURATION);
+                if (ChatObject.isActionBannedByDefault(currentChat, 7)) {
                     this.progressView.setText(LocaleController.getString("GlobalAttachMediaRestricted", R.string.GlobalAttachMediaRestricted));
-                } else if (AndroidUtilities.isBannedForever(chat.banned_rights)) {
+                } else if (AndroidUtilities.isBannedForever(currentChat.banned_rights)) {
                     this.progressView.setText(LocaleController.formatString("AttachMediaRestrictedForever", R.string.AttachMediaRestrictedForever, new Object[0]));
                 } else {
-                    this.progressView.setText(LocaleController.formatString("AttachMediaRestricted", R.string.AttachMediaRestricted, LocaleController.formatDateForBan(chat.banned_rights.until_date)));
+                    this.progressView.setText(LocaleController.formatString("AttachMediaRestricted", R.string.AttachMediaRestricted, LocaleController.formatDateForBan(currentChat.banned_rights.until_date)));
                 }
             }
-        } else if (this.parentAlert.avatarPicker == 2) {
+        } else if (chatAttachAlert.avatarPicker == 2) {
             this.galleryAlbumEntry = MediaController.allMediaAlbumEntry;
         } else {
             this.galleryAlbumEntry = MediaController.allPhotosAlbumEntry;
         }
         if (Build.VERSION.SDK_INT >= 23) {
             if (this.parentAlert.baseFragment.getParentActivity().checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == 0) {
-                z = false;
+                z2 = false;
             }
-            this.noGalleryPermissions = z;
+            this.noGalleryPermissions = z2;
         }
         if (this.galleryAlbumEntry != null) {
-            for (int a = 0; a < Math.min(100, this.galleryAlbumEntry.photos.size()); a++) {
-                MediaController.PhotoEntry photoEntry = this.galleryAlbumEntry.photos.get(a);
-                photoEntry.reset();
+            for (int i = 0; i < Math.min(100, this.galleryAlbumEntry.photos.size()); i++) {
+                this.galleryAlbumEntry.photos.get(i).reset();
             }
         }
         clearSelectedPhotos();
@@ -2990,34 +3099,21 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
     boolean canScheduleMessages() {
-        boolean hasTtl = false;
-        Iterator<Map.Entry<Object, Object>> it = selectedPhotos.entrySet().iterator();
-        while (true) {
-            if (!it.hasNext()) {
+        boolean z;
+        for (Map.Entry<Object, Object> entry : selectedPhotos.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof MediaController.PhotoEntry) {
+                if (((MediaController.PhotoEntry) value).ttl != 0) {
+                    z = true;
+                    break;
+                }
+            } else if ((value instanceof MediaController.SearchImage) && ((MediaController.SearchImage) value).ttl != 0) {
+                z = true;
                 break;
             }
-            Map.Entry<Object, Object> entry = it.next();
-            Object object = entry.getValue();
-            if (object instanceof MediaController.PhotoEntry) {
-                MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) object;
-                if (photoEntry.ttl != 0) {
-                    hasTtl = true;
-                    break;
-                }
-            } else if (object instanceof MediaController.SearchImage) {
-                MediaController.SearchImage searchImage = (MediaController.SearchImage) object;
-                if (searchImage.ttl != 0) {
-                    hasTtl = true;
-                    break;
-                }
-            } else {
-                continue;
-            }
         }
-        if (hasTtl) {
-            return false;
-        }
-        return true;
+        z = false;
+        return !z;
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -3027,24 +3123,26 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // android.view.View
-    public void setTranslationY(float translationY) {
+    public void setTranslationY(float f) {
         if (this.parentAlert.getSheetAnimationType() == 1) {
-            float scale = (translationY / 40.0f) * (-0.1f);
-            int N = this.gridView.getChildCount();
-            for (int a = 0; a < N; a++) {
-                View child = this.gridView.getChildAt(a);
-                if (child instanceof PhotoAttachCameraCell) {
-                    PhotoAttachCameraCell cell = (PhotoAttachCameraCell) child;
-                    cell.getImageView().setScaleX(scale + 1.0f);
-                    cell.getImageView().setScaleY(1.0f + scale);
-                } else if (child instanceof PhotoAttachPhotoCell) {
-                    PhotoAttachPhotoCell cell2 = (PhotoAttachPhotoCell) child;
-                    cell2.getCheckBox().setScaleX(scale + 1.0f);
-                    cell2.getCheckBox().setScaleY(1.0f + scale);
+            float f2 = (f / 40.0f) * (-0.1f);
+            int childCount = this.gridView.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View childAt = this.gridView.getChildAt(i);
+                if (childAt instanceof PhotoAttachCameraCell) {
+                    PhotoAttachCameraCell photoAttachCameraCell = (PhotoAttachCameraCell) childAt;
+                    float f3 = 1.0f + f2;
+                    photoAttachCameraCell.getImageView().setScaleX(f3);
+                    photoAttachCameraCell.getImageView().setScaleY(f3);
+                } else if (childAt instanceof PhotoAttachPhotoCell) {
+                    PhotoAttachPhotoCell photoAttachPhotoCell = (PhotoAttachPhotoCell) childAt;
+                    float f4 = 1.0f + f2;
+                    photoAttachPhotoCell.getCheckBox().setScaleX(f4);
+                    photoAttachPhotoCell.getCheckBox().setScaleY(f4);
                 }
             }
         }
-        super.setTranslationY(translationY);
+        super.setTranslationY(f);
         this.parentAlert.getSheetContainer().invalidate();
         invalidate();
     }
@@ -3058,13 +3156,14 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    void onShow(final ChatAttachAlert.AttachAlertLayout previousLayout) {
+    void onShow(final ChatAttachAlert.AttachAlertLayout attachAlertLayout) {
         ViewPropertyAnimator viewPropertyAnimator = this.headerAnimator;
         if (viewPropertyAnimator != null) {
             viewPropertyAnimator.cancel();
         }
         this.dropDownContainer.setVisibility(0);
-        if (!(previousLayout instanceof ChatAttachAlertPhotoLayoutPreview)) {
+        boolean z = attachAlertLayout instanceof ChatAttachAlertPhotoLayoutPreview;
+        if (!z) {
             clearSelectedPhotos();
             this.dropDown.setAlpha(1.0f);
         } else {
@@ -3074,24 +3173,26 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
         this.parentAlert.actionBar.setTitle("");
         this.layoutManager.scrollToPositionWithOffset(0, 0);
-        if (previousLayout instanceof ChatAttachAlertPhotoLayoutPreview) {
-            Runnable setScrollY = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda2
+        if (z) {
+            this.gridView.post(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda11
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ChatAttachAlertPhotoLayout.this.m2489x9282ac2a(previousLayout);
+                    ChatAttachAlertPhotoLayout.this.lambda$onShow$16(attachAlertLayout);
                 }
-            };
-            this.gridView.post(setScrollY);
+            });
         }
         checkCameraViewPosition();
         resumeCameraPreview();
     }
 
-    /* renamed from: lambda$onShow$16$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2489x9282ac2a(ChatAttachAlert.AttachAlertLayout previousLayout) {
-        int currentItemTop = previousLayout.getCurrentItemTop();
-        int paddingTop = previousLayout.getListTopPadding();
-        this.gridView.scrollBy(0, currentItemTop > AndroidUtilities.dp(8.0f) ? paddingTop - currentItemTop : paddingTop);
+    public /* synthetic */ void lambda$onShow$16(ChatAttachAlert.AttachAlertLayout attachAlertLayout) {
+        int currentItemTop = attachAlertLayout.getCurrentItemTop();
+        int listTopPadding = attachAlertLayout.getListTopPadding();
+        RecyclerListView recyclerListView = this.gridView;
+        if (currentItemTop > AndroidUtilities.dp(8.0f)) {
+            listTopPadding -= currentItemTop;
+        }
+        recyclerListView.scrollBy(0, listTopPadding);
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -3106,19 +3207,18 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             frameLayout.setVisibility(0);
         }
         if (this.cameraView != null) {
-            int count = this.gridView.getChildCount();
-            int a = 0;
+            int childCount = this.gridView.getChildCount();
+            int i = 0;
             while (true) {
-                if (a >= count) {
+                if (i >= childCount) {
                     break;
                 }
-                View child = this.gridView.getChildAt(a);
-                if (!(child instanceof PhotoAttachCameraCell)) {
-                    a++;
-                } else {
-                    child.setVisibility(4);
+                View childAt = this.gridView.getChildAt(i);
+                if (childAt instanceof PhotoAttachCameraCell) {
+                    childAt.setVisibility(4);
                     break;
                 }
+                i++;
             }
         }
         if (this.checkCameraWhenShown) {
@@ -3127,20 +3227,21 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
     }
 
-    public void setCheckCameraWhenShown(boolean checkCameraWhenShown) {
-        this.checkCameraWhenShown = checkCameraWhenShown;
+    public void setCheckCameraWhenShown(boolean z) {
+        this.checkCameraWhenShown = z;
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    void onHideShowProgress(float progress) {
+    void onHideShowProgress(float f) {
         CameraView cameraView = this.cameraView;
         if (cameraView != null) {
-            cameraView.setAlpha(progress);
-            this.cameraIcon.setAlpha(progress);
-            if (progress != 0.0f && this.cameraView.getVisibility() != 0) {
+            cameraView.setAlpha(f);
+            this.cameraIcon.setAlpha(f);
+            if (f != 0.0f && this.cameraView.getVisibility() != 0) {
                 this.cameraView.setVisibility(0);
                 this.cameraIcon.setVisibility(0);
-            } else if (progress == 0.0f && this.cameraView.getVisibility() != 4) {
+            } else if (f != 0.0f || this.cameraView.getVisibility() == 4) {
+            } else {
                 this.cameraView.setVisibility(4);
                 this.cameraIcon.setVisibility(4);
             }
@@ -3150,31 +3251,29 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
     public void onHide() {
         this.isHidden = true;
-        int count = this.gridView.getChildCount();
-        int a = 0;
+        int childCount = this.gridView.getChildCount();
+        int i = 0;
         while (true) {
-            if (a >= count) {
+            if (i >= childCount) {
                 break;
             }
-            View child = this.gridView.getChildAt(a);
-            if (!(child instanceof PhotoAttachCameraCell)) {
-                a++;
-            } else {
-                PhotoAttachCameraCell cell = (PhotoAttachCameraCell) child;
-                child.setVisibility(0);
+            View childAt = this.gridView.getChildAt(i);
+            if (childAt instanceof PhotoAttachCameraCell) {
+                childAt.setVisibility(0);
                 saveLastCameraBitmap();
-                cell.updateBitmap();
+                ((PhotoAttachCameraCell) childAt).updateBitmap();
                 break;
             }
+            i++;
         }
         ViewPropertyAnimator viewPropertyAnimator = this.headerAnimator;
         if (viewPropertyAnimator != null) {
             viewPropertyAnimator.cancel();
         }
-        ViewPropertyAnimator withEndAction = this.dropDown.animate().alpha(0.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.EASE_BOTH).withEndAction(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda14
+        ViewPropertyAnimator withEndAction = this.dropDown.animate().alpha(0.0f).setDuration(150L).setInterpolator(CubicBezierInterpolator.EASE_BOTH).withEndAction(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda7
             @Override // java.lang.Runnable
             public final void run() {
-                ChatAttachAlertPhotoLayout.this.m2485x1e517ac6();
+                ChatAttachAlertPhotoLayout.this.lambda$onHide$17();
             }
         });
         this.headerAnimator = withEndAction;
@@ -3182,8 +3281,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         pauseCameraPreview();
     }
 
-    /* renamed from: lambda$onHide$17$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2485x1e517ac6() {
+    public /* synthetic */ void lambda$onHide$17() {
         this.dropDownContainer.setVisibility(8);
     }
 
@@ -3191,9 +3289,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         CameraSession cameraSession;
         try {
             CameraView cameraView = this.cameraView;
-            if (cameraView != null && (cameraSession = cameraView.getCameraSession()) != null) {
-                CameraController.getInstance().stopPreview(cameraSession);
+            if (cameraView == null || (cameraSession = cameraView.getCameraSession()) == null) {
+                return;
             }
+            CameraController.getInstance().stopPreview(cameraSession);
         } catch (Exception e) {
             FileLog.e(e);
         }
@@ -3203,9 +3302,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         CameraSession cameraSession;
         try {
             CameraView cameraView = this.cameraView;
-            if (cameraView != null && (cameraSession = cameraView.getCameraSession()) != null) {
-                CameraController.getInstance().startPreview(cameraSession);
+            if (cameraView == null || (cameraSession = cameraView.getCameraSession()) == null) {
+                return;
             }
+            CameraController.getInstance().startPreview(cameraSession);
         } catch (Exception e) {
             FileLog.e(e);
         }
@@ -3221,69 +3321,36 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (this.lastNotifyWidth != right - left) {
-            this.lastNotifyWidth = right - left;
+    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+        int i5 = i3 - i;
+        if (this.lastNotifyWidth != i5) {
+            this.lastNotifyWidth = i5;
             PhotoAttachAdapter photoAttachAdapter = this.adapter;
             if (photoAttachAdapter != null) {
                 photoAttachAdapter.notifyDataSetChanged();
             }
         }
-        super.onLayout(changed, left, top, right, bottom);
+        super.onLayout(z, i, i2, i3, i4);
         checkCameraViewPosition();
     }
 
+    /* JADX WARN: Removed duplicated region for block: B:23:0x00c0  */
+    /* JADX WARN: Removed duplicated region for block: B:26:0x00c9  */
+    /* JADX WARN: Removed duplicated region for block: B:29:0x00e6  */
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public void onPreMeasure(int availableWidth, int availableHeight) {
-        int paddingTop;
-        this.ignoreLayout = true;
-        if (AndroidUtilities.isTablet()) {
-            this.itemsPerRow = 4;
-        } else if (AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y) {
-            this.itemsPerRow = 4;
-        } else {
-            this.itemsPerRow = 3;
-        }
-        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
-        layoutParams.topMargin = ActionBar.getCurrentActionBarHeight();
-        int dp = ((availableWidth - AndroidUtilities.dp(12.0f)) - AndroidUtilities.dp(10.0f)) / this.itemsPerRow;
-        this.itemSize = dp;
-        if (this.lastItemSize != dp) {
-            this.lastItemSize = dp;
-            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$$ExternalSyntheticLambda15
-                @Override // java.lang.Runnable
-                public final void run() {
-                    ChatAttachAlertPhotoLayout.this.m2488x4439fb2e();
-                }
-            });
-        }
-        this.layoutManager.setSpanCount(Math.max(1, (this.itemSize * this.itemsPerRow) + (AndroidUtilities.dp(5.0f) * (this.itemsPerRow - 1))));
-        int rows = (int) Math.ceil((this.adapter.getItemCount() - 1) / this.itemsPerRow);
-        int contentSize = (this.itemSize * rows) + ((rows - 1) * AndroidUtilities.dp(5.0f));
-        int newSize = Math.max(0, ((availableHeight - contentSize) - ActionBar.getCurrentActionBarHeight()) - AndroidUtilities.dp(60.0f));
-        if (this.gridExtraSpace != newSize) {
-            this.gridExtraSpace = newSize;
-            this.adapter.notifyDataSetChanged();
-        }
-        if (!AndroidUtilities.isTablet() && AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y) {
-            paddingTop = (int) (availableHeight / 3.5f);
-        } else {
-            int paddingTop2 = availableHeight / 5;
-            paddingTop = paddingTop2 * 2;
-        }
-        int paddingTop3 = paddingTop - AndroidUtilities.dp(52.0f);
-        if (paddingTop3 < 0) {
-            paddingTop3 = 0;
-        }
-        if (this.gridView.getPaddingTop() != paddingTop3) {
-            this.gridView.setPadding(AndroidUtilities.dp(6.0f), paddingTop3, AndroidUtilities.dp(6.0f), AndroidUtilities.dp(48.0f));
-        }
-        this.dropDown.setTextSize((AndroidUtilities.isTablet() || AndroidUtilities.displaySize.x <= AndroidUtilities.displaySize.y) ? 20.0f : 18.0f);
-        this.ignoreLayout = false;
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public void onPreMeasure(int r6, int r7) {
+        /*
+            Method dump skipped, instructions count: 249
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.onPreMeasure(int, int):void");
     }
 
-    /* renamed from: lambda$onPreMeasure$18$org-telegram-ui-Components-ChatAttachAlertPhotoLayout */
-    public /* synthetic */ void m2488x4439fb2e() {
+    public /* synthetic */ void lambda$onPreMeasure$18() {
         this.adapter.notifyDataSetChanged();
     }
 
@@ -3293,8 +3360,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public void onContainerTranslationUpdated(float currentPanTranslationY) {
-        this.currentPanTranslationY = currentPanTranslationY;
+    public void onContainerTranslationUpdated(float f) {
+        this.currentPanTranslationY = f;
         checkCameraViewPosition();
         invalidate();
     }
@@ -3305,8 +3372,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    void onDismissWithButtonClick(int item) {
-        hideCamera((item == 0 || item == 2) ? false : true);
+    void onDismissWithButtonClick(int i) {
+        hideCamera((i == 0 || i == 2) ? false : true);
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
@@ -3323,73 +3390,72 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public boolean onSheetKeyDown(int keyCode, KeyEvent event) {
+    public boolean onSheetKeyDown(int i, KeyEvent keyEvent) {
         if (this.cameraOpened) {
-            if (keyCode == 24 || keyCode == 25 || keyCode == 79 || keyCode == 85) {
-                this.shutterButton.getDelegate().shutterReleased();
-                return true;
+            if (i != 24 && i != 25 && i != 79 && i != 85) {
+                return false;
             }
-            return false;
+            this.shutterButton.getDelegate().shutterReleased();
+            return true;
         }
         return false;
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public boolean onContainerViewTouchEvent(MotionEvent event) {
+    public boolean onContainerViewTouchEvent(MotionEvent motionEvent) {
         if (this.cameraAnimationInProgress) {
             return true;
         }
-        if (this.cameraOpened) {
-            return processTouchEvent(event);
+        if (!this.cameraOpened) {
+            return false;
         }
-        return false;
+        return processTouchEvent(motionEvent);
     }
 
-    @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public boolean onCustomMeasure(View view, int width, int height) {
-        boolean isPortrait = width < height;
+    public boolean onCustomMeasure(View view, int i, int i2) {
+        boolean z = i < i2;
         FrameLayout frameLayout = this.cameraIcon;
         if (view == frameLayout) {
-            frameLayout.measure(View.MeasureSpec.makeMeasureSpec(this.itemSize, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec((int) ((this.itemSize - this.cameraViewOffsetBottomY) - this.cameraViewOffsetY), C.BUFFER_FLAG_ENCRYPTED));
+            frameLayout.measure(View.MeasureSpec.makeMeasureSpec(this.itemSize, 1073741824), View.MeasureSpec.makeMeasureSpec((int) ((this.itemSize - this.cameraViewOffsetBottomY) - this.cameraViewOffsetY), 1073741824));
             return true;
         }
         CameraView cameraView = this.cameraView;
         if (view == cameraView) {
             if (this.cameraOpened && !this.cameraAnimationInProgress) {
-                cameraView.measure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(this.parentAlert.getBottomInset() + height, C.BUFFER_FLAG_ENCRYPTED));
+                cameraView.measure(View.MeasureSpec.makeMeasureSpec(i, 1073741824), View.MeasureSpec.makeMeasureSpec(i2 + this.parentAlert.getBottomInset(), 1073741824));
                 return true;
             }
         } else {
             FrameLayout frameLayout2 = this.cameraPanel;
             if (view == frameLayout2) {
-                if (isPortrait) {
-                    frameLayout2.measure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(126.0f), C.BUFFER_FLAG_ENCRYPTED));
+                if (z) {
+                    frameLayout2.measure(View.MeasureSpec.makeMeasureSpec(i, 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(126.0f), 1073741824));
                 } else {
-                    frameLayout2.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(126.0f), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(height, C.BUFFER_FLAG_ENCRYPTED));
+                    frameLayout2.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(126.0f), 1073741824), View.MeasureSpec.makeMeasureSpec(i2, 1073741824));
                 }
                 return true;
             }
             ZoomControlView zoomControlView = this.zoomControlView;
             if (view == zoomControlView) {
-                if (isPortrait) {
-                    zoomControlView.measure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED));
+                if (z) {
+                    zoomControlView.measure(View.MeasureSpec.makeMeasureSpec(i, 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824));
                 } else {
-                    zoomControlView.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(height, C.BUFFER_FLAG_ENCRYPTED));
+                    zoomControlView.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824), View.MeasureSpec.makeMeasureSpec(i2, 1073741824));
                 }
                 return true;
             }
             RecyclerListView recyclerListView = this.cameraPhotoRecyclerView;
             if (view == recyclerListView) {
                 this.cameraPhotoRecyclerViewIgnoreLayout = true;
-                if (isPortrait) {
-                    recyclerListView.measure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(80.0f), C.BUFFER_FLAG_ENCRYPTED));
+                if (z) {
+                    recyclerListView.measure(View.MeasureSpec.makeMeasureSpec(i, 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(80.0f), 1073741824));
                     if (this.cameraPhotoLayoutManager.getOrientation() != 0) {
                         this.cameraPhotoRecyclerView.setPadding(AndroidUtilities.dp(8.0f), 0, AndroidUtilities.dp(8.0f), 0);
                         this.cameraPhotoLayoutManager.setOrientation(0);
                         this.cameraAttachAdapter.notifyDataSetChanged();
                     }
                 } else {
-                    recyclerListView.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(80.0f), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(height, C.BUFFER_FLAG_ENCRYPTED));
+                    recyclerListView.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(80.0f), 1073741824), View.MeasureSpec.makeMeasureSpec(i2, 1073741824));
                     if (this.cameraPhotoLayoutManager.getOrientation() != 1) {
                         this.cameraPhotoRecyclerView.setPadding(0, AndroidUtilities.dp(8.0f), 0, AndroidUtilities.dp(8.0f));
                         this.cameraPhotoLayoutManager.setOrientation(1);
@@ -3403,69 +3469,68 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         return false;
     }
 
-    @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
-    public boolean onCustomLayout(View view, int left, int top, int right, int bottom) {
-        int cx;
-        int cy;
-        int width = right - left;
-        int height = bottom - top;
-        boolean isPortrait = width < height;
+    public boolean onCustomLayout(View view, int i, int i2, int i3, int i4) {
+        int i5;
+        int i6;
+        int i7 = i3 - i;
+        int i8 = i4 - i2;
+        boolean z = i7 < i8;
         if (view == this.cameraPanel) {
-            if (isPortrait) {
+            if (z) {
                 if (this.cameraPhotoRecyclerView.getVisibility() == 0) {
-                    this.cameraPanel.layout(0, bottom - AndroidUtilities.dp(222.0f), width, bottom - AndroidUtilities.dp(96.0f));
+                    this.cameraPanel.layout(0, i4 - AndroidUtilities.dp(222.0f), i7, i4 - AndroidUtilities.dp(96.0f));
                 } else {
-                    this.cameraPanel.layout(0, bottom - AndroidUtilities.dp(126.0f), width, bottom);
+                    this.cameraPanel.layout(0, i4 - AndroidUtilities.dp(126.0f), i7, i4);
                 }
             } else if (this.cameraPhotoRecyclerView.getVisibility() == 0) {
-                this.cameraPanel.layout(right - AndroidUtilities.dp(222.0f), 0, right - AndroidUtilities.dp(96.0f), height);
+                this.cameraPanel.layout(i3 - AndroidUtilities.dp(222.0f), 0, i3 - AndroidUtilities.dp(96.0f), i8);
             } else {
-                this.cameraPanel.layout(right - AndroidUtilities.dp(126.0f), 0, right, height);
+                this.cameraPanel.layout(i3 - AndroidUtilities.dp(126.0f), 0, i3, i8);
             }
             return true;
         } else if (view == this.zoomControlView) {
-            if (isPortrait) {
+            if (z) {
                 if (this.cameraPhotoRecyclerView.getVisibility() == 0) {
-                    this.zoomControlView.layout(0, bottom - AndroidUtilities.dp(310.0f), width, bottom - AndroidUtilities.dp(260.0f));
+                    this.zoomControlView.layout(0, i4 - AndroidUtilities.dp(310.0f), i7, i4 - AndroidUtilities.dp(260.0f));
                 } else {
-                    this.zoomControlView.layout(0, bottom - AndroidUtilities.dp(176.0f), width, bottom - AndroidUtilities.dp(126.0f));
+                    this.zoomControlView.layout(0, i4 - AndroidUtilities.dp(176.0f), i7, i4 - AndroidUtilities.dp(126.0f));
                 }
             } else if (this.cameraPhotoRecyclerView.getVisibility() == 0) {
-                this.zoomControlView.layout(right - AndroidUtilities.dp(310.0f), 0, right - AndroidUtilities.dp(260.0f), height);
+                this.zoomControlView.layout(i3 - AndroidUtilities.dp(310.0f), 0, i3 - AndroidUtilities.dp(260.0f), i8);
             } else {
-                this.zoomControlView.layout(right - AndroidUtilities.dp(176.0f), 0, right - AndroidUtilities.dp(126.0f), height);
+                this.zoomControlView.layout(i3 - AndroidUtilities.dp(176.0f), 0, i3 - AndroidUtilities.dp(126.0f), i8);
             }
             return true;
         } else {
             TextView textView = this.counterTextView;
             if (view == textView) {
-                if (isPortrait) {
-                    cx = (width - textView.getMeasuredWidth()) / 2;
-                    cy = bottom - AndroidUtilities.dp(167.0f);
+                if (z) {
+                    i6 = (i7 - textView.getMeasuredWidth()) / 2;
+                    i5 = i4 - AndroidUtilities.dp(167.0f);
                     this.counterTextView.setRotation(0.0f);
                     if (this.cameraPhotoRecyclerView.getVisibility() == 0) {
-                        cy -= AndroidUtilities.dp(96.0f);
+                        i5 -= AndroidUtilities.dp(96.0f);
                     }
                 } else {
-                    cx = right - AndroidUtilities.dp(167.0f);
-                    cy = (height / 2) + (this.counterTextView.getMeasuredWidth() / 2);
+                    i6 = i3 - AndroidUtilities.dp(167.0f);
+                    i5 = (i8 / 2) + (this.counterTextView.getMeasuredWidth() / 2);
                     this.counterTextView.setRotation(-90.0f);
                     if (this.cameraPhotoRecyclerView.getVisibility() == 0) {
-                        cx -= AndroidUtilities.dp(96.0f);
+                        i6 -= AndroidUtilities.dp(96.0f);
                     }
                 }
                 TextView textView2 = this.counterTextView;
-                textView2.layout(cx, cy, textView2.getMeasuredWidth() + cx, this.counterTextView.getMeasuredHeight() + cy);
+                textView2.layout(i6, i5, textView2.getMeasuredWidth() + i6, this.counterTextView.getMeasuredHeight() + i5);
                 return true;
             } else if (view != this.cameraPhotoRecyclerView) {
                 return false;
             } else {
-                if (!isPortrait) {
-                    int cx2 = (left + width) - AndroidUtilities.dp(88.0f);
-                    view.layout(cx2, 0, view.getMeasuredWidth() + cx2, view.getMeasuredHeight());
+                if (z) {
+                    int dp = i8 - AndroidUtilities.dp(88.0f);
+                    view.layout(0, dp, view.getMeasuredWidth(), view.getMeasuredHeight() + dp);
                 } else {
-                    int cy2 = height - AndroidUtilities.dp(88.0f);
-                    view.layout(0, cy2, view.getMeasuredWidth(), view.getMeasuredHeight() + cy2);
+                    int dp2 = (i + i7) - AndroidUtilities.dp(88.0f);
+                    view.layout(dp2, 0, view.getMeasuredWidth() + dp2, view.getMeasuredHeight());
                 }
                 return true;
             }
@@ -3473,301 +3538,307 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.albumsDidLoad) {
-            if (this.adapter != null) {
-                if ((this.parentAlert.baseFragment instanceof ChatActivity) || this.parentAlert.avatarPicker == 2) {
-                    this.galleryAlbumEntry = MediaController.allMediaAlbumEntry;
-                } else {
-                    this.galleryAlbumEntry = MediaController.allPhotosAlbumEntry;
-                }
-                if (this.selectedAlbumEntry == null) {
-                    this.selectedAlbumEntry = this.galleryAlbumEntry;
-                } else {
-                    int a = 0;
-                    while (true) {
-                        if (a >= MediaController.allMediaAlbums.size()) {
-                            break;
-                        }
-                        MediaController.AlbumEntry entry = MediaController.allMediaAlbums.get(a);
-                        if (entry.bucketId != this.selectedAlbumEntry.bucketId || entry.videoOnly != this.selectedAlbumEntry.videoOnly) {
-                            a++;
-                        } else {
-                            this.selectedAlbumEntry = entry;
-                            break;
-                        }
-                    }
-                }
-                this.loading = false;
-                this.progressView.showTextView();
-                this.adapter.notifyDataSetChanged();
-                this.cameraAttachAdapter.notifyDataSetChanged();
-                if (!selectedPhotosOrder.isEmpty() && this.galleryAlbumEntry != null) {
-                    int N = selectedPhotosOrder.size();
-                    for (int a2 = 0; a2 < N; a2++) {
-                        Integer imageId = (Integer) selectedPhotosOrder.get(a2);
-                        Object currentEntry = selectedPhotos.get(imageId);
-                        MediaController.PhotoEntry entry2 = this.galleryAlbumEntry.photosByIds.get(imageId.intValue());
-                        if (entry2 != null) {
-                            if (currentEntry instanceof MediaController.PhotoEntry) {
-                                MediaController.PhotoEntry photoEntry = (MediaController.PhotoEntry) currentEntry;
-                                entry2.copyFrom(photoEntry);
-                            }
-                            selectedPhotos.put(imageId, entry2);
-                        }
-                    }
-                }
-                updateAlbumsDropDown();
+    public void didReceivedNotification(int i, int i2, Object... objArr) {
+        if (i == NotificationCenter.albumsDidLoad) {
+            if (this.adapter == null) {
+                return;
             }
-        } else if (id == NotificationCenter.cameraInitied) {
+            ChatAttachAlert chatAttachAlert = this.parentAlert;
+            if ((chatAttachAlert.baseFragment instanceof ChatActivity) || chatAttachAlert.avatarPicker == 2) {
+                this.galleryAlbumEntry = MediaController.allMediaAlbumEntry;
+            } else {
+                this.galleryAlbumEntry = MediaController.allPhotosAlbumEntry;
+            }
+            if (this.selectedAlbumEntry != null) {
+                int i3 = 0;
+                while (true) {
+                    if (i3 >= MediaController.allMediaAlbums.size()) {
+                        break;
+                    }
+                    MediaController.AlbumEntry albumEntry = MediaController.allMediaAlbums.get(i3);
+                    int i4 = albumEntry.bucketId;
+                    MediaController.AlbumEntry albumEntry2 = this.selectedAlbumEntry;
+                    if (i4 == albumEntry2.bucketId && albumEntry.videoOnly == albumEntry2.videoOnly) {
+                        this.selectedAlbumEntry = albumEntry;
+                        break;
+                    }
+                    i3++;
+                }
+            } else {
+                this.selectedAlbumEntry = this.galleryAlbumEntry;
+            }
+            this.loading = false;
+            this.progressView.showTextView();
+            this.adapter.notifyDataSetChanged();
+            this.cameraAttachAdapter.notifyDataSetChanged();
+            if (!selectedPhotosOrder.isEmpty() && this.galleryAlbumEntry != null) {
+                int size = selectedPhotosOrder.size();
+                for (int i5 = 0; i5 < size; i5++) {
+                    Integer num = (Integer) selectedPhotosOrder.get(i5);
+                    Object obj = selectedPhotos.get(num);
+                    MediaController.PhotoEntry photoEntry = this.galleryAlbumEntry.photosByIds.get(num.intValue());
+                    if (photoEntry != null) {
+                        if (obj instanceof MediaController.PhotoEntry) {
+                            photoEntry.copyFrom((MediaController.PhotoEntry) obj);
+                        }
+                        selectedPhotos.put(num, photoEntry);
+                    }
+                }
+            }
+            updateAlbumsDropDown();
+        } else if (i == NotificationCenter.cameraInitied) {
             checkCamera(false);
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class PhotoAttachAdapter extends RecyclerListView.SelectionAdapter {
         private int itemsCount;
         private Context mContext;
         private boolean needCamera;
         private ArrayList<RecyclerListView.Holder> viewsCache = new ArrayList<>(8);
 
-        public PhotoAttachAdapter(Context context, boolean camera) {
+        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
+        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
+            return false;
+        }
+
+        public PhotoAttachAdapter(Context context, boolean z) {
             ChatAttachAlertPhotoLayout.this = r2;
             this.mContext = context;
-            this.needCamera = camera;
+            this.needCamera = z;
         }
 
         public void createCache() {
-            for (int a = 0; a < 8; a++) {
+            for (int i = 0; i < 8; i++) {
                 this.viewsCache.add(createHolder());
             }
         }
 
         public RecyclerListView.Holder createHolder() {
-            PhotoAttachPhotoCell cell = new PhotoAttachPhotoCell(this.mContext, ChatAttachAlertPhotoLayout.this.resourcesProvider);
+            PhotoAttachPhotoCell photoAttachPhotoCell = new PhotoAttachPhotoCell(this.mContext, ChatAttachAlertPhotoLayout.this.resourcesProvider);
             if (Build.VERSION.SDK_INT >= 21 && this == ChatAttachAlertPhotoLayout.this.adapter) {
-                cell.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.PhotoAttachAdapter.1
+                photoAttachPhotoCell.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.PhotoAttachAdapter.1
                     @Override // android.view.ViewOutlineProvider
                     public void getOutline(View view, Outline outline) {
-                        PhotoAttachPhotoCell photoCell = (PhotoAttachPhotoCell) view;
-                        int position = ((Integer) photoCell.getTag()).intValue();
+                        int intValue = ((Integer) ((PhotoAttachPhotoCell) view).getTag()).intValue();
                         if (PhotoAttachAdapter.this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
-                            position++;
+                            intValue++;
                         }
-                        if (position != 0) {
-                            if (position == ChatAttachAlertPhotoLayout.this.itemsPerRow - 1) {
-                                int rad = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
-                                outline.setRoundRect(-rad, 0, view.getMeasuredWidth(), view.getMeasuredHeight() + rad, rad);
+                        if (intValue != 0) {
+                            if (intValue == ChatAttachAlertPhotoLayout.this.itemsPerRow - 1) {
+                                int dp = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
+                                outline.setRoundRect(-dp, 0, view.getMeasuredWidth(), view.getMeasuredHeight() + dp, dp);
                                 return;
                             }
                             outline.setRect(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
                             return;
                         }
-                        int rad2 = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
-                        outline.setRoundRect(0, 0, view.getMeasuredWidth() + rad2, view.getMeasuredHeight() + rad2, rad2);
+                        int dp2 = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
+                        outline.setRoundRect(0, 0, view.getMeasuredWidth() + dp2, view.getMeasuredHeight() + dp2, dp2);
                     }
                 });
-                cell.setClipToOutline(true);
+                photoAttachPhotoCell.setClipToOutline(true);
             }
-            cell.setDelegate(new PhotoAttachPhotoCell.PhotoAttachPhotoCellDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$PhotoAttachAdapter$$ExternalSyntheticLambda0
+            photoAttachPhotoCell.setDelegate(new PhotoAttachPhotoCell.PhotoAttachPhotoCellDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout$PhotoAttachAdapter$$ExternalSyntheticLambda0
                 @Override // org.telegram.ui.Cells.PhotoAttachPhotoCell.PhotoAttachPhotoCellDelegate
-                public final void onCheckClick(PhotoAttachPhotoCell photoAttachPhotoCell) {
-                    ChatAttachAlertPhotoLayout.PhotoAttachAdapter.this.m2497xc0873f11(photoAttachPhotoCell);
+                public final void onCheckClick(PhotoAttachPhotoCell photoAttachPhotoCell2) {
+                    ChatAttachAlertPhotoLayout.PhotoAttachAdapter.this.lambda$createHolder$0(photoAttachPhotoCell2);
                 }
             });
-            return new RecyclerListView.Holder(cell);
+            return new RecyclerListView.Holder(photoAttachPhotoCell);
         }
 
-        /* renamed from: lambda$createHolder$0$org-telegram-ui-Components-ChatAttachAlertPhotoLayout$PhotoAttachAdapter */
-        public /* synthetic */ void m2497xc0873f11(PhotoAttachPhotoCell v) {
+        public /* synthetic */ void lambda$createHolder$0(PhotoAttachPhotoCell photoAttachPhotoCell) {
+            TLRPC$Chat currentChat;
             if (!ChatAttachAlertPhotoLayout.this.mediaEnabled || ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 0) {
                 return;
             }
-            int index = ((Integer) v.getTag()).intValue();
-            MediaController.PhotoEntry photoEntry = v.getPhotoEntry();
+            int intValue = ((Integer) photoAttachPhotoCell.getTag()).intValue();
+            MediaController.PhotoEntry photoEntry = photoAttachPhotoCell.getPhotoEntry();
             int i = 1;
-            boolean added = !ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId));
-            if (!added || ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos < 0 || ChatAttachAlertPhotoLayout.selectedPhotos.size() < ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos) {
-                int num = added ? ChatAttachAlertPhotoLayout.selectedPhotosOrder.size() : -1;
-                if ((ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) && ChatAttachAlertPhotoLayout.this.parentAlert.allowOrder) {
-                    v.setChecked(num, added, true);
-                } else {
-                    v.setChecked(-1, added, true);
-                }
-                ChatAttachAlertPhotoLayout.this.addToSelectedPhotos(photoEntry, index);
-                int updateIndex = index;
-                if (this == ChatAttachAlertPhotoLayout.this.cameraAttachAdapter) {
-                    if (ChatAttachAlertPhotoLayout.this.adapter.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
-                        updateIndex++;
-                    }
-                    ChatAttachAlertPhotoLayout.this.adapter.notifyItemChanged(updateIndex);
-                } else {
-                    ChatAttachAlertPhotoLayout.this.cameraAttachAdapter.notifyItemChanged(updateIndex);
-                }
+            boolean z = !ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId));
+            if (z && ChatAttachAlertPhotoLayout.this.parentAlert.maxSelectedPhotos >= 0) {
+                int size = ChatAttachAlertPhotoLayout.selectedPhotos.size();
                 ChatAttachAlert chatAttachAlert = ChatAttachAlertPhotoLayout.this.parentAlert;
-                if (!added) {
-                    i = 2;
-                }
-                chatAttachAlert.updateCountButton(i);
-            } else if (ChatAttachAlertPhotoLayout.this.parentAlert.allowOrder && (ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity)) {
-                ChatActivity chatActivity = (ChatActivity) ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment;
-                TLRPC.Chat chat = chatActivity.getCurrentChat();
-                if (chat != null && !ChatObject.hasAdminRights(chat) && chat.slowmode_enabled && ChatAttachAlertPhotoLayout.this.alertOnlyOnce != 2) {
+                if (size >= chatAttachAlert.maxSelectedPhotos) {
+                    if (!chatAttachAlert.allowOrder) {
+                        return;
+                    }
+                    BaseFragment baseFragment = chatAttachAlert.baseFragment;
+                    if (!(baseFragment instanceof ChatActivity) || (currentChat = ((ChatActivity) baseFragment).getCurrentChat()) == null || ChatObject.hasAdminRights(currentChat) || !currentChat.slowmode_enabled || ChatAttachAlertPhotoLayout.this.alertOnlyOnce == 2) {
+                        return;
+                    }
                     AlertsCreator.createSimpleAlert(ChatAttachAlertPhotoLayout.this.getContext(), LocaleController.getString("Slowmode", R.string.Slowmode), LocaleController.getString("SlowmodeSelectSendError", R.string.SlowmodeSelectSendError), ChatAttachAlertPhotoLayout.this.resourcesProvider).show();
-                    if (ChatAttachAlertPhotoLayout.this.alertOnlyOnce == 1) {
-                        ChatAttachAlertPhotoLayout.this.alertOnlyOnce = 2;
+                    if (ChatAttachAlertPhotoLayout.this.alertOnlyOnce != 1) {
+                        return;
                     }
+                    ChatAttachAlertPhotoLayout.this.alertOnlyOnce = 2;
+                    return;
                 }
             }
+            int size2 = z ? ChatAttachAlertPhotoLayout.selectedPhotosOrder.size() : -1;
+            ChatAttachAlert chatAttachAlert2 = ChatAttachAlertPhotoLayout.this.parentAlert;
+            if ((chatAttachAlert2.baseFragment instanceof ChatActivity) && chatAttachAlert2.allowOrder) {
+                photoAttachPhotoCell.setChecked(size2, z, true);
+            } else {
+                photoAttachPhotoCell.setChecked(-1, z, true);
+            }
+            ChatAttachAlertPhotoLayout.this.addToSelectedPhotos(photoEntry, intValue);
+            if (this == ChatAttachAlertPhotoLayout.this.cameraAttachAdapter) {
+                if (ChatAttachAlertPhotoLayout.this.adapter.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
+                    intValue++;
+                }
+                ChatAttachAlertPhotoLayout.this.adapter.notifyItemChanged(intValue);
+            } else {
+                ChatAttachAlertPhotoLayout.this.cameraAttachAdapter.notifyItemChanged(intValue);
+            }
+            ChatAttachAlert chatAttachAlert3 = ChatAttachAlertPhotoLayout.this.parentAlert;
+            if (!z) {
+                i = 2;
+            }
+            chatAttachAlert3.updateCountButton(i);
         }
 
-        public MediaController.PhotoEntry getPhoto(int position) {
+        public MediaController.PhotoEntry getPhoto(int i) {
             if (this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
-                position--;
+                i--;
             }
-            return ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(position);
+            return ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+            int itemViewType = viewHolder.getItemViewType();
+            int i2 = 0;
             boolean z = true;
-            r1 = 1;
-            r1 = 1;
-            int i = 1;
-            switch (holder.getItemViewType()) {
-                case 0:
-                    if (this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
-                        position--;
+            if (itemViewType != 0) {
+                if (itemViewType != 1) {
+                    if (itemViewType != 3) {
+                        return;
                     }
-                    PhotoAttachPhotoCell cell = (PhotoAttachPhotoCell) holder.itemView;
-                    if (this == ChatAttachAlertPhotoLayout.this.adapter) {
-                        cell.setItemSize(ChatAttachAlertPhotoLayout.this.itemSize);
-                    } else {
-                        cell.setIsVertical(ChatAttachAlertPhotoLayout.this.cameraPhotoLayoutManager.getOrientation() == 1);
+                    PhotoAttachPermissionCell photoAttachPermissionCell = (PhotoAttachPermissionCell) viewHolder.itemView;
+                    photoAttachPermissionCell.setItemSize(ChatAttachAlertPhotoLayout.this.itemSize);
+                    if (!this.needCamera || !ChatAttachAlertPhotoLayout.this.noCameraPermissions || i != 0) {
+                        i2 = 1;
                     }
-                    if (ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 0) {
-                        cell.getCheckBox().setVisibility(8);
-                    }
-                    MediaController.PhotoEntry photoEntry = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(position);
-                    boolean z2 = this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry;
-                    if (position != getItemCount() - 1) {
-                        z = false;
-                    }
-                    cell.setPhotoEntry(photoEntry, z2, z);
-                    if (!(ChatAttachAlertPhotoLayout.this.parentAlert.baseFragment instanceof ChatActivity) || !ChatAttachAlertPhotoLayout.this.parentAlert.allowOrder) {
-                        cell.setChecked(-1, ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId)), false);
-                    } else {
-                        cell.setChecked(ChatAttachAlertPhotoLayout.selectedPhotosOrder.indexOf(Integer.valueOf(photoEntry.imageId)), ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntry.imageId)), false);
-                    }
-                    cell.getImageView().setTag(Integer.valueOf(position));
-                    cell.setTag(Integer.valueOf(position));
+                    photoAttachPermissionCell.setType(i2);
                     return;
-                case 1:
-                    ChatAttachAlertPhotoLayout.this.cameraCell = (PhotoAttachCameraCell) holder.itemView;
-                    if (ChatAttachAlertPhotoLayout.this.cameraView != null && ChatAttachAlertPhotoLayout.this.cameraView.isInited() && !ChatAttachAlertPhotoLayout.this.isHidden) {
-                        ChatAttachAlertPhotoLayout.this.cameraCell.setVisibility(4);
-                    } else {
-                        ChatAttachAlertPhotoLayout.this.cameraCell.setVisibility(0);
-                    }
-                    ChatAttachAlertPhotoLayout.this.cameraCell.setItemSize(ChatAttachAlertPhotoLayout.this.itemSize);
-                    return;
-                case 2:
-                default:
-                    return;
-                case 3:
-                    PhotoAttachPermissionCell cell2 = (PhotoAttachPermissionCell) holder.itemView;
-                    cell2.setItemSize(ChatAttachAlertPhotoLayout.this.itemSize);
-                    if (this.needCamera && ChatAttachAlertPhotoLayout.this.noCameraPermissions && position == 0) {
-                        i = 0;
-                    }
-                    cell2.setType(i);
-                    return;
+                }
+                ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout = ChatAttachAlertPhotoLayout.this;
+                chatAttachAlertPhotoLayout.cameraCell = (PhotoAttachCameraCell) viewHolder.itemView;
+                CameraView cameraView = chatAttachAlertPhotoLayout.cameraView;
+                if (cameraView != null && cameraView.isInited() && !ChatAttachAlertPhotoLayout.this.isHidden) {
+                    ChatAttachAlertPhotoLayout.this.cameraCell.setVisibility(4);
+                } else {
+                    ChatAttachAlertPhotoLayout.this.cameraCell.setVisibility(0);
+                }
+                ChatAttachAlertPhotoLayout chatAttachAlertPhotoLayout2 = ChatAttachAlertPhotoLayout.this;
+                chatAttachAlertPhotoLayout2.cameraCell.setItemSize(chatAttachAlertPhotoLayout2.itemSize);
+                return;
             }
-        }
-
-        @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            return false;
+            if (this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
+                i--;
+            }
+            PhotoAttachPhotoCell photoAttachPhotoCell = (PhotoAttachPhotoCell) viewHolder.itemView;
+            if (this == ChatAttachAlertPhotoLayout.this.adapter) {
+                photoAttachPhotoCell.setItemSize(ChatAttachAlertPhotoLayout.this.itemSize);
+            } else {
+                photoAttachPhotoCell.setIsVertical(ChatAttachAlertPhotoLayout.this.cameraPhotoLayoutManager.getOrientation() == 1);
+            }
+            if (ChatAttachAlertPhotoLayout.this.parentAlert.avatarPicker != 0) {
+                photoAttachPhotoCell.getCheckBox().setVisibility(8);
+            }
+            MediaController.PhotoEntry photoEntryAtPosition = ChatAttachAlertPhotoLayout.this.getPhotoEntryAtPosition(i);
+            boolean z2 = this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry;
+            if (i != getItemCount() - 1) {
+                z = false;
+            }
+            photoAttachPhotoCell.setPhotoEntry(photoEntryAtPosition, z2, z);
+            ChatAttachAlert chatAttachAlert = ChatAttachAlertPhotoLayout.this.parentAlert;
+            if (!(chatAttachAlert.baseFragment instanceof ChatActivity) || !chatAttachAlert.allowOrder) {
+                photoAttachPhotoCell.setChecked(-1, ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntryAtPosition.imageId)), false);
+            } else {
+                photoAttachPhotoCell.setChecked(ChatAttachAlertPhotoLayout.selectedPhotosOrder.indexOf(Integer.valueOf(photoEntryAtPosition.imageId)), ChatAttachAlertPhotoLayout.selectedPhotos.containsKey(Integer.valueOf(photoEntryAtPosition.imageId)), false);
+            }
+            photoAttachPhotoCell.getImageView().setTag(Integer.valueOf(i));
+            photoAttachPhotoCell.setTag(Integer.valueOf(i));
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            switch (viewType) {
-                case 0:
-                    if (!this.viewsCache.isEmpty()) {
-                        RecyclerListView.Holder holder = this.viewsCache.get(0);
-                        this.viewsCache.remove(0);
-                        return holder;
-                    }
-                    RecyclerListView.Holder holder2 = createHolder();
-                    return holder2;
-                case 1:
-                    ChatAttachAlertPhotoLayout.this.cameraCell = new PhotoAttachCameraCell(this.mContext, ChatAttachAlertPhotoLayout.this.resourcesProvider);
-                    if (Build.VERSION.SDK_INT >= 21) {
-                        ChatAttachAlertPhotoLayout.this.cameraCell.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.PhotoAttachAdapter.2
-                            @Override // android.view.ViewOutlineProvider
-                            public void getOutline(View view, Outline outline) {
-                                int rad = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
-                                outline.setRoundRect(0, 0, view.getMeasuredWidth() + rad, view.getMeasuredHeight() + rad, rad);
-                            }
-                        });
-                        ChatAttachAlertPhotoLayout.this.cameraCell.setClipToOutline(true);
-                    }
-                    RecyclerListView.Holder holder3 = new RecyclerListView.Holder(ChatAttachAlertPhotoLayout.this.cameraCell);
-                    return holder3;
-                case 2:
-                    RecyclerListView.Holder holder4 = new RecyclerListView.Holder(new View(this.mContext) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.PhotoAttachAdapter.3
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+            if (i == 0) {
+                if (!this.viewsCache.isEmpty()) {
+                    RecyclerListView.Holder holder = this.viewsCache.get(0);
+                    this.viewsCache.remove(0);
+                    return holder;
+                }
+                return createHolder();
+            } else if (i != 1) {
+                if (i == 2) {
+                    return new RecyclerListView.Holder(new View(this.mContext) { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.PhotoAttachAdapter.3
                         @Override // android.view.View
-                        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(ChatAttachAlertPhotoLayout.this.gridExtraSpace, C.BUFFER_FLAG_ENCRYPTED));
+                        protected void onMeasure(int i2, int i3) {
+                            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i2), 1073741824), View.MeasureSpec.makeMeasureSpec(ChatAttachAlertPhotoLayout.this.gridExtraSpace, 1073741824));
                         }
                     });
-                    return holder4;
-                default:
-                    RecyclerListView.Holder holder5 = new RecyclerListView.Holder(new PhotoAttachPermissionCell(this.mContext, ChatAttachAlertPhotoLayout.this.resourcesProvider));
-                    return holder5;
+                }
+                return new RecyclerListView.Holder(new PhotoAttachPermissionCell(this.mContext, ChatAttachAlertPhotoLayout.this.resourcesProvider));
+            } else {
+                ChatAttachAlertPhotoLayout.this.cameraCell = new PhotoAttachCameraCell(this.mContext, ChatAttachAlertPhotoLayout.this.resourcesProvider);
+                if (Build.VERSION.SDK_INT >= 21) {
+                    ChatAttachAlertPhotoLayout.this.cameraCell.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertPhotoLayout.PhotoAttachAdapter.2
+                        @Override // android.view.ViewOutlineProvider
+                        public void getOutline(View view, Outline outline) {
+                            int dp = AndroidUtilities.dp(ChatAttachAlertPhotoLayout.this.parentAlert.cornerRadius * 8.0f);
+                            outline.setRoundRect(0, 0, view.getMeasuredWidth() + dp, view.getMeasuredHeight() + dp, dp);
+                        }
+                    });
+                    ChatAttachAlertPhotoLayout.this.cameraCell.setClipToOutline(true);
+                }
+                return new RecyclerListView.Holder(ChatAttachAlertPhotoLayout.this.cameraCell);
             }
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
-            if (holder.itemView instanceof PhotoAttachCameraCell) {
-                PhotoAttachCameraCell cell = (PhotoAttachCameraCell) holder.itemView;
-                cell.updateBitmap();
+        public void onViewAttachedToWindow(RecyclerView.ViewHolder viewHolder) {
+            View view = viewHolder.itemView;
+            if (view instanceof PhotoAttachCameraCell) {
+                ((PhotoAttachCameraCell) view).updateBitmap();
             }
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public int getItemCount() {
+            int i = 1;
             if (!ChatAttachAlertPhotoLayout.this.mediaEnabled) {
                 return 1;
             }
-            int count = 0;
-            if (this.needCamera && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
-                count = 0 + 1;
+            if (!this.needCamera || ChatAttachAlertPhotoLayout.this.selectedAlbumEntry != ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
+                i = 0;
             }
             if (ChatAttachAlertPhotoLayout.this.noGalleryPermissions && this == ChatAttachAlertPhotoLayout.this.adapter) {
-                count++;
+                i++;
             }
-            int count2 = count + ChatAttachAlertPhotoLayout.cameraPhotos.size();
+            int size = i + ChatAttachAlertPhotoLayout.cameraPhotos.size();
             if (ChatAttachAlertPhotoLayout.this.selectedAlbumEntry != null) {
-                count2 += ChatAttachAlertPhotoLayout.this.selectedAlbumEntry.photos.size();
+                size += ChatAttachAlertPhotoLayout.this.selectedAlbumEntry.photos.size();
             }
             if (this == ChatAttachAlertPhotoLayout.this.adapter) {
-                count2++;
+                size++;
             }
-            this.itemsCount = count2;
-            return count2;
+            this.itemsCount = size;
+            return size;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int position) {
+        public int getItemViewType(int i) {
             if (!ChatAttachAlertPhotoLayout.this.mediaEnabled) {
                 return 2;
             }
-            if (this.needCamera && position == 0 && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
+            if (this.needCamera && i == 0 && ChatAttachAlertPhotoLayout.this.selectedAlbumEntry == ChatAttachAlertPhotoLayout.this.galleryAlbumEntry) {
                 return ChatAttachAlertPhotoLayout.this.noCameraPermissions ? 3 : 1;
-            } else if (this == ChatAttachAlertPhotoLayout.this.adapter && position == this.itemsCount - 1) {
+            } else if (this == ChatAttachAlertPhotoLayout.this.adapter && i == this.itemsCount - 1) {
                 return 2;
             } else {
                 return ChatAttachAlertPhotoLayout.this.noGalleryPermissions ? 3 : 0;

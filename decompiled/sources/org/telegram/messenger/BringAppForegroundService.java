@@ -3,7 +3,7 @@ package org.telegram.messenger;
 import android.app.IntentService;
 import android.content.Intent;
 import org.telegram.ui.LaunchActivity;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class BringAppForegroundService extends IntentService {
     public BringAppForegroundService() {
         super("BringAppForegroundService");

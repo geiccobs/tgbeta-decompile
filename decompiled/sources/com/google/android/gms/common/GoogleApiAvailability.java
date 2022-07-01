@@ -1,5 +1,7 @@
 package com.google.android.gms.common;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,56 +19,36 @@ import android.os.Message;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ProgressBar;
+import androidx.annotation.RecentlyNonNull;
+import androidx.annotation.RecentlyNullable;
 import androidx.core.app.NotificationCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import com.google.android.gms.common.api.GoogleApi;
+import com.google.android.gms.base.R$drawable;
 import com.google.android.gms.common.api.GoogleApiActivity;
-import com.google.android.gms.common.api.HasApiKey;
-import com.google.android.gms.common.api.internal.ApiKey;
-import com.google.android.gms.common.api.internal.GoogleApiManager;
 import com.google.android.gms.common.api.internal.LifecycleFragment;
 import com.google.android.gms.common.api.internal.zabk;
 import com.google.android.gms.common.api.internal.zabm;
-import com.google.android.gms.common.api.internal.zabp;
 import com.google.android.gms.common.internal.Preconditions;
+import com.google.android.gms.common.internal.zab;
 import com.google.android.gms.common.internal.zac;
 import com.google.android.gms.common.util.DeviceProperties;
 import com.google.android.gms.common.util.PlatformVersion;
 import com.google.android.gms.internal.base.zas;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import org.telegram.ui.ActionBar.Theme;
+import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
-    public static final String GOOGLE_PLAY_SERVICES_PACKAGE = "com.google.android.gms";
-    private String zac;
     private static final Object zaa = new Object();
     private static final GoogleApiAvailability zab = new GoogleApiAvailability();
-    public static final int GOOGLE_PLAY_SERVICES_VERSION_CODE = GoogleApiAvailabilityLight.GOOGLE_PLAY_SERVICES_VERSION_CODE;
+    private String zac;
 
     public static GoogleApiAvailability getInstance() {
         return zab;
     }
 
-    public Task<Void> makeGooglePlayServicesAvailable(Activity activity) {
-        int i = GOOGLE_PLAY_SERVICES_VERSION_CODE;
-        Preconditions.checkMainThread("makeGooglePlayServicesAvailable must be called from the main thread");
-        int isGooglePlayServicesAvailable = isGooglePlayServicesAvailable(activity, i);
-        if (isGooglePlayServicesAvailable == 0) {
-            return Tasks.forResult(null);
-        }
-        zabp zaa2 = zabp.zaa(activity);
-        zaa2.zab(new ConnectionResult(isGooglePlayServicesAvailable, null), 0);
-        return zaa2.zac();
-    }
-
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes3.dex */
+    @SuppressLint({"HandlerLeak"})
+    /* loaded from: classes.dex */
     public class zaa extends zas {
         private final Context zaa;
 
@@ -79,80 +61,60 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
 
         @Override // android.os.Handler
         public final void handleMessage(Message message) {
-            switch (message.what) {
-                case 1:
-                    int isGooglePlayServicesAvailable = GoogleApiAvailability.this.isGooglePlayServicesAvailable(this.zaa);
-                    if (GoogleApiAvailability.this.isUserResolvableError(isGooglePlayServicesAvailable)) {
-                        GoogleApiAvailability.this.showErrorNotification(this.zaa, isGooglePlayServicesAvailable);
-                        return;
-                    }
+            int i = message.what;
+            if (i == 1) {
+                int isGooglePlayServicesAvailable = GoogleApiAvailability.this.isGooglePlayServicesAvailable(this.zaa);
+                if (!GoogleApiAvailability.this.isUserResolvableError(isGooglePlayServicesAvailable)) {
                     return;
-                default:
-                    int i = message.what;
-                    StringBuilder sb = new StringBuilder(50);
-                    sb.append("Don't know how to handle this message: ");
-                    sb.append(i);
-                    Log.w("GoogleApiAvailability", sb.toString());
-                    return;
+                }
+                GoogleApiAvailability.this.showErrorNotification(this.zaa, isGooglePlayServicesAvailable);
+                return;
             }
+            StringBuilder sb = new StringBuilder(50);
+            sb.append("Don't know how to handle this message: ");
+            sb.append(i);
+            Log.w("GoogleApiAvailability", sb.toString());
         }
     }
 
-    public Dialog getErrorDialog(Activity activity, int i, int i2) {
-        return getErrorDialog(activity, i, i2, (DialogInterface.OnCancelListener) null);
+    @RecentlyNullable
+    public Dialog getErrorDialog(@RecentlyNonNull Activity activity, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
+        return zaa(activity, i, zab.zaa(activity, getErrorResolutionIntent(activity, i, "d"), i2), onCancelListener);
     }
 
-    public Dialog getErrorDialog(Fragment fragment, int i, int i2) {
-        return getErrorDialog(fragment, i, i2, (DialogInterface.OnCancelListener) null);
-    }
-
-    public Dialog getErrorDialog(Activity activity, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
-        return zaa(activity, i, com.google.android.gms.common.internal.zab.zaa(activity, getErrorResolutionIntent(activity, i, Theme.DEFAULT_BACKGROUND_SLUG), i2), onCancelListener);
-    }
-
-    public Dialog getErrorDialog(Fragment fragment, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
-        return zaa(fragment.requireContext(), i, com.google.android.gms.common.internal.zab.zaa(fragment, getErrorResolutionIntent(fragment.requireContext(), i, Theme.DEFAULT_BACKGROUND_SLUG), i2), onCancelListener);
-    }
-
-    public boolean showErrorDialogFragment(Activity activity, int i, int i2) {
-        return showErrorDialogFragment(activity, i, i2, null);
-    }
-
-    public final boolean zaa(Activity activity, LifecycleFragment lifecycleFragment, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
-        Dialog zaa2 = zaa(activity, i, com.google.android.gms.common.internal.zab.zaa(lifecycleFragment, getErrorResolutionIntent(activity, i, Theme.DEFAULT_BACKGROUND_SLUG), 2), onCancelListener);
+    public final boolean zaa(@RecentlyNonNull Activity activity, @RecentlyNonNull LifecycleFragment lifecycleFragment, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
+        Dialog zaa2 = zaa(activity, i, zab.zaa(lifecycleFragment, getErrorResolutionIntent(activity, i, "d"), 2), onCancelListener);
         if (zaa2 == null) {
             return false;
         }
-        zaa(activity, zaa2, GooglePlayServicesUtil.GMS_ERROR_DIALOG, onCancelListener);
+        zaa(activity, zaa2, "GooglePlayServicesErrorDialog", onCancelListener);
         return true;
     }
 
-    public boolean showErrorDialogFragment(Activity activity, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
+    public boolean showErrorDialogFragment(@RecentlyNonNull Activity activity, int i, int i2, DialogInterface.OnCancelListener onCancelListener) {
         Dialog errorDialog = getErrorDialog(activity, i, i2, onCancelListener);
         if (errorDialog == null) {
             return false;
         }
-        zaa(activity, errorDialog, GooglePlayServicesUtil.GMS_ERROR_DIALOG, onCancelListener);
+        zaa(activity, errorDialog, "GooglePlayServicesErrorDialog", onCancelListener);
         return true;
     }
 
-    public void showErrorNotification(Context context, int i) {
+    public void showErrorNotification(@RecentlyNonNull Context context, int i) {
         zaa(context, i, (String) null, getErrorResolutionPendingIntent(context, i, 0, "n"));
     }
 
-    public void showErrorNotification(Context context, ConnectionResult connectionResult) {
-        zaa(context, connectionResult.getErrorCode(), (String) null, getErrorResolutionPendingIntent(context, connectionResult));
-    }
-
+    @TargetApi(R.styleable.MapAttrs_uiZoomControls)
     private final void zaa(Context context, int i, String str, PendingIntent pendingIntent) {
         int i2;
         Log.w("GoogleApiAvailability", String.format("GMS core API Availability. ConnectionResult=%s, tag=%s", Integer.valueOf(i), null), new IllegalArgumentException());
         if (i == 18) {
             zaa(context);
         } else if (pendingIntent == null) {
-            if (i == 6) {
-                Log.w("GoogleApiAvailability", "Missing resolution for ConnectionResult.RESOLUTION_REQUIRED. Call GoogleApiAvailability#showErrorNotification(Context, ConnectionResult) instead.");
+            if (i != 6) {
+                return;
             }
+            Log.w("GoogleApiAvailability", "Missing resolution for ConnectionResult.RESOLUTION_REQUIRED. Call GoogleApiAvailability#showErrorNotification(Context, ConnectionResult) instead.");
         } else {
             String zab2 = zac.zab(context, i);
             String zad = zac.zad(context, i);
@@ -163,12 +125,12 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
                 Preconditions.checkState(PlatformVersion.isAtLeastKitKatWatch());
                 style.setSmallIcon(context.getApplicationInfo().icon).setPriority(2);
                 if (DeviceProperties.isWearableWithoutPlayStore(context)) {
-                    style.addAction(com.google.android.gms.base.R.drawable.common_full_open_on_phone, resources.getString(com.google.android.gms.base.R.string.common_open_on_phone), pendingIntent);
+                    style.addAction(R$drawable.common_full_open_on_phone, resources.getString(com.google.android.gms.base.R$string.common_open_on_phone), pendingIntent);
                 } else {
                     style.setContentIntent(pendingIntent);
                 }
             } else {
-                style.setSmallIcon(17301642).setTicker(resources.getString(com.google.android.gms.base.R.string.common_google_play_services_notification_ticker)).setWhen(System.currentTimeMillis()).setContentIntent(pendingIntent).setContentText(zad);
+                style.setSmallIcon(17301642).setTicker(resources.getString(com.google.android.gms.base.R$string.common_google_play_services_notification_ticker)).setWhen(System.currentTimeMillis()).setContentIntent(pendingIntent).setContentText(zad);
             }
             if (PlatformVersion.isAtLeastO()) {
                 Preconditions.checkState(PlatformVersion.isAtLeastO());
@@ -187,22 +149,17 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
                 style.setChannelId(zaa2);
             }
             Notification build = style.build();
-            switch (i) {
-                case 1:
-                case 2:
-                case 3:
-                    i2 = 10436;
-                    GooglePlayServicesUtilLight.sCanceledAvailabilityNotification.set(false);
-                    break;
-                default:
-                    i2 = 39789;
-                    break;
+            if (i == 1 || i == 2 || i == 3) {
+                i2 = 10436;
+                GooglePlayServicesUtilLight.sCanceledAvailabilityNotification.set(false);
+            } else {
+                i2 = 39789;
             }
             notificationManager.notify(i2, build);
         }
     }
 
-    public final boolean zaa(Context context, ConnectionResult connectionResult, int i) {
+    public final boolean zaa(@RecentlyNonNull Context context, @RecentlyNonNull ConnectionResult connectionResult, int i) {
         PendingIntent errorResolutionPendingIntent = getErrorResolutionPendingIntent(context, connectionResult);
         if (errorResolutionPendingIntent != null) {
             zaa(context, connectionResult.getErrorCode(), (String) null, GoogleApiActivity.zaa(context, errorResolutionPendingIntent, i));
@@ -211,7 +168,8 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
         return false;
     }
 
-    public static Dialog zaa(Activity activity, DialogInterface.OnCancelListener onCancelListener) {
+    @RecentlyNonNull
+    public static Dialog zaa(@RecentlyNonNull Activity activity, @RecentlyNonNull DialogInterface.OnCancelListener onCancelListener) {
         ProgressBar progressBar = new ProgressBar(activity, null, 16842874);
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(0);
@@ -238,25 +196,6 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
         return zabkVar;
     }
 
-    public Task<Void> checkApiAvailability(HasApiKey<?> hasApiKey, HasApiKey<?>... hasApiKeyArr) {
-        return zaa(hasApiKey, hasApiKeyArr).onSuccessTask(com.google.android.gms.common.zaa.zaa);
-    }
-
-    public Task<Void> checkApiAvailability(GoogleApi<?> googleApi, GoogleApi<?>... googleApiArr) {
-        return zaa(googleApi, googleApiArr).onSuccessTask(zab.zaa);
-    }
-
-    private static Task<Map<ApiKey<?>, String>> zaa(HasApiKey<?> hasApiKey, HasApiKey<?>... hasApiKeyArr) {
-        Preconditions.checkNotNull(hasApiKey, "Requested API must not be null.");
-        for (HasApiKey<?> hasApiKey2 : hasApiKeyArr) {
-            Preconditions.checkNotNull(hasApiKey2, "Requested API must not be null.");
-        }
-        ArrayList arrayList = new ArrayList(hasApiKeyArr.length + 1);
-        arrayList.add(hasApiKey);
-        arrayList.addAll(Arrays.asList(hasApiKeyArr));
-        return GoogleApiManager.zaa().zaa(arrayList);
-    }
-
     private final String zaa() {
         String str;
         synchronized (zaa) {
@@ -265,22 +204,13 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
         return str;
     }
 
-    public void setDefaultNotificationChannelId(Context context, String str) {
-        if (PlatformVersion.isAtLeastO()) {
-            Preconditions.checkNotNull(((NotificationManager) Preconditions.checkNotNull(context.getSystemService("notification"))).getNotificationChannel(str));
-        }
-        synchronized (zaa) {
-            this.zac = str;
-        }
-    }
-
     @Override // com.google.android.gms.common.GoogleApiAvailabilityLight
-    public int isGooglePlayServicesAvailable(Context context) {
+    public int isGooglePlayServicesAvailable(@RecentlyNonNull Context context) {
         return super.isGooglePlayServicesAvailable(context);
     }
 
     @Override // com.google.android.gms.common.GoogleApiAvailabilityLight
-    public int isGooglePlayServicesAvailable(Context context, int i) {
+    public int isGooglePlayServicesAvailable(@RecentlyNonNull Context context, int i) {
         return super.isGooglePlayServicesAvailable(context, i);
     }
 
@@ -290,16 +220,19 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
     }
 
     @Override // com.google.android.gms.common.GoogleApiAvailabilityLight
+    @RecentlyNullable
     public Intent getErrorResolutionIntent(Context context, int i, String str) {
         return super.getErrorResolutionIntent(context, i, str);
     }
 
     @Override // com.google.android.gms.common.GoogleApiAvailabilityLight
-    public PendingIntent getErrorResolutionPendingIntent(Context context, int i, int i2) {
+    @RecentlyNullable
+    public PendingIntent getErrorResolutionPendingIntent(@RecentlyNonNull Context context, int i, int i2) {
         return super.getErrorResolutionPendingIntent(context, i, i2);
     }
 
-    public PendingIntent getErrorResolutionPendingIntent(Context context, ConnectionResult connectionResult) {
+    @RecentlyNullable
+    public PendingIntent getErrorResolutionPendingIntent(@RecentlyNonNull Context context, @RecentlyNonNull ConnectionResult connectionResult) {
         if (connectionResult.hasResolution()) {
             return connectionResult.getResolution();
         }
@@ -307,16 +240,11 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
     }
 
     @Override // com.google.android.gms.common.GoogleApiAvailabilityLight
-    public int getClientVersion(Context context) {
-        return super.getClientVersion(context);
-    }
-
-    @Override // com.google.android.gms.common.GoogleApiAvailabilityLight
     public final String getErrorString(int i) {
         return super.getErrorString(i);
     }
 
-    public static Dialog zaa(Context context, int i, com.google.android.gms.common.internal.zab zabVar, DialogInterface.OnCancelListener onCancelListener) {
+    static Dialog zaa(Context context, int i, zab zabVar, DialogInterface.OnCancelListener onCancelListener) {
         AlertDialog.Builder builder = null;
         if (i == 0) {
             return null;
@@ -345,7 +273,7 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
         return builder.create();
     }
 
-    public static void zaa(Activity activity, Dialog dialog, String str, DialogInterface.OnCancelListener onCancelListener) {
+    static void zaa(Activity activity, Dialog dialog, String str, DialogInterface.OnCancelListener onCancelListener) {
         if (activity instanceof FragmentActivity) {
             SupportErrorDialogFragment.newInstance(dialog, onCancelListener).show(((FragmentActivity) activity).getSupportFragmentManager(), str);
             return;
@@ -353,7 +281,7 @@ public class GoogleApiAvailability extends GoogleApiAvailabilityLight {
         ErrorDialogFragment.newInstance(dialog, onCancelListener).show(activity.getFragmentManager(), str);
     }
 
-    public final void zaa(Context context) {
+    final void zaa(Context context) {
         new zaa(context).sendEmptyMessageDelayed(1, 120000L);
     }
 }

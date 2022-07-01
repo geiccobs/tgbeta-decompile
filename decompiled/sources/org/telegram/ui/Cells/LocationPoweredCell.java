@@ -8,12 +8,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class LocationPoweredCell extends FrameLayout {
     private ImageView imageView;
     private final Theme.ResourcesProvider resourcesProvider;
@@ -28,31 +27,31 @@ public class LocationPoweredCell extends FrameLayout {
         TextView textView = new TextView(context);
         this.textView = textView;
         textView.setTextSize(1, 16.0f);
-        this.textView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
+        this.textView.setTextColor(getThemedColor("windowBackgroundWhiteGrayText3"));
         this.textView.setText("Powered by");
         linearLayout.addView(this.textView, LayoutHelper.createLinear(-2, -2));
         ImageView imageView = new ImageView(context);
         this.imageView = imageView;
         imageView.setImageResource(R.drawable.foursquare);
-        this.imageView.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3), PorterDuff.Mode.MULTIPLY));
+        this.imageView.setColorFilter(new PorterDuffColorFilter(getThemedColor("windowBackgroundWhiteGrayText3"), PorterDuff.Mode.MULTIPLY));
         this.imageView.setPadding(0, AndroidUtilities.dp(2.0f), 0, 0);
         linearLayout.addView(this.imageView, LayoutHelper.createLinear(35, -2));
         TextView textView2 = new TextView(context);
         this.textView2 = textView2;
         textView2.setTextSize(1, 16.0f);
-        this.textView2.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
+        this.textView2.setTextColor(getThemedColor("windowBackgroundWhiteGrayText3"));
         this.textView2.setText("Foursquare");
         linearLayout.addView(this.textView2, LayoutHelper.createLinear(-2, -2));
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(56.0f), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(56.0f), 1073741824));
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

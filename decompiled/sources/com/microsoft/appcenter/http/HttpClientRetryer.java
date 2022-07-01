@@ -8,36 +8,41 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class HttpClientRetryer extends HttpClientDecorator {
-    static final long[] RETRY_INTERVALS = {TimeUnit.SECONDS.toMillis(10), TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(20)};
+    static final long[] RETRY_INTERVALS;
     private final Handler mHandler;
     private final Random mRandom;
 
-    public HttpClientRetryer(HttpClient decoratedApi) {
-        this(decoratedApi, new Handler(Looper.getMainLooper()));
+    static {
+        TimeUnit timeUnit = TimeUnit.MINUTES;
+        RETRY_INTERVALS = new long[]{TimeUnit.SECONDS.toMillis(10L), timeUnit.toMillis(5L), timeUnit.toMillis(20L)};
     }
 
-    HttpClientRetryer(HttpClient decoratedApi, Handler handler) {
-        super(decoratedApi);
+    public HttpClientRetryer(HttpClient httpClient) {
+        this(httpClient, new Handler(Looper.getMainLooper()));
+    }
+
+    HttpClientRetryer(HttpClient httpClient, Handler handler) {
+        super(httpClient);
         this.mRandom = new Random();
         this.mHandler = handler;
     }
 
     @Override // com.microsoft.appcenter.http.HttpClient
-    public ServiceCall callAsync(String url, String method, Map<String, String> headers, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
-        RetryableCall retryableCall = new RetryableCall(this.mDecoratedApi, url, method, headers, callTemplate, serviceCallback);
+    public ServiceCall callAsync(String str, String str2, Map<String, String> map, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
+        RetryableCall retryableCall = new RetryableCall(this.mDecoratedApi, str, str2, map, callTemplate, serviceCallback);
         retryableCall.run();
         return retryableCall;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     private class RetryableCall extends HttpClientCallDecorator {
         private int mRetryCount;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        RetryableCall(HttpClient decoratedApi, String url, String method, Map<String, String> headers, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
-            super(decoratedApi, url, method, headers, callTemplate, serviceCallback);
+        RetryableCall(HttpClient httpClient, String str, String str2, Map<String, String> map, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
+            super(httpClient, str, str2, map, callTemplate, serviceCallback);
             HttpClientRetryer.this = r8;
         }
 
@@ -48,32 +53,27 @@ public class HttpClientRetryer extends HttpClientDecorator {
         }
 
         @Override // com.microsoft.appcenter.http.HttpClientCallDecorator, com.microsoft.appcenter.http.ServiceCallback
-        public void onCallFailed(Exception e) {
-            if (this.mRetryCount < HttpClientRetryer.RETRY_INTERVALS.length && HttpUtils.isRecoverableError(e)) {
-                long delay = 0;
-                if (e instanceof HttpException) {
-                    HttpException httpException = (HttpException) e;
-                    String retryAfterMs = httpException.getHttpResponse().getHeaders().get("x-ms-retry-after-ms");
-                    if (retryAfterMs != null) {
-                        delay = Long.parseLong(retryAfterMs);
-                    }
+        public void onCallFailed(Exception exc) {
+            long j;
+            String str;
+            int i = this.mRetryCount;
+            long[] jArr = HttpClientRetryer.RETRY_INTERVALS;
+            if (i < jArr.length && HttpUtils.isRecoverableError(exc)) {
+                long parseLong = (!(exc instanceof HttpException) || (str = ((HttpException) exc).getHttpResponse().getHeaders().get("x-ms-retry-after-ms")) == null) ? 0L : Long.parseLong(str);
+                if (parseLong == 0) {
+                    int i2 = this.mRetryCount;
+                    this.mRetryCount = i2 + 1;
+                    parseLong = (jArr[i2] / 2) + HttpClientRetryer.this.mRandom.nextInt((int) j);
                 }
-                if (delay == 0) {
-                    long[] jArr = HttpClientRetryer.RETRY_INTERVALS;
-                    int i = this.mRetryCount;
-                    this.mRetryCount = i + 1;
-                    long delay2 = jArr[i] / 2;
-                    delay = HttpClientRetryer.this.mRandom.nextInt((int) delay2) + delay2;
+                String str2 = "Try #" + this.mRetryCount + " failed and will be retried in " + parseLong + " ms";
+                if (exc instanceof UnknownHostException) {
+                    str2 = str2 + " (UnknownHostException)";
                 }
-                String message = "Try #" + this.mRetryCount + " failed and will be retried in " + delay + " ms";
-                if (e instanceof UnknownHostException) {
-                    message = message + " (UnknownHostException)";
-                }
-                AppCenterLog.warn("AppCenter", message, e);
-                HttpClientRetryer.this.mHandler.postDelayed(this, delay);
+                AppCenterLog.warn("AppCenter", str2, exc);
+                HttpClientRetryer.this.mHandler.postDelayed(this, parseLong);
                 return;
             }
-            this.mServiceCallback.onCallFailed(e);
+            this.mServiceCallback.onCallFailed(exc);
         }
     }
 }

@@ -1,18 +1,16 @@
 package com.google.android.gms.internal.clearcut;
 
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.RandomAccess;
-/* loaded from: classes3.dex */
-final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
-    private static final zzaz zzfg;
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
+final class zzaz extends zzav<Boolean> implements zzcn<Boolean> {
     private int size;
     private boolean[] zzfh;
 
     static {
-        zzaz zzazVar = new zzaz();
-        zzfg = zzazVar;
-        zzazVar.zzv();
+        new zzaz().zzv();
     }
 
     zzaz() {
@@ -41,7 +39,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
         }
         this.zzfh[i] = z;
         this.size++;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
     private final void zzg(int i) {
@@ -60,7 +58,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
         return sb.toString();
     }
 
-    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zza(i, ((Boolean) obj).booleanValue());
     }
@@ -78,7 +76,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
             return false;
         }
         int i2 = this.size;
-        if (Integer.MAX_VALUE - i2 < i) {
+        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -88,7 +86,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
         }
         System.arraycopy(zzazVar.zzfh, 0, this.zzfh, this.size, zzazVar.size);
         this.size = i3;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return true;
     }
 
@@ -132,7 +130,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
         return i;
     }
 
-    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzw();
         zzg(i);
@@ -143,7 +141,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
             System.arraycopy(zArr, i + 1, zArr, i, i2 - i);
         }
         this.size--;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return Boolean.valueOf(z);
     }
 
@@ -155,7 +153,7 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
                 boolean[] zArr = this.zzfh;
                 System.arraycopy(zArr, i + 1, zArr, i, this.size - i);
                 this.size--;
-                this.modCount++;
+                ((AbstractList) this).modCount++;
                 return true;
             }
         }
@@ -169,13 +167,13 @@ final class zzaz extends zzav<Boolean> implements zzcn<Boolean>, RandomAccess {
             boolean[] zArr = this.zzfh;
             System.arraycopy(zArr, i2, zArr, i, this.size - i2);
             this.size -= i2 - i;
-            this.modCount++;
+            ((AbstractList) this).modCount++;
             return;
         }
         throw new IndexOutOfBoundsException("toIndex < fromIndex");
     }
 
-    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         boolean booleanValue = ((Boolean) obj).booleanValue();
         zzw();

@@ -1,10 +1,13 @@
 package com.google.firebase.installations;
 
+import com.google.auto.value.AutoValue;
 import com.google.firebase.installations.AutoValue_InstallationTokenResult;
-/* loaded from: classes3.dex */
+@AutoValue
+/* loaded from: classes.dex */
 public abstract class InstallationTokenResult {
 
-    /* loaded from: classes3.dex */
+    @AutoValue.Builder
+    /* loaded from: classes.dex */
     public static abstract class Builder {
         public abstract InstallationTokenResult build();
 
@@ -20,8 +23,6 @@ public abstract class InstallationTokenResult {
     public abstract long getTokenCreationTimestamp();
 
     public abstract long getTokenExpirationTimestamp();
-
-    public abstract Builder toBuilder();
 
     public static Builder builder() {
         return new AutoValue_InstallationTokenResult.Builder();

@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class ColoredImageSpan extends ReplacementSpan {
     String colorKey;
     Drawable drawable;
@@ -19,8 +19,8 @@ public class ColoredImageSpan extends ReplacementSpan {
     private int topOffset;
     boolean usePaintColor;
 
-    public ColoredImageSpan(int imageRes) {
-        this(ContextCompat.getDrawable(ApplicationLoader.applicationContext, imageRes));
+    public ColoredImageSpan(int i) {
+        this(ContextCompat.getDrawable(ApplicationLoader.applicationContext, i));
     }
 
     public ColoredImageSpan(Drawable drawable) {
@@ -30,47 +30,41 @@ public class ColoredImageSpan extends ReplacementSpan {
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
     }
 
-    public void setSize(int size) {
-        this.size = size;
-        this.drawable.setBounds(0, 0, size, size);
+    public void setSize(int i) {
+        this.size = i;
+        this.drawable.setBounds(0, 0, i, i);
     }
 
     @Override // android.text.style.ReplacementSpan
-    public int getSize(Paint paint, CharSequence charSequence, int i, int i1, Paint.FontMetricsInt fontMetricsInt) {
-        int i2 = this.size;
-        return i2 != 0 ? i2 : this.drawable.getIntrinsicWidth();
+    public int getSize(Paint paint, CharSequence charSequence, int i, int i2, Paint.FontMetricsInt fontMetricsInt) {
+        int i3 = this.size;
+        return i3 != 0 ? i3 : this.drawable.getIntrinsicWidth();
     }
 
     @Override // android.text.style.ReplacementSpan
-    public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
-        int color;
+    public void draw(Canvas canvas, CharSequence charSequence, int i, int i2, float f, int i3, int i4, int i5, Paint paint) {
+        int i6;
         if (this.usePaintColor) {
-            color = paint.getColor();
+            i6 = paint.getColor();
         } else {
-            color = Theme.getColor(this.colorKey);
+            i6 = Theme.getColor(this.colorKey);
         }
-        if (this.drawableColor != color) {
-            this.drawableColor = color;
+        if (this.drawableColor != i6) {
+            this.drawableColor = i6;
             this.drawable.setColorFilter(new PorterDuffColorFilter(this.drawableColor, PorterDuff.Mode.MULTIPLY));
         }
-        int lineHeight = bottom - top;
-        int drawableHeight = this.size;
-        if (drawableHeight == 0) {
-            drawableHeight = this.drawable.getIntrinsicHeight();
+        int i7 = i5 - i3;
+        int i8 = this.size;
+        if (i8 == 0) {
+            i8 = this.drawable.getIntrinsicHeight();
         }
-        int padding = (lineHeight - drawableHeight) / 2;
         canvas.save();
-        canvas.translate(x, top + padding + AndroidUtilities.dp(this.topOffset));
+        canvas.translate(f, i3 + ((i7 - i8) / 2) + AndroidUtilities.dp(this.topOffset));
         this.drawable.draw(canvas);
         canvas.restore();
     }
 
-    public void setColorKey(String colorKey) {
-        this.colorKey = colorKey;
-        this.usePaintColor = false;
-    }
-
-    public void setTopOffset(int topOffset) {
-        this.topOffset = topOffset;
+    public void setTopOffset(int i) {
+        this.topOffset = i;
     }
 }

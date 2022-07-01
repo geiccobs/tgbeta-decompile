@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.RandomAccess;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzle {
     private static final Class<?> zza = zzd();
     private static final zzlu<?, ?> zzb = zza(false);
@@ -15,117 +15,136 @@ public final class zzle {
 
     public static void zza(Class<?> cls) {
         Class<?> cls2;
-        if (!zzjb.class.isAssignableFrom(cls) && (cls2 = zza) != null && !cls2.isAssignableFrom(cls)) {
-            throw new IllegalArgumentException("Message classes must extend GeneratedMessage or GeneratedMessageLite");
+        if (zzjb.class.isAssignableFrom(cls) || (cls2 = zza) == null || cls2.isAssignableFrom(cls)) {
+            return;
         }
+        throw new IllegalArgumentException("Message classes must extend GeneratedMessage or GeneratedMessageLite");
     }
 
     public static void zza(int i, List<Double> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzg(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzg(i, list, z);
     }
 
     public static void zzb(int i, List<Float> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzf(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzf(i, list, z);
     }
 
     public static void zzc(int i, List<Long> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzc(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzc(i, list, z);
     }
 
     public static void zzd(int i, List<Long> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzd(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzd(i, list, z);
     }
 
     public static void zze(int i, List<Long> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzn(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzn(i, list, z);
     }
 
     public static void zzf(int i, List<Long> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zze(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zze(i, list, z);
     }
 
     public static void zzg(int i, List<Long> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzl(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzl(i, list, z);
     }
 
     public static void zzh(int i, List<Integer> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zza(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zza(i, list, z);
     }
 
     public static void zzi(int i, List<Integer> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzj(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzj(i, list, z);
     }
 
     public static void zzj(int i, List<Integer> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzm(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzm(i, list, z);
     }
 
     public static void zzk(int i, List<Integer> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzb(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzb(i, list, z);
     }
 
     public static void zzl(int i, List<Integer> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzk(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzk(i, list, z);
     }
 
     public static void zzm(int i, List<Integer> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzh(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzh(i, list, z);
     }
 
     public static void zzn(int i, List<Boolean> list, zzmr zzmrVar, boolean z) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzi(i, list, z);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzi(i, list, z);
     }
 
     public static void zza(int i, List<String> list, zzmr zzmrVar) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zza(i, list);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zza(i, list);
     }
 
     public static void zzb(int i, List<zzht> list, zzmr zzmrVar) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzb(i, list);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzb(i, list);
     }
 
     public static void zza(int i, List<?> list, zzmr zzmrVar, zzlc zzlcVar) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zza(i, list, zzlcVar);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zza(i, list, zzlcVar);
     }
 
     public static void zzb(int i, List<?> list, zzmr zzmrVar, zzlc zzlcVar) throws IOException {
-        if (list != null && !list.isEmpty()) {
-            zzmrVar.zzb(i, list, zzlcVar);
+        if (list == null || list.isEmpty()) {
+            return;
         }
+        zzmrVar.zzb(i, list, zzlcVar);
     }
 
     public static int zza(List<Long> list) {
@@ -492,7 +511,7 @@ public final class zzle {
                 return (zzlu) zze.getConstructor(Boolean.TYPE).newInstance(Boolean.valueOf(z));
             }
             return null;
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }
@@ -500,7 +519,7 @@ public final class zzle {
     private static Class<?> zzd() {
         try {
             return Class.forName("com.google.protobuf.GeneratedMessage");
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }
@@ -508,7 +527,7 @@ public final class zzle {
     private static Class<?> zze() {
         try {
             return Class.forName("com.google.protobuf.UnknownFieldSetSchema");
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }
@@ -569,7 +588,7 @@ public final class zzle {
         return ub;
     }
 
-    public static <UT, UB> UB zza(int i, int i2, UB ub, zzlu<UT, UB> zzluVar) {
+    static <UT, UB> UB zza(int i, int i2, UB ub, zzlu<UT, UB> zzluVar) {
         if (ub == null) {
             ub = zzluVar.zza();
         }

@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzb extends Fragment implements LifecycleFragment {
     private static WeakHashMap<Activity, WeakReference<zzb>> zza = new WeakHashMap<>();
     private Map<String, LifecycleCallback> zzb = DesugarCollections.synchronizedMap(new ArrayMap());
@@ -49,10 +49,10 @@ public final class zzb extends Fragment implements LifecycleFragment {
     public final void addCallback(String str, LifecycleCallback lifecycleCallback) {
         if (!this.zzb.containsKey(str)) {
             this.zzb.put(str, lifecycleCallback);
-            if (this.zzc > 0) {
-                new zzi(Looper.getMainLooper()).post(new zza(this, lifecycleCallback, str));
+            if (this.zzc <= 0) {
                 return;
             }
+            new zzi(Looper.getMainLooper()).post(new zza(this, lifecycleCallback, str));
             return;
         }
         StringBuilder sb = new StringBuilder(String.valueOf(str).length() + 59);
@@ -60,16 +60,6 @@ public final class zzb extends Fragment implements LifecycleFragment {
         sb.append(str);
         sb.append(" already added to this fragment.");
         throw new IllegalArgumentException(sb.toString());
-    }
-
-    @Override // com.google.android.gms.common.api.internal.LifecycleFragment
-    public final boolean isCreated() {
-        return this.zzc > 0;
-    }
-
-    @Override // com.google.android.gms.common.api.internal.LifecycleFragment
-    public final boolean isStarted() {
-        return this.zzc >= 2;
     }
 
     @Override // com.google.android.gms.common.api.internal.LifecycleFragment

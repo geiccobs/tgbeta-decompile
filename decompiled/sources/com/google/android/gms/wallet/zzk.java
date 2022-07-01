@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.identity.intents.model.UserAddress;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzk implements Parcelable.Creator<FullWallet> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ FullWallet createFromParcel(Parcel parcel) {

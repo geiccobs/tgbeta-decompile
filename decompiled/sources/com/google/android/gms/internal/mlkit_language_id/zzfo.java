@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzfo implements zzfw {
     private zzfw[] zza;
 
@@ -26,7 +26,7 @@ final class zzfo implements zzfw {
                 return zzfwVar.zzb(cls);
             }
         }
-        String valueOf = String.valueOf(cls.getName());
-        throw new UnsupportedOperationException(valueOf.length() != 0 ? "No factory is available for message type: ".concat(valueOf) : new String("No factory is available for message type: "));
+        String name = cls.getName();
+        throw new UnsupportedOperationException(name.length() != 0 ? "No factory is available for message type: ".concat(name) : new String("No factory is available for message type: "));
     }
 }

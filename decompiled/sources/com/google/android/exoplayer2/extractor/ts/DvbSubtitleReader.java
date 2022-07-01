@@ -4,11 +4,10 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.ExtractorOutput;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.extractor.ts.TsPayloadReader;
-import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class DvbSubtitleReader implements ElementaryStreamReader {
     private int bytesToCheck;
     private final TrackOutput[] outputs;
@@ -17,9 +16,9 @@ public final class DvbSubtitleReader implements ElementaryStreamReader {
     private final List<TsPayloadReader.DvbSubtitleInfo> subtitleInfos;
     private boolean writingSample;
 
-    public DvbSubtitleReader(List<TsPayloadReader.DvbSubtitleInfo> subtitleInfos) {
-        this.subtitleInfos = subtitleInfos;
-        this.outputs = new TrackOutput[subtitleInfos.size()];
+    public DvbSubtitleReader(List<TsPayloadReader.DvbSubtitleInfo> list) {
+        this.subtitleInfos = list;
+        this.outputs = new TrackOutput[list.size()];
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
@@ -28,63 +27,62 @@ public final class DvbSubtitleReader implements ElementaryStreamReader {
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void createTracks(ExtractorOutput extractorOutput, TsPayloadReader.TrackIdGenerator idGenerator) {
+    public void createTracks(ExtractorOutput extractorOutput, TsPayloadReader.TrackIdGenerator trackIdGenerator) {
         for (int i = 0; i < this.outputs.length; i++) {
-            TsPayloadReader.DvbSubtitleInfo subtitleInfo = this.subtitleInfos.get(i);
-            idGenerator.generateNewId();
-            TrackOutput output = extractorOutput.track(idGenerator.getTrackId(), 3);
-            output.format(Format.createImageSampleFormat(idGenerator.getFormatId(), MimeTypes.APPLICATION_DVBSUBS, null, -1, 0, Collections.singletonList(subtitleInfo.initializationData), subtitleInfo.language, null));
-            this.outputs[i] = output;
+            TsPayloadReader.DvbSubtitleInfo dvbSubtitleInfo = this.subtitleInfos.get(i);
+            trackIdGenerator.generateNewId();
+            TrackOutput track = extractorOutput.track(trackIdGenerator.getTrackId(), 3);
+            track.format(Format.createImageSampleFormat(trackIdGenerator.getFormatId(), "application/dvbsubs", null, -1, 0, Collections.singletonList(dvbSubtitleInfo.initializationData), dvbSubtitleInfo.language, null));
+            this.outputs[i] = track;
         }
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void packetStarted(long pesTimeUs, int flags) {
-        if ((flags & 4) == 0) {
+    public void packetStarted(long j, int i) {
+        if ((i & 4) == 0) {
             return;
         }
         this.writingSample = true;
-        this.sampleTimeUs = pesTimeUs;
+        this.sampleTimeUs = j;
         this.sampleBytesWritten = 0;
         this.bytesToCheck = 2;
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
     public void packetFinished() {
-        TrackOutput[] trackOutputArr;
         if (this.writingSample) {
-            for (TrackOutput output : this.outputs) {
-                output.sampleMetadata(this.sampleTimeUs, 1, this.sampleBytesWritten, 0, null);
+            for (TrackOutput trackOutput : this.outputs) {
+                trackOutput.sampleMetadata(this.sampleTimeUs, 1, this.sampleBytesWritten, 0, null);
             }
             this.writingSample = false;
         }
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void consume(ParsableByteArray data) {
+    public void consume(ParsableByteArray parsableByteArray) {
         TrackOutput[] trackOutputArr;
         if (this.writingSample) {
-            if (this.bytesToCheck == 2 && !checkNextByte(data, 32)) {
+            if (this.bytesToCheck == 2 && !checkNextByte(parsableByteArray, 32)) {
                 return;
             }
-            if (this.bytesToCheck == 1 && !checkNextByte(data, 0)) {
+            if (this.bytesToCheck == 1 && !checkNextByte(parsableByteArray, 0)) {
                 return;
             }
-            int dataPosition = data.getPosition();
-            int bytesAvailable = data.bytesLeft();
-            for (TrackOutput output : this.outputs) {
-                data.setPosition(dataPosition);
-                output.sampleData(data, bytesAvailable);
+            int position = parsableByteArray.getPosition();
+            int bytesLeft = parsableByteArray.bytesLeft();
+            for (TrackOutput trackOutput : this.outputs) {
+                parsableByteArray.setPosition(position);
+                trackOutput.sampleData(parsableByteArray, bytesLeft);
             }
-            this.sampleBytesWritten += bytesAvailable;
+            this.sampleBytesWritten += bytesLeft;
         }
     }
 
-    private boolean checkNextByte(ParsableByteArray data, int expectedValue) {
-        if (data.bytesLeft() == 0) {
+    private boolean checkNextByte(ParsableByteArray parsableByteArray, int i) {
+        if (parsableByteArray.bytesLeft() == 0) {
             return false;
         }
-        if (data.readUnsignedByte() != expectedValue) {
+        if (parsableByteArray.readUnsignedByte() != i) {
             this.writingSample = false;
         }
         this.bytesToCheck--;

@@ -1,89 +1,63 @@
 package com.microsoft.appcenter.utils;
 
 import android.util.Log;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class AppCenterLog {
-    public static final String LOG_TAG = "AppCenter";
-    public static final int NONE = 8;
     private static int sLogLevel = 7;
 
     public static int getLogLevel() {
         return sLogLevel;
     }
 
-    public static void setLogLevel(int logLevel) {
-        sLogLevel = logLevel;
+    public static void setLogLevel(int i) {
+        sLogLevel = i;
     }
 
-    public static void verbose(String tag, String message) {
+    public static void verbose(String str, String str2) {
         if (sLogLevel <= 2) {
-            Log.v(tag, message);
+            Log.v(str, str2);
         }
     }
 
-    public static void verbose(String tag, String message, Throwable throwable) {
+    public static void verbose(String str, String str2, Throwable th) {
         if (sLogLevel <= 2) {
-            Log.v(tag, message, throwable);
+            Log.v(str, str2, th);
         }
     }
 
-    public static void debug(String tag, String message) {
+    public static void debug(String str, String str2) {
         if (sLogLevel <= 3) {
-            Log.d(tag, message);
+            Log.d(str, str2);
         }
     }
 
-    public static void debug(String tag, String message, Throwable throwable) {
-        if (sLogLevel <= 3) {
-            Log.d(tag, message, throwable);
-        }
-    }
-
-    public static void info(String tag, String message) {
+    public static void info(String str, String str2) {
         if (sLogLevel <= 4) {
-            Log.i(tag, message);
+            Log.i(str, str2);
         }
     }
 
-    public static void info(String tag, String message, Throwable throwable) {
-        if (sLogLevel <= 4) {
-            Log.i(tag, message, throwable);
-        }
-    }
-
-    public static void warn(String tag, String message) {
+    public static void warn(String str, String str2) {
         if (sLogLevel <= 5) {
-            Log.w(tag, message);
+            Log.w(str, str2);
         }
     }
 
-    public static void warn(String tag, String message, Throwable throwable) {
+    public static void warn(String str, String str2, Throwable th) {
         if (sLogLevel <= 5) {
-            Log.w(tag, message, throwable);
+            Log.w(str, str2, th);
         }
     }
 
-    public static void error(String tag, String message) {
+    public static void error(String str, String str2) {
         if (sLogLevel <= 6) {
-            Log.e(tag, message);
+            Log.e(str, str2);
         }
     }
 
-    public static void error(String tag, String message, Throwable throwable) {
+    public static void error(String str, String str2, Throwable th) {
         if (sLogLevel <= 6) {
-            Log.e(tag, message, throwable);
-        }
-    }
-
-    public static void logAssert(String tag, String message) {
-        if (sLogLevel <= 7) {
-            Log.println(7, tag, message);
-        }
-    }
-
-    public static void logAssert(String tag, String message, Throwable throwable) {
-        if (sLogLevel <= 7) {
-            Log.println(7, tag, message + "\n" + Log.getStackTraceString(throwable));
+            Log.e(str, str2, th);
         }
     }
 }

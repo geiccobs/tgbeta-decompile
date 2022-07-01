@@ -6,7 +6,7 @@ import android.graphics.Path;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class PathAnimator {
     private float durationScale;
     private float scale;
@@ -16,7 +16,7 @@ public class PathAnimator {
     private float pathTime = -1.0f;
     private ArrayList<KeyFrame> keyFrames = new ArrayList<>();
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class KeyFrame {
         public ArrayList<Object> commands;
         public float time;
@@ -26,7 +26,7 @@ public class PathAnimator {
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class MoveTo {
         public float x;
         public float y;
@@ -35,7 +35,7 @@ public class PathAnimator {
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class LineTo {
         public float x;
         public float y;
@@ -44,7 +44,7 @@ public class PathAnimator {
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class CurveTo {
         public float x;
         public float x1;
@@ -57,55 +57,48 @@ public class PathAnimator {
         }
     }
 
-    public PathAnimator(float sc, float x, float y, float dsc) {
-        this.scale = sc;
-        this.tx = x;
-        this.ty = y;
-        this.durationScale = dsc;
+    public PathAnimator(float f, float f2, float f3, float f4) {
+        this.scale = f;
+        this.tx = f2;
+        this.ty = f3;
+        this.durationScale = f4;
     }
 
-    public float getDurationScale() {
-        return this.durationScale;
-    }
-
-    public void addSvgKeyFrame(String svg, float ms) {
-        if (svg == null) {
+    public void addSvgKeyFrame(String str, float f) {
+        if (str == null) {
             return;
         }
         try {
             KeyFrame keyFrame = new KeyFrame();
-            keyFrame.time = this.durationScale * ms;
-            String[] args = svg.split(" ");
-            int a = 0;
-            while (a < args.length) {
-                switch (args[a].charAt(0)) {
-                    case 'C':
-                        CurveTo curveTo = new CurveTo();
-                        curveTo.x1 = (Float.parseFloat(args[a + 1]) + this.tx) * this.scale;
-                        curveTo.y1 = (Float.parseFloat(args[a + 2]) + this.ty) * this.scale;
-                        curveTo.x2 = (Float.parseFloat(args[a + 3]) + this.tx) * this.scale;
-                        curveTo.y2 = (Float.parseFloat(args[a + 4]) + this.ty) * this.scale;
-                        curveTo.x = (Float.parseFloat(args[a + 5]) + this.tx) * this.scale;
-                        curveTo.y = (Float.parseFloat(args[a + 6]) + this.ty) * this.scale;
-                        keyFrame.commands.add(curveTo);
-                        a += 6;
-                        break;
-                    case UndoView.ACTION_GIGAGROUP_SUCCESS /* 76 */:
-                        LineTo lineTo = new LineTo();
-                        lineTo.x = (Float.parseFloat(args[a + 1]) + this.tx) * this.scale;
-                        lineTo.y = (Float.parseFloat(args[a + 2]) + this.ty) * this.scale;
-                        keyFrame.commands.add(lineTo);
-                        a += 2;
-                        break;
-                    case UndoView.ACTION_PAYMENT_SUCCESS /* 77 */:
-                        MoveTo moveTo = new MoveTo();
-                        moveTo.x = (Float.parseFloat(args[a + 1]) + this.tx) * this.scale;
-                        moveTo.y = (Float.parseFloat(args[a + 2]) + this.ty) * this.scale;
-                        keyFrame.commands.add(moveTo);
-                        a += 2;
-                        break;
+            keyFrame.time = f * this.durationScale;
+            String[] split = str.split(" ");
+            int i = 0;
+            while (i < split.length) {
+                char charAt = split[i].charAt(0);
+                if (charAt == 'C') {
+                    CurveTo curveTo = new CurveTo();
+                    curveTo.x1 = (Float.parseFloat(split[i + 1]) + this.tx) * this.scale;
+                    curveTo.y1 = (Float.parseFloat(split[i + 2]) + this.ty) * this.scale;
+                    curveTo.x2 = (Float.parseFloat(split[i + 3]) + this.tx) * this.scale;
+                    curveTo.y2 = (Float.parseFloat(split[i + 4]) + this.ty) * this.scale;
+                    curveTo.x = (Float.parseFloat(split[i + 5]) + this.tx) * this.scale;
+                    i += 6;
+                    curveTo.y = (Float.parseFloat(split[i]) + this.ty) * this.scale;
+                    keyFrame.commands.add(curveTo);
+                } else if (charAt == 'L') {
+                    LineTo lineTo = new LineTo();
+                    lineTo.x = (Float.parseFloat(split[i + 1]) + this.tx) * this.scale;
+                    i += 2;
+                    lineTo.y = (Float.parseFloat(split[i]) + this.ty) * this.scale;
+                    keyFrame.commands.add(lineTo);
+                } else if (charAt == 'M') {
+                    MoveTo moveTo = new MoveTo();
+                    moveTo.x = (Float.parseFloat(split[i + 1]) + this.tx) * this.scale;
+                    i += 2;
+                    moveTo.y = (Float.parseFloat(split[i]) + this.ty) * this.scale;
+                    keyFrame.commands.add(moveTo);
                 }
-                a++;
+                i++;
             }
             this.keyFrames.add(keyFrame);
         } catch (Exception e) {
@@ -113,92 +106,94 @@ public class PathAnimator {
         }
     }
 
-    public void draw(Canvas canvas, Paint paint, float time) {
-        float progress;
-        KeyFrame endKeyFrame;
-        KeyFrame startKeyFrame;
-        float f = time;
+    public void draw(Canvas canvas, Paint paint, float f) {
+        float f2;
         if (this.pathTime != f) {
             this.pathTime = f;
-            KeyFrame startKeyFrame2 = null;
-            KeyFrame endKeyFrame2 = null;
-            int N = this.keyFrames.size();
-            for (int a = 0; a < N; a++) {
-                KeyFrame keyFrame = this.keyFrames.get(a);
-                if ((startKeyFrame2 == null || startKeyFrame2.time < keyFrame.time) && keyFrame.time <= f) {
-                    startKeyFrame2 = keyFrame;
+            int size = this.keyFrames.size();
+            KeyFrame keyFrame = null;
+            KeyFrame keyFrame2 = null;
+            for (int i = 0; i < size; i++) {
+                KeyFrame keyFrame3 = this.keyFrames.get(i);
+                if ((keyFrame2 == null || keyFrame2.time < keyFrame3.time) && keyFrame3.time <= f) {
+                    keyFrame2 = keyFrame3;
                 }
-                if ((endKeyFrame2 == null || endKeyFrame2.time > keyFrame.time) && keyFrame.time >= f) {
-                    endKeyFrame2 = keyFrame;
+                if ((keyFrame == null || keyFrame.time > keyFrame3.time) && keyFrame3.time >= f) {
+                    keyFrame = keyFrame3;
                 }
             }
-            if (endKeyFrame2 == startKeyFrame2) {
-                startKeyFrame2 = null;
+            if (keyFrame == keyFrame2) {
+                keyFrame2 = null;
             }
-            if (startKeyFrame2 != null && endKeyFrame2 == null) {
-                endKeyFrame2 = startKeyFrame2;
-                startKeyFrame2 = null;
+            if (keyFrame2 != null && keyFrame == null) {
+                keyFrame = keyFrame2;
+                keyFrame2 = null;
             }
-            if (endKeyFrame2 == null) {
+            if (keyFrame == null) {
                 return;
             }
-            if (startKeyFrame2 != null && startKeyFrame2.commands.size() != endKeyFrame2.commands.size()) {
+            if (keyFrame2 != null && keyFrame2.commands.size() != keyFrame.commands.size()) {
                 return;
             }
             this.path.reset();
-            int a2 = 0;
-            int N2 = endKeyFrame2.commands.size();
-            while (a2 < N2) {
-                Object startCommand = startKeyFrame2 != null ? startKeyFrame2.commands.get(a2) : null;
-                Object endCommand = endKeyFrame2.commands.get(a2);
-                if (startCommand != null && startCommand.getClass() != endCommand.getClass()) {
+            int size2 = keyFrame.commands.size();
+            for (int i2 = 0; i2 < size2; i2++) {
+                Object obj = keyFrame2 != null ? keyFrame2.commands.get(i2) : null;
+                Object obj2 = keyFrame.commands.get(i2);
+                if (obj != null && obj.getClass() != obj2.getClass()) {
                     return;
                 }
-                if (startKeyFrame2 != null) {
-                    progress = (f - startKeyFrame2.time) / (endKeyFrame2.time - startKeyFrame2.time);
+                if (keyFrame2 != null) {
+                    float f3 = keyFrame2.time;
+                    f2 = (f - f3) / (keyFrame.time - f3);
                 } else {
-                    progress = 1.0f;
+                    f2 = 1.0f;
                 }
-                if (endCommand instanceof MoveTo) {
-                    MoveTo end = (MoveTo) endCommand;
-                    MoveTo start = (MoveTo) startCommand;
-                    if (start != null) {
-                        this.path.moveTo(AndroidUtilities.dpf2(start.x + ((end.x - start.x) * progress)), AndroidUtilities.dpf2(start.y + ((end.y - start.y) * progress)));
+                if (obj2 instanceof MoveTo) {
+                    MoveTo moveTo = (MoveTo) obj2;
+                    MoveTo moveTo2 = (MoveTo) obj;
+                    if (moveTo2 != null) {
+                        Path path = this.path;
+                        float f4 = moveTo2.x;
+                        float dpf2 = AndroidUtilities.dpf2(f4 + ((moveTo.x - f4) * f2));
+                        float f5 = moveTo2.y;
+                        path.moveTo(dpf2, AndroidUtilities.dpf2(f5 + ((moveTo.y - f5) * f2)));
                     } else {
-                        this.path.moveTo(AndroidUtilities.dpf2(end.x), AndroidUtilities.dpf2(end.y));
+                        this.path.moveTo(AndroidUtilities.dpf2(moveTo.x), AndroidUtilities.dpf2(moveTo.y));
                     }
-                    startKeyFrame = startKeyFrame2;
-                    endKeyFrame = endKeyFrame2;
-                } else if (endCommand instanceof LineTo) {
-                    LineTo end2 = (LineTo) endCommand;
-                    LineTo start2 = (LineTo) startCommand;
-                    if (start2 != null) {
-                        this.path.lineTo(AndroidUtilities.dpf2(start2.x + ((end2.x - start2.x) * progress)), AndroidUtilities.dpf2(start2.y + ((end2.y - start2.y) * progress)));
+                } else if (obj2 instanceof LineTo) {
+                    LineTo lineTo = (LineTo) obj2;
+                    LineTo lineTo2 = (LineTo) obj;
+                    if (lineTo2 != null) {
+                        Path path2 = this.path;
+                        float f6 = lineTo2.x;
+                        float dpf22 = AndroidUtilities.dpf2(f6 + ((lineTo.x - f6) * f2));
+                        float f7 = lineTo2.y;
+                        path2.lineTo(dpf22, AndroidUtilities.dpf2(f7 + ((lineTo.y - f7) * f2)));
                     } else {
-                        this.path.lineTo(AndroidUtilities.dpf2(end2.x), AndroidUtilities.dpf2(end2.y));
+                        this.path.lineTo(AndroidUtilities.dpf2(lineTo.x), AndroidUtilities.dpf2(lineTo.y));
                     }
-                    startKeyFrame = startKeyFrame2;
-                    endKeyFrame = endKeyFrame2;
-                } else if (!(endCommand instanceof CurveTo)) {
-                    startKeyFrame = startKeyFrame2;
-                    endKeyFrame = endKeyFrame2;
-                } else {
-                    CurveTo end3 = (CurveTo) endCommand;
-                    CurveTo start3 = (CurveTo) startCommand;
-                    if (start3 != null) {
-                        startKeyFrame = startKeyFrame2;
-                        endKeyFrame = endKeyFrame2;
-                        this.path.cubicTo(AndroidUtilities.dpf2(start3.x1 + ((end3.x1 - start3.x1) * progress)), AndroidUtilities.dpf2(start3.y1 + ((end3.y1 - start3.y1) * progress)), AndroidUtilities.dpf2(start3.x2 + ((end3.x2 - start3.x2) * progress)), AndroidUtilities.dpf2(start3.y2 + ((end3.y2 - start3.y2) * progress)), AndroidUtilities.dpf2(start3.x + ((end3.x - start3.x) * progress)), AndroidUtilities.dpf2(start3.y + ((end3.y - start3.y) * progress)));
+                } else if (obj2 instanceof CurveTo) {
+                    CurveTo curveTo = (CurveTo) obj2;
+                    CurveTo curveTo2 = (CurveTo) obj;
+                    if (curveTo2 != null) {
+                        Path path3 = this.path;
+                        float f8 = curveTo2.x1;
+                        float dpf23 = AndroidUtilities.dpf2(f8 + ((curveTo.x1 - f8) * f2));
+                        float f9 = curveTo2.y1;
+                        float dpf24 = AndroidUtilities.dpf2(f9 + ((curveTo.y1 - f9) * f2));
+                        float f10 = curveTo2.x2;
+                        float dpf25 = AndroidUtilities.dpf2(f10 + ((curveTo.x2 - f10) * f2));
+                        float f11 = curveTo2.y2;
+                        float dpf26 = AndroidUtilities.dpf2(f11 + ((curveTo.y2 - f11) * f2));
+                        float f12 = curveTo2.x;
+                        float dpf27 = AndroidUtilities.dpf2(f12 + ((curveTo.x - f12) * f2));
+                        float f13 = curveTo2.y;
+                        path3.cubicTo(dpf23, dpf24, dpf25, dpf26, dpf27, AndroidUtilities.dpf2(f13 + ((curveTo.y - f13) * f2)));
                     } else {
-                        startKeyFrame = startKeyFrame2;
-                        endKeyFrame = endKeyFrame2;
-                        this.path.cubicTo(AndroidUtilities.dpf2(end3.x1), AndroidUtilities.dpf2(end3.y1), AndroidUtilities.dpf2(end3.x2), AndroidUtilities.dpf2(end3.y2), AndroidUtilities.dpf2(end3.x), AndroidUtilities.dpf2(end3.y));
+                        this.path.cubicTo(AndroidUtilities.dpf2(curveTo.x1), AndroidUtilities.dpf2(curveTo.y1), AndroidUtilities.dpf2(curveTo.x2), AndroidUtilities.dpf2(curveTo.y2), AndroidUtilities.dpf2(curveTo.x), AndroidUtilities.dpf2(curveTo.y));
                     }
                 }
-                a2++;
-                f = time;
-                startKeyFrame2 = startKeyFrame;
-                endKeyFrame2 = endKeyFrame;
             }
             this.path.close();
         }

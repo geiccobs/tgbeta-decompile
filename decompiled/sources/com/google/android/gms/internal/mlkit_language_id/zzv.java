@@ -3,7 +3,7 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzv extends WeakReference<Throwable> {
     private final int zza;
 
@@ -20,16 +20,15 @@ final class zzv extends WeakReference<Throwable> {
     }
 
     public final boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass()) {
-            return false;
+        if (obj != null && obj.getClass() == zzv.class) {
+            if (this == obj) {
+                return true;
+            }
+            zzv zzvVar = (zzv) obj;
+            if (this.zza == zzvVar.zza && get() == zzvVar.get()) {
+                return true;
+            }
         }
-        if (this == obj) {
-            return true;
-        }
-        zzv zzvVar = (zzv) obj;
-        if (this.zza != zzvVar.zza || get() != zzvVar.get()) {
-            return false;
-        }
-        return true;
+        return false;
     }
 }

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzgq<K extends Comparable<K>, V> extends AbstractMap<K, V> {
     private final int zza;
     private List<zzgz> zzb;
@@ -138,10 +138,10 @@ public class zzgq<K extends Comparable<K>, V> extends AbstractMap<K, V> {
         if (zza >= 0) {
             return (V) zzc(zza);
         }
-        if (this.zzc.isEmpty()) {
-            return null;
+        if (!this.zzc.isEmpty()) {
+            return this.zzc.remove(comparable);
         }
-        return this.zzc.remove(comparable);
+        return null;
     }
 
     public final V zzc(int i) {
@@ -172,10 +172,10 @@ public class zzgq<K extends Comparable<K>, V> extends AbstractMap<K, V> {
             int compareTo2 = k.compareTo((Comparable) this.zzb.get(i2).getKey());
             if (compareTo2 < 0) {
                 size = i2 - 1;
-            } else if (compareTo2 > 0) {
-                i = i2 + 1;
-            } else {
+            } else if (compareTo2 <= 0) {
                 return i2;
+            } else {
+                i = i2 + 1;
             }
         }
         return -(i + 1);
@@ -197,9 +197,10 @@ public class zzgq<K extends Comparable<K>, V> extends AbstractMap<K, V> {
     }
 
     public final void zzf() {
-        if (this.zzd) {
-            throw new UnsupportedOperationException();
+        if (!this.zzd) {
+            return;
         }
+        throw new UnsupportedOperationException();
     }
 
     private final SortedMap<K, V> zzg() {
@@ -247,10 +248,7 @@ public class zzgq<K extends Comparable<K>, V> extends AbstractMap<K, V> {
         for (int i2 = 0; i2 < zzc; i2++) {
             i += this.zzb.get(i2).hashCode();
         }
-        if (this.zzc.size() > 0) {
-            return i + this.zzc.hashCode();
-        }
-        return i;
+        return this.zzc.size() > 0 ? i + this.zzc.hashCode() : i;
     }
 
     /* JADX WARN: Multi-variable type inference failed */

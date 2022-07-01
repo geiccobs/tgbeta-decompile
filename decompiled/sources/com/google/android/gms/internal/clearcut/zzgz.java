@@ -2,12 +2,11 @@ package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzgz extends zzfu<zzgz> implements Cloneable {
     private byte[] zzbjb = zzgb.zzse;
     private String zzbjc = "";
     private byte[][] zzbjd = zzgb.zzsd;
-    private boolean zzbje = false;
 
     public zzgz() {
         this.zzrj = null;
@@ -50,15 +49,21 @@ public final class zzgz extends zzfu<zzgz> implements Cloneable {
         if (!zzfy.zza(this.zzbjd, zzgzVar.zzbjd)) {
             return false;
         }
-        return (this.zzrj == null || this.zzrj.isEmpty()) ? zzgzVar.zzrj == null || zzgzVar.zzrj.isEmpty() : this.zzrj.equals(zzgzVar.zzrj);
+        zzfw zzfwVar = this.zzrj;
+        if (zzfwVar != null && !zzfwVar.isEmpty()) {
+            return this.zzrj.equals(zzgzVar.zzrj);
+        }
+        zzfw zzfwVar2 = zzgzVar.zzrj;
+        return zzfwVar2 == null || zzfwVar2.isEmpty();
     }
 
     public final int hashCode() {
-        int hashCode = (((getClass().getName().hashCode() + 527) * 31) + Arrays.hashCode(this.zzbjb)) * 31;
+        int hashCode = (((zzgz.class.getName().hashCode() + 527) * 31) + Arrays.hashCode(this.zzbjb)) * 31;
         String str = this.zzbjc;
         int i = 0;
         int hashCode2 = (((((hashCode + (str == null ? 0 : str.hashCode())) * 31) + zzfy.zza(this.zzbjd)) * 31) + 1237) * 31;
-        if (this.zzrj != null && !this.zzrj.isEmpty()) {
+        zzfw zzfwVar = this.zzrj;
+        if (zzfwVar != null && !zzfwVar.isEmpty()) {
             i = this.zzrj.hashCode();
         }
         return hashCode2 + i;

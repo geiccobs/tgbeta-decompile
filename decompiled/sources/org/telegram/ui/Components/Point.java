@@ -1,5 +1,5 @@
 package org.telegram.ui.Components;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Point {
     public float x;
     public float y;
@@ -7,8 +7,8 @@ public class Point {
     public Point() {
     }
 
-    public Point(float x, float y) {
-        this.x = x;
-        this.y = y;
+    public Point(float f, float f2) {
+        this.x = f;
+        this.y = f2;
     }
 }

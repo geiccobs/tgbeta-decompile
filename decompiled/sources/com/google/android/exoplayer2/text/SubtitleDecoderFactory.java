@@ -11,114 +11,113 @@ import com.google.android.exoplayer2.text.ttml.TtmlDecoder;
 import com.google.android.exoplayer2.text.tx3g.Tx3gDecoder;
 import com.google.android.exoplayer2.text.webvtt.Mp4WebvttDecoder;
 import com.google.android.exoplayer2.text.webvtt.WebvttDecoder;
-import com.google.android.exoplayer2.util.MimeTypes;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface SubtitleDecoderFactory {
     public static final SubtitleDecoderFactory DEFAULT = new SubtitleDecoderFactory() { // from class: com.google.android.exoplayer2.text.SubtitleDecoderFactory.1
         @Override // com.google.android.exoplayer2.text.SubtitleDecoderFactory
         public boolean supportsFormat(Format format) {
-            String mimeType = format.sampleMimeType;
-            return MimeTypes.TEXT_VTT.equals(mimeType) || MimeTypes.TEXT_SSA.equals(mimeType) || MimeTypes.APPLICATION_TTML.equals(mimeType) || MimeTypes.APPLICATION_MP4VTT.equals(mimeType) || MimeTypes.APPLICATION_SUBRIP.equals(mimeType) || MimeTypes.APPLICATION_TX3G.equals(mimeType) || MimeTypes.APPLICATION_CEA608.equals(mimeType) || MimeTypes.APPLICATION_MP4CEA608.equals(mimeType) || MimeTypes.APPLICATION_CEA708.equals(mimeType) || MimeTypes.APPLICATION_DVBSUBS.equals(mimeType) || MimeTypes.APPLICATION_PGS.equals(mimeType);
+            String str = format.sampleMimeType;
+            return "text/vtt".equals(str) || "text/x-ssa".equals(str) || "application/ttml+xml".equals(str) || "application/x-mp4-vtt".equals(str) || "application/x-subrip".equals(str) || "application/x-quicktime-tx3g".equals(str) || "application/cea-608".equals(str) || "application/x-mp4-cea-608".equals(str) || "application/cea-708".equals(str) || "application/dvbsubs".equals(str) || "application/pgs".equals(str);
         }
 
         @Override // com.google.android.exoplayer2.text.SubtitleDecoderFactory
         public SubtitleDecoder createDecoder(Format format) {
-            String mimeType = format.sampleMimeType;
-            if (mimeType != null) {
+            String str = format.sampleMimeType;
+            if (str != null) {
                 char c = 65535;
-                switch (mimeType.hashCode()) {
+                switch (str.hashCode()) {
                     case -1351681404:
-                        if (mimeType.equals(MimeTypes.APPLICATION_DVBSUBS)) {
-                            c = '\t';
+                        if (str.equals("application/dvbsubs")) {
+                            c = 0;
                             break;
                         }
                         break;
                     case -1248334819:
-                        if (mimeType.equals(MimeTypes.APPLICATION_PGS)) {
-                            c = '\n';
+                        if (str.equals("application/pgs")) {
+                            c = 1;
                             break;
                         }
                         break;
                     case -1026075066:
-                        if (mimeType.equals(MimeTypes.APPLICATION_MP4VTT)) {
+                        if (str.equals("application/x-mp4-vtt")) {
                             c = 2;
                             break;
                         }
                         break;
                     case -1004728940:
-                        if (mimeType.equals(MimeTypes.TEXT_VTT)) {
-                            c = 0;
+                        if (str.equals("text/vtt")) {
+                            c = 3;
                             break;
                         }
                         break;
                     case 691401887:
-                        if (mimeType.equals(MimeTypes.APPLICATION_TX3G)) {
-                            c = 5;
+                        if (str.equals("application/x-quicktime-tx3g")) {
+                            c = 4;
                             break;
                         }
                         break;
                     case 822864842:
-                        if (mimeType.equals(MimeTypes.TEXT_SSA)) {
-                            c = 1;
+                        if (str.equals("text/x-ssa")) {
+                            c = 5;
                             break;
                         }
                         break;
                     case 930165504:
-                        if (mimeType.equals(MimeTypes.APPLICATION_MP4CEA608)) {
-                            c = 7;
-                            break;
-                        }
-                        break;
-                    case 1566015601:
-                        if (mimeType.equals(MimeTypes.APPLICATION_CEA608)) {
+                        if (str.equals("application/x-mp4-cea-608")) {
                             c = 6;
                             break;
                         }
                         break;
+                    case 1566015601:
+                        if (str.equals("application/cea-608")) {
+                            c = 7;
+                            break;
+                        }
+                        break;
                     case 1566016562:
-                        if (mimeType.equals(MimeTypes.APPLICATION_CEA708)) {
+                        if (str.equals("application/cea-708")) {
                             c = '\b';
                             break;
                         }
                         break;
                     case 1668750253:
-                        if (mimeType.equals(MimeTypes.APPLICATION_SUBRIP)) {
-                            c = 4;
+                        if (str.equals("application/x-subrip")) {
+                            c = '\t';
                             break;
                         }
                         break;
                     case 1693976202:
-                        if (mimeType.equals(MimeTypes.APPLICATION_TTML)) {
-                            c = 3;
+                        if (str.equals("application/ttml+xml")) {
+                            c = '\n';
                             break;
                         }
                         break;
                 }
                 switch (c) {
                     case 0:
-                        return new WebvttDecoder();
+                        return new DvbDecoder(format.initializationData);
                     case 1:
-                        return new SsaDecoder(format.initializationData);
+                        return new PgsDecoder();
                     case 2:
                         return new Mp4WebvttDecoder();
                     case 3:
-                        return new TtmlDecoder();
+                        return new WebvttDecoder();
                     case 4:
-                        return new SubripDecoder();
-                    case 5:
                         return new Tx3gDecoder(format.initializationData);
+                    case 5:
+                        return new SsaDecoder(format.initializationData);
                     case 6:
                     case 7:
-                        return new Cea608Decoder(mimeType, format.accessibilityChannel);
+                        return new Cea608Decoder(str, format.accessibilityChannel);
                     case '\b':
                         return new Cea708Decoder(format.accessibilityChannel, format.initializationData);
                     case '\t':
-                        return new DvbDecoder(format.initializationData);
+                        return new SubripDecoder();
                     case '\n':
-                        return new PgsDecoder();
+                        return new TtmlDecoder();
                 }
             }
-            throw new IllegalArgumentException("Attempted to create decoder for unsupported MIME type: " + mimeType);
+            throw new IllegalArgumentException("Attempted to create decoder for unsupported MIME type: " + str);
         }
     };
 

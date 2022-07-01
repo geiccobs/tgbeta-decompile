@@ -3,17 +3,19 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.io.IOException;
 import java.util.Arrays;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzhg {
     private static final zzhg zza = new zzhg(0, new int[0], new Object[0], false);
     private int zzb;
     private int[] zzc;
     private Object[] zzd;
     private int zze;
-    private boolean zzf;
 
     public static zzhg zza() {
         return zza;
+    }
+
+    public final void zzb() {
     }
 
     public static zzhg zza(zzhg zzhgVar, zzhg zzhgVar2) {
@@ -34,11 +36,6 @@ public final class zzhg {
         this.zzb = i;
         this.zzc = iArr;
         this.zzd = objArr;
-        this.zzf = z;
-    }
-
-    public final void zzb() {
-        this.zzf = false;
     }
 
     public final void zza(zzib zzibVar) throws IOException {
@@ -70,33 +67,27 @@ public final class zzhg {
 
     private static void zza(int i, Object obj, zzib zzibVar) throws IOException {
         int i2 = i >>> 3;
-        switch (i & 7) {
-            case 0:
-                zzibVar.zza(i2, ((Long) obj).longValue());
-                return;
-            case 1:
-                zzibVar.zzd(i2, ((Long) obj).longValue());
-                return;
-            case 2:
-                zzibVar.zza(i2, (zzdn) obj);
-                return;
-            case 3:
-                if (zzibVar.zza() == zzia.zza) {
-                    zzibVar.zza(i2);
-                    ((zzhg) obj).zzb(zzibVar);
-                    zzibVar.zzb(i2);
-                    return;
-                }
-                zzibVar.zzb(i2);
-                ((zzhg) obj).zzb(zzibVar);
-                zzibVar.zza(i2);
-                return;
-            case 4:
-            default:
-                throw new RuntimeException(zzez.zza());
-            case 5:
+        int i3 = i & 7;
+        if (i3 == 0) {
+            zzibVar.zza(i2, ((Long) obj).longValue());
+        } else if (i3 == 1) {
+            zzibVar.zzd(i2, ((Long) obj).longValue());
+        } else if (i3 == 2) {
+            zzibVar.zza(i2, (zzdn) obj);
+        } else if (i3 != 3) {
+            if (i3 == 5) {
                 zzibVar.zzd(i2, ((Integer) obj).intValue());
                 return;
+            }
+            throw new RuntimeException(zzez.zza());
+        } else if (zzibVar.zza() == zzia.zza) {
+            zzibVar.zza(i2);
+            ((zzhg) obj).zzb(zzibVar);
+            zzibVar.zzb(i2);
+        } else {
+            zzibVar.zzb(i2);
+            ((zzhg) obj).zzb(zzibVar);
+            zzibVar.zza(i2);
         }
     }
 
@@ -123,25 +114,19 @@ public final class zzhg {
         for (int i4 = 0; i4 < this.zzb; i4++) {
             int i5 = this.zzc[i4];
             int i6 = i5 >>> 3;
-            switch (i5 & 7) {
-                case 0:
-                    i = zzea.zze(i6, ((Long) this.zzd[i4]).longValue());
-                    break;
-                case 1:
-                    i = zzea.zzg(i6, ((Long) this.zzd[i4]).longValue());
-                    break;
-                case 2:
-                    i = zzea.zzc(i6, (zzdn) this.zzd[i4]);
-                    break;
-                case 3:
-                    i = (zzea.zze(i6) << 1) + ((zzhg) this.zzd[i4]).zzd();
-                    break;
-                case 4:
-                default:
-                    throw new IllegalStateException(zzez.zza());
-                case 5:
-                    i = zzea.zzi(i6, ((Integer) this.zzd[i4]).intValue());
-                    break;
+            int i7 = i5 & 7;
+            if (i7 == 0) {
+                i = zzea.zze(i6, ((Long) this.zzd[i4]).longValue());
+            } else if (i7 == 1) {
+                i = zzea.zzg(i6, ((Long) this.zzd[i4]).longValue());
+            } else if (i7 == 2) {
+                i = zzea.zzc(i6, (zzdn) this.zzd[i4]);
+            } else if (i7 == 3) {
+                i = (zzea.zze(i6) << 1) + ((zzhg) this.zzd[i4]).zzd();
+            } else if (i7 == 5) {
+                i = zzea.zzi(i6, ((Integer) this.zzd[i4]).intValue());
+            } else {
+                throw new IllegalStateException(zzez.zza());
             }
             i3 += i;
         }
@@ -165,15 +150,14 @@ public final class zzhg {
             int[] iArr2 = zzhgVar.zzc;
             int i2 = 0;
             while (true) {
-                if (i2 < i) {
-                    if (iArr[i2] != iArr2[i2]) {
-                        z = false;
-                        break;
-                    }
-                    i2++;
-                } else {
+                if (i2 >= i) {
                     z = true;
                     break;
+                } else if (iArr[i2] != iArr2[i2]) {
+                    z = false;
+                    break;
+                } else {
+                    i2++;
                 }
             }
             if (z) {
@@ -182,15 +166,14 @@ public final class zzhg {
                 int i3 = this.zzb;
                 int i4 = 0;
                 while (true) {
-                    if (i4 < i3) {
-                        if (!objArr[i4].equals(objArr2[i4])) {
-                            z2 = false;
-                            break;
-                        }
-                        i4++;
-                    } else {
+                    if (i4 >= i3) {
                         z2 = true;
                         break;
+                    } else if (!objArr[i4].equals(objArr2[i4])) {
+                        z2 = false;
+                        break;
+                    } else {
+                        i4++;
                     }
                 }
                 if (z2) {

@@ -1,31 +1,30 @@
 package org.telegram.messenger;
 
 import java.util.concurrent.CountDownLatch;
-import org.telegram.tgnet.TLRPC;
-/* loaded from: classes4.dex */
+import org.telegram.tgnet.TLRPC$Document;
+/* loaded from: classes.dex */
 public class AnimatedFileDrawableStream implements FileLoadOperationStream {
     private volatile boolean canceled;
     private CountDownLatch countDownLatch;
     private int currentAccount;
-    private TLRPC.Document document;
+    private TLRPC$Document document;
     private String finishedFilePath;
     private boolean finishedLoadingFile;
-    private boolean ignored;
     private long lastOffset;
-    private FileLoadOperation loadOperation;
+    private final FileLoadOperation loadOperation;
     private ImageLocation location;
     private Object parentObject;
     private boolean preview;
     private final Object sync = new Object();
     private boolean waitingForLoad;
 
-    public AnimatedFileDrawableStream(TLRPC.Document d, ImageLocation l, Object p, int a, boolean prev) {
-        this.document = d;
-        this.location = l;
-        this.parentObject = p;
-        this.currentAccount = a;
-        this.preview = prev;
-        this.loadOperation = FileLoader.getInstance(a).loadStreamFile(this, this.document, this.location, this.parentObject, 0, this.preview);
+    public AnimatedFileDrawableStream(TLRPC$Document tLRPC$Document, ImageLocation imageLocation, Object obj, int i, boolean z) {
+        this.document = tLRPC$Document;
+        this.location = imageLocation;
+        this.parentObject = obj;
+        this.currentAccount = i;
+        this.preview = z;
+        this.loadOperation = FileLoader.getInstance(i).loadStreamFile(this, this.document, this.location, this.parentObject, 0, this.preview);
     }
 
     public boolean isFinishedLoadingFile() {
@@ -36,35 +35,36 @@ public class AnimatedFileDrawableStream implements FileLoadOperationStream {
         return this.finishedFilePath;
     }
 
-    public int read(int offset, int readLength) {
-        long[] result;
-        long availableLength;
+    public int read(int i, int i2) {
+        long[] downloadedLengthFromOffset;
+        long j;
         synchronized (this.sync) {
             if (this.canceled) {
                 return 0;
             }
-            if (readLength == 0) {
+            if (i2 == 0) {
                 return 0;
             }
-            long availableLength2 = 0;
-            while (availableLength2 == 0) {
+            long j2 = 0;
+            while (j2 == 0) {
                 try {
-                    result = this.loadOperation.getDownloadedLengthFromOffset(offset, readLength);
-                    availableLength = result[0];
+                    downloadedLengthFromOffset = this.loadOperation.getDownloadedLengthFromOffset(i, i2);
+                    j = downloadedLengthFromOffset[0];
                 } catch (Exception e) {
                     e = e;
                 }
                 try {
-                    if (!this.finishedLoadingFile && result[1] != 0) {
+                    if (!this.finishedLoadingFile && downloadedLengthFromOffset[1] != 0) {
                         this.finishedLoadingFile = true;
                         this.finishedFilePath = this.loadOperation.getCacheFileFinal().getAbsolutePath();
                     }
-                    if (availableLength == 0) {
-                        if (this.loadOperation.isPaused() || this.lastOffset != offset || this.preview) {
-                            FileLoader.getInstance(this.currentAccount).loadStreamFile(this, this.document, this.location, this.parentObject, offset, this.preview);
+                    if (j == 0) {
+                        if (this.loadOperation.isPaused() || this.lastOffset != i || this.preview) {
+                            FileLoader.getInstance(this.currentAccount).loadStreamFile(this, this.document, this.location, this.parentObject, i, this.preview);
                         }
                         synchronized (this.sync) {
                             if (this.canceled) {
+                                FileLoader.getInstance(this.currentAccount).cancelLoadFile(this.document);
                                 return 0;
                             }
                             this.countDownLatch = new CountDownLatch(1);
@@ -76,16 +76,16 @@ public class AnimatedFileDrawableStream implements FileLoadOperationStream {
                         this.countDownLatch.await();
                         this.waitingForLoad = false;
                     }
-                    availableLength2 = availableLength;
+                    j2 = j;
                 } catch (Exception e2) {
                     e = e2;
-                    availableLength2 = availableLength;
+                    j2 = j;
                     FileLog.e((Throwable) e, false);
-                    return (int) availableLength2;
+                    return (int) j2;
                 }
             }
-            this.lastOffset = offset + availableLength2;
-            return (int) availableLength2;
+            this.lastOffset = i + j2;
+            return (int) j2;
         }
     }
 
@@ -93,12 +93,12 @@ public class AnimatedFileDrawableStream implements FileLoadOperationStream {
         cancel(true);
     }
 
-    public void cancel(boolean removeLoading) {
+    public void cancel(boolean z) {
         synchronized (this.sync) {
             CountDownLatch countDownLatch = this.countDownLatch;
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                if (removeLoading && !this.canceled && !this.preview) {
+                if (z && !this.canceled && !this.preview) {
                     FileLoader.getInstance(this.currentAccount).removeLoadingVideo(this.document, false, true);
                 }
             }
@@ -112,7 +112,7 @@ public class AnimatedFileDrawableStream implements FileLoadOperationStream {
         }
     }
 
-    public TLRPC.Document getDocument() {
+    public TLRPC$Document getDocument() {
         return this.document;
     }
 

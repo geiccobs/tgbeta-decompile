@@ -2,7 +2,7 @@ package com.google.android.gms.internal.vision;
 
 import java.util.Map;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzjr<K> implements Map.Entry<K, Object> {
     private Map.Entry<K, zzjp> zza;
 

@@ -16,13 +16,14 @@ import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicReference;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.FileLoader;
@@ -33,18 +34,27 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Message;
+import org.telegram.tgnet.TLRPC$MessageMedia;
+import org.telegram.tgnet.TLRPC$Photo;
+import org.telegram.tgnet.TLRPC$PhotoSize;
+import org.telegram.tgnet.TLRPC$TL_chatInviteExported;
+import org.telegram.tgnet.TLRPC$TL_documentEmpty;
+import org.telegram.tgnet.TLRPC$TL_messageActionUserUpdatedPhoto;
+import org.telegram.tgnet.TLRPC$TL_photoEmpty;
+import org.telegram.tgnet.TLRPC$TL_photoStrippedSize;
+import org.telegram.tgnet.TLRPC$VideoSize;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.PhotoViewer;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class ChatActionCell extends BaseCell implements DownloadController.FileDownloadProgressListener, NotificationCenter.NotificationCenterDelegate {
     private int TAG;
     private SpannableStringBuilder accessibilityText;
@@ -69,7 +79,6 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     private ArrayList<Integer> lineWidths;
     private String overrideBackground;
     private Paint overrideBackgroundPaint;
-    private int overrideColor;
     private String overrideText;
     private TextPaint overrideTextPaint;
     private URLSpan pressedLink;
@@ -89,61 +98,73 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     private boolean visiblePartSet;
     private boolean wasLayout;
 
-    /* loaded from: classes4.dex */
-    public interface ThemeDelegate extends Theme.ResourcesProvider {
-        int getCurrentColor();
-    }
-
-    @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.startSpoilers) {
-            setSpoilersSuppressed(false);
-        } else if (id == NotificationCenter.stopSpoilers) {
-            setSpoilersSuppressed(true);
-        }
-    }
-
-    public void setSpoilersSuppressed(boolean s) {
-        for (SpoilerEffect eff : this.spoilers) {
-            eff.setSuppressUpdates(s);
-        }
-    }
-
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public interface ChatActionCellDelegate {
+
+        /* renamed from: org.telegram.ui.Cells.ChatActionCell$ChatActionCellDelegate$-CC */
+        /* loaded from: classes3.dex */
+        public final /* synthetic */ class CC {
+            public static void $default$didClickImage(ChatActionCellDelegate chatActionCellDelegate, ChatActionCell chatActionCell) {
+            }
+
+            public static boolean $default$didLongPress(ChatActionCellDelegate chatActionCellDelegate, ChatActionCell chatActionCell, float f, float f2) {
+                return false;
+            }
+
+            public static void $default$didPressReplyMessage(ChatActionCellDelegate chatActionCellDelegate, ChatActionCell chatActionCell, int i) {
+            }
+
+            public static void $default$needOpenInviteLink(ChatActionCellDelegate chatActionCellDelegate, TLRPC$TL_chatInviteExported tLRPC$TL_chatInviteExported) {
+            }
+
+            public static void $default$needOpenUserProfile(ChatActionCellDelegate chatActionCellDelegate, long j) {
+            }
+        }
+
         void didClickImage(ChatActionCell chatActionCell);
 
         boolean didLongPress(ChatActionCell chatActionCell, float f, float f2);
 
-        void didPressBotButton(MessageObject messageObject, TLRPC.KeyboardButton keyboardButton);
-
         void didPressReplyMessage(ChatActionCell chatActionCell, int i);
 
-        void needOpenInviteLink(TLRPC.TL_chatInviteExported tL_chatInviteExported);
+        void needOpenInviteLink(TLRPC$TL_chatInviteExported tLRPC$TL_chatInviteExported);
 
         void needOpenUserProfile(long j);
+    }
 
-        /* renamed from: org.telegram.ui.Cells.ChatActionCell$ChatActionCellDelegate$-CC */
-        /* loaded from: classes4.dex */
-        public final /* synthetic */ class CC {
-            public static void $default$didClickImage(ChatActionCellDelegate _this, ChatActionCell cell) {
-            }
+    /* loaded from: classes3.dex */
+    public interface ThemeDelegate extends Theme.ResourcesProvider {
+    }
 
-            public static boolean $default$didLongPress(ChatActionCellDelegate _this, ChatActionCell cell, float x, float y) {
-                return false;
-            }
+    @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
+    public void onFailedDownload(String str, boolean z) {
+    }
 
-            public static void $default$needOpenUserProfile(ChatActionCellDelegate _this, long uid) {
-            }
+    @Override // android.view.ViewGroup, android.view.View
+    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+    }
 
-            public static void $default$didPressBotButton(ChatActionCellDelegate _this, MessageObject messageObject, TLRPC.KeyboardButton button) {
-            }
+    @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
+    public void onProgressDownload(String str, long j, long j2) {
+    }
 
-            public static void $default$didPressReplyMessage(ChatActionCellDelegate _this, ChatActionCell cell, int id) {
-            }
+    @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
+    public void onProgressUpload(String str, long j, long j2, boolean z) {
+    }
 
-            public static void $default$needOpenInviteLink(ChatActionCellDelegate _this, TLRPC.TL_chatInviteExported invite) {
-            }
+    @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
+    public void didReceivedNotification(int i, int i2, Object... objArr) {
+        if (i == NotificationCenter.startSpoilers) {
+            setSpoilersSuppressed(false);
+        } else if (i != NotificationCenter.stopSpoilers) {
+        } else {
+            setSpoilersSuppressed(true);
+        }
+    }
+
+    public void setSpoilersSuppressed(boolean z) {
+        for (SpoilerEffect spoilerEffect : this.spoilers) {
+            spoilerEffect.setSuppressUpdates(z);
         }
     }
 
@@ -151,7 +172,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         this(context, false, null);
     }
 
-    public ChatActionCell(Context context, boolean canDrawInParent, ThemeDelegate themeDelegate) {
+    public ChatActionCell(Context context, boolean z, ThemeDelegate themeDelegate) {
         super(context);
         this.currentAccount = UserConfig.selectedAccount;
         this.spoilers = new ArrayList();
@@ -162,7 +183,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         this.rect = new RectF();
         this.invalidatePath = true;
         this.invalidateColors = false;
-        this.canDrawInParent = canDrawInParent;
+        this.canDrawInParent = z;
         this.themeDelegate = themeDelegate;
         ImageReceiver imageReceiver = new ImageReceiver(this);
         this.imageReceiver = imageReceiver;
@@ -171,126 +192,119 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         this.TAG = DownloadController.getInstance(this.currentAccount).generateObserverTag();
     }
 
-    public void setDelegate(ChatActionCellDelegate delegate) {
-        this.delegate = delegate;
+    public void setDelegate(ChatActionCellDelegate chatActionCellDelegate) {
+        this.delegate = chatActionCellDelegate;
     }
 
-    public void setCustomDate(int date, boolean scheduled, boolean inLayout) {
-        CharSequence newText;
-        int i = this.customDate;
-        if (i == date || i / 3600 == date / 3600) {
+    public void setCustomDate(int i, boolean z, boolean z2) {
+        String str;
+        int i2 = this.customDate;
+        if (i2 == i || i2 / 3600 == i / 3600) {
             return;
         }
-        if (scheduled) {
-            if (date == 2147483646) {
-                newText = LocaleController.getString("MessageScheduledUntilOnline", R.string.MessageScheduledUntilOnline);
-            } else {
-                newText = LocaleController.formatString("MessageScheduledOn", R.string.MessageScheduledOn, LocaleController.formatDateChat(date));
-            }
+        if (z) {
+            str = i == 2147483646 ? LocaleController.getString("MessageScheduledUntilOnline", R.string.MessageScheduledUntilOnline) : LocaleController.formatString("MessageScheduledOn", R.string.MessageScheduledOn, LocaleController.formatDateChat(i));
         } else {
-            newText = LocaleController.formatDateChat(date);
+            str = LocaleController.formatDateChat(i);
         }
-        this.customDate = date;
+        this.customDate = i;
         CharSequence charSequence = this.customText;
-        if (charSequence != null && TextUtils.equals(newText, charSequence)) {
+        if (charSequence != null && TextUtils.equals(str, charSequence)) {
             return;
         }
-        this.customText = newText;
+        this.customText = str;
         this.accessibilityText = null;
-        updateTextInternal(inLayout);
+        updateTextInternal(z2);
     }
 
-    private void updateTextInternal(boolean inLayout) {
+    private void updateTextInternal(boolean z) {
         if (getMeasuredWidth() != 0) {
             createLayout(this.customText, getMeasuredWidth());
             invalidate();
         }
-        if (!this.wasLayout) {
-            if (inLayout) {
-                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Cells.ChatActionCell$$ExternalSyntheticLambda0
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        ChatActionCell.this.requestLayout();
-                    }
-                });
-                return;
-            } else {
-                requestLayout();
-                return;
-            }
+        if (this.wasLayout) {
+            buildLayout();
+        } else if (z) {
+            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Cells.ChatActionCell$$ExternalSyntheticLambda0
+                @Override // java.lang.Runnable
+                public final void run() {
+                    ChatActionCell.this.requestLayout();
+                }
+            });
+        } else {
+            requestLayout();
         }
-        buildLayout();
     }
 
-    public void setCustomText(CharSequence text) {
-        this.customText = text;
-        if (text != null) {
+    public void setCustomText(CharSequence charSequence) {
+        this.customText = charSequence;
+        if (charSequence != null) {
             updateTextInternal(false);
         }
     }
 
-    public void setOverrideColor(String background, String text) {
-        this.overrideBackground = background;
-        this.overrideText = text;
+    public void setOverrideColor(String str, String str2) {
+        this.overrideBackground = str;
+        this.overrideText = str2;
     }
 
     public void setMessageObject(MessageObject messageObject) {
+        TLRPC$PhotoSize tLRPC$PhotoSize;
+        AtomicReference<WeakReference<View>> atomicReference;
         StaticLayout staticLayout;
         if (this.currentMessageObject != messageObject || (((staticLayout = this.textLayout) != null && !TextUtils.equals(staticLayout.getText(), messageObject.messageText)) || (!this.hasReplyMessage && messageObject.replyMessageObject != null))) {
+            TLRPC$VideoSize tLRPC$VideoSize = null;
             this.accessibilityText = null;
             this.currentMessageObject = messageObject;
-            if (messageObject != null && messageObject.viewRef != null && (this.currentMessageObject.viewRef.get() == null || this.currentMessageObject.viewRef.get().get() != this)) {
+            if (messageObject != null && (atomicReference = messageObject.viewRef) != null && (atomicReference.get() == null || this.currentMessageObject.viewRef.get().get() != this)) {
                 this.currentMessageObject.viewRef.set(new WeakReference<>(this));
             }
             this.hasReplyMessage = messageObject.replyMessageObject != null;
             DownloadController.getInstance(this.currentAccount).removeLoadingFileObserver(this);
             this.previousWidth = 0;
-            if (this.currentMessageObject.type != 11) {
-                this.imageReceiver.setImageBitmap((Bitmap) null);
-            } else {
-                long id = messageObject.getDialogId();
-                this.avatarDrawable.setInfo(id, null, null);
-                if (this.currentMessageObject.messageOwner.action instanceof TLRPC.TL_messageActionUserUpdatedPhoto) {
-                    this.imageReceiver.setImage(null, null, this.avatarDrawable, null, this.currentMessageObject, 0);
+            if (this.currentMessageObject.type == 11) {
+                this.avatarDrawable.setInfo(messageObject.getDialogId(), null, null);
+                MessageObject messageObject2 = this.currentMessageObject;
+                if (messageObject2.messageOwner.action instanceof TLRPC$TL_messageActionUserUpdatedPhoto) {
+                    this.imageReceiver.setImage(null, null, this.avatarDrawable, null, messageObject2, 0);
                 } else {
-                    TLRPC.PhotoSize strippedPhotoSize = null;
-                    int a = 0;
-                    int N = this.currentMessageObject.photoThumbs.size();
+                    int size = messageObject2.photoThumbs.size();
+                    int i = 0;
                     while (true) {
-                        if (a >= N) {
+                        if (i >= size) {
+                            tLRPC$PhotoSize = null;
                             break;
                         }
-                        TLRPC.PhotoSize photoSize = this.currentMessageObject.photoThumbs.get(a);
-                        if (!(photoSize instanceof TLRPC.TL_photoStrippedSize)) {
-                            a++;
-                        } else {
-                            strippedPhotoSize = photoSize;
+                        tLRPC$PhotoSize = this.currentMessageObject.photoThumbs.get(i);
+                        if (tLRPC$PhotoSize instanceof TLRPC$TL_photoStrippedSize) {
                             break;
                         }
+                        i++;
                     }
-                    TLRPC.PhotoSize photoSize2 = FileLoader.getClosestPhotoSizeWithSize(this.currentMessageObject.photoThumbs, 640);
-                    if (photoSize2 == null) {
-                        this.imageReceiver.setImageBitmap(this.avatarDrawable);
-                    } else {
-                        TLRPC.Photo photo = messageObject.messageOwner.action.photo;
-                        TLRPC.VideoSize videoSize = null;
-                        if (!photo.video_sizes.isEmpty() && SharedConfig.autoplayGifs) {
-                            videoSize = photo.video_sizes.get(0);
-                            if (!messageObject.mediaExists && !DownloadController.getInstance(this.currentAccount).canDownloadMedia(4, videoSize.size)) {
-                                this.currentVideoLocation = ImageLocation.getForPhoto(videoSize, photo);
-                                String fileName = FileLoader.getAttachFileName(videoSize);
-                                DownloadController.getInstance(this.currentAccount).addLoadingFileObserver(fileName, this.currentMessageObject, this);
-                                videoSize = null;
+                    TLRPC$PhotoSize closestPhotoSizeWithSize = FileLoader.getClosestPhotoSizeWithSize(this.currentMessageObject.photoThumbs, 640);
+                    if (closestPhotoSizeWithSize != null) {
+                        TLRPC$Photo tLRPC$Photo = messageObject.messageOwner.action.photo;
+                        if (!tLRPC$Photo.video_sizes.isEmpty() && SharedConfig.autoplayGifs) {
+                            TLRPC$VideoSize tLRPC$VideoSize2 = tLRPC$Photo.video_sizes.get(0);
+                            if (messageObject.mediaExists || DownloadController.getInstance(this.currentAccount).canDownloadMedia(4, tLRPC$VideoSize2.size)) {
+                                tLRPC$VideoSize = tLRPC$VideoSize2;
+                            } else {
+                                this.currentVideoLocation = ImageLocation.getForPhoto(tLRPC$VideoSize2, tLRPC$Photo);
+                                DownloadController.getInstance(this.currentAccount).addLoadingFileObserver(FileLoader.getAttachFileName(tLRPC$VideoSize2), this.currentMessageObject, this);
                             }
                         }
-                        if (videoSize != null) {
-                            this.imageReceiver.setImage(ImageLocation.getForPhoto(videoSize, photo), ImageLoader.AUTOPLAY_FILTER, ImageLocation.getForObject(strippedPhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
+                        if (tLRPC$VideoSize != null) {
+                            this.imageReceiver.setImage(ImageLocation.getForPhoto(tLRPC$VideoSize, tLRPC$Photo), ImageLoader.AUTOPLAY_FILTER, ImageLocation.getForObject(tLRPC$PhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
                         } else {
-                            this.imageReceiver.setImage(ImageLocation.getForObject(photoSize2, this.currentMessageObject.photoThumbsObject), "150_150", ImageLocation.getForObject(strippedPhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
+                            this.imageReceiver.setImage(ImageLocation.getForObject(closestPhotoSizeWithSize, this.currentMessageObject.photoThumbsObject), "150_150", ImageLocation.getForObject(tLRPC$PhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
                         }
+                    } else {
+                        this.imageReceiver.setImageBitmap(this.avatarDrawable);
                     }
                 }
                 this.imageReceiver.setVisible(!PhotoViewer.isShowingImage(this.currentMessageObject), false);
+            } else {
+                this.imageReceiver.setImageBitmap((Bitmap) null);
             }
             requestLayout();
         }
@@ -304,10 +318,10 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         return this.imageReceiver;
     }
 
-    public void setVisiblePart(float visibleTop, int parentH) {
+    public void setVisiblePart(float f, int i) {
         this.visiblePartSet = true;
-        this.backgroundHeight = parentH;
-        this.viewTop = visibleTop;
+        this.backgroundHeight = i;
+        this.viewTop = f;
     }
 
     @Override // org.telegram.ui.Cells.BaseCell
@@ -317,10 +331,6 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             return chatActionCellDelegate.didLongPress(this, this.lastTouchX, this.lastTouchY);
         }
         return false;
-    }
-
-    @Override // android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
     }
 
     @Override // android.view.ViewGroup, android.view.View
@@ -337,131 +347,68 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         this.imageReceiver.onAttachedToWindow();
     }
 
+    /* JADX WARN: Removed duplicated region for block: B:46:0x0092  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x0107  */
+    /* JADX WARN: Removed duplicated region for block: B:74:? A[RETURN, SYNTHETIC] */
     @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent event) {
-        if (this.currentMessageObject == null) {
-            return super.onTouchEvent(event);
-        }
-        float x = event.getX();
-        this.lastTouchX = x;
-        float y = event.getY();
-        this.lastTouchY = y;
-        boolean result = false;
-        if (event.getAction() == 0) {
-            if (this.delegate != null) {
-                if (this.currentMessageObject.type == 11 && this.imageReceiver.isInsideImage(x, y)) {
-                    this.imagePressed = true;
-                    result = true;
-                }
-                if (result) {
-                    startCheckLongPress();
-                }
-            }
-        } else {
-            if (event.getAction() != 2) {
-                cancelCheckLongPress();
-            }
-            if (this.imagePressed) {
-                if (event.getAction() == 1) {
-                    this.imagePressed = false;
-                    ChatActionCellDelegate chatActionCellDelegate = this.delegate;
-                    if (chatActionCellDelegate != null) {
-                        chatActionCellDelegate.didClickImage(this);
-                        playSoundEffect(0);
-                    }
-                } else if (event.getAction() == 3) {
-                    this.imagePressed = false;
-                } else if (event.getAction() == 2 && !this.imageReceiver.isInsideImage(x, y)) {
-                    this.imagePressed = false;
-                }
-            }
-        }
-        if (!result && (event.getAction() == 0 || (this.pressedLink != null && event.getAction() == 1))) {
-            int i = this.textX;
-            if (x >= i) {
-                int i2 = this.textY;
-                if (y >= i2 && x <= i + this.textWidth && y <= this.textHeight + i2) {
-                    float x2 = x - this.textXLeft;
-                    int line = this.textLayout.getLineForVertical((int) (y - i2));
-                    int off = this.textLayout.getOffsetForHorizontal(line, x2);
-                    float left = this.textLayout.getLineLeft(line);
-                    if (left <= x2 && this.textLayout.getLineWidth(line) + left >= x2 && (this.currentMessageObject.messageText instanceof Spannable)) {
-                        Spannable buffer = (Spannable) this.currentMessageObject.messageText;
-                        URLSpan[] link = (URLSpan[]) buffer.getSpans(off, off, URLSpan.class);
-                        if (link.length != 0) {
-                            if (event.getAction() == 0) {
-                                this.pressedLink = link[0];
-                                result = true;
-                            } else {
-                                URLSpan uRLSpan = link[0];
-                                URLSpan uRLSpan2 = this.pressedLink;
-                                if (uRLSpan == uRLSpan2) {
-                                    openLink(uRLSpan2);
-                                    result = true;
-                                }
-                            }
-                        } else {
-                            this.pressedLink = null;
-                        }
-                    } else {
-                        this.pressedLink = null;
-                    }
-                }
-            }
-            this.pressedLink = null;
-        }
-        if (!result) {
-            return super.onTouchEvent(event);
-        }
-        return result;
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public boolean onTouchEvent(android.view.MotionEvent r10) {
+        /*
+            Method dump skipped, instructions count: 268
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatActionCell.onTouchEvent(android.view.MotionEvent):boolean");
     }
 
-    public void openLink(CharacterStyle link) {
-        if (this.delegate != null && (link instanceof URLSpan)) {
-            String url = ((URLSpan) link).getURL();
-            if (url.startsWith("invite")) {
-                URLSpan uRLSpan = this.pressedLink;
-                if (uRLSpan instanceof URLSpanNoUnderline) {
-                    URLSpanNoUnderline spanNoUnderline = (URLSpanNoUnderline) uRLSpan;
-                    TLObject object = spanNoUnderline.getObject();
-                    if (object instanceof TLRPC.TL_chatInviteExported) {
-                        TLRPC.TL_chatInviteExported invite = (TLRPC.TL_chatInviteExported) object;
-                        this.delegate.needOpenInviteLink(invite);
-                        return;
-                    }
+    public void openLink(CharacterStyle characterStyle) {
+        if (this.delegate == null || !(characterStyle instanceof URLSpan)) {
+            return;
+        }
+        String url = ((URLSpan) characterStyle).getURL();
+        if (url.startsWith("invite")) {
+            URLSpan uRLSpan = this.pressedLink;
+            if (uRLSpan instanceof URLSpanNoUnderline) {
+                TLObject object = ((URLSpanNoUnderline) uRLSpan).getObject();
+                if (!(object instanceof TLRPC$TL_chatInviteExported)) {
                     return;
                 }
+                this.delegate.needOpenInviteLink((TLRPC$TL_chatInviteExported) object);
+                return;
             }
-            if (url.startsWith("game")) {
-                this.delegate.didPressReplyMessage(this, this.currentMessageObject.getReplyMsgId());
-            } else if (url.startsWith("http")) {
-                Browser.openUrl(getContext(), url);
-            } else {
-                this.delegate.needOpenUserProfile(Long.parseLong(url));
-            }
+        }
+        if (url.startsWith("game")) {
+            this.delegate.didPressReplyMessage(this, this.currentMessageObject.getReplyMsgId());
+        } else if (url.startsWith("http")) {
+            Browser.openUrl(getContext(), url);
+        } else {
+            this.delegate.needOpenUserProfile(Long.parseLong(url));
         }
     }
 
-    private void createLayout(CharSequence text, int width) {
-        int maxWidth = width - AndroidUtilities.dp(30.0f);
+    private void createLayout(CharSequence charSequence, int i) {
+        int dp = i - AndroidUtilities.dp(30.0f);
         this.invalidatePath = true;
-        this.textLayout = new StaticLayout(text, (TextPaint) getThemedPaint(Theme.key_paint_chatActionText), maxWidth, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+        this.textLayout = new StaticLayout(charSequence, (TextPaint) getThemedPaint("paintChatActionText"), dp, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
         this.spoilersPool.addAll(this.spoilers);
         this.spoilers.clear();
-        if (text instanceof Spannable) {
-            SpoilerEffect.addSpoilers(this, this.textLayout, (Spannable) text, this.spoilersPool, this.spoilers);
+        if (charSequence instanceof Spannable) {
+            SpoilerEffect.addSpoilers(this, this.textLayout, (Spannable) charSequence, this.spoilersPool, this.spoilers);
         }
         this.textHeight = 0;
         this.textWidth = 0;
         try {
-            int linesCount = this.textLayout.getLineCount();
-            for (int a = 0; a < linesCount; a++) {
+            int lineCount = this.textLayout.getLineCount();
+            for (int i2 = 0; i2 < lineCount; i2++) {
                 try {
-                    float lineWidth = this.textLayout.getLineWidth(a);
-                    if (lineWidth > maxWidth) {
-                        lineWidth = maxWidth;
+                    float lineWidth = this.textLayout.getLineWidth(i2);
+                    float f = dp;
+                    if (lineWidth > f) {
+                        lineWidth = f;
                     }
-                    this.textHeight = (int) Math.max(this.textHeight, Math.ceil(this.textLayout.getLineBottom(a)));
+                    this.textHeight = (int) Math.max(this.textHeight, Math.ceil(this.textLayout.getLineBottom(i2)));
                     this.textWidth = (int) Math.max(this.textWidth, Math.ceil(lineWidth));
                 } catch (Exception e) {
                     FileLog.e(e);
@@ -471,51 +418,55 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         } catch (Exception e2) {
             FileLog.e(e2);
         }
-        this.textX = (width - this.textWidth) / 2;
+        this.textX = (i - this.textWidth) / 2;
         this.textY = AndroidUtilities.dp(7.0f);
-        this.textXLeft = (width - this.textLayout.getWidth()) / 2;
+        this.textXLeft = (i - this.textLayout.getWidth()) / 2;
     }
 
     @Override // android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(int i, int i2) {
         if (this.currentMessageObject == null && this.customText == null) {
-            setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), this.textHeight + AndroidUtilities.dp(14.0f));
+            setMeasuredDimension(View.MeasureSpec.getSize(i), this.textHeight + AndroidUtilities.dp(14.0f));
             return;
         }
-        int width = Math.max(AndroidUtilities.dp(30.0f), View.MeasureSpec.getSize(widthMeasureSpec));
-        if (this.previousWidth != width) {
+        int max = Math.max(AndroidUtilities.dp(30.0f), View.MeasureSpec.getSize(i));
+        if (this.previousWidth != max) {
             this.wasLayout = true;
-            this.previousWidth = width;
+            this.previousWidth = max;
             buildLayout();
         }
-        int i = this.textHeight;
+        int i3 = this.textHeight;
         MessageObject messageObject = this.currentMessageObject;
-        setMeasuredDimension(width, i + ((messageObject == null || messageObject.type != 11) ? 0 : AndroidUtilities.roundMessageSize + AndroidUtilities.dp(10.0f)) + AndroidUtilities.dp(14.0f));
+        setMeasuredDimension(max, i3 + ((messageObject == null || messageObject.type != 11) ? 0 : AndroidUtilities.roundMessageSize + AndroidUtilities.dp(10.0f)) + AndroidUtilities.dp(14.0f));
     }
 
     private void buildLayout() {
-        CharSequence text;
+        CharSequence charSequence;
+        TLRPC$MessageMedia tLRPC$MessageMedia;
         MessageObject messageObject = this.currentMessageObject;
         if (messageObject != null) {
-            if (messageObject.messageOwner != null && this.currentMessageObject.messageOwner.media != null && this.currentMessageObject.messageOwner.media.ttl_seconds != 0) {
-                if (this.currentMessageObject.messageOwner.media.photo instanceof TLRPC.TL_photoEmpty) {
-                    text = LocaleController.getString("AttachPhotoExpired", R.string.AttachPhotoExpired);
-                } else if (this.currentMessageObject.messageOwner.media.document instanceof TLRPC.TL_documentEmpty) {
-                    text = LocaleController.getString("AttachVideoExpired", R.string.AttachVideoExpired);
+            TLRPC$Message tLRPC$Message = messageObject.messageOwner;
+            if (tLRPC$Message != null && (tLRPC$MessageMedia = tLRPC$Message.media) != null && tLRPC$MessageMedia.ttl_seconds != 0) {
+                if (tLRPC$MessageMedia.photo instanceof TLRPC$TL_photoEmpty) {
+                    charSequence = LocaleController.getString("AttachPhotoExpired", R.string.AttachPhotoExpired);
+                } else if (tLRPC$MessageMedia.document instanceof TLRPC$TL_documentEmpty) {
+                    charSequence = LocaleController.getString("AttachVideoExpired", R.string.AttachVideoExpired);
                 } else {
-                    text = this.currentMessageObject.messageText;
+                    charSequence = messageObject.messageText;
                 }
             } else {
-                text = this.currentMessageObject.messageText;
+                charSequence = messageObject.messageText;
             }
         } else {
-            text = this.customText;
+            charSequence = this.customText;
         }
-        createLayout(text, this.previousWidth);
+        createLayout(charSequence, this.previousWidth);
         MessageObject messageObject2 = this.currentMessageObject;
-        if (messageObject2 != null && messageObject2.type == 11) {
-            this.imageReceiver.setImageCoords((this.previousWidth - AndroidUtilities.roundMessageSize) / 2, this.textHeight + AndroidUtilities.dp(19.0f), AndroidUtilities.roundMessageSize, AndroidUtilities.roundMessageSize);
+        if (messageObject2 == null || messageObject2.type != 11) {
+            return;
         }
+        int i = AndroidUtilities.roundMessageSize;
+        this.imageReceiver.setImageCoords((this.previousWidth - AndroidUtilities.roundMessageSize) / 2, this.textHeight + AndroidUtilities.dp(19.0f), i, i);
     }
 
     public int getCustomDate() {
@@ -532,40 +483,247 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             return;
         }
         drawBackground(canvas, false);
-        if (this.textPaint != null) {
-            canvas.save();
-            canvas.translate(this.textXLeft, this.textY);
-            if (this.textLayout.getPaint() != this.textPaint) {
-                buildLayout();
-            }
-            canvas.save();
-            SpoilerEffect.clipOutCanvas(canvas, this.spoilers);
-            this.textLayout.draw(canvas);
-            canvas.restore();
-            for (SpoilerEffect eff : this.spoilers) {
-                eff.setColor(this.textLayout.getPaint().getColor());
-                eff.draw(canvas);
-            }
-            canvas.restore();
+        if (this.textPaint == null) {
+            return;
         }
+        canvas.save();
+        canvas.translate(this.textXLeft, this.textY);
+        if (this.textLayout.getPaint() != this.textPaint) {
+            buildLayout();
+        }
+        canvas.save();
+        SpoilerEffect.clipOutCanvas(canvas, this.spoilers);
+        this.textLayout.draw(canvas);
+        canvas.restore();
+        for (SpoilerEffect spoilerEffect : this.spoilers) {
+            spoilerEffect.setColor(this.textLayout.getPaint().getColor());
+            spoilerEffect.draw(canvas);
+        }
+        canvas.restore();
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:119:0x034c  */
-    /* JADX WARN: Removed duplicated region for block: B:120:0x036f  */
-    /* JADX WARN: Removed duplicated region for block: B:69:0x01e1  */
-    /* JADX WARN: Removed duplicated region for block: B:72:0x01f2  */
-    /* JADX WARN: Removed duplicated region for block: B:84:0x0226  */
-    /* JADX WARN: Removed duplicated region for block: B:85:0x024b  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public void drawBackground(android.graphics.Canvas r28, boolean r29) {
-        /*
-            Method dump skipped, instructions count: 1073
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatActionCell.drawBackground(android.graphics.Canvas, boolean):void");
+    public void drawBackground(Canvas canvas, boolean z) {
+        Paint paint;
+        Paint paint2;
+        int i;
+        int i2;
+        int i3;
+        Paint paint3;
+        int i4;
+        float f;
+        int i5;
+        int i6;
+        int i7;
+        int i8;
+        float f2;
+        float f3;
+        int i9;
+        int i10;
+        int i11;
+        if (this.canDrawInParent) {
+            if (hasGradientService() && !z) {
+                return;
+            }
+            if (!hasGradientService() && z) {
+                return;
+            }
+        }
+        Paint themedPaint = getThemedPaint("paintChatActionBackground");
+        this.textPaint = (TextPaint) getThemedPaint("paintChatActionText");
+        String str = this.overrideBackground;
+        if (str != null) {
+            int themedColor = getThemedColor(str);
+            if (this.overrideBackgroundPaint == null) {
+                Paint paint4 = new Paint(1);
+                this.overrideBackgroundPaint = paint4;
+                paint4.setColor(themedColor);
+                TextPaint textPaint = new TextPaint(1);
+                this.overrideTextPaint = textPaint;
+                textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+                this.overrideTextPaint.setTextSize(AndroidUtilities.dp(Math.max(16, SharedConfig.fontSize) - 2));
+                this.overrideTextPaint.setColor(getThemedColor(this.overrideText));
+            }
+            themedPaint = this.overrideBackgroundPaint;
+            this.textPaint = this.overrideTextPaint;
+        }
+        if (this.invalidatePath) {
+            this.invalidatePath = false;
+            this.lineWidths.clear();
+            int lineCount = this.textLayout.getLineCount();
+            int dp = AndroidUtilities.dp(11.0f);
+            int dp2 = AndroidUtilities.dp(8.0f);
+            int i12 = 0;
+            for (int i13 = 0; i13 < lineCount; i13++) {
+                int ceil = (int) Math.ceil(this.textLayout.getLineWidth(i13));
+                if (i13 == 0 || (i11 = i12 - ceil) <= 0 || i11 > dp + dp2) {
+                    i12 = ceil;
+                }
+                this.lineWidths.add(Integer.valueOf(i12));
+            }
+            for (int i14 = lineCount - 2; i14 >= 0; i14--) {
+                int intValue = this.lineWidths.get(i14).intValue();
+                int i15 = i12 - intValue;
+                if (i15 <= 0 || i15 > dp + dp2) {
+                    i12 = intValue;
+                }
+                this.lineWidths.set(i14, Integer.valueOf(i12));
+            }
+            int dp3 = AndroidUtilities.dp(4.0f);
+            int measuredWidth = getMeasuredWidth() / 2;
+            int dp4 = AndroidUtilities.dp(3.0f);
+            int dp5 = AndroidUtilities.dp(6.0f);
+            int i16 = dp - dp4;
+            this.lineHeights.clear();
+            this.backgroundPath.reset();
+            float f4 = measuredWidth;
+            this.backgroundPath.moveTo(f4, dp3);
+            int i17 = 0;
+            int i18 = 0;
+            while (i17 < lineCount) {
+                int intValue2 = this.lineWidths.get(i17).intValue();
+                int i19 = dp2;
+                int lineBottom = this.textLayout.getLineBottom(i17);
+                int i20 = dp5;
+                int i21 = lineCount - 1;
+                if (i17 < i21) {
+                    paint3 = themedPaint;
+                    i4 = this.lineWidths.get(i17 + 1).intValue();
+                } else {
+                    paint3 = themedPaint;
+                    i4 = 0;
+                }
+                int i22 = lineBottom - i18;
+                if (i17 == 0 || intValue2 > i12) {
+                    f = 3.0f;
+                    i22 += AndroidUtilities.dp(3.0f);
+                } else {
+                    f = 3.0f;
+                }
+                if (i17 == i21 || intValue2 > i4) {
+                    i22 += AndroidUtilities.dp(f);
+                }
+                float f5 = (intValue2 / 2.0f) + f4;
+                int i23 = (i17 == i21 || intValue2 >= i4 || i17 == 0 || intValue2 >= i12) ? i19 : i20;
+                if (i17 == 0 || intValue2 > i12) {
+                    f2 = f4;
+                    i6 = lineCount;
+                    i8 = lineBottom;
+                    i5 = i12;
+                    i7 = measuredWidth;
+                    this.rect.set((f5 - dp4) - dp, dp3, i16 + f5, (dp * 2) + dp3);
+                    this.backgroundPath.arcTo(this.rect, -90.0f, 90.0f);
+                } else {
+                    f2 = f4;
+                    if (intValue2 < i12) {
+                        i8 = lineBottom;
+                        float f6 = i16 + f5;
+                        i7 = measuredWidth;
+                        i6 = lineCount;
+                        i5 = i12;
+                        this.rect.set(f6, dp3, (i23 * 2) + f6, i10 + dp3);
+                        this.backgroundPath.arcTo(this.rect, -90.0f, -90.0f);
+                    } else {
+                        i6 = lineCount;
+                        i8 = lineBottom;
+                        i5 = i12;
+                        i7 = measuredWidth;
+                    }
+                }
+                dp3 += i22;
+                if (i17 == i21 || intValue2 >= i4) {
+                    f3 = 3.0f;
+                } else {
+                    f3 = 3.0f;
+                    dp3 -= AndroidUtilities.dp(3.0f);
+                    i22 -= AndroidUtilities.dp(3.0f);
+                }
+                if (i17 != 0 && intValue2 < i5) {
+                    dp3 -= AndroidUtilities.dp(f3);
+                    i22 -= AndroidUtilities.dp(f3);
+                }
+                this.lineHeights.add(Integer.valueOf(i22));
+                if (i17 == i21 || intValue2 > i4) {
+                    this.rect.set((f5 - dp4) - dp, dp3 - (dp * 2), f5 + i16, dp3);
+                    this.backgroundPath.arcTo(this.rect, 0.0f, 90.0f);
+                } else if (intValue2 < i4) {
+                    float f7 = f5 + i16;
+                    this.rect.set(f7, dp3 - i9, (i23 * 2) + f7, dp3);
+                    this.backgroundPath.arcTo(this.rect, 180.0f, -90.0f);
+                }
+                i17++;
+                i12 = intValue2;
+                dp2 = i19;
+                dp5 = i20;
+                themedPaint = paint3;
+                f4 = f2;
+                i18 = i8;
+                measuredWidth = i7;
+                lineCount = i6;
+            }
+            paint = themedPaint;
+            int i24 = dp2;
+            int i25 = measuredWidth;
+            int i26 = dp5;
+            int i27 = lineCount - 1;
+            int i28 = i27;
+            while (i28 >= 0) {
+                int intValue3 = i28 != 0 ? this.lineWidths.get(i28 - 1).intValue() : 0;
+                int intValue4 = this.lineWidths.get(i28).intValue();
+                int intValue5 = i28 != i27 ? this.lineWidths.get(i28 + 1).intValue() : 0;
+                this.textLayout.getLineBottom(i28);
+                float f8 = i25 - (intValue4 / 2);
+                int i29 = (i28 == i27 || intValue4 >= intValue5 || i28 == 0 || intValue4 >= intValue3) ? i24 : i26;
+                if (i28 == i27 || intValue4 > intValue5) {
+                    this.rect.set(f8 - i16, dp3 - (dp * 2), dp4 + f8 + dp, dp3);
+                    this.backgroundPath.arcTo(this.rect, 90.0f, 90.0f);
+                } else if (intValue4 < intValue5) {
+                    float f9 = f8 - i16;
+                    this.rect.set(f9 - (i29 * 2), dp3 - i3, f9, dp3);
+                    this.backgroundPath.arcTo(this.rect, 90.0f, -90.0f);
+                }
+                dp3 -= this.lineHeights.get(i28).intValue();
+                if (i28 == 0 || intValue4 > intValue3) {
+                    this.rect.set(f8 - i16, dp3, f8 + dp4 + dp, (dp * 2) + dp3);
+                    this.backgroundPath.arcTo(this.rect, 180.0f, 90.0f);
+                } else if (intValue4 < intValue3) {
+                    float f10 = f8 - i16;
+                    this.rect.set(f10 - (i29 * 2), dp3, f10, i2 + dp3);
+                    this.backgroundPath.arcTo(this.rect, 0.0f, -90.0f);
+                }
+                i28--;
+            }
+            this.backgroundPath.close();
+        } else {
+            paint = themedPaint;
+        }
+        if (!this.visiblePartSet) {
+            this.backgroundHeight = ((ViewGroup) getParent()).getMeasuredHeight();
+        }
+        ThemeDelegate themeDelegate = this.themeDelegate;
+        if (themeDelegate != null) {
+            themeDelegate.applyServiceShaderMatrix(getMeasuredWidth(), this.backgroundHeight, 0.0f, this.viewTop + AndroidUtilities.dp(4.0f));
+        } else {
+            Theme.applyServiceShaderMatrix(getMeasuredWidth(), this.backgroundHeight, 0.0f, this.viewTop + AndroidUtilities.dp(4.0f));
+        }
+        int i30 = -1;
+        if (!z || getAlpha() == 1.0f) {
+            paint2 = paint;
+            i = -1;
+        } else {
+            i30 = paint.getAlpha();
+            i = Theme.chat_actionBackgroundGradientDarkenPaint.getAlpha();
+            paint2 = paint;
+            paint2.setAlpha((int) (i30 * getAlpha()));
+            Theme.chat_actionBackgroundGradientDarkenPaint.setAlpha((int) (i * getAlpha()));
+        }
+        canvas.drawPath(this.backgroundPath, paint2);
+        if (hasGradientService()) {
+            canvas.drawPath(this.backgroundPath, Theme.chat_actionBackgroundGradientDarkenPaint);
+        }
+        if (i30 >= 0) {
+            paint2.setAlpha(i30);
+            Theme.chat_actionBackgroundGradientDarkenPaint.setAlpha(i);
+        }
     }
 
     public boolean hasGradientService() {
@@ -574,39 +732,27 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     }
 
     @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
-    public void onFailedDownload(String fileName, boolean canceled) {
-    }
-
-    @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
-    public void onSuccessDownload(String fileName) {
+    public void onSuccessDownload(String str) {
         MessageObject messageObject = this.currentMessageObject;
-        if (messageObject != null && messageObject.type == 11) {
-            TLRPC.PhotoSize strippedPhotoSize = null;
-            int a = 0;
-            int N = this.currentMessageObject.photoThumbs.size();
-            while (true) {
-                if (a >= N) {
-                    break;
-                }
-                TLRPC.PhotoSize photoSize = this.currentMessageObject.photoThumbs.get(a);
-                if (!(photoSize instanceof TLRPC.TL_photoStrippedSize)) {
-                    a++;
-                } else {
-                    strippedPhotoSize = photoSize;
-                    break;
-                }
-            }
-            this.imageReceiver.setImage(this.currentVideoLocation, ImageLoader.AUTOPLAY_FILTER, ImageLocation.getForObject(strippedPhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
-            DownloadController.getInstance(this.currentAccount).removeLoadingFileObserver(this);
+        if (messageObject == null || messageObject.type != 11) {
+            return;
         }
-    }
-
-    @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
-    public void onProgressDownload(String fileName, long downloadSize, long totalSize) {
-    }
-
-    @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
-    public void onProgressUpload(String fileName, long downloadSize, long totalSize, boolean isEncrypted) {
+        TLRPC$PhotoSize tLRPC$PhotoSize = null;
+        int i = 0;
+        int size = messageObject.photoThumbs.size();
+        while (true) {
+            if (i >= size) {
+                break;
+            }
+            TLRPC$PhotoSize tLRPC$PhotoSize2 = this.currentMessageObject.photoThumbs.get(i);
+            if (tLRPC$PhotoSize2 instanceof TLRPC$TL_photoStrippedSize) {
+                tLRPC$PhotoSize = tLRPC$PhotoSize2;
+                break;
+            }
+            i++;
+        }
+        this.imageReceiver.setImage(this.currentVideoLocation, ImageLoader.AUTOPLAY_FILTER, ImageLocation.getForObject(tLRPC$PhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
+        DownloadController.getInstance(this.currentAccount).removeLoadingFileObserver(this);
     }
 
     @Override // org.telegram.messenger.DownloadController.FileDownloadProgressListener
@@ -615,60 +761,57 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        if (TextUtils.isEmpty(this.customText) && this.currentMessageObject == null) {
-            return;
-        }
-        if (this.accessibilityText == null) {
-            CharSequence text = !TextUtils.isEmpty(this.customText) ? this.customText : this.currentMessageObject.messageText;
-            SpannableStringBuilder sb = new SpannableStringBuilder(text);
-            CharacterStyle[] links = (CharacterStyle[]) sb.getSpans(0, sb.length(), ClickableSpan.class);
-            for (final CharacterStyle link : links) {
-                int start = sb.getSpanStart(link);
-                int end = sb.getSpanEnd(link);
-                sb.removeSpan(link);
-                ClickableSpan underlineSpan = new ClickableSpan() { // from class: org.telegram.ui.Cells.ChatActionCell.1
-                    {
-                        ChatActionCell.this = this;
-                    }
-
-                    @Override // android.text.style.ClickableSpan
-                    public void onClick(View view) {
-                        if (ChatActionCell.this.delegate != null) {
-                            ChatActionCell.this.openLink(link);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        CharacterStyle[] characterStyleArr;
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        if (!TextUtils.isEmpty(this.customText) || this.currentMessageObject != null) {
+            if (this.accessibilityText == null) {
+                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(!TextUtils.isEmpty(this.customText) ? this.customText : this.currentMessageObject.messageText);
+                for (final CharacterStyle characterStyle : (CharacterStyle[]) spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ClickableSpan.class)) {
+                    int spanStart = spannableStringBuilder.getSpanStart(characterStyle);
+                    int spanEnd = spannableStringBuilder.getSpanEnd(characterStyle);
+                    spannableStringBuilder.removeSpan(characterStyle);
+                    spannableStringBuilder.setSpan(new ClickableSpan() { // from class: org.telegram.ui.Cells.ChatActionCell.1
+                        {
+                            ChatActionCell.this = this;
                         }
-                    }
-                };
-                sb.setSpan(underlineSpan, start, end, 33);
+
+                        @Override // android.text.style.ClickableSpan
+                        public void onClick(View view) {
+                            if (ChatActionCell.this.delegate != null) {
+                                ChatActionCell.this.openLink(characterStyle);
+                            }
+                        }
+                    }, spanStart, spanEnd, 33);
+                }
+                this.accessibilityText = spannableStringBuilder;
             }
-            this.accessibilityText = sb;
+            if (Build.VERSION.SDK_INT < 24) {
+                accessibilityNodeInfo.setContentDescription(this.accessibilityText.toString());
+            } else {
+                accessibilityNodeInfo.setText(this.accessibilityText);
+            }
+            accessibilityNodeInfo.setEnabled(true);
         }
-        if (Build.VERSION.SDK_INT < 24) {
-            info.setContentDescription(this.accessibilityText.toString());
-        } else {
-            info.setText(this.accessibilityText);
-        }
-        info.setEnabled(true);
     }
 
-    public void setInvalidateColors(boolean invalidate) {
-        if (this.invalidateColors == invalidate) {
+    public void setInvalidateColors(boolean z) {
+        if (this.invalidateColors == z) {
             return;
         }
-        this.invalidateColors = invalidate;
+        this.invalidateColors = z;
         invalidate();
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         ThemeDelegate themeDelegate = this.themeDelegate;
-        Integer color = themeDelegate != null ? themeDelegate.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = themeDelegate != null ? themeDelegate.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 
-    private Paint getThemedPaint(String paintKey) {
+    private Paint getThemedPaint(String str) {
         ThemeDelegate themeDelegate = this.themeDelegate;
-        Paint paint = themeDelegate != null ? themeDelegate.getPaint(paintKey) : null;
-        return paint != null ? paint : Theme.getThemePaint(paintKey);
+        Paint paint = themeDelegate != null ? themeDelegate.getPaint(str) : null;
+        return paint != null ? paint : Theme.getThemePaint(str);
     }
 }

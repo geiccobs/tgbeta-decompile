@@ -1,10 +1,10 @@
 package com.google.firebase.messaging.reporting;
 
 import com.google.android.gms.internal.firebase_messaging.zzx;
+import com.google.android.gms.internal.firebase_messaging.zzz;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class MessagingClientEvent {
-    private static final MessagingClientEvent DEFAULT_INSTANCE = new Builder().build();
     private final String analytics_label_;
     private final long bulk_id_;
     private final long campaign_id_;
@@ -22,7 +22,7 @@ public final class MessagingClientEvent {
     private final int ttl_;
 
     /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder {
         private long project_number_ = 0;
         private String message_id_ = "";
@@ -49,16 +49,6 @@ public final class MessagingClientEvent {
 
         public Builder setAnalyticsLabel(String str) {
             this.analytics_label_ = str;
-            return this;
-        }
-
-        public Builder setBulkId(long j) {
-            this.bulk_id_ = j;
-            return this;
-        }
-
-        public Builder setCampaignId(long j) {
-            this.campaign_id_ = j;
             return this;
         }
 
@@ -97,11 +87,6 @@ public final class MessagingClientEvent {
             return this;
         }
 
-        public Builder setPriority(int i) {
-            this.priority_ = i;
-            return this;
-        }
-
         public Builder setProjectNumber(long j) {
             this.project_number_ = j;
             return this;
@@ -124,7 +109,7 @@ public final class MessagingClientEvent {
     }
 
     /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum Event implements zzx {
         UNKNOWN_EVENT(0),
         MESSAGE_DELIVERED(1),
@@ -143,7 +128,7 @@ public final class MessagingClientEvent {
     }
 
     /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum MessageType implements zzx {
         UNKNOWN(0),
         DATA_MESSAGE(1),
@@ -163,7 +148,7 @@ public final class MessagingClientEvent {
     }
 
     /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum SDKPlatform implements zzx {
         UNKNOWN_OS(0),
         ANDROID(1),
@@ -180,6 +165,10 @@ public final class MessagingClientEvent {
         public int getNumber() {
             return this.number_;
         }
+    }
+
+    static {
+        new Builder().build();
     }
 
     MessagingClientEvent(long j, String str, String str2, MessageType messageType, SDKPlatform sDKPlatform, String str3, String str4, int i, int i2, String str5, long j2, Event event, String str6, long j3, String str7) {
@@ -200,70 +189,81 @@ public final class MessagingClientEvent {
         this.composer_label_ = str7;
     }
 
-    public static MessagingClientEvent getDefaultInstance() {
-        return DEFAULT_INSTANCE;
-    }
-
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    @zzz(zza = 13)
     public String getAnalyticsLabel() {
         return this.analytics_label_;
     }
 
+    @zzz(zza = 11)
     public long getBulkId() {
         return this.bulk_id_;
     }
 
+    @zzz(zza = 14)
     public long getCampaignId() {
         return this.campaign_id_;
     }
 
+    @zzz(zza = 7)
     public String getCollapseKey() {
         return this.collapse_key_;
     }
 
+    @zzz(zza = 15)
     public String getComposerLabel() {
         return this.composer_label_;
     }
 
+    @zzz(zza = 12)
     public Event getEvent() {
         return this.event_;
     }
 
+    @zzz(zza = 3)
     public String getInstanceId() {
         return this.instance_id_;
     }
 
+    @zzz(zza = 2)
     public String getMessageId() {
         return this.message_id_;
     }
 
+    @zzz(zza = 4)
     public MessageType getMessageType() {
         return this.message_type_;
     }
 
+    @zzz(zza = 6)
     public String getPackageName() {
         return this.package_name_;
     }
 
+    @zzz(zza = 8)
     public int getPriority() {
         return this.priority_;
     }
 
+    @zzz(zza = 1)
     public long getProjectNumber() {
         return this.project_number_;
     }
 
+    @zzz(zza = 5)
     public SDKPlatform getSdkPlatform() {
         return this.sdk_platform_;
     }
 
+    @zzz(zza = 10)
     public String getTopic() {
         return this.topic_;
     }
 
+    @zzz(zza = 9)
     public int getTtl() {
         return this.ttl_;
     }

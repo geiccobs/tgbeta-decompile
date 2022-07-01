@@ -1,31 +1,24 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
-import androidx.core.text.HtmlCompat;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.googlecode.mp4parser.authoring.tracks.h265.NalUnitTypes;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.telegram.messenger.R;
 import org.telegram.messenger.voip.VoIPService;
-import org.telegram.ui.Components.UndoView;
+import org.telegram.tgnet.ConnectionsManager;
 import sun.misc.Unsafe;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzgd<T> implements zzgp<T> {
     private static final int[] zza = new int[0];
     private static final Unsafe zzb = zzhn.zzc();
     private final int[] zzc;
     private final Object[] zzd;
-    private final int zze;
-    private final int zzf;
     private final zzfz zzg;
     private final boolean zzh;
-    private final boolean zzi;
     private final boolean zzj;
-    private final boolean zzk;
     private final int[] zzl;
     private final int zzm;
     private final int zzn;
@@ -38,12 +31,9 @@ final class zzgd<T> implements zzgp<T> {
     private zzgd(int[] iArr, Object[] objArr, int i, int i2, zzfz zzfzVar, boolean z, boolean z2, int[] iArr2, int i3, int i4, zzge zzgeVar, zzfj zzfjVar, zzhh<?, ?> zzhhVar, zzee<?> zzeeVar, zzfs zzfsVar) {
         this.zzc = iArr;
         this.zzd = objArr;
-        this.zze = i;
-        this.zzf = i2;
-        this.zzi = zzfzVar instanceof zzeo;
+        boolean z3 = zzfzVar instanceof zzeo;
         this.zzj = z;
         this.zzh = zzeeVar != null && zzeeVar.zza(zzfzVar);
-        this.zzk = false;
         this.zzl = iArr2;
         this.zzm = i3;
         this.zzn = i4;
@@ -55,16 +45,15 @@ final class zzgd<T> implements zzgp<T> {
         this.zzs = zzfsVar;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:157:0x0349  */
-    /* JADX WARN: Removed duplicated region for block: B:173:0x03a2  */
-    /* JADX WARN: Removed duplicated region for block: B:177:0x03af A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:159:0x033a  */
+    /* JADX WARN: Removed duplicated region for block: B:176:0x039c  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public static <T> com.google.android.gms.internal.mlkit_language_id.zzgd<T> zza(java.lang.Class<T> r33, com.google.android.gms.internal.mlkit_language_id.zzfx r34, com.google.android.gms.internal.mlkit_language_id.zzge r35, com.google.android.gms.internal.mlkit_language_id.zzfj r36, com.google.android.gms.internal.mlkit_language_id.zzhh<?, ?> r37, com.google.android.gms.internal.mlkit_language_id.zzee<?> r38, com.google.android.gms.internal.mlkit_language_id.zzfs r39) {
         /*
-            Method dump skipped, instructions count: 1073
+            Method dump skipped, instructions count: 1054
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.mlkit_language_id.zzgd.zza(java.lang.Class, com.google.android.gms.internal.mlkit_language_id.zzfx, com.google.android.gms.internal.mlkit_language_id.zzge, com.google.android.gms.internal.mlkit_language_id.zzfj, com.google.android.gms.internal.mlkit_language_id.zzhh, com.google.android.gms.internal.mlkit_language_id.zzee, com.google.android.gms.internal.mlkit_language_id.zzfs):com.google.android.gms.internal.mlkit_language_id.zzgd");
@@ -73,7 +62,7 @@ final class zzgd<T> implements zzgp<T> {
     private static Field zza(Class<?> cls, String str) {
         try {
             return cls.getDeclaredField(str);
-        } catch (NoSuchFieldException e) {
+        } catch (NoSuchFieldException unused) {
             Field[] declaredFields = cls.getDeclaredFields();
             for (Field field : declaredFields) {
                 if (str.equals(field.getName())) {
@@ -82,7 +71,7 @@ final class zzgd<T> implements zzgp<T> {
             }
             String name = cls.getName();
             String arrays = Arrays.toString(declaredFields);
-            StringBuilder sb = new StringBuilder(String.valueOf(str).length() + 40 + String.valueOf(name).length() + String.valueOf(arrays).length());
+            StringBuilder sb = new StringBuilder(String.valueOf(str).length() + 40 + name.length() + String.valueOf(arrays).length());
             sb.append("Field ");
             sb.append(str);
             sb.append(" for ");
@@ -93,288 +82,197 @@ final class zzgd<T> implements zzgp<T> {
         }
     }
 
+    /* JADX WARN: Code restructure failed: missing block: B:10:0x0038, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzgr.zza(com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r10, r6), com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r11, r6)) != false) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:16:0x006a, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzgr.zza(com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r10, r6), com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r11, r6)) != false) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:20:0x007e, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:24:0x0090, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:28:0x00a4, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:32:0x00b6, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:36:0x00c8, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:40:0x00da, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:44:0x00f0, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzgr.zza(com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r10, r6), com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r11, r6)) != false) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:48:0x0106, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzgr.zza(com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r10, r6), com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r11, r6)) != false) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:52:0x011c, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzgr.zza(com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r10, r6), com.google.android.gms.internal.mlkit_language_id.zzhn.zzf(r11, r6)) != false) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:56:0x012e, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zzc(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zzc(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:60:0x0140, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:64:0x0154, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:68:0x0165, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zza(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:72:0x0178, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:76:0x018b, code lost:
+        if (com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r10, r6) == com.google.android.gms.internal.mlkit_language_id.zzhn.zzb(r11, r6)) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:80:0x01a4, code lost:
+        if (java.lang.Float.floatToIntBits(com.google.android.gms.internal.mlkit_language_id.zzhn.zzd(r10, r6)) == java.lang.Float.floatToIntBits(com.google.android.gms.internal.mlkit_language_id.zzhn.zzd(r11, r6))) goto L86;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:84:0x01bf, code lost:
+        if (java.lang.Double.doubleToLongBits(com.google.android.gms.internal.mlkit_language_id.zzhn.zze(r10, r6)) == java.lang.Double.doubleToLongBits(com.google.android.gms.internal.mlkit_language_id.zzhn.zze(r11, r6))) goto L86;
+     */
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
-    public final boolean zza(T t, T t2) {
-        int length = this.zzc.length;
-        int i = 0;
-        while (true) {
-            boolean z = true;
-            if (i < length) {
-                int zzc = zzc(i);
-                long j = zzc & 1048575;
-                switch ((zzc & 267386880) >>> 20) {
-                    case 0:
-                        if (!zzc(t, t2, i) || Double.doubleToLongBits(zzhn.zze(t, j)) != Double.doubleToLongBits(zzhn.zze(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 1:
-                        if (!zzc(t, t2, i) || Float.floatToIntBits(zzhn.zzd(t, j)) != Float.floatToIntBits(zzhn.zzd(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 2:
-                        if (!zzc(t, t2, i) || zzhn.zzb(t, j) != zzhn.zzb(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 3:
-                        if (!zzc(t, t2, i) || zzhn.zzb(t, j) != zzhn.zzb(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 4:
-                        if (!zzc(t, t2, i) || zzhn.zza(t, j) != zzhn.zza(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 5:
-                        if (!zzc(t, t2, i) || zzhn.zzb(t, j) != zzhn.zzb(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 6:
-                        if (!zzc(t, t2, i) || zzhn.zza(t, j) != zzhn.zza(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 7:
-                        if (!zzc(t, t2, i) || zzhn.zzc(t, j) != zzhn.zzc(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 8:
-                        if (!zzc(t, t2, i) || !zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 9:
-                        if (!zzc(t, t2, i) || !zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 10:
-                        if (!zzc(t, t2, i) || !zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 11:
-                        if (!zzc(t, t2, i) || zzhn.zza(t, j) != zzhn.zza(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 12:
-                        if (!zzc(t, t2, i) || zzhn.zza(t, j) != zzhn.zza(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 13:
-                        if (!zzc(t, t2, i) || zzhn.zza(t, j) != zzhn.zza(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 14:
-                        if (!zzc(t, t2, i) || zzhn.zzb(t, j) != zzhn.zzb(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 15:
-                        if (!zzc(t, t2, i) || zzhn.zza(t, j) != zzhn.zza(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 16:
-                        if (!zzc(t, t2, i) || zzhn.zzb(t, j) != zzhn.zzb(t2, j)) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 17:
-                        if (!zzc(t, t2, i) || !zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                    case 18:
-                    case 19:
-                    case 20:
-                    case 21:
-                    case 22:
-                    case 23:
-                    case 24:
-                    case 25:
-                    case 26:
-                    case 27:
-                    case 28:
-                    case NalUnitTypes.NAL_TYPE_RSV_VCL29 /* 29 */:
-                    case 30:
-                    case 31:
-                    case 32:
-                    case 33:
-                    case 34:
-                    case 35:
-                    case 36:
-                    case 37:
-                    case 38:
-                    case 39:
-                    case 40:
-                    case 41:
-                    case 42:
-                    case 43:
-                    case 44:
-                    case 45:
-                    case 46:
-                    case 47:
-                    case 48:
-                    case 49:
-                        z = zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j));
-                        break;
-                    case 50:
-                        z = zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j));
-                        break;
-                    case 51:
-                    case 52:
-                    case 53:
-                    case 54:
-                    case 55:
-                    case UndoView.ACTION_USERNAME_COPIED /* 56 */:
-                    case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
-                    case UndoView.ACTION_TEXT_COPIED /* 58 */:
-                    case 59:
-                    case UndoView.ACTION_PHONE_COPIED /* 60 */:
-                    case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
-                    case 62:
-                    case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
-                    case 64:
-                    case VoIPService.CALL_MIN_LAYER /* 65 */:
-                    case 66:
-                    case 67:
-                    case 68:
-                        long zzd = zzd(i) & 1048575;
-                        if (zzhn.zza(t, zzd) != zzhn.zza(t2, zzd) || !zzgr.zza(zzhn.zzf(t, j), zzhn.zzf(t2, j))) {
-                            z = false;
-                            break;
-                        }
-                        break;
-                }
-                if (!z) {
-                    return false;
-                }
-                i += 3;
-            } else if (!this.zzq.zza(t).equals(this.zzq.zza(t2))) {
-                return false;
-            } else {
-                if (!this.zzh) {
-                    return true;
-                }
-                return this.zzr.zza(t).equals(this.zzr.zza(t2));
-            }
-        }
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public final boolean zza(T r10, T r11) {
+        /*
+            Method dump skipped, instructions count: 640
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.mlkit_language_id.zzgd.zza(java.lang.Object, java.lang.Object):boolean");
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
     public final int zza(T t) {
+        int i;
+        int i2;
         int length = this.zzc.length;
-        int i = 0;
-        for (int i2 = 0; i2 < length; i2 += 3) {
-            int zzc = zzc(i2);
-            int i3 = this.zzc[i2];
+        int i3 = 0;
+        for (int i4 = 0; i4 < length; i4 += 3) {
+            int zzc = zzc(i4);
+            int i5 = this.zzc[i4];
             long j = 1048575 & zzc;
-            int i4 = 37;
+            int i6 = 37;
             switch ((zzc & 267386880) >>> 20) {
                 case 0:
-                    i = (i * 53) + zzeq.zza(Double.doubleToLongBits(zzhn.zze(t, j)));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(Double.doubleToLongBits(zzhn.zze(t, j)));
+                    i3 = i2 + i;
                     break;
                 case 1:
-                    i = (i * 53) + Float.floatToIntBits(zzhn.zzd(t, j));
+                    i2 = i3 * 53;
+                    i = Float.floatToIntBits(zzhn.zzd(t, j));
+                    i3 = i2 + i;
                     break;
                 case 2:
-                    i = (i * 53) + zzeq.zza(zzhn.zzb(t, j));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(zzhn.zzb(t, j));
+                    i3 = i2 + i;
                     break;
                 case 3:
-                    i = (i * 53) + zzeq.zza(zzhn.zzb(t, j));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(zzhn.zzb(t, j));
+                    i3 = i2 + i;
                     break;
                 case 4:
-                    i = (i * 53) + zzhn.zza(t, j);
+                    i2 = i3 * 53;
+                    i = zzhn.zza(t, j);
+                    i3 = i2 + i;
                     break;
                 case 5:
-                    i = (i * 53) + zzeq.zza(zzhn.zzb(t, j));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(zzhn.zzb(t, j));
+                    i3 = i2 + i;
                     break;
                 case 6:
-                    i = (i * 53) + zzhn.zza(t, j);
+                    i2 = i3 * 53;
+                    i = zzhn.zza(t, j);
+                    i3 = i2 + i;
                     break;
                 case 7:
-                    i = (i * 53) + zzeq.zza(zzhn.zzc(t, j));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(zzhn.zzc(t, j));
+                    i3 = i2 + i;
                     break;
                 case 8:
-                    i = (i * 53) + ((String) zzhn.zzf(t, j)).hashCode();
+                    i2 = i3 * 53;
+                    i = ((String) zzhn.zzf(t, j)).hashCode();
+                    i3 = i2 + i;
                     break;
                 case 9:
                     Object zzf = zzhn.zzf(t, j);
                     if (zzf != null) {
-                        i4 = zzf.hashCode();
+                        i6 = zzf.hashCode();
                     }
-                    i = (i * 53) + i4;
+                    i3 = (i3 * 53) + i6;
                     break;
                 case 10:
-                    i = (i * 53) + zzhn.zzf(t, j).hashCode();
+                    i2 = i3 * 53;
+                    i = zzhn.zzf(t, j).hashCode();
+                    i3 = i2 + i;
                     break;
                 case 11:
-                    i = (i * 53) + zzhn.zza(t, j);
+                    i2 = i3 * 53;
+                    i = zzhn.zza(t, j);
+                    i3 = i2 + i;
                     break;
                 case 12:
-                    i = (i * 53) + zzhn.zza(t, j);
+                    i2 = i3 * 53;
+                    i = zzhn.zza(t, j);
+                    i3 = i2 + i;
                     break;
                 case 13:
-                    i = (i * 53) + zzhn.zza(t, j);
+                    i2 = i3 * 53;
+                    i = zzhn.zza(t, j);
+                    i3 = i2 + i;
                     break;
                 case 14:
-                    i = (i * 53) + zzeq.zza(zzhn.zzb(t, j));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(zzhn.zzb(t, j));
+                    i3 = i2 + i;
                     break;
                 case 15:
-                    i = (i * 53) + zzhn.zza(t, j);
+                    i2 = i3 * 53;
+                    i = zzhn.zza(t, j);
+                    i3 = i2 + i;
                     break;
                 case 16:
-                    i = (i * 53) + zzeq.zza(zzhn.zzb(t, j));
+                    i2 = i3 * 53;
+                    i = zzeq.zza(zzhn.zzb(t, j));
+                    i3 = i2 + i;
                     break;
                 case 17:
                     Object zzf2 = zzhn.zzf(t, j);
                     if (zzf2 != null) {
-                        i4 = zzf2.hashCode();
+                        i6 = zzf2.hashCode();
                     }
-                    i = (i * 53) + i4;
+                    i3 = (i3 * 53) + i6;
                     break;
-                case 18:
-                case 19:
-                case 20:
-                case 21:
-                case 22:
-                case 23:
+                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 case 24:
                 case 25:
                 case 26:
                 case 27:
                 case 28:
-                case NalUnitTypes.NAL_TYPE_RSV_VCL29 /* 29 */:
+                case 29:
                 case 30:
                 case 31:
-                case 32:
+                case ConnectionsManager.RequestFlagForceDownload /* 32 */:
                 case 33:
                 case 34:
                 case 35:
@@ -392,151 +290,186 @@ final class zzgd<T> implements zzgp<T> {
                 case 47:
                 case 48:
                 case 49:
-                    i = (i * 53) + zzhn.zzf(t, j).hashCode();
+                    i2 = i3 * 53;
+                    i = zzhn.zzf(t, j).hashCode();
+                    i3 = i2 + i;
                     break;
                 case 50:
-                    i = (i * 53) + zzhn.zzf(t, j).hashCode();
+                    i2 = i3 * 53;
+                    i = zzhn.zzf(t, j).hashCode();
+                    i3 = i2 + i;
                     break;
                 case 51:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(Double.doubleToLongBits(zzb(t, j)));
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(Double.doubleToLongBits(zzb(t, j)));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 52:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + Float.floatToIntBits(zzc(t, j));
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = Float.floatToIntBits(zzc(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 53:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(zze(t, j));
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(zze(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 54:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(zze(t, j));
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(zze(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 55:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzd(t, j);
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzd(t, j);
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
-                case UndoView.ACTION_USERNAME_COPIED /* 56 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(zze(t, j));
+                case 56:
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(zze(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
-                case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzd(t, j);
+                case 57:
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzd(t, j);
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
-                case UndoView.ACTION_TEXT_COPIED /* 58 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(zzf(t, j));
+                case 58:
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(zzf(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 59:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + ((String) zzhn.zzf(t, j)).hashCode();
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = ((String) zzhn.zzf(t, j)).hashCode();
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
-                case UndoView.ACTION_PHONE_COPIED /* 60 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzhn.zzf(t, j).hashCode();
+                case 60:
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzhn.zzf(t, j).hashCode();
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
-                case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzhn.zzf(t, j).hashCode();
+                case 61:
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzhn.zzf(t, j).hashCode();
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 62:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzd(t, j);
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzd(t, j);
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
-                case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzd(t, j);
+                case 63:
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzd(t, j);
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 64:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzd(t, j);
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzd(t, j);
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case VoIPService.CALL_MIN_LAYER /* 65 */:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(zze(t, j));
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(zze(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 66:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzd(t, j);
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzd(t, j);
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 67:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzeq.zza(zze(t, j));
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzeq.zza(zze(t, j));
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
                 case 68:
-                    if (zza((zzgd<T>) t, i3, i2)) {
-                        i = (i * 53) + zzhn.zzf(t, j).hashCode();
+                    if (zza((zzgd<T>) t, i5, i4)) {
+                        i2 = i3 * 53;
+                        i = zzhn.zzf(t, j).hashCode();
+                        i3 = i2 + i;
                         break;
                     } else {
                         break;
                     }
             }
         }
-        int hashCode = (i * 53) + this.zzq.zza(t).hashCode();
-        if (this.zzh) {
-            return (hashCode * 53) + this.zzr.zza(t).hashCode();
-        }
-        return hashCode;
+        int hashCode = (i3 * 53) + this.zzq.zza(t).hashCode();
+        return this.zzh ? (hashCode * 53) + this.zzr.zza(t).hashCode() : hashCode;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
     public final void zzb(T t, T t2) {
-        if (t2 == null) {
-            throw new NullPointerException();
-        }
+        t2.getClass();
         for (int i = 0; i < this.zzc.length; i += 3) {
             int zzc = zzc(i);
             long j = 1048575 & zzc;
@@ -676,21 +609,21 @@ final class zzgd<T> implements zzgp<T> {
                 case 17:
                     zza(t, t2, i);
                     break;
-                case 18:
-                case 19:
-                case 20:
-                case 21:
-                case 22:
-                case 23:
+                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 case 24:
                 case 25:
                 case 26:
                 case 27:
                 case 28:
-                case NalUnitTypes.NAL_TYPE_RSV_VCL29 /* 29 */:
+                case 29:
                 case 30:
                 case 31:
-                case 32:
+                case ConnectionsManager.RequestFlagForceDownload /* 32 */:
                 case 33:
                 case 34:
                 case 35:
@@ -718,9 +651,9 @@ final class zzgd<T> implements zzgp<T> {
                 case 53:
                 case 54:
                 case 55:
-                case UndoView.ACTION_USERNAME_COPIED /* 56 */:
-                case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
-                case UndoView.ACTION_TEXT_COPIED /* 58 */:
+                case 56:
+                case 57:
+                case 58:
                 case 59:
                     if (zza((zzgd<T>) t2, i2, i)) {
                         zzhn.zza(t, j, zzhn.zzf(t2, j));
@@ -729,12 +662,12 @@ final class zzgd<T> implements zzgp<T> {
                     } else {
                         break;
                     }
-                case UndoView.ACTION_PHONE_COPIED /* 60 */:
+                case 60:
                     zzb(t, t2, i);
                     break;
-                case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
+                case 61:
                 case 62:
-                case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
+                case 63:
                 case 64:
                 case VoIPService.CALL_MIN_LAYER /* 65 */:
                 case 66:
@@ -767,7 +700,8 @@ final class zzgd<T> implements zzgp<T> {
         if (zzf != null && zzf2 != null) {
             zzhn.zza(t, zzc, zzeq.zza(zzf, zzf2));
             zzb((zzgd<T>) t, i);
-        } else if (zzf2 != null) {
+        } else if (zzf2 == null) {
+        } else {
             zzhn.zza(t, zzc, zzf2);
             zzb((zzgd<T>) t, i);
         }
@@ -785,1065 +719,1295 @@ final class zzgd<T> implements zzgp<T> {
         if (zzf != null && zzf2 != null) {
             zzhn.zza(t, j, zzeq.zza(zzf, zzf2));
             zzb((zzgd<T>) t, i2, i);
-        } else if (zzf2 != null) {
+        } else if (zzf2 == null) {
+        } else {
             zzhn.zza(t, j, zzf2);
             zzb((zzgd<T>) t, i2, i);
         }
     }
 
+    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
     public final int zzd(T t) {
         int i;
         long j;
-        int i2 = 267386880;
-        int i3 = 1048575;
-        int i4 = 1;
+        int i2;
+        int zzb2;
+        int i3;
+        int i4;
+        int i5;
+        int i6;
+        int i7;
+        int zzb3;
+        int i8;
+        int i9;
+        int i10;
+        int i11 = 267386880;
+        int i12 = 1048575;
+        int i13 = 1;
         if (this.zzj) {
             Unsafe unsafe = zzb;
-            int i5 = 0;
-            int i6 = 0;
-            while (i5 < this.zzc.length) {
-                int zzc = zzc(i5);
-                int i7 = (zzc & i2) >>> 20;
-                int i8 = this.zzc[i5];
+            int i14 = 0;
+            int i15 = 0;
+            while (i14 < this.zzc.length) {
+                int zzc = zzc(i14);
+                int i16 = (zzc & i11) >>> 20;
+                int i17 = this.zzc[i14];
                 long j2 = zzc & 1048575;
-                if (i7 >= zzek.DOUBLE_LIST_PACKED.zza() && i7 <= zzek.SINT64_LIST_PACKED.zza()) {
-                    int i9 = this.zzc[i5 + 2];
+                if (i16 >= zzek.DOUBLE_LIST_PACKED.zza() && i16 <= zzek.SINT64_LIST_PACKED.zza()) {
+                    int i18 = this.zzc[i14 + 2];
                 }
-                switch (i7) {
+                switch (i16) {
                     case 0:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzb(i8, (double) FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzb(i17, 0.0d);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 1:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzb(i8, 0.0f);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzb(i17, 0.0f);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 2:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzd(i8, zzhn.zzb(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzd(i17, zzhn.zzb(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 3:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zze(i8, zzhn.zzb(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zze(i17, zzhn.zzb(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 4:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzf(i8, zzhn.zza(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzf(i17, zzhn.zza(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 5:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzg(i8, 0L);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzg(i17, 0L);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 6:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzi(i8, 0);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzi(i17, 0);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 7:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzb(i8, true);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzb(i17, true);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 8:
-                        if (zza((zzgd<T>) t, i5)) {
+                        if (zza((zzgd<T>) t, i14)) {
                             Object zzf = zzhn.zzf(t, j2);
                             if (zzf instanceof zzdn) {
-                                i6 += zzea.zzc(i8, (zzdn) zzf);
+                                zzb3 = zzea.zzc(i17, (zzdn) zzf);
                                 break;
                             } else {
-                                i6 += zzea.zzb(i8, (String) zzf);
+                                zzb3 = zzea.zzb(i17, (String) zzf);
                                 break;
                             }
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 9:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzgr.zza(i8, zzhn.zzf(t, j2), zza(i5));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzgr.zza(i17, zzhn.zzf(t, j2), zza(i14));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 10:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzc(i8, (zzdn) zzhn.zzf(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzc(i17, (zzdn) zzhn.zzf(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 11:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzg(i8, zzhn.zza(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzg(i17, zzhn.zza(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 12:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzk(i8, zzhn.zza(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzk(i17, zzhn.zza(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 13:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzj(i8, 0);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzj(i17, 0);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 14:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzh(i8, 0L);
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzh(i17, 0L);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 15:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzh(i8, zzhn.zza(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzh(i17, zzhn.zza(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 16:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzf(i8, zzhn.zzb(t, j2));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzf(i17, zzhn.zzb(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 17:
-                        if (zza((zzgd<T>) t, i5)) {
-                            i6 += zzea.zzc(i8, (zzfz) zzhn.zzf(t, j2), zza(i5));
+                        if (zza((zzgd<T>) t, i14)) {
+                            zzb3 = zzea.zzc(i17, (zzfz) zzhn.zzf(t, j2), zza(i14));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case 18:
-                        i6 += zzgr.zzi(i8, zza(t, j2), false);
+                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                        zzb3 = zzgr.zzi(i17, zza(t, j2), false);
                         break;
-                    case 19:
-                        i6 += zzgr.zzh(i8, zza(t, j2), false);
+                    case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                        zzb3 = zzgr.zzh(i17, zza(t, j2), false);
                         break;
-                    case 20:
-                        i6 += zzgr.zza(i8, (List<Long>) zza(t, j2), false);
+                    case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                        zzb3 = zzgr.zza(i17, (List<Long>) zza(t, j2), false);
                         break;
-                    case 21:
-                        i6 += zzgr.zzb(i8, (List<Long>) zza(t, j2), false);
+                    case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                        zzb3 = zzgr.zzb(i17, (List<Long>) zza(t, j2), false);
                         break;
-                    case 22:
-                        i6 += zzgr.zze(i8, zza(t, j2), false);
+                    case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                        zzb3 = zzgr.zze(i17, zza(t, j2), false);
                         break;
-                    case 23:
-                        i6 += zzgr.zzi(i8, zza(t, j2), false);
+                    case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
+                        zzb3 = zzgr.zzi(i17, zza(t, j2), false);
                         break;
                     case 24:
-                        i6 += zzgr.zzh(i8, zza(t, j2), false);
+                        zzb3 = zzgr.zzh(i17, zza(t, j2), false);
                         break;
                     case 25:
-                        i6 += zzgr.zzj(i8, zza(t, j2), false);
+                        zzb3 = zzgr.zzj(i17, zza(t, j2), false);
                         break;
                     case 26:
-                        i6 += zzgr.zza(i8, zza(t, j2));
+                        zzb3 = zzgr.zza(i17, zza(t, j2));
                         break;
                     case 27:
-                        i6 += zzgr.zza(i8, zza(t, j2), zza(i5));
+                        zzb3 = zzgr.zza(i17, zza(t, j2), zza(i14));
                         break;
                     case 28:
-                        i6 += zzgr.zzb(i8, zza(t, j2));
+                        zzb3 = zzgr.zzb(i17, zza(t, j2));
                         break;
-                    case NalUnitTypes.NAL_TYPE_RSV_VCL29 /* 29 */:
-                        i6 += zzgr.zzf(i8, zza(t, j2), false);
+                    case 29:
+                        zzb3 = zzgr.zzf(i17, zza(t, j2), false);
                         break;
                     case 30:
-                        i6 += zzgr.zzd(i8, zza(t, j2), false);
+                        zzb3 = zzgr.zzd(i17, zza(t, j2), false);
                         break;
                     case 31:
-                        i6 += zzgr.zzh(i8, zza(t, j2), false);
+                        zzb3 = zzgr.zzh(i17, zza(t, j2), false);
                         break;
-                    case 32:
-                        i6 += zzgr.zzi(i8, zza(t, j2), false);
+                    case ConnectionsManager.RequestFlagForceDownload /* 32 */:
+                        zzb3 = zzgr.zzi(i17, zza(t, j2), false);
                         break;
                     case 33:
-                        i6 += zzgr.zzg(i8, zza(t, j2), false);
+                        zzb3 = zzgr.zzg(i17, zza(t, j2), false);
                         break;
                     case 34:
-                        i6 += zzgr.zzc(i8, zza(t, j2), false);
+                        zzb3 = zzgr.zzc(i17, zza(t, j2), false);
                         break;
                     case 35:
-                        int zzi = zzgr.zzi((List) unsafe.getObject(t, j2));
-                        if (zzi > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzi) + zzi;
+                        i9 = zzgr.zzi((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 36:
-                        int zzh = zzgr.zzh((List) unsafe.getObject(t, j2));
-                        if (zzh > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzh) + zzh;
+                        i9 = zzgr.zzh((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 37:
-                        int zza2 = zzgr.zza((List) unsafe.getObject(t, j2));
-                        if (zza2 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zza2) + zza2;
+                        i9 = zzgr.zza((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 38:
-                        int zzb2 = zzgr.zzb((List) unsafe.getObject(t, j2));
-                        if (zzb2 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzb2) + zzb2;
+                        i9 = zzgr.zzb((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 39:
-                        int zze = zzgr.zze((List) unsafe.getObject(t, j2));
-                        if (zze > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zze) + zze;
+                        i9 = zzgr.zze((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 40:
-                        int zzi2 = zzgr.zzi((List) unsafe.getObject(t, j2));
-                        if (zzi2 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzi2) + zzi2;
+                        i9 = zzgr.zzi((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 41:
-                        int zzh2 = zzgr.zzh((List) unsafe.getObject(t, j2));
-                        if (zzh2 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzh2) + zzh2;
+                        i9 = zzgr.zzh((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 42:
-                        int zzj = zzgr.zzj((List) unsafe.getObject(t, j2));
-                        if (zzj > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzj) + zzj;
+                        i9 = zzgr.zzj((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 43:
-                        int zzf2 = zzgr.zzf((List) unsafe.getObject(t, j2));
-                        if (zzf2 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzf2) + zzf2;
+                        i9 = zzgr.zzf((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 44:
-                        int zzd = zzgr.zzd((List) unsafe.getObject(t, j2));
-                        if (zzd > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzd) + zzd;
+                        i9 = zzgr.zzd((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 45:
-                        int zzh3 = zzgr.zzh((List) unsafe.getObject(t, j2));
-                        if (zzh3 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzh3) + zzh3;
+                        i9 = zzgr.zzh((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 46:
-                        int zzi3 = zzgr.zzi((List) unsafe.getObject(t, j2));
-                        if (zzi3 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzi3) + zzi3;
+                        i9 = zzgr.zzi((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 47:
-                        int zzg = zzgr.zzg((List) unsafe.getObject(t, j2));
-                        if (zzg > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzg) + zzg;
+                        i9 = zzgr.zzg((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 48:
-                        int zzc2 = zzgr.zzc((List) unsafe.getObject(t, j2));
-                        if (zzc2 > 0) {
-                            i6 += zzea.zze(i8) + zzea.zzg(zzc2) + zzc2;
+                        i9 = zzgr.zzc((List) unsafe.getObject(t, j2));
+                        if (i9 > 0) {
+                            i10 = zzea.zze(i17);
+                            i8 = zzea.zzg(i9);
+                            zzb3 = i10 + i8 + i9;
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 49:
-                        i6 += zzgr.zzb(i8, (List<zzfz>) zza(t, j2), zza(i5));
+                        zzb3 = zzgr.zzb(i17, (List<zzfz>) zza(t, j2), zza(i14));
                         break;
                     case 50:
-                        i6 += this.zzs.zza(i8, zzhn.zzf(t, j2), zzb(i5));
+                        zzb3 = this.zzs.zza(i17, zzhn.zzf(t, j2), zzb(i14));
                         break;
                     case 51:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzb(i8, (double) FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzb(i17, 0.0d);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 52:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzb(i8, 0.0f);
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzb(i17, 0.0f);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 53:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzd(i8, zze(t, j2));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzd(i17, zze(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 54:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zze(i8, zze(t, j2));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zze(i17, zze(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 55:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzf(i8, zzd(t, j2));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzf(i17, zzd(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case UndoView.ACTION_USERNAME_COPIED /* 56 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzg(i8, 0L);
+                    case 56:
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzg(i17, 0L);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzi(i8, 0);
+                    case 57:
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzi(i17, 0);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case UndoView.ACTION_TEXT_COPIED /* 58 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzb(i8, true);
+                    case 58:
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzb(i17, true);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 59:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            Object zzf3 = zzhn.zzf(t, j2);
-                            if (zzf3 instanceof zzdn) {
-                                i6 += zzea.zzc(i8, (zzdn) zzf3);
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            Object zzf2 = zzhn.zzf(t, j2);
+                            if (zzf2 instanceof zzdn) {
+                                zzb3 = zzea.zzc(i17, (zzdn) zzf2);
                                 break;
                             } else {
-                                i6 += zzea.zzb(i8, (String) zzf3);
+                                zzb3 = zzea.zzb(i17, (String) zzf2);
                                 break;
                             }
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case UndoView.ACTION_PHONE_COPIED /* 60 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzgr.zza(i8, zzhn.zzf(t, j2), zza(i5));
+                    case 60:
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzgr.zza(i17, zzhn.zzf(t, j2), zza(i14));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzc(i8, (zzdn) zzhn.zzf(t, j2));
+                    case 61:
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzc(i17, (zzdn) zzhn.zzf(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 62:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzg(i8, zzd(t, j2));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzg(i17, zzd(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
-                    case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzk(i8, zzd(t, j2));
+                    case 63:
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzk(i17, zzd(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 64:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzj(i8, 0);
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzj(i17, 0);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case VoIPService.CALL_MIN_LAYER /* 65 */:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzh(i8, 0L);
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzh(i17, 0L);
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 66:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzh(i8, zzd(t, j2));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzh(i17, zzd(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 67:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzf(i8, zze(t, j2));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzf(i17, zze(t, j2));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
                     case 68:
-                        if (zza((zzgd<T>) t, i8, i5)) {
-                            i6 += zzea.zzc(i8, (zzfz) zzhn.zzf(t, j2), zza(i5));
+                        if (zza((zzgd<T>) t, i17, i14)) {
+                            zzb3 = zzea.zzc(i17, (zzfz) zzhn.zzf(t, j2), zza(i14));
                             break;
                         } else {
-                            break;
+                            continue;
+                            i14 += 3;
+                            i11 = 267386880;
                         }
+                    default:
+                        i14 += 3;
+                        i11 = 267386880;
                 }
-                i5 += 3;
-                i2 = 267386880;
+                i15 += zzb3;
+                i14 += 3;
+                i11 = 267386880;
             }
-            return i6 + zza((zzhh) this.zzq, (Object) t);
+            return i15 + zza((zzhh) this.zzq, (Object) t);
         }
         Unsafe unsafe2 = zzb;
-        int i10 = 0;
-        int i11 = 0;
-        int i12 = 1048575;
-        int i13 = 0;
-        while (i10 < this.zzc.length) {
-            int zzc3 = zzc(i10);
+        int i19 = 0;
+        int i20 = 0;
+        int i21 = 1048575;
+        int i22 = 0;
+        while (i19 < this.zzc.length) {
+            int zzc2 = zzc(i19);
             int[] iArr = this.zzc;
-            int i14 = iArr[i10];
-            int i15 = (zzc3 & 267386880) >>> 20;
-            if (i15 > 17) {
-                i = 0;
-            } else {
-                int i16 = iArr[i10 + 2];
-                int i17 = i16 & i3;
-                i = i4 << (i16 >>> 20);
-                if (i17 != i12) {
-                    i13 = unsafe2.getInt(t, i17);
-                    i12 = i17;
+            int i23 = iArr[i19];
+            int i24 = (zzc2 & 267386880) >>> 20;
+            if (i24 <= 17) {
+                int i25 = iArr[i19 + 2];
+                int i26 = i25 & i12;
+                i = i13 << (i25 >>> 20);
+                if (i26 != i21) {
+                    i22 = unsafe2.getInt(t, i26);
+                    i21 = i26;
                 }
+            } else {
+                i = 0;
             }
-            long j3 = zzc3 & i3;
-            switch (i15) {
+            long j3 = zzc2 & i12;
+            switch (i24) {
                 case 0:
                     j = 0;
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzb(i14, (double) FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
-                        break;
-                    } else {
-                        break;
+                    if ((i22 & i) != 0) {
+                        i20 += zzea.zzb(i23, 0.0d);
+                        continue;
+                        i19 += 3;
+                        i12 = 1048575;
+                        i13 = 1;
                     }
+                    break;
                 case 1:
                     j = 0;
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzb(i14, 0.0f);
-                        break;
-                    } else {
+                    if ((i22 & i) != 0) {
+                        i20 += zzea.zzb(i23, 0.0f);
                         break;
                     }
+                    break;
                 case 2:
                     j = 0;
-                    if ((i & i13) != 0) {
-                        i11 += zzea.zzd(i14, unsafe2.getLong(t, j3));
-                        break;
-                    } else {
+                    if ((i & i22) != 0) {
+                        i2 = zzea.zzd(i23, unsafe2.getLong(t, j3));
+                        i20 += i2;
                         break;
                     }
+                    break;
                 case 3:
                     j = 0;
-                    if ((i & i13) != 0) {
-                        i11 += zzea.zze(i14, unsafe2.getLong(t, j3));
-                        break;
-                    } else {
+                    if ((i & i22) != 0) {
+                        i2 = zzea.zze(i23, unsafe2.getLong(t, j3));
+                        i20 += i2;
                         break;
                     }
+                    break;
                 case 4:
                     j = 0;
-                    if ((i & i13) != 0) {
-                        i11 += zzea.zzf(i14, unsafe2.getInt(t, j3));
-                        break;
-                    } else {
+                    if ((i & i22) != 0) {
+                        i2 = zzea.zzf(i23, unsafe2.getInt(t, j3));
+                        i20 += i2;
                         break;
                     }
+                    break;
                 case 5:
-                    if ((i13 & i) == 0) {
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        i11 += zzea.zzg(i14, 0L);
+                    j = 0;
+                    if ((i22 & i) != 0) {
+                        i2 = zzea.zzg(i23, 0L);
+                        i20 += i2;
                         break;
                     }
+                    break;
                 case 6:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzi(i14, 0);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        i20 += zzea.zzi(i23, 0);
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 7:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzb(i14, true);
+                    if ((i22 & i) != 0) {
+                        i20 += zzea.zzb(i23, true);
                         j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                        i19 += 3;
+                        i12 = 1048575;
+                        i13 = 1;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 8:
-                    if ((i13 & i) != 0) {
+                    if ((i22 & i) != 0) {
                         Object object = unsafe2.getObject(t, j3);
                         if (object instanceof zzdn) {
-                            i11 += zzea.zzc(i14, (zzdn) object);
-                            j = 0;
-                            break;
+                            zzb2 = zzea.zzc(i23, (zzdn) object);
                         } else {
-                            i11 += zzea.zzb(i14, (String) object);
-                            j = 0;
-                            break;
+                            zzb2 = zzea.zzb(i23, (String) object);
                         }
-                    } else {
-                        j = 0;
-                        break;
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 9:
-                    if ((i13 & i) != 0) {
-                        i11 += zzgr.zza(i14, unsafe2.getObject(t, j3), zza(i10));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzgr.zza(i23, unsafe2.getObject(t, j3), zza(i19));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 10:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzc(i14, (zzdn) unsafe2.getObject(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzc(i23, (zzdn) unsafe2.getObject(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 11:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzg(i14, unsafe2.getInt(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzg(i23, unsafe2.getInt(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 12:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzk(i14, unsafe2.getInt(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzk(i23, unsafe2.getInt(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 13:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzj(i14, 0);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        i3 = zzea.zzj(i23, 0);
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 14:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzh(i14, 0L);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzh(i23, 0L);
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 15:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzh(i14, unsafe2.getInt(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzh(i23, unsafe2.getInt(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 16:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzf(i14, unsafe2.getLong(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzf(i23, unsafe2.getLong(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 17:
-                    if ((i13 & i) != 0) {
-                        i11 += zzea.zzc(i14, (zzfz) unsafe2.getObject(t, j3), zza(i10));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if ((i22 & i) != 0) {
+                        zzb2 = zzea.zzc(i23, (zzfz) unsafe2.getObject(t, j3), zza(i19));
+                        i20 += zzb2;
                     }
-                case 18:
-                    i11 += zzgr.zzi(i14, (List) unsafe2.getObject(t, j3), false);
                     j = 0;
-                    break;
-                case 19:
-                    i11 += zzgr.zzh(i14, (List) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    zzb2 = zzgr.zzi(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += zzb2;
                     j = 0;
-                    break;
-                case 20:
-                    i11 += zzgr.zza(i14, (List<Long>) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                    i4 = zzgr.zzh(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
-                case 21:
-                    i11 += zzgr.zzb(i14, (List<Long>) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                    i4 = zzgr.zza(i23, (List<Long>) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
-                case 22:
-                    i11 += zzgr.zze(i14, (List) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                    i4 = zzgr.zzb(i23, (List<Long>) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
-                case 23:
-                    i11 += zzgr.zzi(i14, (List) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                    i4 = zzgr.zze(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
+                    i4 = zzgr.zzi(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 24:
-                    i11 += zzgr.zzh(i14, (List) unsafe2.getObject(t, j3), false);
+                    i4 = zzgr.zzh(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 25:
-                    i11 += zzgr.zzj(i14, (List) unsafe2.getObject(t, j3), false);
+                    i4 = zzgr.zzj(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 26:
-                    i11 += zzgr.zza(i14, (List) unsafe2.getObject(t, j3));
+                    zzb2 = zzgr.zza(i23, (List) unsafe2.getObject(t, j3));
+                    i20 += zzb2;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 27:
-                    i11 += zzgr.zza(i14, (List<?>) unsafe2.getObject(t, j3), zza(i10));
+                    zzb2 = zzgr.zza(i23, (List<?>) unsafe2.getObject(t, j3), zza(i19));
+                    i20 += zzb2;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 28:
-                    i11 += zzgr.zzb(i14, (List) unsafe2.getObject(t, j3));
+                    zzb2 = zzgr.zzb(i23, (List) unsafe2.getObject(t, j3));
+                    i20 += zzb2;
                     j = 0;
-                    break;
-                case NalUnitTypes.NAL_TYPE_RSV_VCL29 /* 29 */:
-                    i11 += zzgr.zzf(i14, (List) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 29:
+                    zzb2 = zzgr.zzf(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += zzb2;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 30:
-                    i11 += zzgr.zzd(i14, (List) unsafe2.getObject(t, j3), false);
+                    i4 = zzgr.zzd(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 31:
-                    i11 += zzgr.zzh(i14, (List) unsafe2.getObject(t, j3), false);
+                    i4 = zzgr.zzh(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
-                case 32:
-                    i11 += zzgr.zzi(i14, (List) unsafe2.getObject(t, j3), false);
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case ConnectionsManager.RequestFlagForceDownload /* 32 */:
+                    i4 = zzgr.zzi(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 33:
-                    i11 += zzgr.zzg(i14, (List) unsafe2.getObject(t, j3), false);
+                    i4 = zzgr.zzg(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 34:
-                    i11 += zzgr.zzc(i14, (List) unsafe2.getObject(t, j3), false);
+                    i4 = zzgr.zzc(i23, (List) unsafe2.getObject(t, j3), false);
+                    i20 += i4;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 35:
-                    int zzi4 = zzgr.zzi((List) unsafe2.getObject(t, j3));
-                    if (zzi4 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzi4) + zzi4;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzi((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 36:
-                    int zzh4 = zzgr.zzh((List) unsafe2.getObject(t, j3));
-                    if (zzh4 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzh4) + zzh4;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzh((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 37:
-                    int zza3 = zzgr.zza((List) unsafe2.getObject(t, j3));
-                    if (zza3 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zza3) + zza3;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zza((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 38:
-                    int zzb3 = zzgr.zzb((List) unsafe2.getObject(t, j3));
-                    if (zzb3 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzb3) + zzb3;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzb((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 39:
-                    int zze2 = zzgr.zze((List) unsafe2.getObject(t, j3));
-                    if (zze2 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zze2) + zze2;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zze((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 40:
-                    int zzi5 = zzgr.zzi((List) unsafe2.getObject(t, j3));
-                    if (zzi5 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzi5) + zzi5;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzi((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 41:
-                    int zzh5 = zzgr.zzh((List) unsafe2.getObject(t, j3));
-                    if (zzh5 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzh5) + zzh5;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzh((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 42:
-                    int zzj2 = zzgr.zzj((List) unsafe2.getObject(t, j3));
-                    if (zzj2 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzj2) + zzj2;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzj((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 43:
-                    int zzf4 = zzgr.zzf((List) unsafe2.getObject(t, j3));
-                    if (zzf4 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzf4) + zzf4;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzf((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 44:
-                    int zzd2 = zzgr.zzd((List) unsafe2.getObject(t, j3));
-                    if (zzd2 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzd2) + zzd2;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzd((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 45:
-                    int zzh6 = zzgr.zzh((List) unsafe2.getObject(t, j3));
-                    if (zzh6 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzh6) + zzh6;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzh((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 46:
-                    int zzi6 = zzgr.zzi((List) unsafe2.getObject(t, j3));
-                    if (zzi6 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzi6) + zzi6;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzi((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 47:
-                    int zzg2 = zzgr.zzg((List) unsafe2.getObject(t, j3));
-                    if (zzg2 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzg2) + zzg2;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzg((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 48:
-                    int zzc4 = zzgr.zzc((List) unsafe2.getObject(t, j3));
-                    if (zzc4 > 0) {
-                        i11 += zzea.zze(i14) + zzea.zzg(zzc4) + zzc4;
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    i7 = zzgr.zzc((List) unsafe2.getObject(t, j3));
+                    if (i7 > 0) {
+                        i6 = zzea.zze(i23);
+                        i5 = zzea.zzg(i7);
+                        i3 = i6 + i5 + i7;
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 49:
-                    i11 += zzgr.zzb(i14, (List) unsafe2.getObject(t, j3), zza(i10));
+                    zzb2 = zzgr.zzb(i23, (List) unsafe2.getObject(t, j3), zza(i19));
+                    i20 += zzb2;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 50:
-                    i11 += this.zzs.zza(i14, unsafe2.getObject(t, j3), zzb(i10));
+                    zzb2 = this.zzs.zza(i23, unsafe2.getObject(t, j3), zzb(i19));
+                    i20 += zzb2;
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 51:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzb(i14, (double) FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzb(i23, 0.0d);
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 52:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzb(i14, 0.0f);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        i3 = zzea.zzb(i23, 0.0f);
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 53:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzd(i14, zze(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzd(i23, zze(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 54:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zze(i14, zze(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zze(i23, zze(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 55:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzf(i14, zzd(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzf(i23, zzd(t, j3));
+                        i20 += zzb2;
                     }
-                case UndoView.ACTION_USERNAME_COPIED /* 56 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzg(i14, 0L);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 56:
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzg(i23, 0L);
+                        i20 += zzb2;
                     }
-                case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzi(i14, 0);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 57:
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        i3 = zzea.zzi(i23, 0);
+                        i20 += i3;
                     }
-                case UndoView.ACTION_TEXT_COPIED /* 58 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzb(i14, true);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 58:
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        i3 = zzea.zzb(i23, true);
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 59:
-                    if (zza((zzgd<T>) t, i14, i10)) {
+                    if (zza((zzgd<T>) t, i23, i19)) {
                         Object object2 = unsafe2.getObject(t, j3);
                         if (object2 instanceof zzdn) {
-                            i11 += zzea.zzc(i14, (zzdn) object2);
-                            j = 0;
-                            break;
+                            zzb2 = zzea.zzc(i23, (zzdn) object2);
                         } else {
-                            i11 += zzea.zzb(i14, (String) object2);
-                            j = 0;
-                            break;
+                            zzb2 = zzea.zzb(i23, (String) object2);
                         }
-                    } else {
-                        j = 0;
-                        break;
+                        i20 += zzb2;
                     }
-                case UndoView.ACTION_PHONE_COPIED /* 60 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzgr.zza(i14, unsafe2.getObject(t, j3), zza(i10));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 60:
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzgr.zza(i23, unsafe2.getObject(t, j3), zza(i19));
+                        i20 += zzb2;
                     }
-                case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzc(i14, (zzdn) unsafe2.getObject(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 61:
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzc(i23, (zzdn) unsafe2.getObject(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 62:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzg(i14, zzd(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzg(i23, zzd(t, j3));
+                        i20 += zzb2;
                     }
-                case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzk(i14, zzd(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
+                case 63:
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzk(i23, zzd(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 64:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzj(i14, 0);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        i3 = zzea.zzj(i23, 0);
+                        i20 += i3;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case VoIPService.CALL_MIN_LAYER /* 65 */:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzh(i14, 0L);
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzh(i23, 0L);
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 66:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzh(i14, zzd(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzh(i23, zzd(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 67:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzf(i14, zze(t, j3));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzf(i23, zze(t, j3));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 case 68:
-                    if (zza((zzgd<T>) t, i14, i10)) {
-                        i11 += zzea.zzc(i14, (zzfz) unsafe2.getObject(t, j3), zza(i10));
-                        j = 0;
-                        break;
-                    } else {
-                        j = 0;
-                        break;
+                    if (zza((zzgd<T>) t, i23, i19)) {
+                        zzb2 = zzea.zzc(i23, (zzfz) unsafe2.getObject(t, j3), zza(i19));
+                        i20 += zzb2;
                     }
+                    j = 0;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
                 default:
                     j = 0;
-                    break;
+                    i19 += 3;
+                    i12 = 1048575;
+                    i13 = 1;
             }
-            i10 += 3;
-            i3 = 1048575;
-            i4 = 1;
+            i19 += 3;
+            i12 = 1048575;
+            i13 = 1;
         }
-        int i18 = 0;
-        int zza4 = i11 + zza((zzhh) this.zzq, (Object) t);
-        if (this.zzh) {
-            zzej<?> zza5 = this.zzr.zza(t);
-            for (int i19 = 0; i19 < zza5.zza.zzc(); i19++) {
-                Map.Entry<?, Object> zzb4 = zza5.zza.zzb(i19);
-                i18 += zzej.zza((zzel) zzb4.getKey(), zzb4.getValue());
-            }
-            for (Map.Entry<?, Object> entry : zza5.zza.zzd()) {
-                i18 += zzej.zza((zzel) entry.getKey(), entry.getValue());
-            }
-            return zza4 + i18;
+        int i27 = 0;
+        int zza2 = i20 + zza((zzhh) this.zzq, (Object) t);
+        if (!this.zzh) {
+            return zza2;
         }
-        return zza4;
+        zzej<?> zza3 = this.zzr.zza(t);
+        for (int i28 = 0; i28 < zza3.zza.zzc(); i28++) {
+            Map.Entry<?, Object> zzb4 = zza3.zza.zzb(i28);
+            i27 += zzej.zza((zzel) zzb4.getKey(), zzb4.getValue());
+        }
+        for (Map.Entry<?, Object> entry : zza3.zza.zzd()) {
+            i27 += zzej.zza((zzel) entry.getKey(), entry.getValue());
+        }
+        return zza2 + i27;
     }
 
     private static <UT, UB> int zza(zzhh<UT, UB> zzhhVar, T t) {
@@ -1854,10 +2018,10 @@ final class zzgd<T> implements zzgp<T> {
         return (List) zzhn.zzf(obj, j);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:12:0x003f  */
-    /* JADX WARN: Removed duplicated region for block: B:165:0x059f  */
-    /* JADX WARN: Removed duplicated region for block: B:180:0x05e2  */
-    /* JADX WARN: Removed duplicated region for block: B:333:0x0b42  */
+    /* JADX WARN: Removed duplicated region for block: B:12:0x003b  */
+    /* JADX WARN: Removed duplicated region for block: B:165:0x0513  */
+    /* JADX WARN: Removed duplicated region for block: B:180:0x0552  */
+    /* JADX WARN: Removed duplicated region for block: B:333:0x0a2a  */
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
     /*
         Code decompiled incorrectly, please refer to instructions dump.
@@ -1865,21 +2029,21 @@ final class zzgd<T> implements zzgp<T> {
     */
     public final void zza(T r14, com.google.android.gms.internal.mlkit_language_id.zzib r15) throws java.io.IOException {
         /*
-            Method dump skipped, instructions count: 3196
+            Method dump skipped, instructions count: 2916
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.mlkit_language_id.zzgd.zza(java.lang.Object, com.google.android.gms.internal.mlkit_language_id.zzib):void");
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:10:0x0035  */
-    /* JADX WARN: Removed duplicated region for block: B:190:0x0559  */
+    /* JADX WARN: Removed duplicated region for block: B:10:0x0031  */
+    /* JADX WARN: Removed duplicated region for block: B:172:0x0495  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private final void zzb(T r18, com.google.android.gms.internal.mlkit_language_id.zzib r19) throws java.io.IOException {
         /*
-            Method dump skipped, instructions count: 1538
+            Method dump skipped, instructions count: 1342
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.mlkit_language_id.zzgd.zzb(java.lang.Object, com.google.android.gms.internal.mlkit_language_id.zzib):void");
@@ -1938,10 +2102,6 @@ final class zzgd<T> implements zzgp<T> {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r1v14 */
-    /* JADX WARN: Type inference failed for: r1v16, types: [com.google.android.gms.internal.mlkit_language_id.zzgp] */
-    /* JADX WARN: Type inference failed for: r1v22 */
-    /* JADX WARN: Type inference failed for: r1v5, types: [com.google.android.gms.internal.mlkit_language_id.zzgp] */
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
     public final boolean zzc(T t) {
         int i;
@@ -1960,79 +2120,55 @@ final class zzgd<T> implements zzgp<T> {
             int i8 = this.zzc[i6 + 2];
             int i9 = i8 & 1048575;
             int i10 = 1 << (i8 >>> 20);
-            if (i9 == i3) {
-                i2 = i3;
-                i = i4;
-            } else if (i9 == 1048575) {
+            if (i9 != i3) {
+                if (i9 != 1048575) {
+                    i4 = zzb.getInt(t, i9);
+                }
                 i = i4;
                 i2 = i9;
             } else {
-                i = zzb.getInt(t, i9);
-                i2 = i9;
+                i2 = i3;
+                i = i4;
             }
             if (((268435456 & zzc) != 0) && !zza(t, i6, i2, i, i10)) {
                 return false;
             }
-            switch ((267386880 & zzc) >>> 20) {
-                case 9:
-                case 17:
-                    if (zza(t, i6, i2, i, i10) && !zza(t, zzc, zza(i6))) {
-                        return false;
-                    }
-                    break;
-                case 27:
-                case 49:
-                    List list = (List) zzhn.zzf(t, zzc & 1048575);
-                    if (!list.isEmpty()) {
-                        ?? zza2 = zza(i6);
-                        int i11 = 0;
-                        while (true) {
-                            if (i11 < list.size()) {
-                                if (!zza2.zzc(list.get(i11))) {
-                                    z = false;
-                                } else {
-                                    i11++;
-                                }
-                            }
+            int i11 = (267386880 & zzc) >>> 20;
+            if (i11 == 9 || i11 == 17) {
+                if (zza(t, i6, i2, i, i10) && !zza(t, zzc, zza(i6))) {
+                    return false;
+                }
+            } else {
+                if (i11 != 27) {
+                    if (i11 == 60 || i11 == 68) {
+                        if (zza((zzgd<T>) t, i7, i6) && !zza(t, zzc, zza(i6))) {
+                            return false;
+                        }
+                    } else if (i11 != 49) {
+                        if (i11 == 50 && !this.zzs.zza(zzhn.zzf(t, zzc & 1048575)).isEmpty()) {
+                            this.zzs.zzc(zzb(i6));
+                            throw null;
                         }
                     }
-                    if (z) {
-                        break;
-                    } else {
-                        return false;
-                    }
-                case 50:
-                    Map<?, ?> zza3 = this.zzs.zza(zzhn.zzf(t, zzc & 1048575));
-                    if (!zza3.isEmpty()) {
-                        if (this.zzs.zzc(zzb(i6)).zzb.zza() == zzhy.MESSAGE) {
-                            zzgp<T> zzgpVar = 0;
-                            Iterator<?> it = zza3.values().iterator();
-                            while (true) {
-                                if (it.hasNext()) {
-                                    Object next = it.next();
-                                    if (zzgpVar == null) {
-                                        zzgpVar = zzgk.zza().zza((Class) next.getClass());
-                                    }
-                                    boolean zzc2 = zzgpVar.zzc(next);
-                                    zzgpVar = zzgpVar;
-                                    if (!zzc2) {
-                                        z = false;
-                                    }
-                                }
-                            }
+                }
+                List list = (List) zzhn.zzf(t, zzc & 1048575);
+                if (!list.isEmpty()) {
+                    zzgp zza2 = zza(i6);
+                    int i12 = 0;
+                    while (true) {
+                        if (i12 >= list.size()) {
+                            break;
+                        } else if (!zza2.zzc(list.get(i12))) {
+                            z = false;
+                            break;
+                        } else {
+                            i12++;
                         }
                     }
-                    if (z) {
-                        break;
-                    } else {
-                        return false;
-                    }
-                case UndoView.ACTION_PHONE_COPIED /* 60 */:
-                case 68:
-                    if (zza((zzgd<T>) t, i7, i6) && !zza(t, zzc, zza(i6))) {
-                        return false;
-                    }
-                    break;
+                }
+                if (!z) {
+                    return false;
+                }
             }
             i5++;
             i3 = i2;
@@ -2102,7 +2238,7 @@ final class zzgd<T> implements zzgp<T> {
         long j2 = zzc & 1048575;
         switch ((zzc & 267386880) >>> 20) {
             case 0:
-                return zzhn.zze(t, j2) != FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE;
+                return zzhn.zze(t, j2) != 0.0d;
             case 1:
                 return zzhn.zzd(t, j2) != 0.0f;
             case 2:

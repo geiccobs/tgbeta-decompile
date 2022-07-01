@@ -2,27 +2,13 @@ package com.google.android.exoplayer2.text.webvtt;
 
 import android.text.Layout;
 import android.text.TextUtils;
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.util.Util;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class WebvttCssStyle {
-    public static final int FONT_SIZE_UNIT_EM = 2;
-    public static final int FONT_SIZE_UNIT_PERCENT = 3;
-    public static final int FONT_SIZE_UNIT_PIXEL = 1;
-    private static final int OFF = 0;
-    private static final int ON = 1;
-    public static final int STYLE_BOLD = 1;
-    public static final int STYLE_BOLD_ITALIC = 3;
-    public static final int STYLE_ITALIC = 2;
-    public static final int STYLE_NORMAL = 0;
-    public static final int UNSPECIFIED = -1;
     private int backgroundColor;
     private int bold;
     private int fontColor;
@@ -39,24 +25,6 @@ public final class WebvttCssStyle {
     private String targetVoice;
     private Layout.Alignment textAlign;
     private int underline;
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    public @interface FontSizeUnit {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    private @interface OptionalBoolean {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    public @interface StyleFlags {
-    }
 
     public WebvttCssStyle() {
         reset();
@@ -79,31 +47,31 @@ public final class WebvttCssStyle {
         this.textAlign = null;
     }
 
-    public void setTargetId(String targetId) {
-        this.targetId = targetId;
+    public void setTargetId(String str) {
+        this.targetId = str;
     }
 
-    public void setTargetTagName(String targetTag) {
-        this.targetTag = targetTag;
+    public void setTargetTagName(String str) {
+        this.targetTag = str;
     }
 
-    public void setTargetClasses(String[] targetClasses) {
-        this.targetClasses = Arrays.asList(targetClasses);
+    public void setTargetClasses(String[] strArr) {
+        this.targetClasses = Arrays.asList(strArr);
     }
 
-    public void setTargetVoice(String targetVoice) {
-        this.targetVoice = targetVoice;
+    public void setTargetVoice(String str) {
+        this.targetVoice = str;
     }
 
-    public int getSpecificityScore(String id, String tag, String[] classes, String voice) {
+    public int getSpecificityScore(String str, String str2, String[] strArr, String str3) {
         if (!this.targetId.isEmpty() || !this.targetTag.isEmpty() || !this.targetClasses.isEmpty() || !this.targetVoice.isEmpty()) {
-            int score = updateScoreForMatch(updateScoreForMatch(updateScoreForMatch(0, this.targetId, id, C.BUFFER_FLAG_ENCRYPTED), this.targetTag, tag, 2), this.targetVoice, voice, 4);
-            if (score == -1 || !Arrays.asList(classes).containsAll(this.targetClasses)) {
-                return 0;
+            int updateScoreForMatch = updateScoreForMatch(updateScoreForMatch(updateScoreForMatch(0, this.targetId, str, 1073741824), this.targetTag, str2, 2), this.targetVoice, str3, 4);
+            if (updateScoreForMatch != -1 && Arrays.asList(strArr).containsAll(this.targetClasses)) {
+                return updateScoreForMatch + (this.targetClasses.size() * 4);
             }
-            return score + (this.targetClasses.size() * 4);
+            return 0;
         }
-        return TextUtils.isEmpty(tag) ? 1 : 0;
+        return TextUtils.isEmpty(str2) ? 1 : 0;
     }
 
     public int getStyle() {
@@ -123,27 +91,22 @@ public final class WebvttCssStyle {
         return this.linethrough == 1;
     }
 
-    public WebvttCssStyle setLinethrough(boolean linethrough) {
-        this.linethrough = linethrough ? 1 : 0;
-        return this;
-    }
-
     public boolean isUnderline() {
         return this.underline == 1;
     }
 
-    public WebvttCssStyle setUnderline(boolean underline) {
-        this.underline = underline ? 1 : 0;
+    public WebvttCssStyle setUnderline(boolean z) {
+        this.underline = z ? 1 : 0;
         return this;
     }
 
-    public WebvttCssStyle setBold(boolean bold) {
-        this.bold = bold ? 1 : 0;
+    public WebvttCssStyle setBold(boolean z) {
+        this.bold = z ? 1 : 0;
         return this;
     }
 
-    public WebvttCssStyle setItalic(boolean italic) {
-        this.italic = italic ? 1 : 0;
+    public WebvttCssStyle setItalic(boolean z) {
+        this.italic = z ? 1 : 0;
         return this;
     }
 
@@ -151,8 +114,8 @@ public final class WebvttCssStyle {
         return this.fontFamily;
     }
 
-    public WebvttCssStyle setFontFamily(String fontFamily) {
-        this.fontFamily = Util.toLowerInvariant(fontFamily);
+    public WebvttCssStyle setFontFamily(String str) {
+        this.fontFamily = Util.toLowerInvariant(str);
         return this;
     }
 
@@ -163,8 +126,8 @@ public final class WebvttCssStyle {
         return this.fontColor;
     }
 
-    public WebvttCssStyle setFontColor(int color) {
-        this.fontColor = color;
+    public WebvttCssStyle setFontColor(int i) {
+        this.fontColor = i;
         this.hasFontColor = true;
         return this;
     }
@@ -180,8 +143,8 @@ public final class WebvttCssStyle {
         return this.backgroundColor;
     }
 
-    public WebvttCssStyle setBackgroundColor(int backgroundColor) {
-        this.backgroundColor = backgroundColor;
+    public WebvttCssStyle setBackgroundColor(int i) {
+        this.backgroundColor = i;
         this.hasBackgroundColor = true;
         return this;
     }
@@ -194,21 +157,6 @@ public final class WebvttCssStyle {
         return this.textAlign;
     }
 
-    public WebvttCssStyle setTextAlign(Layout.Alignment textAlign) {
-        this.textAlign = textAlign;
-        return this;
-    }
-
-    public WebvttCssStyle setFontSize(float fontSize) {
-        this.fontSize = fontSize;
-        return this;
-    }
-
-    public WebvttCssStyle setFontSizeUnit(short unit) {
-        this.fontSizeUnit = unit;
-        return this;
-    }
-
     public int getFontSizeUnit() {
         return this.fontSizeUnit;
     }
@@ -217,47 +165,13 @@ public final class WebvttCssStyle {
         return this.fontSize;
     }
 
-    public void cascadeFrom(WebvttCssStyle style) {
-        if (style.hasFontColor) {
-            setFontColor(style.fontColor);
+    private static int updateScoreForMatch(int i, String str, String str2, int i2) {
+        if (str.isEmpty() || i == -1) {
+            return i;
         }
-        int i = style.bold;
-        if (i != -1) {
-            this.bold = i;
-        }
-        int i2 = style.italic;
-        if (i2 != -1) {
-            this.italic = i2;
-        }
-        String str = style.fontFamily;
-        if (str != null) {
-            this.fontFamily = str;
-        }
-        if (this.linethrough == -1) {
-            this.linethrough = style.linethrough;
-        }
-        if (this.underline == -1) {
-            this.underline = style.underline;
-        }
-        if (this.textAlign == null) {
-            this.textAlign = style.textAlign;
-        }
-        if (this.fontSizeUnit == -1) {
-            this.fontSizeUnit = style.fontSizeUnit;
-            this.fontSize = style.fontSize;
-        }
-        if (style.hasBackgroundColor) {
-            setBackgroundColor(style.backgroundColor);
-        }
-    }
-
-    private static int updateScoreForMatch(int currentScore, String target, String actual, int score) {
-        if (target.isEmpty() || currentScore == -1) {
-            return currentScore;
-        }
-        if (!target.equals(actual)) {
+        if (!str.equals(str2)) {
             return -1;
         }
-        return currentScore + score;
+        return i + i2;
     }
 }

@@ -4,9 +4,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class RecyclerViewItemRangeSelector implements RecyclerView.OnItemTouchListener {
-    private static final int AUTO_SCROLL_DELAY = 15;
     private int autoScrollVelocity;
     private RecyclerViewItemRangeSelectorDelegate delegate;
     private boolean dragSelectActive;
@@ -19,29 +18,28 @@ public class RecyclerViewItemRangeSelector implements RecyclerView.OnItemTouchLi
     private boolean inBottomHotspot;
     private boolean inTopHotspot;
     private int initialSelection;
-    private boolean isAutoScrolling;
     private RecyclerView recyclerView;
     private int lastDraggedIndex = -1;
     private int hotspotHeight = AndroidUtilities.dp(80.0f);
     private Runnable autoScrollRunnable = new Runnable() { // from class: org.telegram.ui.Components.RecyclerViewItemRangeSelector.1
         @Override // java.lang.Runnable
         public void run() {
-            if (RecyclerViewItemRangeSelector.this.recyclerView != null) {
-                if (RecyclerViewItemRangeSelector.this.inTopHotspot) {
-                    RecyclerViewItemRangeSelector.this.recyclerView.scrollBy(0, -RecyclerViewItemRangeSelector.this.autoScrollVelocity);
-                    AndroidUtilities.runOnUIThread(this);
-                } else if (RecyclerViewItemRangeSelector.this.inBottomHotspot) {
-                    RecyclerViewItemRangeSelector.this.recyclerView.scrollBy(0, RecyclerViewItemRangeSelector.this.autoScrollVelocity);
-                    AndroidUtilities.runOnUIThread(this);
-                }
+            if (RecyclerViewItemRangeSelector.this.recyclerView == null) {
+                return;
+            }
+            if (RecyclerViewItemRangeSelector.this.inTopHotspot) {
+                RecyclerViewItemRangeSelector.this.recyclerView.scrollBy(0, -RecyclerViewItemRangeSelector.this.autoScrollVelocity);
+                AndroidUtilities.runOnUIThread(this);
+            } else if (!RecyclerViewItemRangeSelector.this.inBottomHotspot) {
+            } else {
+                RecyclerViewItemRangeSelector.this.recyclerView.scrollBy(0, RecyclerViewItemRangeSelector.this.autoScrollVelocity);
+                AndroidUtilities.runOnUIThread(this);
             }
         }
     };
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface RecyclerViewItemRangeSelectorDelegate {
-        int getItemCount();
-
         boolean isIndexSelectable(int i);
 
         boolean isSelected(int i);
@@ -51,124 +49,106 @@ public class RecyclerViewItemRangeSelector implements RecyclerView.OnItemTouchLi
         void setSelected(View view, int i, boolean z);
     }
 
+    @Override // androidx.recyclerview.widget.RecyclerView.OnItemTouchListener
+    public void onRequestDisallowInterceptTouchEvent(boolean z) {
+    }
+
     public RecyclerViewItemRangeSelector(RecyclerViewItemRangeSelectorDelegate recyclerViewItemRangeSelectorDelegate) {
         this.delegate = recyclerViewItemRangeSelectorDelegate;
     }
 
-    private void disableAutoScroll() {
-        this.hotspotHeight = -1;
-        this.hotspotOffsetTop = -1;
-        this.hotspotOffsetBottom = -1;
-    }
-
     @Override // androidx.recyclerview.widget.RecyclerView.OnItemTouchListener
-    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        boolean result = false;
-        boolean adapterIsEmpty = rv.getAdapter() == null || rv.getAdapter().getItemCount() == 0;
-        if (this.dragSelectActive && !adapterIsEmpty) {
-            result = true;
+    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+        boolean z = false;
+        boolean z2 = recyclerView.getAdapter() == null || recyclerView.getAdapter().getItemCount() == 0;
+        if (this.dragSelectActive && !z2) {
+            z = true;
         }
-        if (result) {
-            this.recyclerView = rv;
+        if (z) {
+            this.recyclerView = recyclerView;
             int i = this.hotspotHeight;
             if (i > -1) {
                 int i2 = this.hotspotOffsetTop;
                 this.hotspotTopBoundStart = i2;
                 this.hotspotTopBoundEnd = i2 + i;
-                this.hotspotBottomBoundStart = (rv.getMeasuredHeight() - this.hotspotHeight) - this.hotspotOffsetBottom;
-                this.hotspotBottomBoundEnd = rv.getMeasuredHeight() - this.hotspotOffsetBottom;
+                this.hotspotBottomBoundStart = (recyclerView.getMeasuredHeight() - this.hotspotHeight) - this.hotspotOffsetBottom;
+                this.hotspotBottomBoundEnd = recyclerView.getMeasuredHeight() - this.hotspotOffsetBottom;
             }
         }
-        if (result && e.getAction() == 1) {
+        if (z && motionEvent.getAction() == 1) {
             onDragSelectionStop();
         }
-        return result;
+        return z;
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.OnItemTouchListener
-    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        int itemPosition;
-        RecyclerViewItemRangeSelectorDelegate recyclerViewItemRangeSelectorDelegate;
-        View v = rv.findChildViewUnder(e.getX(), e.getY());
-        if (v != null) {
-            itemPosition = rv.getChildAdapterPosition(v);
+    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+        View findChildViewUnder = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+        int childAdapterPosition = findChildViewUnder != null ? recyclerView.getChildAdapterPosition(findChildViewUnder) : -1;
+        float y = motionEvent.getY();
+        int action = motionEvent.getAction();
+        if (action == 1) {
+            onDragSelectionStop();
+        } else if (action != 2) {
         } else {
-            itemPosition = -1;
-        }
-        float y = e.getY();
-        switch (e.getAction()) {
-            case 1:
-                onDragSelectionStop();
-                return;
-            case 2:
-                if (this.hotspotHeight > -1) {
-                    if (y >= this.hotspotTopBoundStart && y <= this.hotspotTopBoundEnd) {
-                        this.inBottomHotspot = false;
-                        if (!this.inTopHotspot) {
-                            this.inTopHotspot = true;
-                            AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
-                            AndroidUtilities.runOnUIThread(this.autoScrollRunnable);
-                        }
-                        int i = this.hotspotTopBoundEnd;
-                        int i2 = this.hotspotTopBoundStart;
-                        float simulatedFactor = i - i2;
-                        float simulatedY = y - i2;
-                        this.autoScrollVelocity = ((int) (simulatedFactor - simulatedY)) / 2;
-                    } else if (y >= this.hotspotBottomBoundStart && y <= this.hotspotBottomBoundEnd) {
-                        this.inTopHotspot = false;
-                        if (!this.inBottomHotspot) {
-                            this.inBottomHotspot = true;
-                            AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
-                            AndroidUtilities.runOnUIThread(this.autoScrollRunnable);
-                        }
-                        int i3 = this.hotspotBottomBoundEnd;
-                        float simulatedY2 = i3 + y;
-                        float simulatedFactor2 = this.hotspotBottomBoundStart + i3;
-                        this.autoScrollVelocity = ((int) (simulatedY2 - simulatedFactor2)) / 2;
-                    } else if (this.inTopHotspot || this.inBottomHotspot) {
+            if (this.hotspotHeight > -1) {
+                if (y >= this.hotspotTopBoundStart && y <= this.hotspotTopBoundEnd) {
+                    this.inBottomHotspot = false;
+                    if (!this.inTopHotspot) {
+                        this.inTopHotspot = true;
                         AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
-                        this.inTopHotspot = false;
-                        this.inBottomHotspot = false;
+                        AndroidUtilities.runOnUIThread(this.autoScrollRunnable);
                     }
+                    int i = this.hotspotTopBoundEnd;
+                    int i2 = this.hotspotTopBoundStart;
+                    this.autoScrollVelocity = ((int) ((i - i2) - (y - i2))) / 2;
+                } else if (y >= this.hotspotBottomBoundStart && y <= this.hotspotBottomBoundEnd) {
+                    this.inTopHotspot = false;
+                    if (!this.inBottomHotspot) {
+                        this.inBottomHotspot = true;
+                        AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
+                        AndroidUtilities.runOnUIThread(this.autoScrollRunnable);
+                    }
+                    int i3 = this.hotspotBottomBoundEnd;
+                    this.autoScrollVelocity = ((int) ((y + i3) - (this.hotspotBottomBoundStart + i3))) / 2;
+                } else if (this.inTopHotspot || this.inBottomHotspot) {
+                    AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
+                    this.inTopHotspot = false;
+                    this.inBottomHotspot = false;
                 }
-                if (itemPosition == -1 || this.lastDraggedIndex == itemPosition) {
-                    return;
-                }
-                this.lastDraggedIndex = itemPosition;
-                this.delegate.setSelected(v, itemPosition, !recyclerViewItemRangeSelectorDelegate.isSelected(itemPosition));
+            }
+            if (childAdapterPosition == -1 || this.lastDraggedIndex == childAdapterPosition) {
                 return;
-            default:
-                return;
+            }
+            this.lastDraggedIndex = childAdapterPosition;
+            RecyclerViewItemRangeSelectorDelegate recyclerViewItemRangeSelectorDelegate = this.delegate;
+            recyclerViewItemRangeSelectorDelegate.setSelected(findChildViewUnder, childAdapterPosition, !recyclerViewItemRangeSelectorDelegate.isSelected(childAdapterPosition));
         }
     }
 
-    @Override // androidx.recyclerview.widget.RecyclerView.OnItemTouchListener
-    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-    }
-
-    public boolean setIsActive(View view, boolean active, int selection, boolean select) {
-        if (active && this.dragSelectActive) {
-            return false;
+    public boolean setIsActive(View view, boolean z, int i, boolean z2) {
+        if (!z || !this.dragSelectActive) {
+            this.lastDraggedIndex = -1;
+            AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
+            this.inTopHotspot = false;
+            this.inBottomHotspot = false;
+            if (!z) {
+                this.initialSelection = -1;
+                return false;
+            } else if (!this.delegate.isIndexSelectable(i)) {
+                this.dragSelectActive = false;
+                this.initialSelection = -1;
+                return false;
+            } else {
+                this.delegate.onStartStopSelection(true);
+                this.delegate.setSelected(view, this.initialSelection, z2);
+                this.dragSelectActive = z;
+                this.initialSelection = i;
+                this.lastDraggedIndex = i;
+                return true;
+            }
         }
-        this.lastDraggedIndex = -1;
-        AndroidUtilities.cancelRunOnUIThread(this.autoScrollRunnable);
-        this.inTopHotspot = false;
-        this.inBottomHotspot = false;
-        if (!active) {
-            this.initialSelection = -1;
-            return false;
-        } else if (!this.delegate.isIndexSelectable(selection)) {
-            this.dragSelectActive = false;
-            this.initialSelection = -1;
-            return false;
-        } else {
-            this.delegate.onStartStopSelection(true);
-            this.delegate.setSelected(view, this.initialSelection, select);
-            this.dragSelectActive = active;
-            this.initialSelection = selection;
-            this.lastDraggedIndex = selection;
-            return true;
-        }
+        return false;
     }
 
     private void onDragSelectionStop() {

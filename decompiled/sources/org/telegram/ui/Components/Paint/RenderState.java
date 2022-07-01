@@ -1,12 +1,10 @@
 package org.telegram.ui.Components.Paint;
 
 import android.graphics.PointF;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class RenderState {
-    private static final int DEFAULT_STATE_SIZE = 256;
     private int allocatedCount;
     public float alpha;
     public float angle;
@@ -38,20 +36,20 @@ public class RenderState {
         return this.buffer.getFloat();
     }
 
-    public void setPosition(int position) {
+    public void setPosition(int i) {
         ByteBuffer byteBuffer = this.buffer;
-        if (byteBuffer == null || position < 0 || position >= this.allocatedCount) {
+        if (byteBuffer == null || i < 0 || i >= this.allocatedCount) {
             return;
         }
-        byteBuffer.position(position * 5 * 4);
+        byteBuffer.position(i * 5 * 4);
     }
 
-    public void appendValuesCount(int count) {
-        int newTotalCount = this.count + count;
-        if (newTotalCount > this.allocatedCount || this.buffer == null) {
+    public void appendValuesCount(int i) {
+        int i2 = this.count + i;
+        if (i2 > this.allocatedCount || this.buffer == null) {
             resizeBuffer();
         }
-        this.count = newTotalCount;
+        this.count = i2;
     }
 
     public void resizeBuffer() {
@@ -66,25 +64,25 @@ public class RenderState {
         this.buffer.position(0);
     }
 
-    public boolean addPoint(PointF point, float size, float angle, float alpha, int index) {
-        if ((index != -1 && index >= this.allocatedCount) || this.buffer.position() == this.buffer.limit()) {
+    public boolean addPoint(PointF pointF, float f, float f2, float f3, int i) {
+        if ((i != -1 && i >= this.allocatedCount) || this.buffer.position() == this.buffer.limit()) {
             resizeBuffer();
             return false;
         }
-        if (index != -1) {
-            this.buffer.position(index * 5 * 4);
+        if (i != -1) {
+            this.buffer.position(i * 5 * 4);
         }
-        this.buffer.putFloat(point.x);
-        this.buffer.putFloat(point.y);
-        this.buffer.putFloat(size);
-        this.buffer.putFloat(angle);
-        this.buffer.putFloat(alpha);
+        this.buffer.putFloat(pointF.x);
+        this.buffer.putFloat(pointF.y);
+        this.buffer.putFloat(f);
+        this.buffer.putFloat(f2);
+        this.buffer.putFloat(f3);
         return true;
     }
 
     public void reset() {
         this.count = 0;
-        this.remainder = FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE;
+        this.remainder = 0.0d;
         ByteBuffer byteBuffer = this.buffer;
         if (byteBuffer != null) {
             byteBuffer.position(0);

@@ -1,15 +1,15 @@
 package com.google.firebase.installations.remote;
 
 import com.google.firebase.installations.remote.TokenResult;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class AutoValue_TokenResult extends TokenResult {
     private final TokenResult.ResponseCode responseCode;
     private final String token;
     private final long tokenExpirationTimestamp;
 
-    private AutoValue_TokenResult(String token, long tokenExpirationTimestamp, TokenResult.ResponseCode responseCode) {
-        this.token = token;
-        this.tokenExpirationTimestamp = tokenExpirationTimestamp;
+    private AutoValue_TokenResult(String str, long j, TokenResult.ResponseCode responseCode) {
+        this.token = str;
+        this.tokenExpirationTimestamp = j;
         this.responseCode = responseCode;
     }
 
@@ -32,23 +32,23 @@ final class AutoValue_TokenResult extends TokenResult {
         return "TokenResult{token=" + this.token + ", tokenExpirationTimestamp=" + this.tokenExpirationTimestamp + ", responseCode=" + this.responseCode + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof TokenResult)) {
+        if (!(obj instanceof TokenResult)) {
             return false;
         }
-        TokenResult that = (TokenResult) o;
+        TokenResult tokenResult = (TokenResult) obj;
         String str = this.token;
-        if (str != null ? str.equals(that.getToken()) : that.getToken() == null) {
-            if (this.tokenExpirationTimestamp == that.getTokenExpirationTimestamp()) {
+        if (str != null ? str.equals(tokenResult.getToken()) : tokenResult.getToken() == null) {
+            if (this.tokenExpirationTimestamp == tokenResult.getTokenExpirationTimestamp()) {
                 TokenResult.ResponseCode responseCode = this.responseCode;
                 if (responseCode == null) {
-                    if (that.getResponseCode() == null) {
+                    if (tokenResult.getResponseCode() == null) {
                         return true;
                     }
-                } else if (responseCode.equals(that.getResponseCode())) {
+                } else if (responseCode.equals(tokenResult.getResponseCode())) {
                     return true;
                 }
             }
@@ -57,49 +57,34 @@ final class AutoValue_TokenResult extends TokenResult {
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
         String str = this.token;
         int i = 0;
         int hashCode = str == null ? 0 : str.hashCode();
         long j = this.tokenExpirationTimestamp;
-        int h$2 = (((h$ ^ hashCode) * 1000003) ^ ((int) (j ^ (j >>> 32)))) * 1000003;
+        int i2 = (((hashCode ^ 1000003) * 1000003) ^ ((int) (j ^ (j >>> 32)))) * 1000003;
         TokenResult.ResponseCode responseCode = this.responseCode;
         if (responseCode != null) {
             i = responseCode.hashCode();
         }
-        return h$2 ^ i;
-    }
-
-    @Override // com.google.firebase.installations.remote.TokenResult
-    public TokenResult.Builder toBuilder() {
-        return new Builder(this);
+        return i2 ^ i;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder extends TokenResult.Builder {
         private TokenResult.ResponseCode responseCode;
         private String token;
         private Long tokenExpirationTimestamp;
 
-        public Builder() {
-        }
-
-        private Builder(TokenResult source) {
-            this.token = source.getToken();
-            this.tokenExpirationTimestamp = Long.valueOf(source.getTokenExpirationTimestamp());
-            this.responseCode = source.getResponseCode();
-        }
-
         @Override // com.google.firebase.installations.remote.TokenResult.Builder
-        public TokenResult.Builder setToken(String token) {
-            this.token = token;
+        public TokenResult.Builder setToken(String str) {
+            this.token = str;
             return this;
         }
 
         @Override // com.google.firebase.installations.remote.TokenResult.Builder
-        public TokenResult.Builder setTokenExpirationTimestamp(long tokenExpirationTimestamp) {
-            this.tokenExpirationTimestamp = Long.valueOf(tokenExpirationTimestamp);
+        public TokenResult.Builder setTokenExpirationTimestamp(long j) {
+            this.tokenExpirationTimestamp = Long.valueOf(j);
             return this;
         }
 
@@ -111,12 +96,12 @@ final class AutoValue_TokenResult extends TokenResult {
 
         @Override // com.google.firebase.installations.remote.TokenResult.Builder
         public TokenResult build() {
-            String missing = "";
+            String str = "";
             if (this.tokenExpirationTimestamp == null) {
-                missing = missing + " tokenExpirationTimestamp";
+                str = str + " tokenExpirationTimestamp";
             }
-            if (!missing.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + missing);
+            if (!str.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + str);
             }
             return new AutoValue_TokenResult(this.token, this.tokenExpirationTimestamp.longValue(), this.responseCode);
         }

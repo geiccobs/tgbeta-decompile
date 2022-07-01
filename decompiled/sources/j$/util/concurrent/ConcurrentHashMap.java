@@ -1,18 +1,19 @@
 package j$.util.concurrent;
 
-import com.microsoft.appcenter.ingestion.models.CommonProperties;
-import j$.util.Collection;
+import j$.util.AbstractC0033a;
+import j$.util.AbstractC0034b;
 import j$.util.Iterator;
-import j$.util.Spliterator;
+import j$.util.function.BiConsumer;
+import j$.util.function.BiFunction;
 import j$.util.function.Consumer;
-import j$.util.function.IntFunction;
+import j$.util.function.Function;
 import j$.util.function.Predicate;
-import j$.wrappers.C$r8$wrapper$java$util$function$BiConsumer$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$BiFunction$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$Consumer$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$Function$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$IntFunction$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$Predicate$VWRP;
+import j$.wrappers.C0226q;
+import j$.wrappers.C0227s;
+import j$.wrappers.C0231w;
+import j$.wrappers.M;
+import j$.wrappers.P0;
+import j$.wrappers.x0;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamField;
@@ -29,376 +30,2699 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.stream.Stream;
+import org.telegram.tgnet.ConnectionsManager;
 import sun.misc.Unsafe;
 /* loaded from: classes2.dex */
-public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements java.util.concurrent.ConcurrentMap<K, V>, Serializable, ConcurrentMap<K, V> {
-    private static final long ABASE;
-    private static final int ASHIFT;
-    private static final long BASECOUNT;
-    private static final long CELLSBUSY;
-    private static final long CELLVALUE;
-    private static final int DEFAULT_CAPACITY = 16;
-    private static final int DEFAULT_CONCURRENCY_LEVEL = 16;
-    static final int HASH_BITS = Integer.MAX_VALUE;
-    private static final float LOAD_FACTOR = 0.75f;
-    private static final int MAXIMUM_CAPACITY = 1073741824;
-    static final int MAX_ARRAY_SIZE = 2147483639;
-    private static final int MIN_TRANSFER_STRIDE = 16;
-    static final int MIN_TREEIFY_CAPACITY = 64;
-    static final int MOVED = -1;
-    static final int RESERVED = -3;
-    private static final long SIZECTL;
-    private static final long TRANSFERINDEX;
-    static final int TREEBIN = -2;
-    static final int TREEIFY_THRESHOLD = 8;
-    private static final Unsafe U;
-    static final int UNTREEIFY_THRESHOLD = 6;
+public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V>, Serializable, j$.util.concurrent.b {
+    static final int g = Runtime.getRuntime().availableProcessors();
+    private static final Unsafe h;
+    private static final long i;
+    private static final long j;
+    private static final long k;
+    private static final long l;
+    private static final long m;
+    private static final long n;
+    private static final int o;
+    private static final ObjectStreamField[] serialPersistentFields;
     private static final long serialVersionUID = 7249069246763182397L;
+    volatile transient l[] a;
+    private volatile transient l[] b;
     private volatile transient long baseCount;
+    private volatile transient c[] c;
     private volatile transient int cellsBusy;
-    private volatile transient CounterCell[] counterCells;
-    private transient EntrySetView<K, V> entrySet;
-    private transient KeySetView<K, V> keySet;
-    private volatile transient Node<K, V>[] nextTable;
+    private transient i d;
+    private transient u e;
+    private transient e f;
     private volatile transient int sizeCtl;
-    volatile transient Node<K, V>[] table;
     private volatile transient int transferIndex;
-    private transient ValuesView<K, V> values;
-    private static int RESIZE_STAMP_BITS = 16;
-    private static final int MAX_RESIZERS = 65535;
-    private static final int RESIZE_STAMP_SHIFT = 16;
-    static final int NCPU = Runtime.getRuntime().availableProcessors();
-    private static final ObjectStreamField[] serialPersistentFields = {new ObjectStreamField("segments", Segment[].class), new ObjectStreamField("segmentMask", Integer.TYPE), new ObjectStreamField("segmentShift", Integer.TYPE)};
 
-    /* JADX WARN: Multi-variable type inference failed */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
-    public /* synthetic */ Object compute(Object obj, BiFunction biFunction) {
-        return compute((ConcurrentHashMap<K, V>) obj, (j$.util.function.BiFunction<? super ConcurrentHashMap<K, V>, ? super V, ? extends V>) C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
-    }
+    /* loaded from: classes2.dex */
+    public static class a extends p {
+        final ConcurrentHashMap i;
+        l j;
 
-    /* JADX WARN: Multi-variable type inference failed */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
-    public /* synthetic */ Object computeIfAbsent(Object obj, Function function) {
-        return computeIfAbsent((ConcurrentHashMap<K, V>) obj, (j$.util.function.Function<? super ConcurrentHashMap<K, V>, ? extends V>) C$r8$wrapper$java$util$function$Function$VWRP.convert(function));
-    }
+        a(l[] lVarArr, int i, int i2, int i3, ConcurrentHashMap concurrentHashMap) {
+            super(lVarArr, i, i2, i3);
+            this.i = concurrentHashMap;
+            a();
+        }
 
-    /* JADX WARN: Multi-variable type inference failed */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
-    public /* synthetic */ Object computeIfPresent(Object obj, BiFunction biFunction) {
-        return computeIfPresent((ConcurrentHashMap<K, V>) obj, (j$.util.function.BiFunction<? super ConcurrentHashMap<K, V>, ? super V, ? extends V>) C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
-    }
+        public final boolean hasMoreElements() {
+            return this.b != null;
+        }
 
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
-    public /* synthetic */ void forEach(BiConsumer biConsumer) {
-        forEach(C$r8$wrapper$java$util$function$BiConsumer$VWRP.convert(biConsumer));
-    }
+        public final boolean hasNext() {
+            return this.b != null;
+        }
 
-    /* JADX WARN: Multi-variable type inference failed */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
-    public /* synthetic */ Object merge(Object obj, Object obj2, BiFunction biFunction) {
-        return merge((ConcurrentHashMap<K, V>) obj, obj2, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
-    }
-
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
-    public /* synthetic */ void replaceAll(BiFunction biFunction) {
-        replaceAll(C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
-    }
-
-    static {
-        try {
-            Unsafe unsafe = DesugarUnsafe.getUnsafe();
-            U = unsafe;
-            SIZECTL = unsafe.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("sizeCtl"));
-            TRANSFERINDEX = unsafe.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("transferIndex"));
-            BASECOUNT = unsafe.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("baseCount"));
-            CELLSBUSY = unsafe.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("cellsBusy"));
-            CELLVALUE = unsafe.objectFieldOffset(CounterCell.class.getDeclaredField(CommonProperties.VALUE));
-            ABASE = unsafe.arrayBaseOffset(Node[].class);
-            int scale = unsafe.arrayIndexScale(Node[].class);
-            if (((scale - 1) & scale) != 0) {
-                throw new Error("data type scale not a power of two");
+        public final void remove() {
+            l lVar = this.j;
+            if (lVar != null) {
+                this.j = null;
+                this.i.i(lVar.b, null, null);
+                return;
             }
-            ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
-        } catch (Exception e) {
-            throw new Error(e);
+            throw new IllegalStateException();
         }
     }
 
     /* loaded from: classes2.dex */
-    public static class Node<K, V> implements Map.Entry<K, V> {
-        final int hash;
-        final K key;
-        volatile Node<K, V> next;
-        volatile V val;
+    public static final class c {
+        volatile long value;
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        Node(int hash, K key, V val, Node<K, V> node) {
-            this.hash = hash;
-            this.key = key;
-            this.val = val;
-            this.next = node;
+        c(long j) {
+            this.value = j;
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    static final class d extends a implements Iterator, j$.util.Iterator {
+        d(l[] lVarArr, int i, int i2, int i3, ConcurrentHashMap concurrentHashMap) {
+            super(lVarArr, i, i2, i3, concurrentHashMap);
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Map.Entry
-        public final K getKey() {
-            return this.key;
+        @Override // j$.util.Iterator
+        public /* synthetic */ void forEachRemaining(Consumer consumer) {
+            Iterator.CC.$default$forEachRemaining(this, consumer);
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Map.Entry
-        public final V getValue() {
-            return this.val;
+        @Override // java.util.Iterator
+        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
+            Iterator.CC.$default$forEachRemaining(this, C0231w.b(consumer));
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Map.Entry
+        @Override // java.util.Iterator, j$.util.Iterator
+        public Object next() {
+            l lVar = this.b;
+            if (lVar != null) {
+                Object obj = lVar.b;
+                Object obj2 = lVar.c;
+                this.j = lVar;
+                a();
+                return new k(obj, obj2, this.i);
+            }
+            throw new NoSuchElementException();
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class e extends b implements Set, AbstractC0034b {
+        e(ConcurrentHashMap concurrentHashMap) {
+            super(concurrentHashMap);
+        }
+
+        /* renamed from: a */
+        public boolean add(Map.Entry entry) {
+            return this.a.h(entry.getKey(), entry.getValue(), false) == null;
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public boolean addAll(Collection collection) {
+            java.util.Iterator it = collection.iterator();
+            boolean z = false;
+            while (it.hasNext()) {
+                if (add((Map.Entry) it.next())) {
+                    z = true;
+                }
+            }
+            return z;
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.b, java.util.Collection
+        public boolean contains(Object obj) {
+            Map.Entry entry;
+            Object key;
+            Object obj2;
+            Object value;
+            return (!(obj instanceof Map.Entry) || (key = (entry = (Map.Entry) obj).getKey()) == null || (obj2 = this.a.get(key)) == null || (value = entry.getValue()) == null || (value != obj2 && !value.equals(obj2))) ? false : true;
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public final boolean equals(Object obj) {
+            Set set;
+            return (obj instanceof Set) && ((set = (Set) obj) == this || (containsAll(set) && set.containsAll(this)));
+        }
+
+        @Override // j$.util.AbstractC0034b, j$.lang.e
+        public void forEach(Consumer consumer) {
+            consumer.getClass();
+            l[] lVarArr = this.a.a;
+            if (lVarArr != null) {
+                p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+                while (true) {
+                    l a = pVar.a();
+                    if (a == null) {
+                        return;
+                    }
+                    consumer.accept(new k(a.b, a.c, this.a));
+                }
+            }
+        }
+
+        @Override // java.lang.Iterable
+        public /* synthetic */ void forEach(java.util.function.Consumer consumer) {
+            forEach(C0231w.b(consumer));
+        }
+
+        @Override // java.util.Collection, java.util.Set
         public final int hashCode() {
-            return this.key.hashCode() ^ this.val.hashCode();
+            l[] lVarArr = this.a.a;
+            int i = 0;
+            if (lVarArr != null) {
+                p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+                while (true) {
+                    l a = pVar.a();
+                    if (a == null) {
+                        break;
+                    }
+                    i += a.hashCode();
+                }
+            }
+            return i;
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        public final String toString() {
-            return this.key + "=" + this.val;
+        @Override // j$.util.concurrent.ConcurrentHashMap.b, java.util.Collection, java.lang.Iterable
+        public java.util.Iterator iterator() {
+            ConcurrentHashMap concurrentHashMap = this.a;
+            l[] lVarArr = concurrentHashMap.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            return new d(lVarArr, length, 0, length, concurrentHashMap);
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Map.Entry
-        public final V setValue(V value) {
+        @Override // j$.util.AbstractC0034b
+        public /* synthetic */ boolean k(Predicate predicate) {
+            return AbstractC0033a.h(this, predicate);
+        }
+
+        @Override // java.util.Collection
+        public /* synthetic */ Stream parallelStream() {
+            return P0.n0(AbstractC0033a.g(this));
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public boolean remove(Object obj) {
+            Map.Entry entry;
+            Object key;
+            Object value;
+            return (obj instanceof Map.Entry) && (key = (entry = (Map.Entry) obj).getKey()) != null && (value = entry.getValue()) != null && this.a.remove(key, value);
+        }
+
+        @Override // java.util.Collection
+        public /* synthetic */ boolean removeIf(java.util.function.Predicate predicate) {
+            return AbstractC0033a.h(this, x0.a(predicate));
+        }
+
+        @Override // java.util.Collection, java.lang.Iterable, java.util.Set, j$.util.AbstractC0034b, j$.lang.e
+        /* renamed from: spliterator */
+        public j$.util.u mo71spliterator() {
+            ConcurrentHashMap concurrentHashMap = this.a;
+            long m = concurrentHashMap.m();
+            l[] lVarArr = concurrentHashMap.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            long j = 0;
+            if (m >= 0) {
+                j = m;
+            }
+            return new f(lVarArr, length, 0, length, j, concurrentHashMap);
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class f extends p implements j$.util.u {
+        final ConcurrentHashMap i;
+        long j;
+
+        f(l[] lVarArr, int i, int i2, int i3, long j, ConcurrentHashMap concurrentHashMap) {
+            super(lVarArr, i, i2, i3);
+            this.i = concurrentHashMap;
+            this.j = j;
+        }
+
+        @Override // j$.util.u
+        public boolean b(Consumer consumer) {
+            consumer.getClass();
+            l a = a();
+            if (a == null) {
+                return false;
+            }
+            consumer.accept(new k(a.b, a.c, this.i));
+            return true;
+        }
+
+        @Override // j$.util.u
+        public int characteristics() {
+            return 4353;
+        }
+
+        @Override // j$.util.u
+        public long estimateSize() {
+            return this.j;
+        }
+
+        @Override // j$.util.u
+        public void forEachRemaining(Consumer consumer) {
+            consumer.getClass();
+            while (true) {
+                l a = a();
+                if (a != null) {
+                    consumer.accept(new k(a.b, a.c, this.i));
+                } else {
+                    return;
+                }
+            }
+        }
+
+        @Override // j$.util.u
+        public Comparator getComparator() {
+            throw new IllegalStateException();
+        }
+
+        @Override // j$.util.u
+        public /* synthetic */ long getExactSizeIfKnown() {
+            return AbstractC0033a.e(this);
+        }
+
+        @Override // j$.util.u
+        public /* synthetic */ boolean hasCharacteristics(int i) {
+            return AbstractC0033a.f(this, i);
+        }
+
+        @Override // j$.util.u
+        public j$.util.u trySplit() {
+            int i = this.f;
+            int i2 = this.g;
+            int i3 = (i + i2) >>> 1;
+            if (i3 <= i) {
+                return null;
+            }
+            l[] lVarArr = this.a;
+            int i4 = this.h;
+            this.g = i3;
+            long j = this.j >>> 1;
+            this.j = j;
+            return new f(lVarArr, i4, i3, i2, j, this.i);
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class g extends l {
+        final l[] e;
+
+        g(l[] lVarArr) {
+            super(-1, null, null, null);
+            this.e = lVarArr;
+        }
+
+        /* JADX WARN: Code restructure failed: missing block: B:19:0x0027, code lost:
+            if ((r0 instanceof j$.util.concurrent.ConcurrentHashMap.g) == false) goto L29;
+         */
+        /* JADX WARN: Code restructure failed: missing block: B:20:0x0029, code lost:
+            r0 = ((j$.util.concurrent.ConcurrentHashMap.g) r0).e;
+         */
+        /* JADX WARN: Code restructure failed: missing block: B:22:0x0032, code lost:
+            return r0.a(r5, r6);
+         */
+        @Override // j$.util.concurrent.ConcurrentHashMap.l
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        j$.util.concurrent.ConcurrentHashMap.l a(int r5, java.lang.Object r6) {
+            /*
+                r4 = this;
+                j$.util.concurrent.ConcurrentHashMap$l[] r0 = r4.e
+            L2:
+                r1 = 0
+                if (r0 == 0) goto L37
+                int r2 = r0.length
+                if (r2 == 0) goto L37
+                int r2 = r2 + (-1)
+                r2 = r2 & r5
+                j$.util.concurrent.ConcurrentHashMap$l r0 = j$.util.concurrent.ConcurrentHashMap.n(r0, r2)
+                if (r0 != 0) goto L12
+                goto L37
+            L12:
+                int r2 = r0.a
+                if (r2 != r5) goto L23
+                java.lang.Object r3 = r0.b
+                if (r3 == r6) goto L22
+                if (r3 == 0) goto L23
+                boolean r3 = r6.equals(r3)
+                if (r3 == 0) goto L23
+            L22:
+                return r0
+            L23:
+                if (r2 >= 0) goto L33
+                boolean r1 = r0 instanceof j$.util.concurrent.ConcurrentHashMap.g
+                if (r1 == 0) goto L2e
+                j$.util.concurrent.ConcurrentHashMap$g r0 = (j$.util.concurrent.ConcurrentHashMap.g) r0
+                j$.util.concurrent.ConcurrentHashMap$l[] r0 = r0.e
+                goto L2
+            L2e:
+                j$.util.concurrent.ConcurrentHashMap$l r5 = r0.a(r5, r6)
+                return r5
+            L33:
+                j$.util.concurrent.ConcurrentHashMap$l r0 = r0.d
+                if (r0 != 0) goto L12
+            L37:
+                return r1
+            */
+            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.g.a(int, java.lang.Object):j$.util.concurrent.ConcurrentHashMap$l");
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class h extends a implements java.util.Iterator, Enumeration, j$.util.Iterator {
+        h(l[] lVarArr, int i, int i2, int i3, ConcurrentHashMap concurrentHashMap) {
+            super(lVarArr, i, i2, i3, concurrentHashMap);
+        }
+
+        @Override // j$.util.Iterator
+        public /* synthetic */ void forEachRemaining(Consumer consumer) {
+            Iterator.CC.$default$forEachRemaining(this, consumer);
+        }
+
+        @Override // java.util.Iterator
+        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
+            Iterator.CC.$default$forEachRemaining(this, C0231w.b(consumer));
+        }
+
+        @Override // java.util.Iterator, j$.util.Iterator
+        public final Object next() {
+            l lVar = this.b;
+            if (lVar != null) {
+                Object obj = lVar.b;
+                this.j = lVar;
+                a();
+                return obj;
+            }
+            throw new NoSuchElementException();
+        }
+
+        @Override // java.util.Enumeration
+        public final Object nextElement() {
+            return next();
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static class i extends b implements Set, AbstractC0034b {
+        i(ConcurrentHashMap concurrentHashMap, Object obj) {
+            super(concurrentHashMap);
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public boolean add(Object obj) {
             throw new UnsupportedOperationException();
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Map.Entry
-        public final boolean equals(Object o) {
-            Map.Entry<?, ?> e;
-            Object k;
-            Object v;
-            K k2;
-            Object u;
-            return (o instanceof Map.Entry) && (k = (e = (Map.Entry) o).getKey()) != null && (v = e.getValue()) != null && (k == (k2 = this.key) || k.equals(k2)) && (v == (u = this.val) || v.equals(u));
+        @Override // java.util.Collection, java.util.Set
+        public boolean addAll(Collection collection) {
+            throw new UnsupportedOperationException();
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        Node<K, V> find(int h, Object k) {
-            Node<K, V> node;
-            K ek;
-            Node<K, V> node2 = this;
-            if (k != null) {
-                do {
-                    if (node2.hash == h && ((ek = node2.key) == k || (ek != null && k.equals(ek)))) {
-                        return node2;
+        @Override // j$.util.concurrent.ConcurrentHashMap.b, java.util.Collection
+        public boolean contains(Object obj) {
+            return this.a.containsKey(obj);
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public boolean equals(Object obj) {
+            Set set;
+            return (obj instanceof Set) && ((set = (Set) obj) == this || (containsAll(set) && set.containsAll(this)));
+        }
+
+        @Override // j$.util.AbstractC0034b, j$.lang.e
+        public void forEach(Consumer consumer) {
+            consumer.getClass();
+            l[] lVarArr = this.a.a;
+            if (lVarArr != null) {
+                p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+                while (true) {
+                    l a = pVar.a();
+                    if (a == null) {
+                        return;
                     }
-                    node = node2.next;
-                    node2 = node;
-                } while (node != null);
+                    consumer.accept(a.b);
+                }
+            }
+        }
+
+        @Override // java.lang.Iterable
+        public /* synthetic */ void forEach(java.util.function.Consumer consumer) {
+            forEach(C0231w.b(consumer));
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public int hashCode() {
+            java.util.Iterator it = iterator();
+            int i = 0;
+            while (((a) it).hasNext()) {
+                i += ((h) it).next().hashCode();
+            }
+            return i;
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.b, java.util.Collection, java.lang.Iterable
+        public java.util.Iterator iterator() {
+            ConcurrentHashMap concurrentHashMap = this.a;
+            l[] lVarArr = concurrentHashMap.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            return new h(lVarArr, length, 0, length, concurrentHashMap);
+        }
+
+        @Override // j$.util.AbstractC0034b
+        public /* synthetic */ boolean k(Predicate predicate) {
+            return AbstractC0033a.h(this, predicate);
+        }
+
+        @Override // java.util.Collection
+        public /* synthetic */ Stream parallelStream() {
+            return P0.n0(AbstractC0033a.g(this));
+        }
+
+        @Override // java.util.Collection, java.util.Set
+        public boolean remove(Object obj) {
+            return this.a.remove(obj) != null;
+        }
+
+        @Override // java.util.Collection
+        public /* synthetic */ boolean removeIf(java.util.function.Predicate predicate) {
+            return AbstractC0033a.h(this, x0.a(predicate));
+        }
+
+        @Override // java.util.Collection, java.lang.Iterable, java.util.Set, j$.util.AbstractC0034b, j$.lang.e
+        /* renamed from: spliterator */
+        public j$.util.u mo71spliterator() {
+            ConcurrentHashMap concurrentHashMap = this.a;
+            long m = concurrentHashMap.m();
+            l[] lVarArr = concurrentHashMap.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            long j = 0;
+            if (m >= 0) {
+                j = m;
+            }
+            return new j(lVarArr, length, 0, length, j);
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class j extends p implements j$.util.u {
+        long i;
+
+        j(l[] lVarArr, int i, int i2, int i3, long j) {
+            super(lVarArr, i, i2, i3);
+            this.i = j;
+        }
+
+        @Override // j$.util.u
+        public boolean b(Consumer consumer) {
+            consumer.getClass();
+            l a = a();
+            if (a == null) {
+                return false;
+            }
+            consumer.accept(a.b);
+            return true;
+        }
+
+        @Override // j$.util.u
+        public int characteristics() {
+            return 4353;
+        }
+
+        @Override // j$.util.u
+        public long estimateSize() {
+            return this.i;
+        }
+
+        @Override // j$.util.u
+        public void forEachRemaining(Consumer consumer) {
+            consumer.getClass();
+            while (true) {
+                l a = a();
+                if (a != null) {
+                    consumer.accept(a.b);
+                } else {
+                    return;
+                }
+            }
+        }
+
+        @Override // j$.util.u
+        public Comparator getComparator() {
+            throw new IllegalStateException();
+        }
+
+        @Override // j$.util.u
+        public /* synthetic */ long getExactSizeIfKnown() {
+            return AbstractC0033a.e(this);
+        }
+
+        @Override // j$.util.u
+        public /* synthetic */ boolean hasCharacteristics(int i) {
+            return AbstractC0033a.f(this, i);
+        }
+
+        @Override // j$.util.u
+        public j$.util.u trySplit() {
+            int i = this.f;
+            int i2 = this.g;
+            int i3 = (i + i2) >>> 1;
+            if (i3 <= i) {
+                return null;
+            }
+            l[] lVarArr = this.a;
+            int i4 = this.h;
+            this.g = i3;
+            long j = this.i >>> 1;
+            this.i = j;
+            return new j(lVarArr, i4, i3, i2, j);
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class k implements Map.Entry {
+        final Object a;
+        Object b;
+        final ConcurrentHashMap c;
+
+        k(Object obj, Object obj2, ConcurrentHashMap concurrentHashMap) {
+            this.a = obj;
+            this.b = obj2;
+            this.c = concurrentHashMap;
+        }
+
+        @Override // java.util.Map.Entry
+        public boolean equals(Object obj) {
+            Map.Entry entry;
+            Object key;
+            Object value;
+            Object obj2;
+            Object obj3;
+            return (obj instanceof Map.Entry) && (key = (entry = (Map.Entry) obj).getKey()) != null && (value = entry.getValue()) != null && (key == (obj2 = this.a) || key.equals(obj2)) && (value == (obj3 = this.b) || value.equals(obj3));
+        }
+
+        @Override // java.util.Map.Entry
+        public Object getKey() {
+            return this.a;
+        }
+
+        @Override // java.util.Map.Entry
+        public Object getValue() {
+            return this.b;
+        }
+
+        @Override // java.util.Map.Entry
+        public int hashCode() {
+            return this.a.hashCode() ^ this.b.hashCode();
+        }
+
+        /* JADX WARN: Multi-variable type inference failed */
+        @Override // java.util.Map.Entry
+        public Object setValue(Object obj) {
+            obj.getClass();
+            Object obj2 = this.b;
+            this.b = obj;
+            this.c.put(this.a, obj);
+            return obj2;
+        }
+
+        public String toString() {
+            return this.a + "=" + this.b;
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static class l implements Map.Entry {
+        final int a;
+        final Object b;
+        volatile Object c;
+        volatile l d;
+
+        l(int i, Object obj, Object obj2, l lVar) {
+            this.a = i;
+            this.b = obj;
+            this.c = obj2;
+            this.d = lVar;
+        }
+
+        l a(int i, Object obj) {
+            Object obj2;
+            l lVar = this;
+            do {
+                if (lVar.a == i && ((obj2 = lVar.b) == obj || (obj2 != null && obj.equals(obj2)))) {
+                    return lVar;
+                }
+                lVar = lVar.d;
+            } while (lVar != null);
+            return null;
+        }
+
+        @Override // java.util.Map.Entry
+        public final boolean equals(Object obj) {
+            Map.Entry entry;
+            Object key;
+            Object value;
+            Object obj2;
+            Object obj3;
+            return (obj instanceof Map.Entry) && (key = (entry = (Map.Entry) obj).getKey()) != null && (value = entry.getValue()) != null && (key == (obj2 = this.b) || key.equals(obj2)) && (value == (obj3 = this.c) || value.equals(obj3));
+        }
+
+        @Override // java.util.Map.Entry
+        public final Object getKey() {
+            return this.b;
+        }
+
+        @Override // java.util.Map.Entry
+        public final Object getValue() {
+            return this.c;
+        }
+
+        @Override // java.util.Map.Entry
+        public final int hashCode() {
+            return this.b.hashCode() ^ this.c.hashCode();
+        }
+
+        @Override // java.util.Map.Entry
+        public final Object setValue(Object obj) {
+            throw new UnsupportedOperationException();
+        }
+
+        public final String toString() {
+            return this.b + "=" + this.c;
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class m extends l {
+        m() {
+            super(-3, null, null, null);
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.l
+        l a(int i, Object obj) {
+            return null;
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    static class n extends ReentrantLock {
+        n(float f) {
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class o {
+        int a;
+        int b;
+        l[] c;
+        o d;
+
+        o() {
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static class p {
+        l[] a;
+        l b = null;
+        o c;
+        o d;
+        int e;
+        int f;
+        int g;
+        final int h;
+
+        p(l[] lVarArr, int i, int i2, int i3) {
+            this.a = lVarArr;
+            this.h = i;
+            this.e = i2;
+            this.f = i2;
+            this.g = i3;
+        }
+
+        final l a() {
+            l[] lVarArr;
+            int length;
+            int i;
+            o oVar;
+            l lVar = this.b;
+            if (lVar != null) {
+                lVar = lVar.d;
+            }
+            while (lVar == null) {
+                if (this.f >= this.g || (lVarArr = this.a) == null || (length = lVarArr.length) <= (i = this.e) || i < 0) {
+                    this.b = null;
+                    return null;
+                }
+                l n = ConcurrentHashMap.n(lVarArr, i);
+                if (n == null || n.a >= 0) {
+                    lVar = n;
+                } else if (n instanceof g) {
+                    this.a = ((g) n).e;
+                    o oVar2 = this.d;
+                    if (oVar2 != null) {
+                        this.d = oVar2.d;
+                    } else {
+                        oVar2 = new o();
+                    }
+                    oVar2.c = lVarArr;
+                    oVar2.a = length;
+                    oVar2.b = i;
+                    oVar2.d = this.c;
+                    this.c = oVar2;
+                    lVar = null;
+                } else {
+                    lVar = n instanceof q ? ((q) n).f : null;
+                }
+                if (this.c != null) {
+                    while (true) {
+                        oVar = this.c;
+                        if (oVar == null) {
+                            break;
+                        }
+                        int i2 = this.e;
+                        int i3 = oVar.a;
+                        int i4 = i2 + i3;
+                        this.e = i4;
+                        if (i4 < length) {
+                            break;
+                        }
+                        this.e = oVar.b;
+                        this.a = oVar.c;
+                        oVar.c = null;
+                        o oVar3 = oVar.d;
+                        oVar.d = this.d;
+                        this.c = oVar3;
+                        this.d = oVar;
+                        length = i3;
+                    }
+                    if (oVar == null) {
+                        int i5 = this.e + this.h;
+                        this.e = i5;
+                        if (i5 >= length) {
+                            int i6 = this.f + 1;
+                            this.f = i6;
+                            this.e = i6;
+                        }
+                    }
+                } else {
+                    int i7 = i + this.h;
+                    this.e = i7;
+                    if (i7 >= length) {
+                        int i8 = this.f + 1;
+                        this.f = i8;
+                        this.e = i8;
+                    }
+                }
+            }
+            this.b = lVar;
+            return lVar;
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class q extends l {
+        private static final Unsafe h;
+        private static final long i;
+        r e;
+        volatile r f;
+        volatile Thread g;
+        volatile int lockState;
+
+        static {
+            try {
+                Unsafe c = j$.util.concurrent.c.c();
+                h = c;
+                i = c.objectFieldOffset(q.class.getDeclaredField("lockState"));
+            } catch (Exception e) {
+                throw new Error(e);
+            }
+        }
+
+        q(r rVar) {
+            super(-2, null, null, null);
+            int j;
+            int d;
+            this.f = rVar;
+            r rVar2 = null;
+            while (rVar != null) {
+                r rVar3 = (r) rVar.d;
+                rVar.g = null;
+                rVar.f = null;
+                if (rVar2 == null) {
+                    rVar.e = null;
+                    rVar.i = false;
+                } else {
+                    Object obj = rVar.b;
+                    int i2 = rVar.a;
+                    r rVar4 = rVar2;
+                    Class cls = null;
+                    while (true) {
+                        Object obj2 = rVar4.b;
+                        int i3 = rVar4.a;
+                        j = i3 > i2 ? -1 : i3 < i2 ? 1 : ((cls == null && (cls = ConcurrentHashMap.c(obj)) == null) || (d = ConcurrentHashMap.d(cls, obj, obj2)) == 0) ? j(obj, obj2) : d;
+                        r rVar5 = j <= 0 ? rVar4.f : rVar4.g;
+                        if (rVar5 == null) {
+                            break;
+                        }
+                        rVar4 = rVar5;
+                    }
+                    rVar.e = rVar4;
+                    if (j <= 0) {
+                        rVar4.f = rVar;
+                    } else {
+                        rVar4.g = rVar;
+                    }
+                    rVar = c(rVar2, rVar);
+                }
+                rVar2 = rVar;
+                rVar = rVar3;
+            }
+            this.e = rVar2;
+        }
+
+        static r b(r rVar, r rVar2) {
+            while (rVar2 != null && rVar2 != rVar) {
+                r rVar3 = rVar2.e;
+                if (rVar3 == null) {
+                    rVar2.i = false;
+                    return rVar2;
+                } else if (rVar2.i) {
+                    rVar2.i = false;
+                    return rVar;
+                } else {
+                    r rVar4 = rVar3.f;
+                    r rVar5 = null;
+                    if (rVar4 == rVar2) {
+                        rVar4 = rVar3.g;
+                        if (rVar4 != null && rVar4.i) {
+                            rVar4.i = false;
+                            rVar3.i = true;
+                            rVar = h(rVar, rVar3);
+                            rVar3 = rVar2.e;
+                            rVar4 = rVar3 == null ? null : rVar3.g;
+                        }
+                        if (rVar4 == null) {
+                            rVar2 = rVar3;
+                        } else {
+                            r rVar6 = rVar4.f;
+                            r rVar7 = rVar4.g;
+                            if ((rVar7 != null && rVar7.i) || (rVar6 != null && rVar6.i)) {
+                                if (rVar7 == null || !rVar7.i) {
+                                    if (rVar6 != null) {
+                                        rVar6.i = false;
+                                    }
+                                    rVar4.i = true;
+                                    rVar = i(rVar, rVar4);
+                                    rVar3 = rVar2.e;
+                                    if (rVar3 != null) {
+                                        rVar5 = rVar3.g;
+                                    }
+                                } else {
+                                    rVar5 = rVar4;
+                                }
+                                if (rVar5 != null) {
+                                    rVar5.i = rVar3 == null ? false : rVar3.i;
+                                    r rVar8 = rVar5.g;
+                                    if (rVar8 != null) {
+                                        rVar8.i = false;
+                                    }
+                                }
+                                if (rVar3 != null) {
+                                    rVar3.i = false;
+                                    rVar = h(rVar, rVar3);
+                                }
+                                rVar2 = rVar;
+                                rVar = rVar2;
+                            }
+                            rVar4.i = true;
+                            rVar2 = rVar3;
+                        }
+                    } else {
+                        if (rVar4 != null && rVar4.i) {
+                            rVar4.i = false;
+                            rVar3.i = true;
+                            rVar = i(rVar, rVar3);
+                            rVar3 = rVar2.e;
+                            rVar4 = rVar3 == null ? null : rVar3.f;
+                        }
+                        if (rVar4 == null) {
+                            rVar2 = rVar3;
+                        } else {
+                            r rVar9 = rVar4.f;
+                            r rVar10 = rVar4.g;
+                            if ((rVar9 != null && rVar9.i) || (rVar10 != null && rVar10.i)) {
+                                if (rVar9 == null || !rVar9.i) {
+                                    if (rVar10 != null) {
+                                        rVar10.i = false;
+                                    }
+                                    rVar4.i = true;
+                                    rVar = h(rVar, rVar4);
+                                    rVar3 = rVar2.e;
+                                    if (rVar3 != null) {
+                                        rVar5 = rVar3.f;
+                                    }
+                                } else {
+                                    rVar5 = rVar4;
+                                }
+                                if (rVar5 != null) {
+                                    rVar5.i = rVar3 == null ? false : rVar3.i;
+                                    r rVar11 = rVar5.f;
+                                    if (rVar11 != null) {
+                                        rVar11.i = false;
+                                    }
+                                }
+                                if (rVar3 != null) {
+                                    rVar3.i = false;
+                                    rVar = i(rVar, rVar3);
+                                }
+                                rVar2 = rVar;
+                                rVar = rVar2;
+                            }
+                            rVar4.i = true;
+                            rVar2 = rVar3;
+                        }
+                    }
+                }
+            }
+            return rVar;
+        }
+
+        static r c(r rVar, r rVar2) {
+            r rVar3;
+            rVar2.i = true;
+            while (true) {
+                r rVar4 = rVar2.e;
+                if (rVar4 == null) {
+                    rVar2.i = false;
+                    return rVar2;
+                } else if (!rVar4.i || (rVar3 = rVar4.e) == null) {
+                    break;
+                } else {
+                    r rVar5 = rVar3.f;
+                    if (rVar4 == rVar5) {
+                        rVar5 = rVar3.g;
+                        if (rVar5 == null || !rVar5.i) {
+                            if (rVar2 == rVar4.g) {
+                                rVar = h(rVar, rVar4);
+                                r rVar6 = rVar4.e;
+                                rVar3 = rVar6 == null ? null : rVar6.e;
+                                rVar4 = rVar6;
+                                rVar2 = rVar4;
+                            }
+                            if (rVar4 != null) {
+                                rVar4.i = false;
+                                if (rVar3 != null) {
+                                    rVar3.i = true;
+                                    rVar = i(rVar, rVar3);
+                                }
+                            }
+                        } else {
+                            rVar5.i = false;
+                            rVar4.i = false;
+                            rVar3.i = true;
+                            rVar2 = rVar3;
+                        }
+                    } else if (rVar5 == null || !rVar5.i) {
+                        if (rVar2 == rVar4.f) {
+                            rVar = i(rVar, rVar4);
+                            r rVar7 = rVar4.e;
+                            rVar3 = rVar7 == null ? null : rVar7.e;
+                            rVar4 = rVar7;
+                            rVar2 = rVar4;
+                        }
+                        if (rVar4 != null) {
+                            rVar4.i = false;
+                            if (rVar3 != null) {
+                                rVar3.i = true;
+                                rVar = h(rVar, rVar3);
+                            }
+                        }
+                    } else {
+                        rVar5.i = false;
+                        rVar4.i = false;
+                        rVar3.i = true;
+                        rVar2 = rVar3;
+                    }
+                }
+            }
+            return rVar;
+        }
+
+        private final void d() {
+            boolean z = false;
+            while (true) {
+                int i2 = this.lockState;
+                if ((i2 & (-3)) == 0) {
+                    if (h.compareAndSwapInt(this, i, i2, 1)) {
+                        break;
+                    }
+                } else if ((i2 & 2) == 0) {
+                    if (h.compareAndSwapInt(this, i, i2, i2 | 2)) {
+                        z = true;
+                        this.g = Thread.currentThread();
+                    }
+                } else if (z) {
+                    LockSupport.park(this);
+                }
+            }
+            if (z) {
+                this.g = null;
+            }
+        }
+
+        private final void e() {
+            if (!h.compareAndSwapInt(this, i, 0, 1)) {
+                d();
+            }
+        }
+
+        static r h(r rVar, r rVar2) {
+            r rVar3 = rVar2.g;
+            if (rVar3 != null) {
+                r rVar4 = rVar3.f;
+                rVar2.g = rVar4;
+                if (rVar4 != null) {
+                    rVar4.e = rVar2;
+                }
+                r rVar5 = rVar2.e;
+                rVar3.e = rVar5;
+                if (rVar5 == null) {
+                    rVar3.i = false;
+                    rVar = rVar3;
+                } else if (rVar5.f == rVar2) {
+                    rVar5.f = rVar3;
+                } else {
+                    rVar5.g = rVar3;
+                }
+                rVar3.f = rVar2;
+                rVar2.e = rVar3;
+            }
+            return rVar;
+        }
+
+        static r i(r rVar, r rVar2) {
+            r rVar3 = rVar2.f;
+            if (rVar3 != null) {
+                r rVar4 = rVar3.g;
+                rVar2.f = rVar4;
+                if (rVar4 != null) {
+                    rVar4.e = rVar2;
+                }
+                r rVar5 = rVar2.e;
+                rVar3.e = rVar5;
+                if (rVar5 == null) {
+                    rVar3.i = false;
+                    rVar = rVar3;
+                } else if (rVar5.g == rVar2) {
+                    rVar5.g = rVar3;
+                } else {
+                    rVar5.f = rVar3;
+                }
+                rVar3.g = rVar2;
+                rVar2.e = rVar3;
+            }
+            return rVar;
+        }
+
+        static int j(Object obj, Object obj2) {
+            int compareTo;
+            return (obj == null || obj2 == null || (compareTo = obj.getClass().getName().compareTo(obj2.getClass().getName())) == 0) ? System.identityHashCode(obj) <= System.identityHashCode(obj2) ? -1 : 1 : compareTo;
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.l
+        final l a(int i2, Object obj) {
+            Object obj2;
+            Thread thread;
+            Thread thread2;
+            l lVar = this.f;
+            while (true) {
+                r rVar = null;
+                if (lVar == null) {
+                    return null;
+                }
+                int i3 = this.lockState;
+                if ((i3 & 3) == 0) {
+                    Unsafe unsafe = h;
+                    long j = i;
+                    if (unsafe.compareAndSwapInt(this, j, i3, i3 + 4)) {
+                        try {
+                            r rVar2 = this.e;
+                            if (rVar2 != null) {
+                                rVar = rVar2.b(i2, obj, null);
+                            }
+                            if (j$.util.concurrent.c.a(unsafe, this, j, -4) == 6 && (thread2 = this.g) != null) {
+                                LockSupport.unpark(thread2);
+                            }
+                            return rVar;
+                        } catch (Throwable th) {
+                            if (j$.util.concurrent.c.a(h, this, i, -4) == 6 && (thread = this.g) != null) {
+                                LockSupport.unpark(thread);
+                            }
+                            throw th;
+                        }
+                    }
+                } else if (lVar.a != i2 || ((obj2 = lVar.b) != obj && (obj2 == null || !obj.equals(obj2)))) {
+                    lVar = lVar.d;
+                }
+            }
+            return lVar;
+        }
+
+        /* JADX WARN: Code restructure failed: missing block: B:29:0x0060, code lost:
+            return r3;
+         */
+        /* JADX WARN: Code restructure failed: missing block: B:49:0x00a3, code lost:
+            return null;
+         */
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        final j$.util.concurrent.ConcurrentHashMap.r f(int r16, java.lang.Object r17, java.lang.Object r18) {
+            /*
+                r15 = this;
+                r1 = r15
+                r0 = r16
+                r4 = r17
+                j$.util.concurrent.ConcurrentHashMap$r r2 = r1.e
+                r8 = 0
+                r9 = 0
+                r10 = r2
+                r2 = r8
+                r3 = 0
+            Lc:
+                if (r10 != 0) goto L22
+                j$.util.concurrent.ConcurrentHashMap$r r9 = new j$.util.concurrent.ConcurrentHashMap$r
+                r6 = 0
+                r7 = 0
+                r2 = r9
+                r3 = r16
+                r4 = r17
+                r5 = r18
+                r2.<init>(r3, r4, r5, r6, r7)
+                r1.e = r9
+                r1.f = r9
+                goto La3
+            L22:
+                int r5 = r10.a
+                r11 = 1
+                if (r5 <= r0) goto L2a
+                r5 = -1
+                r12 = -1
+                goto L69
+            L2a:
+                if (r5 >= r0) goto L2e
+                r12 = 1
+                goto L69
+            L2e:
+                java.lang.Object r5 = r10.b
+                if (r5 == r4) goto Lab
+                if (r5 == 0) goto L3c
+                boolean r6 = r4.equals(r5)
+                if (r6 == 0) goto L3c
+                goto Lab
+            L3c:
+                if (r2 != 0) goto L44
+                java.lang.Class r2 = j$.util.concurrent.ConcurrentHashMap.c(r17)
+                if (r2 == 0) goto L4a
+            L44:
+                int r6 = j$.util.concurrent.ConcurrentHashMap.d(r2, r4, r5)
+                if (r6 != 0) goto L68
+            L4a:
+                if (r3 != 0) goto L62
+                j$.util.concurrent.ConcurrentHashMap$r r3 = r10.f
+                if (r3 == 0) goto L56
+                j$.util.concurrent.ConcurrentHashMap$r r3 = r3.b(r0, r4, r2)
+                if (r3 != 0) goto L60
+            L56:
+                j$.util.concurrent.ConcurrentHashMap$r r3 = r10.g
+                if (r3 == 0) goto L61
+                j$.util.concurrent.ConcurrentHashMap$r r3 = r3.b(r0, r4, r2)
+                if (r3 == 0) goto L61
+            L60:
+                return r3
+            L61:
+                r3 = 1
+            L62:
+                int r5 = j(r4, r5)
+                r12 = r5
+                goto L69
+            L68:
+                r12 = r6
+            L69:
+                if (r12 > 0) goto L6e
+                j$.util.concurrent.ConcurrentHashMap$r r5 = r10.f
+                goto L70
+            L6e:
+                j$.util.concurrent.ConcurrentHashMap$r r5 = r10.g
+            L70:
+                if (r5 != 0) goto La8
+                j$.util.concurrent.ConcurrentHashMap$r r13 = r1.f
+                j$.util.concurrent.ConcurrentHashMap$r r14 = new j$.util.concurrent.ConcurrentHashMap$r
+                r2 = r14
+                r3 = r16
+                r4 = r17
+                r5 = r18
+                r6 = r13
+                r7 = r10
+                r2.<init>(r3, r4, r5, r6, r7)
+                r1.f = r14
+                if (r13 == 0) goto L88
+                r13.h = r14
+            L88:
+                if (r12 > 0) goto L8d
+                r10.f = r14
+                goto L8f
+            L8d:
+                r10.g = r14
+            L8f:
+                boolean r0 = r10.i
+                if (r0 != 0) goto L96
+                r14.i = r11
+                goto La3
+            L96:
+                r15.e()
+                j$.util.concurrent.ConcurrentHashMap$r r0 = r1.e     // Catch: java.lang.Throwable -> La4
+                j$.util.concurrent.ConcurrentHashMap$r r0 = c(r0, r14)     // Catch: java.lang.Throwable -> La4
+                r1.e = r0     // Catch: java.lang.Throwable -> La4
+                r1.lockState = r9
+            La3:
+                return r8
+            La4:
+                r0 = move-exception
+                r1.lockState = r9
+                throw r0
+            La8:
+                r10 = r5
+                goto Lc
+            Lab:
+                return r10
+            */
+            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.q.f(int, java.lang.Object, java.lang.Object):j$.util.concurrent.ConcurrentHashMap$r");
+        }
+
+        /* JADX WARN: Removed duplicated region for block: B:56:0x008e A[Catch: all -> 0x00c8, TryCatch #0 {all -> 0x00c8, blocks: (B:21:0x0030, B:25:0x0039, B:28:0x003f, B:30:0x004d, B:31:0x0052, B:33:0x0058, B:35:0x005c, B:36:0x005f, B:37:0x0061, B:38:0x0065, B:40:0x006b, B:41:0x006d, B:44:0x0077, B:46:0x007b, B:47:0x007e, B:56:0x008e, B:59:0x0096, B:61:0x009a, B:62:0x009d, B:63:0x009f, B:64:0x00a5, B:67:0x00aa, B:68:0x00ae, B:70:0x00b2, B:72:0x00b6, B:74:0x00ba, B:75:0x00bd, B:77:0x00c1, B:78:0x00c3), top: B:85:0x0030 }] */
+        /* JADX WARN: Removed duplicated region for block: B:66:0x00a9  */
+        /* JADX WARN: Removed duplicated region for block: B:67:0x00aa A[Catch: all -> 0x00c8, TryCatch #0 {all -> 0x00c8, blocks: (B:21:0x0030, B:25:0x0039, B:28:0x003f, B:30:0x004d, B:31:0x0052, B:33:0x0058, B:35:0x005c, B:36:0x005f, B:37:0x0061, B:38:0x0065, B:40:0x006b, B:41:0x006d, B:44:0x0077, B:46:0x007b, B:47:0x007e, B:56:0x008e, B:59:0x0096, B:61:0x009a, B:62:0x009d, B:63:0x009f, B:64:0x00a5, B:67:0x00aa, B:68:0x00ae, B:70:0x00b2, B:72:0x00b6, B:74:0x00ba, B:75:0x00bd, B:77:0x00c1, B:78:0x00c3), top: B:85:0x0030 }] */
+        /* JADX WARN: Removed duplicated region for block: B:70:0x00b2 A[Catch: all -> 0x00c8, TryCatch #0 {all -> 0x00c8, blocks: (B:21:0x0030, B:25:0x0039, B:28:0x003f, B:30:0x004d, B:31:0x0052, B:33:0x0058, B:35:0x005c, B:36:0x005f, B:37:0x0061, B:38:0x0065, B:40:0x006b, B:41:0x006d, B:44:0x0077, B:46:0x007b, B:47:0x007e, B:56:0x008e, B:59:0x0096, B:61:0x009a, B:62:0x009d, B:63:0x009f, B:64:0x00a5, B:67:0x00aa, B:68:0x00ae, B:70:0x00b2, B:72:0x00b6, B:74:0x00ba, B:75:0x00bd, B:77:0x00c1, B:78:0x00c3), top: B:85:0x0030 }] */
+        /* JADX WARN: Removed duplicated region for block: B:74:0x00ba A[Catch: all -> 0x00c8, TryCatch #0 {all -> 0x00c8, blocks: (B:21:0x0030, B:25:0x0039, B:28:0x003f, B:30:0x004d, B:31:0x0052, B:33:0x0058, B:35:0x005c, B:36:0x005f, B:37:0x0061, B:38:0x0065, B:40:0x006b, B:41:0x006d, B:44:0x0077, B:46:0x007b, B:47:0x007e, B:56:0x008e, B:59:0x0096, B:61:0x009a, B:62:0x009d, B:63:0x009f, B:64:0x00a5, B:67:0x00aa, B:68:0x00ae, B:70:0x00b2, B:72:0x00b6, B:74:0x00ba, B:75:0x00bd, B:77:0x00c1, B:78:0x00c3), top: B:85:0x0030 }] */
+        /* JADX WARN: Removed duplicated region for block: B:75:0x00bd A[Catch: all -> 0x00c8, TryCatch #0 {all -> 0x00c8, blocks: (B:21:0x0030, B:25:0x0039, B:28:0x003f, B:30:0x004d, B:31:0x0052, B:33:0x0058, B:35:0x005c, B:36:0x005f, B:37:0x0061, B:38:0x0065, B:40:0x006b, B:41:0x006d, B:44:0x0077, B:46:0x007b, B:47:0x007e, B:56:0x008e, B:59:0x0096, B:61:0x009a, B:62:0x009d, B:63:0x009f, B:64:0x00a5, B:67:0x00aa, B:68:0x00ae, B:70:0x00b2, B:72:0x00b6, B:74:0x00ba, B:75:0x00bd, B:77:0x00c1, B:78:0x00c3), top: B:85:0x0030 }] */
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        final boolean g(j$.util.concurrent.ConcurrentHashMap.r r11) {
+            /*
+                Method dump skipped, instructions count: 205
+                To view this dump add '--comments-level debug' option
+            */
+            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.q.g(j$.util.concurrent.ConcurrentHashMap$r):boolean");
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    public static final class r extends l {
+        r e;
+        r f;
+        r g;
+        r h;
+        boolean i;
+
+        r(int i, Object obj, Object obj2, l lVar, r rVar) {
+            super(i, obj, obj2, lVar);
+            this.e = rVar;
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.l
+        l a(int i, Object obj) {
+            return b(i, obj, null);
+        }
+
+        final r b(int i, Object obj, Class cls) {
+            int d;
+            if (obj != null) {
+                r rVar = this;
+                do {
+                    r rVar2 = rVar.f;
+                    r rVar3 = rVar.g;
+                    int i2 = rVar.a;
+                    if (i2 <= i) {
+                        if (i2 >= i) {
+                            Object obj2 = rVar.b;
+                            if (obj2 == obj || (obj2 != null && obj.equals(obj2))) {
+                                return rVar;
+                            }
+                            if (rVar2 != null) {
+                                if (rVar3 != null) {
+                                    if ((cls == null && (cls = ConcurrentHashMap.c(obj)) == null) || (d = ConcurrentHashMap.d(cls, obj, obj2)) == 0) {
+                                        r b = rVar3.b(i, obj, cls);
+                                        if (b != null) {
+                                            return b;
+                                        }
+                                    } else if (d >= 0) {
+                                        rVar2 = rVar3;
+                                    }
+                                }
+                            }
+                        }
+                        rVar = rVar3;
+                        continue;
+                    }
+                    rVar = rVar2;
+                    continue;
+                } while (rVar != null);
                 return null;
             }
             return null;
         }
     }
 
-    static final int spread(int h) {
-        return ((h >>> 16) ^ h) & Integer.MAX_VALUE;
+    /* loaded from: classes2.dex */
+    public static final class s extends a implements java.util.Iterator, Enumeration, j$.util.Iterator {
+        s(l[] lVarArr, int i, int i2, int i3, ConcurrentHashMap concurrentHashMap) {
+            super(lVarArr, i, i2, i3, concurrentHashMap);
+        }
+
+        @Override // j$.util.Iterator
+        public /* synthetic */ void forEachRemaining(Consumer consumer) {
+            Iterator.CC.$default$forEachRemaining(this, consumer);
+        }
+
+        @Override // java.util.Iterator
+        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
+            Iterator.CC.$default$forEachRemaining(this, C0231w.b(consumer));
+        }
+
+        @Override // java.util.Iterator, j$.util.Iterator
+        public final Object next() {
+            l lVar = this.b;
+            if (lVar != null) {
+                Object obj = lVar.c;
+                this.j = lVar;
+                a();
+                return obj;
+            }
+            throw new NoSuchElementException();
+        }
+
+        @Override // java.util.Enumeration
+        public final Object nextElement() {
+            return next();
+        }
     }
 
-    private static final int tableSizeFor(int c) {
-        int n = c - 1;
-        int n2 = n | (n >>> 1);
-        int n3 = n2 | (n2 >>> 2);
-        int n4 = n3 | (n3 >>> 4);
-        int n5 = n4 | (n4 >>> 8);
-        int n6 = n5 | (n5 >>> 16);
-        if (n6 < 0) {
+    /* loaded from: classes2.dex */
+    public static final class t extends p implements j$.util.u {
+        long i;
+
+        t(l[] lVarArr, int i, int i2, int i3, long j) {
+            super(lVarArr, i, i2, i3);
+            this.i = j;
+        }
+
+        @Override // j$.util.u
+        public boolean b(Consumer consumer) {
+            consumer.getClass();
+            l a = a();
+            if (a == null) {
+                return false;
+            }
+            consumer.accept(a.c);
+            return true;
+        }
+
+        @Override // j$.util.u
+        public int characteristics() {
+            return 4352;
+        }
+
+        @Override // j$.util.u
+        public long estimateSize() {
+            return this.i;
+        }
+
+        @Override // j$.util.u
+        public void forEachRemaining(Consumer consumer) {
+            consumer.getClass();
+            while (true) {
+                l a = a();
+                if (a != null) {
+                    consumer.accept(a.c);
+                } else {
+                    return;
+                }
+            }
+        }
+
+        @Override // j$.util.u
+        public Comparator getComparator() {
+            throw new IllegalStateException();
+        }
+
+        @Override // j$.util.u
+        public /* synthetic */ long getExactSizeIfKnown() {
+            return AbstractC0033a.e(this);
+        }
+
+        @Override // j$.util.u
+        public /* synthetic */ boolean hasCharacteristics(int i) {
+            return AbstractC0033a.f(this, i);
+        }
+
+        @Override // j$.util.u
+        public j$.util.u trySplit() {
+            int i = this.f;
+            int i2 = this.g;
+            int i3 = (i + i2) >>> 1;
+            if (i3 <= i) {
+                return null;
+            }
+            l[] lVarArr = this.a;
+            int i4 = this.h;
+            this.g = i3;
+            long j = this.i >>> 1;
+            this.i = j;
+            return new t(lVarArr, i4, i3, i2, j);
+        }
+    }
+
+    /* loaded from: classes2.dex */
+    static final class u extends b implements AbstractC0034b {
+        u(ConcurrentHashMap concurrentHashMap) {
+            super(concurrentHashMap);
+        }
+
+        @Override // java.util.Collection
+        public final boolean add(Object obj) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override // java.util.Collection
+        public final boolean addAll(Collection collection) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.b, java.util.Collection
+        public final boolean contains(Object obj) {
+            return this.a.containsValue(obj);
+        }
+
+        @Override // j$.util.AbstractC0034b, j$.lang.e
+        public void forEach(Consumer consumer) {
+            consumer.getClass();
+            l[] lVarArr = this.a.a;
+            if (lVarArr != null) {
+                p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+                while (true) {
+                    l a = pVar.a();
+                    if (a == null) {
+                        return;
+                    }
+                    consumer.accept(a.c);
+                }
+            }
+        }
+
+        @Override // java.lang.Iterable
+        public /* synthetic */ void forEach(java.util.function.Consumer consumer) {
+            forEach(C0231w.b(consumer));
+        }
+
+        @Override // j$.util.concurrent.ConcurrentHashMap.b, java.util.Collection, java.lang.Iterable
+        public final java.util.Iterator iterator() {
+            ConcurrentHashMap concurrentHashMap = this.a;
+            l[] lVarArr = concurrentHashMap.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            return new s(lVarArr, length, 0, length, concurrentHashMap);
+        }
+
+        @Override // j$.util.AbstractC0034b
+        public /* synthetic */ boolean k(Predicate predicate) {
+            return AbstractC0033a.h(this, predicate);
+        }
+
+        @Override // java.util.Collection
+        public /* synthetic */ Stream parallelStream() {
+            return P0.n0(AbstractC0033a.g(this));
+        }
+
+        @Override // java.util.Collection
+        public final boolean remove(Object obj) {
+            a aVar;
+            if (obj != null) {
+                java.util.Iterator it = iterator();
+                do {
+                    aVar = (a) it;
+                    if (!aVar.hasNext()) {
+                        return false;
+                    }
+                } while (!obj.equals(((s) it).next()));
+                aVar.remove();
+                return true;
+            }
+            return false;
+        }
+
+        @Override // java.util.Collection
+        public /* synthetic */ boolean removeIf(java.util.function.Predicate predicate) {
+            return AbstractC0033a.h(this, x0.a(predicate));
+        }
+
+        @Override // java.util.Collection, java.lang.Iterable, j$.util.AbstractC0034b, j$.lang.e
+        /* renamed from: spliterator */
+        public j$.util.u mo71spliterator() {
+            ConcurrentHashMap concurrentHashMap = this.a;
+            long m = concurrentHashMap.m();
+            l[] lVarArr = concurrentHashMap.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            long j = 0;
+            if (m >= 0) {
+                j = m;
+            }
+            return new t(lVarArr, length, 0, length, j);
+        }
+    }
+
+    static {
+        Class cls = Integer.TYPE;
+        serialPersistentFields = new ObjectStreamField[]{new ObjectStreamField("segments", n[].class), new ObjectStreamField("segmentMask", cls), new ObjectStreamField("segmentShift", cls)};
+        try {
+            Unsafe c2 = j$.util.concurrent.c.c();
+            h = c2;
+            i = c2.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("sizeCtl"));
+            j = c2.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("transferIndex"));
+            k = c2.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("baseCount"));
+            l = c2.objectFieldOffset(ConcurrentHashMap.class.getDeclaredField("cellsBusy"));
+            m = c2.objectFieldOffset(c.class.getDeclaredField("value"));
+            n = c2.arrayBaseOffset(l[].class);
+            int arrayIndexScale = c2.arrayIndexScale(l[].class);
+            if (((arrayIndexScale - 1) & arrayIndexScale) != 0) {
+                throw new Error("data type scale not a power of two");
+            }
+            o = 31 - Integer.numberOfLeadingZeros(arrayIndexScale);
+        } catch (Exception e2) {
+            throw new Error(e2);
+        }
+    }
+
+    public ConcurrentHashMap() {
+    }
+
+    public ConcurrentHashMap(int i2) {
+        if (i2 >= 0) {
+            this.sizeCtl = i2 >= 536870912 ? 1073741824 : o(i2 + (i2 >>> 1) + 1);
+            return;
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public ConcurrentHashMap(int i2, float f2, int i3) {
+        if (f2 <= 0.0f || i2 < 0 || i3 <= 0) {
+            throw new IllegalArgumentException();
+        }
+        double d2 = (i2 < i3 ? i3 : i2) / f2;
+        Double.isNaN(d2);
+        long j2 = (long) (d2 + 1.0d);
+        this.sizeCtl = j2 >= 1073741824 ? 1073741824 : o((int) j2);
+    }
+
+    /* JADX WARN: Code restructure failed: missing block: B:5:0x0012, code lost:
+        if (r1.compareAndSwapLong(r11, r3, r5, r9) == false) goto L6;
+     */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private final void a(long r12, int r14) {
+        /*
+            r11 = this;
+            j$.util.concurrent.ConcurrentHashMap$c[] r0 = r11.c
+            if (r0 != 0) goto L14
+            sun.misc.Unsafe r1 = j$.util.concurrent.ConcurrentHashMap.h
+            long r3 = j$.util.concurrent.ConcurrentHashMap.k
+            long r5 = r11.baseCount
+            long r9 = r5 + r12
+            r2 = r11
+            r7 = r9
+            boolean r1 = r1.compareAndSwapLong(r2, r3, r5, r7)
+            if (r1 != 0) goto L3b
+        L14:
+            r1 = 1
+            if (r0 == 0) goto L94
+            int r2 = r0.length
+            int r2 = r2 - r1
+            if (r2 < 0) goto L94
+            int r3 = j$.util.concurrent.i.c()
+            r2 = r2 & r3
+            r4 = r0[r2]
+            if (r4 == 0) goto L94
+            sun.misc.Unsafe r3 = j$.util.concurrent.ConcurrentHashMap.h
+            long r5 = j$.util.concurrent.ConcurrentHashMap.m
+            long r7 = r4.value
+            long r9 = r7 + r12
+            boolean r0 = r3.compareAndSwapLong(r4, r5, r7, r9)
+            if (r0 != 0) goto L34
+            r1 = r0
+            goto L94
+        L34:
+            if (r14 > r1) goto L37
+            return
+        L37:
+            long r9 = r11.m()
+        L3b:
+            if (r14 < 0) goto L93
+        L3d:
+            int r4 = r11.sizeCtl
+            long r12 = (long) r4
+            int r14 = (r9 > r12 ? 1 : (r9 == r12 ? 0 : -1))
+            if (r14 < 0) goto L93
+            j$.util.concurrent.ConcurrentHashMap$l[] r12 = r11.a
+            if (r12 == 0) goto L93
+            int r13 = r12.length
+            r14 = 1073741824(0x40000000, float:2.0)
+            if (r13 >= r14) goto L93
+            int r13 = j(r13)
+            if (r4 >= 0) goto L7b
+            int r14 = r4 >>> 16
+            if (r14 != r13) goto L93
+            int r14 = r13 + 1
+            if (r4 == r14) goto L93
+            r14 = 65535(0xffff, float:9.1834E-41)
+            int r13 = r13 + r14
+            if (r4 == r13) goto L93
+            j$.util.concurrent.ConcurrentHashMap$l[] r13 = r11.b
+            if (r13 == 0) goto L93
+            int r14 = r11.transferIndex
+            if (r14 > 0) goto L6a
+            goto L93
+        L6a:
+            sun.misc.Unsafe r0 = j$.util.concurrent.ConcurrentHashMap.h
+            long r2 = j$.util.concurrent.ConcurrentHashMap.i
+            int r5 = r4 + 1
+            r1 = r11
+            boolean r14 = r0.compareAndSwapInt(r1, r2, r4, r5)
+            if (r14 == 0) goto L8e
+            r11.p(r12, r13)
+            goto L8e
+        L7b:
+            sun.misc.Unsafe r0 = j$.util.concurrent.ConcurrentHashMap.h
+            long r2 = j$.util.concurrent.ConcurrentHashMap.i
+            int r13 = r13 << 16
+            int r5 = r13 + 2
+            r1 = r11
+            boolean r13 = r0.compareAndSwapInt(r1, r2, r4, r5)
+            if (r13 == 0) goto L8e
+            r13 = 0
+            r11.p(r12, r13)
+        L8e:
+            long r9 = r11.m()
+            goto L3d
+        L93:
+            return
+        L94:
+            r11.e(r12, r1)
+            return
+        */
+        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.a(long, int):void");
+    }
+
+    static final boolean b(l[] lVarArr, int i2, l lVar, l lVar2) {
+        return h.compareAndSwapObject(lVarArr, (i2 << o) + n, (Object) null, lVar2);
+    }
+
+    static Class c(Object obj) {
+        Type[] actualTypeArguments;
+        if (obj instanceof Comparable) {
+            Class<?> cls = obj.getClass();
+            if (cls == String.class) {
+                return cls;
+            }
+            Type[] genericInterfaces = cls.getGenericInterfaces();
+            if (genericInterfaces == null) {
+                return null;
+            }
+            for (Type type : genericInterfaces) {
+                if (type instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) type;
+                    if (parameterizedType.getRawType() == Comparable.class && (actualTypeArguments = parameterizedType.getActualTypeArguments()) != null && actualTypeArguments.length == 1 && actualTypeArguments[0] == cls) {
+                        return cls;
+                    }
+                }
+            }
+            return null;
+        }
+        return null;
+    }
+
+    static int d(Class cls, Object obj, Object obj2) {
+        if (obj2 == null || obj2.getClass() != cls) {
+            return 0;
+        }
+        return ((Comparable) obj).compareTo(obj2);
+    }
+
+    /* JADX WARN: Code restructure failed: missing block: B:48:0x009b, code lost:
+        if (r24.c != r7) goto L89;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:49:0x009d, code lost:
+        r1 = new j$.util.concurrent.ConcurrentHashMap.c[r8 << 1];
+        r2 = 0;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:50:0x00a2, code lost:
+        if (r2 >= r8) goto L106;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:51:0x00a4, code lost:
+        r1[r2] = r7[r2];
+        r2 = r2 + 1;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:52:0x00ab, code lost:
+        r24.c = r1;
+     */
+    /* JADX WARN: Removed duplicated region for block: B:102:0x001b A[SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:84:0x0101 A[SYNTHETIC] */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private final void e(long r25, boolean r27) {
+        /*
+            Method dump skipped, instructions count: 258
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.e(long, boolean):void");
+    }
+
+    private final l[] g() {
+        while (true) {
+            l[] lVarArr = this.a;
+            if (lVarArr == null || lVarArr.length == 0) {
+                int i2 = this.sizeCtl;
+                if (i2 < 0) {
+                    Thread.yield();
+                } else if (h.compareAndSwapInt(this, i, i2, -1)) {
+                    try {
+                        l[] lVarArr2 = this.a;
+                        if (lVarArr2 == null || lVarArr2.length == 0) {
+                            int i3 = i2 > 0 ? i2 : 16;
+                            l[] lVarArr3 = new l[i3];
+                            this.a = lVarArr3;
+                            i2 = i3 - (i3 >>> 2);
+                            lVarArr2 = lVarArr3;
+                        }
+                        this.sizeCtl = i2;
+                        return lVarArr2;
+                    } catch (Throwable th) {
+                        this.sizeCtl = i2;
+                        throw th;
+                    }
+                }
+            } else {
+                return lVarArr;
+            }
+        }
+    }
+
+    static final int j(int i2) {
+        return Integer.numberOfLeadingZeros(i2) | 32768;
+    }
+
+    static final void k(l[] lVarArr, int i2, l lVar) {
+        h.putObjectVolatile(lVarArr, (i2 << o) + n, lVar);
+    }
+
+    static final int l(int i2) {
+        return (i2 ^ (i2 >>> 16)) & ConnectionsManager.DEFAULT_DATACENTER_ID;
+    }
+
+    static final l n(l[] lVarArr, int i2) {
+        return (l) h.getObjectVolatile(lVarArr, (i2 << o) + n);
+    }
+
+    private static final int o(int i2) {
+        int i3 = i2 - 1;
+        int i4 = i3 | (i3 >>> 1);
+        int i5 = i4 | (i4 >>> 2);
+        int i6 = i5 | (i5 >>> 4);
+        int i7 = i6 | (i6 >>> 8);
+        int i8 = i7 | (i7 >>> 16);
+        if (i8 < 0) {
             return 1;
         }
-        if (n6 < 1073741824) {
-            return n6 + 1;
+        if (i8 < 1073741824) {
+            return 1 + i8;
         }
         return 1073741824;
     }
 
-    static Class<?> comparableClassFor(Object x) {
-        Type[] as;
-        if (x instanceof Comparable) {
-            Class<?> c = x.getClass();
-            if (c == String.class) {
-                return c;
+    /* JADX WARN: Multi-variable type inference failed */
+    /* JADX WARN: Type inference failed for: r13v13, types: [j$.util.concurrent.ConcurrentHashMap$l] */
+    /* JADX WARN: Type inference failed for: r13v14, types: [j$.util.concurrent.ConcurrentHashMap$l] */
+    /* JADX WARN: Type inference failed for: r6v19, types: [j$.util.concurrent.ConcurrentHashMap$l] */
+    /* JADX WARN: Type inference failed for: r6v24, types: [j$.util.concurrent.ConcurrentHashMap$l] */
+    private final void p(l[] lVarArr, l[] lVarArr2) {
+        l[] lVarArr3;
+        l[] lVarArr4;
+        int i2;
+        int i3;
+        int i4;
+        int i5;
+        g gVar;
+        r rVar;
+        int i6;
+        ConcurrentHashMap<K, V> concurrentHashMap = this;
+        int length = lVarArr.length;
+        int i7 = g;
+        int i8 = i7 > 1 ? (length >>> 3) / i7 : length;
+        int i9 = i8 < 16 ? 16 : i8;
+        if (lVarArr2 == null) {
+            try {
+                l[] lVarArr5 = new l[length << 1];
+                concurrentHashMap.b = lVarArr5;
+                concurrentHashMap.transferIndex = length;
+                lVarArr3 = lVarArr5;
+            } catch (Throwable unused) {
+                concurrentHashMap.sizeCtl = ConnectionsManager.DEFAULT_DATACENTER_ID;
+                return;
             }
-            Type[] ts = c.getGenericInterfaces();
-            if (ts != null) {
-                for (Type t : ts) {
-                    if (t instanceof ParameterizedType) {
-                        ParameterizedType p = (ParameterizedType) t;
-                        if (p.getRawType() == Comparable.class && (as = p.getActualTypeArguments()) != null && as.length == 1 && as[0] == c) {
-                            return c;
+        } else {
+            lVarArr3 = lVarArr2;
+        }
+        int length2 = lVarArr3.length;
+        g gVar2 = new g(lVarArr3);
+        l[] lVarArr6 = lVarArr;
+        int i10 = 0;
+        int i11 = 0;
+        boolean z = true;
+        boolean z2 = false;
+        while (true) {
+            if (z) {
+                int i12 = i10 - 1;
+                if (i12 >= i11 || z2) {
+                    lVarArr4 = lVarArr6;
+                    i10 = i12;
+                    i11 = i11;
+                } else {
+                    int i13 = concurrentHashMap.transferIndex;
+                    if (i13 <= 0) {
+                        lVarArr4 = lVarArr6;
+                        i10 = -1;
+                    } else {
+                        Unsafe unsafe = h;
+                        long j2 = j;
+                        int i14 = i13 > i9 ? i13 - i9 : 0;
+                        lVarArr4 = lVarArr6;
+                        i2 = i11;
+                        if (unsafe.compareAndSwapInt(this, j2, i13, i14)) {
+                            i10 = i13 - 1;
+                            i11 = i14;
+                        } else {
+                            lVarArr6 = lVarArr4;
+                            i10 = i12;
+                            i11 = i2;
                         }
                     }
                 }
-                return null;
+                lVarArr6 = lVarArr4;
+                z = false;
+            } else {
+                l[] lVarArr7 = lVarArr6;
+                i2 = i11;
+                r rVar2 = null;
+                if (i10 < 0 || i10 >= length || (i3 = i10 + length) >= length2) {
+                    int i15 = i9;
+                    int i16 = length2;
+                    g gVar3 = gVar2;
+                    if (z2) {
+                        this.b = null;
+                        this.a = lVarArr3;
+                        this.sizeCtl = (length << 1) - (length >>> 1);
+                        return;
+                    }
+                    Unsafe unsafe2 = h;
+                    long j3 = i;
+                    int i17 = this.sizeCtl;
+                    int i18 = i10;
+                    if (!unsafe2.compareAndSwapInt(this, j3, i17, i17 - 1)) {
+                        gVar2 = gVar3;
+                        concurrentHashMap = this;
+                        i10 = i18;
+                        lVarArr6 = lVarArr7;
+                        i11 = i2;
+                        i9 = i15;
+                        length2 = i16;
+                    } else if (i17 - 2 != (j(length) << 16)) {
+                        return;
+                    } else {
+                        gVar2 = gVar3;
+                        i10 = length;
+                        concurrentHashMap = this;
+                        lVarArr6 = lVarArr7;
+                        i11 = i2;
+                        i9 = i15;
+                        length2 = i16;
+                        z = true;
+                        z2 = true;
+                    }
+                } else {
+                    l n2 = n(lVarArr7, i10);
+                    if (n2 == null) {
+                        z = b(lVarArr7, i10, null, gVar2);
+                        lVarArr6 = lVarArr7;
+                        i11 = i2;
+                    } else {
+                        int i19 = n2.a;
+                        if (i19 == -1) {
+                            lVarArr6 = lVarArr7;
+                            i11 = i2;
+                            z = true;
+                        } else {
+                            synchronized (n2) {
+                                if (n(lVarArr7, i10) == n2) {
+                                    if (i19 >= 0) {
+                                        int i20 = i19 & length;
+                                        r rVar3 = n2;
+                                        for (r rVar4 = n2.d; rVar4 != null; rVar4 = rVar4.d) {
+                                            int i21 = rVar4.a & length;
+                                            if (i21 != i20) {
+                                                rVar3 = rVar4;
+                                                i20 = i21;
+                                            }
+                                        }
+                                        if (i20 == 0) {
+                                            rVar = null;
+                                            rVar2 = rVar3;
+                                        } else {
+                                            rVar = rVar3;
+                                        }
+                                        l lVar = n2;
+                                        while (lVar != rVar3) {
+                                            int i22 = lVar.a;
+                                            r rVar5 = rVar3;
+                                            Object obj = lVar.b;
+                                            int i23 = i9;
+                                            Object obj2 = lVar.c;
+                                            if ((i22 & length) == 0) {
+                                                i6 = length2;
+                                                rVar2 = new l(i22, obj, obj2, rVar2);
+                                            } else {
+                                                i6 = length2;
+                                                rVar = new l(i22, obj, obj2, rVar);
+                                            }
+                                            lVar = lVar.d;
+                                            rVar3 = rVar5;
+                                            i9 = i23;
+                                            length2 = i6;
+                                        }
+                                        i5 = i9;
+                                        i4 = length2;
+                                        k(lVarArr3, i10, rVar2);
+                                        k(lVarArr3, i3, rVar);
+                                        k(lVarArr7, i10, gVar2);
+                                        gVar = gVar2;
+                                        lVarArr6 = lVarArr7;
+                                    } else {
+                                        i5 = i9;
+                                        i4 = length2;
+                                        if (n2 instanceof q) {
+                                            q qVar = (q) n2;
+                                            r rVar6 = null;
+                                            r rVar7 = null;
+                                            l lVar2 = qVar.f;
+                                            int i24 = 0;
+                                            int i25 = 0;
+                                            r rVar8 = null;
+                                            while (lVar2 != null) {
+                                                q qVar2 = qVar;
+                                                int i26 = lVar2.a;
+                                                g gVar4 = gVar2;
+                                                r rVar9 = new r(i26, lVar2.b, lVar2.c, null, null);
+                                                if ((i26 & length) == 0) {
+                                                    rVar9.h = rVar7;
+                                                    if (rVar7 == null) {
+                                                        rVar2 = rVar9;
+                                                    } else {
+                                                        rVar7.d = rVar9;
+                                                    }
+                                                    i24++;
+                                                    rVar7 = rVar9;
+                                                } else {
+                                                    rVar9.h = rVar6;
+                                                    if (rVar6 == null) {
+                                                        rVar8 = rVar9;
+                                                    } else {
+                                                        rVar6.d = rVar9;
+                                                    }
+                                                    i25++;
+                                                    rVar6 = rVar9;
+                                                }
+                                                lVar2 = lVar2.d;
+                                                qVar = qVar2;
+                                                gVar2 = gVar4;
+                                            }
+                                            q qVar3 = qVar;
+                                            g gVar5 = gVar2;
+                                            l s2 = i24 <= 6 ? s(rVar2) : i25 != 0 ? new q(rVar2) : qVar3;
+                                            l s3 = i25 <= 6 ? s(rVar8) : i24 != 0 ? new q(rVar8) : qVar3;
+                                            k(lVarArr3, i10, s2);
+                                            k(lVarArr3, i3, s3);
+                                            gVar = gVar5;
+                                            k(lVarArr, i10, gVar);
+                                            lVarArr6 = lVarArr;
+                                        }
+                                    }
+                                    z = true;
+                                } else {
+                                    i5 = i9;
+                                    i4 = length2;
+                                }
+                                gVar = gVar2;
+                                lVarArr6 = lVarArr7;
+                            }
+                            gVar2 = gVar;
+                            i11 = i2;
+                            i9 = i5;
+                            length2 = i4;
+                            concurrentHashMap = this;
+                        }
+                    }
+                }
             }
-            return null;
         }
-        return null;
     }
 
-    static int compareComparables(Class<?> kc, Object k, Object x) {
-        if (x == null || x.getClass() != kc) {
-            return 0;
+    private final void q(l[] lVarArr, int i2) {
+        int length = lVarArr.length;
+        if (length < 64) {
+            r(length << 1);
+            return;
         }
-        return ((Comparable) k).compareTo(x);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    static final <K, V> Node<K, V> tabAt(Node<K, V>[] nodeArr, int i) {
-        return (Node) U.getObjectVolatile(nodeArr, (i << ASHIFT) + ABASE);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    static final <K, V> boolean casTabAt(Node<K, V>[] nodeArr, int i, Node<K, V> node, Node<K, V> node2) {
-        return U.compareAndSwapObject(nodeArr, ABASE + (i << ASHIFT), node, node2);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    static final <K, V> void setTabAt(Node<K, V>[] nodeArr, int i, Node<K, V> node) {
-        U.putObjectVolatile(nodeArr, (i << ASHIFT) + ABASE, node);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public ConcurrentHashMap() {
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public ConcurrentHashMap(int initialCapacity) {
-        int cap;
-        if (initialCapacity < 0) {
-            throw new IllegalArgumentException();
+        l n2 = n(lVarArr, i2);
+        if (n2 == null || n2.a < 0) {
+            return;
         }
-        if (initialCapacity >= 536870912) {
-            cap = 1073741824;
+        synchronized (n2) {
+            if (n(lVarArr, i2) == n2) {
+                r rVar = null;
+                l lVar = n2;
+                r rVar2 = null;
+                while (lVar != null) {
+                    r rVar3 = new r(lVar.a, lVar.b, lVar.c, null, null);
+                    rVar3.h = rVar2;
+                    if (rVar2 == null) {
+                        rVar = rVar3;
+                    } else {
+                        rVar2.d = rVar3;
+                    }
+                    lVar = lVar.d;
+                    rVar2 = rVar3;
+                }
+                k(lVarArr, i2, new q(rVar));
+            }
+        }
+    }
+
+    private final void r(int i2) {
+        int length;
+        l[] lVarArr;
+        int o2 = i2 >= 536870912 ? 1073741824 : o(i2 + (i2 >>> 1) + 1);
+        while (true) {
+            int i3 = this.sizeCtl;
+            if (i3 >= 0) {
+                l[] lVarArr2 = this.a;
+                if (lVarArr2 == null || (length = lVarArr2.length) == 0) {
+                    int i4 = i3 > o2 ? i3 : o2;
+                    if (h.compareAndSwapInt(this, i, i3, -1)) {
+                        try {
+                            if (this.a == lVarArr2) {
+                                this.a = new l[i4];
+                                i3 = i4 - (i4 >>> 2);
+                            }
+                        } finally {
+                            this.sizeCtl = i3;
+                        }
+                    } else {
+                        continue;
+                    }
+                } else if (o2 <= i3 || length >= 1073741824) {
+                    return;
+                } else {
+                    if (lVarArr2 == this.a) {
+                        int j2 = j(length);
+                        if (i3 < 0) {
+                            if ((i3 >>> 16) != j2 || i3 == j2 + 1 || i3 == j2 + 65535 || (lVarArr = this.b) == null || this.transferIndex <= 0) {
+                                return;
+                            }
+                            if (h.compareAndSwapInt(this, i, i3, i3 + 1)) {
+                                p(lVarArr2, lVarArr);
+                            }
+                        } else if (h.compareAndSwapInt(this, i, i3, (j2 << 16) + 2)) {
+                            p(lVarArr2, null);
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                return;
+            }
+        }
+    }
+
+    private void readObject(ObjectInputStream objectInputStream) {
+        long j2;
+        int i2;
+        boolean z;
+        Object obj;
+        this.sizeCtl = -1;
+        objectInputStream.defaultReadObject();
+        long j3 = 0;
+        long j4 = 0;
+        l lVar = null;
+        while (true) {
+            Object readObject = objectInputStream.readObject();
+            Object readObject2 = objectInputStream.readObject();
+            j2 = 1;
+            if (readObject == null || readObject2 == null) {
+                break;
+            }
+            j4++;
+            lVar = new l(l(readObject.hashCode()), readObject, readObject2, lVar);
+        }
+        if (j4 == 0) {
+            this.sizeCtl = 0;
+            return;
+        }
+        if (j4 >= 536870912) {
+            i2 = 1073741824;
         } else {
-            cap = tableSizeFor((initialCapacity >>> 1) + initialCapacity + 1);
+            int i3 = (int) j4;
+            i2 = o(i3 + (i3 >>> 1) + 1);
         }
-        this.sizeCtl = cap;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public ConcurrentHashMap(Map<? extends K, ? extends V> m) {
-        this.sizeCtl = 16;
-        putAll(m);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public ConcurrentHashMap(int initialCapacity, float loadFactor) {
-        this(initialCapacity, loadFactor, 1);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
-        if (loadFactor <= 0.0f || initialCapacity < 0 || concurrencyLevel <= 0) {
-            throw new IllegalArgumentException();
-        }
-        double d = (initialCapacity < concurrencyLevel ? concurrencyLevel : initialCapacity) / loadFactor;
-        Double.isNaN(d);
-        long size = (long) (d + 1.0d);
-        int cap = size >= 1073741824 ? 1073741824 : tableSizeFor((int) size);
-        this.sizeCtl = cap;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public int size() {
-        long n = sumCount();
-        if (n < 0) {
-            return 0;
-        }
-        if (n <= 2147483647L) {
-            return (int) n;
-        }
-        return Integer.MAX_VALUE;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public boolean isEmpty() {
-        return sumCount() <= 0;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public V get(Object key) {
-        int n;
-        K ek;
-        int h = spread(key.hashCode());
-        Node<K, V>[] nodeArr = this.table;
-        if (nodeArr != null && (n = nodeArr.length) > 0) {
-            Node<K, V> tabAt = tabAt(nodeArr, (n - 1) & h);
-            Node<K, V> node = tabAt;
-            if (tabAt != null) {
-                int eh = node.hash;
-                if (eh == h) {
-                    K ek2 = node.key;
-                    if (ek2 == key || (ek2 != null && key.equals(ek2))) {
-                        return node.val;
+        l[] lVarArr = new l[i2];
+        int i4 = i2 - 1;
+        while (lVar != null) {
+            l lVar2 = lVar.d;
+            int i5 = lVar.a;
+            int i6 = i5 & i4;
+            l n2 = n(lVarArr, i6);
+            if (n2 == null) {
+                z = true;
+            } else {
+                Object obj2 = lVar.b;
+                if (n2.a >= 0) {
+                    int i7 = 0;
+                    for (l lVar3 = n2; lVar3 != null; lVar3 = lVar3.d) {
+                        if (lVar3.a == i5 && ((obj = lVar3.b) == obj2 || (obj != null && obj2.equals(obj)))) {
+                            z = false;
+                            break;
+                        }
+                        i7++;
                     }
-                } else if (eh < 0) {
-                    Node<K, V> find = node.find(h, key);
-                    if (find == null) {
-                        return null;
+                    z = true;
+                    if (z && i7 >= 8) {
+                        j3++;
+                        lVar.d = n2;
+                        l lVar4 = lVar;
+                        r rVar = null;
+                        r rVar2 = null;
+                        while (lVar4 != null) {
+                            long j5 = j3;
+                            r rVar3 = new r(lVar4.a, lVar4.b, lVar4.c, null, null);
+                            rVar3.h = rVar2;
+                            if (rVar2 == null) {
+                                rVar = rVar3;
+                            } else {
+                                rVar2.d = rVar3;
+                            }
+                            lVar4 = lVar4.d;
+                            rVar2 = rVar3;
+                            j3 = j5;
+                        }
+                        k(lVarArr, i6, new q(rVar));
                     }
-                    return find.val;
+                } else if (((q) n2).f(i5, obj2, lVar.c) == null) {
+                    j3 += j2;
                 }
-                while (true) {
-                    Node<K, V> node2 = node.next;
-                    node = node2;
-                    if (node2 == null) {
-                        break;
-                    } else if (node.hash != h || ((ek = node.key) != key && (ek == null || !key.equals(ek)))) {
-                    }
-                }
-                return node.val;
+                z = false;
             }
+            if (z) {
+                j3++;
+                lVar.d = n2;
+                k(lVarArr, i6, lVar);
+            }
+            j2 = 1;
+            lVar = lVar2;
         }
-        return null;
+        this.a = lVarArr;
+        this.sizeCtl = i2 - (i2 >>> 2);
+        this.baseCount = j3;
     }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public boolean containsKey(Object key) {
-        return get(key) != null;
+    static l s(l lVar) {
+        l lVar2 = null;
+        l lVar3 = null;
+        while (lVar != null) {
+            l lVar4 = new l(lVar.a, lVar.b, lVar.c, null);
+            if (lVar3 == null) {
+                lVar2 = lVar4;
+            } else {
+                lVar3.d = lVar4;
+            }
+            lVar = lVar.d;
+            lVar3 = lVar4;
+        }
+        return lVar2;
     }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public boolean containsValue(Object value) {
-        if (value == null) {
-            throw new NullPointerException();
+    private void writeObject(ObjectOutputStream objectOutputStream) {
+        int i2 = 1;
+        int i3 = 0;
+        while (i2 < 16) {
+            i3++;
+            i2 <<= 1;
         }
-        Node<K, V>[] nodeArr = this.table;
-        if (nodeArr != null) {
-            Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
+        int i4 = 32 - i3;
+        int i5 = i2 - 1;
+        n[] nVarArr = new n[16];
+        for (int i6 = 0; i6 < 16; i6++) {
+            nVarArr[i6] = new n(0.75f);
+        }
+        objectOutputStream.putFields().put("segments", nVarArr);
+        objectOutputStream.putFields().put("segmentShift", i4);
+        objectOutputStream.putFields().put("segmentMask", i5);
+        objectOutputStream.writeFields();
+        l[] lVarArr = this.a;
+        if (lVarArr != null) {
+            p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
             while (true) {
-                Node<K, V> advance = traverser.advance();
-                if (advance == null) {
+                l a2 = pVar.a();
+                if (a2 == null) {
                     break;
                 }
-                V v = advance.val;
-                if (v == value) {
+                objectOutputStream.writeObject(a2.b);
+                objectOutputStream.writeObject(a2.c);
+            }
+        }
+        objectOutputStream.writeObject(null);
+        objectOutputStream.writeObject(null);
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public void clear() {
+        l n2;
+        l[] lVarArr = this.a;
+        long j2 = 0;
+        loop0: while (true) {
+            int i2 = 0;
+            while (lVarArr != null && i2 < lVarArr.length) {
+                n2 = n(lVarArr, i2);
+                if (n2 == null) {
+                    i2++;
+                } else {
+                    int i3 = n2.a;
+                    if (i3 == -1) {
+                        break;
+                    }
+                    synchronized (n2) {
+                        if (n(lVarArr, i2) == n2) {
+                            for (l lVar = i3 >= 0 ? n2 : n2 instanceof q ? ((q) n2).f : null; lVar != null; lVar = lVar.d) {
+                                j2--;
+                            }
+                            k(lVarArr, i2, null);
+                            i2++;
+                        }
+                    }
+                }
+            }
+            lVarArr = f(lVarArr, n2);
+        }
+        if (j2 != 0) {
+            a(j2, -1);
+        }
+    }
+
+    @Override // j$.util.Map
+    public Object compute(Object obj, BiFunction biFunction) {
+        int i2;
+        l lVar;
+        Object obj2;
+        Object obj3;
+        if (obj == null || biFunction == null) {
+            throw null;
+        }
+        int l2 = l(obj.hashCode());
+        l[] lVarArr = this.a;
+        int i3 = 0;
+        Object obj4 = null;
+        int i4 = 0;
+        while (true) {
+            if (lVarArr != null) {
+                int length = lVarArr.length;
+                if (length != 0) {
+                    int i5 = (length - 1) & l2;
+                    l n2 = n(lVarArr, i5);
+                    if (n2 == null) {
+                        m mVar = new m();
+                        synchronized (mVar) {
+                            if (b(lVarArr, i5, null, mVar)) {
+                                Object apply = biFunction.apply(obj, null);
+                                if (apply != null) {
+                                    lVar = new l(l2, obj, apply, null);
+                                    i2 = 1;
+                                } else {
+                                    i2 = i3;
+                                    lVar = null;
+                                }
+                                k(lVarArr, i5, lVar);
+                                i3 = i2;
+                                obj4 = apply;
+                                i4 = 1;
+                            }
+                        }
+                        if (i4 != 0) {
+                            break;
+                        }
+                    } else {
+                        int i6 = n2.a;
+                        if (i6 == -1) {
+                            lVarArr = f(lVarArr, n2);
+                        } else {
+                            synchronized (n2) {
+                                if (n(lVarArr, i5) == n2) {
+                                    if (i6 >= 0) {
+                                        l lVar2 = null;
+                                        l lVar3 = n2;
+                                        int i7 = 1;
+                                        while (true) {
+                                            if (lVar3.a != l2 || ((obj3 = lVar3.b) != obj && (obj3 == null || !obj.equals(obj3)))) {
+                                                l lVar4 = lVar3.d;
+                                                if (lVar4 == null) {
+                                                    Object apply2 = biFunction.apply(obj, null);
+                                                    if (apply2 != null) {
+                                                        lVar3.d = new l(l2, obj, apply2, null);
+                                                        i3 = 1;
+                                                    }
+                                                    obj2 = apply2;
+                                                } else {
+                                                    i7++;
+                                                    lVar2 = lVar3;
+                                                    lVar3 = lVar4;
+                                                }
+                                            }
+                                        }
+                                        obj2 = biFunction.apply(obj, lVar3.c);
+                                        if (obj2 != null) {
+                                            lVar3.c = obj2;
+                                        } else {
+                                            l lVar5 = lVar3.d;
+                                            if (lVar2 != null) {
+                                                lVar2.d = lVar5;
+                                            } else {
+                                                k(lVarArr, i5, lVar5);
+                                            }
+                                            i3 = -1;
+                                        }
+                                        i4 = i7;
+                                        obj4 = obj2;
+                                    } else if (n2 instanceof q) {
+                                        q qVar = (q) n2;
+                                        r rVar = qVar.e;
+                                        r b2 = rVar != null ? rVar.b(l2, obj, null) : null;
+                                        Object apply3 = biFunction.apply(obj, b2 == null ? null : b2.c);
+                                        if (apply3 != null) {
+                                            if (b2 != null) {
+                                                b2.c = apply3;
+                                            } else {
+                                                qVar.f(l2, obj, apply3);
+                                                i3 = 1;
+                                            }
+                                        } else if (b2 != null) {
+                                            if (qVar.g(b2)) {
+                                                k(lVarArr, i5, s(qVar.f));
+                                            }
+                                            i3 = -1;
+                                        }
+                                        obj4 = apply3;
+                                        i4 = 1;
+                                    }
+                                }
+                            }
+                            if (i4 != 0) {
+                                if (i4 >= 8) {
+                                    q(lVarArr, i5);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            lVarArr = g();
+        }
+        if (i3 != 0) {
+            a(i3, i4);
+        }
+        return obj4;
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
+    public /* synthetic */ Object compute(Object obj, java.util.function.BiFunction biFunction) {
+        return compute(obj, C0227s.a(biFunction));
+    }
+
+    @Override // j$.util.Map
+    public Object computeIfAbsent(Object obj, Function function) {
+        Object obj2;
+        int i2;
+        Object obj3;
+        r b2;
+        Object obj4;
+        if (obj == null || function == null) {
+            throw null;
+        }
+        int l2 = l(obj.hashCode());
+        l[] lVarArr = this.a;
+        Object obj5 = null;
+        int i3 = 0;
+        while (true) {
+            if (lVarArr != null) {
+                int length = lVarArr.length;
+                if (length != 0) {
+                    int i4 = (length - 1) & l2;
+                    l n2 = n(lVarArr, i4);
+                    boolean z = true;
+                    if (n2 == null) {
+                        m mVar = new m();
+                        synchronized (mVar) {
+                            if (b(lVarArr, i4, null, mVar)) {
+                                Object apply = function.apply(obj);
+                                k(lVarArr, i4, apply != null ? new l(l2, obj, apply, null) : null);
+                                obj5 = apply;
+                                i3 = 1;
+                            }
+                        }
+                        if (i3 != 0) {
+                            break;
+                        }
+                    } else {
+                        int i5 = n2.a;
+                        if (i5 == -1) {
+                            lVarArr = f(lVarArr, n2);
+                        } else {
+                            synchronized (n2) {
+                                if (n(lVarArr, i4) == n2) {
+                                    if (i5 >= 0) {
+                                        l lVar = n2;
+                                        i2 = 1;
+                                        while (true) {
+                                            if (lVar.a != l2 || ((obj4 = lVar.b) != obj && (obj4 == null || !obj.equals(obj4)))) {
+                                                l lVar2 = lVar.d;
+                                                if (lVar2 == null) {
+                                                    obj2 = function.apply(obj);
+                                                    if (obj2 != null) {
+                                                        lVar.d = new l(l2, obj, obj2, null);
+                                                    }
+                                                } else {
+                                                    i2++;
+                                                    lVar = lVar2;
+                                                }
+                                            }
+                                        }
+                                        obj3 = lVar.c;
+                                        z = false;
+                                        int i6 = i2;
+                                        obj5 = obj3;
+                                        i3 = i6;
+                                    } else if (n2 instanceof q) {
+                                        i2 = 2;
+                                        q qVar = (q) n2;
+                                        r rVar = qVar.e;
+                                        if (rVar == null || (b2 = rVar.b(l2, obj, null)) == null) {
+                                            obj2 = function.apply(obj);
+                                            if (obj2 != null) {
+                                                qVar.f(l2, obj, obj2);
+                                                i3 = i2;
+                                                obj5 = obj2;
+                                            }
+                                            z = false;
+                                            i3 = i2;
+                                            obj5 = obj2;
+                                        } else {
+                                            obj3 = b2.c;
+                                            z = false;
+                                            int i62 = i2;
+                                            obj5 = obj3;
+                                            i3 = i62;
+                                        }
+                                    }
+                                }
+                                z = false;
+                            }
+                            if (i3 != 0) {
+                                if (i3 >= 8) {
+                                    q(lVarArr, i4);
+                                }
+                                if (!z) {
+                                    return obj5;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            lVarArr = g();
+        }
+        if (obj5 != null) {
+            a(1L, i3);
+        }
+        return obj5;
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
+    public /* synthetic */ Object computeIfAbsent(Object obj, java.util.function.Function function) {
+        return computeIfAbsent(obj, M.a(function));
+    }
+
+    @Override // j$.util.Map
+    public Object computeIfPresent(Object obj, BiFunction biFunction) {
+        r b2;
+        l s2;
+        Object obj2;
+        if (obj == null || biFunction == null) {
+            throw null;
+        }
+        int l2 = l(obj.hashCode());
+        l[] lVarArr = this.a;
+        int i2 = 0;
+        Object obj3 = null;
+        int i3 = 0;
+        while (true) {
+            if (lVarArr != null) {
+                int length = lVarArr.length;
+                if (length != 0) {
+                    int i4 = (length - 1) & l2;
+                    l n2 = n(lVarArr, i4);
+                    if (n2 == null) {
+                        break;
+                    }
+                    int i5 = n2.a;
+                    if (i5 == -1) {
+                        lVarArr = f(lVarArr, n2);
+                    } else {
+                        synchronized (n2) {
+                            if (n(lVarArr, i4) == n2) {
+                                if (i5 >= 0) {
+                                    i3 = 1;
+                                    l lVar = null;
+                                    l lVar2 = n2;
+                                    while (true) {
+                                        if (lVar2.a != l2 || ((obj2 = lVar2.b) != obj && (obj2 == null || !obj.equals(obj2)))) {
+                                            l lVar3 = lVar2.d;
+                                            if (lVar3 == null) {
+                                                break;
+                                            }
+                                            i3++;
+                                            lVar = lVar2;
+                                            lVar2 = lVar3;
+                                        }
+                                    }
+                                    obj3 = biFunction.apply(obj, lVar2.c);
+                                    if (obj3 != null) {
+                                        lVar2.c = obj3;
+                                    } else {
+                                        s2 = lVar2.d;
+                                        if (lVar != null) {
+                                            lVar.d = s2;
+                                            i2 = -1;
+                                        }
+                                        k(lVarArr, i4, s2);
+                                        i2 = -1;
+                                    }
+                                } else if (n2 instanceof q) {
+                                    i3 = 2;
+                                    q qVar = (q) n2;
+                                    r rVar = qVar.e;
+                                    if (rVar != null && (b2 = rVar.b(l2, obj, null)) != null) {
+                                        obj3 = biFunction.apply(obj, b2.c);
+                                        if (obj3 != null) {
+                                            b2.c = obj3;
+                                        } else {
+                                            if (qVar.g(b2)) {
+                                                s2 = s(qVar.f);
+                                                k(lVarArr, i4, s2);
+                                            }
+                                            i2 = -1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (i3 != 0) {
+                            break;
+                        }
+                    }
+                }
+            }
+            lVarArr = g();
+        }
+        if (i2 != 0) {
+            a(i2, i3);
+        }
+        return obj3;
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
+    public /* synthetic */ Object computeIfPresent(Object obj, java.util.function.BiFunction biFunction) {
+        return computeIfPresent(obj, C0227s.a(biFunction));
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public boolean containsKey(Object obj) {
+        return get(obj) != null;
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public boolean containsValue(Object obj) {
+        obj.getClass();
+        l[] lVarArr = this.a;
+        if (lVarArr != null) {
+            p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+            while (true) {
+                l a2 = pVar.a();
+                if (a2 == null) {
+                    break;
+                }
+                Object obj2 = a2.c;
+                if (obj2 == obj) {
                     return true;
                 }
-                if (v != null && value.equals(v)) {
+                if (obj2 != null && obj.equals(obj2)) {
                     return true;
                 }
             }
@@ -406,350 +2730,612 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements java.u
         return false;
     }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public V put(K key, V value) {
-        return putVal(key, value, false);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    final V putVal(K key, V value, boolean onlyIfAbsent) {
-        K ek;
-        if (key == null || value == null) {
-            throw new NullPointerException();
-        }
-        int hash = spread(key.hashCode());
-        int binCount = 0;
-        Node<K, V>[] nodeArr = this.table;
-        while (true) {
-            if (nodeArr != null) {
-                int n = nodeArr.length;
-                if (n != 0) {
-                    int i = (n - 1) & hash;
-                    Node<K, V> tabAt = tabAt(nodeArr, i);
-                    if (tabAt == null) {
-                        if (casTabAt(nodeArr, i, null, new Node(hash, key, value, null))) {
-                            break;
-                        }
-                    } else {
-                        int fh = tabAt.hash;
-                        if (fh == -1) {
-                            nodeArr = helpTransfer(nodeArr, tabAt);
-                        } else {
-                            V oldVal = null;
-                            synchronized (tabAt) {
-                                if (tabAt(nodeArr, i) == tabAt) {
-                                    if (fh >= 0) {
-                                        binCount = 1;
-                                        Node<K, V> node = tabAt;
-                                        while (true) {
-                                            if (node.hash != hash || ((ek = node.key) != key && (ek == null || !key.equals(ek)))) {
-                                                Node<K, V> node2 = node;
-                                                Node<K, V> node3 = node.next;
-                                                node = node3;
-                                                if (node3 == null) {
-                                                    node2.next = new Node<>(hash, key, value, null);
-                                                    break;
-                                                }
-                                                binCount++;
-                                            }
-                                        }
-                                        oldVal = node.val;
-                                        if (!onlyIfAbsent) {
-                                            node.val = value;
-                                        }
-                                    } else if (tabAt instanceof TreeBin) {
-                                        binCount = 2;
-                                        TreeNode<K, V> putTreeVal = ((TreeBin) tabAt).putTreeVal(hash, key, value);
-                                        if (putTreeVal != null) {
-                                            oldVal = putTreeVal.val;
-                                            if (!onlyIfAbsent) {
-                                                putTreeVal.val = value;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if (binCount != 0) {
-                                if (binCount >= 8) {
-                                    treeifyBin(nodeArr, i);
-                                }
-                                if (oldVal != null) {
-                                    return oldVal;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            nodeArr = initTable();
-        }
-        addCount(1L, binCount);
-        return null;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public void putAll(Map<? extends K, ? extends V> m) {
-        tryPresize(m.size());
-        for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
-            putVal(e.getKey(), e.getValue(), false);
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public V remove(Object key) {
-        return replaceNode(key, null, null);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    final V replaceNode(Object key, V value, Object cv) {
-        int i;
-        Node<K, V> tabAt;
-        TreeNode<K, V> findTreeNode;
-        K ek;
-        Object obj = key;
-        int hash = spread(key.hashCode());
-        Node<K, V>[] nodeArr = this.table;
-        while (nodeArr != null) {
-            int n = nodeArr.length;
-            if (n != 0 && (tabAt = tabAt(nodeArr, (i = (n - 1) & hash))) != null) {
-                int fh = tabAt.hash;
-                if (fh == -1) {
-                    nodeArr = helpTransfer(nodeArr, tabAt);
-                } else {
-                    V oldVal = null;
-                    boolean validated = false;
-                    synchronized (tabAt) {
-                        if (tabAt(nodeArr, i) == tabAt) {
-                            if (fh >= 0) {
-                                validated = true;
-                                Node<K, V> node = tabAt;
-                                Node<K, V> node2 = null;
-                                while (true) {
-                                    if (node.hash != hash || ((ek = node.key) != obj && (ek == null || !obj.equals(ek)))) {
-                                        node2 = node;
-                                        Node<K, V> node3 = node.next;
-                                        node = node3;
-                                        if (node3 == null) {
-                                            break;
-                                        }
-                                    }
-                                }
-                                V ev = node.val;
-                                if (cv == null || cv == ev || (ev != null && cv.equals(ev))) {
-                                    oldVal = ev;
-                                    if (value != null) {
-                                        node.val = value;
-                                    } else if (node2 != null) {
-                                        node2.next = node.next;
-                                    } else {
-                                        setTabAt(nodeArr, i, node.next);
-                                    }
-                                }
-                            } else if (tabAt instanceof TreeBin) {
-                                validated = true;
-                                TreeBin treeBin = (TreeBin) tabAt;
-                                TreeNode<K, V> treeNode = treeBin.root;
-                                if (treeNode != null && (findTreeNode = treeNode.findTreeNode(hash, obj, null)) != null) {
-                                    V pv = findTreeNode.val;
-                                    if (cv == null || cv == pv || (pv != null && cv.equals(pv))) {
-                                        oldVal = pv;
-                                        if (value != null) {
-                                            findTreeNode.val = value;
-                                        } else if (treeBin.removeTreeNode(findTreeNode)) {
-                                            setTabAt(nodeArr, i, untreeify(treeBin.first));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (validated) {
-                        if (oldVal != null) {
-                            if (value == null) {
-                                addCount(-1L, -1);
-                            }
-                            return oldVal;
-                        }
-                        return null;
-                    }
-                }
-                obj = key;
-            } else {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:34:0x004f -> B:43:0x0052). Please submit an issue!!! */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public void clear() {
-        int i;
-        Throwable th;
-        Throwable th2;
-        Node<K, V> node;
-        long delta = 0;
-        int i2 = 0;
-        Node<K, V>[] nodeArr = this.table;
-        while (nodeArr != null && i2 < nodeArr.length) {
-            Node<K, V> tabAt = tabAt(nodeArr, i2);
-            if (tabAt == null) {
-                i2++;
-            } else {
-                int fh = tabAt.hash;
-                if (fh == -1) {
-                    nodeArr = helpTransfer(nodeArr, tabAt);
-                    i2 = 0;
-                } else {
-                    synchronized (tabAt) {
-                        try {
-                            if (tabAt(nodeArr, i2) == tabAt) {
-                                if (fh >= 0) {
-                                    node = tabAt;
-                                } else if (!(tabAt instanceof TreeBin)) {
-                                    node = null;
-                                } else {
-                                    node = ((TreeBin) tabAt).first;
-                                }
-                                while (node != null) {
-                                    delta--;
-                                    node = node.next;
-                                }
-                                int i3 = i2 + 1;
-                                try {
-                                    setTabAt(nodeArr, i2, null);
-                                    i2 = i3;
-                                } catch (Throwable th3) {
-                                    th = th3;
-                                    i = i3;
-                                    try {
-                                    } catch (Throwable th4) {
-                                        int i4 = i;
-                                        th2 = th4;
-                                        i2 = i4;
-                                        Throwable th5 = th2;
-                                        i = i2;
-                                        th = th5;
-                                        throw th;
-                                    }
-                                    throw th;
-                                }
-                            }
-                        } catch (Throwable th6) {
-                            th2 = th6;
-                            Throwable th52 = th2;
-                            i = i2;
-                            th = th52;
-                            throw th;
-                        }
-                    }
-                }
-            }
-        }
-        if (delta != 0) {
-            addCount(delta, -1);
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public Set<K> keySet() {
-        KeySetView<K, V> keySetView = this.keySet;
-        if (keySetView != null) {
-            return keySetView;
-        }
-        KeySetView<K, V> keySetView2 = new KeySetView<>(this, null);
-        this.keySet = keySetView2;
-        return keySetView2;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public Collection<V> values() {
-        ValuesView<K, V> valuesView = this.values;
-        if (valuesView != null) {
-            return valuesView;
-        }
-        ValuesView<K, V> valuesView2 = new ValuesView<>(this);
-        this.values = valuesView2;
-        return valuesView2;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
     @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
     public Set<Map.Entry<K, V>> entrySet() {
-        EntrySetView<K, V> entrySetView = this.entrySet;
-        if (entrySetView != null) {
-            return entrySetView;
+        e eVar = this.f;
+        if (eVar != null) {
+            return eVar;
         }
-        EntrySetView<K, V> entrySetView2 = new EntrySetView<>(this);
-        this.entrySet = entrySetView2;
-        return entrySetView2;
+        e eVar2 = new e(this);
+        this.f = eVar2;
+        return eVar2;
     }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
     @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public int hashCode() {
-        int h = 0;
-        Node<K, V>[] nodeArr = this.table;
-        if (nodeArr != null) {
-            Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
+    public boolean equals(Object obj) {
+        V value;
+        V v;
+        if (obj != this) {
+            if (!(obj instanceof Map)) {
+                return false;
+            }
+            Map map = (Map) obj;
+            l[] lVarArr = this.a;
+            int length = lVarArr == null ? 0 : lVarArr.length;
+            p pVar = new p(lVarArr, length, 0, length);
             while (true) {
-                Node<K, V> advance = traverser.advance();
-                if (advance == null) {
+                l a2 = pVar.a();
+                if (a2 == null) {
+                    for (Map.Entry<K, V> entry : map.entrySet()) {
+                        K key = entry.getKey();
+                        if (key == null || (value = entry.getValue()) == null || (v = get(key)) == null || (value != v && !value.equals(v))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                Object obj2 = a2.c;
+                Object obj3 = map.get(a2.b);
+                if (obj3 == null || (obj3 != obj2 && !obj3.equals(obj2))) {
                     break;
                 }
-                h += advance.key.hashCode() ^ advance.val.hashCode();
             }
+            return false;
         }
-        return h;
+        return true;
     }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
+    final l[] f(l[] lVarArr, l lVar) {
+        l[] lVarArr2;
+        int i2;
+        if (!(lVar instanceof g) || (lVarArr2 = ((g) lVar).e) == null) {
+            return this.a;
+        }
+        int j2 = j(lVarArr.length);
+        while (true) {
+            if (lVarArr2 != this.b || this.a != lVarArr || (i2 = this.sizeCtl) >= 0 || (i2 >>> 16) != j2 || i2 == j2 + 1 || i2 == 65535 + j2 || this.transferIndex <= 0) {
+                break;
+            } else if (h.compareAndSwapInt(this, i, i2, i2 + 1)) {
+                p(lVarArr, lVarArr2);
+                break;
+            }
+        }
+        return lVarArr2;
+    }
+
+    @Override // j$.util.concurrent.b, j$.util.Map
+    public void forEach(BiConsumer biConsumer) {
+        biConsumer.getClass();
+        l[] lVarArr = this.a;
+        if (lVarArr != null) {
+            p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+            while (true) {
+                l a2 = pVar.a();
+                if (a2 == null) {
+                    return;
+                }
+                biConsumer.accept(a2.b, a2.c);
+            }
+        }
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
+    public /* synthetic */ void forEach(java.util.function.BiConsumer biConsumer) {
+        forEach(C0226q.a(biConsumer));
+    }
+
+    /* JADX WARN: Code restructure failed: missing block: B:32:0x004d, code lost:
+        return (V) r1.c;
+     */
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public V get(java.lang.Object r5) {
+        /*
+            r4 = this;
+            int r0 = r5.hashCode()
+            int r0 = l(r0)
+            j$.util.concurrent.ConcurrentHashMap$l[] r1 = r4.a
+            r2 = 0
+            if (r1 == 0) goto L4e
+            int r3 = r1.length
+            if (r3 <= 0) goto L4e
+            int r3 = r3 + (-1)
+            r3 = r3 & r0
+            j$.util.concurrent.ConcurrentHashMap$l r1 = n(r1, r3)
+            if (r1 == 0) goto L4e
+            int r3 = r1.a
+            if (r3 != r0) goto L2c
+            java.lang.Object r3 = r1.b
+            if (r3 == r5) goto L29
+            if (r3 == 0) goto L37
+            boolean r3 = r5.equals(r3)
+            if (r3 == 0) goto L37
+        L29:
+            java.lang.Object r5 = r1.c
+            return r5
+        L2c:
+            if (r3 >= 0) goto L37
+            j$.util.concurrent.ConcurrentHashMap$l r5 = r1.a(r0, r5)
+            if (r5 == 0) goto L36
+            java.lang.Object r2 = r5.c
+        L36:
+            return r2
+        L37:
+            j$.util.concurrent.ConcurrentHashMap$l r1 = r1.d
+            if (r1 == 0) goto L4e
+            int r3 = r1.a
+            if (r3 != r0) goto L37
+            java.lang.Object r3 = r1.b
+            if (r3 == r5) goto L4b
+            if (r3 == 0) goto L37
+            boolean r3 = r5.equals(r3)
+            if (r3 == 0) goto L37
+        L4b:
+            java.lang.Object r5 = r1.c
+            return r5
+        L4e:
+            return r2
+        */
+        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.get(java.lang.Object):java.lang.Object");
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.Map
+    public Object getOrDefault(Object obj, Object obj2) {
+        V v = get(obj);
+        return v == null ? obj2 : v;
+    }
+
+    /* JADX WARN: Code restructure failed: missing block: B:29:0x0053, code lost:
+        if (r11 == false) goto L30;
+     */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    final java.lang.Object h(java.lang.Object r9, java.lang.Object r10, boolean r11) {
+        /*
+            r8 = this;
+            r0 = 0
+            if (r9 == 0) goto L98
+            if (r10 == 0) goto L98
+            int r1 = r9.hashCode()
+            int r1 = l(r1)
+            r2 = 0
+            j$.util.concurrent.ConcurrentHashMap$l[] r3 = r8.a
+        L10:
+            if (r3 == 0) goto L92
+            int r4 = r3.length
+            if (r4 != 0) goto L17
+            goto L92
+        L17:
+            int r4 = r4 + (-1)
+            r4 = r4 & r1
+            j$.util.concurrent.ConcurrentHashMap$l r5 = n(r3, r4)
+            if (r5 != 0) goto L2c
+            j$.util.concurrent.ConcurrentHashMap$l r5 = new j$.util.concurrent.ConcurrentHashMap$l
+            r5.<init>(r1, r9, r10, r0)
+            boolean r4 = b(r3, r4, r0, r5)
+            if (r4 == 0) goto L10
+            goto L89
+        L2c:
+            int r6 = r5.a
+            r7 = -1
+            if (r6 != r7) goto L36
+            j$.util.concurrent.ConcurrentHashMap$l[] r3 = r8.f(r3, r5)
+            goto L10
+        L36:
+            monitor-enter(r5)
+            j$.util.concurrent.ConcurrentHashMap$l r7 = n(r3, r4)     // Catch: java.lang.Throwable -> L8f
+            if (r7 != r5) goto L7b
+            if (r6 < 0) goto L68
+            r2 = 1
+            r6 = r5
+        L41:
+            int r7 = r6.a     // Catch: java.lang.Throwable -> L8f
+            if (r7 != r1) goto L58
+            java.lang.Object r7 = r6.b     // Catch: java.lang.Throwable -> L8f
+            if (r7 == r9) goto L51
+            if (r7 == 0) goto L58
+            boolean r7 = r9.equals(r7)     // Catch: java.lang.Throwable -> L8f
+            if (r7 == 0) goto L58
+        L51:
+            java.lang.Object r7 = r6.c     // Catch: java.lang.Throwable -> L8f
+            if (r11 != 0) goto L7c
+        L55:
+            r6.c = r10     // Catch: java.lang.Throwable -> L8f
+            goto L7c
+        L58:
+            j$.util.concurrent.ConcurrentHashMap$l r7 = r6.d     // Catch: java.lang.Throwable -> L8f
+            if (r7 != 0) goto L64
+            j$.util.concurrent.ConcurrentHashMap$l r7 = new j$.util.concurrent.ConcurrentHashMap$l     // Catch: java.lang.Throwable -> L8f
+            r7.<init>(r1, r9, r10, r0)     // Catch: java.lang.Throwable -> L8f
+            r6.d = r7     // Catch: java.lang.Throwable -> L8f
+            goto L7b
+        L64:
+            int r2 = r2 + 1
+            r6 = r7
+            goto L41
+        L68:
+            boolean r6 = r5 instanceof j$.util.concurrent.ConcurrentHashMap.q     // Catch: java.lang.Throwable -> L8f
+            if (r6 == 0) goto L7b
+            r2 = 2
+            r6 = r5
+            j$.util.concurrent.ConcurrentHashMap$q r6 = (j$.util.concurrent.ConcurrentHashMap.q) r6     // Catch: java.lang.Throwable -> L8f
+            j$.util.concurrent.ConcurrentHashMap$r r6 = r6.f(r1, r9, r10)     // Catch: java.lang.Throwable -> L8f
+            if (r6 == 0) goto L7b
+            java.lang.Object r7 = r6.c     // Catch: java.lang.Throwable -> L8f
+            if (r11 != 0) goto L7c
+            goto L55
+        L7b:
+            r7 = r0
+        L7c:
+            monitor-exit(r5)     // Catch: java.lang.Throwable -> L8f
+            if (r2 == 0) goto L10
+            r9 = 8
+            if (r2 < r9) goto L86
+            r8.q(r3, r4)
+        L86:
+            if (r7 == 0) goto L89
+            return r7
+        L89:
+            r9 = 1
+            r8.a(r9, r2)
+            return r0
+        L8f:
+            r9 = move-exception
+            monitor-exit(r5)     // Catch: java.lang.Throwable -> L8f
+            throw r9
+        L92:
+            j$.util.concurrent.ConcurrentHashMap$l[] r3 = r8.g()
+            goto L10
+        L98:
+            goto L9a
+        L99:
+            throw r0
+        L9a:
+            goto L99
+        */
+        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.h(java.lang.Object, java.lang.Object, boolean):java.lang.Object");
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public int hashCode() {
+        l[] lVarArr = this.a;
+        int i2 = 0;
+        if (lVarArr != null) {
+            p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+            while (true) {
+                l a2 = pVar.a();
+                if (a2 == null) {
+                    break;
+                }
+                i2 += a2.c.hashCode() ^ a2.b.hashCode();
+            }
+        }
+        return i2;
+    }
+
+    final Object i(Object obj, Object obj2, Object obj3) {
+        int length;
+        int i2;
+        l n2;
+        Object obj4;
+        r b2;
+        l s2;
+        Object obj5;
+        int l2 = l(obj.hashCode());
+        l[] lVarArr = this.a;
+        while (true) {
+            if (lVarArr == null || (length = lVarArr.length) == 0 || (n2 = n(lVarArr, (i2 = (length - 1) & l2))) == null) {
+                break;
+            }
+            int i3 = n2.a;
+            if (i3 == -1) {
+                lVarArr = f(lVarArr, n2);
+            } else {
+                boolean z = false;
+                synchronized (n2) {
+                    if (n(lVarArr, i2) == n2) {
+                        if (i3 >= 0) {
+                            l lVar = null;
+                            l lVar2 = n2;
+                            while (true) {
+                                if (lVar2.a != l2 || ((obj5 = lVar2.b) != obj && (obj5 == null || !obj.equals(obj5)))) {
+                                    l lVar3 = lVar2.d;
+                                    if (lVar3 == null) {
+                                        break;
+                                    }
+                                    lVar = lVar2;
+                                    lVar2 = lVar3;
+                                }
+                            }
+                            obj4 = lVar2.c;
+                            if (obj3 == null || obj3 == obj4 || (obj4 != null && obj3.equals(obj4))) {
+                                if (obj2 != null) {
+                                    lVar2.c = obj2;
+                                } else if (lVar != null) {
+                                    lVar.d = lVar2.d;
+                                } else {
+                                    s2 = lVar2.d;
+                                    k(lVarArr, i2, s2);
+                                }
+                                z = true;
+                            }
+                            obj4 = null;
+                            z = true;
+                        } else if (n2 instanceof q) {
+                            q qVar = (q) n2;
+                            r rVar = qVar.e;
+                            if (rVar != null && (b2 = rVar.b(l2, obj, null)) != null) {
+                                obj4 = b2.c;
+                                if (obj3 == null || obj3 == obj4 || (obj4 != null && obj3.equals(obj4))) {
+                                    if (obj2 != null) {
+                                        b2.c = obj2;
+                                    } else if (qVar.g(b2)) {
+                                        s2 = s(qVar.f);
+                                        k(lVarArr, i2, s2);
+                                    }
+                                    z = true;
+                                }
+                            }
+                            obj4 = null;
+                            z = true;
+                        }
+                    }
+                    obj4 = null;
+                }
+                if (z) {
+                    if (obj4 != null) {
+                        if (obj2 == null) {
+                            a(-1L, -1);
+                        }
+                        return obj4;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public boolean isEmpty() {
+        return m() <= 0;
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public Set<K> keySet() {
+        i iVar = this.d;
+        if (iVar != null) {
+            return iVar;
+        }
+        i iVar2 = new i(this, null);
+        this.d = iVar2;
+        return iVar2;
+    }
+
+    final long m() {
+        c[] cVarArr = this.c;
+        long j2 = this.baseCount;
+        if (cVarArr != null) {
+            for (c cVar : cVarArr) {
+                if (cVar != null) {
+                    j2 += cVar.value;
+                }
+            }
+        }
+        return j2;
+    }
+
+    @Override // j$.util.Map
+    public Object merge(Object obj, Object obj2, BiFunction biFunction) {
+        int i2;
+        Object obj3;
+        Object obj4;
+        Object obj5 = obj2;
+        if (obj == null || obj5 == null || biFunction == null) {
+            throw null;
+        }
+        int l2 = l(obj.hashCode());
+        l[] lVarArr = this.a;
+        int i3 = 0;
+        Object obj6 = null;
+        int i4 = 0;
+        while (true) {
+            if (lVarArr != null) {
+                int length = lVarArr.length;
+                if (length != 0) {
+                    int i5 = (length - 1) & l2;
+                    l n2 = n(lVarArr, i5);
+                    i2 = 1;
+                    if (n2 != null) {
+                        int i6 = n2.a;
+                        if (i6 == -1) {
+                            lVarArr = f(lVarArr, n2);
+                        } else {
+                            synchronized (n2) {
+                                if (n(lVarArr, i5) == n2) {
+                                    if (i6 >= 0) {
+                                        l lVar = null;
+                                        l lVar2 = n2;
+                                        int i7 = 1;
+                                        while (true) {
+                                            if (lVar2.a != l2 || ((obj4 = lVar2.b) != obj && (obj4 == null || !obj.equals(obj4)))) {
+                                                l lVar3 = lVar2.d;
+                                                if (lVar3 == null) {
+                                                    lVar2.d = new l(l2, obj, obj5, null);
+                                                    obj3 = obj5;
+                                                    break;
+                                                }
+                                                i7++;
+                                                lVar = lVar2;
+                                                lVar2 = lVar3;
+                                            }
+                                        }
+                                        Object apply = biFunction.apply(lVar2.c, obj5);
+                                        if (apply != null) {
+                                            lVar2.c = apply;
+                                        } else {
+                                            l lVar4 = lVar2.d;
+                                            if (lVar != null) {
+                                                lVar.d = lVar4;
+                                            } else {
+                                                k(lVarArr, i5, lVar4);
+                                            }
+                                            i3 = -1;
+                                        }
+                                        i2 = i3;
+                                        obj3 = apply;
+                                        i4 = i7;
+                                        obj6 = obj3;
+                                        i3 = i2;
+                                    } else if (n2 instanceof q) {
+                                        i4 = 2;
+                                        q qVar = (q) n2;
+                                        r rVar = qVar.e;
+                                        r b2 = rVar == null ? null : rVar.b(l2, obj, null);
+                                        Object apply2 = b2 == null ? obj5 : biFunction.apply(b2.c, obj5);
+                                        if (apply2 != null) {
+                                            if (b2 != null) {
+                                                b2.c = apply2;
+                                            } else {
+                                                qVar.f(l2, obj, apply2);
+                                                i3 = 1;
+                                            }
+                                        } else if (b2 != null) {
+                                            if (qVar.g(b2)) {
+                                                k(lVarArr, i5, s(qVar.f));
+                                            }
+                                            i3 = -1;
+                                        }
+                                        obj6 = apply2;
+                                    }
+                                }
+                            }
+                            if (i4 != 0) {
+                                if (i4 >= 8) {
+                                    q(lVarArr, i5);
+                                }
+                                i2 = i3;
+                                obj5 = obj6;
+                            }
+                        }
+                    } else if (b(lVarArr, i5, null, new l(l2, obj, obj5, null))) {
+                        break;
+                    }
+                }
+            }
+            lVarArr = g();
+        }
+        if (i2 != 0) {
+            a(i2, i4);
+        }
+        return obj5;
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
+    public /* synthetic */ Object merge(Object obj, Object obj2, java.util.function.BiFunction biFunction) {
+        return merge(obj, obj2, C0227s.a(biFunction));
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public V put(K k2, V v) {
+        return (V) h(k2, v, false);
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public void putAll(Map<? extends K, ? extends V> map) {
+        r(map.size());
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+            h(entry.getKey(), entry.getValue(), false);
+        }
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.Map
+    public V putIfAbsent(K k2, V v) {
+        return (V) h(k2, v, true);
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public V remove(Object obj) {
+        return (V) i(obj, null, null);
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.Map
+    public boolean remove(Object obj, Object obj2) {
+        obj.getClass();
+        return (obj2 == null || i(obj, null, obj2) == null) ? false : true;
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.Map
+    public Object replace(Object obj, Object obj2) {
+        if (obj == null || obj2 == null) {
+            throw null;
+        }
+        return i(obj, obj2, null);
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.Map
+    public boolean replace(Object obj, Object obj2, Object obj3) {
+        if (obj == null || obj2 == null || obj3 == null) {
+            throw null;
+        }
+        return i(obj, obj3, obj2) != null;
+    }
+
+    @Override // j$.util.Map
+    public void replaceAll(BiFunction biFunction) {
+        biFunction.getClass();
+        l[] lVarArr = this.a;
+        if (lVarArr != null) {
+            p pVar = new p(lVarArr, lVarArr.length, 0, lVarArr.length);
+            while (true) {
+                l a2 = pVar.a();
+                if (a2 == null) {
+                    return;
+                }
+                Object obj = a2.c;
+                Object obj2 = a2.b;
+                do {
+                    Object apply = biFunction.apply(obj2, obj);
+                    apply.getClass();
+                    if (i(obj2, apply, obj) == null) {
+                        obj = get(obj2);
+                    }
+                } while (obj != null);
+            }
+        }
+    }
+
+    @Override // java.util.Map, java.util.concurrent.ConcurrentMap
+    public /* synthetic */ void replaceAll(java.util.function.BiFunction biFunction) {
+        replaceAll(C0227s.a(biFunction));
+    }
+
+    @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
+    public int size() {
+        long m2 = m();
+        if (m2 < 0) {
+            return 0;
+        }
+        return m2 > 2147483647L ? ConnectionsManager.DEFAULT_DATACENTER_ID : (int) m2;
+    }
+
     @Override // java.util.AbstractMap
     public String toString() {
-        Node<K, V>[] nodeArr = this.table;
-        int f = nodeArr == null ? 0 : nodeArr.length;
-        Traverser traverser = new Traverser(nodeArr, f, 0, f);
+        l[] lVarArr = this.a;
+        int length = lVarArr == null ? 0 : lVarArr.length;
+        p pVar = new p(lVarArr, length, 0, length);
         StringBuilder sb = new StringBuilder();
         sb.append('{');
-        Node<K, V> advance = traverser.advance();
-        Node<K, V> node = advance;
-        if (advance != null) {
+        l a2 = pVar.a();
+        if (a2 != null) {
             while (true) {
-                K k = node.key;
-                V v = node.val;
-                Object obj = "(this Map)";
-                sb.append(k == this ? obj : k);
-                sb.append('=');
-                if (v != this) {
-                    obj = v;
+                Object obj = a2.b;
+                Object obj2 = a2.c;
+                if (obj == this) {
+                    obj = "(this Map)";
                 }
                 sb.append(obj);
-                Node<K, V> advance2 = traverser.advance();
-                node = advance2;
-                if (advance2 == null) {
+                sb.append('=');
+                if (obj2 == this) {
+                    obj2 = "(this Map)";
+                }
+                sb.append(obj2);
+                a2 = pVar.a();
+                if (a2 == null) {
                     break;
                 }
                 sb.append(',');
@@ -760,2824 +3346,145 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements java.u
         return sb.toString();
     }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
     @Override // java.util.AbstractMap, java.util.Map, j$.util.Map
-    public boolean equals(Object o) {
-        Object mv;
-        Object v;
-        if (o != this) {
-            if (!(o instanceof Map)) {
-                return false;
-            }
-            Map<?, ?> m = (Map) o;
-            Node<K, V>[] nodeArr = this.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            Traverser traverser = new Traverser(nodeArr, f, 0, f);
-            while (true) {
-                Node<K, V> advance = traverser.advance();
-                if (advance != null) {
-                    V val = advance.val;
-                    Object v2 = m.get(advance.key);
-                    if (v2 == null || (v2 != val && !v2.equals(val))) {
-                        break;
-                    }
-                } else {
-                    for (Map.Entry<?, ?> e : m.entrySet()) {
-                        Object mk = e.getKey();
-                        if (mk == null || (mv = e.getValue()) == null || (v = get(mk)) == null || (mv != v && !mv.equals(v))) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            }
-            return false;
+    public Collection values() {
+        u uVar = this.e;
+        if (uVar != null) {
+            return uVar;
         }
-        return true;
+        u uVar2 = new u(this);
+        this.e = uVar2;
+        return uVar2;
     }
 
     /* loaded from: classes2.dex */
-    static class Segment<K, V> extends ReentrantLock implements Serializable {
-        private static final long serialVersionUID = 2249069246763182397L;
-        final float loadFactor;
+    public static abstract class b implements Collection, Serializable {
+        final ConcurrentHashMap a;
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Segment != java.util.concurrent.ConcurrentHashMap$Segment<K, V> */
-        Segment(float lf) {
-            this.loadFactor = lf;
+        b(ConcurrentHashMap concurrentHashMap) {
+            this.a = concurrentHashMap;
         }
-    }
 
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Segment[] != java.util.concurrent.ConcurrentHashMap$Segment<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-    private void writeObject(ObjectOutputStream s) {
-        int sshift = 0;
-        int ssize = 1;
-        while (ssize < 16) {
-            sshift++;
-            ssize <<= 1;
+        @Override // java.util.Collection
+        public final void clear() {
+            this.a.clear();
         }
-        int segmentShift = 32 - sshift;
-        int segmentMask = ssize - 1;
-        Segment[] segmentArr = new Segment[16];
-        for (int i = 0; i < segmentArr.length; i++) {
-            segmentArr[i] = new Segment(0.75f);
-        }
-        s.putFields().put("segments", segmentArr);
-        s.putFields().put("segmentShift", segmentShift);
-        s.putFields().put("segmentMask", segmentMask);
-        s.writeFields();
-        Node<K, V>[] nodeArr = this.table;
-        if (nodeArr != null) {
-            Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-            while (true) {
-                Node<K, V> advance = traverser.advance();
-                if (advance == null) {
-                    break;
-                }
-                s.writeObject(advance.key);
-                s.writeObject(advance.val);
-            }
-        }
-        s.writeObject(null);
-        s.writeObject(null);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    private void readObject(ObjectInputStream s) {
-        int n;
-        int mask;
-        long size;
-        boolean insertAtFront;
-        long j;
-        K qk;
-        this.sizeCtl = -1;
-        s.defaultReadObject();
-        long size2 = 0;
-        Node<K, V> node = null;
-        while (true) {
-            Object readObject = s.readObject();
-            Object readObject2 = s.readObject();
-            if (readObject == null || readObject2 == null) {
-                break;
-            }
-            node = new Node<>(spread(readObject.hashCode()), readObject, readObject2, node);
-            size2++;
-        }
-        if (size2 == 0) {
-            this.sizeCtl = 0;
-            return;
-        }
-        if (size2 >= 536870912) {
-            n = 1073741824;
-        } else {
-            int n2 = (int) size2;
-            int sz = n2 + (n2 >>> 1);
-            n = tableSizeFor(sz + 1);
-        }
-        Node<K, V>[] nodeArr = new Node[n];
-        int mask2 = n - 1;
-        long added = 0;
-        while (node != null) {
-            Node<K, V> node2 = node.next;
-            int h = node.hash;
-            int j2 = h & mask2;
-            Node<K, V> tabAt = tabAt(nodeArr, j2);
-            if (tabAt == null) {
-                insertAtFront = true;
-                size = size2;
-                mask = mask2;
-            } else {
-                K k = node.key;
-                if (tabAt.hash < 0) {
-                    if (((TreeBin) tabAt).putTreeVal(h, k, node.val) == null) {
-                        added++;
-                    }
-                    insertAtFront = false;
-                    size = size2;
-                    mask = mask2;
-                } else {
-                    int binCount = 0;
-                    boolean insertAtFront2 = true;
-                    long j3 = size2;
-                    size = j3;
-                    for (Node<K, V> node3 = tabAt; node3 != null; node3 = node3.next) {
-                        if (node3.hash != h || ((qk = node3.key) != k && (qk == null || !k.equals(qk)))) {
-                            binCount++;
-                        }
-                        insertAtFront2 = false;
-                        break;
-                    }
-                    if (insertAtFront2 && binCount >= 8) {
-                        added++;
-                        node.next = tabAt;
-                        TreeNode<K, V> treeNode = null;
-                        Node<K, V> node4 = node;
-                        TreeNode<K, V> treeNode2 = null;
-                        while (node4 != null) {
-                            int mask3 = mask2;
-                            int mask4 = node4.hash;
-                            long added2 = added;
-                            TreeNode<K, V> treeNode3 = new TreeNode<>(mask4, node4.key, node4.val, null, null);
-                            treeNode3.prev = treeNode2;
-                            if (treeNode2 == null) {
-                                treeNode = treeNode3;
-                            } else {
-                                treeNode2.next = treeNode3;
-                            }
-                            treeNode2 = treeNode3;
-                            node4 = node4.next;
-                            mask2 = mask3;
-                            added = added2;
-                        }
-                        mask = mask2;
-                        setTabAt(nodeArr, j2, new TreeBin(treeNode));
-                        insertAtFront = false;
-                    } else {
-                        mask = mask2;
-                        insertAtFront = insertAtFront2;
-                    }
-                }
-            }
-            if (!insertAtFront) {
-                j = 1;
-            } else {
-                j = 1;
-                added++;
-                node.next = tabAt;
-                setTabAt(nodeArr, j2, node);
-            }
-            node = node2;
-            size2 = size;
-            mask2 = mask;
-        }
-        this.table = nodeArr;
-        this.sizeCtl = n - (n >>> 2);
-        this.baseCount = added;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public V putIfAbsent(K key, V value) {
-        return putVal(key, value, true);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public boolean remove(Object key, Object value) {
-        if (key != null) {
-            return (value == null || replaceNode(key, null, value) == null) ? false : true;
-        }
-        throw new NullPointerException();
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public boolean replace(K key, V oldValue, V newValue) {
-        if (key == null || oldValue == null || newValue == null) {
-            throw new NullPointerException();
-        }
-        return replaceNode(key, newValue, oldValue) != null;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public V replace(K key, V value) {
-        if (key == null || value == null) {
-            throw new NullPointerException();
-        }
-        return replaceNode(key, value, null);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    @Override // java.util.Map, java.util.concurrent.ConcurrentMap, j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public V getOrDefault(Object key, V defaultValue) {
-        V v = get(key);
-        return v == null ? defaultValue : v;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.function.BiConsumer != java.util.function.BiConsumer<? super K, ? super V> */
-    @Override // j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public void forEach(j$.util.function.BiConsumer<? super K, ? super V> biConsumer) {
-        if (biConsumer == null) {
-            throw new NullPointerException();
-        }
-        Node<K, V>[] nodeArr = this.table;
-        if (nodeArr != null) {
-            Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-            while (true) {
-                Node<K, V> advance = traverser.advance();
-                if (advance != null) {
-                    biConsumer.accept((K) advance.key, (V) advance.val);
-                } else {
-                    return;
-                }
-            }
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.function.BiFunction != java.util.function.BiFunction<? super K, ? super V, ? extends V> */
-    @Override // j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public void replaceAll(j$.util.function.BiFunction<? super K, ? super V, ? extends V> biFunction) {
-        V v;
-        if (biFunction == null) {
-            throw new NullPointerException();
-        }
-        Node<K, V>[] nodeArr = this.table;
-        if (nodeArr != null) {
-            Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-            while (true) {
-                Node<K, V> advance = traverser.advance();
-                if (advance != null) {
-                    V v2 = advance.val;
-                    Object obj = (K) advance.key;
-                    do {
-                        V newValue = biFunction.apply(obj, v2);
-                        if (newValue == null) {
-                            throw new NullPointerException();
-                        }
-                        if (replaceNode(obj, newValue, v2) == null) {
-                            v = get(obj);
-                            V oldValue = v;
-                            v2 = (Object) oldValue;
-                        }
-                    } while (v != null);
-                } else {
-                    return;
-                }
-            }
-        }
-    }
-
-    /* JADX WARN: Code restructure failed: missing block: B:45:0x0085, code lost:
-        r1 = r10.val;
-     */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.function.Function != java.util.function.Function<? super K, ? extends V> */
-    @Override // j$.util.concurrent.ConcurrentMap, j$.util.Map
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public V computeIfAbsent(K r14, j$.util.function.Function<? super K, ? extends V> r15) {
-        /*
-            Method dump skipped, instructions count: 235
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.computeIfAbsent(java.lang.Object, j$.util.function.Function):java.lang.Object");
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.function.BiFunction != java.util.function.BiFunction<? super K, ? super V, ? extends V> */
-    @Override // j$.util.concurrent.ConcurrentMap, j$.util.Map
-    public V computeIfPresent(K key, j$.util.function.BiFunction<? super K, ? super V, ? extends V> biFunction) {
-        TreeNode<K, V> findTreeNode;
-        K ek;
-        if (key == null || biFunction == null) {
-            throw new NullPointerException();
-        }
-        int h = spread(key.hashCode());
-        V val = null;
-        int delta = 0;
-        int binCount = 0;
-        Node<K, V>[] nodeArr = this.table;
-        while (true) {
-            if (nodeArr != null) {
-                int n = nodeArr.length;
-                if (n != 0) {
-                    int i = (n - 1) & h;
-                    Node<K, V> tabAt = tabAt(nodeArr, i);
-                    if (tabAt == null) {
-                        break;
-                    }
-                    int fh = tabAt.hash;
-                    if (fh == -1) {
-                        nodeArr = helpTransfer(nodeArr, tabAt);
-                    } else {
-                        synchronized (tabAt) {
-                            if (tabAt(nodeArr, i) == tabAt) {
-                                if (fh >= 0) {
-                                    binCount = 1;
-                                    Node<K, V> node = tabAt;
-                                    Node<K, V> node2 = null;
-                                    while (true) {
-                                        if (node.hash != h || ((ek = node.key) != key && (ek == null || !key.equals(ek)))) {
-                                            node2 = node;
-                                            Node<K, V> node3 = node.next;
-                                            node = node3;
-                                            if (node3 == null) {
-                                                break;
-                                            }
-                                            binCount++;
-                                        }
-                                    }
-                                    val = biFunction.apply(key, (V) node.val);
-                                    if (val != null) {
-                                        node.val = val;
-                                    } else {
-                                        delta = -1;
-                                        Node<K, V> node4 = node.next;
-                                        if (node2 != null) {
-                                            node2.next = node4;
-                                        } else {
-                                            setTabAt(nodeArr, i, node4);
-                                        }
-                                    }
-                                } else if (tabAt instanceof TreeBin) {
-                                    binCount = 2;
-                                    TreeBin treeBin = (TreeBin) tabAt;
-                                    TreeNode<K, V> treeNode = treeBin.root;
-                                    if (treeNode != null && (findTreeNode = treeNode.findTreeNode(h, key, null)) != null) {
-                                        val = biFunction.apply(key, (V) findTreeNode.val);
-                                        if (val != null) {
-                                            findTreeNode.val = val;
-                                        } else {
-                                            delta = -1;
-                                            if (treeBin.removeTreeNode(findTreeNode)) {
-                                                setTabAt(nodeArr, i, untreeify(treeBin.first));
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (binCount != 0) {
-                            break;
-                        }
-                    }
-                }
-            }
-            nodeArr = initTable();
-        }
-        if (delta != 0) {
-            addCount(delta, binCount);
-        }
-        return val;
-    }
-
-    /* JADX WARN: Code restructure failed: missing block: B:48:0x00a3, code lost:
-        r5 = r20.apply(r2, (V) r7.val);
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:49:0x00aa, code lost:
-        if (r5 == null) goto L51;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:50:0x00ac, code lost:
-        r7.val = r5;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:51:0x00af, code lost:
-        r6 = -1;
-        r12 = r7.next;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:52:0x00b2, code lost:
-        if (r0 == null) goto L54;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:53:0x00b4, code lost:
-        r0.next = r12;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:54:0x00b7, code lost:
-        setTabAt(r8, r0, r12);
-     */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.function.BiFunction != java.util.function.BiFunction<? super K, ? super V, ? extends V> */
-    /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:91:0x0126 -> B:92:0x0127). Please submit an issue!!! */
-    @Override // j$.util.concurrent.ConcurrentMap, j$.util.Map
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public V compute(K r19, j$.util.function.BiFunction<? super K, ? super V, ? extends V> r20) {
-        /*
-            Method dump skipped, instructions count: 314
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.compute(java.lang.Object, j$.util.function.BiFunction):java.lang.Object");
-    }
-
-    /* JADX WARN: Code restructure failed: missing block: B:55:0x00af, code lost:
-        r6 = r22;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:58:0x00b7, code lost:
-        r0.next = new j$.util.concurrent.ConcurrentHashMap.Node<>(r5, r2, r6, null);
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:59:0x00bc, code lost:
-        r7 = 1;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:61:0x00c1, code lost:
-        r0 = th;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:63:0x00c7, code lost:
-        r0 = th;
-     */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.function.BiFunction != java.util.function.BiFunction<? super V, ? super V, ? extends V> */
-    /* JADX WARN: Removed duplicated region for block: B:134:0x012f A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:139:0x014e A[SYNTHETIC] */
-    /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:133:? -> B:104:0x013e). Please submit an issue!!! */
-    @Override // j$.util.concurrent.ConcurrentMap, j$.util.Map
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public V merge(K r21, V r22, j$.util.function.BiFunction<? super V, ? super V, ? extends V> r23) {
-        /*
-            Method dump skipped, instructions count: 346
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.merge(java.lang.Object, java.lang.Object, j$.util.function.BiFunction):java.lang.Object");
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public boolean contains(Object value) {
-        return containsValue(value);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    public Enumeration<K> keys() {
-        Node<K, V>[] nodeArr = this.table;
-        int f = nodeArr == null ? 0 : nodeArr.length;
-        return new KeyIterator(nodeArr, f, 0, f, this);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    public Enumeration<V> elements() {
-        Node<K, V>[] nodeArr = this.table;
-        int f = nodeArr == null ? 0 : nodeArr.length;
-        return new ValueIterator(nodeArr, f, 0, f, this);
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    public long mappingCount() {
-        long n = sumCount();
-        if (n < 0) {
-            return 0L;
-        }
-        return n;
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class ForwardingNode<K, V> extends Node<K, V> {
-        final Node<K, V>[] nextTable;
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ForwardingNode != java.util.concurrent.ConcurrentHashMap$ForwardingNode<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        ForwardingNode(Node<K, V>[] nodeArr) {
-            super(-1, null, null, null);
-            this.nextTable = nodeArr;
-        }
-
-        /* JADX WARN: Code restructure failed: missing block: B:20:0x002d, code lost:
-            if ((r4 instanceof j$.util.concurrent.ConcurrentHashMap.ForwardingNode) == false) goto L32;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:21:0x002f, code lost:
-            r0 = ((j$.util.concurrent.ConcurrentHashMap.ForwardingNode) r4).nextTable;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:23:0x0039, code lost:
-            return r4.find(r8, r9);
-         */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ForwardingNode != java.util.concurrent.ConcurrentHashMap$ForwardingNode<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        @Override // j$.util.concurrent.ConcurrentHashMap.Node
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        j$.util.concurrent.ConcurrentHashMap.Node<K, V> find(int r8, java.lang.Object r9) {
-            /*
-                r7 = this;
-                j$.util.concurrent.ConcurrentHashMap$Node<K, V>[] r0 = r7.nextTable
-            L2:
-                r1 = 0
-                if (r9 == 0) goto L41
-                if (r0 == 0) goto L41
-                int r2 = r0.length
-                r3 = r2
-                if (r2 == 0) goto L41
-                int r2 = r3 + (-1)
-                r2 = r2 & r8
-                j$.util.concurrent.ConcurrentHashMap$Node r2 = j$.util.concurrent.ConcurrentHashMap.tabAt(r0, r2)
-                r4 = r2
-                if (r2 != 0) goto L16
-                goto L41
-            L16:
-                int r2 = r4.hash
-                r5 = r2
-                if (r2 != r8) goto L29
-                K r2 = r4.key
-                r6 = r2
-                if (r2 == r9) goto L28
-                if (r6 == 0) goto L29
-                boolean r2 = r9.equals(r6)
-                if (r2 == 0) goto L29
-            L28:
-                return r4
-            L29:
-                if (r5 >= 0) goto L3a
-                boolean r1 = r4 instanceof j$.util.concurrent.ConcurrentHashMap.ForwardingNode
-                if (r1 == 0) goto L35
-                r1 = r4
-                j$.util.concurrent.ConcurrentHashMap$ForwardingNode r1 = (j$.util.concurrent.ConcurrentHashMap.ForwardingNode) r1
-                j$.util.concurrent.ConcurrentHashMap$Node<K, V>[] r0 = r1.nextTable
-                goto L2
-            L35:
-                j$.util.concurrent.ConcurrentHashMap$Node r1 = r4.find(r8, r9)
-                return r1
-            L3a:
-                j$.util.concurrent.ConcurrentHashMap$Node<K, V> r2 = r4.next
-                r4 = r2
-                if (r2 != 0) goto L40
-                return r1
-            L40:
-                goto L16
-            L41:
-                return r1
-            */
-            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.ForwardingNode.find(int, java.lang.Object):j$.util.concurrent.ConcurrentHashMap$Node");
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class ReservationNode<K, V> extends Node<K, V> {
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ReservationNode != java.util.concurrent.ConcurrentHashMap$ReservationNode<K, V> */
-        ReservationNode() {
-            super(-3, null, null, null);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ReservationNode != java.util.concurrent.ConcurrentHashMap$ReservationNode<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.Node
-        Node<K, V> find(int h, Object k) {
-            return null;
-        }
-    }
-
-    static final int resizeStamp(int n) {
-        return Integer.numberOfLeadingZeros(n) | (1 << (RESIZE_STAMP_BITS - 1));
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    private final Node<K, V>[] initTable() {
-        Node<K, V>[] nodeArr;
-        while (true) {
-            Node<K, V>[] nodeArr2 = this.table;
-            nodeArr = nodeArr2;
-            if (nodeArr2 != null && nodeArr.length != 0) {
-                break;
-            }
-            int i = this.sizeCtl;
-            int sc = i;
-            if (i < 0) {
-                Thread.yield();
-            } else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
-                try {
-                    Node<K, V>[] nodeArr3 = this.table;
-                    nodeArr = nodeArr3;
-                    if (nodeArr3 == null || nodeArr.length == 0) {
-                        int n = sc > 0 ? sc : 16;
-                        Node<K, V>[] nodeArr4 = new Node[n];
-                        nodeArr = nodeArr4;
-                        this.table = nodeArr4;
-                        sc = n - (n >>> 2);
-                    }
-                } finally {
-                    this.sizeCtl = sc;
-                }
-            }
-        }
-        return nodeArr;
-    }
-
-    /* JADX WARN: Code restructure failed: missing block: B:5:0x001b, code lost:
-        if (r0.compareAndSwapLong(r23, r2, r4, r6) == false) goto L6;
-     */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    private final void addCount(long r24, int r26) {
-        /*
-            r23 = this;
-            r8 = r23
-            r9 = r24
-            r11 = r26
-            j$.util.concurrent.ConcurrentHashMap$CounterCell[] r0 = r8.counterCells
-            r12 = r0
-            if (r0 != 0) goto L1d
-            sun.misc.Unsafe r0 = j$.util.concurrent.ConcurrentHashMap.U
-            long r2 = j$.util.concurrent.ConcurrentHashMap.BASECOUNT
-            long r4 = r8.baseCount
-            r13 = r4
-            long r6 = r13 + r9
-            r15 = r6
-            r1 = r23
-            boolean r0 = r0.compareAndSwapLong(r1, r2, r4, r6)
-            if (r0 != 0) goto L4d
-        L1d:
-            r0 = 1
-            if (r12 == 0) goto Lb8
-            int r1 = r12.length
-            r2 = 1
-            int r1 = r1 - r2
-            r3 = r1
-            if (r1 < 0) goto Lb8
-            int r1 = j$.util.concurrent.ThreadLocalRandom.getProbe()
-            r1 = r1 & r3
-            r1 = r12[r1]
-            r4 = r1
-            if (r1 == 0) goto Lb8
-            sun.misc.Unsafe r13 = j$.util.concurrent.ConcurrentHashMap.U
-            long r15 = j$.util.concurrent.ConcurrentHashMap.CELLVALUE
-            long r5 = r4.value
-            r21 = r5
-            long r19 = r21 + r9
-            r14 = r4
-            r17 = r5
-            boolean r1 = r13.compareAndSwapLong(r14, r15, r17, r19)
-            r0 = r1
-            if (r1 != 0) goto L46
-            goto Lb8
-        L46:
-            if (r11 > r2) goto L49
-            return
-        L49:
-            long r15 = r23.sumCount()
-        L4d:
-            if (r11 < 0) goto Lb7
-        L4f:
-            int r0 = r8.sizeCtl
-            r6 = r0
-            long r0 = (long) r0
-            int r2 = (r15 > r0 ? 1 : (r15 == r0 ? 0 : -1))
-            if (r2 < 0) goto Lb7
-            j$.util.concurrent.ConcurrentHashMap$Node<K, V>[] r0 = r8.table
-            r7 = r0
-            if (r0 == 0) goto Lb7
-            int r0 = r7.length
-            r13 = r0
-            r1 = 1073741824(0x40000000, float:2.0)
-            if (r0 >= r1) goto Lb7
-            int r14 = resizeStamp(r13)
-            if (r6 >= 0) goto L99
-            int r0 = j$.util.concurrent.ConcurrentHashMap.RESIZE_STAMP_SHIFT
-            int r0 = r6 >>> r0
-            if (r0 != r14) goto Lb7
-            int r0 = r14 + 1
-            if (r6 == r0) goto Lb7
-            int r0 = j$.util.concurrent.ConcurrentHashMap.MAX_RESIZERS
-            int r0 = r0 + r14
-            if (r6 == r0) goto Lb7
-            j$.util.concurrent.ConcurrentHashMap$Node<K, V>[] r0 = r8.nextTable
-            r5 = r0
-            if (r0 == 0) goto L97
-            int r0 = r8.transferIndex
-            if (r0 > 0) goto L81
-            goto Lb7
-        L81:
-            sun.misc.Unsafe r0 = j$.util.concurrent.ConcurrentHashMap.U
-            long r2 = j$.util.concurrent.ConcurrentHashMap.SIZECTL
-            int r17 = r6 + 1
-            r1 = r23
-            r4 = r6
-            r11 = r5
-            r5 = r17
-            boolean r0 = r0.compareAndSwapInt(r1, r2, r4, r5)
-            if (r0 == 0) goto Lb0
-            r8.transfer(r7, r11)
-            goto Lb0
-        L97:
-            r11 = r5
-            goto Lb7
-        L99:
-            sun.misc.Unsafe r0 = j$.util.concurrent.ConcurrentHashMap.U
-            long r2 = j$.util.concurrent.ConcurrentHashMap.SIZECTL
-            int r1 = j$.util.concurrent.ConcurrentHashMap.RESIZE_STAMP_SHIFT
-            int r1 = r14 << r1
-            int r5 = r1 + 2
-            r1 = r23
-            r4 = r6
-            boolean r0 = r0.compareAndSwapInt(r1, r2, r4, r5)
-            if (r0 == 0) goto Lb0
-            r0 = 0
-            r8.transfer(r7, r0)
-        Lb0:
-            long r15 = r23.sumCount()
-            r11 = r26
-            goto L4f
-        Lb7:
-            return
-        Lb8:
-            r8.fullAddCount(r9, r0)
-            return
-        */
-        throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.addCount(long, int):void");
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    final Node<K, V>[] helpTransfer(Node<K, V>[] nodeArr, Node<K, V> node) {
-        Node<K, V>[] nodeArr2;
-        int sc;
-        if (nodeArr != null && (node instanceof ForwardingNode) && (nodeArr2 = ((ForwardingNode) node).nextTable) != null) {
-            int rs = resizeStamp(nodeArr.length);
-            while (true) {
-                if (nodeArr2 != this.nextTable || this.table != nodeArr || (sc = this.sizeCtl) >= 0 || (sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 || sc == MAX_RESIZERS + rs || this.transferIndex <= 0) {
-                    break;
-                } else if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1)) {
-                    transfer(nodeArr, nodeArr2);
-                    break;
-                }
-            }
-            return nodeArr2;
-        }
-        return this.table;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    private final void tryPresize(int size) {
-        int n;
-        Node<K, V>[] nodeArr;
-        int c = size >= 536870912 ? 1073741824 : tableSizeFor((size >>> 1) + size + 1);
-        while (true) {
-            int i = this.sizeCtl;
-            int sc = i;
-            if (i >= 0) {
-                Node<K, V>[] nodeArr2 = this.table;
-                if (nodeArr2 == null || (n = nodeArr2.length) == 0) {
-                    int n2 = sc > c ? sc : c;
-                    if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
-                        try {
-                            if (this.table == nodeArr2) {
-                                this.table = new Node[n2];
-                                sc = n2 - (n2 >>> 2);
-                            }
-                        } finally {
-                            this.sizeCtl = sc;
-                        }
-                    } else {
-                        continue;
-                    }
-                } else if (c > sc && n < 1073741824) {
-                    if (nodeArr2 == this.table) {
-                        int rs = resizeStamp(n);
-                        if (sc < 0) {
-                            if ((sc >>> RESIZE_STAMP_SHIFT) == rs && sc != rs + 1 && sc != MAX_RESIZERS + rs && (nodeArr = this.nextTable) != null && this.transferIndex > 0) {
-                                if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1)) {
-                                    transfer(nodeArr2, nodeArr);
-                                }
-                            } else {
-                                return;
-                            }
-                        } else if (U.compareAndSwapInt(this, SIZECTL, sc, (rs << RESIZE_STAMP_SHIFT) + 2)) {
-                            transfer(nodeArr2, null);
-                        }
-                    } else {
-                        continue;
-                    }
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ForwardingNode != java.util.concurrent.ConcurrentHashMap$ForwardingNode<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:133:0x021f -> B:136:0x022b). Please submit an issue!!! */
-    private final void transfer(Node<K, V>[] nodeArr, Node<K, V>[] nodeArr2) {
-        Node<K, V>[] nodeArr3;
-        int nextn;
-        int stride;
-        boolean finishing;
-        boolean advance;
-        Throwable th;
-        boolean finishing2;
-        boolean advance2;
-        int h;
-        boolean finishing3;
-        Node<K, V> node;
-        Node<K, V> node2;
-        int nextn2;
-        ConcurrentHashMap<K, V> concurrentHashMap = this;
-        int n = nodeArr.length;
-        int i = NCPU;
-        int i2 = i > 1 ? (n >>> 3) / i : n;
-        int stride2 = i2;
-        int stride3 = i2 < 16 ? 16 : stride2;
-        if (nodeArr2 == null) {
-            try {
-                Node<K, V>[] nodeArr4 = new Node[n << 1];
-                concurrentHashMap.nextTable = nodeArr4;
-                concurrentHashMap.transferIndex = n;
-                nodeArr3 = nodeArr4;
-            } catch (Throwable th2) {
-                concurrentHashMap.sizeCtl = Integer.MAX_VALUE;
-                return;
-            }
-        } else {
-            nodeArr3 = nodeArr2;
-        }
-        int nextn3 = nodeArr3.length;
-        ForwardingNode forwardingNode = new ForwardingNode(nodeArr3);
-        boolean advance3 = true;
-        boolean finishing4 = false;
-        int i3 = 0;
-        int bound = 0;
-        while (true) {
-            if (!advance3) {
-                int bound2 = bound;
-                if (i3 < 0 || i3 >= n) {
-                    stride = stride3;
-                    nextn = nextn3;
-                    advance = advance3;
-                    finishing = finishing4;
-                } else if (i3 + n >= nextn3) {
-                    stride = stride3;
-                    nextn = nextn3;
-                    advance = advance3;
-                    finishing = finishing4;
-                } else {
-                    Node<K, V> tabAt = tabAt(nodeArr, i3);
-                    if (tabAt == null) {
-                        advance3 = casTabAt(nodeArr, i3, null, forwardingNode);
-                        stride = stride3;
-                        nextn = nextn3;
-                    } else {
-                        int i4 = tabAt.hash;
-                        int fh = i4;
-                        if (i4 == -1) {
-                            advance3 = true;
-                            stride = stride3;
-                            nextn = nextn3;
-                        } else {
-                            synchronized (tabAt) {
-                                try {
-                                } catch (Throwable th3) {
-                                    th = th3;
-                                }
-                                try {
-                                    if (tabAt(nodeArr, i3) != tabAt) {
-                                        stride = stride3;
-                                        nextn = nextn3;
-                                        advance2 = advance3;
-                                        finishing2 = finishing4;
-                                    } else if (fh >= 0) {
-                                        int runBit = fh & n;
-                                        Node<K, V> node3 = tabAt;
-                                        try {
-                                            for (Node<K, V> node4 = tabAt.next; node4 != null; node4 = node4.next) {
-                                                try {
-                                                    int b = node4.hash & n;
-                                                    if (b != runBit) {
-                                                        runBit = b;
-                                                        node3 = node4;
-                                                    }
-                                                } catch (Throwable th4) {
-                                                    th = th4;
-                                                    throw th;
-                                                }
-                                            }
-                                            if (runBit == 0) {
-                                                node2 = node3;
-                                                node = null;
-                                            } else {
-                                                node = node3;
-                                                node2 = null;
-                                            }
-                                            Node<K, V> node5 = tabAt;
-                                            while (node5 != node3) {
-                                                int fh2 = fh;
-                                                try {
-                                                    int fh3 = node5.hash;
-                                                    Node<K, V> node6 = node3;
-                                                    K pk = node5.key;
-                                                    int stride4 = stride3;
-                                                    try {
-                                                        V pv = node5.val;
-                                                        if ((fh3 & n) == 0) {
-                                                            nextn2 = nextn3;
-                                                            try {
-                                                                node2 = new Node<>(fh3, pk, pv, node2);
-                                                                continue;
-                                                            } catch (Throwable th5) {
-                                                                th = th5;
-                                                                throw th;
-                                                            }
-                                                        } else {
-                                                            nextn2 = nextn3;
-                                                            node = new Node<>(fh3, pk, pv, node);
-                                                            continue;
-                                                        }
-                                                        node5 = node5.next;
-                                                        fh = fh2;
-                                                        node3 = node6;
-                                                        stride3 = stride4;
-                                                        nextn3 = nextn2;
-                                                    } catch (Throwable th6) {
-                                                        th = th6;
-                                                    }
-                                                } catch (Throwable th7) {
-                                                    th = th7;
-                                                }
-                                            }
-                                            stride = stride3;
-                                            nextn = nextn3;
-                                            setTabAt(nodeArr3, i3, node2);
-                                            setTabAt(nodeArr3, i3 + n, node);
-                                            setTabAt(nodeArr, i3, forwardingNode);
-                                            advance3 = true;
-                                            finishing2 = finishing4;
-                                        } catch (Throwable th8) {
-                                            th = th8;
-                                        }
-                                    } else {
-                                        stride = stride3;
-                                        nextn = nextn3;
-                                        try {
-                                            if (tabAt instanceof TreeBin) {
-                                                TreeBin treeBin = (TreeBin) tabAt;
-                                                Node node7 = treeBin.first;
-                                                int hc = 0;
-                                                int lc = 0;
-                                                TreeNode<K, V> treeNode = null;
-                                                TreeNode<K, V> treeNode2 = null;
-                                                TreeNode<K, V> treeNode3 = null;
-                                                TreeNode<K, V> treeNode4 = null;
-                                                while (node7 != null) {
-                                                    boolean advance4 = advance3;
-                                                    try {
-                                                        h = node7.hash;
-                                                        finishing3 = finishing4;
-                                                    } catch (Throwable th9) {
-                                                        th = th9;
-                                                    }
-                                                    try {
-                                                        TreeNode<K, V> treeNode5 = new TreeNode<>(h, node7.key, node7.val, null, null);
-                                                        if ((h & n) == 0) {
-                                                            treeNode5.prev = treeNode3;
-                                                            if (treeNode3 == null) {
-                                                                treeNode4 = treeNode5;
-                                                            } else {
-                                                                treeNode3.next = treeNode5;
-                                                            }
-                                                            treeNode3 = treeNode5;
-                                                            lc++;
-                                                        } else {
-                                                            treeNode5.prev = treeNode;
-                                                            if (treeNode == null) {
-                                                                treeNode2 = treeNode5;
-                                                            } else {
-                                                                treeNode.next = treeNode5;
-                                                            }
-                                                            treeNode = treeNode5;
-                                                            hc++;
-                                                        }
-                                                        node7 = (Node<K, V>) node7.next;
-                                                        advance3 = advance4;
-                                                        finishing4 = finishing3;
-                                                    } catch (Throwable th10) {
-                                                        th = th10;
-                                                        throw th;
-                                                    }
-                                                }
-                                                finishing2 = finishing4;
-                                                Node untreeify = lc <= 6 ? untreeify(treeNode4) : hc != 0 ? new TreeBin(treeNode4) : treeBin;
-                                                Node untreeify2 = hc <= 6 ? untreeify(treeNode2) : lc != 0 ? new TreeBin(treeNode2) : treeBin;
-                                                setTabAt(nodeArr3, i3, untreeify);
-                                                setTabAt(nodeArr3, i3 + n, untreeify2);
-                                                setTabAt(nodeArr, i3, forwardingNode);
-                                                advance3 = true;
-                                            } else {
-                                                advance2 = advance3;
-                                                finishing2 = finishing4;
-                                            }
-                                        } catch (Throwable th11) {
-                                            th = th11;
-                                        }
-                                    }
-                                } catch (Throwable th12) {
-                                    th = th12;
-                                    throw th;
-                                }
-                                advance3 = advance2;
-                            }
-                            concurrentHashMap = this;
-                            finishing4 = finishing2;
-                        }
-                    }
-                    bound = bound2;
-                    stride3 = stride;
-                    nextn3 = nextn;
-                }
-                if (finishing) {
-                    this.nextTable = null;
-                    this.table = nodeArr3;
-                    this.sizeCtl = (n << 1) - (n >>> 1);
-                    return;
-                }
-                concurrentHashMap = this;
-                Unsafe unsafe = U;
-                long j = SIZECTL;
-                int sc = concurrentHashMap.sizeCtl;
-                int i5 = i3;
-                if (!unsafe.compareAndSwapInt(this, j, sc, sc - 1)) {
-                    i3 = i5;
-                    advance3 = advance;
-                    finishing4 = finishing;
-                } else if (sc - 2 != (resizeStamp(n) << RESIZE_STAMP_SHIFT)) {
-                    return;
-                } else {
-                    advance3 = true;
-                    finishing4 = true;
-                    i3 = n;
-                }
-                bound = bound2;
-                stride3 = stride;
-                nextn3 = nextn;
-            } else {
-                int i6 = i3 - 1;
-                if (i6 >= bound || finishing4) {
-                    i3 = i6;
-                    advance3 = false;
-                    bound = bound;
-                } else {
-                    int nextIndex = concurrentHashMap.transferIndex;
-                    if (nextIndex <= 0) {
-                        i3 = -1;
-                        advance3 = false;
-                    } else {
-                        Unsafe unsafe2 = U;
-                        long j2 = TRANSFERINDEX;
-                        int nextIndex2 = nextIndex > stride3 ? nextIndex - stride3 : 0;
-                        int nextBound = nextIndex2;
-                        int bound3 = bound;
-                        if (unsafe2.compareAndSwapInt(this, j2, nextIndex, nextIndex2)) {
-                            i3 = nextIndex - 1;
-                            advance3 = false;
-                            bound = nextBound;
-                        } else {
-                            i3 = i6;
-                            bound = bound3;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class CounterCell {
-        volatile long value;
-
-        CounterCell(long x) {
-            this.value = x;
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    final long sumCount() {
-        CounterCell[] as = this.counterCells;
-        long sum = this.baseCount;
-        if (as != null) {
-            for (CounterCell a : as) {
-                if (a != null) {
-                    sum += a.value;
-                }
-            }
-        }
-        return sum;
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    private final void fullAddCount(long x, boolean wasUncontended) {
-        boolean wasUncontended2;
-        int n;
-        CounterCell a;
-        int m;
-        int probe = ThreadLocalRandom.getProbe();
-        int h = probe;
-        if (probe != 0) {
-            wasUncontended2 = wasUncontended;
-        } else {
-            ThreadLocalRandom.localInit();
-            h = ThreadLocalRandom.getProbe();
-            wasUncontended2 = true;
-        }
-        boolean wasUncontended3 = wasUncontended2;
-        int h2 = h;
-        boolean collide = false;
-        while (true) {
-            CounterCell[] as = this.counterCells;
-            if (as != null && (n = as.length) > 0) {
-                CounterCell a2 = as[(n - 1) & h2];
-                if (a2 == null) {
-                    if (this.cellsBusy != 0) {
-                        a = a2;
-                    } else {
-                        CounterCell r = new CounterCell(x);
-                        if (this.cellsBusy != 0) {
-                            a = a2;
-                        } else {
-                            a = a2;
-                            if (U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
-                                boolean created = false;
-                                try {
-                                    CounterCell[] rs = this.counterCells;
-                                    if (rs != null && (m = rs.length) > 0) {
-                                        int j = (m - 1) & h2;
-                                        if (rs[j] == null) {
-                                            rs[j] = r;
-                                            created = true;
-                                        }
-                                    }
-                                    if (created) {
-                                        return;
-                                    }
-                                } finally {
-                                }
-                            }
-                        }
-                    }
-                    collide = false;
-                    h2 = ThreadLocalRandom.advanceProbe(h2);
-                } else {
-                    if (!wasUncontended3) {
-                        wasUncontended3 = true;
-                    } else {
-                        Unsafe unsafe = U;
-                        long j2 = CELLVALUE;
-                        long v = a2.value;
-                        if (!unsafe.compareAndSwapLong(a2, j2, v, v + x)) {
-                            if (this.counterCells == as && n < NCPU) {
-                                if (!collide) {
-                                    collide = true;
-                                } else if (this.cellsBusy == 0 && unsafe.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
-                                    try {
-                                        if (this.counterCells == as) {
-                                            CounterCell[] rs2 = new CounterCell[n << 1];
-                                            for (int i = 0; i < n; i++) {
-                                                rs2[i] = as[i];
-                                            }
-                                            this.counterCells = rs2;
-                                        }
-                                        this.cellsBusy = 0;
-                                        collide = false;
-                                    } finally {
-                                    }
-                                }
-                            }
-                            collide = false;
-                        } else {
-                            return;
-                        }
-                    }
-                    h2 = ThreadLocalRandom.advanceProbe(h2);
-                }
-            } else {
-                int h3 = this.cellsBusy;
-                if (h3 == 0 && this.counterCells == as && U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
-                    boolean init = false;
-                    try {
-                        if (this.counterCells == as) {
-                            CounterCell[] rs3 = new CounterCell[2];
-                            rs3[h2 & 1] = new CounterCell(x);
-                            this.counterCells = rs3;
-                            init = true;
-                        }
-                        if (init) {
-                            return;
-                        }
-                    } finally {
-                    }
-                } else {
-                    Unsafe unsafe2 = U;
-                    long j3 = BASECOUNT;
-                    long v2 = this.baseCount;
-                    if (unsafe2.compareAndSwapLong(this, j3, v2, v2 + x)) {
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-    private final void treeifyBin(Node<K, V>[] nodeArr, int index) {
-        if (nodeArr != null) {
-            int n = nodeArr.length;
-            if (n < 64) {
-                tryPresize(n << 1);
-                return;
-            }
-            Node<K, V> tabAt = tabAt(nodeArr, index);
-            if (tabAt != null && tabAt.hash >= 0) {
-                synchronized (tabAt) {
-                    if (tabAt(nodeArr, index) == tabAt) {
-                        TreeNode<K, V> treeNode = null;
-                        TreeNode<K, V> treeNode2 = null;
-                        for (Node<K, V> node = tabAt; node != null; node = node.next) {
-                            TreeNode<K, V> treeNode3 = new TreeNode<>(node.hash, node.key, node.val, null, null);
-                            treeNode3.prev = treeNode2;
-                            if (treeNode2 == null) {
-                                treeNode = treeNode3;
-                            } else {
-                                treeNode2.next = treeNode3;
-                            }
-                            treeNode2 = treeNode3;
-                        }
-                        setTabAt(nodeArr, index, new TreeBin(treeNode));
-                    }
-                }
-            }
-        }
-    }
-
-    /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-    static <K, V> Node<K, V> untreeify(Node<K, V> node) {
-        Node<K, V> node2 = null;
-        Node<K, V> node3 = null;
-        for (Node<K, V> node4 = node; node4 != null; node4 = node4.next) {
-            Node<K, V> node5 = new Node<>(node4.hash, node4.key, node4.val, null);
-            if (node3 == null) {
-                node2 = node5;
-            } else {
-                node3.next = node5;
-            }
-            node3 = node5;
-        }
-        return node2;
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class TreeNode<K, V> extends Node<K, V> {
-        TreeNode<K, V> left;
-        TreeNode<K, V> parent;
-        TreeNode<K, V> prev;
-        boolean red;
-        TreeNode<K, V> right;
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        TreeNode(int hash, K key, V val, Node<K, V> node, TreeNode<K, V> treeNode) {
-            super(hash, key, val, node);
-            this.parent = treeNode;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.Node
-        Node<K, V> find(int h, Object k) {
-            return findTreeNode(h, k, null);
-        }
-
-        /* JADX WARN: Code restructure failed: missing block: B:20:0x002f, code lost:
-            if (r3 != null) goto L21;
-         */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        final j$.util.concurrent.ConcurrentHashMap.TreeNode<K, V> findTreeNode(int r8, java.lang.Object r9, java.lang.Class<?> r10) {
-            /*
-                r7 = this;
-                if (r9 == 0) goto L4c
-                r0 = r7
-            L3:
-                j$.util.concurrent.ConcurrentHashMap$TreeNode<K, V> r1 = r0.left
-                j$.util.concurrent.ConcurrentHashMap$TreeNode<K, V> r2 = r0.right
-                int r3 = r0.hash
-                r4 = r3
-                if (r3 <= r8) goto Le
-                r0 = r1
-                goto L48
-            Le:
-                if (r4 >= r8) goto L12
-                r0 = r2
-                goto L48
-            L12:
-                K r3 = r0.key
-                r5 = r3
-                if (r3 == r9) goto L4b
-                if (r5 == 0) goto L20
-                boolean r3 = r9.equals(r5)
-                if (r3 == 0) goto L20
-                goto L4b
-            L20:
-                if (r1 != 0) goto L24
-                r0 = r2
-                goto L48
-            L24:
-                if (r2 != 0) goto L28
-                r0 = r1
-                goto L48
-            L28:
-                if (r10 != 0) goto L31
-                java.lang.Class r3 = j$.util.concurrent.ConcurrentHashMap.comparableClassFor(r9)
-                r10 = r3
-                if (r3 == 0) goto L3f
-            L31:
-                int r3 = j$.util.concurrent.ConcurrentHashMap.compareComparables(r10, r9, r5)
-                r6 = r3
-                if (r3 == 0) goto L3f
-                if (r6 >= 0) goto L3c
-                r3 = r1
-                goto L3d
-            L3c:
-                r3 = r2
-            L3d:
-                r0 = r3
-                goto L48
-            L3f:
-                j$.util.concurrent.ConcurrentHashMap$TreeNode r3 = r2.findTreeNode(r8, r9, r10)
-                r6 = r3
-                if (r3 == 0) goto L47
-                return r6
-            L47:
-                r0 = r1
-            L48:
-                if (r0 != 0) goto L3
-                goto L4c
-            L4b:
-                return r0
-            L4c:
-                r0 = 0
-                return r0
-            */
-            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.TreeNode.findTreeNode(int, java.lang.Object, java.lang.Class):j$.util.concurrent.ConcurrentHashMap$TreeNode");
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class TreeBin<K, V> extends Node<K, V> {
-        static final /* synthetic */ boolean $assertionsDisabled = true;
-        private static final long LOCKSTATE;
-        static final int READER = 4;
-        private static final Unsafe U;
-        static final int WAITER = 2;
-        static final int WRITER = 1;
-        volatile TreeNode<K, V> first;
-        volatile int lockState;
-        TreeNode<K, V> root;
-        volatile Thread waiter;
-
-        static {
-            try {
-                Unsafe unsafe = DesugarUnsafe.getUnsafe();
-                U = unsafe;
-                LOCKSTATE = unsafe.objectFieldOffset(TreeBin.class.getDeclaredField("lockState"));
-            } catch (Exception e) {
-                throw new Error(e);
-            }
-        }
-
-        static int tieBreakOrder(Object a, Object b) {
-            int d;
-            if (a == null || b == null || (d = a.getClass().getName().compareTo(b.getClass().getName())) == 0) {
-                int d2 = System.identityHashCode(a) <= System.identityHashCode(b) ? -1 : 1;
-                return d2;
-            }
-            return d;
-        }
-
-        /* JADX WARN: Code restructure failed: missing block: B:15:0x0036, code lost:
-            if (r9 != null) goto L16;
-         */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        TreeBin(j$.util.concurrent.ConcurrentHashMap.TreeNode<K, V> r14) {
-            /*
-                r13 = this;
-                r0 = -2
-                r1 = 0
-                r13.<init>(r0, r1, r1, r1)
-                r13.first = r14
-                r0 = 0
-                r2 = r14
-            L9:
-                if (r2 == 0) goto L61
-                j$.util.concurrent.ConcurrentHashMap$Node<K, V> r3 = r2.next
-                j$.util.concurrent.ConcurrentHashMap$TreeNode r3 = (j$.util.concurrent.ConcurrentHashMap.TreeNode) r3
-                r2.right = r1
-                r2.left = r1
-                if (r0 != 0) goto L1c
-                r2.parent = r1
-                r4 = 0
-                r2.red = r4
-                r0 = r2
-                goto L5e
-            L1c:
-                K r4 = r2.key
-                int r5 = r2.hash
-                r6 = 0
-                r7 = r0
-            L22:
-                K r8 = r7.key
-                int r9 = r7.hash
-                r10 = r9
-                if (r9 <= r5) goto L2b
-                r9 = -1
-                goto L45
-            L2b:
-                if (r10 >= r5) goto L2f
-                r9 = 1
-                goto L45
-            L2f:
-                if (r6 != 0) goto L38
-                java.lang.Class r9 = j$.util.concurrent.ConcurrentHashMap.comparableClassFor(r4)
-                r6 = r9
-                if (r9 == 0) goto L3f
-            L38:
-                int r9 = j$.util.concurrent.ConcurrentHashMap.compareComparables(r6, r4, r8)
-                r11 = r9
-                if (r9 != 0) goto L44
-            L3f:
-                int r9 = tieBreakOrder(r4, r8)
-                goto L45
-            L44:
-                r9 = r11
-            L45:
-                r11 = r7
-                if (r9 > 0) goto L4b
-                j$.util.concurrent.ConcurrentHashMap$TreeNode<K, V> r12 = r7.left
-                goto L4d
-            L4b:
-                j$.util.concurrent.ConcurrentHashMap$TreeNode<K, V> r12 = r7.right
-            L4d:
-                r7 = r12
-                if (r12 != 0) goto L60
-                r2.parent = r11
-                if (r9 > 0) goto L57
-                r11.left = r2
-                goto L59
-            L57:
-                r11.right = r2
-            L59:
-                j$.util.concurrent.ConcurrentHashMap$TreeNode r0 = balanceInsertion(r0, r2)
-            L5e:
-                r2 = r3
-                goto L9
-            L60:
-                goto L22
-            L61:
-                r13.root = r0
-                boolean r1 = j$.util.concurrent.ConcurrentHashMap.TreeBin.$assertionsDisabled
-                if (r1 != 0) goto L74
-                boolean r1 = checkInvariants(r0)
-                if (r1 == 0) goto L6e
-                goto L74
-            L6e:
-                java.lang.AssertionError r1 = new java.lang.AssertionError
-                r1.<init>()
-                throw r1
-            L74:
-                return
-            */
-            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.TreeBin.<init>(j$.util.concurrent.ConcurrentHashMap$TreeNode):void");
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        private final void lockRoot() {
-            if (!U.compareAndSwapInt(this, LOCKSTATE, 0, 1)) {
-                contendedLock();
-            }
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        private final void unlockRoot() {
-            this.lockState = 0;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        private final void contendedLock() {
-            boolean waiting = false;
-            while (true) {
-                int s = this.lockState;
-                if ((s & (-3)) == 0) {
-                    if (U.compareAndSwapInt(this, LOCKSTATE, s, 1)) {
-                        break;
-                    }
-                } else if ((s & 2) == 0) {
-                    if (U.compareAndSwapInt(this, LOCKSTATE, s, s | 2)) {
-                        waiting = true;
-                        this.waiter = Thread.currentThread();
-                    }
-                } else if (waiting) {
-                    LockSupport.park(this);
-                }
-            }
-            if (waiting) {
-                this.waiter = null;
-            }
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.Node
-        final Node<K, V> find(int h, Object k) {
-            K ek;
-            Thread w;
-            Thread w2;
-            TreeNode<K, V> treeNode = null;
-            if (k != null) {
-                Node<K, V> node = this.first;
-                while (node != null) {
-                    int s = this.lockState;
-                    if ((s & 3) != 0) {
-                        if (node.hash == h && ((ek = node.key) == k || (ek != null && k.equals(ek)))) {
-                            return node;
-                        }
-                        node = node.next;
-                    } else {
-                        Unsafe unsafe = U;
-                        long j = LOCKSTATE;
-                        if (unsafe.compareAndSwapInt(this, j, s, s + 4)) {
-                            try {
-                                TreeNode<K, V> treeNode2 = this.root;
-                                if (treeNode2 != null) {
-                                    treeNode = treeNode2.findTreeNode(h, k, null);
-                                }
-                                if (DesugarUnsafe.getAndAddInt(unsafe, this, j, -4) == 6 && (w2 = this.waiter) != null) {
-                                    LockSupport.unpark(w2);
-                                }
-                                return treeNode;
-                            } catch (Throwable th) {
-                                if (DesugarUnsafe.getAndAddInt(U, this, LOCKSTATE, -4) == 6 && (w = this.waiter) != null) {
-                                    LockSupport.unpark(w);
-                                }
-                                throw th;
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        /* JADX WARN: Code restructure failed: missing block: B:17:0x004a, code lost:
-            if (r2 != null) goto L18;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:29:0x006e, code lost:
-            return r5;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:52:0x00c0, code lost:
-            if (j$.util.concurrent.ConcurrentHashMap.TreeBin.$assertionsDisabled != false) goto L57;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:54:0x00c8, code lost:
-            if (checkInvariants(r16.root) == false) goto L55;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:56:0x00d0, code lost:
-            throw new java.lang.AssertionError();
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:57:0x00d1, code lost:
-            return null;
-         */
-        /* JADX WARN: Code restructure failed: missing block: B:71:?, code lost:
-            return null;
-         */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        final j$.util.concurrent.ConcurrentHashMap.TreeNode<K, V> putTreeVal(int r17, K r18, V r19) {
-            /*
-                Method dump skipped, instructions count: 223
-                To view this dump add '--comments-level debug' option
-            */
-            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.TreeBin.putTreeVal(int, java.lang.Object, java.lang.Object):j$.util.concurrent.ConcurrentHashMap$TreeNode");
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeBin != java.util.concurrent.ConcurrentHashMap$TreeBin<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        final boolean removeTreeNode(TreeNode<K, V> treeNode) {
-            TreeNode<K, V> treeNode2;
-            TreeNode<K, V> treeNode3;
-            TreeNode<K, V> treeNode4;
-            TreeNode<K, V> treeNode5 = (TreeNode) treeNode.next;
-            TreeNode<K, V> treeNode6 = treeNode.prev;
-            if (treeNode6 == null) {
-                this.first = treeNode5;
-            } else {
-                treeNode6.next = treeNode5;
-            }
-            if (treeNode5 != null) {
-                treeNode5.prev = treeNode6;
-            }
-            if (this.first == null) {
-                this.root = null;
-                return true;
-            }
-            TreeNode<K, V> treeNode7 = this.root;
-            TreeNode<K, V> treeNode8 = treeNode7;
-            if (treeNode7 == null || treeNode8.right == null || (treeNode2 = treeNode8.left) == null || treeNode2.left == null) {
-                return true;
-            }
-            lockRoot();
-            try {
-                TreeNode<K, V> treeNode9 = treeNode.left;
-                TreeNode<K, V> treeNode10 = treeNode.right;
-                if (treeNode9 != null && treeNode10 != null) {
-                    TreeNode<K, V> treeNode11 = treeNode10;
-                    while (true) {
-                        TreeNode<K, V> treeNode12 = treeNode11.left;
-                        if (treeNode12 == null) {
-                            break;
-                        }
-                        treeNode11 = treeNode12;
-                    }
-                    boolean c = treeNode11.red;
-                    treeNode11.red = treeNode.red;
-                    treeNode.red = c;
-                    TreeNode<K, V> treeNode13 = treeNode11.right;
-                    TreeNode<K, V> treeNode14 = treeNode.parent;
-                    if (treeNode11 == treeNode10) {
-                        treeNode.parent = treeNode11;
-                        treeNode11.right = treeNode;
-                    } else {
-                        TreeNode<K, V> treeNode15 = treeNode11.parent;
-                        treeNode.parent = treeNode15;
-                        if (treeNode15 != null) {
-                            if (treeNode11 == treeNode15.left) {
-                                treeNode15.left = treeNode;
-                            } else {
-                                treeNode15.right = treeNode;
-                            }
-                        }
-                        treeNode11.right = treeNode10;
-                        if (treeNode10 != null) {
-                            treeNode10.parent = treeNode11;
-                        }
-                    }
-                    treeNode.left = null;
-                    treeNode.right = treeNode13;
-                    if (treeNode13 != null) {
-                        treeNode13.parent = treeNode;
-                    }
-                    treeNode11.left = treeNode9;
-                    if (treeNode9 != null) {
-                        treeNode9.parent = treeNode11;
-                    }
-                    treeNode11.parent = treeNode14;
-                    if (treeNode14 == null) {
-                        treeNode8 = treeNode11;
-                    } else if (treeNode == treeNode14.left) {
-                        treeNode14.left = treeNode11;
-                    } else {
-                        treeNode14.right = treeNode11;
-                    }
-                    if (treeNode13 != null) {
-                        treeNode3 = treeNode13;
-                    } else {
-                        treeNode3 = treeNode;
-                    }
-                } else if (treeNode9 != null) {
-                    treeNode3 = treeNode9;
-                } else if (treeNode10 != null) {
-                    treeNode3 = treeNode10;
-                } else {
-                    treeNode3 = treeNode;
-                }
-                if (treeNode3 != treeNode) {
-                    TreeNode<K, V> treeNode16 = treeNode.parent;
-                    treeNode3.parent = treeNode16;
-                    if (treeNode16 == null) {
-                        treeNode8 = treeNode3;
-                    } else if (treeNode == treeNode16.left) {
-                        treeNode16.left = treeNode3;
-                    } else {
-                        treeNode16.right = treeNode3;
-                    }
-                    treeNode.parent = null;
-                    treeNode.right = null;
-                    treeNode.left = null;
-                }
-                this.root = treeNode.red ? treeNode8 : balanceDeletion(treeNode8, treeNode3);
-                if (treeNode == treeNode3 && (treeNode4 = treeNode.parent) != null) {
-                    if (treeNode == treeNode4.left) {
-                        treeNode4.left = null;
-                    } else if (treeNode == treeNode4.right) {
-                        treeNode4.right = null;
-                    }
-                    treeNode.parent = null;
-                }
-                unlockRoot();
-                if (!$assertionsDisabled && !checkInvariants(this.root)) {
-                    throw new AssertionError();
-                }
-                return false;
-            } catch (Throwable th) {
-                unlockRoot();
-                throw th;
-            }
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        static <K, V> TreeNode<K, V> rotateLeft(TreeNode<K, V> treeNode, TreeNode<K, V> treeNode2) {
-            TreeNode<K, V> treeNode3;
-            if (treeNode2 != null && (treeNode3 = treeNode2.right) != null) {
-                TreeNode<K, V> treeNode4 = treeNode3.left;
-                treeNode2.right = treeNode4;
-                if (treeNode4 != null) {
-                    treeNode4.parent = treeNode2;
-                }
-                TreeNode<K, V> treeNode5 = treeNode2.parent;
-                treeNode3.parent = treeNode5;
-                if (treeNode5 == null) {
-                    treeNode = treeNode3;
-                    treeNode3.red = false;
-                } else if (treeNode5.left == treeNode2) {
-                    treeNode5.left = treeNode3;
-                } else {
-                    treeNode5.right = treeNode3;
-                }
-                treeNode3.left = treeNode2;
-                treeNode2.parent = treeNode3;
-            }
-            return treeNode;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        static <K, V> TreeNode<K, V> rotateRight(TreeNode<K, V> treeNode, TreeNode<K, V> treeNode2) {
-            TreeNode<K, V> treeNode3;
-            if (treeNode2 != null && (treeNode3 = treeNode2.left) != null) {
-                TreeNode<K, V> treeNode4 = treeNode3.right;
-                treeNode2.left = treeNode4;
-                if (treeNode4 != null) {
-                    treeNode4.parent = treeNode2;
-                }
-                TreeNode<K, V> treeNode5 = treeNode2.parent;
-                treeNode3.parent = treeNode5;
-                if (treeNode5 == null) {
-                    treeNode = treeNode3;
-                    treeNode3.red = false;
-                } else if (treeNode5.right == treeNode2) {
-                    treeNode5.right = treeNode3;
-                } else {
-                    treeNode5.left = treeNode3;
-                }
-                treeNode3.right = treeNode2;
-                treeNode2.parent = treeNode3;
-            }
-            return treeNode;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        static <K, V> TreeNode<K, V> balanceInsertion(TreeNode<K, V> treeNode, TreeNode<K, V> treeNode2) {
-            treeNode2.red = true;
-            while (true) {
-                TreeNode<K, V> treeNode3 = treeNode2.parent;
-                TreeNode<K, V> treeNode4 = treeNode3;
-                if (treeNode3 == null) {
-                    treeNode2.red = false;
-                    return treeNode2;
-                } else if (!treeNode4.red) {
-                    break;
-                } else {
-                    TreeNode<K, V> treeNode5 = treeNode4.parent;
-                    TreeNode<K, V> treeNode6 = treeNode5;
-                    if (treeNode5 == null) {
-                        break;
-                    }
-                    TreeNode<K, V> treeNode7 = treeNode6.left;
-                    TreeNode<K, V> treeNode8 = null;
-                    if (treeNode4 == treeNode7) {
-                        TreeNode<K, V> treeNode9 = treeNode6.right;
-                        if (treeNode9 != null && treeNode9.red) {
-                            treeNode9.red = false;
-                            treeNode4.red = false;
-                            treeNode6.red = true;
-                            treeNode2 = treeNode6;
-                        } else {
-                            if (treeNode2 == treeNode4.right) {
-                                treeNode2 = treeNode4;
-                                treeNode = rotateLeft(treeNode, treeNode4);
-                                TreeNode<K, V> treeNode10 = treeNode2.parent;
-                                treeNode4 = treeNode10;
-                                if (treeNode10 != null) {
-                                    treeNode8 = treeNode4.parent;
-                                }
-                                treeNode6 = treeNode8;
-                            }
-                            if (treeNode4 != null) {
-                                treeNode4.red = false;
-                                if (treeNode6 != null) {
-                                    treeNode6.red = true;
-                                    treeNode = rotateRight(treeNode, treeNode6);
-                                }
-                            }
-                        }
-                    } else if (treeNode7 != null && treeNode7.red) {
-                        treeNode7.red = false;
-                        treeNode4.red = false;
-                        treeNode6.red = true;
-                        treeNode2 = treeNode6;
-                    } else {
-                        if (treeNode2 == treeNode4.left) {
-                            treeNode2 = treeNode4;
-                            treeNode = rotateRight(treeNode, treeNode4);
-                            TreeNode<K, V> treeNode11 = treeNode2.parent;
-                            treeNode4 = treeNode11;
-                            if (treeNode11 != null) {
-                                treeNode8 = treeNode4.parent;
-                            }
-                            treeNode6 = treeNode8;
-                        }
-                        if (treeNode4 != null) {
-                            treeNode4.red = false;
-                            if (treeNode6 != null) {
-                                treeNode6.red = true;
-                                treeNode = rotateLeft(treeNode, treeNode6);
-                            }
-                        }
-                    }
-                }
-            }
-            return treeNode;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        static <K, V> TreeNode<K, V> balanceDeletion(TreeNode<K, V> treeNode, TreeNode<K, V> treeNode2) {
-            while (treeNode2 != null && treeNode2 != treeNode) {
-                TreeNode<K, V> treeNode3 = treeNode2.parent;
-                TreeNode<K, V> treeNode4 = treeNode3;
-                if (treeNode3 == null) {
-                    treeNode2.red = false;
-                    return treeNode2;
-                } else if (treeNode2.red) {
-                    treeNode2.red = false;
-                    return treeNode;
-                } else {
-                    TreeNode<K, V> treeNode5 = treeNode4.left;
-                    TreeNode<K, V> treeNode6 = treeNode5;
-                    TreeNode<K, V> treeNode7 = null;
-                    if (treeNode5 == treeNode2) {
-                        TreeNode<K, V> treeNode8 = treeNode4.right;
-                        TreeNode<K, V> treeNode9 = treeNode8;
-                        if (treeNode8 != null && treeNode9.red) {
-                            treeNode9.red = false;
-                            treeNode4.red = true;
-                            treeNode = rotateLeft(treeNode, treeNode4);
-                            TreeNode<K, V> treeNode10 = treeNode2.parent;
-                            treeNode4 = treeNode10;
-                            treeNode9 = treeNode10 == null ? null : treeNode4.right;
-                        }
-                        if (treeNode9 == null) {
-                            treeNode2 = treeNode4;
-                        } else {
-                            TreeNode<K, V> treeNode11 = treeNode9.left;
-                            TreeNode<K, V> treeNode12 = treeNode9.right;
-                            if ((treeNode12 == null || !treeNode12.red) && (treeNode11 == null || !treeNode11.red)) {
-                                treeNode9.red = true;
-                                treeNode2 = treeNode4;
-                            } else {
-                                if (treeNode12 == null || !treeNode12.red) {
-                                    if (treeNode11 != null) {
-                                        treeNode11.red = false;
-                                    }
-                                    treeNode9.red = true;
-                                    treeNode = rotateRight(treeNode, treeNode9);
-                                    TreeNode<K, V> treeNode13 = treeNode2.parent;
-                                    treeNode4 = treeNode13;
-                                    if (treeNode13 != null) {
-                                        treeNode7 = treeNode4.right;
-                                    }
-                                    treeNode9 = treeNode7;
-                                }
-                                if (treeNode9 != null) {
-                                    treeNode9.red = treeNode4 == null ? false : treeNode4.red;
-                                    TreeNode<K, V> treeNode14 = treeNode9.right;
-                                    if (treeNode14 != null) {
-                                        treeNode14.red = false;
-                                    }
-                                }
-                                if (treeNode4 != null) {
-                                    treeNode4.red = false;
-                                    treeNode = rotateLeft(treeNode, treeNode4);
-                                }
-                                treeNode2 = treeNode;
-                            }
-                        }
-                    } else {
-                        if (treeNode6 != null && treeNode6.red) {
-                            treeNode6.red = false;
-                            treeNode4.red = true;
-                            treeNode = rotateRight(treeNode, treeNode4);
-                            TreeNode<K, V> treeNode15 = treeNode2.parent;
-                            treeNode4 = treeNode15;
-                            treeNode6 = treeNode15 == null ? null : treeNode4.left;
-                        }
-                        if (treeNode6 == null) {
-                            treeNode2 = treeNode4;
-                        } else {
-                            TreeNode<K, V> treeNode16 = treeNode6.left;
-                            TreeNode<K, V> treeNode17 = treeNode6.right;
-                            if ((treeNode16 == null || !treeNode16.red) && (treeNode17 == null || !treeNode17.red)) {
-                                treeNode6.red = true;
-                                treeNode2 = treeNode4;
-                            } else {
-                                if (treeNode16 == null || !treeNode16.red) {
-                                    if (treeNode17 != null) {
-                                        treeNode17.red = false;
-                                    }
-                                    treeNode6.red = true;
-                                    treeNode = rotateLeft(treeNode, treeNode6);
-                                    TreeNode<K, V> treeNode18 = treeNode2.parent;
-                                    treeNode4 = treeNode18;
-                                    if (treeNode18 != null) {
-                                        treeNode7 = treeNode4.left;
-                                    }
-                                    treeNode6 = treeNode7;
-                                }
-                                if (treeNode6 != null) {
-                                    treeNode6.red = treeNode4 == null ? false : treeNode4.red;
-                                    TreeNode<K, V> treeNode19 = treeNode6.left;
-                                    if (treeNode19 != null) {
-                                        treeNode19.red = false;
-                                    }
-                                }
-                                if (treeNode4 != null) {
-                                    treeNode4.red = false;
-                                    treeNode = rotateRight(treeNode, treeNode4);
-                                }
-                                treeNode2 = treeNode;
-                            }
-                        }
-                    }
-                }
-            }
-            return treeNode;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TreeNode != java.util.concurrent.ConcurrentHashMap$TreeNode<K, V> */
-        static <K, V> boolean checkInvariants(TreeNode<K, V> treeNode) {
-            TreeNode<K, V> treeNode2 = treeNode.parent;
-            TreeNode<K, V> treeNode3 = treeNode.left;
-            TreeNode<K, V> treeNode4 = treeNode.right;
-            TreeNode<K, V> treeNode5 = treeNode.prev;
-            TreeNode treeNode6 = (TreeNode) treeNode.next;
-            if (treeNode5 != null && treeNode5.next != treeNode) {
-                return false;
-            }
-            if (treeNode6 != null && treeNode6.prev != treeNode) {
-                return false;
-            }
-            if (treeNode2 != null && treeNode != treeNode2.left && treeNode != treeNode2.right) {
-                return false;
-            }
-            if (treeNode3 != null && (treeNode3.parent != treeNode || treeNode3.hash > treeNode.hash)) {
-                return false;
-            }
-            if (treeNode4 != null && (treeNode4.parent != treeNode || treeNode4.hash < treeNode.hash)) {
-                return false;
-            }
-            if (treeNode.red && treeNode3 != null && treeNode3.red && treeNode4 != null && treeNode4.red) {
-                return false;
-            }
-            if (treeNode3 != null && !checkInvariants(treeNode3)) {
-                return false;
-            }
-            if (treeNode4 != null && !checkInvariants(treeNode4)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class TableStack<K, V> {
-        int index;
-        int length;
-        TableStack<K, V> next;
-        Node<K, V>[] tab;
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TableStack != java.util.concurrent.ConcurrentHashMap$TableStack<K, V> */
-        TableStack() {
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static class Traverser<K, V> {
-        int baseIndex;
-        int baseLimit;
-        final int baseSize;
-        int index;
-        Node<K, V> next = null;
-        TableStack<K, V> spare;
-        TableStack<K, V> stack;
-        Node<K, V>[] tab;
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        Traverser(Node<K, V>[] nodeArr, int size, int index, int limit) {
-            this.tab = nodeArr;
-            this.baseSize = size;
-            this.index = index;
-            this.baseIndex = index;
-            this.baseLimit = limit;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        final Node<K, V> advance() {
-            Node<K, V>[] nodeArr;
-            int n;
-            int i;
-            Node<K, V> node = this.next;
-            TreeNode<K, V> treeNode = node;
-            if (node != null) {
-                treeNode = treeNode.next;
-            }
-            while (treeNode == null) {
-                if (this.baseIndex >= this.baseLimit || (nodeArr = this.tab) == null || (n = nodeArr.length) <= (i = this.index) || i < 0) {
-                    this.next = null;
-                    return null;
-                }
-                Node<K, V> tabAt = ConcurrentHashMap.tabAt(nodeArr, i);
-                treeNode = tabAt;
-                if (tabAt != null && treeNode.hash < 0) {
-                    if (treeNode instanceof ForwardingNode) {
-                        this.tab = ((ForwardingNode) treeNode).nextTable;
-                        treeNode = null;
-                        pushState(nodeArr, i, n);
-                    } else if (treeNode instanceof TreeBin) {
-                        treeNode = ((TreeBin) treeNode).first;
-                    } else {
-                        treeNode = null;
-                    }
-                }
-                if (this.stack != null) {
-                    recoverState(n);
-                } else {
-                    int i2 = this.baseSize + i;
-                    this.index = i2;
-                    if (i2 >= n) {
-                        int i3 = this.baseIndex + 1;
-                        this.baseIndex = i3;
-                        this.index = i3;
-                    }
-                }
-            }
-            this.next = treeNode;
-            return treeNode;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TableStack != java.util.concurrent.ConcurrentHashMap$TableStack<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        private void pushState(Node<K, V>[] nodeArr, int i, int n) {
-            TableStack<K, V> tableStack = this.spare;
-            if (tableStack != null) {
-                this.spare = tableStack.next;
-            } else {
-                tableStack = new TableStack<>();
-            }
-            tableStack.tab = nodeArr;
-            tableStack.length = n;
-            tableStack.index = i;
-            tableStack.next = this.stack;
-            this.stack = tableStack;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$TableStack != java.util.concurrent.ConcurrentHashMap$TableStack<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        private void recoverState(int n) {
-            TableStack<K, V> tableStack;
-            while (true) {
-                tableStack = this.stack;
-                if (tableStack == null) {
-                    break;
-                }
-                int i = this.index;
-                int len = tableStack.length;
-                int i2 = i + len;
-                this.index = i2;
-                if (i2 < n) {
-                    break;
-                }
-                n = len;
-                this.index = tableStack.index;
-                this.tab = tableStack.tab;
-                tableStack.tab = null;
-                TableStack<K, V> tableStack2 = tableStack.next;
-                tableStack.next = this.spare;
-                this.stack = tableStack2;
-                this.spare = tableStack;
-            }
-            if (tableStack == null) {
-                int i3 = this.index + this.baseSize;
-                this.index = i3;
-                if (i3 >= n) {
-                    int i4 = this.baseIndex + 1;
-                    this.baseIndex = i4;
-                    this.index = i4;
-                }
-            }
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static class BaseIterator<K, V> extends Traverser<K, V> {
-        Node<K, V> lastReturned;
-        final ConcurrentHashMap<K, V> map;
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$BaseIterator != java.util.concurrent.ConcurrentHashMap$BaseIterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        BaseIterator(Node<K, V>[] nodeArr, int size, int index, int limit, ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(nodeArr, size, index, limit);
-            this.map = concurrentHashMap;
-            advance();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$BaseIterator != java.util.concurrent.ConcurrentHashMap$BaseIterator<K, V> */
-        public final boolean hasNext() {
-            return this.next != null;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$BaseIterator != java.util.concurrent.ConcurrentHashMap$BaseIterator<K, V> */
-        public final boolean hasMoreElements() {
-            return this.next != null;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$BaseIterator != java.util.concurrent.ConcurrentHashMap$BaseIterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        public final void remove() {
-            Node<K, V> node = this.lastReturned;
-            if (node == null) {
-                throw new IllegalStateException();
-            }
-            this.lastReturned = null;
-            this.map.replaceNode(node.key, null, null);
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class KeyIterator<K, V> extends BaseIterator<K, V> implements Iterator<K>, Enumeration<K>, j$.util.Iterator<K> {
-        @Override // j$.util.Iterator
-        public /* synthetic */ void forEachRemaining(Consumer consumer) {
-            Iterator.CC.$default$forEachRemaining(this, consumer);
-        }
-
-        @Override // java.util.Iterator
-        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
-            forEachRemaining(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeyIterator != java.util.concurrent.ConcurrentHashMap$KeyIterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        KeyIterator(Node<K, V>[] nodeArr, int index, int size, int limit, ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(nodeArr, index, size, limit, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeyIterator != java.util.concurrent.ConcurrentHashMap$KeyIterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Iterator, j$.util.Iterator
-        public final K next() {
-            Node<K, V> node = this.next;
-            if (node == null) {
-                throw new NoSuchElementException();
-            }
-            K k = node.key;
-            this.lastReturned = node;
-            advance();
-            return k;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeyIterator != java.util.concurrent.ConcurrentHashMap$KeyIterator<K, V> */
-        @Override // java.util.Enumeration
-        public final K nextElement() {
-            return next();
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class ValueIterator<K, V> extends BaseIterator<K, V> implements java.util.Iterator<V>, Enumeration<V>, j$.util.Iterator<V> {
-        @Override // j$.util.Iterator
-        public /* synthetic */ void forEachRemaining(Consumer consumer) {
-            Iterator.CC.$default$forEachRemaining(this, consumer);
-        }
-
-        @Override // java.util.Iterator
-        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
-            forEachRemaining(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueIterator != java.util.concurrent.ConcurrentHashMap$ValueIterator<K, V> */
-        ValueIterator(Node<K, V>[] nodeArr, int index, int size, int limit, ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(nodeArr, index, size, limit, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueIterator != java.util.concurrent.ConcurrentHashMap$ValueIterator<K, V> */
-        @Override // java.util.Iterator, j$.util.Iterator
-        public final V next() {
-            Node<K, V> node = this.next;
-            if (node == null) {
-                throw new NoSuchElementException();
-            }
-            V v = node.val;
-            this.lastReturned = node;
-            advance();
-            return v;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueIterator != java.util.concurrent.ConcurrentHashMap$ValueIterator<K, V> */
-        @Override // java.util.Enumeration
-        public final V nextElement() {
-            return next();
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    static final class EntryIterator<K, V> extends BaseIterator<K, V> implements java.util.Iterator<Map.Entry<K, V>>, j$.util.Iterator<Map.Entry<K, V>> {
-        @Override // j$.util.Iterator
-        public /* synthetic */ void forEachRemaining(Consumer consumer) {
-            Iterator.CC.$default$forEachRemaining(this, consumer);
-        }
-
-        @Override // java.util.Iterator
-        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
-            forEachRemaining(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntryIterator != java.util.concurrent.ConcurrentHashMap$EntryIterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        EntryIterator(Node<K, V>[] nodeArr, int index, int size, int limit, ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(nodeArr, index, size, limit, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntryIterator != java.util.concurrent.ConcurrentHashMap$EntryIterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        @Override // java.util.Iterator, j$.util.Iterator
-        public final Map.Entry<K, V> next() {
-            Node<K, V> node = this.next;
-            if (node == null) {
-                throw new NoSuchElementException();
-            }
-            K k = node.key;
-            V v = node.val;
-            this.lastReturned = node;
-            advance();
-            return new MapEntry(k, v, this.map);
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class MapEntry<K, V> implements Map.Entry<K, V> {
-        final K key;
-        final ConcurrentHashMap<K, V> map;
-        V val;
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        MapEntry(K key, V val, ConcurrentHashMap<K, V> concurrentHashMap) {
-            this.key = key;
-            this.val = val;
-            this.map = concurrentHashMap;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        @Override // java.util.Map.Entry
-        public K getKey() {
-            return this.key;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        @Override // java.util.Map.Entry
-        public V getValue() {
-            return this.val;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        @Override // java.util.Map.Entry
-        public int hashCode() {
-            return this.key.hashCode() ^ this.val.hashCode();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        public String toString() {
-            return this.key + "=" + this.val;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        @Override // java.util.Map.Entry
-        public boolean equals(Object o) {
-            Map.Entry<?, ?> e;
-            Object k;
-            Object v;
-            K k2;
-            V v2;
-            return (o instanceof Map.Entry) && (k = (e = (Map.Entry) o).getKey()) != null && (v = e.getValue()) != null && (k == (k2 = this.key) || k.equals(k2)) && (v == (v2 = this.val) || v.equals(v2));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$MapEntry != java.util.concurrent.ConcurrentHashMap$MapEntry<K, V> */
-        @Override // java.util.Map.Entry
-        public V setValue(V value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            V v = this.val;
-            this.val = value;
-            this.map.put(this.key, value);
-            return v;
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class KeySpliterator<K, V> extends Traverser<K, V> implements Spliterator<K> {
-        long est;
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ Comparator getComparator() {
-            return Spliterator.CC.$default$getComparator(this);
-        }
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ long getExactSizeIfKnown() {
-            return Spliterator.CC.$default$getExactSizeIfKnown(this);
-        }
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ boolean hasCharacteristics(int i) {
-            return Spliterator.CC.$default$hasCharacteristics(this, i);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySpliterator != java.util.concurrent.ConcurrentHashMap$KeySpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        KeySpliterator(Node<K, V>[] nodeArr, int size, int index, int limit, long est) {
-            super(nodeArr, size, index, limit);
-            this.est = est;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySpliterator != java.util.concurrent.ConcurrentHashMap$KeySpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public Spliterator<K> trySplit() {
-            int i = this.baseIndex;
-            int f = this.baseLimit;
-            int h = (i + f) >>> 1;
-            if (h <= i) {
-                return null;
-            }
-            Node<K, V>[] nodeArr = this.tab;
-            int i2 = this.baseSize;
-            this.baseLimit = h;
-            long j = this.est >>> 1;
-            this.est = j;
-            return new KeySpliterator(nodeArr, i2, h, f, j);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySpliterator != java.util.concurrent.ConcurrentHashMap$KeySpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super K> */
-        @Override // j$.util.Spliterator
-        public void forEachRemaining(Consumer<? super K> consumer) {
-            if (consumer != null) {
-                while (true) {
-                    Node<K, V> advance = advance();
-                    if (advance != null) {
-                        consumer.accept((K) advance.key);
-                    } else {
-                        return;
-                    }
-                }
-            } else {
-                throw new NullPointerException();
-            }
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySpliterator != java.util.concurrent.ConcurrentHashMap$KeySpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super K> */
-        @Override // j$.util.Spliterator
-        public boolean tryAdvance(Consumer<? super K> consumer) {
-            if (consumer == null) {
-                throw new NullPointerException();
-            }
-            Node<K, V> advance = advance();
-            if (advance == null) {
-                return false;
-            }
-            consumer.accept((K) advance.key);
-            return true;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySpliterator != java.util.concurrent.ConcurrentHashMap$KeySpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public long estimateSize() {
-            return this.est;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySpliterator != java.util.concurrent.ConcurrentHashMap$KeySpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public int characteristics() {
-            return 4353;
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class ValueSpliterator<K, V> extends Traverser<K, V> implements Spliterator<V> {
-        long est;
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ Comparator getComparator() {
-            return Spliterator.CC.$default$getComparator(this);
-        }
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ long getExactSizeIfKnown() {
-            return Spliterator.CC.$default$getExactSizeIfKnown(this);
-        }
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ boolean hasCharacteristics(int i) {
-            return Spliterator.CC.$default$hasCharacteristics(this, i);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueSpliterator != java.util.concurrent.ConcurrentHashMap$ValueSpliterator<K, V> */
-        ValueSpliterator(Node<K, V>[] nodeArr, int size, int index, int limit, long est) {
-            super(nodeArr, size, index, limit);
-            this.est = est;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueSpliterator != java.util.concurrent.ConcurrentHashMap$ValueSpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public Spliterator<V> trySplit() {
-            int i = this.baseIndex;
-            int f = this.baseLimit;
-            int h = (i + f) >>> 1;
-            if (h <= i) {
-                return null;
-            }
-            Node<K, V>[] nodeArr = this.tab;
-            int i2 = this.baseSize;
-            this.baseLimit = h;
-            long j = this.est >>> 1;
-            this.est = j;
-            return new ValueSpliterator(nodeArr, i2, h, f, j);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueSpliterator != java.util.concurrent.ConcurrentHashMap$ValueSpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super V> */
-        @Override // j$.util.Spliterator
-        public void forEachRemaining(Consumer<? super V> consumer) {
-            if (consumer != null) {
-                while (true) {
-                    Node<K, V> advance = advance();
-                    if (advance != null) {
-                        consumer.accept((V) advance.val);
-                    } else {
-                        return;
-                    }
-                }
-            } else {
-                throw new NullPointerException();
-            }
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueSpliterator != java.util.concurrent.ConcurrentHashMap$ValueSpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super V> */
-        @Override // j$.util.Spliterator
-        public boolean tryAdvance(Consumer<? super V> consumer) {
-            if (consumer == null) {
-                throw new NullPointerException();
-            }
-            Node<K, V> advance = advance();
-            if (advance == null) {
-                return false;
-            }
-            consumer.accept((V) advance.val);
-            return true;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueSpliterator != java.util.concurrent.ConcurrentHashMap$ValueSpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public long estimateSize() {
-            return this.est;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValueSpliterator != java.util.concurrent.ConcurrentHashMap$ValueSpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public int characteristics() {
-            return 4352;
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class EntrySpliterator<K, V> extends Traverser<K, V> implements Spliterator<Map.Entry<K, V>> {
-        long est;
-        final ConcurrentHashMap<K, V> map;
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ Comparator getComparator() {
-            return Spliterator.CC.$default$getComparator(this);
-        }
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ long getExactSizeIfKnown() {
-            return Spliterator.CC.$default$getExactSizeIfKnown(this);
-        }
-
-        @Override // j$.util.Spliterator
-        public /* synthetic */ boolean hasCharacteristics(int i) {
-            return Spliterator.CC.$default$hasCharacteristics(this, i);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySpliterator != java.util.concurrent.ConcurrentHashMap$EntrySpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        EntrySpliterator(Node<K, V>[] nodeArr, int size, int index, int limit, long est, ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(nodeArr, size, index, limit);
-            this.map = concurrentHashMap;
-            this.est = est;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySpliterator != java.util.concurrent.ConcurrentHashMap$EntrySpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public Spliterator<Map.Entry<K, V>> trySplit() {
-            int i = this.baseIndex;
-            int f = this.baseLimit;
-            int h = (i + f) >>> 1;
-            if (h <= i) {
-                return null;
-            }
-            Node<K, V>[] nodeArr = this.tab;
-            int i2 = this.baseSize;
-            this.baseLimit = h;
-            long j = this.est >>> 1;
-            this.est = j;
-            return new EntrySpliterator(nodeArr, i2, h, f, j, this.map);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySpliterator != java.util.concurrent.ConcurrentHashMap$EntrySpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super java.util.Map$Entry<K, V>> */
-        @Override // j$.util.Spliterator
-        public void forEachRemaining(Consumer<? super Map.Entry<K, V>> consumer) {
-            if (consumer != null) {
-                while (true) {
-                    Node<K, V> advance = advance();
-                    if (advance != null) {
-                        consumer.accept(new MapEntry(advance.key, advance.val, this.map));
-                    } else {
-                        return;
-                    }
-                }
-            } else {
-                throw new NullPointerException();
-            }
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySpliterator != java.util.concurrent.ConcurrentHashMap$EntrySpliterator<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super java.util.Map$Entry<K, V>> */
-        @Override // j$.util.Spliterator
-        public boolean tryAdvance(Consumer<? super Map.Entry<K, V>> consumer) {
-            if (consumer == null) {
-                throw new NullPointerException();
-            }
-            Node<K, V> advance = advance();
-            if (advance == null) {
-                return false;
-            }
-            consumer.accept(new MapEntry(advance.key, advance.val, this.map));
-            return true;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySpliterator != java.util.concurrent.ConcurrentHashMap$EntrySpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public long estimateSize() {
-            return this.est;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySpliterator != java.util.concurrent.ConcurrentHashMap$EntrySpliterator<K, V> */
-        @Override // j$.util.Spliterator
-        public int characteristics() {
-            return 4353;
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static abstract class CollectionView<K, V, E> implements Collection<E>, Serializable {
-        private static final String oomeMsg = "Required array size too large";
-        private static final long serialVersionUID = 7249069246763182397L;
-        final ConcurrentHashMap<K, V> map;
 
         @Override // java.util.Collection
         public abstract boolean contains(Object obj);
 
-        @Override // java.util.Collection, java.lang.Iterable
-        public abstract java.util.Iterator<E> iterator();
-
+        /* JADX WARN: Removed duplicated region for block: B:6:0x000c  */
         @Override // java.util.Collection
-        public abstract boolean remove(Object obj);
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        CollectionView(ConcurrentHashMap<K, V> concurrentHashMap) {
-            this.map = concurrentHashMap;
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        public final boolean containsAll(java.util.Collection r2) {
+            /*
+                r1 = this;
+                if (r2 == r1) goto L1a
+                java.util.Iterator r2 = r2.iterator()
+            L6:
+                boolean r0 = r2.hasNext()
+                if (r0 == 0) goto L1a
+                java.lang.Object r0 = r2.next()
+                if (r0 == 0) goto L18
+                boolean r0 = r1.contains(r0)
+                if (r0 != 0) goto L6
+            L18:
+                r2 = 0
+                return r2
+            L1a:
+                r2 = 1
+                return r2
+            */
+            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.b.containsAll(java.util.Collection):boolean");
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        public ConcurrentHashMap<K, V> getMap() {
-            return this.map;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        @Override // java.util.Collection
-        public final void clear() {
-            this.map.clear();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        @Override // java.util.Collection
-        public final int size() {
-            return this.map.size();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
         @Override // java.util.Collection
         public final boolean isEmpty() {
-            return this.map.isEmpty();
+            return this.a.isEmpty();
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
+        @Override // java.util.Collection, java.lang.Iterable
+        public abstract java.util.Iterator iterator();
+
+        @Override // java.util.Collection
+        public final boolean removeAll(Collection collection) {
+            collection.getClass();
+            java.util.Iterator it = iterator();
+            boolean z = false;
+            while (it.hasNext()) {
+                if (collection.contains(it.next())) {
+                    it.remove();
+                    z = true;
+                }
+            }
+            return z;
+        }
+
+        @Override // java.util.Collection
+        public final boolean retainAll(Collection collection) {
+            collection.getClass();
+            java.util.Iterator it = iterator();
+            boolean z = false;
+            while (it.hasNext()) {
+                if (!collection.contains(it.next())) {
+                    it.remove();
+                    z = true;
+                }
+            }
+            return z;
+        }
+
+        @Override // java.util.Collection
+        public final int size() {
+            return this.a.size();
+        }
+
         @Override // java.util.Collection
         public final Object[] toArray() {
-            long sz = this.map.mappingCount();
-            if (sz > 2147483639) {
-                throw new OutOfMemoryError(oomeMsg);
+            long m = this.a.m();
+            if (m < 0) {
+                m = 0;
             }
-            int n = (int) sz;
-            Object[] r = new Object[n];
-            int i = 0;
-            java.util.Iterator<E> it = iterator();
-            while (it.hasNext()) {
-                E e = it.next();
-                if (i == n) {
-                    if (n >= ConcurrentHashMap.MAX_ARRAY_SIZE) {
-                        throw new OutOfMemoryError(oomeMsg);
+            if (m <= 2147483639) {
+                int i = (int) m;
+                Object[] objArr = new Object[i];
+                int i2 = 0;
+                java.util.Iterator it = iterator();
+                while (it.hasNext()) {
+                    Object next = it.next();
+                    if (i2 == i) {
+                        int i3 = 2147483639;
+                        if (i >= 2147483639) {
+                            throw new OutOfMemoryError("Required array size too large");
+                        }
+                        if (i < 1073741819) {
+                            i3 = (i >>> 1) + 1 + i;
+                        }
+                        objArr = Arrays.copyOf(objArr, i3);
+                        i = i3;
                     }
-                    if (n >= 1073741819) {
-                        n = ConcurrentHashMap.MAX_ARRAY_SIZE;
-                    } else {
-                        n += (n >>> 1) + 1;
-                    }
-                    r = Arrays.copyOf(r, n);
+                    objArr[i2] = next;
+                    i2++;
                 }
-                r[i] = e;
-                i++;
+                return i2 == i ? objArr : Arrays.copyOf(objArr, i2);
             }
-            return i == n ? r : Arrays.copyOf(r, i);
+            throw new OutOfMemoryError("Required array size too large");
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        /* JADX WARN: Multi-variable type inference failed */
-        @Override // java.util.Collection
-        public final <T> T[] toArray(T[] a) {
-            long sz = this.map.mappingCount();
-            if (sz > 2147483639) {
-                throw new OutOfMemoryError(oomeMsg);
-            }
-            int m = (int) sz;
-            T[] r = a.length >= m ? a : (T[]) ((Object[]) Array.newInstance(a.getClass().getComponentType(), m));
-            int n = r.length;
-            int i = 0;
-            java.util.Iterator<E> it = iterator();
-            while (it.hasNext()) {
-                E e = it.next();
-                if (i == n) {
-                    if (n >= ConcurrentHashMap.MAX_ARRAY_SIZE) {
-                        throw new OutOfMemoryError(oomeMsg);
-                    }
-                    if (n >= 1073741819) {
-                        n = ConcurrentHashMap.MAX_ARRAY_SIZE;
-                    } else {
-                        n += (n >>> 1) + 1;
-                    }
-                    r = (T[]) Arrays.copyOf(r, n);
-                }
-                r[i] = e;
-                i++;
-            }
-            if (a != r || i >= n) {
-                return i == n ? r : (T[]) Arrays.copyOf(r, i);
-            }
-            r[i] = null;
-            return r;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
         public final String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
-            java.util.Iterator<E> it = iterator();
+            java.util.Iterator it = iterator();
             if (it.hasNext()) {
                 while (true) {
-                    Object e = it.next();
-                    sb.append(e == this ? "(this Collection)" : e);
+                    Object next = it.next();
+                    if (next == this) {
+                        next = "(this Collection)";
+                    }
+                    sb.append(next);
                     if (!it.hasNext()) {
                         break;
                     }
@@ -3589,491 +3496,41 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements java.u
             return sb.toString();
         }
 
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        /* JADX WARN: Removed duplicated region for block: B:6:0x000c  */
         @Override // java.util.Collection
-        /*
-            Code decompiled incorrectly, please refer to instructions dump.
-            To view partially-correct add '--show-bad-code' argument
-        */
-        public final boolean containsAll(java.util.Collection<?> r4) {
-            /*
-                r3 = this;
-                if (r4 == r3) goto L1c
-                java.util.Iterator r0 = r4.iterator()
-            L6:
-                boolean r1 = r0.hasNext()
-                if (r1 == 0) goto L1c
-                java.lang.Object r1 = r0.next()
-                if (r1 == 0) goto L1a
-                boolean r2 = r3.contains(r1)
-                if (r2 != 0) goto L19
-                goto L1a
-            L19:
-                goto L6
-            L1a:
-                r0 = 0
-                return r0
-            L1c:
-                r0 = 1
-                return r0
-            */
-            throw new UnsupportedOperationException("Method not decompiled: j$.util.concurrent.ConcurrentHashMap.CollectionView.containsAll(java.util.Collection):boolean");
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        @Override // java.util.Collection
-        public final boolean removeAll(Collection<?> c) {
-            if (c == null) {
-                throw new NullPointerException();
+        public final Object[] toArray(Object[] objArr) {
+            long m = this.a.m();
+            if (m < 0) {
+                m = 0;
             }
-            boolean modified = false;
-            java.util.Iterator<E> it = iterator();
-            while (it.hasNext()) {
-                if (c.contains(it.next())) {
-                    it.remove();
-                    modified = true;
-                }
-            }
-            return modified;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$CollectionView != java.util.concurrent.ConcurrentHashMap$CollectionView<K, V, E> */
-        @Override // java.util.Collection
-        public final boolean retainAll(Collection<?> c) {
-            if (c == null) {
-                throw new NullPointerException();
-            }
-            boolean modified = false;
-            java.util.Iterator<E> it = iterator();
-            while (it.hasNext()) {
-                if (!c.contains(it.next())) {
-                    it.remove();
-                    modified = true;
-                }
-            }
-            return modified;
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static class KeySetView<K, V> extends CollectionView<K, V, K> implements Set<K>, Serializable, j$.util.Set<K> {
-        private static final long serialVersionUID = 7249069246763182397L;
-        private final V value;
-
-        @Override // java.lang.Iterable
-        public /* synthetic */ void forEach(java.util.function.Consumer consumer) {
-            forEach(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
-        }
-
-        @Override // j$.util.Collection
-        public /* synthetic */ boolean removeIf(Predicate predicate) {
-            return Collection.CC.$default$removeIf(this, predicate);
-        }
-
-        @Override // java.util.Collection
-        public /* synthetic */ boolean removeIf(java.util.function.Predicate predicate) {
-            return removeIf(C$r8$wrapper$java$util$function$Predicate$VWRP.convert(predicate));
-        }
-
-        @Override // j$.util.Collection
-        public /* synthetic */ Object[] toArray(IntFunction intFunction) {
-            return Collection.CC.$default$toArray(this, intFunction);
-        }
-
-        public /* synthetic */ Object[] toArray(java.util.function.IntFunction intFunction) {
-            return toArray(C$r8$wrapper$java$util$function$IntFunction$VWRP.convert(intFunction));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView
-        public /* bridge */ /* synthetic */ ConcurrentHashMap getMap() {
-            return super.getMap();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        KeySetView(ConcurrentHashMap<K, V> concurrentHashMap, V value) {
-            super(concurrentHashMap);
-            this.value = value;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        public V getMappedValue() {
-            return this.value;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection
-        public boolean contains(Object o) {
-            return this.map.containsKey(o);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection
-        public boolean remove(Object o) {
-            return this.map.remove(o) != null;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection, java.lang.Iterable
-        public java.util.Iterator<K> iterator() {
-            ConcurrentHashMap<K, V> concurrentHashMap = this.map;
-            Node<K, V>[] nodeArr = concurrentHashMap.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            return new KeyIterator(nodeArr, f, 0, f, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public boolean add(K e) {
-            V v = this.value;
-            if (v != null) {
-                return this.map.putVal(e, v, true) == null;
-            }
-            throw new UnsupportedOperationException();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public boolean addAll(java.util.Collection<? extends K> c) {
-            boolean added = false;
-            V v = this.value;
-            if (v == null) {
-                throw new UnsupportedOperationException();
-            }
-            for (K e : c) {
-                if (this.map.putVal(e, v, true) == null) {
-                    added = true;
-                }
-            }
-            return added;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public int hashCode() {
-            int h = 0;
-            java.util.Iterator<K> it = iterator();
-            while (it.hasNext()) {
-                K e = it.next();
-                h += e.hashCode();
-            }
-            return h;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public boolean equals(Object o) {
-            Set<?> c;
-            return (o instanceof Set) && ((c = (Set) o) == this || (containsAll(c) && c.containsAll(this)));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        @Override // java.util.Collection, java.lang.Iterable, java.util.Set, j$.util.Set, j$.util.Collection, j$.lang.Iterable
-        public Spliterator<K> spliterator() {
-            ConcurrentHashMap<K, V> concurrentHashMap = this.map;
-            long n = concurrentHashMap.sumCount();
-            Node<K, V>[] nodeArr = concurrentHashMap.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            return new KeySpliterator(nodeArr, f, 0, f, n < 0 ? 0L : n);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$KeySetView != java.util.concurrent.ConcurrentHashMap$KeySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super K> */
-        @Override // j$.util.Collection, j$.lang.Iterable
-        public void forEach(Consumer<? super K> consumer) {
-            if (consumer == null) {
-                throw new NullPointerException();
-            }
-            Node<K, V>[] nodeArr = this.map.table;
-            if (nodeArr != null) {
-                Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-                while (true) {
-                    Node<K, V> advance = traverser.advance();
-                    if (advance != null) {
-                        consumer.accept((K) advance.key);
-                    } else {
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
-    /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes2.dex */
-    public static final class ValuesView<K, V> extends CollectionView<K, V, V> implements java.util.Collection<V>, Serializable, j$.util.Collection<V> {
-        private static final long serialVersionUID = 2249069246763182397L;
-
-        @Override // java.lang.Iterable
-        public /* synthetic */ void forEach(java.util.function.Consumer consumer) {
-            forEach(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
-        }
-
-        @Override // j$.util.Collection
-        public /* synthetic */ boolean removeIf(Predicate predicate) {
-            return Collection.CC.$default$removeIf(this, predicate);
-        }
-
-        @Override // java.util.Collection
-        public /* synthetic */ boolean removeIf(java.util.function.Predicate predicate) {
-            return removeIf(C$r8$wrapper$java$util$function$Predicate$VWRP.convert(predicate));
-        }
-
-        @Override // j$.util.Collection
-        public /* synthetic */ Object[] toArray(IntFunction intFunction) {
-            return Collection.CC.$default$toArray(this, intFunction);
-        }
-
-        public /* synthetic */ Object[] toArray(java.util.function.IntFunction intFunction) {
-            return toArray(C$r8$wrapper$java$util$function$IntFunction$VWRP.convert(intFunction));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        ValuesView(ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection
-        public final boolean contains(Object o) {
-            return this.map.containsValue(o);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection
-        public final boolean remove(Object o) {
-            if (o != null) {
-                java.util.Iterator<V> it = iterator();
+            if (m <= 2147483639) {
+                int i = (int) m;
+                Object[] objArr2 = objArr.length >= i ? objArr : (Object[]) Array.newInstance(objArr.getClass().getComponentType(), i);
+                int length = objArr2.length;
+                int i2 = 0;
+                java.util.Iterator it = iterator();
                 while (it.hasNext()) {
-                    if (o.equals(it.next())) {
-                        it.remove();
-                        return true;
+                    Object next = it.next();
+                    if (i2 == length) {
+                        int i3 = 2147483639;
+                        if (length >= 2147483639) {
+                            throw new OutOfMemoryError("Required array size too large");
+                        }
+                        if (length < 1073741819) {
+                            i3 = (length >>> 1) + 1 + length;
+                        }
+                        objArr2 = Arrays.copyOf(objArr2, i3);
+                        length = i3;
                     }
+                    objArr2[i2] = next;
+                    i2++;
                 }
-                return false;
-            }
-            return false;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection, java.lang.Iterable
-        public final java.util.Iterator<V> iterator() {
-            ConcurrentHashMap<K, V> concurrentHashMap = this.map;
-            Node<K, V>[] nodeArr = concurrentHashMap.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            return new ValueIterator(nodeArr, f, 0, f, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        @Override // java.util.Collection, j$.util.Collection
-        public final boolean add(V e) {
-            throw new UnsupportedOperationException();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        @Override // java.util.Collection, j$.util.Collection
-        public final boolean addAll(java.util.Collection<? extends V> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        @Override // java.util.Collection, java.lang.Iterable, j$.util.Collection, j$.lang.Iterable
-        public Spliterator<V> spliterator() {
-            ConcurrentHashMap<K, V> concurrentHashMap = this.map;
-            long n = concurrentHashMap.sumCount();
-            Node<K, V>[] nodeArr = concurrentHashMap.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            return new ValueSpliterator(nodeArr, f, 0, f, n < 0 ? 0L : n);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$ValuesView != java.util.concurrent.ConcurrentHashMap$ValuesView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super V> */
-        @Override // j$.util.Collection, j$.lang.Iterable
-        public void forEach(Consumer<? super V> consumer) {
-            if (consumer == null) {
-                throw new NullPointerException();
-            }
-            Node<K, V>[] nodeArr = this.map.table;
-            if (nodeArr != null) {
-                Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-                while (true) {
-                    Node<K, V> advance = traverser.advance();
-                    if (advance != null) {
-                        consumer.accept((V) advance.val);
-                    } else {
-                        return;
-                    }
+                if (objArr != objArr2 || i2 >= length) {
+                    return i2 == length ? objArr2 : Arrays.copyOf(objArr2, i2);
                 }
+                objArr2[i2] = null;
+                return objArr2;
             }
-        }
-    }
-
-    /* loaded from: classes2.dex */
-    public static final class EntrySetView<K, V> extends CollectionView<K, V, Map.Entry<K, V>> implements Set<Map.Entry<K, V>>, Serializable, j$.util.Set<Map.Entry<K, V>> {
-        private static final long serialVersionUID = 2249069246763182397L;
-
-        @Override // java.lang.Iterable
-        public /* synthetic */ void forEach(java.util.function.Consumer consumer) {
-            forEach(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
-        }
-
-        @Override // j$.util.Collection
-        public /* synthetic */ boolean removeIf(Predicate predicate) {
-            return Collection.CC.$default$removeIf(this, predicate);
-        }
-
-        @Override // java.util.Collection
-        public /* synthetic */ boolean removeIf(java.util.function.Predicate predicate) {
-            return removeIf(C$r8$wrapper$java$util$function$Predicate$VWRP.convert(predicate));
-        }
-
-        @Override // j$.util.Collection
-        public /* synthetic */ Object[] toArray(IntFunction intFunction) {
-            return Collection.CC.$default$toArray(this, intFunction);
-        }
-
-        public /* synthetic */ Object[] toArray(java.util.function.IntFunction intFunction) {
-            return toArray(C$r8$wrapper$java$util$function$IntFunction$VWRP.convert(intFunction));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public /* bridge */ /* synthetic */ boolean add(Object obj) {
-            return add((Map.Entry) ((Map.Entry) obj));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        EntrySetView(ConcurrentHashMap<K, V> concurrentHashMap) {
-            super(concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection
-        public boolean contains(Object o) {
-            Map.Entry<?, ?> e;
-            Object k;
-            Object r;
-            Object v;
-            return (!(o instanceof Map.Entry) || (k = (e = (Map.Entry) o).getKey()) == null || (r = this.map.get(k)) == null || (v = e.getValue()) == null || (v != r && !v.equals(r))) ? false : true;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection
-        public boolean remove(Object o) {
-            Map.Entry<?, ?> e;
-            Object k;
-            Object v;
-            return (o instanceof Map.Entry) && (k = (e = (Map.Entry) o).getKey()) != null && (v = e.getValue()) != null && this.map.remove(k, v);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        @Override // j$.util.concurrent.ConcurrentHashMap.CollectionView, java.util.Collection, java.lang.Iterable
-        public java.util.Iterator<Map.Entry<K, V>> iterator() {
-            ConcurrentHashMap<K, V> concurrentHashMap = this.map;
-            Node<K, V>[] nodeArr = concurrentHashMap.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            return new EntryIterator(nodeArr, f, 0, f, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        public boolean add(Map.Entry<K, V> e) {
-            return this.map.putVal(e.getKey(), e.getValue(), false) == null;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public boolean addAll(java.util.Collection<? extends Map.Entry<K, V>> c) {
-            boolean added = false;
-            for (Map.Entry<K, V> e : c) {
-                if (add((Map.Entry) e)) {
-                    added = true;
-                }
-            }
-            return added;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public final int hashCode() {
-            int h = 0;
-            Node<K, V>[] nodeArr = this.map.table;
-            if (nodeArr != null) {
-                Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-                while (true) {
-                    Node<K, V> advance = traverser.advance();
-                    if (advance == null) {
-                        break;
-                    }
-                    h += advance.hashCode();
-                }
-            }
-            return h;
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        @Override // java.util.Collection, java.util.Set, j$.util.Set, j$.util.Collection
-        public final boolean equals(Object o) {
-            Set<?> c;
-            return (o instanceof Set) && ((c = (Set) o) == this || (containsAll(c) && c.containsAll(this)));
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap != java.util.concurrent.ConcurrentHashMap<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        @Override // java.util.Collection, java.lang.Iterable, java.util.Set, j$.util.Set, j$.util.Collection, j$.lang.Iterable
-        public Spliterator<Map.Entry<K, V>> spliterator() {
-            ConcurrentHashMap<K, V> concurrentHashMap = this.map;
-            long n = concurrentHashMap.sumCount();
-            Node<K, V>[] nodeArr = concurrentHashMap.table;
-            int f = nodeArr == null ? 0 : nodeArr.length;
-            return new EntrySpliterator(nodeArr, f, 0, f, n < 0 ? 0L : n, concurrentHashMap);
-        }
-
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$EntrySetView != java.util.concurrent.ConcurrentHashMap$EntrySetView<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node != java.util.concurrent.ConcurrentHashMap$Node<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Node[] != java.util.concurrent.ConcurrentHashMap$Node<K, V>[] */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.concurrent.ConcurrentHashMap$Traverser != java.util.concurrent.ConcurrentHashMap$Traverser<K, V> */
-        /* JADX WARN: Generic types in debug info not equals: j$.util.function.Consumer != java.util.function.Consumer<? super java.util.Map$Entry<K, V>> */
-        @Override // j$.util.Collection, j$.lang.Iterable
-        public void forEach(Consumer<? super Map.Entry<K, V>> consumer) {
-            if (consumer == null) {
-                throw new NullPointerException();
-            }
-            Node<K, V>[] nodeArr = this.map.table;
-            if (nodeArr != null) {
-                Traverser traverser = new Traverser(nodeArr, nodeArr.length, 0, nodeArr.length);
-                while (true) {
-                    Node<K, V> advance = traverser.advance();
-                    if (advance != null) {
-                        consumer.accept(new MapEntry(advance.key, advance.val, this.map));
-                    } else {
-                        return;
-                    }
-                }
-            }
+            throw new OutOfMemoryError("Required array size too large");
         }
     }
 }

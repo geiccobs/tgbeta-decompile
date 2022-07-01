@@ -2,17 +2,17 @@ package com.google.android.datatransport.runtime.backends;
 
 import com.google.android.datatransport.runtime.backends.BackendResponse;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class AutoValue_BackendResponse extends BackendResponse {
     private final long nextRequestWaitMillis;
     private final BackendResponse.Status status;
 
-    public AutoValue_BackendResponse(BackendResponse.Status status, long nextRequestWaitMillis) {
+    public AutoValue_BackendResponse(BackendResponse.Status status, long j) {
         if (status == null) {
             throw new NullPointerException("Null status");
         }
         this.status = status;
-        this.nextRequestWaitMillis = nextRequestWaitMillis;
+        this.nextRequestWaitMillis = j;
     }
 
     @Override // com.google.android.datatransport.runtime.backends.BackendResponse
@@ -29,20 +29,19 @@ public final class AutoValue_BackendResponse extends BackendResponse {
         return "BackendResponse{status=" + this.status + ", nextRequestWaitMillis=" + this.nextRequestWaitMillis + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof BackendResponse)) {
+        if (!(obj instanceof BackendResponse)) {
             return false;
         }
-        BackendResponse that = (BackendResponse) o;
-        return this.status.equals(that.getStatus()) && this.nextRequestWaitMillis == that.getNextRequestWaitMillis();
+        BackendResponse backendResponse = (BackendResponse) obj;
+        return this.status.equals(backendResponse.getStatus()) && this.nextRequestWaitMillis == backendResponse.getNextRequestWaitMillis();
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
         long j = this.nextRequestWaitMillis;
-        return ((h$ ^ this.status.hashCode()) * 1000003) ^ ((int) (j ^ (j >>> 32)));
+        return ((this.status.hashCode() ^ 1000003) * 1000003) ^ ((int) (j ^ (j >>> 32)));
     }
 }

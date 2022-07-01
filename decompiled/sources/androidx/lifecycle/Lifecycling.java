@@ -7,40 +7,36 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Lifecycling {
-    private static final int GENERATED_CALLBACK = 2;
-    private static final int REFLECTIVE_CALLBACK = 1;
     private static Map<Class, Integer> sCallbackCache = new HashMap();
     private static Map<Class, List<Constructor<? extends GeneratedAdapter>>> sClassToAdapters = new HashMap();
 
-    public static GenericLifecycleObserver getCallback(Object object) {
-        if (object instanceof FullLifecycleObserver) {
-            return new FullLifecycleObserverAdapter((FullLifecycleObserver) object);
+    public static GenericLifecycleObserver getCallback(Object obj) {
+        if (obj instanceof FullLifecycleObserver) {
+            return new FullLifecycleObserverAdapter((FullLifecycleObserver) obj);
         }
-        if (object instanceof GenericLifecycleObserver) {
-            return (GenericLifecycleObserver) object;
+        if (obj instanceof GenericLifecycleObserver) {
+            return (GenericLifecycleObserver) obj;
         }
-        Class<?> klass = object.getClass();
-        int type = getObserverConstructorType(klass);
-        if (type == 2) {
-            List<Constructor<? extends GeneratedAdapter>> constructors = sClassToAdapters.get(klass);
-            if (constructors.size() == 1) {
-                GeneratedAdapter generatedAdapter = createGeneratedAdapter(constructors.get(0), object);
-                return new SingleGeneratedAdapterObserver(generatedAdapter);
+        Class<?> cls = obj.getClass();
+        if (getObserverConstructorType(cls) == 2) {
+            List<Constructor<? extends GeneratedAdapter>> list = sClassToAdapters.get(cls);
+            if (list.size() == 1) {
+                return new SingleGeneratedAdapterObserver(createGeneratedAdapter(list.get(0), obj));
             }
-            GeneratedAdapter[] adapters = new GeneratedAdapter[constructors.size()];
-            for (int i = 0; i < constructors.size(); i++) {
-                adapters[i] = createGeneratedAdapter(constructors.get(i), object);
+            GeneratedAdapter[] generatedAdapterArr = new GeneratedAdapter[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                generatedAdapterArr[i] = createGeneratedAdapter(list.get(i), obj);
             }
-            return new CompositeGeneratedAdaptersObserver(adapters);
+            return new CompositeGeneratedAdaptersObserver(generatedAdapterArr);
         }
-        return new ReflectiveGenericLifecycleObserver(object);
+        return new ReflectiveGenericLifecycleObserver(obj);
     }
 
-    private static GeneratedAdapter createGeneratedAdapter(Constructor<? extends GeneratedAdapter> constructor, Object object) {
+    private static GeneratedAdapter createGeneratedAdapter(Constructor<? extends GeneratedAdapter> constructor, Object obj) {
         try {
-            return constructor.newInstance(object);
+            return constructor.newInstance(obj);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InstantiationException e2) {
@@ -50,87 +46,83 @@ public class Lifecycling {
         }
     }
 
-    private static Constructor<? extends GeneratedAdapter> generatedConstructor(Class<?> klass) {
-        String str;
+    private static Constructor<? extends GeneratedAdapter> generatedConstructor(Class<?> cls) {
         try {
-            Package aPackage = klass.getPackage();
-            String name = klass.getCanonicalName();
-            String fullPackage = aPackage != null ? aPackage.getName() : "";
-            String adapterName = getAdapterName(fullPackage.isEmpty() ? name : name.substring(fullPackage.length() + 1));
-            if (fullPackage.isEmpty()) {
-                str = adapterName;
-            } else {
-                str = fullPackage + "." + adapterName;
+            Package r0 = cls.getPackage();
+            String canonicalName = cls.getCanonicalName();
+            String name = r0 != null ? r0.getName() : "";
+            if (!name.isEmpty()) {
+                canonicalName = canonicalName.substring(name.length() + 1);
             }
-            Constructor declaredConstructor = Class.forName(str).getDeclaredConstructor(klass);
+            String adapterName = getAdapterName(canonicalName);
+            if (!name.isEmpty()) {
+                adapterName = name + "." + adapterName;
+            }
+            Constructor declaredConstructor = Class.forName(adapterName).getDeclaredConstructor(cls);
             if (!declaredConstructor.isAccessible()) {
                 declaredConstructor.setAccessible(true);
             }
             return declaredConstructor;
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException unused) {
             return null;
-        } catch (NoSuchMethodException e2) {
-            throw new RuntimeException(e2);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static int getObserverConstructorType(Class<?> klass) {
-        if (sCallbackCache.containsKey(klass)) {
-            return sCallbackCache.get(klass).intValue();
+    private static int getObserverConstructorType(Class<?> cls) {
+        if (sCallbackCache.containsKey(cls)) {
+            return sCallbackCache.get(cls).intValue();
         }
-        int type = resolveObserverCallbackType(klass);
-        sCallbackCache.put(klass, Integer.valueOf(type));
-        return type;
+        int resolveObserverCallbackType = resolveObserverCallbackType(cls);
+        sCallbackCache.put(cls, Integer.valueOf(resolveObserverCallbackType));
+        return resolveObserverCallbackType;
     }
 
-    private static int resolveObserverCallbackType(Class<?> klass) {
+    private static int resolveObserverCallbackType(Class<?> cls) {
         Class<?>[] interfaces;
-        if (klass.getCanonicalName() == null) {
+        if (cls.getCanonicalName() == null) {
             return 1;
         }
-        Constructor<? extends GeneratedAdapter> constructor = generatedConstructor(klass);
-        if (constructor != null) {
-            sClassToAdapters.put(klass, Collections.singletonList(constructor));
+        Constructor<? extends GeneratedAdapter> generatedConstructor = generatedConstructor(cls);
+        if (generatedConstructor != null) {
+            sClassToAdapters.put(cls, Collections.singletonList(generatedConstructor));
             return 2;
-        }
-        boolean hasLifecycleMethods = ClassesInfoCache.sInstance.hasLifecycleMethods(klass);
-        if (hasLifecycleMethods) {
+        } else if (ClassesInfoCache.sInstance.hasLifecycleMethods(cls)) {
             return 1;
-        }
-        Class<?> superclass = klass.getSuperclass();
-        List<Constructor<? extends GeneratedAdapter>> adapterConstructors = null;
-        if (isLifecycleParent(superclass)) {
-            if (getObserverConstructorType(superclass) == 1) {
-                return 1;
-            }
-            adapterConstructors = new ArrayList<>(sClassToAdapters.get(superclass));
-        }
-        for (Class<?> intrface : klass.getInterfaces()) {
-            if (isLifecycleParent(intrface)) {
-                if (getObserverConstructorType(intrface) == 1) {
+        } else {
+            Class<? super Object> superclass = cls.getSuperclass();
+            ArrayList arrayList = null;
+            if (isLifecycleParent(superclass)) {
+                if (getObserverConstructorType(superclass) == 1) {
                     return 1;
                 }
-                if (adapterConstructors == null) {
-                    adapterConstructors = new ArrayList<>();
-                }
-                adapterConstructors.addAll(sClassToAdapters.get(intrface));
+                arrayList = new ArrayList(sClassToAdapters.get(superclass));
             }
+            for (Class<?> cls2 : cls.getInterfaces()) {
+                if (isLifecycleParent(cls2)) {
+                    if (getObserverConstructorType(cls2) == 1) {
+                        return 1;
+                    }
+                    if (arrayList == null) {
+                        arrayList = new ArrayList();
+                    }
+                    arrayList.addAll(sClassToAdapters.get(cls2));
+                }
+            }
+            if (arrayList == null) {
+                return 1;
+            }
+            sClassToAdapters.put(cls, arrayList);
+            return 2;
         }
-        if (adapterConstructors == null) {
-            return 1;
-        }
-        sClassToAdapters.put(klass, adapterConstructors);
-        return 2;
     }
 
-    private static boolean isLifecycleParent(Class<?> klass) {
-        return klass != null && LifecycleObserver.class.isAssignableFrom(klass);
+    private static boolean isLifecycleParent(Class<?> cls) {
+        return cls != null && LifecycleObserver.class.isAssignableFrom(cls);
     }
 
-    public static String getAdapterName(String className) {
-        return className.replace(".", "_") + "_LifecycleAdapter";
-    }
-
-    private Lifecycling() {
+    public static String getAdapterName(String str) {
+        return str.replace(".", "_") + "_LifecycleAdapter";
     }
 }

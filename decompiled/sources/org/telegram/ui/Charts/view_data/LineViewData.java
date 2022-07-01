@@ -8,7 +8,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Charts.BaseChartView;
 import org.telegram.ui.Charts.data.ChartData;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class LineViewData {
     public ValueAnimator animatorIn;
     public ValueAnimator animatorOut;
@@ -47,18 +47,17 @@ public class LineViewData {
         paint3.setStyle(Paint.Style.STROKE);
         paint3.setStrokeCap(Paint.Cap.ROUND);
         paint3.setColor(line.color);
-        this.linesPath = new float[line.y.length << 2];
-        this.linesPathBottom = new float[line.y.length << 2];
+        int[] iArr = line.y;
+        this.linesPath = new float[iArr.length << 2];
+        this.linesPathBottom = new float[iArr.length << 2];
     }
 
     public void updateColors() {
-        if (this.line.colorKey != null && Theme.hasThemeKey(this.line.colorKey)) {
+        String str = this.line.colorKey;
+        if (str != null && Theme.hasThemeKey(str)) {
             this.lineColor = Theme.getColor(this.line.colorKey);
         } else {
-            int color = Theme.getColor(Theme.key_windowBackgroundWhite);
-            boolean darkBackground = ColorUtils.calculateLuminance(color) < 0.5d;
-            ChartData.Line line = this.line;
-            this.lineColor = darkBackground ? line.colorDark : line.color;
+            this.lineColor = (ColorUtils.calculateLuminance(Theme.getColor("windowBackgroundWhite")) > 0.5d ? 1 : (ColorUtils.calculateLuminance(Theme.getColor("windowBackgroundWhite")) == 0.5d ? 0 : -1)) < 0 ? this.line.colorDark : this.line.color;
         }
         this.paint.setColor(this.lineColor);
         this.bottomLinePaint.setColor(this.lineColor);

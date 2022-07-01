@@ -6,7 +6,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.SettingsApi;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzbi implements SettingsApi {
     @Override // com.google.android.gms.location.SettingsApi
     public final PendingResult<LocationSettingsResult> checkLocationSettings(GoogleApiClient googleApiClient, LocationSettingsRequest locationSettingsRequest) {

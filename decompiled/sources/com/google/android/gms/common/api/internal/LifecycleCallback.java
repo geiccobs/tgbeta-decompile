@@ -1,21 +1,49 @@
 package com.google.android.gms.common.api.internal;
 
 import android.app.Activity;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.Keep;
+import androidx.annotation.RecentlyNonNull;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LifecycleCallback {
+    @RecentlyNonNull
     protected final LifecycleFragment mLifecycleFragment;
 
+    @Keep
     private static LifecycleFragment getChimeraLifecycleFragmentImpl(LifecycleActivity lifecycleActivity) {
         throw new IllegalStateException("Method not available in SDK.");
     }
 
-    public static LifecycleFragment getFragment(LifecycleActivity lifecycleActivity) {
+    public void dump(@RecentlyNonNull String str, @RecentlyNonNull FileDescriptor fileDescriptor, @RecentlyNonNull PrintWriter printWriter, @RecentlyNonNull String[] strArr) {
+    }
+
+    public void onActivityResult(int i, int i2, @RecentlyNonNull Intent intent) {
+    }
+
+    public void onCreate(Bundle bundle) {
+    }
+
+    public void onDestroy() {
+    }
+
+    public void onResume() {
+    }
+
+    public void onSaveInstanceState(@RecentlyNonNull Bundle bundle) {
+    }
+
+    public void onStart() {
+    }
+
+    public void onStop() {
+    }
+
+    @RecentlyNonNull
+    public static LifecycleFragment getFragment(@RecentlyNonNull LifecycleActivity lifecycleActivity) {
         if (lifecycleActivity.isSupport()) {
             return zzc.zza(lifecycleActivity.asFragmentActivity());
         }
@@ -25,43 +53,17 @@ public class LifecycleCallback {
         throw new IllegalArgumentException("Can't get fragment for unexpected activity.");
     }
 
-    public static LifecycleFragment getFragment(Activity activity) {
+    @RecentlyNonNull
+    public static LifecycleFragment getFragment(@RecentlyNonNull Activity activity) {
         return getFragment(new LifecycleActivity(activity));
     }
 
-    public static LifecycleFragment getFragment(ContextWrapper contextWrapper) {
-        throw new UnsupportedOperationException();
-    }
-
-    public LifecycleCallback(LifecycleFragment lifecycleFragment) {
+    public LifecycleCallback(@RecentlyNonNull LifecycleFragment lifecycleFragment) {
         this.mLifecycleFragment = lifecycleFragment;
     }
 
+    @RecentlyNonNull
     public Activity getActivity() {
         return this.mLifecycleFragment.getLifecycleActivity();
-    }
-
-    public void onCreate(Bundle bundle) {
-    }
-
-    public void onStart() {
-    }
-
-    public void onResume() {
-    }
-
-    public void onSaveInstanceState(Bundle bundle) {
-    }
-
-    public void onActivityResult(int i, int i2, Intent intent) {
-    }
-
-    public void onStop() {
-    }
-
-    public void onDestroy() {
-    }
-
-    public void dump(String str, FileDescriptor fileDescriptor, PrintWriter printWriter, String[] strArr) {
     }
 }

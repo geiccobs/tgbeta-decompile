@@ -3,7 +3,7 @@ package org.telegram.messenger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class PopupReplyReceiver extends BroadcastReceiver {
     @Override // android.content.BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
@@ -11,10 +11,10 @@ public class PopupReplyReceiver extends BroadcastReceiver {
             return;
         }
         ApplicationLoader.postInitApplication();
-        int currentAccount = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
-        if (!UserConfig.isValidAccount(currentAccount)) {
+        int intExtra = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
+        if (!UserConfig.isValidAccount(intExtra)) {
             return;
         }
-        NotificationsController.getInstance(currentAccount).forceShowPopupForReply();
+        NotificationsController.getInstance(intExtra).forceShowPopupForReply();
     }
 }

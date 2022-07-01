@@ -1,7 +1,5 @@
 package org.telegram.ui.Components.voip;
-
-import org.telegram.messenger.NotificationCenter;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class RTMPStreamPipOverlay$$ExternalSyntheticLambda4 implements Runnable {
     public static final /* synthetic */ RTMPStreamPipOverlay$$ExternalSyntheticLambda4 INSTANCE = new RTMPStreamPipOverlay$$ExternalSyntheticLambda4();
 
@@ -10,6 +8,6 @@ public final /* synthetic */ class RTMPStreamPipOverlay$$ExternalSyntheticLambda
 
     @Override // java.lang.Runnable
     public final void run() {
-        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.groupCallVisibilityChanged, new Object[0]);
+        RTMPStreamPipOverlay.lambda$dismissInternal$6();
     }
 }

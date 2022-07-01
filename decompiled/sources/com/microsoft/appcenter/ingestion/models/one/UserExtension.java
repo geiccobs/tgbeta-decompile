@@ -5,10 +5,8 @@ import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class UserExtension implements Model {
-    private static final String LOCALE = "locale";
-    private static final String LOCAL_ID = "localId";
     private String localId;
     private String locale;
 
@@ -16,56 +14,55 @@ public class UserExtension implements Model {
         return this.localId;
     }
 
-    public void setLocalId(String localId) {
-        this.localId = localId;
+    public void setLocalId(String str) {
+        this.localId = str;
     }
 
     public String getLocale() {
         return this.locale;
     }
 
-    public void setLocale(String locale) {
-        this.locale = locale;
+    public void setLocale(String str) {
+        this.locale = str;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) {
-        setLocalId(object.optString(LOCAL_ID, null));
-        setLocale(object.optString(LOCALE, null));
+    public void read(JSONObject jSONObject) {
+        setLocalId(jSONObject.optString("localId", null));
+        setLocale(jSONObject.optString("locale", null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        JSONUtils.write(writer, LOCAL_ID, getLocalId());
-        JSONUtils.write(writer, LOCALE, getLocale());
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        JSONUtils.write(jSONStringer, "localId", getLocalId());
+        JSONUtils.write(jSONStringer, "locale", getLocale());
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || UserExtension.class != obj.getClass()) {
             return false;
         }
-        UserExtension that = (UserExtension) o;
+        UserExtension userExtension = (UserExtension) obj;
         String str = this.localId;
-        if (str == null ? that.localId != null : !str.equals(that.localId)) {
+        if (str == null ? userExtension.localId != null : !str.equals(userExtension.localId)) {
             return false;
         }
         String str2 = this.locale;
-        return str2 != null ? str2.equals(that.locale) : that.locale == null;
+        String str3 = userExtension.locale;
+        return str2 != null ? str2.equals(str3) : str3 == null;
     }
 
     public int hashCode() {
         String str = this.localId;
         int i = 0;
-        int result = str != null ? str.hashCode() : 0;
-        int i2 = result * 31;
+        int hashCode = (str != null ? str.hashCode() : 0) * 31;
         String str2 = this.locale;
         if (str2 != null) {
             i = str2.hashCode();
         }
-        int result2 = i2 + i;
-        return result2;
+        return hashCode + i;
     }
 }

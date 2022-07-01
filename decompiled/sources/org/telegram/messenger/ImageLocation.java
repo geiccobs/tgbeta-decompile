@@ -1,11 +1,30 @@
 package org.telegram.messenger;
 
-import com.google.android.exoplayer2.text.ttml.TtmlNode;
+import java.util.ArrayList;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Chat;
+import org.telegram.tgnet.TLRPC$ChatPhoto;
+import org.telegram.tgnet.TLRPC$Document;
+import org.telegram.tgnet.TLRPC$FileLocation;
+import org.telegram.tgnet.TLRPC$InputPeer;
+import org.telegram.tgnet.TLRPC$InputStickerSet;
+import org.telegram.tgnet.TLRPC$Photo;
+import org.telegram.tgnet.TLRPC$PhotoSize;
+import org.telegram.tgnet.TLRPC$TL_fileLocationToBeDeprecated;
+import org.telegram.tgnet.TLRPC$TL_inputPeerChannel;
+import org.telegram.tgnet.TLRPC$TL_inputPeerChat;
+import org.telegram.tgnet.TLRPC$TL_inputPeerUser;
+import org.telegram.tgnet.TLRPC$TL_photoPathSize;
+import org.telegram.tgnet.TLRPC$TL_photoStrippedSize;
+import org.telegram.tgnet.TLRPC$TL_secureFile;
+import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC$UserFull;
+import org.telegram.tgnet.TLRPC$UserProfilePhoto;
+import org.telegram.tgnet.TLRPC$VideoSize;
+import org.telegram.tgnet.TLRPC$WebPage;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class ImageLocation {
     public static final int TYPE_BIG = 0;
     public static final int TYPE_SMALL = 1;
@@ -14,32 +33,32 @@ public class ImageLocation {
     public long access_hash;
     public long currentSize;
     public int dc_id;
-    public TLRPC.Document document;
+    public TLRPC$Document document;
     public long documentId;
     public byte[] file_reference;
     public int imageType;
     public byte[] iv;
     public byte[] key;
-    public TLRPC.TL_fileLocationToBeDeprecated location;
+    public TLRPC$TL_fileLocationToBeDeprecated location;
     public String path;
-    public TLRPC.Photo photo;
+    public TLRPC$Photo photo;
     public long photoId;
-    public TLRPC.InputPeer photoPeer;
+    public TLRPC$InputPeer photoPeer;
     public int photoPeerType;
-    public TLRPC.PhotoSize photoSize;
+    public TLRPC$PhotoSize photoSize;
     public SecureDocument secureDocument;
-    public TLRPC.InputStickerSet stickerSet;
+    public TLRPC$InputStickerSet stickerSet;
     public String thumbSize;
     public int thumbVersion;
     public long videoSeekTo;
     public WebFile webFile;
 
-    public static ImageLocation getForPath(String path) {
-        if (path == null) {
+    public static ImageLocation getForPath(String str) {
+        if (str == null) {
             return null;
         }
         ImageLocation imageLocation = new ImageLocation();
-        imageLocation.path = path;
+        imageLocation.path = str;
         return imageLocation;
     }
 
@@ -52,15 +71,15 @@ public class ImageLocation {
         return imageLocation;
     }
 
-    public static ImageLocation getForDocument(TLRPC.Document document) {
-        if (document == null) {
+    public static ImageLocation getForDocument(TLRPC$Document tLRPC$Document) {
+        if (tLRPC$Document == null) {
             return null;
         }
         ImageLocation imageLocation = new ImageLocation();
-        imageLocation.document = document;
-        imageLocation.key = document.key;
-        imageLocation.iv = document.iv;
-        imageLocation.currentSize = document.size;
+        imageLocation.document = tLRPC$Document;
+        imageLocation.key = tLRPC$Document.key;
+        imageLocation.iv = tLRPC$Document.iv;
+        imageLocation.currentSize = tLRPC$Document.size;
         return imageLocation;
     }
 
@@ -74,299 +93,293 @@ public class ImageLocation {
         return imageLocation;
     }
 
-    public static ImageLocation getForObject(TLRPC.PhotoSize photoSize, TLObject object) {
-        if (object instanceof TLRPC.Photo) {
-            return getForPhoto(photoSize, (TLRPC.Photo) object);
+    public static ImageLocation getForObject(TLRPC$PhotoSize tLRPC$PhotoSize, TLObject tLObject) {
+        if (tLObject instanceof TLRPC$Photo) {
+            return getForPhoto(tLRPC$PhotoSize, (TLRPC$Photo) tLObject);
         }
-        if (object instanceof TLRPC.Document) {
-            return getForDocument(photoSize, (TLRPC.Document) object);
+        if (!(tLObject instanceof TLRPC$Document)) {
+            return null;
         }
-        return null;
+        return getForDocument(tLRPC$PhotoSize, (TLRPC$Document) tLObject);
     }
 
-    public static ImageLocation getForPhoto(TLRPC.PhotoSize photoSize, TLRPC.Photo photo) {
-        int dc_id;
-        if ((photoSize instanceof TLRPC.TL_photoStrippedSize) || (photoSize instanceof TLRPC.TL_photoPathSize)) {
+    public static ImageLocation getForPhoto(TLRPC$PhotoSize tLRPC$PhotoSize, TLRPC$Photo tLRPC$Photo) {
+        if ((tLRPC$PhotoSize instanceof TLRPC$TL_photoStrippedSize) || (tLRPC$PhotoSize instanceof TLRPC$TL_photoPathSize)) {
             ImageLocation imageLocation = new ImageLocation();
-            imageLocation.photoSize = photoSize;
+            imageLocation.photoSize = tLRPC$PhotoSize;
             return imageLocation;
-        } else if (photoSize == null || photo == null) {
+        } else if (tLRPC$PhotoSize == null || tLRPC$Photo == null) {
             return null;
         } else {
-            if (photo.dc_id != 0) {
-                dc_id = photo.dc_id;
-            } else {
-                dc_id = photoSize.location.dc_id;
+            int i = tLRPC$Photo.dc_id;
+            if (i == 0) {
+                i = tLRPC$PhotoSize.location.dc_id;
             }
-            return getForPhoto(photoSize.location, photoSize.size, photo, null, null, 1, dc_id, null, photoSize.type);
+            return getForPhoto(tLRPC$PhotoSize.location, tLRPC$PhotoSize.size, tLRPC$Photo, null, null, 1, i, null, tLRPC$PhotoSize.type);
         }
     }
 
-    public static ImageLocation getForUserOrChat(TLObject object, int type) {
-        if (object instanceof TLRPC.User) {
-            return getForUser((TLRPC.User) object, type);
+    public static ImageLocation getForUserOrChat(TLObject tLObject, int i) {
+        if (tLObject instanceof TLRPC$User) {
+            return getForUser((TLRPC$User) tLObject, i);
         }
-        if (object instanceof TLRPC.Chat) {
-            return getForChat((TLRPC.Chat) object, type);
-        }
-        return null;
-    }
-
-    public static ImageLocation getForUser(TLRPC.User user, int type) {
-        int dc_id;
-        TLRPC.UserFull userFull;
-        if (user == null || user.access_hash == 0 || user.photo == null) {
+        if (!(tLObject instanceof TLRPC$Chat)) {
             return null;
         }
-        if (type == 3) {
-            int currentAccount = UserConfig.selectedAccount;
-            if (!MessagesController.getInstance(currentAccount).isPremiumUser(user) || !user.photo.has_video || (userFull = MessagesController.getInstance(currentAccount).getUserFull(user.id)) == null || userFull.profile_photo == null || userFull.profile_photo.video_sizes == null || userFull.profile_photo.video_sizes.isEmpty()) {
+        return getForChat((TLRPC$Chat) tLObject, i);
+    }
+
+    public static ImageLocation getForUser(TLRPC$User tLRPC$User, int i) {
+        TLRPC$UserProfilePhoto tLRPC$UserProfilePhoto;
+        TLRPC$UserFull userFull;
+        TLRPC$Photo tLRPC$Photo;
+        ArrayList<TLRPC$VideoSize> arrayList;
+        if (tLRPC$User == null || tLRPC$User.access_hash == 0 || (tLRPC$UserProfilePhoto = tLRPC$User.photo) == null) {
+            return null;
+        }
+        if (i == 3) {
+            int i2 = UserConfig.selectedAccount;
+            if (!MessagesController.getInstance(i2).isPremiumUser(tLRPC$User) || !tLRPC$User.photo.has_video || (userFull = MessagesController.getInstance(i2).getUserFull(tLRPC$User.id)) == null || (tLRPC$Photo = userFull.profile_photo) == null || (arrayList = tLRPC$Photo.video_sizes) == null || arrayList.isEmpty()) {
                 return null;
             }
-            TLRPC.VideoSize videoSize = userFull.profile_photo.video_sizes.get(0);
-            int i = 0;
+            int i3 = 0;
+            TLRPC$VideoSize tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(0);
             while (true) {
-                if (i >= userFull.profile_photo.video_sizes.size()) {
+                if (i3 >= userFull.profile_photo.video_sizes.size()) {
                     break;
-                } else if (!TtmlNode.TAG_P.equals(userFull.profile_photo.video_sizes.get(i).type)) {
-                    i++;
+                } else if ("p".equals(userFull.profile_photo.video_sizes.get(i3).type)) {
+                    tLRPC$VideoSize = userFull.profile_photo.video_sizes.get(i3);
+                    break;
                 } else {
-                    TLRPC.VideoSize videoSize2 = userFull.profile_photo.video_sizes.get(i);
-                    videoSize = videoSize2;
-                    break;
+                    i3++;
                 }
             }
-            return getForPhoto(videoSize, userFull.profile_photo);
-        } else if (type == 2) {
-            if (user.photo.stripped_thumb == null) {
+            return getForPhoto(tLRPC$VideoSize, userFull.profile_photo);
+        } else if (i == 2) {
+            if (tLRPC$UserProfilePhoto.stripped_thumb == null) {
                 return null;
             }
             ImageLocation imageLocation = new ImageLocation();
-            TLRPC.TL_photoStrippedSize tL_photoStrippedSize = new TLRPC.TL_photoStrippedSize();
-            imageLocation.photoSize = tL_photoStrippedSize;
-            tL_photoStrippedSize.type = "s";
-            imageLocation.photoSize.bytes = user.photo.stripped_thumb;
+            TLRPC$TL_photoStrippedSize tLRPC$TL_photoStrippedSize = new TLRPC$TL_photoStrippedSize();
+            imageLocation.photoSize = tLRPC$TL_photoStrippedSize;
+            tLRPC$TL_photoStrippedSize.type = "s";
+            tLRPC$TL_photoStrippedSize.bytes = tLRPC$User.photo.stripped_thumb;
             return imageLocation;
         } else {
-            TLRPC.UserProfilePhoto userProfilePhoto = user.photo;
-            TLRPC.FileLocation fileLocation = type == 0 ? userProfilePhoto.photo_big : userProfilePhoto.photo_small;
-            if (fileLocation == null) {
+            TLRPC$FileLocation tLRPC$FileLocation = i == 0 ? tLRPC$UserProfilePhoto.photo_big : tLRPC$UserProfilePhoto.photo_small;
+            if (tLRPC$FileLocation == null) {
                 return null;
             }
-            TLRPC.TL_inputPeerUser inputPeer = new TLRPC.TL_inputPeerUser();
-            inputPeer.user_id = user.id;
-            inputPeer.access_hash = user.access_hash;
-            if (user.photo.dc_id != 0) {
-                dc_id = user.photo.dc_id;
-            } else {
-                int dc_id2 = fileLocation.dc_id;
-                dc_id = dc_id2;
+            TLRPC$TL_inputPeerUser tLRPC$TL_inputPeerUser = new TLRPC$TL_inputPeerUser();
+            tLRPC$TL_inputPeerUser.user_id = tLRPC$User.id;
+            tLRPC$TL_inputPeerUser.access_hash = tLRPC$User.access_hash;
+            int i4 = tLRPC$User.photo.dc_id;
+            if (i4 == 0) {
+                i4 = tLRPC$FileLocation.dc_id;
             }
-            ImageLocation location = getForPhoto(fileLocation, 0, null, null, inputPeer, type, dc_id, null, null);
-            location.photoId = user.photo.photo_id;
-            return location;
+            ImageLocation forPhoto = getForPhoto(tLRPC$FileLocation, 0, null, null, tLRPC$TL_inputPeerUser, i, i4, null, null);
+            forPhoto.photoId = tLRPC$User.photo.photo_id;
+            return forPhoto;
         }
     }
 
-    public static ImageLocation getForChat(TLRPC.Chat chat, int type) {
-        TLRPC.InputPeer inputPeer;
-        int dc_id;
-        if (chat == null || chat.photo == null) {
+    public static ImageLocation getForChat(TLRPC$Chat tLRPC$Chat, int i) {
+        TLRPC$ChatPhoto tLRPC$ChatPhoto;
+        TLRPC$InputPeer tLRPC$InputPeer;
+        if (tLRPC$Chat == null || (tLRPC$ChatPhoto = tLRPC$Chat.photo) == null) {
             return null;
         }
-        if (type == 2) {
-            if (chat.photo.stripped_thumb == null) {
+        if (i == 2) {
+            if (tLRPC$ChatPhoto.stripped_thumb == null) {
                 return null;
             }
             ImageLocation imageLocation = new ImageLocation();
-            TLRPC.TL_photoStrippedSize tL_photoStrippedSize = new TLRPC.TL_photoStrippedSize();
-            imageLocation.photoSize = tL_photoStrippedSize;
-            tL_photoStrippedSize.type = "s";
-            imageLocation.photoSize.bytes = chat.photo.stripped_thumb;
+            TLRPC$TL_photoStrippedSize tLRPC$TL_photoStrippedSize = new TLRPC$TL_photoStrippedSize();
+            imageLocation.photoSize = tLRPC$TL_photoStrippedSize;
+            tLRPC$TL_photoStrippedSize.type = "s";
+            tLRPC$TL_photoStrippedSize.bytes = tLRPC$Chat.photo.stripped_thumb;
             return imageLocation;
         }
-        TLRPC.ChatPhoto chatPhoto = chat.photo;
-        TLRPC.FileLocation fileLocation = type == 0 ? chatPhoto.photo_big : chatPhoto.photo_small;
-        if (fileLocation == null) {
+        TLRPC$FileLocation tLRPC$FileLocation = i == 0 ? tLRPC$ChatPhoto.photo_big : tLRPC$ChatPhoto.photo_small;
+        if (tLRPC$FileLocation == null) {
             return null;
         }
-        if (ChatObject.isChannel(chat)) {
-            if (chat.access_hash == 0) {
+        if (ChatObject.isChannel(tLRPC$Chat)) {
+            if (tLRPC$Chat.access_hash == 0) {
                 return null;
             }
-            inputPeer = new TLRPC.TL_inputPeerChannel();
-            inputPeer.channel_id = chat.id;
-            inputPeer.access_hash = chat.access_hash;
+            tLRPC$InputPeer = new TLRPC$TL_inputPeerChannel();
+            tLRPC$InputPeer.channel_id = tLRPC$Chat.id;
+            tLRPC$InputPeer.access_hash = tLRPC$Chat.access_hash;
         } else {
-            inputPeer = new TLRPC.TL_inputPeerChat();
-            inputPeer.chat_id = chat.id;
+            tLRPC$InputPeer = new TLRPC$TL_inputPeerChat();
+            tLRPC$InputPeer.chat_id = tLRPC$Chat.id;
         }
-        if (chat.photo.dc_id != 0) {
-            dc_id = chat.photo.dc_id;
-        } else {
-            int dc_id2 = fileLocation.dc_id;
-            dc_id = dc_id2;
+        TLRPC$InputPeer tLRPC$InputPeer2 = tLRPC$InputPeer;
+        int i2 = tLRPC$Chat.photo.dc_id;
+        if (i2 == 0) {
+            i2 = tLRPC$FileLocation.dc_id;
         }
-        ImageLocation location = getForPhoto(fileLocation, 0, null, null, inputPeer, type, dc_id, null, null);
-        location.photoId = chat.photo.photo_id;
-        return location;
+        ImageLocation forPhoto = getForPhoto(tLRPC$FileLocation, 0, null, null, tLRPC$InputPeer2, i, i2, null, null);
+        forPhoto.photoId = tLRPC$Chat.photo.photo_id;
+        return forPhoto;
     }
 
-    public static ImageLocation getForSticker(TLRPC.PhotoSize photoSize, TLRPC.Document sticker, int thumbVersion) {
-        TLRPC.InputStickerSet stickerSet;
-        if ((photoSize instanceof TLRPC.TL_photoStrippedSize) || (photoSize instanceof TLRPC.TL_photoPathSize)) {
+    public static ImageLocation getForSticker(TLRPC$PhotoSize tLRPC$PhotoSize, TLRPC$Document tLRPC$Document, int i) {
+        TLRPC$InputStickerSet inputStickerSet;
+        if ((tLRPC$PhotoSize instanceof TLRPC$TL_photoStrippedSize) || (tLRPC$PhotoSize instanceof TLRPC$TL_photoPathSize)) {
             ImageLocation imageLocation = new ImageLocation();
-            imageLocation.photoSize = photoSize;
+            imageLocation.photoSize = tLRPC$PhotoSize;
             return imageLocation;
-        } else if (photoSize == null || sticker == null || (stickerSet = MediaDataController.getInputStickerSet(sticker)) == null) {
+        } else if (tLRPC$PhotoSize == null || tLRPC$Document == null || (inputStickerSet = MediaDataController.getInputStickerSet(tLRPC$Document)) == null) {
             return null;
         } else {
-            ImageLocation imageLocation2 = getForPhoto(photoSize.location, photoSize.size, null, null, null, 1, sticker.dc_id, stickerSet, photoSize.type);
-            if (MessageObject.isAnimatedStickerDocument(sticker, true)) {
-                imageLocation2.imageType = 1;
+            ImageLocation forPhoto = getForPhoto(tLRPC$PhotoSize.location, tLRPC$PhotoSize.size, null, null, null, 1, tLRPC$Document.dc_id, inputStickerSet, tLRPC$PhotoSize.type);
+            if (MessageObject.isAnimatedStickerDocument(tLRPC$Document, true)) {
+                forPhoto.imageType = 1;
             }
-            imageLocation2.thumbVersion = thumbVersion;
-            return imageLocation2;
+            forPhoto.thumbVersion = i;
+            return forPhoto;
         }
     }
 
-    public static ImageLocation getForDocument(TLRPC.VideoSize videoSize, TLRPC.Document document) {
-        if (videoSize == null || document == null) {
+    public static ImageLocation getForDocument(TLRPC$VideoSize tLRPC$VideoSize, TLRPC$Document tLRPC$Document) {
+        if (tLRPC$VideoSize == null || tLRPC$Document == null) {
             return null;
         }
-        ImageLocation location = getForPhoto(videoSize.location, videoSize.size, null, document, null, 1, document.dc_id, null, videoSize.type);
-        if ("f".equals(videoSize.type)) {
-            location.imageType = 1;
+        ImageLocation forPhoto = getForPhoto(tLRPC$VideoSize.location, tLRPC$VideoSize.size, null, tLRPC$Document, null, 1, tLRPC$Document.dc_id, null, tLRPC$VideoSize.type);
+        if ("f".equals(tLRPC$VideoSize.type)) {
+            forPhoto.imageType = 1;
         } else {
-            location.imageType = 2;
+            forPhoto.imageType = 2;
         }
-        return location;
+        return forPhoto;
     }
 
-    public static ImageLocation getForPhoto(TLRPC.VideoSize videoSize, TLRPC.Photo photo) {
-        if (videoSize == null || photo == null) {
+    public static ImageLocation getForPhoto(TLRPC$VideoSize tLRPC$VideoSize, TLRPC$Photo tLRPC$Photo) {
+        if (tLRPC$VideoSize == null || tLRPC$Photo == null) {
             return null;
         }
-        ImageLocation location = getForPhoto(videoSize.location, videoSize.size, photo, null, null, 1, photo.dc_id, null, videoSize.type);
-        location.imageType = 2;
-        if ((videoSize.flags & 1) != 0) {
-            location.videoSeekTo = (int) (videoSize.video_start_ts * 1000.0d);
+        ImageLocation forPhoto = getForPhoto(tLRPC$VideoSize.location, tLRPC$VideoSize.size, tLRPC$Photo, null, null, 1, tLRPC$Photo.dc_id, null, tLRPC$VideoSize.type);
+        forPhoto.imageType = 2;
+        if ((tLRPC$VideoSize.flags & 1) != 0) {
+            forPhoto.videoSeekTo = (int) (tLRPC$VideoSize.video_start_ts * 1000.0d);
         }
-        return location;
+        return forPhoto;
     }
 
-    public static ImageLocation getForDocument(TLRPC.PhotoSize photoSize, TLRPC.Document document) {
-        if ((photoSize instanceof TLRPC.TL_photoStrippedSize) || (photoSize instanceof TLRPC.TL_photoPathSize)) {
+    public static ImageLocation getForDocument(TLRPC$PhotoSize tLRPC$PhotoSize, TLRPC$Document tLRPC$Document) {
+        if ((tLRPC$PhotoSize instanceof TLRPC$TL_photoStrippedSize) || (tLRPC$PhotoSize instanceof TLRPC$TL_photoPathSize)) {
             ImageLocation imageLocation = new ImageLocation();
-            imageLocation.photoSize = photoSize;
+            imageLocation.photoSize = tLRPC$PhotoSize;
             return imageLocation;
-        } else if (photoSize == null || document == null) {
-            return null;
+        } else if (tLRPC$PhotoSize != null && tLRPC$Document != null) {
+            return getForPhoto(tLRPC$PhotoSize.location, tLRPC$PhotoSize.size, null, tLRPC$Document, null, 1, tLRPC$Document.dc_id, null, tLRPC$PhotoSize.type);
         } else {
-            return getForPhoto(photoSize.location, photoSize.size, null, document, null, 1, document.dc_id, null, photoSize.type);
+            return null;
         }
     }
 
-    public static ImageLocation getForLocal(TLRPC.FileLocation location) {
-        if (location == null) {
+    public static ImageLocation getForLocal(TLRPC$FileLocation tLRPC$FileLocation) {
+        if (tLRPC$FileLocation == null) {
             return null;
         }
         ImageLocation imageLocation = new ImageLocation();
-        TLRPC.TL_fileLocationToBeDeprecated tL_fileLocationToBeDeprecated = new TLRPC.TL_fileLocationToBeDeprecated();
-        imageLocation.location = tL_fileLocationToBeDeprecated;
-        tL_fileLocationToBeDeprecated.local_id = location.local_id;
-        imageLocation.location.volume_id = location.volume_id;
-        imageLocation.location.secret = location.secret;
-        imageLocation.location.dc_id = location.dc_id;
+        TLRPC$TL_fileLocationToBeDeprecated tLRPC$TL_fileLocationToBeDeprecated = new TLRPC$TL_fileLocationToBeDeprecated();
+        imageLocation.location = tLRPC$TL_fileLocationToBeDeprecated;
+        tLRPC$TL_fileLocationToBeDeprecated.local_id = tLRPC$FileLocation.local_id;
+        tLRPC$TL_fileLocationToBeDeprecated.volume_id = tLRPC$FileLocation.volume_id;
+        tLRPC$TL_fileLocationToBeDeprecated.secret = tLRPC$FileLocation.secret;
+        tLRPC$TL_fileLocationToBeDeprecated.dc_id = tLRPC$FileLocation.dc_id;
         return imageLocation;
     }
 
-    private static ImageLocation getForPhoto(TLRPC.FileLocation location, int size, TLRPC.Photo photo, TLRPC.Document document, TLRPC.InputPeer photoPeer, int photoPeerType, int dc_id, TLRPC.InputStickerSet stickerSet, String thumbSize) {
-        if (location != null) {
-            if (photo == null && photoPeer == null && stickerSet == null && document == null) {
+    private static ImageLocation getForPhoto(TLRPC$FileLocation tLRPC$FileLocation, int i, TLRPC$Photo tLRPC$Photo, TLRPC$Document tLRPC$Document, TLRPC$InputPeer tLRPC$InputPeer, int i2, int i3, TLRPC$InputStickerSet tLRPC$InputStickerSet, String str) {
+        if (tLRPC$FileLocation != null) {
+            if (tLRPC$Photo == null && tLRPC$InputPeer == null && tLRPC$InputStickerSet == null && tLRPC$Document == null) {
                 return null;
             }
             ImageLocation imageLocation = new ImageLocation();
-            imageLocation.dc_id = dc_id;
-            imageLocation.photo = photo;
-            imageLocation.currentSize = size;
-            imageLocation.photoPeer = photoPeer;
-            imageLocation.photoPeerType = photoPeerType;
-            imageLocation.stickerSet = stickerSet;
-            if (location instanceof TLRPC.TL_fileLocationToBeDeprecated) {
-                imageLocation.location = (TLRPC.TL_fileLocationToBeDeprecated) location;
-                if (photo != null) {
-                    imageLocation.file_reference = photo.file_reference;
-                    imageLocation.access_hash = photo.access_hash;
-                    imageLocation.photoId = photo.id;
-                    imageLocation.thumbSize = thumbSize;
-                } else if (document != null) {
-                    imageLocation.file_reference = document.file_reference;
-                    imageLocation.access_hash = document.access_hash;
-                    imageLocation.documentId = document.id;
-                    imageLocation.thumbSize = thumbSize;
+            imageLocation.dc_id = i3;
+            imageLocation.photo = tLRPC$Photo;
+            imageLocation.currentSize = i;
+            imageLocation.photoPeer = tLRPC$InputPeer;
+            imageLocation.photoPeerType = i2;
+            imageLocation.stickerSet = tLRPC$InputStickerSet;
+            if (tLRPC$FileLocation instanceof TLRPC$TL_fileLocationToBeDeprecated) {
+                imageLocation.location = (TLRPC$TL_fileLocationToBeDeprecated) tLRPC$FileLocation;
+                if (tLRPC$Photo != null) {
+                    imageLocation.file_reference = tLRPC$Photo.file_reference;
+                    imageLocation.access_hash = tLRPC$Photo.access_hash;
+                    imageLocation.photoId = tLRPC$Photo.id;
+                    imageLocation.thumbSize = str;
+                } else if (tLRPC$Document != null) {
+                    imageLocation.file_reference = tLRPC$Document.file_reference;
+                    imageLocation.access_hash = tLRPC$Document.access_hash;
+                    imageLocation.documentId = tLRPC$Document.id;
+                    imageLocation.thumbSize = str;
                 }
             } else {
-                TLRPC.TL_fileLocationToBeDeprecated tL_fileLocationToBeDeprecated = new TLRPC.TL_fileLocationToBeDeprecated();
-                imageLocation.location = tL_fileLocationToBeDeprecated;
-                tL_fileLocationToBeDeprecated.local_id = location.local_id;
-                imageLocation.location.volume_id = location.volume_id;
-                imageLocation.location.secret = location.secret;
-                imageLocation.dc_id = location.dc_id;
-                imageLocation.file_reference = location.file_reference;
-                imageLocation.key = location.key;
-                imageLocation.iv = location.iv;
-                imageLocation.access_hash = location.secret;
+                TLRPC$TL_fileLocationToBeDeprecated tLRPC$TL_fileLocationToBeDeprecated = new TLRPC$TL_fileLocationToBeDeprecated();
+                imageLocation.location = tLRPC$TL_fileLocationToBeDeprecated;
+                tLRPC$TL_fileLocationToBeDeprecated.local_id = tLRPC$FileLocation.local_id;
+                tLRPC$TL_fileLocationToBeDeprecated.volume_id = tLRPC$FileLocation.volume_id;
+                tLRPC$TL_fileLocationToBeDeprecated.secret = tLRPC$FileLocation.secret;
+                imageLocation.dc_id = tLRPC$FileLocation.dc_id;
+                imageLocation.file_reference = tLRPC$FileLocation.file_reference;
+                imageLocation.key = tLRPC$FileLocation.key;
+                imageLocation.iv = tLRPC$FileLocation.iv;
+                imageLocation.access_hash = tLRPC$FileLocation.secret;
             }
             return imageLocation;
         }
         return null;
     }
 
-    public static String getStrippedKey(Object parentObject, Object fullObject, Object strippedObject) {
-        if (parentObject instanceof TLRPC.WebPage) {
-            if (fullObject instanceof ImageLocation) {
-                ImageLocation imageLocation = (ImageLocation) fullObject;
-                if (imageLocation.document != null) {
-                    fullObject = imageLocation.document;
-                } else if (imageLocation.photoSize != null) {
-                    fullObject = imageLocation.photoSize;
-                } else if (imageLocation.photo != null) {
-                    fullObject = imageLocation.photo;
+    public static String getStrippedKey(Object obj, Object obj2, Object obj3) {
+        if (obj instanceof TLRPC$WebPage) {
+            if (obj2 instanceof ImageLocation) {
+                ImageLocation imageLocation = (ImageLocation) obj2;
+                Object obj4 = imageLocation.document;
+                if (obj4 == null && (obj4 = imageLocation.photoSize) == null) {
+                    TLRPC$Photo tLRPC$Photo = imageLocation.photo;
+                    if (tLRPC$Photo != null) {
+                        obj2 = tLRPC$Photo;
+                    }
+                } else {
+                    obj2 = obj4;
                 }
             }
-            if (fullObject == null) {
-                return "stripped" + FileRefController.getKeyForParentObject(parentObject) + "_" + strippedObject;
-            } else if (fullObject instanceof TLRPC.Document) {
-                TLRPC.Document document = (TLRPC.Document) fullObject;
-                return "stripped" + FileRefController.getKeyForParentObject(parentObject) + "_" + document.id;
-            } else if (fullObject instanceof TLRPC.Photo) {
-                TLRPC.Photo photo = (TLRPC.Photo) fullObject;
-                return "stripped" + FileRefController.getKeyForParentObject(parentObject) + "_" + photo.id;
-            } else if (fullObject instanceof TLRPC.PhotoSize) {
-                TLRPC.PhotoSize size = (TLRPC.PhotoSize) fullObject;
-                if (size.location != null) {
-                    return "stripped" + FileRefController.getKeyForParentObject(parentObject) + "_" + size.location.local_id + "_" + size.location.volume_id;
+            if (obj2 == null) {
+                return "stripped" + FileRefController.getKeyForParentObject(obj) + "_" + obj3;
+            } else if (obj2 instanceof TLRPC$Document) {
+                return "stripped" + FileRefController.getKeyForParentObject(obj) + "_" + ((TLRPC$Document) obj2).id;
+            } else if (obj2 instanceof TLRPC$Photo) {
+                return "stripped" + FileRefController.getKeyForParentObject(obj) + "_" + ((TLRPC$Photo) obj2).id;
+            } else if (obj2 instanceof TLRPC$PhotoSize) {
+                TLRPC$PhotoSize tLRPC$PhotoSize = (TLRPC$PhotoSize) obj2;
+                if (tLRPC$PhotoSize.location != null) {
+                    return "stripped" + FileRefController.getKeyForParentObject(obj) + "_" + tLRPC$PhotoSize.location.local_id + "_" + tLRPC$PhotoSize.location.volume_id;
                 }
-                return "stripped" + FileRefController.getKeyForParentObject(parentObject);
-            } else if (fullObject instanceof TLRPC.FileLocation) {
-                TLRPC.FileLocation loc = (TLRPC.FileLocation) fullObject;
-                return "stripped" + FileRefController.getKeyForParentObject(parentObject) + "_" + loc.local_id + "_" + loc.volume_id;
+                return "stripped" + FileRefController.getKeyForParentObject(obj);
+            } else if (obj2 instanceof TLRPC$FileLocation) {
+                TLRPC$FileLocation tLRPC$FileLocation = (TLRPC$FileLocation) obj2;
+                return "stripped" + FileRefController.getKeyForParentObject(obj) + "_" + tLRPC$FileLocation.local_id + "_" + tLRPC$FileLocation.volume_id;
             }
         }
-        return "stripped" + FileRefController.getKeyForParentObject(parentObject);
+        return "stripped" + FileRefController.getKeyForParentObject(obj);
     }
 
-    public String getKey(Object parentObject, Object fullObject, boolean url) {
+    public String getKey(Object obj, Object obj2, boolean z) {
         if (this.secureDocument != null) {
             return this.secureDocument.secureFile.dc_id + "_" + this.secureDocument.secureFile.id;
         }
-        TLRPC.PhotoSize photoSize = this.photoSize;
-        if ((photoSize instanceof TLRPC.TL_photoStrippedSize) || (photoSize instanceof TLRPC.TL_photoPathSize)) {
-            if (photoSize.bytes.length > 0) {
-                return getStrippedKey(parentObject, fullObject, this.photoSize);
+        TLRPC$PhotoSize tLRPC$PhotoSize = this.photoSize;
+        if ((tLRPC$PhotoSize instanceof TLRPC$TL_photoStrippedSize) || (tLRPC$PhotoSize instanceof TLRPC$TL_photoPathSize)) {
+            if (tLRPC$PhotoSize.bytes.length <= 0) {
+                return null;
             }
-            return null;
+            return getStrippedKey(obj, obj2, tLRPC$PhotoSize);
         } else if (this.location != null) {
             return this.location.volume_id + "_" + this.location.local_id;
         } else {
@@ -374,10 +387,10 @@ public class ImageLocation {
             if (webFile != null) {
                 return Utilities.MD5(webFile.url);
             }
-            TLRPC.Document document = this.document;
-            if (document != null) {
-                if (!url && (document instanceof DocumentObject.ThemeDocument)) {
-                    DocumentObject.ThemeDocument themeDocument = (DocumentObject.ThemeDocument) document;
+            TLRPC$Document tLRPC$Document = this.document;
+            if (tLRPC$Document != null) {
+                if (!z && (tLRPC$Document instanceof DocumentObject.ThemeDocument)) {
+                    DocumentObject.ThemeDocument themeDocument = (DocumentObject.ThemeDocument) tLRPC$Document;
                     StringBuilder sb = new StringBuilder();
                     sb.append(this.document.dc_id);
                     sb.append("_");
@@ -395,17 +408,17 @@ public class ImageLocation {
                     }
                     sb.append(i);
                     return sb.toString();
-                } else if (document.id != 0 && this.document.dc_id != 0) {
-                    return this.document.dc_id + "_" + this.document.id;
-                } else {
+                } else if (tLRPC$Document.id == 0 || tLRPC$Document.dc_id == 0) {
                     return null;
+                } else {
+                    return this.document.dc_id + "_" + this.document.id;
                 }
             }
             String str = this.path;
-            if (str != null) {
-                return Utilities.MD5(str);
+            if (str == null) {
+                return null;
             }
-            return null;
+            return Utilities.MD5(str);
         }
     }
 
@@ -414,25 +427,29 @@ public class ImageLocation {
     }
 
     public long getSize() {
-        TLRPC.PhotoSize photoSize = this.photoSize;
-        if (photoSize != null) {
-            return photoSize.size;
-        }
-        SecureDocument secureDocument = this.secureDocument;
-        if (secureDocument != null) {
-            if (secureDocument.secureFile != null) {
-                return this.secureDocument.secureFile.size;
-            }
+        int i;
+        TLRPC$PhotoSize tLRPC$PhotoSize = this.photoSize;
+        if (tLRPC$PhotoSize != null) {
+            i = tLRPC$PhotoSize.size;
         } else {
-            TLRPC.Document document = this.document;
-            if (document != null) {
-                return document.size;
+            SecureDocument secureDocument = this.secureDocument;
+            if (secureDocument != null) {
+                TLRPC$TL_secureFile tLRPC$TL_secureFile = secureDocument.secureFile;
+                if (tLRPC$TL_secureFile != null) {
+                    return tLRPC$TL_secureFile.size;
+                }
+            } else {
+                TLRPC$Document tLRPC$Document = this.document;
+                if (tLRPC$Document != null) {
+                    return tLRPC$Document.size;
+                }
+                WebFile webFile = this.webFile;
+                if (webFile != null) {
+                    i = webFile.size;
+                }
             }
-            WebFile webFile = this.webFile;
-            if (webFile != null) {
-                return webFile.size;
-            }
+            return this.currentSize;
         }
-        return this.currentSize;
+        return i;
     }
 }

@@ -1,15 +1,18 @@
 package com.google.android.gms.maps.model;
+
+import androidx.annotation.RecentlyNonNull;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Dash extends PatternItem {
     public final float length;
 
-    public Dash(float length) {
-        super(0, Float.valueOf(Math.max(length, 0.0f)));
-        this.length = Math.max(length, 0.0f);
+    public Dash(float f) {
+        super(0, Float.valueOf(Math.max(f, 0.0f)));
+        this.length = Math.max(f, 0.0f);
     }
 
     @Override // com.google.android.gms.maps.model.PatternItem
+    @RecentlyNonNull
     public String toString() {
         float f = this.length;
         StringBuilder sb = new StringBuilder(30);

@@ -3,7 +3,7 @@ package com.google.android.gms.cloudmessaging;
 import android.os.Looper;
 import android.os.Message;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzy extends com.google.android.gms.internal.cloudmessaging.zze {
     private final /* synthetic */ Rpc zza;
 

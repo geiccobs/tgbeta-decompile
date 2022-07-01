@@ -1,20 +1,13 @@
 package com.google.android.gms.common.util;
 
 import android.content.Context;
-import android.os.DropBoxManager;
 import android.util.Log;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Preconditions;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class CrashUtils {
-    private static final String[] zza = {"android.", "com.android.", "dalvik.", "java.", "javax."};
-    private static DropBoxManager zzb = null;
-    private static boolean zzc = false;
-    private static int zzd = -1;
-    private static int zze = 0;
-    private static int zzf = 0;
-
-    public static boolean addDynamiteErrorToDropBox(Context context, Throwable th) {
+    public static boolean addDynamiteErrorToDropBox(@RecentlyNonNull Context context, @RecentlyNonNull Throwable th) {
         return zza(context, th, 536870912);
     }
 

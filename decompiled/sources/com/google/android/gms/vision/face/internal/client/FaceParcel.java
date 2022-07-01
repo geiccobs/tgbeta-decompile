@@ -2,11 +2,15 @@ package com.google.android.gms.vision.face.internal.client;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.RecentlyNonNull;
+import com.google.android.apps.common.proguard.UsedByNative;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes3.dex */
+@UsedByNative("wrapper.cc")
+/* loaded from: classes.dex */
 public class FaceParcel extends AbstractSafeParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<FaceParcel> CREATOR = new zzd();
     public final int zza;
     public final float zzb;
@@ -16,6 +20,7 @@ public class FaceParcel extends AbstractSafeParcelable {
     public final float zzf;
     public final float zzg;
     public final float zzh;
+    @RecentlyNonNull
     public final LandmarkParcel[] zzi;
     public final float zzj;
     public final float zzk;
@@ -42,12 +47,13 @@ public class FaceParcel extends AbstractSafeParcelable {
         this.zzn = f11;
     }
 
-    public FaceParcel(int i, int i2, float f, float f2, float f3, float f4, float f5, float f6, LandmarkParcel[] landmarkParcelArr, float f7, float f8, float f9) {
+    @UsedByNative("wrapper.cc")
+    public FaceParcel(int i, int i2, float f, float f2, float f3, float f4, float f5, float f6, @RecentlyNonNull LandmarkParcel[] landmarkParcelArr, float f7, float f8, float f9) {
         this(i, i2, f, f2, f3, f4, f5, f6, 0.0f, landmarkParcelArr, f7, f8, f9, new zza[0], -1.0f);
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zzo);
         SafeParcelWriter.writeInt(parcel, 2, this.zza);

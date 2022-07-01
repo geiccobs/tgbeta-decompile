@@ -1,17 +1,17 @@
 package com.google.android.gms.location;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.ReflectedParcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import java.util.Arrays;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class LocationAvailability extends AbstractSafeParcelable implements ReflectedParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<LocationAvailability> CREATOR = new zzbe();
     @Deprecated
     int zza;
@@ -29,29 +29,7 @@ public final class LocationAvailability extends AbstractSafeParcelable implement
         this.zze = zzboVarArr;
     }
 
-    public static LocationAvailability extractLocationAvailability(Intent intent) {
-        if (!hasLocationAvailability(intent)) {
-            return null;
-        }
-        try {
-            Bundle extras = intent.getExtras();
-            if (extras == null) {
-                return null;
-            }
-            return (LocationAvailability) extras.getParcelable("com.google.android.gms.location.EXTRA_LOCATION_AVAILABILITY");
-        } catch (ClassCastException e) {
-            return null;
-        }
-    }
-
-    public static boolean hasLocationAvailability(Intent intent) {
-        if (intent == null) {
-            return false;
-        }
-        return intent.hasExtra("com.google.android.gms.location.EXTRA_LOCATION_AVAILABILITY");
-    }
-
-    public boolean equals(Object obj) {
+    public boolean equals(@RecentlyNonNull Object obj) {
         if (obj instanceof LocationAvailability) {
             LocationAvailability locationAvailability = (LocationAvailability) obj;
             if (this.zza == locationAvailability.zza && this.zzb == locationAvailability.zzb && this.zzc == locationAvailability.zzc && this.zzd == locationAvailability.zzd && Arrays.equals(this.zze, locationAvailability.zze)) {
@@ -69,6 +47,7 @@ public final class LocationAvailability extends AbstractSafeParcelable implement
         return this.zzd < 1000;
     }
 
+    @RecentlyNonNull
     public String toString() {
         boolean isLocationAvailable = isLocationAvailable();
         StringBuilder sb = new StringBuilder(48);
@@ -79,7 +58,7 @@ public final class LocationAvailability extends AbstractSafeParcelable implement
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, this.zza);
         SafeParcelWriter.writeInt(parcel, 2, this.zzb);

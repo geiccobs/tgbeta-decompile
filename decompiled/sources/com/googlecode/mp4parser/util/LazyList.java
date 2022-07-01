@@ -2,24 +2,19 @@ package com.googlecode.mp4parser.util;
 
 import j$.util.Iterator;
 import j$.util.function.Consumer;
-import j$.wrappers.C$r8$wrapper$java$util$function$Consumer$VWRP;
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LazyList<E> extends AbstractList<E> {
     private static final Logger LOG = Logger.getLogger(LazyList.class);
     Iterator<E> elementSource;
     List<E> underlying;
 
-    public LazyList(List<E> underlying, Iterator<E> elementSource) {
-        this.underlying = underlying;
-        this.elementSource = elementSource;
-    }
-
-    public List<E> getUnderlying() {
-        return this.underlying;
+    public LazyList(List<E> list, Iterator<E> it) {
+        this.underlying = list;
+        this.elementSource = it;
     }
 
     private void blowup() {
@@ -47,7 +42,7 @@ public class LazyList<E> extends AbstractList<E> {
     }
 
     /* renamed from: com.googlecode.mp4parser.util.LazyList$1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     class AnonymousClass1 implements Iterator<E>, j$.util.Iterator {
         int pos = 0;
 
@@ -58,11 +53,6 @@ public class LazyList<E> extends AbstractList<E> {
         @Override // j$.util.Iterator
         public /* synthetic */ void forEachRemaining(Consumer consumer) {
             Iterator.CC.$default$forEachRemaining(this, consumer);
-        }
-
-        @Override // java.util.Iterator
-        public /* synthetic */ void forEachRemaining(java.util.function.Consumer consumer) {
-            forEachRemaining(C$r8$wrapper$java$util$function$Consumer$VWRP.convert(consumer));
         }
 
         @Override // java.util.Iterator, j$.util.Iterator
@@ -78,7 +68,8 @@ public class LazyList<E> extends AbstractList<E> {
                 this.pos = i + 1;
                 return list.get(i);
             }
-            LazyList.this.underlying.add(LazyList.this.elementSource.next());
+            LazyList lazyList = LazyList.this;
+            lazyList.underlying.add(lazyList.elementSource.next());
             return (E) next();
         }
 

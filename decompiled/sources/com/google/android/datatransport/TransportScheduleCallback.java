@@ -1,5 +1,5 @@
 package com.google.android.datatransport;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface TransportScheduleCallback {
     void onSchedule(Exception exc);
 }

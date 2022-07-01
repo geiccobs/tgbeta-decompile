@@ -12,12 +12,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Tasks {
 
     /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface zza<T> extends OnCanceledListener, OnFailureListener, OnSuccessListener<T> {
     }
 
@@ -29,7 +30,7 @@ public final class Tasks {
 
     /* JADX INFO: Access modifiers changed from: private */
     /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zzb implements zza {
         private final CountDownLatch zza;
 
@@ -72,15 +73,20 @@ public final class Tasks {
     }
 
     /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zzc implements zza {
         private final Object zza = new Object();
         private final int zzb;
         private final zzu<Void> zzc;
+        @GuardedBy("mLock")
         private int zzd;
+        @GuardedBy("mLock")
         private int zze;
+        @GuardedBy("mLock")
         private int zzf;
+        @GuardedBy("mLock")
         private Exception zzg;
+        @GuardedBy("mLock")
         private boolean zzh;
 
         public zzc(int i, zzu<Void> zzuVar) {
@@ -114,6 +120,7 @@ public final class Tasks {
             }
         }
 
+        @GuardedBy("mLock")
         private final void zza() {
             if (this.zzd + this.zze + this.zzf == this.zzb) {
                 if (this.zzg != null) {
@@ -139,11 +146,6 @@ public final class Tasks {
         zzu zzuVar = new zzu();
         zzuVar.zza();
         return zzuVar;
-    }
-
-    @Deprecated
-    public static <TResult> Task<TResult> call(Callable<TResult> callable) {
-        return call(TaskExecutors.MAIN_THREAD, callable);
     }
 
     @Deprecated
@@ -199,27 +201,6 @@ public final class Tasks {
         return zzuVar;
     }
 
-    public static Task<Void> whenAll(Task<?>... taskArr) {
-        if (taskArr == null || taskArr.length == 0) {
-            return forResult(null);
-        }
-        return whenAll(Arrays.asList(taskArr));
-    }
-
-    public static <TResult> Task<List<TResult>> whenAllSuccess(Collection<? extends Task<?>> collection) {
-        if (collection == null || collection.isEmpty()) {
-            return forResult(Collections.emptyList());
-        }
-        return (Task<List<TResult>>) whenAll(collection).continueWith(new zzaa(collection));
-    }
-
-    public static <TResult> Task<List<TResult>> whenAllSuccess(Task<?>... taskArr) {
-        if (taskArr == null || taskArr.length == 0) {
-            return forResult(Collections.emptyList());
-        }
-        return whenAllSuccess(Arrays.asList(taskArr));
-    }
-
     public static Task<List<Task<?>>> whenAllComplete(Collection<? extends Task<?>> collection) {
         if (collection == null || collection.isEmpty()) {
             return forResult(Collections.emptyList());
@@ -245,11 +226,9 @@ public final class Tasks {
     }
 
     private static <T> void zza(Task<T> task, zza<? super T> zzaVar) {
-        task.addOnSuccessListener(TaskExecutors.zza, zzaVar);
-        task.addOnFailureListener(TaskExecutors.zza, zzaVar);
-        task.addOnCanceledListener(TaskExecutors.zza, zzaVar);
-    }
-
-    private Tasks() {
+        Executor executor = TaskExecutors.zza;
+        task.addOnSuccessListener(executor, zzaVar);
+        task.addOnFailureListener(executor, zzaVar);
+        task.addOnCanceledListener(executor, zzaVar);
     }
 }

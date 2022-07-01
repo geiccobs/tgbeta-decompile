@@ -4,24 +4,24 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class NotificationDismissReceiver extends BroadcastReceiver {
     @Override // android.content.BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
         if (intent == null) {
             return;
         }
-        int currentAccount = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
-        if (!UserConfig.isValidAccount(currentAccount)) {
+        int intExtra = intent.getIntExtra("currentAccount", UserConfig.selectedAccount);
+        if (!UserConfig.isValidAccount(intExtra)) {
             return;
         }
-        long dialogId = intent.getLongExtra("dialogId", 0L);
-        int date = intent.getIntExtra("messageDate", 0);
-        if (dialogId == 0) {
-            MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dismissDate", date).commit();
+        long longExtra = intent.getLongExtra("dialogId", 0L);
+        int intExtra2 = intent.getIntExtra("messageDate", 0);
+        if (longExtra == 0) {
+            MessagesController.getNotificationsSettings(intExtra).edit().putInt("dismissDate", intExtra2).commit();
             return;
         }
-        SharedPreferences.Editor edit = MessagesController.getNotificationsSettings(currentAccount).edit();
-        edit.putInt("dismissDate" + dialogId, date).commit();
+        SharedPreferences.Editor edit = MessagesController.getNotificationsSettings(intExtra).edit();
+        edit.putInt("dismissDate" + longExtra, intExtra2).commit();
     }
 }

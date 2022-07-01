@@ -2,14 +2,14 @@ package androidx.lifecycle;
 
 import android.util.Log;
 import androidx.arch.core.internal.FastSafeIterableMap;
+import androidx.arch.core.internal.SafeIterableMap;
 import androidx.lifecycle.Lifecycle;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LifecycleRegistry extends Lifecycle {
-    private static final String LOG_TAG = "LifecycleRegistry";
     private final WeakReference<LifecycleOwner> mLifecycleOwner;
     private FastSafeIterableMap<LifecycleObserver, ObserverWithState> mObserverMap = new FastSafeIterableMap<>();
     private int mAddingObserverCounter = 0;
@@ -18,8 +18,8 @@ public class LifecycleRegistry extends Lifecycle {
     private ArrayList<Lifecycle.State> mParentStates = new ArrayList<>();
     private Lifecycle.State mState = Lifecycle.State.INITIALIZED;
 
-    public LifecycleRegistry(LifecycleOwner provider) {
-        this.mLifecycleOwner = new WeakReference<>(provider);
+    public LifecycleRegistry(LifecycleOwner lifecycleOwner) {
+        this.mLifecycleOwner = new WeakReference<>(lifecycleOwner);
     }
 
     public void markState(Lifecycle.State state) {
@@ -27,15 +27,14 @@ public class LifecycleRegistry extends Lifecycle {
     }
 
     public void handleLifecycleEvent(Lifecycle.Event event) {
-        Lifecycle.State next = getStateAfter(event);
-        moveToState(next);
+        moveToState(getStateAfter(event));
     }
 
-    private void moveToState(Lifecycle.State next) {
-        if (this.mState == next) {
+    private void moveToState(Lifecycle.State state) {
+        if (this.mState == state) {
             return;
         }
-        this.mState = next;
+        this.mState = state;
         if (this.mHandlingEvent || this.mAddingObserverCounter != 0) {
             this.mNewEventOccurred = true;
             return;
@@ -49,44 +48,46 @@ public class LifecycleRegistry extends Lifecycle {
         if (this.mObserverMap.size() == 0) {
             return true;
         }
-        Lifecycle.State eldestObserverState = this.mObserverMap.eldest().getValue().mState;
-        Lifecycle.State newestObserverState = this.mObserverMap.newest().getValue().mState;
-        return eldestObserverState == newestObserverState && this.mState == newestObserverState;
+        Lifecycle.State state = this.mObserverMap.eldest().getValue().mState;
+        Lifecycle.State state2 = this.mObserverMap.newest().getValue().mState;
+        return state == state2 && this.mState == state2;
     }
 
-    private Lifecycle.State calculateTargetState(LifecycleObserver observer) {
-        Map.Entry<LifecycleObserver, ObserverWithState> previous = this.mObserverMap.ceil(observer);
-        Lifecycle.State parentState = null;
-        Lifecycle.State siblingState = previous != null ? previous.getValue().mState : null;
+    private Lifecycle.State calculateTargetState(LifecycleObserver lifecycleObserver) {
+        Map.Entry<LifecycleObserver, ObserverWithState> ceil = this.mObserverMap.ceil(lifecycleObserver);
+        Lifecycle.State state = null;
+        Lifecycle.State state2 = ceil != null ? ceil.getValue().mState : null;
         if (!this.mParentStates.isEmpty()) {
             ArrayList<Lifecycle.State> arrayList = this.mParentStates;
-            parentState = arrayList.get(arrayList.size() - 1);
+            state = arrayList.get(arrayList.size() - 1);
         }
-        return min(min(this.mState, siblingState), parentState);
+        return min(min(this.mState, state2), state);
     }
 
     @Override // androidx.lifecycle.Lifecycle
-    public void addObserver(LifecycleObserver observer) {
+    public void addObserver(LifecycleObserver lifecycleObserver) {
         LifecycleOwner lifecycleOwner;
-        Lifecycle.State initialState = this.mState == Lifecycle.State.DESTROYED ? Lifecycle.State.DESTROYED : Lifecycle.State.INITIALIZED;
-        ObserverWithState statefulObserver = new ObserverWithState(observer, initialState);
-        ObserverWithState previous = this.mObserverMap.putIfAbsent(observer, statefulObserver);
-        if (previous != null || (lifecycleOwner = this.mLifecycleOwner.get()) == null) {
-            return;
+        Lifecycle.State state = this.mState;
+        Lifecycle.State state2 = Lifecycle.State.DESTROYED;
+        if (state != state2) {
+            state2 = Lifecycle.State.INITIALIZED;
         }
-        boolean isReentrance = this.mAddingObserverCounter != 0 || this.mHandlingEvent;
-        Lifecycle.State targetState = calculateTargetState(observer);
-        this.mAddingObserverCounter++;
-        while (statefulObserver.mState.compareTo(targetState) < 0 && this.mObserverMap.contains(observer)) {
-            pushParentState(statefulObserver.mState);
-            statefulObserver.dispatchEvent(lifecycleOwner, upEvent(statefulObserver.mState));
-            popParentState();
-            targetState = calculateTargetState(observer);
+        ObserverWithState observerWithState = new ObserverWithState(lifecycleObserver, state2);
+        if (this.mObserverMap.putIfAbsent(lifecycleObserver, observerWithState) == null && (lifecycleOwner = this.mLifecycleOwner.get()) != null) {
+            boolean z = this.mAddingObserverCounter != 0 || this.mHandlingEvent;
+            Lifecycle.State calculateTargetState = calculateTargetState(lifecycleObserver);
+            this.mAddingObserverCounter++;
+            while (observerWithState.mState.compareTo(calculateTargetState) < 0 && this.mObserverMap.contains(lifecycleObserver)) {
+                pushParentState(observerWithState.mState);
+                observerWithState.dispatchEvent(lifecycleOwner, upEvent(observerWithState.mState));
+                popParentState();
+                calculateTargetState = calculateTargetState(lifecycleObserver);
+            }
+            if (!z) {
+                sync();
+            }
+            this.mAddingObserverCounter--;
         }
-        if (!isReentrance) {
-            sync();
-        }
-        this.mAddingObserverCounter--;
     }
 
     private void popParentState() {
@@ -99,12 +100,8 @@ public class LifecycleRegistry extends Lifecycle {
     }
 
     @Override // androidx.lifecycle.Lifecycle
-    public void removeObserver(LifecycleObserver observer) {
-        this.mObserverMap.remove(observer);
-    }
-
-    public int getObserverCount() {
-        return this.mObserverMap.size();
+    public void removeObserver(LifecycleObserver lifecycleObserver) {
+        this.mObserverMap.remove(lifecycleObserver);
     }
 
     @Override // androidx.lifecycle.Lifecycle
@@ -130,7 +127,7 @@ public class LifecycleRegistry extends Lifecycle {
     }
 
     /* renamed from: androidx.lifecycle.LifecycleRegistry$1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$androidx$lifecycle$Lifecycle$Event;
         static final /* synthetic */ int[] $SwitchMap$androidx$lifecycle$Lifecycle$State;
@@ -140,99 +137,105 @@ public class LifecycleRegistry extends Lifecycle {
             $SwitchMap$androidx$lifecycle$Lifecycle$State = iArr;
             try {
                 iArr[Lifecycle.State.INITIALIZED.ordinal()] = 1;
-            } catch (NoSuchFieldError e) {
+            } catch (NoSuchFieldError unused) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$State[Lifecycle.State.CREATED.ordinal()] = 2;
-            } catch (NoSuchFieldError e2) {
+            } catch (NoSuchFieldError unused2) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$State[Lifecycle.State.STARTED.ordinal()] = 3;
-            } catch (NoSuchFieldError e3) {
+            } catch (NoSuchFieldError unused3) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$State[Lifecycle.State.RESUMED.ordinal()] = 4;
-            } catch (NoSuchFieldError e4) {
+            } catch (NoSuchFieldError unused4) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$State[Lifecycle.State.DESTROYED.ordinal()] = 5;
-            } catch (NoSuchFieldError e5) {
+            } catch (NoSuchFieldError unused5) {
             }
             int[] iArr2 = new int[Lifecycle.Event.values().length];
             $SwitchMap$androidx$lifecycle$Lifecycle$Event = iArr2;
             try {
                 iArr2[Lifecycle.Event.ON_CREATE.ordinal()] = 1;
-            } catch (NoSuchFieldError e6) {
+            } catch (NoSuchFieldError unused6) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_STOP.ordinal()] = 2;
-            } catch (NoSuchFieldError e7) {
+            } catch (NoSuchFieldError unused7) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_START.ordinal()] = 3;
-            } catch (NoSuchFieldError e8) {
+            } catch (NoSuchFieldError unused8) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_PAUSE.ordinal()] = 4;
-            } catch (NoSuchFieldError e9) {
+            } catch (NoSuchFieldError unused9) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_RESUME.ordinal()] = 5;
-            } catch (NoSuchFieldError e10) {
+            } catch (NoSuchFieldError unused10) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_DESTROY.ordinal()] = 6;
-            } catch (NoSuchFieldError e11) {
+            } catch (NoSuchFieldError unused11) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_ANY.ordinal()] = 7;
-            } catch (NoSuchFieldError e12) {
+            } catch (NoSuchFieldError unused12) {
             }
         }
     }
 
     private static Lifecycle.Event downEvent(Lifecycle.State state) {
-        switch (AnonymousClass1.$SwitchMap$androidx$lifecycle$Lifecycle$State[state.ordinal()]) {
-            case 1:
-                throw new IllegalArgumentException();
-            case 2:
+        int i = AnonymousClass1.$SwitchMap$androidx$lifecycle$Lifecycle$State[state.ordinal()];
+        if (i != 1) {
+            if (i == 2) {
                 return Lifecycle.Event.ON_DESTROY;
-            case 3:
+            }
+            if (i == 3) {
                 return Lifecycle.Event.ON_STOP;
-            case 4:
+            }
+            if (i == 4) {
                 return Lifecycle.Event.ON_PAUSE;
-            case 5:
+            }
+            if (i == 5) {
                 throw new IllegalArgumentException();
-            default:
-                throw new IllegalArgumentException("Unexpected state value " + state);
+            }
+            throw new IllegalArgumentException("Unexpected state value " + state);
         }
+        throw new IllegalArgumentException();
     }
 
     private static Lifecycle.Event upEvent(Lifecycle.State state) {
-        switch (AnonymousClass1.$SwitchMap$androidx$lifecycle$Lifecycle$State[state.ordinal()]) {
-            case 1:
-            case 5:
-                return Lifecycle.Event.ON_CREATE;
-            case 2:
+        int i = AnonymousClass1.$SwitchMap$androidx$lifecycle$Lifecycle$State[state.ordinal()];
+        if (i != 1) {
+            if (i == 2) {
                 return Lifecycle.Event.ON_START;
-            case 3:
+            }
+            if (i == 3) {
                 return Lifecycle.Event.ON_RESUME;
-            case 4:
+            }
+            if (i == 4) {
                 throw new IllegalArgumentException();
-            default:
+            }
+            if (i != 5) {
                 throw new IllegalArgumentException("Unexpected state value " + state);
+            }
         }
+        return Lifecycle.Event.ON_CREATE;
     }
 
     /* JADX WARN: Multi-variable type inference failed */
     private void forwardPass(LifecycleOwner lifecycleOwner) {
-        Iterator<Map.Entry<LifecycleObserver, ObserverWithState>> ascendingIterator = this.mObserverMap.iteratorWithAdditions();
-        while (ascendingIterator.hasNext() && !this.mNewEventOccurred) {
-            Map.Entry<LifecycleObserver, ObserverWithState> entry = ascendingIterator.next();
-            ObserverWithState observer = entry.getValue();
-            while (observer.mState.compareTo(this.mState) < 0 && !this.mNewEventOccurred && this.mObserverMap.contains(entry.getKey())) {
-                pushParentState(observer.mState);
-                observer.dispatchEvent(lifecycleOwner, upEvent(observer.mState));
+        SafeIterableMap<LifecycleObserver, ObserverWithState>.IteratorWithAdditions iteratorWithAdditions = this.mObserverMap.iteratorWithAdditions();
+        while (iteratorWithAdditions.hasNext() && !this.mNewEventOccurred) {
+            Map.Entry next = iteratorWithAdditions.next();
+            ObserverWithState observerWithState = (ObserverWithState) next.getValue();
+            while (observerWithState.mState.compareTo(this.mState) < 0 && !this.mNewEventOccurred && this.mObserverMap.contains(next.getKey())) {
+                pushParentState(observerWithState.mState);
+                observerWithState.dispatchEvent(lifecycleOwner, upEvent(observerWithState.mState));
                 popParentState();
             }
         }
@@ -241,12 +244,12 @@ public class LifecycleRegistry extends Lifecycle {
     private void backwardPass(LifecycleOwner lifecycleOwner) {
         Iterator<Map.Entry<LifecycleObserver, ObserverWithState>> descendingIterator = this.mObserverMap.descendingIterator();
         while (descendingIterator.hasNext() && !this.mNewEventOccurred) {
-            Map.Entry<LifecycleObserver, ObserverWithState> entry = descendingIterator.next();
-            ObserverWithState observer = entry.getValue();
-            while (observer.mState.compareTo(this.mState) > 0 && !this.mNewEventOccurred && this.mObserverMap.contains(entry.getKey())) {
-                Lifecycle.Event event = downEvent(observer.mState);
-                pushParentState(getStateAfter(event));
-                observer.dispatchEvent(lifecycleOwner, event);
+            Map.Entry<LifecycleObserver, ObserverWithState> next = descendingIterator.next();
+            ObserverWithState value = next.getValue();
+            while (value.mState.compareTo(this.mState) > 0 && !this.mNewEventOccurred && this.mObserverMap.contains(next.getKey())) {
+                Lifecycle.Event downEvent = downEvent(value.mState);
+                pushParentState(getStateAfter(downEvent));
+                value.dispatchEvent(lifecycleOwner, downEvent);
                 popParentState();
             }
         }
@@ -255,7 +258,7 @@ public class LifecycleRegistry extends Lifecycle {
     private void sync() {
         LifecycleOwner lifecycleOwner = this.mLifecycleOwner.get();
         if (lifecycleOwner == null) {
-            Log.w(LOG_TAG, "LifecycleOwner is garbage collected, you shouldn't try dispatch new events from it.");
+            Log.w("LifecycleRegistry", "LifecycleOwner is garbage collected, you shouldn't try dispatch new events from it.");
             return;
         }
         while (!isSynced()) {
@@ -271,25 +274,25 @@ public class LifecycleRegistry extends Lifecycle {
         this.mNewEventOccurred = false;
     }
 
-    static Lifecycle.State min(Lifecycle.State state1, Lifecycle.State state2) {
-        return (state2 == null || state2.compareTo(state1) >= 0) ? state1 : state2;
+    static Lifecycle.State min(Lifecycle.State state, Lifecycle.State state2) {
+        return (state2 == null || state2.compareTo(state) >= 0) ? state : state2;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class ObserverWithState {
         GenericLifecycleObserver mLifecycleObserver;
         Lifecycle.State mState;
 
-        ObserverWithState(LifecycleObserver observer, Lifecycle.State initialState) {
-            this.mLifecycleObserver = Lifecycling.getCallback(observer);
-            this.mState = initialState;
+        ObserverWithState(LifecycleObserver lifecycleObserver, Lifecycle.State state) {
+            this.mLifecycleObserver = Lifecycling.getCallback(lifecycleObserver);
+            this.mState = state;
         }
 
-        void dispatchEvent(LifecycleOwner owner, Lifecycle.Event event) {
-            Lifecycle.State newState = LifecycleRegistry.getStateAfter(event);
-            this.mState = LifecycleRegistry.min(this.mState, newState);
-            this.mLifecycleObserver.onStateChanged(owner, event);
-            this.mState = newState;
+        void dispatchEvent(LifecycleOwner lifecycleOwner, Lifecycle.Event event) {
+            Lifecycle.State stateAfter = LifecycleRegistry.getStateAfter(event);
+            this.mState = LifecycleRegistry.min(this.mState, stateAfter);
+            this.mLifecycleObserver.onStateChanged(lifecycleOwner, event);
+            this.mState = stateAfter;
         }
     }
 }

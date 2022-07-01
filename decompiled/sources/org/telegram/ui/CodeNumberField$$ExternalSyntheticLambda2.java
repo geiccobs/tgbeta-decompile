@@ -1,7 +1,7 @@
 package org.telegram.ui;
 
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class CodeNumberField$$ExternalSyntheticLambda2 implements SimpleFloatPropertyCompat.Getter {
     public static final /* synthetic */ CodeNumberField$$ExternalSyntheticLambda2 INSTANCE = new CodeNumberField$$ExternalSyntheticLambda2();
 
@@ -11,7 +11,7 @@ public final /* synthetic */ class CodeNumberField$$ExternalSyntheticLambda2 imp
     @Override // org.telegram.ui.Components.SimpleFloatPropertyCompat.Getter
     public final float get(Object obj) {
         float f;
-        f = ((CodeNumberField) obj).focusedProgress;
+        f = ((CodeNumberField) obj).successProgress;
         return f;
     }
 }

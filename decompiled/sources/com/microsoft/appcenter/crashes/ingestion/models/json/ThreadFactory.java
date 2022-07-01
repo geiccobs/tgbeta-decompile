@@ -4,7 +4,7 @@ import com.microsoft.appcenter.crashes.ingestion.models.Thread;
 import com.microsoft.appcenter.ingestion.models.json.ModelFactory;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ThreadFactory implements ModelFactory<Thread> {
     private static final ThreadFactory sInstance = new ThreadFactory();
 
@@ -21,7 +21,7 @@ public class ThreadFactory implements ModelFactory<Thread> {
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.json.ModelFactory
-    public List<Thread> createList(int capacity) {
-        return new ArrayList(capacity);
+    public List<Thread> createList(int i) {
+        return new ArrayList(i);
     }
 }

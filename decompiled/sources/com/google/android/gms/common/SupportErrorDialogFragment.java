@@ -4,11 +4,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import androidx.annotation.RecentlyNonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import com.google.android.gms.common.internal.Preconditions;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class SupportErrorDialogFragment extends DialogFragment {
     private Dialog zaa;
     private DialogInterface.OnCancelListener zab;
@@ -27,19 +28,15 @@ public class SupportErrorDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    @Override // androidx.fragment.app.DialogFragment, android.content.DialogInterface.OnCancelListener
-    public void onCancel(DialogInterface dialogInterface) {
+    @Override // android.content.DialogInterface.OnCancelListener
+    public void onCancel(@RecentlyNonNull DialogInterface dialogInterface) {
         DialogInterface.OnCancelListener onCancelListener = this.zab;
         if (onCancelListener != null) {
             onCancelListener.onCancel(dialogInterface);
         }
     }
 
-    public static SupportErrorDialogFragment newInstance(Dialog dialog) {
-        return newInstance(dialog, null);
-    }
-
-    public static SupportErrorDialogFragment newInstance(Dialog dialog, DialogInterface.OnCancelListener onCancelListener) {
+    public static SupportErrorDialogFragment newInstance(@RecentlyNonNull Dialog dialog, DialogInterface.OnCancelListener onCancelListener) {
         SupportErrorDialogFragment supportErrorDialogFragment = new SupportErrorDialogFragment();
         Dialog dialog2 = (Dialog) Preconditions.checkNotNull(dialog, "Cannot display null dialog");
         dialog2.setOnCancelListener(null);
@@ -52,7 +49,7 @@ public class SupportErrorDialogFragment extends DialogFragment {
     }
 
     @Override // androidx.fragment.app.DialogFragment
-    public void show(FragmentManager fragmentManager, String str) {
+    public void show(@RecentlyNonNull FragmentManager fragmentManager, String str) {
         super.show(fragmentManager, str);
     }
 }

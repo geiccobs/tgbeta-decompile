@@ -12,8 +12,9 @@ import com.google.android.gms.wallet.wobs.TimeInterval;
 import com.google.android.gms.wallet.wobs.UriData;
 import com.google.android.gms.wallet.wobs.WalletObjectMessage;
 import java.util.ArrayList;
+import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzr implements Parcelable.Creator<LoyaltyWalletObject> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ LoyaltyWalletObject createFromParcel(Parcel parcel) {
@@ -94,22 +95,22 @@ public final class zzr implements Parcelable.Creator<LoyaltyWalletObject> {
                 case 17:
                     str12 = SafeParcelReader.createString(parcel, readHeader);
                     break;
-                case 18:
+                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
                     arrayList3 = SafeParcelReader.createTypedList(parcel, readHeader, LabelValueRow.CREATOR);
                     break;
-                case 19:
+                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                     z = SafeParcelReader.readBoolean(parcel, readHeader);
                     break;
-                case 20:
+                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                     newArrayList4 = SafeParcelReader.createTypedList(parcel, readHeader, UriData.CREATOR);
                     break;
-                case 21:
+                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
                     newArrayList5 = SafeParcelReader.createTypedList(parcel, readHeader, TextModuleData.CREATOR);
                     break;
-                case 22:
+                case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                     newArrayList6 = SafeParcelReader.createTypedList(parcel, readHeader, UriData.CREATOR);
                     break;
-                case 23:
+                case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                     loyaltyPoints = (LoyaltyPoints) SafeParcelReader.createParcelable(parcel, readHeader, LoyaltyPoints.CREATOR);
                     break;
                 default:

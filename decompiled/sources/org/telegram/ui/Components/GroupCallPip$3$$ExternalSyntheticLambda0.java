@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import org.telegram.ui.Components.GroupCallPip;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class GroupCallPip$3$$ExternalSyntheticLambda0 implements Runnable {
     public static final /* synthetic */ GroupCallPip$3$$ExternalSyntheticLambda0 INSTANCE = new GroupCallPip$3$$ExternalSyntheticLambda0();
 

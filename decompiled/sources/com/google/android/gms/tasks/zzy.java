@@ -2,7 +2,7 @@ package com.google.android.gms.tasks;
 
 import java.util.concurrent.Callable;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzy implements Runnable {
     private final /* synthetic */ zzu zza;
     private final /* synthetic */ Callable zzb;

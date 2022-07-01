@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzga {
     public static <T extends zzfz> String zza(T t) {
         if (t == null) {
@@ -51,22 +51,17 @@ public final class zzga {
                     stringBuffer2.append(sb2);
                     stringBuffer2.append("\"");
                 } else if (obj instanceof byte[]) {
-                    byte[] bArr = (byte[]) obj;
-                    if (bArr == null) {
-                        stringBuffer2.append("\"\"");
-                    } else {
-                        stringBuffer2.append('\"');
-                        for (byte b : bArr) {
-                            int i2 = b & 255;
-                            if (i2 == 92 || i2 == 34) {
-                                stringBuffer2.append('\\');
-                            } else if (i2 < 32 || i2 >= 127) {
-                                stringBuffer2.append(String.format("\\%03o", Integer.valueOf(i2)));
-                            }
-                            stringBuffer2.append((char) i2);
+                    stringBuffer2.append('\"');
+                    for (byte b : (byte[]) obj) {
+                        int i2 = b & 255;
+                        if (i2 == 92 || i2 == 34) {
+                            stringBuffer2.append('\\');
+                        } else if (i2 < 32 || i2 >= 127) {
+                            stringBuffer2.append(String.format("\\%03o", Integer.valueOf(i2)));
                         }
-                        stringBuffer2.append('\"');
+                        stringBuffer2.append((char) i2);
                     }
+                    stringBuffer2.append('\"');
                 } else {
                     stringBuffer2.append(obj);
                 }
@@ -107,7 +102,7 @@ public final class zzga {
                             String valueOf2 = String.valueOf(substring);
                             zza(substring, cls.getMethod(valueOf2.length() != 0 ? "get".concat(valueOf2) : new String("get"), new Class[0]).invoke(obj, new Object[0]), stringBuffer, stringBuffer2);
                         }
-                    } catch (NoSuchMethodException e) {
+                    } catch (NoSuchMethodException unused) {
                     }
                 }
             }

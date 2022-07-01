@@ -1,13 +1,8 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
-import com.google.android.exoplayer2.extractor.ts.PsExtractor;
-import com.google.android.exoplayer2.extractor.ts.TsExtractor;
-import com.google.android.gms.location.LocationRequest;
-import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.BasePermissionsActivity;
-import org.telegram.ui.Components.SearchViewPager;
+import org.telegram.messenger.FileLoader;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public enum zzaj implements zzet {
     UNKNOWN_EVENT(0),
     ON_DEVICE_FACE_DETECT(1),
@@ -21,9 +16,9 @@ public enum zzaj implements zzet {
     ON_DEVICE_BARCODE_CLOSE(23),
     ON_DEVICE_IMAGE_LABEL_DETECT(141),
     ON_DEVICE_IMAGE_LABEL_CREATE(142),
-    ON_DEVICE_IMAGE_LABEL_CLOSE(TLRPC.LAYER),
+    ON_DEVICE_IMAGE_LABEL_CLOSE(143),
     ON_DEVICE_IMAGE_LABEL_LOAD(144),
-    ON_DEVICE_SMART_REPLY_DETECT(BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE_FOR_AVATAR),
+    ON_DEVICE_SMART_REPLY_DETECT(151),
     ON_DEVICE_SMART_REPLY_CREATE(152),
     ON_DEVICE_SMART_REPLY_CLOSE(153),
     ON_DEVICE_SMART_REPLY_BLACKLIST_UPDATE(154),
@@ -32,7 +27,7 @@ public enum zzaj implements zzet {
     ON_DEVICE_LANGUAGE_IDENTIFICATION_LOAD(164),
     ON_DEVICE_LANGUAGE_IDENTIFICATION_CLOSE(163),
     ON_DEVICE_TRANSLATOR_TRANSLATE(171),
-    ON_DEVICE_TRANSLATOR_CREATE(TsExtractor.TS_STREAM_TYPE_AC4),
+    ON_DEVICE_TRANSLATOR_CREATE(172),
     ON_DEVICE_TRANSLATOR_LOAD(173),
     ON_DEVICE_TRANSLATOR_CLOSE(174),
     ON_DEVICE_TRANSLATOR_DOWNLOAD(175),
@@ -42,7 +37,7 @@ public enum zzaj implements zzet {
     ON_DEVICE_ENTITY_EXTRACTION_CLOSE(244),
     ON_DEVICE_ENTITY_EXTRACTION_DOWNLOAD(245),
     ON_DEVICE_OBJECT_CREATE(191),
-    ON_DEVICE_OBJECT_LOAD(PsExtractor.AUDIO_STREAM),
+    ON_DEVICE_OBJECT_LOAD(192),
     ON_DEVICE_OBJECT_INFERENCE(193),
     ON_DEVICE_OBJECT_CLOSE(194),
     ON_DEVICE_DI_CREATE(311),
@@ -98,20 +93,20 @@ public enum zzaj implements zzet {
     CLOUD_WEB_SEARCH_CLOSE(133),
     CUSTOM_MODEL_RUN(102),
     CUSTOM_MODEL_CREATE(103),
-    CUSTOM_MODEL_CLOSE(LocationRequest.PRIORITY_LOW_POWER),
-    CUSTOM_MODEL_LOAD(LocationRequest.PRIORITY_NO_POWER),
+    CUSTOM_MODEL_CLOSE(104),
+    CUSTOM_MODEL_LOAD(105),
     AUTOML_IMAGE_LABELING_RUN(181),
     AUTOML_IMAGE_LABELING_CREATE(182),
     AUTOML_IMAGE_LABELING_CLOSE(183),
     AUTOML_IMAGE_LABELING_LOAD(184),
     MODEL_DOWNLOAD(100),
-    MODEL_UPDATE(101),
+    MODEL_UPDATE(FileLoader.MEDIA_DIR_VIDEO_PUBLIC),
     REMOTE_MODEL_IS_DOWNLOADED(251),
     REMOTE_MODEL_DELETE_ON_DEVICE(252),
     ACCELERATION_ANALYTICS(260),
     AGGREGATED_AUTO_ML_IMAGE_LABELING_INFERENCE(200),
-    AGGREGATED_CUSTOM_MODEL_INFERENCE(SearchViewPager.forwardItemId),
-    AGGREGATED_ON_DEVICE_BARCODE_DETECTION(SearchViewPager.deleteItemId),
+    AGGREGATED_CUSTOM_MODEL_INFERENCE(201),
+    AGGREGATED_ON_DEVICE_BARCODE_DETECTION(202),
     AGGREGATED_ON_DEVICE_FACE_DETECTION(203),
     AGGREGATED_ON_DEVICE_IMAGE_LABEL_DETECTION(204),
     AGGREGATED_ON_DEVICE_OBJECT_INFERENCE(205),
@@ -131,8 +126,6 @@ public enum zzaj implements zzet {
     INPUT_IMAGE_CONSTRUCTION(361),
     HANDLE_LEAKED(371);
     
-    private static final zzes<zzaj> zzdr = new zzes<zzaj>() { // from class: com.google.android.gms.internal.mlkit_language_id.zzam
-    };
     private final int zzds;
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzet
@@ -146,10 +139,15 @@ public enum zzaj implements zzet {
 
     @Override // java.lang.Enum
     public final String toString() {
-        return "<" + getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzds + " name=" + name() + '>';
+        return "<" + zzaj.class.getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzds + " name=" + name() + '>';
     }
 
     zzaj(int i) {
         this.zzds = i;
+    }
+
+    static {
+        new Object() { // from class: com.google.android.gms.internal.mlkit_language_id.zzam
+        };
     }
 }

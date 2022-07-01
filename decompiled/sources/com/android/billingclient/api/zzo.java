@@ -3,7 +3,7 @@ package com.android.billingclient.api;
 import android.content.Context;
 import android.content.IntentFilter;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzo {
     private final Context zza;
     private final zzn zzb;
@@ -22,10 +22,6 @@ public final class zzo {
         PurchasesUpdatedListener purchasesUpdatedListener;
         purchasesUpdatedListener = this.zzb.zzb;
         return purchasesUpdatedListener;
-    }
-
-    public final void zzd() {
-        this.zzb.zzd(this.zza);
     }
 
     public final void zze() {

@@ -2,18 +2,18 @@ package com.google.android.gms.common.api.internal;
 
 import android.app.Activity;
 import android.content.Intent;
+import androidx.annotation.RecentlyNonNull;
+import androidx.annotation.RecentlyNullable;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface LifecycleFragment {
-    void addCallback(String str, LifecycleCallback lifecycleCallback);
+    void addCallback(@RecentlyNonNull String str, @RecentlyNonNull LifecycleCallback lifecycleCallback);
 
-    <T extends LifecycleCallback> T getCallbackOrNull(String str, Class<T> cls);
+    @RecentlyNullable
+    <T extends LifecycleCallback> T getCallbackOrNull(@RecentlyNonNull String str, @RecentlyNonNull Class<T> cls);
 
+    @RecentlyNonNull
     Activity getLifecycleActivity();
 
-    boolean isCreated();
-
-    boolean isStarted();
-
-    void startActivityForResult(Intent intent, int i);
+    void startActivityForResult(@RecentlyNonNull Intent intent, int i);
 }

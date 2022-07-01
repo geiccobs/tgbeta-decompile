@@ -1,5 +1,5 @@
 package org.webrtc;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class DtmfSender {
     private long nativeDtmfSender;
 
@@ -13,8 +13,8 @@ public class DtmfSender {
 
     private static native String nativeTones(long j);
 
-    public DtmfSender(long nativeDtmfSender) {
-        this.nativeDtmfSender = nativeDtmfSender;
+    public DtmfSender(long j) {
+        this.nativeDtmfSender = j;
     }
 
     public boolean canInsertDtmf() {
@@ -22,9 +22,9 @@ public class DtmfSender {
         return nativeCanInsertDtmf(this.nativeDtmfSender);
     }
 
-    public boolean insertDtmf(String tones, int duration, int interToneGap) {
+    public boolean insertDtmf(String str, int i, int i2) {
         checkDtmfSenderExists();
-        return nativeInsertDtmf(this.nativeDtmfSender, tones, duration, interToneGap);
+        return nativeInsertDtmf(this.nativeDtmfSender, str, i, i2);
     }
 
     public String tones() {
@@ -49,8 +49,9 @@ public class DtmfSender {
     }
 
     private void checkDtmfSenderExists() {
-        if (this.nativeDtmfSender == 0) {
-            throw new IllegalStateException("DtmfSender has been disposed.");
+        if (this.nativeDtmfSender != 0) {
+            return;
         }
+        throw new IllegalStateException("DtmfSender has been disposed.");
     }
 }

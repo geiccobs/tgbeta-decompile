@@ -1,6 +1,6 @@
 package com.google.android.gms.tasks;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zza extends CancellationToken {
     private final zzu<Void> zza = new zzu<>();
 

@@ -4,187 +4,200 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.opengl.GLES20;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Render {
-    public static RectF RenderPath(Path path, RenderState state) {
-        state.baseWeight = path.getBaseWeight();
-        state.spacing = path.getBrush().getSpacing();
-        state.alpha = path.getBrush().getAlpha();
-        state.angle = path.getBrush().getAngle();
-        state.scale = path.getBrush().getScale();
+    public static RectF RenderPath(Path path, RenderState renderState) {
+        renderState.baseWeight = path.getBaseWeight();
+        renderState.spacing = path.getBrush().getSpacing();
+        renderState.alpha = path.getBrush().getAlpha();
+        renderState.angle = path.getBrush().getAngle();
+        renderState.scale = path.getBrush().getScale();
         int length = path.getLength();
         if (length == 0) {
             return null;
         }
+        int i = 0;
         if (length == 1) {
-            PaintStamp(path.getPoints()[0], state);
+            PaintStamp(path.getPoints()[0], renderState);
         } else {
             Point[] points = path.getPoints();
-            state.prepare();
-            for (int i = 0; i < points.length - 1; i++) {
-                PaintSegment(points[i], points[i + 1], state);
+            renderState.prepare();
+            while (i < points.length - 1) {
+                Point point = points[i];
+                i++;
+                PaintSegment(point, points[i], renderState);
             }
         }
-        path.remainder = state.remainder;
-        return Draw(state);
+        path.remainder = renderState.remainder;
+        return Draw(renderState);
     }
 
-    private static void PaintSegment(Point lastPoint, Point point, RenderState state) {
-        Point unitVector;
-        double distance = lastPoint.getDistanceTo(point);
-        Point vector = point.substract(lastPoint);
-        Point unitVector2 = new Point(1.0d, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
-        float vectorAngle = Math.abs(state.angle) > 0.0f ? state.angle : (float) Math.atan2(vector.y, vector.x);
-        float brushWeight = ((state.baseWeight * state.scale) * 1.0f) / state.viewportScale;
-        double step = Math.max(1.0f, state.spacing * brushWeight);
-        if (distance <= FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE) {
-            unitVector = unitVector2;
-        } else {
-            Double.isNaN(distance);
-            Point unitVector3 = vector.multiplyByScalar(1.0d / distance);
-            unitVector = unitVector3;
+    private static void PaintSegment(Point point, Point point2, RenderState renderState) {
+        boolean z;
+        int i;
+        double distanceTo = point.getDistanceTo(point2);
+        Point substract = point2.substract(point);
+        Point point3 = new Point(1.0d, 1.0d, 0.0d);
+        float atan2 = Math.abs(renderState.angle) > 0.0f ? renderState.angle : (float) Math.atan2(substract.y, substract.x);
+        float f = ((renderState.baseWeight * renderState.scale) * 1.0f) / renderState.viewportScale;
+        double max = Math.max(1.0f, renderState.spacing * f);
+        if (distanceTo > 0.0d) {
+            Double.isNaN(distanceTo);
+            point3 = substract.multiplyByScalar(1.0d / distanceTo);
         }
-        float boldenedAlpha = Math.min(1.0f, state.alpha * 1.15f);
-        boolean boldenHead = lastPoint.edge;
-        boolean boldenTail = point.edge;
-        double d = state.remainder;
-        Double.isNaN(distance);
-        Double.isNaN(step);
-        int count = (int) Math.ceil((distance - d) / step);
-        int currentCount = state.getCount();
-        state.appendValuesCount(count);
-        state.setPosition(currentCount);
-        Point start = lastPoint.add(unitVector.multiplyByScalar(state.remainder));
-        double f = state.remainder;
-        boolean succeed = true;
-        boolean boldenHead2 = boldenHead;
-        Point start2 = start;
-        while (f <= distance) {
-            float alpha = boldenHead2 ? boldenedAlpha : state.alpha;
-            Point start3 = start2;
-            int currentCount2 = currentCount;
-            int count2 = count;
-            succeed = state.addPoint(start2.toPointF(), brushWeight, vectorAngle, alpha, -1);
-            if (!succeed) {
+        Point point4 = point3;
+        float min = Math.min(1.0f, renderState.alpha * 1.15f);
+        boolean z2 = point.edge;
+        boolean z3 = point2.edge;
+        double d = renderState.remainder;
+        Double.isNaN(distanceTo);
+        Double.isNaN(max);
+        int count = renderState.getCount();
+        renderState.appendValuesCount((int) Math.ceil((distanceTo - d) / max));
+        renderState.setPosition(count);
+        Point add = point.add(point4.multiplyByScalar(renderState.remainder));
+        double d2 = renderState.remainder;
+        boolean z4 = true;
+        while (true) {
+            if (d2 > distanceTo) {
+                z = z3;
+                i = 1;
                 break;
             }
-            start2 = start3.add(unitVector.multiplyByScalar(step));
-            boldenHead2 = false;
-            Double.isNaN(step);
-            f += step;
-            currentCount = currentCount2;
-            count = count2;
+            i = 1;
+            z = z3;
+            z4 = renderState.addPoint(add.toPointF(), f, atan2, z2 ? min : renderState.alpha, -1);
+            if (!z4) {
+                break;
+            }
+            add = add.add(point4.multiplyByScalar(max));
+            z2 = false;
+            Double.isNaN(max);
+            d2 += max;
+            z3 = z;
         }
-        if (succeed && boldenTail) {
-            state.appendValuesCount(1);
-            state.addPoint(point.toPointF(), brushWeight, vectorAngle, boldenedAlpha, -1);
+        if (z4 && z) {
+            renderState.appendValuesCount(i);
+            renderState.addPoint(point2.toPointF(), f, atan2, min, -1);
         }
-        Double.isNaN(distance);
-        state.remainder = f - distance;
+        Double.isNaN(distanceTo);
+        renderState.remainder = d2 - distanceTo;
     }
 
-    private static void PaintStamp(Point point, RenderState state) {
-        float brushWeight = ((state.baseWeight * state.scale) * 1.0f) / state.viewportScale;
-        PointF start = point.toPointF();
-        float angle = Math.abs(state.angle) > 0.0f ? state.angle : 0.0f;
-        float alpha = state.alpha;
-        state.prepare();
-        state.appendValuesCount(1);
-        state.addPoint(start, brushWeight, angle, alpha, 0);
+    private static void PaintStamp(Point point, RenderState renderState) {
+        float f = ((renderState.baseWeight * renderState.scale) * 1.0f) / renderState.viewportScale;
+        PointF pointF = point.toPointF();
+        float f2 = Math.abs(renderState.angle) > 0.0f ? renderState.angle : 0.0f;
+        float f3 = renderState.alpha;
+        renderState.prepare();
+        renderState.appendValuesCount(1);
+        renderState.addPoint(pointF, f, f2, f3, 0);
     }
 
-    private static RectF Draw(RenderState state) {
-        RectF dataBounds = new RectF(0.0f, 0.0f, 0.0f, 0.0f);
-        int count = state.getCount();
+    private static RectF Draw(RenderState renderState) {
+        float f;
+        int i;
+        RectF rectF = new RectF(0.0f, 0.0f, 0.0f, 0.0f);
+        int count = renderState.getCount();
         if (count == 0) {
-            return dataBounds;
+            return rectF;
         }
-        int capacity = 20 * ((count * 4) + ((count - 1) * 2));
-        ByteBuffer bb = ByteBuffer.allocateDirect(capacity);
-        bb.order(ByteOrder.nativeOrder());
-        FloatBuffer vertexData = bb.asFloatBuffer();
-        vertexData.position(0);
-        state.setPosition(0);
-        int i = 0;
-        int n = 0;
-        while (i < count) {
-            float x = state.read();
-            float y = state.read();
-            float size = state.read();
-            float angle = state.read();
-            float alpha = state.read();
-            int capacity2 = capacity;
-            RectF rect = new RectF(x - size, y - size, x + size, y + size);
-            float[] points = {rect.left, rect.top, rect.right, rect.top, rect.left, rect.bottom, rect.right, rect.bottom};
-            float centerX = rect.centerX();
-            float centerY = rect.centerY();
-            Matrix t = new Matrix();
-            ByteBuffer bb2 = bb;
-            t.setRotate((float) Math.toDegrees(angle), centerX, centerY);
-            t.mapPoints(points);
-            t.mapRect(rect);
-            Utils.RectFIntegral(rect);
-            dataBounds.union(rect);
-            if (n != 0) {
-                float angle2 = points[0];
-                vertexData.put(angle2);
-                vertexData.put(points[1]);
-                vertexData.put(0.0f);
-                vertexData.put(0.0f);
-                vertexData.put(alpha);
-                n++;
+        int i2 = count - 1;
+        ByteBuffer allocateDirect = ByteBuffer.allocateDirect(((count * 4) + (i2 * 2)) * 20);
+        allocateDirect.order(ByteOrder.nativeOrder());
+        FloatBuffer asFloatBuffer = allocateDirect.asFloatBuffer();
+        char c = 0;
+        asFloatBuffer.position(0);
+        renderState.setPosition(0);
+        int i3 = 0;
+        int i4 = 0;
+        while (i3 < count) {
+            float read = renderState.read();
+            float read2 = renderState.read();
+            float read3 = renderState.read();
+            float read4 = renderState.read();
+            float read5 = renderState.read();
+            RectF rectF2 = new RectF(read - read3, read2 - read3, read + read3, read2 + read3);
+            float[] fArr = new float[8];
+            float f2 = rectF2.left;
+            fArr[c] = f2;
+            float f3 = rectF2.top;
+            fArr[1] = f3;
+            float f4 = rectF2.right;
+            fArr[2] = f4;
+            fArr[3] = f3;
+            fArr[4] = f2;
+            float f5 = rectF2.bottom;
+            fArr[5] = f5;
+            fArr[6] = f4;
+            fArr[7] = f5;
+            float centerX = rectF2.centerX();
+            float centerY = rectF2.centerY();
+            Matrix matrix = new Matrix();
+            matrix.setRotate((float) Math.toDegrees(read4), centerX, centerY);
+            matrix.mapPoints(fArr);
+            matrix.mapRect(rectF2);
+            Utils.RectFIntegral(rectF2);
+            rectF.union(rectF2);
+            if (i4 != 0) {
+                asFloatBuffer.put(fArr[0]);
+                i = 1;
+                asFloatBuffer.put(fArr[1]);
+                f = 0.0f;
+                asFloatBuffer.put(0.0f);
+                asFloatBuffer.put(0.0f);
+                asFloatBuffer.put(read5);
+                i4++;
+            } else {
+                i = 1;
+                f = 0.0f;
             }
-            vertexData.put(points[0]);
-            vertexData.put(points[1]);
-            vertexData.put(0.0f);
-            vertexData.put(0.0f);
-            vertexData.put(alpha);
-            vertexData.put(points[2]);
-            vertexData.put(points[3]);
-            vertexData.put(1.0f);
-            vertexData.put(0.0f);
-            vertexData.put(alpha);
-            vertexData.put(points[4]);
-            vertexData.put(points[5]);
-            vertexData.put(0.0f);
-            vertexData.put(1.0f);
-            vertexData.put(alpha);
-            vertexData.put(points[6]);
-            vertexData.put(points[7]);
-            vertexData.put(1.0f);
-            vertexData.put(1.0f);
-            vertexData.put(alpha);
-            n = n + 1 + 1 + 1 + 1;
-            if (i != count - 1) {
-                vertexData.put(points[6]);
-                vertexData.put(points[7]);
-                vertexData.put(1.0f);
-                vertexData.put(1.0f);
-                vertexData.put(alpha);
-                n++;
+            asFloatBuffer.put(fArr[0]);
+            asFloatBuffer.put(fArr[i]);
+            asFloatBuffer.put(f);
+            asFloatBuffer.put(f);
+            asFloatBuffer.put(read5);
+            asFloatBuffer.put(fArr[2]);
+            asFloatBuffer.put(fArr[3]);
+            asFloatBuffer.put(1.0f);
+            asFloatBuffer.put(f);
+            asFloatBuffer.put(read5);
+            asFloatBuffer.put(fArr[4]);
+            asFloatBuffer.put(fArr[5]);
+            asFloatBuffer.put(f);
+            asFloatBuffer.put(1.0f);
+            asFloatBuffer.put(read5);
+            asFloatBuffer.put(fArr[6]);
+            asFloatBuffer.put(fArr[7]);
+            asFloatBuffer.put(1.0f);
+            asFloatBuffer.put(1.0f);
+            asFloatBuffer.put(read5);
+            i4 = i4 + i + i + i + i;
+            if (i3 != i2) {
+                asFloatBuffer.put(fArr[6]);
+                asFloatBuffer.put(fArr[7]);
+                asFloatBuffer.put(1.0f);
+                asFloatBuffer.put(1.0f);
+                asFloatBuffer.put(read5);
+                i4++;
             }
-            i++;
-            capacity = capacity2;
-            bb = bb2;
+            i3++;
+            c = 0;
         }
-        vertexData.position(0);
-        FloatBuffer coordData = vertexData.slice();
-        GLES20.glVertexAttribPointer(0, 2, 5126, false, 20, (Buffer) coordData);
+        asFloatBuffer.position(0);
+        GLES20.glVertexAttribPointer(0, 2, 5126, false, 20, (Buffer) asFloatBuffer.slice());
         GLES20.glEnableVertexAttribArray(0);
-        vertexData.position(2);
-        FloatBuffer texData = vertexData.slice();
-        GLES20.glVertexAttribPointer(1, 2, 5126, true, 20, (Buffer) texData);
+        asFloatBuffer.position(2);
+        GLES20.glVertexAttribPointer(1, 2, 5126, true, 20, (Buffer) asFloatBuffer.slice());
         GLES20.glEnableVertexAttribArray(1);
-        vertexData.position(4);
-        FloatBuffer alphaData = vertexData.slice();
-        GLES20.glVertexAttribPointer(2, 1, 5126, true, 20, (Buffer) alphaData);
+        asFloatBuffer.position(4);
+        GLES20.glVertexAttribPointer(2, 1, 5126, true, 20, (Buffer) asFloatBuffer.slice());
         GLES20.glEnableVertexAttribArray(2);
-        GLES20.glDrawArrays(5, 0, n);
-        return dataBounds;
+        GLES20.glDrawArrays(5, 0, i4);
+        return rectF;
     }
 }

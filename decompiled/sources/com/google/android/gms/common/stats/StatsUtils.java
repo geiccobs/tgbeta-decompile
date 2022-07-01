@@ -1,19 +1,15 @@
 package com.google.android.gms.common.stats;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.PowerManager;
 import android.os.Process;
 import android.text.TextUtils;
+import androidx.annotation.RecentlyNonNull;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 @Deprecated
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class StatsUtils {
-    public static String getEventKey(Context context, Intent intent) {
-        return String.valueOf(System.identityHashCode(intent) | (System.identityHashCode(context) << 32));
-    }
-
-    public static String getEventKey(PowerManager.WakeLock wakeLock, String str) {
+    @RecentlyNonNull
+    public static String getEventKey(@RecentlyNonNull PowerManager.WakeLock wakeLock, @RecentlyNonNull String str) {
         String valueOf = String.valueOf(String.valueOf((Process.myPid() << 32) | System.identityHashCode(wakeLock)));
         if (TextUtils.isEmpty(str)) {
             str = "";

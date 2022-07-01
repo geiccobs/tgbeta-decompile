@@ -8,7 +8,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class PlayingGameDrawable extends StatusDrawable {
     private final boolean isDialogScreen;
     private float progress;
@@ -20,31 +20,44 @@ public class PlayingGameDrawable extends StatusDrawable {
     private boolean started = false;
     private RectF rect = new RectF();
 
-    public PlayingGameDrawable(boolean isDialogScreen, Theme.ResourcesProvider resourcesProvider) {
-        this.isDialogScreen = isDialogScreen;
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int i) {
+    }
+
+    @Override // org.telegram.ui.Components.StatusDrawable
+    public void setColor(int i) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
+
+    public PlayingGameDrawable(boolean z, Theme.ResourcesProvider resourcesProvider) {
+        this.isDialogScreen = z;
         this.resourcesProvider = resourcesProvider;
     }
 
     @Override // org.telegram.ui.Components.StatusDrawable
-    public void setIsChat(boolean value) {
-        this.isChat = value;
-    }
-
-    @Override // org.telegram.ui.Components.StatusDrawable
-    public void setColor(int color) {
+    public void setIsChat(boolean z) {
+        this.isChat = z;
     }
 
     private void update() {
-        long newTime = System.currentTimeMillis();
-        long dt = newTime - this.lastUpdateTime;
-        this.lastUpdateTime = newTime;
-        if (dt > 16) {
-            dt = 16;
+        long currentTimeMillis = System.currentTimeMillis();
+        long j = currentTimeMillis - this.lastUpdateTime;
+        this.lastUpdateTime = currentTimeMillis;
+        if (j > 16) {
+            j = 16;
         }
         if (this.progress >= 1.0f) {
             this.progress = 0.0f;
         }
-        float f = this.progress + (((float) dt) / 300.0f);
+        float f = this.progress + (((float) j) / 300.0f);
         this.progress = f;
         if (f > 1.0f) {
             this.progress = 1.0f;
@@ -67,38 +80,34 @@ public class PlayingGameDrawable extends StatusDrawable {
 
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
-        int rad;
-        int size = AndroidUtilities.dp(10.0f);
-        int y = getBounds().top + ((getIntrinsicHeight() - size) / 2);
-        int y2 = this.isChat ? y : y + AndroidUtilities.dp(1.0f);
-        this.paint.setColor(Theme.getColor(this.isDialogScreen ? Theme.key_chats_actionMessage : Theme.key_chat_status, this.resourcesProvider));
-        this.rect.set(0.0f, y2, size, y2 + size);
-        float f = this.progress;
-        if (f < 0.5f) {
-            rad = (int) ((1.0f - (f / 0.5f)) * 35.0f);
-        } else {
-            rad = (int) (((f - 0.5f) * 35.0f) / 0.5f);
+        int dp = AndroidUtilities.dp(10.0f);
+        int intrinsicHeight = getBounds().top + ((getIntrinsicHeight() - dp) / 2);
+        if (!this.isChat) {
+            intrinsicHeight += AndroidUtilities.dp(1.0f);
         }
-        for (int a = 0; a < 3; a++) {
+        int i = intrinsicHeight;
+        this.paint.setColor(Theme.getColor(this.isDialogScreen ? "chats_actionMessage" : "chat_status", this.resourcesProvider));
+        this.rect.set(0.0f, i, dp, i + dp);
+        float f = this.progress;
+        int i2 = (int) (f < 0.5f ? (1.0f - (f / 0.5f)) * 35.0f : ((f - 0.5f) * 35.0f) / 0.5f);
+        for (int i3 = 0; i3 < 3; i3++) {
             float f2 = this.progress;
-            float x = ((AndroidUtilities.dp(5.0f) * a) + AndroidUtilities.dp(9.2f)) - (AndroidUtilities.dp(5.0f) * f2);
-            if (a == 2) {
+            float dp2 = ((AndroidUtilities.dp(5.0f) * i3) + AndroidUtilities.dp(9.2f)) - (AndroidUtilities.dp(5.0f) * f2);
+            if (i3 == 2) {
                 this.paint.setAlpha(Math.min(255, (int) ((f2 * 255.0f) / 0.5f)));
-            } else if (a == 0) {
-                if (f2 > 0.5f) {
-                    this.paint.setAlpha((int) ((1.0f - ((f2 - 0.5f) / 0.5f)) * 255.0f));
-                } else {
-                    this.paint.setAlpha(255);
-                }
+            } else if (i3 != 0) {
+                this.paint.setAlpha(255);
+            } else if (f2 > 0.5f) {
+                this.paint.setAlpha((int) ((1.0f - ((f2 - 0.5f) / 0.5f)) * 255.0f));
             } else {
                 this.paint.setAlpha(255);
             }
-            canvas.drawCircle(x, (size / 2) + y2, AndroidUtilities.dp(1.2f), this.paint);
+            canvas.drawCircle(dp2, (dp / 2) + i, AndroidUtilities.dp(1.2f), this.paint);
         }
         this.paint.setAlpha(255);
-        canvas.drawArc(this.rect, rad, 360 - (rad * 2), true, this.paint);
-        this.paint.setColor(Theme.getColor(this.isDialogScreen ? Theme.key_windowBackgroundWhite : Theme.key_actionBarDefault));
-        canvas.drawCircle(AndroidUtilities.dp(4.0f), ((size / 2) + y2) - AndroidUtilities.dp(2.0f), AndroidUtilities.dp(1.0f), this.paint);
+        canvas.drawArc(this.rect, i2, 360 - (i2 * 2), true, this.paint);
+        this.paint.setColor(Theme.getColor(this.isDialogScreen ? "windowBackgroundWhite" : "actionBarDefault"));
+        canvas.drawCircle(AndroidUtilities.dp(4.0f), (i + (dp / 2)) - AndroidUtilities.dp(2.0f), AndroidUtilities.dp(1.0f), this.paint);
         checkUpdate();
     }
 
@@ -115,19 +124,6 @@ public class PlayingGameDrawable extends StatusDrawable {
                 }, 100L);
             }
         }
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int alpha) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter cf) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
     }
 
     @Override // android.graphics.drawable.Drawable

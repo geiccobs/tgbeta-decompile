@@ -2,9 +2,8 @@ package com.googlecode.mp4parser.util;
 
 import com.coremedia.iso.IsoTypeReader;
 import com.coremedia.iso.IsoTypeWriter;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import java.nio.ByteBuffer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Matrix {
     double a;
     double b;
@@ -15,56 +14,45 @@ public class Matrix {
     double u;
     double v;
     double w;
-    public static final Matrix ROTATE_0 = new Matrix(1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
-    public static final Matrix ROTATE_90 = new Matrix(FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, 1.0d, -1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
-    public static final Matrix ROTATE_180 = new Matrix(-1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, -1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
-    public static final Matrix ROTATE_270 = new Matrix(FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, -1.0d, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, 1.0d, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE, FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE);
+    public static final Matrix ROTATE_0 = new Matrix(1.0d, 0.0d, 0.0d, 1.0d, 0.0d, 0.0d, 1.0d, 0.0d, 0.0d);
+    public static final Matrix ROTATE_90 = new Matrix(0.0d, 1.0d, -1.0d, 0.0d, 0.0d, 0.0d, 1.0d, 0.0d, 0.0d);
+    public static final Matrix ROTATE_180 = new Matrix(-1.0d, 0.0d, 0.0d, -1.0d, 0.0d, 0.0d, 1.0d, 0.0d, 0.0d);
+    public static final Matrix ROTATE_270 = new Matrix(0.0d, -1.0d, 1.0d, 0.0d, 0.0d, 0.0d, 1.0d, 0.0d, 0.0d);
 
-    public Matrix(double a, double b, double c, double d, double u, double v, double w, double tx, double ty) {
-        this.u = u;
-        this.v = v;
-        this.w = w;
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.d = d;
-        this.tx = tx;
-        this.ty = ty;
+    public Matrix(double d, double d2, double d3, double d4, double d5, double d6, double d7, double d8, double d9) {
+        this.u = d5;
+        this.v = d6;
+        this.w = d7;
+        this.a = d;
+        this.b = d2;
+        this.c = d3;
+        this.d = d4;
+        this.tx = d8;
+        this.ty = d9;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || Matrix.class != obj.getClass()) {
             return false;
         }
-        Matrix matrix = (Matrix) o;
-        if (Double.compare(matrix.a, this.a) == 0 && Double.compare(matrix.b, this.b) == 0 && Double.compare(matrix.c, this.c) == 0 && Double.compare(matrix.d, this.d) == 0 && Double.compare(matrix.tx, this.tx) == 0 && Double.compare(matrix.ty, this.ty) == 0 && Double.compare(matrix.u, this.u) == 0 && Double.compare(matrix.v, this.v) == 0 && Double.compare(matrix.w, this.w) == 0) {
-            return true;
-        }
-        return false;
+        Matrix matrix = (Matrix) obj;
+        return Double.compare(matrix.a, this.a) == 0 && Double.compare(matrix.b, this.b) == 0 && Double.compare(matrix.c, this.c) == 0 && Double.compare(matrix.d, this.d) == 0 && Double.compare(matrix.tx, this.tx) == 0 && Double.compare(matrix.ty, this.ty) == 0 && Double.compare(matrix.u, this.u) == 0 && Double.compare(matrix.v, this.v) == 0 && Double.compare(matrix.w, this.w) == 0;
     }
 
     public int hashCode() {
-        long temp = Double.doubleToLongBits(this.u);
-        int result = (int) ((temp >>> 32) ^ temp);
-        long temp2 = Double.doubleToLongBits(this.v);
-        int result2 = (result * 31) + ((int) ((temp2 >>> 32) ^ temp2));
-        long temp3 = Double.doubleToLongBits(this.w);
-        int result3 = (result2 * 31) + ((int) ((temp3 >>> 32) ^ temp3));
-        long temp4 = Double.doubleToLongBits(this.a);
-        int result4 = (result3 * 31) + ((int) ((temp4 >>> 32) ^ temp4));
-        long temp5 = Double.doubleToLongBits(this.b);
-        int result5 = (result4 * 31) + ((int) ((temp5 >>> 32) ^ temp5));
-        long temp6 = Double.doubleToLongBits(this.c);
-        int result6 = (result5 * 31) + ((int) ((temp6 >>> 32) ^ temp6));
-        long temp7 = Double.doubleToLongBits(this.d);
-        int result7 = (result6 * 31) + ((int) ((temp7 >>> 32) ^ temp7));
-        long temp8 = Double.doubleToLongBits(this.tx);
-        int result8 = (result7 * 31) + ((int) ((temp8 >>> 32) ^ temp8));
-        long temp9 = Double.doubleToLongBits(this.ty);
-        return (result8 * 31) + ((int) ((temp9 >>> 32) ^ temp9));
+        long doubleToLongBits = Double.doubleToLongBits(this.u);
+        long doubleToLongBits2 = Double.doubleToLongBits(this.v);
+        long doubleToLongBits3 = Double.doubleToLongBits(this.w);
+        long doubleToLongBits4 = Double.doubleToLongBits(this.a);
+        long doubleToLongBits5 = Double.doubleToLongBits(this.b);
+        long doubleToLongBits6 = Double.doubleToLongBits(this.c);
+        long doubleToLongBits7 = Double.doubleToLongBits(this.d);
+        long doubleToLongBits8 = Double.doubleToLongBits(this.tx);
+        long doubleToLongBits9 = Double.doubleToLongBits(this.ty);
+        return (((((((((((((((((int) (doubleToLongBits ^ (doubleToLongBits >>> 32))) * 31) + ((int) (doubleToLongBits2 ^ (doubleToLongBits2 >>> 32)))) * 31) + ((int) (doubleToLongBits3 ^ (doubleToLongBits3 >>> 32)))) * 31) + ((int) (doubleToLongBits4 ^ (doubleToLongBits4 >>> 32)))) * 31) + ((int) (doubleToLongBits5 ^ (doubleToLongBits5 >>> 32)))) * 31) + ((int) (doubleToLongBits6 ^ (doubleToLongBits6 >>> 32)))) * 31) + ((int) (doubleToLongBits7 ^ (doubleToLongBits7 >>> 32)))) * 31) + ((int) (doubleToLongBits8 ^ (doubleToLongBits8 >>> 32)))) * 31) + ((int) (doubleToLongBits9 ^ (doubleToLongBits9 >>> 32)));
     }
 
     public String toString() {
@@ -83,8 +71,8 @@ public class Matrix {
         return "Matrix{u=" + this.u + ", v=" + this.v + ", w=" + this.w + ", a=" + this.a + ", b=" + this.b + ", c=" + this.c + ", d=" + this.d + ", tx=" + this.tx + ", ty=" + this.ty + '}';
     }
 
-    public static Matrix fromFileOrder(double a, double b, double u, double c, double d, double v, double tx, double ty, double w) {
-        return new Matrix(a, b, c, d, u, v, w, tx, ty);
+    public static Matrix fromFileOrder(double d, double d2, double d3, double d4, double d5, double d6, double d7, double d8, double d9) {
+        return new Matrix(d, d2, d4, d5, d3, d6, d9, d7, d8);
     }
 
     public static Matrix fromByteBuffer(ByteBuffer byteBuffer) {

@@ -2,6 +2,7 @@ package com.google.android.gms.common.util;
 
 import android.os.Process;
 import android.os.StrictMode;
+import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.internal.Preconditions;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -11,13 +12,10 @@ import javax.annotation.Nullable;
 /* loaded from: classes.dex */
 public class ProcessUtils {
     @Nullable
-    private static String zza = null;
-    private static int zzb = 0;
-    private static long zzc = 0;
+    private static String zza;
+    private static int zzb;
 
-    private ProcessUtils() {
-    }
-
+    @RecentlyNullable
     public static String getMyProcessName() {
         if (zza == null) {
             if (zzb == 0) {
@@ -45,7 +43,7 @@ public class ProcessUtils {
             try {
                 str = ((String) Preconditions.checkNotNull(bufferedReader.readLine())).trim();
                 IOUtils.closeQuietly(bufferedReader);
-            } catch (IOException e) {
+            } catch (IOException unused) {
                 IOUtils.closeQuietly(bufferedReader);
                 return str;
             } catch (Throwable th2) {
@@ -53,7 +51,7 @@ public class ProcessUtils {
                 IOUtils.closeQuietly(bufferedReader);
                 throw th;
             }
-        } catch (IOException e2) {
+        } catch (IOException unused2) {
             bufferedReader = null;
         } catch (Throwable th3) {
             th = th3;

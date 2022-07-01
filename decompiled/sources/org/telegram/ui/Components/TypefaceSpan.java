@@ -3,77 +3,56 @@ package org.telegram.ui.Components;
 import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.text.style.MetricAffectingSpan;
-import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes5.dex */
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes3.dex */
 public class TypefaceSpan extends MetricAffectingSpan {
     private int color;
     private int textSize;
     private Typeface typeface;
 
-    public TypefaceSpan(Typeface tf) {
-        this.typeface = tf;
+    public TypefaceSpan(Typeface typeface) {
+        this.typeface = typeface;
     }
 
-    public TypefaceSpan(Typeface tf, int size) {
-        this.typeface = tf;
-        this.textSize = size;
-    }
-
-    public TypefaceSpan(Typeface tf, int size, int textColor) {
-        this.typeface = tf;
-        if (size > 0) {
-            this.textSize = size;
+    public TypefaceSpan(Typeface typeface, int i, int i2) {
+        this.typeface = typeface;
+        if (i > 0) {
+            this.textSize = i;
         }
-        this.color = textColor;
+        this.color = i2;
     }
 
-    public Typeface getTypeface() {
-        return this.typeface;
-    }
-
-    public void setColor(int value) {
-        this.color = value;
-    }
-
-    public boolean isMono() {
-        return this.typeface == Typeface.MONOSPACE;
-    }
-
-    public boolean isBold() {
-        return this.typeface == AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM);
-    }
-
-    public boolean isItalic() {
-        return this.typeface == AndroidUtilities.getTypeface("fonts/ritalic.ttf");
+    public void setColor(int i) {
+        this.color = i;
     }
 
     @Override // android.text.style.MetricAffectingSpan
-    public void updateMeasureState(TextPaint p) {
+    public void updateMeasureState(TextPaint textPaint) {
         Typeface typeface = this.typeface;
         if (typeface != null) {
-            p.setTypeface(typeface);
+            textPaint.setTypeface(typeface);
         }
         int i = this.textSize;
         if (i != 0) {
-            p.setTextSize(i);
+            textPaint.setTextSize(i);
         }
-        p.setFlags(p.getFlags() | 128);
+        textPaint.setFlags(textPaint.getFlags() | ConnectionsManager.RequestFlagNeedQuickAck);
     }
 
     @Override // android.text.style.CharacterStyle
-    public void updateDrawState(TextPaint tp) {
+    public void updateDrawState(TextPaint textPaint) {
         Typeface typeface = this.typeface;
         if (typeface != null) {
-            tp.setTypeface(typeface);
+            textPaint.setTypeface(typeface);
         }
         int i = this.textSize;
         if (i != 0) {
-            tp.setTextSize(i);
+            textPaint.setTextSize(i);
         }
         int i2 = this.color;
         if (i2 != 0) {
-            tp.setColor(i2);
+            textPaint.setColor(i2);
         }
-        tp.setFlags(tp.getFlags() | 128);
+        textPaint.setFlags(textPaint.getFlags() | ConnectionsManager.RequestFlagNeedQuickAck);
     }
 }

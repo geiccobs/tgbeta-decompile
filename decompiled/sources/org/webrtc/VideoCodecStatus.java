@@ -1,5 +1,5 @@
 package org.webrtc;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public enum VideoCodecStatus {
     REQUEST_SLI(2),
     NO_OUTPUT(1),
@@ -17,10 +17,11 @@ public enum VideoCodecStatus {
     
     private final int number;
 
-    VideoCodecStatus(int number) {
-        this.number = number;
+    VideoCodecStatus(int i) {
+        this.number = i;
     }
 
+    @CalledByNative
     public int getNumber() {
         return this.number;
     }

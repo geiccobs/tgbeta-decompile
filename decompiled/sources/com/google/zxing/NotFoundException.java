@@ -1,12 +1,12 @@
 package com.google.zxing;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class NotFoundException extends ReaderException {
     private static final NotFoundException INSTANCE;
 
     static {
         NotFoundException notFoundException = new NotFoundException();
         INSTANCE = notFoundException;
-        notFoundException.setStackTrace(NO_TRACE);
+        notFoundException.setStackTrace(ReaderException.NO_TRACE);
     }
 
     private NotFoundException() {

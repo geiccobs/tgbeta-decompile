@@ -4,12 +4,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzx {
-    public static String zza(@NullableDecl String str) {
-        return zzu.zza(str);
-    }
-
     public static String zza(@NullableDecl String str, @NullableDecl Object... objArr) {
         int indexOf;
         String valueOf = String.valueOf(str);
@@ -47,7 +43,7 @@ public final class zzx {
         } catch (Exception e) {
             String name = obj.getClass().getName();
             String hexString = Integer.toHexString(System.identityHashCode(obj));
-            StringBuilder sb = new StringBuilder(String.valueOf(name).length() + 1 + String.valueOf(hexString).length());
+            StringBuilder sb = new StringBuilder(name.length() + 1 + String.valueOf(hexString).length());
             sb.append(name);
             sb.append('@');
             sb.append(hexString);
@@ -57,7 +53,7 @@ public final class zzx {
             String valueOf = String.valueOf(sb2);
             logger.logp(level, "com.google.common.base.Strings", "lenientToString", valueOf.length() != 0 ? "Exception during lenientFormat for ".concat(valueOf) : new String("Exception during lenientFormat for "), (Throwable) e);
             String name2 = e.getClass().getName();
-            StringBuilder sb3 = new StringBuilder(String.valueOf(sb2).length() + 9 + String.valueOf(name2).length());
+            StringBuilder sb3 = new StringBuilder(String.valueOf(sb2).length() + 9 + name2.length());
             sb3.append("<");
             sb3.append(sb2);
             sb3.append(" threw ");

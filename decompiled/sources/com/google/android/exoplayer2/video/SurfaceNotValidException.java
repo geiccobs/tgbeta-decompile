@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.video;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class SurfaceNotValidException extends IllegalArgumentException {
-    public SurfaceNotValidException(Throwable e) {
-        super(e);
+    public SurfaceNotValidException(Throwable th) {
+        super(th);
     }
 }

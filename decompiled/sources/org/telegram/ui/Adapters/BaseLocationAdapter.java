@@ -1,7 +1,6 @@
 package org.telegram.ui.Adapters;
 
 import android.location.Location;
-import android.os.Build;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DialogObject;
@@ -13,9 +12,20 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$BotInlineMessage;
+import org.telegram.tgnet.TLRPC$BotInlineResult;
+import org.telegram.tgnet.TLRPC$TL_botInlineMessageMediaVenue;
+import org.telegram.tgnet.TLRPC$TL_contacts_resolveUsername;
+import org.telegram.tgnet.TLRPC$TL_contacts_resolvedPeer;
+import org.telegram.tgnet.TLRPC$TL_error;
+import org.telegram.tgnet.TLRPC$TL_inputGeoPoint;
+import org.telegram.tgnet.TLRPC$TL_inputPeerEmpty;
+import org.telegram.tgnet.TLRPC$TL_messageMediaVenue;
+import org.telegram.tgnet.TLRPC$TL_messages_getInlineBotResults;
+import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC$messages_BotResults;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdapter {
     private int currentRequestNum;
     private BaseLocationAdapterDelegate delegate;
@@ -28,13 +38,13 @@ public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdap
     protected boolean searching;
     private boolean searchingUser;
     protected boolean searched = false;
-    protected ArrayList<TLRPC.TL_messageMediaVenue> places = new ArrayList<>();
+    protected ArrayList<TLRPC$TL_messageMediaVenue> places = new ArrayList<>();
     protected ArrayList<String> iconUrls = new ArrayList<>();
     private int currentAccount = UserConfig.selectedAccount;
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public interface BaseLocationAdapterDelegate {
-        void didLoadSearchResult(ArrayList<TLRPC.TL_messageMediaVenue> arrayList);
+        void didLoadSearchResult(ArrayList<TLRPC$TL_messageMediaVenue> arrayList);
     }
 
     public void destroy() {
@@ -44,13 +54,13 @@ public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdap
         }
     }
 
-    public void setDelegate(long did, BaseLocationAdapterDelegate delegate) {
-        this.dialogId = did;
-        this.delegate = delegate;
+    public void setDelegate(long j, BaseLocationAdapterDelegate baseLocationAdapterDelegate) {
+        this.dialogId = j;
+        this.delegate = baseLocationAdapterDelegate;
     }
 
-    public void searchDelayed(final String query, final Location coordinate) {
-        if (query == null || query.length() == 0) {
+    public void searchDelayed(final String str, final Location location) {
+        if (str == null || str.length() == 0) {
             this.places.clear();
             this.searchInProgress = false;
             notifyDataSetChanged();
@@ -62,31 +72,29 @@ public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdap
         }
         this.searchInProgress = true;
         DispatchQueue dispatchQueue = Utilities.searchQueue;
-        Runnable runnable = new Runnable() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda1
+        Runnable runnable = new Runnable() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                BaseLocationAdapter.this.m1447xdd58fbb0(query, coordinate);
+                BaseLocationAdapter.this.lambda$searchDelayed$1(str, location);
             }
         };
         this.searchRunnable = runnable;
         dispatchQueue.postRunnable(runnable, 400L);
     }
 
-    /* renamed from: lambda$searchDelayed$1$org-telegram-ui-Adapters-BaseLocationAdapter */
-    public /* synthetic */ void m1447xdd58fbb0(final String query, final Location coordinate) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda0
+    public /* synthetic */ void lambda$searchDelayed$1(final String str, final Location location) {
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                BaseLocationAdapter.this.m1446x23e16e11(query, coordinate);
+                BaseLocationAdapter.this.lambda$searchDelayed$0(str, location);
             }
         });
     }
 
-    /* renamed from: lambda$searchDelayed$0$org-telegram-ui-Adapters-BaseLocationAdapter */
-    public /* synthetic */ void m1446x23e16e11(String query, Location coordinate) {
+    public /* synthetic */ void lambda$searchDelayed$0(String str, Location location) {
         this.searchRunnable = null;
         this.lastSearchLocation = null;
-        searchPlacesWithQuery(query, coordinate, true);
+        searchPlacesWithQuery(str, location, true);
     }
 
     private void searchBotUser() {
@@ -94,37 +102,35 @@ public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdap
             return;
         }
         this.searchingUser = true;
-        TLRPC.TL_contacts_resolveUsername req = new TLRPC.TL_contacts_resolveUsername();
-        req.username = MessagesController.getInstance(this.currentAccount).venueSearchBot;
-        ConnectionsManager.getInstance(this.currentAccount).sendRequest(req, new RequestDelegate() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda4
+        TLRPC$TL_contacts_resolveUsername tLRPC$TL_contacts_resolveUsername = new TLRPC$TL_contacts_resolveUsername();
+        tLRPC$TL_contacts_resolveUsername.username = MessagesController.getInstance(this.currentAccount).venueSearchBot;
+        ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_contacts_resolveUsername, new RequestDelegate() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda4
             @Override // org.telegram.tgnet.RequestDelegate
-            public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
-                BaseLocationAdapter.this.m1445x63b66c1e(tLObject, tL_error);
+            public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
+                BaseLocationAdapter.this.lambda$searchBotUser$3(tLObject, tLRPC$TL_error);
             }
         });
     }
 
-    /* renamed from: lambda$searchBotUser$3$org-telegram-ui-Adapters-BaseLocationAdapter */
-    public /* synthetic */ void m1445x63b66c1e(final TLObject response, TLRPC.TL_error error) {
-        if (response != null) {
+    public /* synthetic */ void lambda$searchBotUser$3(final TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
+        if (tLObject != null) {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda2
                 @Override // java.lang.Runnable
                 public final void run() {
-                    BaseLocationAdapter.this.m1444xaa3ede7f(response);
+                    BaseLocationAdapter.this.lambda$searchBotUser$2(tLObject);
                 }
             });
         }
     }
 
-    /* renamed from: lambda$searchBotUser$2$org-telegram-ui-Adapters-BaseLocationAdapter */
-    public /* synthetic */ void m1444xaa3ede7f(TLObject response) {
-        TLRPC.TL_contacts_resolvedPeer res = (TLRPC.TL_contacts_resolvedPeer) response;
-        MessagesController.getInstance(this.currentAccount).putUsers(res.users, false);
-        MessagesController.getInstance(this.currentAccount).putChats(res.chats, false);
-        MessagesStorage.getInstance(this.currentAccount).putUsersAndChats(res.users, res.chats, true, true);
-        Location coord = this.lastSearchLocation;
+    public /* synthetic */ void lambda$searchBotUser$2(TLObject tLObject) {
+        TLRPC$TL_contacts_resolvedPeer tLRPC$TL_contacts_resolvedPeer = (TLRPC$TL_contacts_resolvedPeer) tLObject;
+        MessagesController.getInstance(this.currentAccount).putUsers(tLRPC$TL_contacts_resolvedPeer.users, false);
+        MessagesController.getInstance(this.currentAccount).putChats(tLRPC$TL_contacts_resolvedPeer.chats, false);
+        MessagesStorage.getInstance(this.currentAccount).putUsersAndChats(tLRPC$TL_contacts_resolvedPeer.users, tLRPC$TL_contacts_resolvedPeer.chats, true, true);
+        Location location = this.lastSearchLocation;
         this.lastSearchLocation = null;
-        searchPlacesWithQuery(this.lastSearchQuery, coord, false);
+        searchPlacesWithQuery(this.lastSearchQuery, location, false);
     }
 
     public boolean isSearching() {
@@ -135,37 +141,18 @@ public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdap
         return this.lastFoundQuery;
     }
 
-    public void searchPlacesWithQuery(String query, Location coordinate, boolean searchUser) {
-        searchPlacesWithQuery(query, coordinate, searchUser, false);
+    public void searchPlacesWithQuery(String str, Location location, boolean z) {
+        searchPlacesWithQuery(str, location, z, false);
     }
 
-    protected void notifyStartSearch(boolean wasSearching, int oldItemCount, boolean animated) {
-        if (animated && Build.VERSION.SDK_INT >= 19) {
-            if (this.places.isEmpty() || wasSearching) {
-                if (!wasSearching) {
-                    int fromIndex = Math.max(0, getItemCount() - 4);
-                    notifyItemRangeRemoved(fromIndex, getItemCount() - fromIndex);
-                    return;
-                }
+    public void searchPlacesWithQuery(final String str, Location location, boolean z, boolean z2) {
+        if (location != null) {
+            Location location2 = this.lastSearchLocation;
+            if (location2 != null && location.distanceTo(location2) < 200.0f) {
                 return;
             }
-            int placesCount = this.places.size() + 3;
-            int offset = oldItemCount - placesCount;
-            notifyItemInserted(offset);
-            notifyItemRangeRemoved(offset, placesCount);
-            return;
-        }
-        notifyDataSetChanged();
-    }
-
-    public void searchPlacesWithQuery(final String query, Location coordinate, boolean searchUser, boolean animated) {
-        if (coordinate != null) {
-            Location location = this.lastSearchLocation;
-            if (location != null && coordinate.distanceTo(location) < 200.0f) {
-                return;
-            }
-            this.lastSearchLocation = new Location(coordinate);
-            this.lastSearchQuery = query;
+            this.lastSearchLocation = new Location(location);
+            this.lastSearchQuery = str;
             if (this.searching) {
                 this.searching = false;
                 if (this.currentRequestNum != 0) {
@@ -174,77 +161,77 @@ public abstract class BaseLocationAdapter extends RecyclerListView.SelectionAdap
                 }
             }
             getItemCount();
-            boolean z = this.searching;
             this.searching = true;
-            boolean z2 = this.searched;
             this.searched = true;
-            TLObject object = MessagesController.getInstance(this.currentAccount).getUserOrChat(MessagesController.getInstance(this.currentAccount).venueSearchBot);
-            if (!(object instanceof TLRPC.User)) {
-                if (searchUser) {
-                    searchBotUser();
+            TLObject userOrChat = MessagesController.getInstance(this.currentAccount).getUserOrChat(MessagesController.getInstance(this.currentAccount).venueSearchBot);
+            if (!(userOrChat instanceof TLRPC$User)) {
+                if (!z) {
                     return;
                 }
+                searchBotUser();
                 return;
             }
-            TLRPC.User user = (TLRPC.User) object;
-            TLRPC.TL_messages_getInlineBotResults req = new TLRPC.TL_messages_getInlineBotResults();
-            req.query = query == null ? "" : query;
-            req.bot = MessagesController.getInstance(this.currentAccount).getInputUser(user);
-            req.offset = "";
-            req.geo_point = new TLRPC.TL_inputGeoPoint();
-            req.geo_point.lat = AndroidUtilities.fixLocationCoord(coordinate.getLatitude());
-            req.geo_point._long = AndroidUtilities.fixLocationCoord(coordinate.getLongitude());
-            req.flags = 1 | req.flags;
+            TLRPC$User tLRPC$User = (TLRPC$User) userOrChat;
+            TLRPC$TL_messages_getInlineBotResults tLRPC$TL_messages_getInlineBotResults = new TLRPC$TL_messages_getInlineBotResults();
+            tLRPC$TL_messages_getInlineBotResults.query = str == null ? "" : str;
+            tLRPC$TL_messages_getInlineBotResults.bot = MessagesController.getInstance(this.currentAccount).getInputUser(tLRPC$User);
+            tLRPC$TL_messages_getInlineBotResults.offset = "";
+            TLRPC$TL_inputGeoPoint tLRPC$TL_inputGeoPoint = new TLRPC$TL_inputGeoPoint();
+            tLRPC$TL_messages_getInlineBotResults.geo_point = tLRPC$TL_inputGeoPoint;
+            tLRPC$TL_inputGeoPoint.lat = AndroidUtilities.fixLocationCoord(location.getLatitude());
+            tLRPC$TL_messages_getInlineBotResults.geo_point._long = AndroidUtilities.fixLocationCoord(location.getLongitude());
+            tLRPC$TL_messages_getInlineBotResults.flags |= 1;
             if (DialogObject.isEncryptedDialog(this.dialogId)) {
-                req.peer = new TLRPC.TL_inputPeerEmpty();
+                tLRPC$TL_messages_getInlineBotResults.peer = new TLRPC$TL_inputPeerEmpty();
             } else {
-                req.peer = MessagesController.getInstance(this.currentAccount).getInputPeer(this.dialogId);
+                tLRPC$TL_messages_getInlineBotResults.peer = MessagesController.getInstance(this.currentAccount).getInputPeer(this.dialogId);
             }
-            this.currentRequestNum = ConnectionsManager.getInstance(this.currentAccount).sendRequest(req, new RequestDelegate() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda5
+            this.currentRequestNum = ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_messages_getInlineBotResults, new RequestDelegate() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda5
                 @Override // org.telegram.tgnet.RequestDelegate
-                public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
-                    BaseLocationAdapter.this.m1449xd7bd1b58(query, tLObject, tL_error);
+                public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
+                    BaseLocationAdapter.this.lambda$searchPlacesWithQuery$5(str, tLObject, tLRPC$TL_error);
                 }
             });
             notifyDataSetChanged();
         }
     }
 
-    /* renamed from: lambda$searchPlacesWithQuery$5$org-telegram-ui-Adapters-BaseLocationAdapter */
-    public /* synthetic */ void m1449xd7bd1b58(final String query, final TLObject response, final TLRPC.TL_error error) {
+    public /* synthetic */ void lambda$searchPlacesWithQuery$5(final String str, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.BaseLocationAdapter$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                BaseLocationAdapter.this.m1448x1e458db9(error, query, response);
+                BaseLocationAdapter.this.lambda$searchPlacesWithQuery$4(tLRPC$TL_error, str, tLObject);
             }
         });
     }
 
-    /* renamed from: lambda$searchPlacesWithQuery$4$org-telegram-ui-Adapters-BaseLocationAdapter */
-    public /* synthetic */ void m1448x1e458db9(TLRPC.TL_error error, String query, TLObject response) {
-        if (error == null) {
+    public /* synthetic */ void lambda$searchPlacesWithQuery$4(TLRPC$TL_error tLRPC$TL_error, String str, TLObject tLObject) {
+        if (tLRPC$TL_error == null) {
             this.currentRequestNum = 0;
             this.searching = false;
             this.places.clear();
             this.iconUrls.clear();
             this.searchInProgress = false;
-            this.lastFoundQuery = query;
-            TLRPC.messages_BotResults res = (TLRPC.messages_BotResults) response;
-            int size = res.results.size();
-            for (int a = 0; a < size; a++) {
-                TLRPC.BotInlineResult result = res.results.get(a);
-                if ("venue".equals(result.type) && (result.send_message instanceof TLRPC.TL_botInlineMessageMediaVenue)) {
-                    TLRPC.TL_botInlineMessageMediaVenue mediaVenue = (TLRPC.TL_botInlineMessageMediaVenue) result.send_message;
-                    ArrayList<String> arrayList = this.iconUrls;
-                    arrayList.add("https://ss3.4sqi.net/img/categories_v2/" + mediaVenue.venue_type + "_64.png");
-                    TLRPC.TL_messageMediaVenue venue = new TLRPC.TL_messageMediaVenue();
-                    venue.geo = mediaVenue.geo;
-                    venue.address = mediaVenue.address;
-                    venue.title = mediaVenue.title;
-                    venue.venue_type = mediaVenue.venue_type;
-                    venue.venue_id = mediaVenue.venue_id;
-                    venue.provider = mediaVenue.provider;
-                    this.places.add(venue);
+            this.lastFoundQuery = str;
+            TLRPC$messages_BotResults tLRPC$messages_BotResults = (TLRPC$messages_BotResults) tLObject;
+            int size = tLRPC$messages_BotResults.results.size();
+            for (int i = 0; i < size; i++) {
+                TLRPC$BotInlineResult tLRPC$BotInlineResult = tLRPC$messages_BotResults.results.get(i);
+                if ("venue".equals(tLRPC$BotInlineResult.type)) {
+                    TLRPC$BotInlineMessage tLRPC$BotInlineMessage = tLRPC$BotInlineResult.send_message;
+                    if (tLRPC$BotInlineMessage instanceof TLRPC$TL_botInlineMessageMediaVenue) {
+                        TLRPC$TL_botInlineMessageMediaVenue tLRPC$TL_botInlineMessageMediaVenue = (TLRPC$TL_botInlineMessageMediaVenue) tLRPC$BotInlineMessage;
+                        ArrayList<String> arrayList = this.iconUrls;
+                        arrayList.add("https://ss3.4sqi.net/img/categories_v2/" + tLRPC$TL_botInlineMessageMediaVenue.venue_type + "_64.png");
+                        TLRPC$TL_messageMediaVenue tLRPC$TL_messageMediaVenue = new TLRPC$TL_messageMediaVenue();
+                        tLRPC$TL_messageMediaVenue.geo = tLRPC$TL_botInlineMessageMediaVenue.geo;
+                        tLRPC$TL_messageMediaVenue.address = tLRPC$TL_botInlineMessageMediaVenue.address;
+                        tLRPC$TL_messageMediaVenue.title = tLRPC$TL_botInlineMessageMediaVenue.title;
+                        tLRPC$TL_messageMediaVenue.venue_type = tLRPC$TL_botInlineMessageMediaVenue.venue_type;
+                        tLRPC$TL_messageMediaVenue.venue_id = tLRPC$TL_botInlineMessageMediaVenue.venue_id;
+                        tLRPC$TL_messageMediaVenue.provider = tLRPC$TL_botInlineMessageMediaVenue.provider;
+                        this.places.add(tLRPC$TL_messageMediaVenue);
+                    }
                 }
             }
         }

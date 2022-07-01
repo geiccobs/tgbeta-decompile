@@ -10,13 +10,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class ActionBarMenuSubItem extends FrameLayout {
     boolean bottom;
     private CheckBox2 checkView;
@@ -32,27 +31,27 @@ public class ActionBarMenuSubItem extends FrameLayout {
     private TextView textView;
     boolean top;
 
-    public ActionBarMenuSubItem(Context context, boolean top, boolean bottom) {
-        this(context, false, top, bottom);
+    public ActionBarMenuSubItem(Context context, boolean z, boolean z2) {
+        this(context, false, z, z2);
     }
 
-    public ActionBarMenuSubItem(Context context, boolean needCheck, boolean top, boolean bottom) {
-        this(context, needCheck, top, bottom, null);
+    public ActionBarMenuSubItem(Context context, boolean z, boolean z2, boolean z3) {
+        this(context, z, z2, z3, null);
     }
 
-    public ActionBarMenuSubItem(Context context, boolean top, boolean bottom, Theme.ResourcesProvider resourcesProvider) {
-        this(context, false, top, bottom, resourcesProvider);
+    public ActionBarMenuSubItem(Context context, boolean z, boolean z2, Theme.ResourcesProvider resourcesProvider) {
+        this(context, false, z, z2, resourcesProvider);
     }
 
-    public ActionBarMenuSubItem(Context context, boolean needCheck, boolean top, boolean bottom, Theme.ResourcesProvider resourcesProvider) {
+    public ActionBarMenuSubItem(Context context, boolean z, boolean z2, boolean z3, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.itemHeight = 48;
         this.resourcesProvider = resourcesProvider;
-        this.top = top;
-        this.bottom = bottom;
-        this.textColor = getThemedColor(Theme.key_actionBarDefaultSubmenuItem);
-        this.iconColor = getThemedColor(Theme.key_actionBarDefaultSubmenuItemIcon);
-        this.selectorColor = getThemedColor(Theme.key_dialogButtonSelector);
+        this.top = z2;
+        this.bottom = z3;
+        this.textColor = getThemedColor("actionBarDefaultSubmenuItem");
+        this.iconColor = getThemedColor("actionBarDefaultSubmenuItemIcon");
+        this.selectorColor = getThemedColor("dialogButtonSelector");
         updateBackground();
         setPadding(AndroidUtilities.dp(18.0f), 0, AndroidUtilities.dp(18.0f), 0);
         ImageView imageView = new ImageView(context);
@@ -70,50 +69,51 @@ public class ActionBarMenuSubItem extends FrameLayout {
         this.textView.setTextColor(this.textColor);
         this.textView.setTextSize(1, 16.0f);
         addView(this.textView, LayoutHelper.createFrame(-2, -2, (LocaleController.isRTL ? 5 : 3) | 16));
-        if (needCheck) {
+        if (z) {
             CheckBox2 checkBox2 = new CheckBox2(context, 26, resourcesProvider);
             this.checkView = checkBox2;
             checkBox2.setDrawUnchecked(false);
-            this.checkView.setColor(null, null, Theme.key_radioBackgroundChecked);
+            this.checkView.setColor(null, null, "radioBackgroundChecked");
             this.checkView.setDrawBackgroundAsArc(-1);
             addView(this.checkView, LayoutHelper.createFrame(26, -1, (!LocaleController.isRTL ? 3 : i) | 16));
         }
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.itemHeight), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.itemHeight), 1073741824));
     }
 
-    public void setItemHeight(int itemHeight) {
-        this.itemHeight = itemHeight;
+    public void setItemHeight(int i) {
+        this.itemHeight = i;
     }
 
-    public void setChecked(boolean checked) {
+    public void setChecked(boolean z) {
         CheckBox2 checkBox2 = this.checkView;
         if (checkBox2 == null) {
             return;
         }
-        checkBox2.setChecked(checked, true);
+        checkBox2.setChecked(z, true);
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setEnabled(isEnabled());
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.setEnabled(isEnabled());
         CheckBox2 checkBox2 = this.checkView;
-        if (checkBox2 != null && checkBox2.isChecked()) {
-            info.setCheckable(true);
-            info.setChecked(this.checkView.isChecked());
-            info.setClassName("android.widget.CheckBox");
+        if (checkBox2 == null || !checkBox2.isChecked()) {
+            return;
         }
+        accessibilityNodeInfo.setCheckable(true);
+        accessibilityNodeInfo.setChecked(this.checkView.isChecked());
+        accessibilityNodeInfo.setClassName("android.widget.CheckBox");
     }
 
-    public void setCheckColor(String colorKey) {
-        this.checkView.setColor(null, null, colorKey);
+    public void setCheckColor(String str) {
+        this.checkView.setColor(null, null, str);
     }
 
-    public void setRightIcon(int icon) {
+    public void setRightIcon(int i) {
         if (this.rightIcon == null) {
             ImageView imageView = new ImageView(getContext());
             this.rightIcon = imageView;
@@ -130,11 +130,11 @@ public class ActionBarMenuSubItem extends FrameLayout {
             f = 18.0f;
         }
         setPadding(dp, 0, AndroidUtilities.dp(f), 0);
-        this.rightIcon.setImageResource(icon);
+        this.rightIcon.setImageResource(i);
     }
 
-    public void setTextAndIcon(CharSequence text, int icon) {
-        setTextAndIcon(text, icon, null);
+    public void setTextAndIcon(CharSequence charSequence, int i) {
+        setTextAndIcon(charSequence, i, null);
     }
 
     public void setMultiline() {
@@ -144,13 +144,13 @@ public class ActionBarMenuSubItem extends FrameLayout {
         this.textView.setGravity(16);
     }
 
-    public void setTextAndIcon(CharSequence text, int icon, Drawable iconDrawable) {
-        this.textView.setText(text);
-        if (icon != 0 || iconDrawable != null || this.checkView != null) {
-            if (iconDrawable != null) {
-                this.imageView.setImageDrawable(iconDrawable);
+    public void setTextAndIcon(CharSequence charSequence, int i, Drawable drawable) {
+        this.textView.setText(charSequence);
+        if (i != 0 || drawable != null || this.checkView != null) {
+            if (drawable != null) {
+                this.imageView.setImageDrawable(drawable);
             } else {
-                this.imageView.setImageResource(icon);
+                this.imageView.setImageResource(i);
             }
             this.imageView.setVisibility(0);
             this.textView.setPadding(LocaleController.isRTL ? 0 : AndroidUtilities.dp(43.0f), 0, LocaleController.isRTL ? AndroidUtilities.dp(43.0f) : 0, 0);
@@ -160,43 +160,43 @@ public class ActionBarMenuSubItem extends FrameLayout {
         this.textView.setPadding(0, 0, 0, 0);
     }
 
-    public ActionBarMenuSubItem setColors(int textColor, int iconColor) {
-        setTextColor(textColor);
-        setIconColor(iconColor);
+    public ActionBarMenuSubItem setColors(int i, int i2) {
+        setTextColor(i);
+        setIconColor(i2);
         return this;
     }
 
-    public void setTextColor(int textColor) {
-        if (this.textColor != textColor) {
+    public void setTextColor(int i) {
+        if (this.textColor != i) {
             TextView textView = this.textView;
-            this.textColor = textColor;
-            textView.setTextColor(textColor);
+            this.textColor = i;
+            textView.setTextColor(i);
         }
     }
 
-    public void setIconColor(int iconColor) {
-        if (this.iconColor != iconColor) {
+    public void setIconColor(int i) {
+        if (this.iconColor != i) {
             ImageView imageView = this.imageView;
-            this.iconColor = iconColor;
-            imageView.setColorFilter(new PorterDuffColorFilter(iconColor, PorterDuff.Mode.MULTIPLY));
+            this.iconColor = i;
+            imageView.setColorFilter(new PorterDuffColorFilter(i, PorterDuff.Mode.MULTIPLY));
         }
     }
 
-    public void setIcon(int resId) {
-        this.imageView.setImageResource(resId);
+    public void setIcon(int i) {
+        this.imageView.setImageResource(i);
     }
 
-    public void setText(String text) {
-        this.textView.setText(text);
+    public void setText(String str) {
+        this.textView.setText(str);
     }
 
-    public void setSubtextColor(int color) {
-        this.subtextView.setTextColor(color);
+    public void setSubtextColor(int i) {
+        this.subtextView.setTextColor(i);
     }
 
-    public void setSubtext(String text) {
+    public void setSubtext(String str) {
         int i = 8;
-        boolean oldVisible = true;
+        boolean z = true;
         int i2 = 0;
         if (this.subtextView == null) {
             TextView textView = new TextView(getContext());
@@ -216,24 +216,24 @@ public class ActionBarMenuSubItem extends FrameLayout {
             }
             addView(textView2, LayoutHelper.createFrame(-2, -2.0f, i3 | 16, 0.0f, 10.0f, 0.0f, 0.0f));
         }
-        boolean visible = !TextUtils.isEmpty(text);
+        boolean z2 = !TextUtils.isEmpty(str);
         if (this.subtextView.getVisibility() != 0) {
-            oldVisible = false;
+            z = false;
         }
-        if (visible != oldVisible) {
+        if (z2 != z) {
             TextView textView3 = this.subtextView;
-            if (visible) {
+            if (z2) {
                 i = 0;
             }
             textView3.setVisibility(i);
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.textView.getLayoutParams();
-            if (visible) {
+            if (z2) {
                 i2 = AndroidUtilities.dp(10.0f);
             }
             layoutParams.bottomMargin = i2;
             this.textView.setLayoutParams(layoutParams);
         }
-        this.subtextView.setText(text);
+        this.subtextView.setText(str);
     }
 
     public TextView getTextView() {
@@ -244,35 +244,35 @@ public class ActionBarMenuSubItem extends FrameLayout {
         return this.imageView;
     }
 
-    public void setSelectorColor(int selectorColor) {
-        if (this.selectorColor != selectorColor) {
-            this.selectorColor = selectorColor;
+    public void setSelectorColor(int i) {
+        if (this.selectorColor != i) {
+            this.selectorColor = i;
             updateBackground();
         }
     }
 
-    public void updateSelectorBackground(boolean top, boolean bottom) {
-        if (this.top == top && this.bottom == bottom) {
+    public void updateSelectorBackground(boolean z, boolean z2) {
+        if (this.top == z && this.bottom == z2) {
             return;
         }
-        this.top = top;
-        this.bottom = bottom;
+        this.top = z;
+        this.bottom = z2;
         updateBackground();
     }
 
     void updateBackground() {
-        int bottomBackgroundRadius = 6;
-        int topBackgroundRadius = this.top ? 6 : 0;
+        int i = 6;
+        int i2 = this.top ? 6 : 0;
         if (!this.bottom) {
-            bottomBackgroundRadius = 0;
+            i = 0;
         }
-        setBackground(Theme.createRadSelectorDrawable(this.selectorColor, topBackgroundRadius, bottomBackgroundRadius));
+        setBackground(Theme.createRadSelectorDrawable(this.selectorColor, i2, i));
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 
     public CheckBox2 getCheckView() {

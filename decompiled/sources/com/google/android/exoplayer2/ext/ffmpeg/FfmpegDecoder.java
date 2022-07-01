@@ -4,14 +4,13 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.decoder.DecoderInputBuffer;
 import com.google.android.exoplayer2.decoder.SimpleDecoder;
 import com.google.android.exoplayer2.decoder.SimpleOutputBuffer;
-import com.google.android.exoplayer2.extractor.mp4.Atom;
 import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
 import java.nio.ByteBuffer;
 import java.util.List;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.MediaController;
+/* loaded from: classes.dex */
 final class FfmpegDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutputBuffer, FfmpegDecoderException> {
     private static final int DECODER_ERROR_INVALID_DATA = -1;
     private static final int DECODER_ERROR_OTHER = -2;
@@ -38,21 +37,21 @@ final class FfmpegDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutput
 
     private native long ffmpegReset(long j, byte[] bArr);
 
-    public FfmpegDecoder(int numInputBuffers, int numOutputBuffers, int initialInputBufferSize, Format format, boolean outputFloat) throws FfmpegDecoderException {
-        super(new DecoderInputBuffer[numInputBuffers], new SimpleOutputBuffer[numOutputBuffers]);
+    public FfmpegDecoder(int i, int i2, int i3, Format format, boolean z) throws FfmpegDecoderException {
+        super(new DecoderInputBuffer[i], new SimpleOutputBuffer[i2]);
         Assertions.checkNotNull(format.sampleMimeType);
         String str = (String) Assertions.checkNotNull(FfmpegLibrary.getCodecName(format.sampleMimeType));
         this.codecName = str;
         byte[] extraData = getExtraData(format.sampleMimeType, format.initializationData);
         this.extraData = extraData;
-        this.encoding = outputFloat ? 4 : 2;
-        this.outputBufferSize = outputFloat ? 131072 : 65536;
-        long ffmpegInitialize = ffmpegInitialize(str, extraData, outputFloat, format.sampleRate, format.channelCount);
+        this.encoding = z ? 4 : 2;
+        this.outputBufferSize = z ? OUTPUT_BUFFER_SIZE_32BIT : 65536;
+        long ffmpegInitialize = ffmpegInitialize(str, extraData, z, format.sampleRate, format.channelCount);
         this.nativeContext = ffmpegInitialize;
         if (ffmpegInitialize == 0) {
             throw new FfmpegDecoderException("Initialization failed.");
         }
-        setInitialInputBufferSize(initialInputBufferSize);
+        setInitialInputBufferSize(i3);
     }
 
     @Override // com.google.android.exoplayer2.decoder.Decoder
@@ -71,26 +70,26 @@ final class FfmpegDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutput
     }
 
     @Override // com.google.android.exoplayer2.decoder.SimpleDecoder
-    public FfmpegDecoderException createUnexpectedDecodeException(Throwable error) {
-        return new FfmpegDecoderException("Unexpected decode error", error);
+    public FfmpegDecoderException createUnexpectedDecodeException(Throwable th) {
+        return new FfmpegDecoderException("Unexpected decode error", th);
     }
 
-    public FfmpegDecoderException decode(DecoderInputBuffer inputBuffer, SimpleOutputBuffer outputBuffer, boolean reset) {
-        if (reset) {
+    public FfmpegDecoderException decode(DecoderInputBuffer decoderInputBuffer, SimpleOutputBuffer simpleOutputBuffer, boolean z) {
+        if (z) {
             long ffmpegReset = ffmpegReset(this.nativeContext, this.extraData);
             this.nativeContext = ffmpegReset;
             if (ffmpegReset == 0) {
                 return new FfmpegDecoderException("Error resetting (see logcat).");
             }
         }
-        ByteBuffer inputData = (ByteBuffer) Util.castNonNull(inputBuffer.data);
-        int inputSize = inputData.limit();
-        ByteBuffer outputData = outputBuffer.init(inputBuffer.timeUs, this.outputBufferSize);
-        int result = ffmpegDecode(this.nativeContext, inputData, inputSize, outputData, this.outputBufferSize);
-        if (result == -1) {
-            outputBuffer.setFlags(Integer.MIN_VALUE);
+        ByteBuffer byteBuffer = (ByteBuffer) Util.castNonNull(decoderInputBuffer.data);
+        int limit = byteBuffer.limit();
+        ByteBuffer init = simpleOutputBuffer.init(decoderInputBuffer.timeUs, this.outputBufferSize);
+        int ffmpegDecode = ffmpegDecode(this.nativeContext, byteBuffer, limit, init, this.outputBufferSize);
+        if (ffmpegDecode == -1) {
+            simpleOutputBuffer.setFlags(Integer.MIN_VALUE);
             return null;
-        } else if (result == -2) {
+        } else if (ffmpegDecode == -2) {
             return new FfmpegDecoderException("Error decoding (see logcat).");
         } else {
             if (!this.hasOutputFormat) {
@@ -98,14 +97,14 @@ final class FfmpegDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutput
                 this.sampleRate = ffmpegGetSampleRate(this.nativeContext);
                 if (this.sampleRate == 0 && "alac".equals(this.codecName)) {
                     Assertions.checkNotNull(this.extraData);
-                    ParsableByteArray parsableExtraData = new ParsableByteArray(this.extraData);
-                    parsableExtraData.setPosition(this.extraData.length - 4);
-                    this.sampleRate = parsableExtraData.readUnsignedIntToInt();
+                    ParsableByteArray parsableByteArray = new ParsableByteArray(this.extraData);
+                    parsableByteArray.setPosition(this.extraData.length - 4);
+                    this.sampleRate = parsableByteArray.readUnsignedIntToInt();
                 }
                 this.hasOutputFormat = true;
             }
-            outputData.position(0);
-            outputData.limit(result);
+            init.position(0);
+            init.limit(ffmpegDecode);
             return null;
         }
     }
@@ -129,78 +128,71 @@ final class FfmpegDecoder extends SimpleDecoder<DecoderInputBuffer, SimpleOutput
         return this.encoding;
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    private static byte[] getExtraData(String mimeType, List<byte[]> initializationData) {
-        char c;
-        switch (mimeType.hashCode()) {
+    private static byte[] getExtraData(String str, List<byte[]> list) {
+        str.hashCode();
+        char c = 65535;
+        switch (str.hashCode()) {
             case -1003765268:
-                if (mimeType.equals(MimeTypes.AUDIO_VORBIS)) {
-                    c = 3;
-                    break;
-                }
-                c = 65535;
-                break;
-            case -53558318:
-                if (mimeType.equals("audio/mp4a-latm")) {
+                if (str.equals("audio/vorbis")) {
                     c = 0;
                     break;
                 }
-                c = 65535;
                 break;
-            case 1504470054:
-                if (mimeType.equals(MimeTypes.AUDIO_ALAC)) {
-                    c = 2;
-                    break;
-                }
-                c = 65535;
-                break;
-            case 1504891608:
-                if (mimeType.equals(MimeTypes.AUDIO_OPUS)) {
+            case -53558318:
+                if (str.equals(MediaController.AUIDO_MIME_TYPE)) {
                     c = 1;
                     break;
                 }
-                c = 65535;
                 break;
-            default:
-                c = 65535;
+            case 1504470054:
+                if (str.equals("audio/alac")) {
+                    c = 2;
+                    break;
+                }
+                break;
+            case 1504891608:
+                if (str.equals("audio/opus")) {
+                    c = 3;
+                    break;
+                }
                 break;
         }
         switch (c) {
             case 0:
+                return getVorbisExtraData(list);
             case 1:
-                return initializationData.get(0);
-            case 2:
-                return getAlacExtraData(initializationData);
             case 3:
-                return getVorbisExtraData(initializationData);
+                return list.get(0);
+            case 2:
+                return getAlacExtraData(list);
             default:
                 return null;
         }
     }
 
-    private static byte[] getAlacExtraData(List<byte[]> initializationData) {
-        byte[] magicCookie = initializationData.get(0);
-        int alacAtomLength = magicCookie.length + 12;
-        ByteBuffer alacAtom = ByteBuffer.allocate(alacAtomLength);
-        alacAtom.putInt(alacAtomLength);
-        alacAtom.putInt(Atom.TYPE_alac);
-        alacAtom.putInt(0);
-        alacAtom.put(magicCookie, 0, magicCookie.length);
-        return alacAtom.array();
+    private static byte[] getAlacExtraData(List<byte[]> list) {
+        byte[] bArr = list.get(0);
+        int length = bArr.length + 12;
+        ByteBuffer allocate = ByteBuffer.allocate(length);
+        allocate.putInt(length);
+        allocate.putInt(1634492771);
+        allocate.putInt(0);
+        allocate.put(bArr, 0, bArr.length);
+        return allocate.array();
     }
 
-    private static byte[] getVorbisExtraData(List<byte[]> initializationData) {
-        byte[] header0 = initializationData.get(0);
-        byte[] header1 = initializationData.get(1);
-        byte[] extraData = new byte[header0.length + header1.length + 6];
-        extraData[0] = (byte) (header0.length >> 8);
-        extraData[1] = (byte) (header0.length & 255);
-        System.arraycopy(header0, 0, extraData, 2, header0.length);
-        extraData[header0.length + 2] = 0;
-        extraData[header0.length + 3] = 0;
-        extraData[header0.length + 4] = (byte) (header1.length >> 8);
-        extraData[header0.length + 5] = (byte) (header1.length & 255);
-        System.arraycopy(header1, 0, extraData, header0.length + 6, header1.length);
-        return extraData;
+    private static byte[] getVorbisExtraData(List<byte[]> list) {
+        byte[] bArr = list.get(0);
+        byte[] bArr2 = list.get(1);
+        byte[] bArr3 = new byte[bArr.length + bArr2.length + 6];
+        bArr3[0] = (byte) (bArr.length >> 8);
+        bArr3[1] = (byte) (bArr.length & 255);
+        System.arraycopy(bArr, 0, bArr3, 2, bArr.length);
+        bArr3[bArr.length + 2] = 0;
+        bArr3[bArr.length + 3] = 0;
+        bArr3[bArr.length + 4] = (byte) (bArr2.length >> 8);
+        bArr3[bArr.length + 5] = (byte) (bArr2.length & 255);
+        System.arraycopy(bArr2, 0, bArr3, bArr.length + 6, bArr2.length);
+        return bArr3;
     }
 }

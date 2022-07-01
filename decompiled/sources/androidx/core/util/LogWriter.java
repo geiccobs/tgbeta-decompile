@@ -2,10 +2,11 @@ package androidx.core.util;
 
 import android.util.Log;
 import java.io.Writer;
+import org.telegram.tgnet.ConnectionsManager;
 @Deprecated
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LogWriter extends Writer {
-    private StringBuilder mBuilder = new StringBuilder(128);
+    private StringBuilder mBuilder = new StringBuilder((int) ConnectionsManager.RequestFlagNeedQuickAck);
     private final String mTag;
 
     public LogWriter(String tag) {

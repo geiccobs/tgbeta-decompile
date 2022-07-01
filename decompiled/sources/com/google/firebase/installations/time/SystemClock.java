@@ -1,5 +1,5 @@
 package com.google.firebase.installations.time;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class SystemClock implements Clock {
     private static SystemClock singleton;
 

@@ -6,7 +6,7 @@ import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.internal.auth.zzak;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zza extends Api.AbstractClientBuilder<zzak, AuthProxyOptions> {
     @Override // com.google.android.gms.common.api.Api.AbstractClientBuilder
     public final /* synthetic */ zzak buildClient(Context context, Looper looper, ClientSettings clientSettings, AuthProxyOptions authProxyOptions, GoogleApiClient.ConnectionCallbacks connectionCallbacks, GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {

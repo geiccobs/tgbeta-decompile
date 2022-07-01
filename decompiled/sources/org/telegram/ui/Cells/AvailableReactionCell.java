@@ -7,32 +7,30 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.SvgHelper;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$TL_availableReaction;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Switch;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class AvailableReactionCell extends FrameLayout {
     private CheckBox2 checkBox;
     private BackupImageView imageView;
     private View overlaySelectorView;
-    public TLRPC.TL_availableReaction react;
+    public TLRPC$TL_availableReaction react;
     private Switch switchView;
     private TextView textView;
 
-    public AvailableReactionCell(Context context, boolean checkbox) {
+    public AvailableReactionCell(Context context, boolean z) {
         super(context);
         TextView textView = new TextView(context);
         this.textView = textView;
-        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
         this.textView.setTextSize(1, 16.0f);
         this.textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         this.textView.setLines(1);
@@ -46,17 +44,17 @@ public class AvailableReactionCell extends FrameLayout {
         backupImageView.setAspectFit(true);
         this.imageView.setLayerNum(1);
         addView(this.imageView, LayoutHelper.createFrameRelatively(32.0f, 32.0f, 8388627, 23.0f, 0.0f, 0.0f, 0.0f));
-        if (checkbox) {
+        if (z) {
             CheckBox2 checkBox2 = new CheckBox2(context, 26, null);
             this.checkBox = checkBox2;
             checkBox2.setDrawUnchecked(false);
-            this.checkBox.setColor(null, null, Theme.key_radioBackgroundChecked);
+            this.checkBox.setColor(null, null, "radioBackgroundChecked");
             this.checkBox.setDrawBackgroundAsArc(-1);
             addView(this.checkBox, LayoutHelper.createFrameRelatively(26.0f, 26.0f, 8388629, 0.0f, 0.0f, 22.0f, 0.0f));
         } else {
-            Switch r2 = new Switch(context);
-            this.switchView = r2;
-            r2.setColors(Theme.key_switchTrack, Theme.key_switchTrackChecked, Theme.key_switchTrackBlueThumb, Theme.key_switchTrackBlueThumbChecked);
+            Switch r11 = new Switch(context);
+            this.switchView = r11;
+            r11.setColors("switchTrack", "switchTrackChecked", "switchTrackBlueThumb", "switchTrackBlueThumbChecked");
             addView(this.switchView, LayoutHelper.createFrameRelatively(37.0f, 20.0f, 8388629, 0.0f, 0.0f, 22.0f, 0.0f));
         }
         View view = new View(context);
@@ -67,34 +65,31 @@ public class AvailableReactionCell extends FrameLayout {
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec((int) (AndroidUtilities.dp(58.0f) + Theme.dividerPaint.getStrokeWidth()), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec((int) (AndroidUtilities.dp(58.0f) + Theme.dividerPaint.getStrokeWidth()), 1073741824));
     }
 
-    public void bind(TLRPC.TL_availableReaction react, boolean checked) {
-        boolean animated = false;
-        if (react != null && this.react != null && react.reaction.equals(this.react.reaction)) {
-            animated = true;
-        }
-        this.react = react;
-        this.textView.setText(react.title);
-        SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(react.static_icon, Theme.key_windowBackgroundGray, 1.0f);
-        this.imageView.setImage(ImageLocation.getForDocument(react.center_icon), "40_40_lastframe", "webp", svgThumb, react);
-        setChecked(checked, animated);
+    public void bind(TLRPC$TL_availableReaction tLRPC$TL_availableReaction, boolean z) {
+        TLRPC$TL_availableReaction tLRPC$TL_availableReaction2;
+        boolean z2 = (tLRPC$TL_availableReaction == null || (tLRPC$TL_availableReaction2 = this.react) == null || !tLRPC$TL_availableReaction.reaction.equals(tLRPC$TL_availableReaction2.reaction)) ? false : true;
+        this.react = tLRPC$TL_availableReaction;
+        this.textView.setText(tLRPC$TL_availableReaction.title);
+        this.imageView.setImage(ImageLocation.getForDocument(tLRPC$TL_availableReaction.center_icon), "40_40_lastframe", "webp", DocumentObject.getSvgThumb(tLRPC$TL_availableReaction.static_icon, "windowBackgroundGray", 1.0f), tLRPC$TL_availableReaction);
+        setChecked(z, z2);
     }
 
-    public void setChecked(boolean checked) {
-        setChecked(checked, false);
+    public void setChecked(boolean z) {
+        setChecked(z, false);
     }
 
-    public void setChecked(boolean checked, boolean animated) {
+    public void setChecked(boolean z, boolean z2) {
         Switch r0 = this.switchView;
         if (r0 != null) {
-            r0.setChecked(checked, animated);
+            r0.setChecked(z, z2);
         }
         CheckBox2 checkBox2 = this.checkBox;
         if (checkBox2 != null) {
-            checkBox2.setChecked(checked, animated);
+            checkBox2.setChecked(z, z2);
         }
     }
 
@@ -104,39 +99,37 @@ public class AvailableReactionCell extends FrameLayout {
             return r0.isChecked();
         }
         CheckBox2 checkBox2 = this.checkBox;
-        if (checkBox2 != null) {
-            return checkBox2.isChecked();
+        if (checkBox2 == null) {
+            return false;
         }
-        return false;
+        return checkBox2.isChecked();
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        canvas.drawColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-        float w = Theme.dividerPaint.getStrokeWidth();
-        int l = 0;
-        int r = 0;
-        int pad = AndroidUtilities.dp(81.0f);
+        canvas.drawColor(Theme.getColor("windowBackgroundWhite"));
+        float strokeWidth = Theme.dividerPaint.getStrokeWidth();
+        int dp = AndroidUtilities.dp(81.0f);
+        int i = 0;
         if (LocaleController.isRTL) {
-            r = pad;
-        } else {
-            l = pad;
+            i = dp;
+            dp = 0;
         }
-        canvas.drawLine(getPaddingLeft() + l, getHeight() - w, (getWidth() - getPaddingRight()) - r, getHeight() - w, Theme.dividerPaint);
+        canvas.drawLine(getPaddingLeft() + dp, getHeight() - strokeWidth, (getWidth() - getPaddingRight()) - i, getHeight() - strokeWidth, Theme.dividerPaint);
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setEnabled(true);
-        info.setClickable(true);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.setEnabled(true);
+        accessibilityNodeInfo.setClickable(true);
         if (this.switchView != null) {
-            info.setCheckable(true);
-            info.setChecked(isChecked());
-            info.setClassName("android.widget.Switch");
+            accessibilityNodeInfo.setCheckable(true);
+            accessibilityNodeInfo.setChecked(isChecked());
+            accessibilityNodeInfo.setClassName("android.widget.Switch");
         } else if (isChecked()) {
-            info.setSelected(true);
+            accessibilityNodeInfo.setSelected(true);
         }
-        info.setContentDescription(this.textView.getText());
+        accessibilityNodeInfo.setContentDescription(this.textView.getText());
     }
 }

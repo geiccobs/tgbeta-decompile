@@ -8,17 +8,8 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class AbstractErrorLog extends AbstractLog {
-    private static final String APP_LAUNCH_TIMESTAMP = "appLaunchTimestamp";
-    private static final String ARCHITECTURE = "architecture";
-    private static final String ERROR_THREAD_ID = "errorThreadId";
-    private static final String ERROR_THREAD_NAME = "errorThreadName";
-    private static final String FATAL = "fatal";
-    private static final String PARENT_PROCESS_ID = "parentProcessId";
-    private static final String PARENT_PROCESS_NAME = "parentProcessName";
-    private static final String PROCESS_ID = "processId";
-    private static final String PROCESS_NAME = "processName";
     private Date appLaunchTimestamp;
     private String architecture;
     private Long errorThreadId;
@@ -34,189 +25,188 @@ public abstract class AbstractErrorLog extends AbstractLog {
         return this.id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setId(UUID uuid) {
+        this.id = uuid;
     }
 
     public Integer getProcessId() {
         return this.processId;
     }
 
-    public void setProcessId(Integer processId) {
-        this.processId = processId;
+    public void setProcessId(Integer num) {
+        this.processId = num;
     }
 
     public String getProcessName() {
         return this.processName;
     }
 
-    public void setProcessName(String processName) {
-        this.processName = processName;
+    public void setProcessName(String str) {
+        this.processName = str;
     }
 
     public Integer getParentProcessId() {
         return this.parentProcessId;
     }
 
-    public void setParentProcessId(Integer parentProcessId) {
-        this.parentProcessId = parentProcessId;
+    public void setParentProcessId(Integer num) {
+        this.parentProcessId = num;
     }
 
     public String getParentProcessName() {
         return this.parentProcessName;
     }
 
-    public void setParentProcessName(String parentProcessName) {
-        this.parentProcessName = parentProcessName;
+    public void setParentProcessName(String str) {
+        this.parentProcessName = str;
     }
 
     public Long getErrorThreadId() {
         return this.errorThreadId;
     }
 
-    public void setErrorThreadId(Long errorThreadId) {
-        this.errorThreadId = errorThreadId;
+    public void setErrorThreadId(Long l) {
+        this.errorThreadId = l;
     }
 
     public String getErrorThreadName() {
         return this.errorThreadName;
     }
 
-    public void setErrorThreadName(String errorThreadName) {
-        this.errorThreadName = errorThreadName;
+    public void setErrorThreadName(String str) {
+        this.errorThreadName = str;
     }
 
     public Boolean getFatal() {
         return this.fatal;
     }
 
-    public void setFatal(Boolean fatal) {
-        this.fatal = fatal;
+    public void setFatal(Boolean bool) {
+        this.fatal = bool;
     }
 
     public Date getAppLaunchTimestamp() {
         return this.appLaunchTimestamp;
     }
 
-    public void setAppLaunchTimestamp(Date appLaunchTimestamp) {
-        this.appLaunchTimestamp = appLaunchTimestamp;
+    public void setAppLaunchTimestamp(Date date) {
+        this.appLaunchTimestamp = date;
     }
 
     public String getArchitecture() {
         return this.architecture;
     }
 
-    public void setArchitecture(String architecture) {
-        this.architecture = architecture;
+    public void setArchitecture(String str) {
+        this.architecture = str;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) throws JSONException {
-        super.read(object);
-        setId(UUID.fromString(object.getString("id")));
-        setProcessId(JSONUtils.readInteger(object, PROCESS_ID));
-        setProcessName(object.optString(PROCESS_NAME, null));
-        setParentProcessId(JSONUtils.readInteger(object, PARENT_PROCESS_ID));
-        setParentProcessName(object.optString(PARENT_PROCESS_NAME, null));
-        setErrorThreadId(JSONUtils.readLong(object, ERROR_THREAD_ID));
-        setErrorThreadName(object.optString(ERROR_THREAD_NAME, null));
-        setFatal(JSONUtils.readBoolean(object, FATAL));
-        setAppLaunchTimestamp(JSONDateUtils.toDate(object.getString(APP_LAUNCH_TIMESTAMP)));
-        setArchitecture(object.optString(ARCHITECTURE, null));
+    public void read(JSONObject jSONObject) throws JSONException {
+        super.read(jSONObject);
+        setId(UUID.fromString(jSONObject.getString("id")));
+        setProcessId(JSONUtils.readInteger(jSONObject, "processId"));
+        setProcessName(jSONObject.optString("processName", null));
+        setParentProcessId(JSONUtils.readInteger(jSONObject, "parentProcessId"));
+        setParentProcessName(jSONObject.optString("parentProcessName", null));
+        setErrorThreadId(JSONUtils.readLong(jSONObject, "errorThreadId"));
+        setErrorThreadName(jSONObject.optString("errorThreadName", null));
+        setFatal(JSONUtils.readBoolean(jSONObject, "fatal"));
+        setAppLaunchTimestamp(JSONDateUtils.toDate(jSONObject.getString("appLaunchTimestamp")));
+        setArchitecture(jSONObject.optString("architecture", null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        super.write(writer);
-        JSONUtils.write(writer, "id", getId());
-        JSONUtils.write(writer, PROCESS_ID, getProcessId());
-        JSONUtils.write(writer, PROCESS_NAME, getProcessName());
-        JSONUtils.write(writer, PARENT_PROCESS_ID, getParentProcessId());
-        JSONUtils.write(writer, PARENT_PROCESS_NAME, getParentProcessName());
-        JSONUtils.write(writer, ERROR_THREAD_ID, getErrorThreadId());
-        JSONUtils.write(writer, ERROR_THREAD_NAME, getErrorThreadName());
-        JSONUtils.write(writer, FATAL, getFatal());
-        JSONUtils.write(writer, APP_LAUNCH_TIMESTAMP, JSONDateUtils.toString(getAppLaunchTimestamp()));
-        JSONUtils.write(writer, ARCHITECTURE, getArchitecture());
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        super.write(jSONStringer);
+        JSONUtils.write(jSONStringer, "id", getId());
+        JSONUtils.write(jSONStringer, "processId", getProcessId());
+        JSONUtils.write(jSONStringer, "processName", getProcessName());
+        JSONUtils.write(jSONStringer, "parentProcessId", getParentProcessId());
+        JSONUtils.write(jSONStringer, "parentProcessName", getParentProcessName());
+        JSONUtils.write(jSONStringer, "errorThreadId", getErrorThreadId());
+        JSONUtils.write(jSONStringer, "errorThreadName", getErrorThreadName());
+        JSONUtils.write(jSONStringer, "fatal", getFatal());
+        JSONUtils.write(jSONStringer, "appLaunchTimestamp", JSONDateUtils.toString(getAppLaunchTimestamp()));
+        JSONUtils.write(jSONStringer, "architecture", getArchitecture());
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
+        if (obj == null || getClass() != obj.getClass() || !super.equals(obj)) {
             return false;
         }
-        AbstractErrorLog that = (AbstractErrorLog) o;
+        AbstractErrorLog abstractErrorLog = (AbstractErrorLog) obj;
         UUID uuid = this.id;
-        if (uuid == null ? that.id != null : !uuid.equals(that.id)) {
+        if (uuid == null ? abstractErrorLog.id != null : !uuid.equals(abstractErrorLog.id)) {
             return false;
         }
         Integer num = this.processId;
-        if (num == null ? that.processId != null : !num.equals(that.processId)) {
+        if (num == null ? abstractErrorLog.processId != null : !num.equals(abstractErrorLog.processId)) {
             return false;
         }
         String str = this.processName;
-        if (str == null ? that.processName != null : !str.equals(that.processName)) {
+        if (str == null ? abstractErrorLog.processName != null : !str.equals(abstractErrorLog.processName)) {
             return false;
         }
         Integer num2 = this.parentProcessId;
-        if (num2 == null ? that.parentProcessId != null : !num2.equals(that.parentProcessId)) {
+        if (num2 == null ? abstractErrorLog.parentProcessId != null : !num2.equals(abstractErrorLog.parentProcessId)) {
             return false;
         }
         String str2 = this.parentProcessName;
-        if (str2 == null ? that.parentProcessName != null : !str2.equals(that.parentProcessName)) {
+        if (str2 == null ? abstractErrorLog.parentProcessName != null : !str2.equals(abstractErrorLog.parentProcessName)) {
             return false;
         }
         Long l = this.errorThreadId;
-        if (l == null ? that.errorThreadId != null : !l.equals(that.errorThreadId)) {
+        if (l == null ? abstractErrorLog.errorThreadId != null : !l.equals(abstractErrorLog.errorThreadId)) {
             return false;
         }
         String str3 = this.errorThreadName;
-        if (str3 == null ? that.errorThreadName != null : !str3.equals(that.errorThreadName)) {
+        if (str3 == null ? abstractErrorLog.errorThreadName != null : !str3.equals(abstractErrorLog.errorThreadName)) {
             return false;
         }
         Boolean bool = this.fatal;
-        if (bool == null ? that.fatal != null : !bool.equals(that.fatal)) {
+        if (bool == null ? abstractErrorLog.fatal != null : !bool.equals(abstractErrorLog.fatal)) {
             return false;
         }
         Date date = this.appLaunchTimestamp;
-        if (date == null ? that.appLaunchTimestamp != null : !date.equals(that.appLaunchTimestamp)) {
+        if (date == null ? abstractErrorLog.appLaunchTimestamp != null : !date.equals(abstractErrorLog.appLaunchTimestamp)) {
             return false;
         }
         String str4 = this.architecture;
-        return str4 != null ? str4.equals(that.architecture) : that.architecture == null;
+        String str5 = abstractErrorLog.architecture;
+        return str4 != null ? str4.equals(str5) : str5 == null;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
     public int hashCode() {
-        int result = super.hashCode();
-        int i = result * 31;
+        int hashCode = super.hashCode() * 31;
         UUID uuid = this.id;
-        int i2 = 0;
-        int result2 = i + (uuid != null ? uuid.hashCode() : 0);
-        int result3 = result2 * 31;
+        int i = 0;
+        int hashCode2 = (hashCode + (uuid != null ? uuid.hashCode() : 0)) * 31;
         Integer num = this.processId;
-        int result4 = (result3 + (num != null ? num.hashCode() : 0)) * 31;
+        int hashCode3 = (hashCode2 + (num != null ? num.hashCode() : 0)) * 31;
         String str = this.processName;
-        int result5 = (result4 + (str != null ? str.hashCode() : 0)) * 31;
+        int hashCode4 = (hashCode3 + (str != null ? str.hashCode() : 0)) * 31;
         Integer num2 = this.parentProcessId;
-        int result6 = (result5 + (num2 != null ? num2.hashCode() : 0)) * 31;
+        int hashCode5 = (hashCode4 + (num2 != null ? num2.hashCode() : 0)) * 31;
         String str2 = this.parentProcessName;
-        int result7 = (result6 + (str2 != null ? str2.hashCode() : 0)) * 31;
+        int hashCode6 = (hashCode5 + (str2 != null ? str2.hashCode() : 0)) * 31;
         Long l = this.errorThreadId;
-        int result8 = (result7 + (l != null ? l.hashCode() : 0)) * 31;
+        int hashCode7 = (hashCode6 + (l != null ? l.hashCode() : 0)) * 31;
         String str3 = this.errorThreadName;
-        int result9 = (result8 + (str3 != null ? str3.hashCode() : 0)) * 31;
+        int hashCode8 = (hashCode7 + (str3 != null ? str3.hashCode() : 0)) * 31;
         Boolean bool = this.fatal;
-        int result10 = (result9 + (bool != null ? bool.hashCode() : 0)) * 31;
+        int hashCode9 = (hashCode8 + (bool != null ? bool.hashCode() : 0)) * 31;
         Date date = this.appLaunchTimestamp;
-        int result11 = (result10 + (date != null ? date.hashCode() : 0)) * 31;
+        int hashCode10 = (hashCode9 + (date != null ? date.hashCode() : 0)) * 31;
         String str4 = this.architecture;
         if (str4 != null) {
-            i2 = str4.hashCode();
+            i = str4.hashCode();
         }
-        return result11 + i2;
+        return hashCode10 + i;
     }
 }

@@ -1,7 +1,7 @@
 package com.google.android.datatransport.cct.internal;
 
 import com.google.android.datatransport.cct.internal.AndroidClientInfo;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class AutoValue_AndroidClientInfo extends AndroidClientInfo {
     private final String applicationBuild;
     private final String country;
@@ -16,19 +16,19 @@ final class AutoValue_AndroidClientInfo extends AndroidClientInfo {
     private final String product;
     private final Integer sdkVersion;
 
-    private AutoValue_AndroidClientInfo(Integer sdkVersion, String model, String hardware, String device, String product, String osBuild, String manufacturer, String fingerprint, String locale, String country, String mccMnc, String applicationBuild) {
-        this.sdkVersion = sdkVersion;
-        this.model = model;
-        this.hardware = hardware;
-        this.device = device;
-        this.product = product;
-        this.osBuild = osBuild;
-        this.manufacturer = manufacturer;
-        this.fingerprint = fingerprint;
-        this.locale = locale;
-        this.country = country;
-        this.mccMnc = mccMnc;
-        this.applicationBuild = applicationBuild;
+    private AutoValue_AndroidClientInfo(Integer num, String str, String str2, String str3, String str4, String str5, String str6, String str7, String str8, String str9, String str10, String str11) {
+        this.sdkVersion = num;
+        this.model = str;
+        this.hardware = str2;
+        this.device = str3;
+        this.product = str4;
+        this.osBuild = str5;
+        this.manufacturer = str6;
+        this.fingerprint = str7;
+        this.locale = str8;
+        this.country = str9;
+        this.mccMnc = str10;
+        this.applicationBuild = str11;
     }
 
     @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo
@@ -95,42 +95,42 @@ final class AutoValue_AndroidClientInfo extends AndroidClientInfo {
         return "AndroidClientInfo{sdkVersion=" + this.sdkVersion + ", model=" + this.model + ", hardware=" + this.hardware + ", device=" + this.device + ", product=" + this.product + ", osBuild=" + this.osBuild + ", manufacturer=" + this.manufacturer + ", fingerprint=" + this.fingerprint + ", locale=" + this.locale + ", country=" + this.country + ", mccMnc=" + this.mccMnc + ", applicationBuild=" + this.applicationBuild + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof AndroidClientInfo)) {
+        if (!(obj instanceof AndroidClientInfo)) {
             return false;
         }
-        AndroidClientInfo that = (AndroidClientInfo) o;
+        AndroidClientInfo androidClientInfo = (AndroidClientInfo) obj;
         Integer num = this.sdkVersion;
-        if (num != null ? num.equals(that.getSdkVersion()) : that.getSdkVersion() == null) {
+        if (num != null ? num.equals(androidClientInfo.getSdkVersion()) : androidClientInfo.getSdkVersion() == null) {
             String str = this.model;
-            if (str != null ? str.equals(that.getModel()) : that.getModel() == null) {
+            if (str != null ? str.equals(androidClientInfo.getModel()) : androidClientInfo.getModel() == null) {
                 String str2 = this.hardware;
-                if (str2 != null ? str2.equals(that.getHardware()) : that.getHardware() == null) {
+                if (str2 != null ? str2.equals(androidClientInfo.getHardware()) : androidClientInfo.getHardware() == null) {
                     String str3 = this.device;
-                    if (str3 != null ? str3.equals(that.getDevice()) : that.getDevice() == null) {
+                    if (str3 != null ? str3.equals(androidClientInfo.getDevice()) : androidClientInfo.getDevice() == null) {
                         String str4 = this.product;
-                        if (str4 != null ? str4.equals(that.getProduct()) : that.getProduct() == null) {
+                        if (str4 != null ? str4.equals(androidClientInfo.getProduct()) : androidClientInfo.getProduct() == null) {
                             String str5 = this.osBuild;
-                            if (str5 != null ? str5.equals(that.getOsBuild()) : that.getOsBuild() == null) {
+                            if (str5 != null ? str5.equals(androidClientInfo.getOsBuild()) : androidClientInfo.getOsBuild() == null) {
                                 String str6 = this.manufacturer;
-                                if (str6 != null ? str6.equals(that.getManufacturer()) : that.getManufacturer() == null) {
+                                if (str6 != null ? str6.equals(androidClientInfo.getManufacturer()) : androidClientInfo.getManufacturer() == null) {
                                     String str7 = this.fingerprint;
-                                    if (str7 != null ? str7.equals(that.getFingerprint()) : that.getFingerprint() == null) {
+                                    if (str7 != null ? str7.equals(androidClientInfo.getFingerprint()) : androidClientInfo.getFingerprint() == null) {
                                         String str8 = this.locale;
-                                        if (str8 != null ? str8.equals(that.getLocale()) : that.getLocale() == null) {
+                                        if (str8 != null ? str8.equals(androidClientInfo.getLocale()) : androidClientInfo.getLocale() == null) {
                                             String str9 = this.country;
-                                            if (str9 != null ? str9.equals(that.getCountry()) : that.getCountry() == null) {
+                                            if (str9 != null ? str9.equals(androidClientInfo.getCountry()) : androidClientInfo.getCountry() == null) {
                                                 String str10 = this.mccMnc;
-                                                if (str10 != null ? str10.equals(that.getMccMnc()) : that.getMccMnc() == null) {
+                                                if (str10 != null ? str10.equals(androidClientInfo.getMccMnc()) : androidClientInfo.getMccMnc() == null) {
                                                     String str11 = this.applicationBuild;
                                                     if (str11 == null) {
-                                                        if (that.getApplicationBuild() == null) {
+                                                        if (androidClientInfo.getApplicationBuild() == null) {
                                                             return true;
                                                         }
-                                                    } else if (str11.equals(that.getApplicationBuild())) {
+                                                    } else if (str11.equals(androidClientInfo.getApplicationBuild())) {
                                                         return true;
                                                     }
                                                 }
@@ -148,39 +148,38 @@ final class AutoValue_AndroidClientInfo extends AndroidClientInfo {
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
         Integer num = this.sdkVersion;
         int i = 0;
-        int h$2 = (h$ ^ (num == null ? 0 : num.hashCode())) * 1000003;
+        int hashCode = ((num == null ? 0 : num.hashCode()) ^ 1000003) * 1000003;
         String str = this.model;
-        int h$3 = (h$2 ^ (str == null ? 0 : str.hashCode())) * 1000003;
+        int hashCode2 = (hashCode ^ (str == null ? 0 : str.hashCode())) * 1000003;
         String str2 = this.hardware;
-        int h$4 = (h$3 ^ (str2 == null ? 0 : str2.hashCode())) * 1000003;
+        int hashCode3 = (hashCode2 ^ (str2 == null ? 0 : str2.hashCode())) * 1000003;
         String str3 = this.device;
-        int h$5 = (h$4 ^ (str3 == null ? 0 : str3.hashCode())) * 1000003;
+        int hashCode4 = (hashCode3 ^ (str3 == null ? 0 : str3.hashCode())) * 1000003;
         String str4 = this.product;
-        int h$6 = (h$5 ^ (str4 == null ? 0 : str4.hashCode())) * 1000003;
+        int hashCode5 = (hashCode4 ^ (str4 == null ? 0 : str4.hashCode())) * 1000003;
         String str5 = this.osBuild;
-        int h$7 = (h$6 ^ (str5 == null ? 0 : str5.hashCode())) * 1000003;
+        int hashCode6 = (hashCode5 ^ (str5 == null ? 0 : str5.hashCode())) * 1000003;
         String str6 = this.manufacturer;
-        int h$8 = (h$7 ^ (str6 == null ? 0 : str6.hashCode())) * 1000003;
+        int hashCode7 = (hashCode6 ^ (str6 == null ? 0 : str6.hashCode())) * 1000003;
         String str7 = this.fingerprint;
-        int h$9 = (h$8 ^ (str7 == null ? 0 : str7.hashCode())) * 1000003;
+        int hashCode8 = (hashCode7 ^ (str7 == null ? 0 : str7.hashCode())) * 1000003;
         String str8 = this.locale;
-        int h$10 = (h$9 ^ (str8 == null ? 0 : str8.hashCode())) * 1000003;
+        int hashCode9 = (hashCode8 ^ (str8 == null ? 0 : str8.hashCode())) * 1000003;
         String str9 = this.country;
-        int h$11 = (h$10 ^ (str9 == null ? 0 : str9.hashCode())) * 1000003;
+        int hashCode10 = (hashCode9 ^ (str9 == null ? 0 : str9.hashCode())) * 1000003;
         String str10 = this.mccMnc;
-        int h$12 = (h$11 ^ (str10 == null ? 0 : str10.hashCode())) * 1000003;
+        int hashCode11 = (hashCode10 ^ (str10 == null ? 0 : str10.hashCode())) * 1000003;
         String str11 = this.applicationBuild;
         if (str11 != null) {
             i = str11.hashCode();
         }
-        return h$12 ^ i;
+        return hashCode11 ^ i;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder extends AndroidClientInfo.Builder {
         private String applicationBuild;
         private String country;
@@ -196,74 +195,74 @@ final class AutoValue_AndroidClientInfo extends AndroidClientInfo {
         private Integer sdkVersion;
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setSdkVersion(Integer sdkVersion) {
-            this.sdkVersion = sdkVersion;
+        public AndroidClientInfo.Builder setSdkVersion(Integer num) {
+            this.sdkVersion = num;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setModel(String model) {
-            this.model = model;
+        public AndroidClientInfo.Builder setModel(String str) {
+            this.model = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setHardware(String hardware) {
-            this.hardware = hardware;
+        public AndroidClientInfo.Builder setHardware(String str) {
+            this.hardware = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setDevice(String device) {
-            this.device = device;
+        public AndroidClientInfo.Builder setDevice(String str) {
+            this.device = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setProduct(String product) {
-            this.product = product;
+        public AndroidClientInfo.Builder setProduct(String str) {
+            this.product = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setOsBuild(String osBuild) {
-            this.osBuild = osBuild;
+        public AndroidClientInfo.Builder setOsBuild(String str) {
+            this.osBuild = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setManufacturer(String manufacturer) {
-            this.manufacturer = manufacturer;
+        public AndroidClientInfo.Builder setManufacturer(String str) {
+            this.manufacturer = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setFingerprint(String fingerprint) {
-            this.fingerprint = fingerprint;
+        public AndroidClientInfo.Builder setFingerprint(String str) {
+            this.fingerprint = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setLocale(String locale) {
-            this.locale = locale;
+        public AndroidClientInfo.Builder setLocale(String str) {
+            this.locale = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setCountry(String country) {
-            this.country = country;
+        public AndroidClientInfo.Builder setCountry(String str) {
+            this.country = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setMccMnc(String mccMnc) {
-            this.mccMnc = mccMnc;
+        public AndroidClientInfo.Builder setMccMnc(String str) {
+            this.mccMnc = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.AndroidClientInfo.Builder
-        public AndroidClientInfo.Builder setApplicationBuild(String applicationBuild) {
-            this.applicationBuild = applicationBuild;
+        public AndroidClientInfo.Builder setApplicationBuild(String str) {
+            this.applicationBuild = str;
             return this;
         }
 

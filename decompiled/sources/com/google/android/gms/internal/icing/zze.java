@@ -2,12 +2,10 @@ package com.google.android.gms.internal.icing;
 
 import com.google.android.gms.common.api.Api;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zze {
     public static final Api.ClientKey<zzae> zza;
     public static final Api<Api.ApiOptions.NoOptions> zzb;
-    @Deprecated
-    public static final zzz zzc = new zzal();
     private static final Api.AbstractClientBuilder<zzae, Api.ApiOptions.NoOptions> zzd;
 
     static {
@@ -16,5 +14,6 @@ public final class zze {
         zzd zzdVar = new zzd();
         zzd = zzdVar;
         zzb = new Api<>("AppDataSearch.LIGHTWEIGHT_API", zzdVar, clientKey);
+        new zzal();
     }
 }

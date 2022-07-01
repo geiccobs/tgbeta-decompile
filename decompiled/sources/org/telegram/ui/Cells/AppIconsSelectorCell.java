@@ -1,11 +1,13 @@
 package org.telegram.ui.Cells;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.util.DisplayMetrics;
@@ -19,7 +21,6 @@ import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.exoplayer2.C;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,8 +28,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.AppIconsSelectorCell;
@@ -38,19 +39,18 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.LauncherIconController;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class AppIconsSelectorCell extends RecyclerListView implements NotificationCenter.NotificationCenterDelegate {
-    public static final float ICONS_ROUND_RADIUS = 18.0f;
     private List<LauncherIconController.LauncherIcon> availableIcons = new ArrayList();
     private int currentAccount;
     private LinearLayoutManager linearLayoutManager;
 
-    public AppIconsSelectorCell(final Context context, final BaseFragment fragment, int currentAccount) {
+    public AppIconsSelectorCell(final Context context, final BaseFragment baseFragment, int i) {
         super(context);
-        this.currentAccount = currentAccount;
+        this.currentAccount = i;
         setPadding(0, AndroidUtilities.dp(12.0f), 0, AndroidUtilities.dp(12.0f));
         setFocusable(false);
-        setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
         setItemAnimator(null);
         setLayoutAnimation(null);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, 0, false);
@@ -58,17 +58,17 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
         setLayoutManager(linearLayoutManager);
         setAdapter(new RecyclerView.Adapter() { // from class: org.telegram.ui.Cells.AppIconsSelectorCell.1
             @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                return new RecyclerListView.Holder(new IconHolderView(parent.getContext()));
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i2) {
+                return new RecyclerListView.Holder(new IconHolderView(viewGroup.getContext()));
             }
 
             @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-            public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-                IconHolderView holderView = (IconHolderView) holder.itemView;
-                LauncherIconController.LauncherIcon icon = (LauncherIconController.LauncherIcon) AppIconsSelectorCell.this.availableIcons.get(position);
-                holderView.bind(icon);
-                holderView.iconView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(18.0f), 0, Theme.getColor(Theme.key_listSelector), -16777216));
-                holderView.iconView.setForeground(icon.foreground);
+            public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i2) {
+                IconHolderView iconHolderView = (IconHolderView) viewHolder.itemView;
+                LauncherIconController.LauncherIcon launcherIcon = (LauncherIconController.LauncherIcon) AppIconsSelectorCell.this.availableIcons.get(i2);
+                iconHolderView.bind(launcherIcon);
+                iconHolderView.iconView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(18.0f), 0, Theme.getColor("listSelectorSDK21"), -16777216));
+                iconHolderView.iconView.setForeground(launcherIcon.foreground);
             }
 
             @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -78,43 +78,42 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
         });
         addItemDecoration(new RecyclerView.ItemDecoration() { // from class: org.telegram.ui.Cells.AppIconsSelectorCell.2
             @Override // androidx.recyclerview.widget.RecyclerView.ItemDecoration
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                int pos = parent.getChildViewHolder(view).getAdapterPosition();
-                if (pos == 0) {
-                    outRect.left = AndroidUtilities.dp(18.0f);
+            public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
+                int adapterPosition = recyclerView.getChildViewHolder(view).getAdapterPosition();
+                if (adapterPosition == 0) {
+                    rect.left = AndroidUtilities.dp(18.0f);
                 }
-                if (pos == AppIconsSelectorCell.this.getAdapter().getItemCount() - 1) {
-                    outRect.right = AndroidUtilities.dp(18.0f);
+                if (adapterPosition == AppIconsSelectorCell.this.getAdapter().getItemCount() - 1) {
+                    rect.right = AndroidUtilities.dp(18.0f);
                     return;
                 }
                 int itemCount = AppIconsSelectorCell.this.getAdapter().getItemCount();
                 if (itemCount == 4) {
-                    outRect.right = ((AppIconsSelectorCell.this.getWidth() - AndroidUtilities.dp(36.0f)) - (AndroidUtilities.dp(58.0f) * itemCount)) / (itemCount - 1);
+                    rect.right = ((AppIconsSelectorCell.this.getWidth() - AndroidUtilities.dp(36.0f)) - (AndroidUtilities.dp(58.0f) * itemCount)) / (itemCount - 1);
                 } else {
-                    outRect.right = AndroidUtilities.dp(24.0f);
+                    rect.right = AndroidUtilities.dp(24.0f);
                 }
             }
         });
         setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Cells.AppIconsSelectorCell$$ExternalSyntheticLambda0
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
-            public final void onItemClick(View view, int i) {
-                AppIconsSelectorCell.this.m1631lambda$new$0$orgtelegramuiCellsAppIconsSelectorCell(fragment, context, view, i);
+            public final void onItemClick(View view, int i2) {
+                AppIconsSelectorCell.this.lambda$new$0(baseFragment, context, view, i2);
             }
         });
         updateIconsVisibility();
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Cells-AppIconsSelectorCell */
-    public /* synthetic */ void m1631lambda$new$0$orgtelegramuiCellsAppIconsSelectorCell(BaseFragment fragment, Context context, View view, int position) {
-        IconHolderView holderView = (IconHolderView) view;
-        LauncherIconController.LauncherIcon icon = this.availableIcons.get(position);
-        if (icon.premium && !UserConfig.hasPremiumOnAccounts()) {
-            fragment.showDialog(new PremiumFeatureBottomSheet(fragment, 10, true));
-        } else if (!LauncherIconController.isEnabled(icon)) {
-            LinearSmoothScroller smoothScroller = new LinearSmoothScroller(context) { // from class: org.telegram.ui.Cells.AppIconsSelectorCell.3
+    public /* synthetic */ void lambda$new$0(BaseFragment baseFragment, Context context, View view, int i) {
+        IconHolderView iconHolderView = (IconHolderView) view;
+        LauncherIconController.LauncherIcon launcherIcon = this.availableIcons.get(i);
+        if (launcherIcon.premium && !UserConfig.hasPremiumOnAccounts()) {
+            baseFragment.showDialog(new PremiumFeatureBottomSheet(baseFragment, 10, true));
+        } else if (!LauncherIconController.isEnabled(launcherIcon)) {
+            LinearSmoothScroller linearSmoothScroller = new LinearSmoothScroller(this, context) { // from class: org.telegram.ui.Cells.AppIconsSelectorCell.3
                 @Override // androidx.recyclerview.widget.LinearSmoothScroller
-                public int calculateDtToFit(int viewStart, int viewEnd, int boxStart, int boxEnd, int snapPreference) {
-                    return (boxStart - viewStart) + AndroidUtilities.dp(16.0f);
+                public int calculateDtToFit(int i2, int i3, int i4, int i5, int i6) {
+                    return (i4 - i2) + AndroidUtilities.dp(16.0f);
                 }
 
                 @Override // androidx.recyclerview.widget.LinearSmoothScroller
@@ -122,20 +121,21 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
                     return super.calculateSpeedPerPixel(displayMetrics) * 3.0f;
                 }
             };
-            smoothScroller.setTargetPosition(position);
-            this.linearLayoutManager.startSmoothScroll(smoothScroller);
-            LauncherIconController.setIcon(icon);
-            holderView.setSelected(true, true);
-            for (int i = 0; i < getChildCount(); i++) {
-                IconHolderView otherView = (IconHolderView) getChildAt(i);
-                if (otherView != holderView) {
-                    otherView.setSelected(false, true);
+            linearSmoothScroller.setTargetPosition(i);
+            this.linearLayoutManager.startSmoothScroll(linearSmoothScroller);
+            LauncherIconController.setIcon(launcherIcon);
+            iconHolderView.setSelected(true, true);
+            for (int i2 = 0; i2 < getChildCount(); i2++) {
+                IconHolderView iconHolderView2 = (IconHolderView) getChildAt(i2);
+                if (iconHolderView2 != iconHolderView) {
+                    iconHolderView2.setSelected(false, true);
                 }
             }
-            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, 5, icon);
+            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, 5, launcherIcon);
         }
     }
 
+    @SuppressLint({"NotifyDataSetChanged"})
     private void updateIconsVisibility() {
         this.availableIcons.clear();
         this.availableIcons.addAll(Arrays.asList(LauncherIconController.LauncherIcon.values()));
@@ -152,8 +152,7 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
         getAdapter().notifyDataSetChanged();
         invalidateItemDecorations();
         for (int i2 = 0; i2 < this.availableIcons.size(); i2++) {
-            LauncherIconController.LauncherIcon icon = this.availableIcons.get(i2);
-            if (LauncherIconController.isEnabled(icon)) {
+            if (LauncherIconController.isEnabled(this.availableIcons.get(i2))) {
                 this.linearLayoutManager.scrollToPositionWithOffset(i2, AndroidUtilities.dp(16.0f));
                 return;
             }
@@ -161,14 +160,14 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.View
-    public void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    public void onSizeChanged(int i, int i2, int i3, int i4) {
+        super.onSizeChanged(i, i2, i3, i4);
         invalidateItemDecorations();
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.View
-    public void onMeasure(int widthSpec, int heightSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthSpec), C.BUFFER_FLAG_ENCRYPTED), heightSpec);
+    public void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), i2);
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup, android.view.View
@@ -184,13 +183,13 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.premiumStatusChangedGlobal) {
+    public void didReceivedNotification(int i, int i2, Object... objArr) {
+        if (i == NotificationCenter.premiumStatusChangedGlobal) {
             updateIconsVisibility();
         }
     }
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public static final class IconHolderView extends LinearLayout {
         private AdaptiveIconImageView iconView;
         private Paint outlinePaint;
@@ -210,7 +209,7 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
             this.titleView = textView;
             textView.setSingleLine();
             this.titleView.setTextSize(1, 13.0f);
-            this.titleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+            this.titleView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
             addView(this.titleView, LayoutHelper.createLinear(-2, -2, 1, 0, 4, 0, 0));
             this.outlinePaint.setStyle(Paint.Style.STROKE);
             this.outlinePaint.setStrokeWidth(Math.max(2, AndroidUtilities.dp(0.5f)));
@@ -219,65 +218,64 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
         @Override // android.view.View
         public void draw(Canvas canvas) {
             super.draw(canvas);
-            float stroke = this.outlinePaint.getStrokeWidth();
-            AndroidUtilities.rectTmp.set(this.iconView.getLeft() + stroke, this.iconView.getTop() + stroke, this.iconView.getRight() - stroke, this.iconView.getBottom() - stroke);
-            canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(18.0f), AndroidUtilities.dp(18.0f), this.outlinePaint);
+            float strokeWidth = this.outlinePaint.getStrokeWidth();
+            RectF rectF = AndroidUtilities.rectTmp;
+            rectF.set(this.iconView.getLeft() + strokeWidth, this.iconView.getTop() + strokeWidth, this.iconView.getRight() - strokeWidth, this.iconView.getBottom() - strokeWidth);
+            canvas.drawRoundRect(rectF, AndroidUtilities.dp(18.0f), AndroidUtilities.dp(18.0f), this.outlinePaint);
         }
 
-        private void setProgress(float progress) {
-            this.progress = progress;
-            this.titleView.setTextColor(ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), Theme.getColor(Theme.key_windowBackgroundWhiteValueText), progress));
-            this.outlinePaint.setColor(ColorUtils.blendARGB(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_switchTrack), 63), Theme.getColor(Theme.key_windowBackgroundWhiteValueText), progress));
-            this.outlinePaint.setStrokeWidth(Math.max(2, AndroidUtilities.dp(AndroidUtilities.lerp(0.5f, 2.0f, progress))));
+        private void setProgress(float f) {
+            this.progress = f;
+            this.titleView.setTextColor(ColorUtils.blendARGB(Theme.getColor("windowBackgroundWhiteBlackText"), Theme.getColor("windowBackgroundWhiteValueText"), f));
+            this.outlinePaint.setColor(ColorUtils.blendARGB(ColorUtils.setAlphaComponent(Theme.getColor("switchTrack"), 63), Theme.getColor("windowBackgroundWhiteValueText"), f));
+            this.outlinePaint.setStrokeWidth(Math.max(2, AndroidUtilities.dp(AndroidUtilities.lerp(0.5f, 2.0f, f))));
             invalidate();
         }
 
-        public void setSelected(boolean selected, boolean animate) {
-            float to = selected ? 1.0f : 0.0f;
-            float f = this.progress;
-            if (to == f && animate) {
-                return;
+        public void setSelected(boolean z, boolean z2) {
+            float f = z ? 1.0f : 0.0f;
+            float f2 = this.progress;
+            if (f != f2 || !z2) {
+                if (z2) {
+                    ValueAnimator duration = ValueAnimator.ofFloat(f2, f).setDuration(250L);
+                    duration.setInterpolator(Easings.easeInOutQuad);
+                    duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Cells.AppIconsSelectorCell$IconHolderView$$ExternalSyntheticLambda0
+                        @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                        public final void onAnimationUpdate(ValueAnimator valueAnimator) {
+                            AppIconsSelectorCell.IconHolderView.this.lambda$setSelected$0(valueAnimator);
+                        }
+                    });
+                    duration.start();
+                    return;
+                }
+                setProgress(f);
             }
-            if (animate) {
-                ValueAnimator animator = ValueAnimator.ofFloat(f, to).setDuration(250L);
-                animator.setInterpolator(Easings.easeInOutQuad);
-                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Cells.AppIconsSelectorCell$IconHolderView$$ExternalSyntheticLambda0
-                    @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                    public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        AppIconsSelectorCell.IconHolderView.this.m1632xfd226fea(valueAnimator);
-                    }
-                });
-                animator.start();
-                return;
-            }
-            setProgress(to);
         }
 
-        /* renamed from: lambda$setSelected$0$org-telegram-ui-Cells-AppIconsSelectorCell$IconHolderView */
-        public /* synthetic */ void m1632xfd226fea(ValueAnimator animation) {
-            setProgress(((Float) animation.getAnimatedValue()).floatValue());
+        public /* synthetic */ void lambda$setSelected$0(ValueAnimator valueAnimator) {
+            setProgress(((Float) valueAnimator.getAnimatedValue()).floatValue());
         }
 
-        public void bind(LauncherIconController.LauncherIcon icon) {
-            this.iconView.setImageResource(icon.background);
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) this.titleView.getLayoutParams();
-            if (icon.premium && !UserConfig.hasPremiumOnAccounts()) {
-                SpannableString str = new SpannableString("d " + LocaleController.getString(icon.title));
-                ColoredImageSpan span = new ColoredImageSpan((int) R.drawable.msg_mini_premiumlock);
-                span.setTopOffset(1);
-                span.setSize(AndroidUtilities.dp(13.0f));
-                str.setSpan(span, 0, 1, 33);
-                params.rightMargin = AndroidUtilities.dp(4.0f);
-                this.titleView.setText(str);
+        public void bind(LauncherIconController.LauncherIcon launcherIcon) {
+            this.iconView.setImageResource(launcherIcon.background);
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.titleView.getLayoutParams();
+            if (launcherIcon.premium && !UserConfig.hasPremiumOnAccounts()) {
+                SpannableString spannableString = new SpannableString("d " + LocaleController.getString(launcherIcon.title));
+                ColoredImageSpan coloredImageSpan = new ColoredImageSpan((int) R.drawable.msg_mini_premiumlock);
+                coloredImageSpan.setTopOffset(1);
+                coloredImageSpan.setSize(AndroidUtilities.dp(13.0f));
+                spannableString.setSpan(coloredImageSpan, 0, 1, 33);
+                marginLayoutParams.rightMargin = AndroidUtilities.dp(4.0f);
+                this.titleView.setText(spannableString);
             } else {
-                params.rightMargin = 0;
-                this.titleView.setText(LocaleController.getString(icon.title));
+                marginLayoutParams.rightMargin = 0;
+                this.titleView.setText(LocaleController.getString(launcherIcon.title));
             }
-            setSelected(LauncherIconController.isEnabled(icon), false);
+            setSelected(LauncherIconController.isEnabled(launcherIcon), false);
         }
     }
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public static class AdaptiveIconImageView extends ImageView {
         private Drawable foreground;
         private Path path = new Path();
@@ -288,27 +286,27 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
             super(context);
         }
 
-        public void setForeground(int res) {
-            this.foreground = ContextCompat.getDrawable(getContext(), res);
+        public void setForeground(int i) {
+            this.foreground = ContextCompat.getDrawable(getContext(), i);
             invalidate();
         }
 
         @Override // android.view.View
-        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-            super.onSizeChanged(w, h, oldw, oldh);
+        protected void onSizeChanged(int i, int i2, int i3, int i4) {
+            super.onSizeChanged(i, i2, i3, i4);
             updatePath();
         }
 
-        public void setPadding(int padding) {
-            setPadding(padding, padding, padding, padding);
+        public void setPadding(int i) {
+            setPadding(i, i, i, i);
         }
 
-        public void setOuterPadding(int outerPadding) {
-            this.outerPadding = outerPadding;
+        public void setOuterPadding(int i) {
+            this.outerPadding = i;
         }
 
-        public void setBackgroundOuterPadding(int backgroundOuterPadding) {
-            this.backgroundOuterPadding = backgroundOuterPadding;
+        public void setBackgroundOuterPadding(int i) {
+            this.backgroundOuterPadding = i;
         }
 
         @Override // android.view.View

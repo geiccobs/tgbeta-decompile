@@ -5,14 +5,14 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
+import androidx.annotation.RecentlyNonNull;
+import com.google.android.gms.common.annotation.KeepName;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Releasable;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.ResultTransform;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.api.TransformedResult;
 import com.google.android.gms.common.internal.ICancelToken;
 import com.google.android.gms.common.internal.Preconditions;
 import java.lang.ref.WeakReference;
@@ -21,9 +21,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+@KeepName
+/* loaded from: classes.dex */
 public abstract class BasePendingResult<R extends Result> extends PendingResult<R> {
     static final ThreadLocal<Boolean> zaa = new zao();
+    @KeepName
     private zaa mResultGuardian;
     private final Object zab;
     private final CallbackHandler<R> zac;
@@ -42,7 +44,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
     private boolean zap;
 
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public final class zaa {
         private zaa() {
             BasePendingResult.this = r1;
@@ -69,48 +71,46 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
         this.zad = new WeakReference<>(null);
     }
 
-    public abstract R createFailedResult(Status status);
+    public static <R extends Result> ResultCallback<R> zab(ResultCallback<R> resultCallback) {
+        return resultCallback;
+    }
+
+    public abstract R createFailedResult(@RecentlyNonNull Status status);
 
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class CallbackHandler<R extends Result> extends com.google.android.gms.internal.base.zas {
-        public CallbackHandler() {
-            this(Looper.getMainLooper());
-        }
-
-        public CallbackHandler(Looper looper) {
+        public CallbackHandler(@RecentlyNonNull Looper looper) {
             super(looper);
         }
 
-        public final void zaa(ResultCallback<? super R> resultCallback, R r) {
+        public final void zaa(@RecentlyNonNull ResultCallback<? super R> resultCallback, @RecentlyNonNull R r) {
             sendMessage(obtainMessage(1, new Pair((ResultCallback) Preconditions.checkNotNull(BasePendingResult.zab(resultCallback)), r)));
         }
 
         /* JADX WARN: Multi-variable type inference failed */
         @Override // android.os.Handler
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case 1:
-                    Pair pair = (Pair) message.obj;
-                    ResultCallback resultCallback = (ResultCallback) pair.first;
-                    Result result = (Result) pair.second;
-                    try {
-                        resultCallback.onResult(result);
-                        return;
-                    } catch (RuntimeException e) {
-                        BasePendingResult.zaa(result);
-                        throw e;
-                    }
-                case 2:
+        public void handleMessage(@RecentlyNonNull Message message) {
+            int i = message.what;
+            if (i != 1) {
+                if (i == 2) {
                     ((BasePendingResult) message.obj).forceFailureUnlessReady(Status.RESULT_TIMEOUT);
                     return;
-                default:
-                    int i = message.what;
-                    StringBuilder sb = new StringBuilder(45);
-                    sb.append("Don't know how to handle message: ");
-                    sb.append(i);
-                    Log.wtf("BasePendingResult", sb.toString(), new Exception());
-                    return;
+                }
+                StringBuilder sb = new StringBuilder(45);
+                sb.append("Don't know how to handle message: ");
+                sb.append(i);
+                Log.wtf("BasePendingResult", sb.toString(), new Exception());
+                return;
+            }
+            Pair pair = (Pair) message.obj;
+            ResultCallback resultCallback = (ResultCallback) pair.first;
+            Result result = (Result) pair.second;
+            try {
+                resultCallback.onResult(result);
+            } catch (RuntimeException e) {
+                BasePendingResult.zaa(result);
+                throw e;
             }
         }
     }
@@ -125,51 +125,13 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
         this.zad = new WeakReference<>(googleApiClient);
     }
 
-    @Deprecated
-    public BasePendingResult(Looper looper) {
-        this.zab = new Object();
-        this.zae = new CountDownLatch(1);
-        this.zaf = new ArrayList<>();
-        this.zah = new AtomicReference<>();
-        this.zap = false;
-        this.zac = new CallbackHandler<>(looper);
-        this.zad = new WeakReference<>(null);
-    }
-
-    public BasePendingResult(CallbackHandler<R> callbackHandler) {
-        this.zab = new Object();
-        this.zae = new CountDownLatch(1);
-        this.zaf = new ArrayList<>();
-        this.zah = new AtomicReference<>();
-        this.zap = false;
-        this.zac = (CallbackHandler) Preconditions.checkNotNull(callbackHandler, "CallbackHandler must not be null");
-        this.zad = new WeakReference<>(null);
-    }
-
     public final boolean isReady() {
         return this.zae.getCount() == 0;
     }
 
     @Override // com.google.android.gms.common.api.PendingResult
-    public final R await() {
-        Preconditions.checkNotMainThread("await must not be called on the UI thread");
-        boolean z = true;
-        Preconditions.checkState(!this.zak, "Result has already been consumed");
-        if (this.zao != null) {
-            z = false;
-        }
-        Preconditions.checkState(z, "Cannot await if then() has been called.");
-        try {
-            this.zae.await();
-        } catch (InterruptedException e) {
-            forceFailureUnlessReady(Status.RESULT_INTERRUPTED);
-        }
-        Preconditions.checkState(isReady(), "Result is not ready.");
-        return zac();
-    }
-
-    @Override // com.google.android.gms.common.api.PendingResult
-    public final R await(long j, TimeUnit timeUnit) {
+    @RecentlyNonNull
+    public final R await(long j, @RecentlyNonNull TimeUnit timeUnit) {
         if (j > 0) {
             Preconditions.checkNotMainThread("await must not be called on the UI thread when time is greater than zero.");
         }
@@ -183,7 +145,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
             if (!this.zae.await(j, timeUnit)) {
                 forceFailureUnlessReady(Status.RESULT_TIMEOUT);
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException unused) {
             forceFailureUnlessReady(Status.RESULT_INTERRUPTED);
         }
         Preconditions.checkState(isReady(), "Result is not ready.");
@@ -215,37 +177,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
     }
 
     @Override // com.google.android.gms.common.api.PendingResult
-    public final void setResultCallback(ResultCallback<? super R> resultCallback, long j, TimeUnit timeUnit) {
-        synchronized (this.zab) {
-            if (resultCallback == null) {
-                this.zag = null;
-                return;
-            }
-            boolean z = true;
-            Preconditions.checkState(!this.zak, "Result has already been consumed.");
-            if (this.zao != null) {
-                z = false;
-            }
-            Preconditions.checkState(z, "Cannot set callbacks if then() has been called.");
-            if (isCanceled()) {
-                return;
-            }
-            if (isReady()) {
-                this.zac.zaa(resultCallback, zac());
-            } else {
-                this.zag = resultCallback;
-                CallbackHandler<R> callbackHandler = this.zac;
-                callbackHandler.sendMessageDelayed(callbackHandler.obtainMessage(2, this), timeUnit.toMillis(j));
-            }
-        }
-    }
-
-    public static <R extends Result> ResultCallback<R> zab(ResultCallback<R> resultCallback) {
-        return resultCallback;
-    }
-
-    @Override // com.google.android.gms.common.api.PendingResult
-    public final void addStatusListener(PendingResult.StatusListener statusListener) {
+    public final void addStatusListener(@RecentlyNonNull PendingResult.StatusListener statusListener) {
         Preconditions.checkArgument(statusListener != null, "Callback cannot be null.");
         synchronized (this.zab) {
             if (isReady()) {
@@ -264,7 +196,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
                 if (iCancelToken != null) {
                     try {
                         iCancelToken.cancel();
-                    } catch (RemoteException e) {
+                    } catch (RemoteException unused) {
                     }
                 }
                 zaa(this.zai);
@@ -294,31 +226,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
         return z;
     }
 
-    @Override // com.google.android.gms.common.api.PendingResult
-    public <S extends Result> TransformedResult<S> then(ResultTransform<? super R, ? extends S> resultTransform) {
-        TransformedResult<S> then;
-        Preconditions.checkState(!this.zak, "Result has already been consumed.");
-        synchronized (this.zab) {
-            boolean z = false;
-            Preconditions.checkState(this.zao == null, "Cannot call then() twice.");
-            Preconditions.checkState(this.zag == null, "Cannot call then() if callbacks are set.");
-            if (!this.zal) {
-                z = true;
-            }
-            Preconditions.checkState(z, "Cannot call then() if result was canceled.");
-            this.zap = true;
-            this.zao = new zacn<>(this.zad);
-            then = this.zao.then(resultTransform);
-            if (isReady()) {
-                this.zac.zaa(this.zao, zac());
-            } else {
-                this.zag = this.zao;
-            }
-        }
-        return then;
-    }
-
-    public final void setResult(R r) {
+    public final void setResult(@RecentlyNonNull R r) {
         synchronized (this.zab) {
             if (this.zam || this.zal) {
                 zaa(r);
@@ -336,7 +244,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
     }
 
     @Deprecated
-    public final void forceFailureUnlessReady(Status status) {
+    public final void forceFailureUnlessReady(@RecentlyNonNull Status status) {
         synchronized (this.zab) {
             if (!isReady()) {
                 setResult(createFailedResult(status));
@@ -347,12 +255,6 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
 
     public final void zaa(zacq zacqVar) {
         this.zah.set(zacqVar);
-    }
-
-    protected final void setCancelToken(ICancelToken iCancelToken) {
-        synchronized (this.zab) {
-            this.zan = iCancelToken;
-        }
     }
 
     public final void zab() {
@@ -411,7 +313,7 @@ public abstract class BasePendingResult<R extends Result> extends PendingResult<
                 ((Releasable) result).release();
             } catch (RuntimeException e) {
                 String valueOf = String.valueOf(result);
-                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 18);
+                StringBuilder sb = new StringBuilder(valueOf.length() + 18);
                 sb.append("Unable to release ");
                 sb.append(valueOf);
                 Log.w("BasePendingResult", sb.toString(), e);

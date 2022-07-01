@@ -1,28 +1,23 @@
 package com.google.android.gms.internal.clearcut;
 
-import com.google.android.exoplayer2.C;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzci {
-    public static final byte[] zzkt;
-    private static final ByteBuffer zzku;
-    private static final zzbk zzkv;
     static final Charset UTF_8 = Charset.forName("UTF-8");
-    private static final Charset ISO_8859_1 = Charset.forName(C.ISO88591_NAME);
+    public static final byte[] zzkt;
 
     static {
+        Charset.forName("ISO-8859-1");
         byte[] bArr = new byte[0];
         zzkt = bArr;
-        zzku = ByteBuffer.wrap(bArr);
-        zzkv = zzbk.zza(bArr, 0, bArr.length, false);
+        ByteBuffer.wrap(bArr);
+        zzbk.zza(bArr, 0, bArr.length, false);
     }
 
     public static <T> T checkNotNull(T t) {
-        if (t != null) {
-            return t;
-        }
-        throw new NullPointerException();
+        t.getClass();
+        return t;
     }
 
     public static int hashCode(byte[] bArr) {

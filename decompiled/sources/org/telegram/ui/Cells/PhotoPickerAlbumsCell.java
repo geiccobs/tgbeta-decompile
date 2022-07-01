@@ -10,15 +10,13 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
-import com.microsoft.appcenter.Constants;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MediaController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class PhotoPickerAlbumsCell extends FrameLayout {
     private int albumsCount;
     private PhotoPickerAlbumsCellDelegate delegate;
@@ -26,13 +24,13 @@ public class PhotoPickerAlbumsCell extends FrameLayout {
     private MediaController.AlbumEntry[] albumEntries = new MediaController.AlbumEntry[4];
     private AlbumView[] albumViews = new AlbumView[4];
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public interface PhotoPickerAlbumsCellDelegate {
         void didSelectAlbum(MediaController.AlbumEntry albumEntry);
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public class AlbumView extends FrameLayout {
         private TextView countTextView;
         private BackupImageView imageView;
@@ -75,17 +73,17 @@ public class PhotoPickerAlbumsCell extends FrameLayout {
         }
 
         @Override // android.view.View
-        public boolean onTouchEvent(MotionEvent event) {
+        public boolean onTouchEvent(MotionEvent motionEvent) {
             if (Build.VERSION.SDK_INT >= 21) {
-                this.selector.drawableHotspotChanged(event.getX(), event.getY());
+                this.selector.drawableHotspotChanged(motionEvent.getX(), motionEvent.getY());
             }
-            return super.onTouchEvent(event);
+            return super.onTouchEvent(motionEvent);
         }
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
             if (!this.imageView.getImageReceiver().hasNotThumb() || this.imageView.getImageReceiver().getCurrentAlpha() != 1.0f) {
-                PhotoPickerAlbumsCell.this.backgroundPaint.setColor(Theme.getColor(Theme.key_chat_attachPhotoBackground));
+                PhotoPickerAlbumsCell.this.backgroundPaint.setColor(Theme.getColor("chat_attachPhotoBackground"));
                 canvas.drawRect(0.0f, 0.0f, this.imageView.getMeasuredWidth(), this.imageView.getMeasuredHeight(), PhotoPickerAlbumsCell.this.backgroundPaint);
             }
         }
@@ -93,88 +91,87 @@ public class PhotoPickerAlbumsCell extends FrameLayout {
 
     public PhotoPickerAlbumsCell(Context context) {
         super(context);
-        for (int a = 0; a < 4; a++) {
-            this.albumViews[a] = new AlbumView(context);
-            addView(this.albumViews[a]);
-            this.albumViews[a].setVisibility(4);
-            this.albumViews[a].setTag(Integer.valueOf(a));
-            this.albumViews[a].setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.PhotoPickerAlbumsCell$$ExternalSyntheticLambda0
+        for (int i = 0; i < 4; i++) {
+            this.albumViews[i] = new AlbumView(context);
+            addView(this.albumViews[i]);
+            this.albumViews[i].setVisibility(4);
+            this.albumViews[i].setTag(Integer.valueOf(i));
+            this.albumViews[i].setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Cells.PhotoPickerAlbumsCell$$ExternalSyntheticLambda0
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    PhotoPickerAlbumsCell.this.m1663lambda$new$0$orgtelegramuiCellsPhotoPickerAlbumsCell(view);
+                    PhotoPickerAlbumsCell.this.lambda$new$0(view);
                 }
             });
         }
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Cells-PhotoPickerAlbumsCell */
-    public /* synthetic */ void m1663lambda$new$0$orgtelegramuiCellsPhotoPickerAlbumsCell(View v) {
+    public /* synthetic */ void lambda$new$0(View view) {
         PhotoPickerAlbumsCellDelegate photoPickerAlbumsCellDelegate = this.delegate;
         if (photoPickerAlbumsCellDelegate != null) {
-            photoPickerAlbumsCellDelegate.didSelectAlbum(this.albumEntries[((Integer) v.getTag()).intValue()]);
+            photoPickerAlbumsCellDelegate.didSelectAlbum(this.albumEntries[((Integer) view.getTag()).intValue()]);
         }
     }
 
-    public void setAlbumsCount(int count) {
-        int a = 0;
+    public void setAlbumsCount(int i) {
+        int i2 = 0;
         while (true) {
             AlbumView[] albumViewArr = this.albumViews;
-            if (a < albumViewArr.length) {
-                albumViewArr[a].setVisibility(a < count ? 0 : 4);
-                a++;
+            if (i2 < albumViewArr.length) {
+                albumViewArr[i2].setVisibility(i2 < i ? 0 : 4);
+                i2++;
             } else {
-                this.albumsCount = count;
+                this.albumsCount = i;
                 return;
             }
         }
     }
 
-    public void setDelegate(PhotoPickerAlbumsCellDelegate delegate) {
-        this.delegate = delegate;
+    public void setDelegate(PhotoPickerAlbumsCellDelegate photoPickerAlbumsCellDelegate) {
+        this.delegate = photoPickerAlbumsCellDelegate;
     }
 
-    public void setAlbum(int a, MediaController.AlbumEntry albumEntry) {
-        this.albumEntries[a] = albumEntry;
+    public void setAlbum(int i, MediaController.AlbumEntry albumEntry) {
+        this.albumEntries[i] = albumEntry;
         if (albumEntry != null) {
-            AlbumView albumView = this.albumViews[a];
+            AlbumView albumView = this.albumViews[i];
             albumView.imageView.setOrientation(0, true);
-            if (albumEntry.coverPhoto == null || albumEntry.coverPhoto.path == null) {
+            MediaController.PhotoEntry photoEntry = albumEntry.coverPhoto;
+            if (photoEntry == null || photoEntry.path == null) {
                 albumView.imageView.setImageDrawable(Theme.chat_attachEmptyDrawable);
             } else {
                 albumView.imageView.setOrientation(albumEntry.coverPhoto.orientation, true);
                 if (albumEntry.coverPhoto.isVideo) {
                     BackupImageView backupImageView = albumView.imageView;
-                    backupImageView.setImage("vthumb://" + albumEntry.coverPhoto.imageId + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + albumEntry.coverPhoto.path, null, Theme.chat_attachEmptyDrawable);
+                    backupImageView.setImage("vthumb://" + albumEntry.coverPhoto.imageId + ":" + albumEntry.coverPhoto.path, null, Theme.chat_attachEmptyDrawable);
                 } else {
                     BackupImageView backupImageView2 = albumView.imageView;
-                    backupImageView2.setImage("thumb://" + albumEntry.coverPhoto.imageId + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + albumEntry.coverPhoto.path, null, Theme.chat_attachEmptyDrawable);
+                    backupImageView2.setImage("thumb://" + albumEntry.coverPhoto.imageId + ":" + albumEntry.coverPhoto.path, null, Theme.chat_attachEmptyDrawable);
                 }
             }
             albumView.nameTextView.setText(albumEntry.bucketName);
             albumView.countTextView.setText(String.format("%d", Integer.valueOf(albumEntry.photos.size())));
             return;
         }
-        this.albumViews[a].setVisibility(4);
+        this.albumViews[i].setVisibility(4);
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int itemWidth;
+    protected void onMeasure(int i, int i2) {
+        int i3;
         if (AndroidUtilities.isTablet()) {
-            itemWidth = ((AndroidUtilities.dp(490.0f) - AndroidUtilities.dp(12.0f)) - ((this.albumsCount - 1) * AndroidUtilities.dp(4.0f))) / this.albumsCount;
+            i3 = ((AndroidUtilities.dp(490.0f) - AndroidUtilities.dp(12.0f)) - ((this.albumsCount - 1) * AndroidUtilities.dp(4.0f))) / this.albumsCount;
         } else {
-            itemWidth = ((AndroidUtilities.displaySize.x - AndroidUtilities.dp(12.0f)) - ((this.albumsCount - 1) * AndroidUtilities.dp(4.0f))) / this.albumsCount;
+            i3 = ((AndroidUtilities.displaySize.x - AndroidUtilities.dp(12.0f)) - ((this.albumsCount - 1) * AndroidUtilities.dp(4.0f))) / this.albumsCount;
         }
-        for (int a = 0; a < this.albumsCount; a++) {
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.albumViews[a].getLayoutParams();
+        for (int i4 = 0; i4 < this.albumsCount; i4++) {
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.albumViews[i4].getLayoutParams();
             layoutParams.topMargin = AndroidUtilities.dp(4.0f);
-            layoutParams.leftMargin = (AndroidUtilities.dp(4.0f) + itemWidth) * a;
-            layoutParams.width = itemWidth;
-            layoutParams.height = itemWidth;
+            layoutParams.leftMargin = (AndroidUtilities.dp(4.0f) + i3) * i4;
+            layoutParams.width = i3;
+            layoutParams.height = i3;
             layoutParams.gravity = 51;
-            this.albumViews[a].setLayoutParams(layoutParams);
+            this.albumViews[i4].setLayoutParams(layoutParams);
         }
-        int a2 = AndroidUtilities.dp(4.0f);
-        super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(a2 + itemWidth, C.BUFFER_FLAG_ENCRYPTED));
+        super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(4.0f) + i3, 1073741824));
     }
 }

@@ -3,7 +3,7 @@ package com.google.android.gms.internal.mlkit_common;
 import com.google.mlkit.common.sdkinternal.SharedPrefManager;
 import java.util.concurrent.Callable;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final /* synthetic */ class zzdu implements Callable {
     private final SharedPrefManager zza;
 

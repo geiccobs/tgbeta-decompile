@@ -2,11 +2,13 @@ package com.google.android.gms.wallet.wobs;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class TimeInterval extends AbstractSafeParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<TimeInterval> CREATOR = new zzl();
     long zza;
     long zzb;
@@ -14,24 +16,16 @@ public final class TimeInterval extends AbstractSafeParcelable {
     TimeInterval() {
     }
 
-    public long getEndTimestamp() {
-        return this.zzb;
-    }
-
-    public long getStartTimestamp() {
-        return this.zza;
-    }
-
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel dest, int i) {
-        int beginObjectHeader = SafeParcelWriter.beginObjectHeader(dest);
-        SafeParcelWriter.writeLong(dest, 2, this.zza);
-        SafeParcelWriter.writeLong(dest, 3, this.zzb);
-        SafeParcelWriter.finishObjectHeader(dest, beginObjectHeader);
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+        int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
+        SafeParcelWriter.writeLong(parcel, 2, this.zza);
+        SafeParcelWriter.writeLong(parcel, 3, this.zzb);
+        SafeParcelWriter.finishObjectHeader(parcel, beginObjectHeader);
     }
 
-    public TimeInterval(long startTimestamp, long endTimestamp) {
-        this.zza = startTimestamp;
-        this.zzb = endTimestamp;
+    public TimeInterval(long j, long j2) {
+        this.zza = j;
+        this.zzb = j2;
     }
 }

@@ -1,20 +1,20 @@
 package com.google.android.gms.internal.clearcut;
 
-import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-/* loaded from: classes3.dex */
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
 public abstract class zzbn extends zzba {
     private static final Logger logger = Logger.getLogger(zzbn.class.getName());
     private static final boolean zzfy = zzfd.zzed();
     zzbp zzfz;
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class zza extends zzbn {
         private final byte[] buffer;
         private final int limit;
@@ -167,7 +167,7 @@ public abstract class zzbn extends zzba {
                     byte[] bArr = this.buffer;
                     int i = this.position;
                     this.position = i + 1;
-                    zzfd.zza(bArr, i, (byte) ((((int) j) & 127) | 128));
+                    zzfd.zza(bArr, i, (byte) ((((int) j) & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     j >>>= 7;
                 }
                 byte[] bArr2 = this.buffer;
@@ -181,7 +181,7 @@ public abstract class zzbn extends zzba {
                     byte[] bArr3 = this.buffer;
                     int i3 = this.position;
                     this.position = i3 + 1;
-                    bArr3[i3] = (byte) ((((int) j) & 127) | 128);
+                    bArr3[i3] = (byte) ((((int) j) & 127) | ConnectionsManager.RequestFlagNeedQuickAck);
                     j >>>= 7;
                 } catch (IndexOutOfBoundsException e) {
                     throw new zzc(String.format("Pos: %d, limit: %d, len: %d", Integer.valueOf(this.position), Integer.valueOf(this.limit), 1), e);
@@ -251,12 +251,6 @@ public abstract class zzbn extends zzba {
         }
 
         @Override // com.google.android.gms.internal.clearcut.zzbn
-        public final void zzd(byte[] bArr, int i, int i2) throws IOException {
-            zzo(i2);
-            write(bArr, 0, i2);
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzbn
         public final void zzf(int i, int i2) throws IOException {
             zzb(i, 5);
             zzq(i2);
@@ -266,8 +260,8 @@ public abstract class zzbn extends zzba {
         public final void zzg(String str) throws IOException {
             int i = this.position;
             try {
-                int zzt = zzt(str.length() * 3);
-                int zzt2 = zzt(str.length());
+                int zzt = zzbn.zzt(str.length() * 3);
+                int zzt2 = zzbn.zzt(str.length());
                 if (zzt2 != zzt) {
                     zzo(zzff.zza(str));
                     this.position = zzff.zza(str, this.buffer, this.position, zzag());
@@ -303,7 +297,7 @@ public abstract class zzbn extends zzba {
                     byte[] bArr = this.buffer;
                     int i2 = this.position;
                     this.position = i2 + 1;
-                    zzfd.zza(bArr, i2, (byte) ((i & 127) | 128));
+                    zzfd.zza(bArr, i2, (byte) ((i & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     i >>>= 7;
                 }
                 byte[] bArr2 = this.buffer;
@@ -317,7 +311,7 @@ public abstract class zzbn extends zzba {
                     byte[] bArr3 = this.buffer;
                     int i4 = this.position;
                     this.position = i4 + 1;
-                    bArr3[i4] = (byte) ((i & 127) | 128);
+                    bArr3[i4] = (byte) ((i & 127) | ConnectionsManager.RequestFlagNeedQuickAck);
                     i >>>= 7;
                 } catch (IndexOutOfBoundsException e) {
                     throw new zzc(String.format("Pos: %d, limit: %d, len: %d", Integer.valueOf(this.position), Integer.valueOf(this.limit), 1), e);
@@ -351,7 +345,7 @@ public abstract class zzbn extends zzba {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zzb extends zza {
         private final ByteBuffer zzga;
         private int zzgb;
@@ -368,12 +362,8 @@ public abstract class zzbn extends zzba {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class zzc extends IOException {
-        zzc() {
-            super("CodedOutputStream was writing to a flat byte array and ran out of space.");
-        }
-
         /* JADX WARN: Illegal instructions before constructor call */
         /*
             Code decompiled incorrectly, please refer to instructions dump.
@@ -383,16 +373,15 @@ public abstract class zzbn extends zzba {
             /*
                 r2 = this;
                 java.lang.String r0 = "CodedOutputStream was writing to a flat byte array and ran out of space.: "
-                java.lang.String r0 = java.lang.String.valueOf(r0)
                 java.lang.String r3 = java.lang.String.valueOf(r3)
                 int r1 = r3.length()
-                if (r1 == 0) goto L15
+                if (r1 == 0) goto L11
                 java.lang.String r3 = r0.concat(r3)
-                goto L1a
-            L15:
+                goto L16
+            L11:
                 java.lang.String r3 = new java.lang.String
                 r3.<init>(r0)
-            L1a:
+            L16:
                 r2.<init>(r3)
                 return
             */
@@ -408,16 +397,15 @@ public abstract class zzbn extends zzba {
             /*
                 r2 = this;
                 java.lang.String r0 = "CodedOutputStream was writing to a flat byte array and ran out of space.: "
-                java.lang.String r0 = java.lang.String.valueOf(r0)
                 java.lang.String r3 = java.lang.String.valueOf(r3)
                 int r1 = r3.length()
-                if (r1 == 0) goto L15
+                if (r1 == 0) goto L11
                 java.lang.String r3 = r0.concat(r3)
-                goto L1a
-            L15:
+                goto L16
+            L11:
                 java.lang.String r3 = new java.lang.String
                 r3.<init>(r0)
-            L1a:
+            L16:
                 r2.<init>(r3, r4)
                 return
             */
@@ -429,9 +417,8 @@ public abstract class zzbn extends zzba {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zzd extends zzbn {
-        private final int zzgb;
         private final ByteBuffer zzgc;
         private final ByteBuffer zzgd;
 
@@ -439,7 +426,7 @@ public abstract class zzbn extends zzba {
             super();
             this.zzgc = byteBuffer;
             this.zzgd = byteBuffer.duplicate().order(ByteOrder.LITTLE_ENDIAN);
-            this.zzgb = byteBuffer.position();
+            byteBuffer.position();
         }
 
         private final void zzi(String str) throws IOException {
@@ -565,7 +552,7 @@ public abstract class zzbn extends zzba {
         public final void zzb(long j) throws IOException {
             while (((-128) & j) != 0) {
                 try {
-                    this.zzgd.put((byte) ((((int) j) & 127) | 128));
+                    this.zzgd.put((byte) ((((int) j) & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     j >>>= 7;
                 } catch (BufferOverflowException e) {
                     throw new zzc(e);
@@ -608,12 +595,6 @@ public abstract class zzbn extends zzba {
         }
 
         @Override // com.google.android.gms.internal.clearcut.zzbn
-        public final void zzd(byte[] bArr, int i, int i2) throws IOException {
-            zzo(i2);
-            write(bArr, 0, i2);
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzbn
         public final void zzf(int i, int i2) throws IOException {
             zzb(i, 5);
             zzq(i2);
@@ -623,8 +604,8 @@ public abstract class zzbn extends zzba {
         public final void zzg(String str) throws IOException {
             int position = this.zzgd.position();
             try {
-                int zzt = zzt(str.length() * 3);
-                int zzt2 = zzt(str.length());
+                int zzt = zzbn.zzt(str.length() * 3);
+                int zzt2 = zzbn.zzt(str.length());
                 if (zzt2 != zzt) {
                     zzo(zzff.zza(str));
                     zzi(str);
@@ -658,7 +639,7 @@ public abstract class zzbn extends zzba {
         public final void zzo(int i) throws IOException {
             while ((i & (-128)) != 0) {
                 try {
-                    this.zzgd.put((byte) ((i & 127) | 128));
+                    this.zzgd.put((byte) ((i & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     i >>>= 7;
                 } catch (BufferOverflowException e) {
                     throw new zzc(e);
@@ -677,7 +658,7 @@ public abstract class zzbn extends zzba {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zze extends zzbn {
         private final ByteBuffer zzgc;
         private final ByteBuffer zzgd;
@@ -722,7 +703,7 @@ public abstract class zzbn extends zzba {
                 }
             }
             if (bArr == null) {
-                throw new NullPointerException(CommonProperties.VALUE);
+                throw new NullPointerException("value");
             }
             throw new zzc(String.format("Pos: %d, limit: %d, len: %d", Long.valueOf(this.zzgi), Long.valueOf(this.zzgg), Integer.valueOf(i2)));
         }
@@ -835,7 +816,7 @@ public abstract class zzbn extends zzba {
                         break;
                     }
                     this.zzgi = j2 + 1;
-                    zzfd.zza(j2, (byte) ((((int) j) & 127) | 128));
+                    zzfd.zza(j2, (byte) ((((int) j) & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     j >>>= 7;
                 }
             } else {
@@ -848,7 +829,7 @@ public abstract class zzbn extends zzba {
                         break;
                     }
                     this.zzgi = j2 + 1;
-                    zzfd.zza(j2, (byte) ((((int) j) & 127) | 128));
+                    zzfd.zza(j2, (byte) ((((int) j) & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     j >>>= 7;
                 }
             }
@@ -887,12 +868,6 @@ public abstract class zzbn extends zzba {
         }
 
         @Override // com.google.android.gms.internal.clearcut.zzbn
-        public final void zzd(byte[] bArr, int i, int i2) throws IOException {
-            zzo(i2);
-            write(bArr, 0, i2);
-        }
-
-        @Override // com.google.android.gms.internal.clearcut.zzbn
         public final void zzf(int i, int i2) throws IOException {
             zzb(i, 5);
             zzq(i2);
@@ -902,8 +877,8 @@ public abstract class zzbn extends zzba {
         public final void zzg(String str) throws IOException {
             long j = this.zzgi;
             try {
-                int zzt = zzt(str.length() * 3);
-                int zzt2 = zzt(str.length());
+                int zzt = zzbn.zzt(str.length() * 3);
+                int zzt2 = zzbn.zzt(str.length());
                 if (zzt2 != zzt) {
                     int zza = zzff.zza(str);
                     zzo(zza);
@@ -945,7 +920,7 @@ public abstract class zzbn extends zzba {
                 while ((i & (-128)) != 0) {
                     long j2 = this.zzgi;
                     this.zzgi = j2 + 1;
-                    zzfd.zza(j2, (byte) ((i & 127) | 128));
+                    zzfd.zza(j2, (byte) ((i & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     i >>>= 7;
                 }
                 j = this.zzgi;
@@ -959,7 +934,7 @@ public abstract class zzbn extends zzba {
                         break;
                     }
                     this.zzgi = j + 1;
-                    zzfd.zza(j, (byte) ((i & 127) | 128));
+                    zzfd.zza(j, (byte) ((i & 127) | ConnectionsManager.RequestFlagNeedQuickAck));
                     i >>>= 7;
                 }
             }
@@ -1163,7 +1138,7 @@ public abstract class zzbn extends zzba {
         int i;
         try {
             i = zzff.zza(str);
-        } catch (zzfi e) {
+        } catch (zzfi unused) {
             i = str.getBytes(zzci.UTF_8).length;
         }
         return zzt(i) + i;
@@ -1324,8 +1299,6 @@ public abstract class zzbn extends zzba {
     public abstract void zzd(int i, int i2) throws IOException;
 
     public abstract void zzd(long j) throws IOException;
-
-    public abstract void zzd(byte[] bArr, int i, int i2) throws IOException;
 
     public final void zze(int i, int i2) throws IOException {
         zzd(i, zzy(i2));

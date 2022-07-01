@@ -10,11 +10,11 @@ import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class ContactsSyncAdapterService extends Service {
-    private static SyncAdapterImpl sSyncAdapter = null;
+    private static SyncAdapterImpl sSyncAdapter;
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes.dex */
     public static class SyncAdapterImpl extends AbstractThreadedSyncAdapter {
         private Context mContext;
 
@@ -24,9 +24,9 @@ public class ContactsSyncAdapterService extends Service {
         }
 
         @Override // android.content.AbstractThreadedSyncAdapter
-        public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        public void onPerformSync(Account account, Bundle bundle, String str, ContentProviderClient contentProviderClient, SyncResult syncResult) {
             try {
-                ContactsSyncAdapterService.performSync(this.mContext, account, extras, authority, provider, syncResult);
+                ContactsSyncAdapterService.performSync(this.mContext, account, bundle, str, contentProviderClient, syncResult);
             } catch (OperationCanceledException e) {
                 FileLog.e(e);
             }
@@ -45,7 +45,7 @@ public class ContactsSyncAdapterService extends Service {
         return sSyncAdapter;
     }
 
-    public static void performSync(Context context, Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) throws OperationCanceledException {
+    public static void performSync(Context context, Account account, Bundle bundle, String str, ContentProviderClient contentProviderClient, SyncResult syncResult) throws OperationCanceledException {
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("performSync: " + account.toString());
         }

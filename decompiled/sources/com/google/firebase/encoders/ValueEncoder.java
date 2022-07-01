@@ -1,4 +1,7 @@
 package com.google.firebase.encoders;
-/* loaded from: classes3.dex */
-public interface ValueEncoder<T> extends Encoder<T, ValueEncoderContext> {
+
+import java.io.IOException;
+/* loaded from: classes.dex */
+public interface ValueEncoder<T> {
+    /* synthetic */ void encode(TValue tvalue, TContext tcontext) throws IOException;
 }

@@ -1,41 +1,36 @@
 package com.microsoft.appcenter.ingestion.models.json;
 
-import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import com.microsoft.appcenter.ingestion.models.Log;
 import com.microsoft.appcenter.ingestion.models.LogContainer;
 import com.microsoft.appcenter.ingestion.models.one.CommonSchemaLog;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class DefaultLogSerializer implements LogSerializer {
-    private static final String LOGS = "logs";
     private final Map<String, LogFactory> mLogFactories = new HashMap();
 
-    private JSONStringer writeLog(JSONStringer writer, Log log) throws JSONException {
-        writer.object();
-        log.write(writer);
-        writer.endObject();
-        return writer;
+    private JSONStringer writeLog(JSONStringer jSONStringer, Log log) throws JSONException {
+        jSONStringer.object();
+        log.write(jSONStringer);
+        jSONStringer.endObject();
+        return jSONStringer;
     }
 
-    private Log readLog(JSONObject object, String type) throws JSONException {
-        if (type == null) {
-            type = object.getString(CommonProperties.TYPE);
+    private Log readLog(JSONObject jSONObject, String str) throws JSONException {
+        if (str == null) {
+            str = jSONObject.getString("type");
         }
-        LogFactory logFactory = this.mLogFactories.get(type);
+        LogFactory logFactory = this.mLogFactories.get(str);
         if (logFactory == null) {
-            throw new JSONException("Unknown log type: " + type);
+            throw new JSONException("Unknown log type: " + str);
         }
-        Log log = logFactory.create();
-        log.read(object);
-        return log;
+        Log create = logFactory.create();
+        create.read(jSONObject);
+        return create;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.json.LogSerializer
@@ -44,8 +39,8 @@ public class DefaultLogSerializer implements LogSerializer {
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.json.LogSerializer
-    public Log deserializeLog(String json, String type) throws JSONException {
-        return readLog(new JSONObject(json), type);
+    public Log deserializeLog(String str, String str2) throws JSONException {
+        return readLog(new JSONObject(str), str2);
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.json.LogSerializer
@@ -55,34 +50,19 @@ public class DefaultLogSerializer implements LogSerializer {
 
     @Override // com.microsoft.appcenter.ingestion.models.json.LogSerializer
     public String serializeContainer(LogContainer logContainer) throws JSONException {
-        JSONStringer writer = new JSONStringer();
-        writer.object();
-        writer.key(LOGS).array();
+        JSONStringer jSONStringer = new JSONStringer();
+        jSONStringer.object();
+        jSONStringer.key("logs").array();
         for (Log log : logContainer.getLogs()) {
-            writeLog(writer, log);
+            writeLog(jSONStringer, log);
         }
-        writer.endArray();
-        writer.endObject();
-        return writer.toString();
+        jSONStringer.endArray();
+        jSONStringer.endObject();
+        return jSONStringer.toString();
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.json.LogSerializer
-    public LogContainer deserializeContainer(String json, String type) throws JSONException {
-        JSONObject jContainer = new JSONObject(json);
-        LogContainer container = new LogContainer();
-        JSONArray jLogs = jContainer.getJSONArray(LOGS);
-        List<Log> logs = new ArrayList<>();
-        for (int i = 0; i < jLogs.length(); i++) {
-            JSONObject jLog = jLogs.getJSONObject(i);
-            Log log = readLog(jLog, type);
-            logs.add(log);
-        }
-        container.setLogs(logs);
-        return container;
-    }
-
-    @Override // com.microsoft.appcenter.ingestion.models.json.LogSerializer
-    public void addLogFactory(String logType, LogFactory logFactory) {
-        this.mLogFactories.put(logType, logFactory);
+    public void addLogFactory(String str, LogFactory logFactory) {
+        this.mLogFactories.put(str, logFactory);
     }
 }

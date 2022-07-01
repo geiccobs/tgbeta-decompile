@@ -1,10 +1,11 @@
 package com.google.firebase.appindexing.internal;
 
 import android.os.RemoteException;
+import com.google.android.gms.internal.icing.zzaa;
 import com.google.android.gms.internal.icing.zzak;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzq extends zzs {
     final /* synthetic */ zzc[] zza;
 
@@ -13,7 +14,7 @@ public final class zzq extends zzs {
     }
 
     @Override // com.google.firebase.appindexing.internal.zzs
-    protected final void zza(com.google.android.gms.internal.icing.zzaa zzaaVar) throws RemoteException {
+    protected final void zza(zzaa zzaaVar) throws RemoteException {
         zzaaVar.zze(new zzak(this), this.zza);
     }
 }

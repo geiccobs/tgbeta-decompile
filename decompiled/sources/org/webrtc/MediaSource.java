@@ -1,31 +1,32 @@
 package org.webrtc;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class MediaSource {
     private long nativeSource;
     private final RefCountDelegate refCountDelegate;
 
     private static native State nativeGetState(long j);
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public enum State {
         INITIALIZING,
         LIVE,
         ENDED,
         MUTED;
 
-        static State fromNativeIndex(int nativeIndex) {
-            return values()[nativeIndex];
+        @CalledByNative("State")
+        static State fromNativeIndex(int i) {
+            return values()[i];
         }
     }
 
-    public MediaSource(final long nativeSource) {
+    public MediaSource(final long j) {
         this.refCountDelegate = new RefCountDelegate(new Runnable() { // from class: org.webrtc.MediaSource$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                JniCommon.nativeReleaseRef(nativeSource);
+                JniCommon.nativeReleaseRef(j);
             }
         });
-        this.nativeSource = nativeSource;
+        this.nativeSource = j;
     }
 
     public State state() {
@@ -55,8 +56,9 @@ public class MediaSource {
     }
 
     private void checkMediaSourceExists() {
-        if (this.nativeSource == 0) {
-            throw new IllegalStateException("MediaSource has been disposed.");
+        if (this.nativeSource != 0) {
+            return;
         }
+        throw new IllegalStateException("MediaSource has been disposed.");
     }
 }

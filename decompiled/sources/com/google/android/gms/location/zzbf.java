@@ -3,8 +3,9 @@ package com.google.android.gms.location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
+import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzbf implements Parcelable.Creator<LocationRequest> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ LocationRequest createFromParcel(Parcel parcel) {
@@ -15,7 +16,7 @@ public final class zzbf implements Parcelable.Creator<LocationRequest> {
         long j4 = 0;
         int i = 102;
         boolean z = false;
-        int i2 = Integer.MAX_VALUE;
+        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         float f = 0.0f;
         boolean z2 = false;
         while (parcel.dataPosition() < validateObjectHeader) {

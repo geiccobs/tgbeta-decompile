@@ -1,16 +1,16 @@
 package com.google.android.gms.maps.model;
 
 import android.os.RemoteException;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Preconditions;
-import com.google.android.gms.dynamic.ObjectWrapper;
-import java.util.List;
+import com.google.android.gms.internal.maps.zzl;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Circle {
-    private final com.google.android.gms.internal.maps.zzl zza;
+    private final zzl zza;
 
-    public Circle(com.google.android.gms.internal.maps.zzl zzlVar) {
-        this.zza = (com.google.android.gms.internal.maps.zzl) Preconditions.checkNotNull(zzlVar);
+    public Circle(zzl zzlVar) {
+        this.zza = (zzl) Preconditions.checkNotNull(zzlVar);
     }
 
     public final boolean equals(Object obj) {
@@ -24,73 +24,9 @@ public final class Circle {
         }
     }
 
-    public LatLng getCenter() {
-        try {
-            return this.zza.zzg();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public int getFillColor() {
-        try {
-            return this.zza.zzo();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public String getId() {
-        try {
-            return this.zza.zze();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
     public double getRadius() {
         try {
             return this.zza.zzi();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public int getStrokeColor() {
-        try {
-            return this.zza.zzm();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public List<PatternItem> getStrokePattern() {
-        try {
-            return PatternItem.zza(this.zza.zzy());
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public float getStrokeWidth() {
-        try {
-            return this.zza.zzk();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public Object getTag() {
-        try {
-            return ObjectWrapper.unwrap(this.zza.zzA());
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public float getZIndex() {
-        try {
-            return this.zza.zzq();
         } catch (RemoteException e) {
             throw new RuntimeRemoteException(e);
         }
@@ -104,34 +40,10 @@ public final class Circle {
         }
     }
 
-    public boolean isClickable() {
+    public void setCenter(@RecentlyNonNull LatLng latLng) {
         try {
-            return this.zza.zzw();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public boolean isVisible() {
-        try {
-            return this.zza.zzs();
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setCenter(LatLng center) {
-        try {
-            Preconditions.checkNotNull(center, "center must not be null.");
-            this.zza.zzf(center);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setTag(Object tag) {
-        try {
-            this.zza.zzz(ObjectWrapper.wrap(tag));
+            Preconditions.checkNotNull(latLng, "center must not be null.");
+            this.zza.zzf(latLng);
         } catch (RemoteException e) {
             throw new RuntimeRemoteException(e);
         }
@@ -145,65 +57,25 @@ public final class Circle {
         }
     }
 
-    public void setClickable(boolean clickable) {
+    public void setFillColor(int i) {
         try {
-            this.zza.zzv(clickable);
+            this.zza.zzn(i);
         } catch (RemoteException e) {
             throw new RuntimeRemoteException(e);
         }
     }
 
-    public void setFillColor(int color) {
+    public void setRadius(double d) {
         try {
-            this.zza.zzn(color);
+            this.zza.zzh(d);
         } catch (RemoteException e) {
             throw new RuntimeRemoteException(e);
         }
     }
 
-    public void setRadius(double radius) {
+    public void setStrokeColor(int i) {
         try {
-            this.zza.zzh(radius);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setStrokeColor(int color) {
-        try {
-            this.zza.zzl(color);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setStrokePattern(List<PatternItem> list) {
-        try {
-            this.zza.zzx(list);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setStrokeWidth(float width) {
-        try {
-            this.zza.zzj(width);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setVisible(boolean visible) {
-        try {
-            this.zza.zzr(visible);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-    }
-
-    public void setZIndex(float zIndex) {
-        try {
-            this.zza.zzp(zIndex);
+            this.zza.zzl(i);
         } catch (RemoteException e) {
             throw new RuntimeRemoteException(e);
         }

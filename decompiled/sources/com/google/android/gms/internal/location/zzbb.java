@@ -7,7 +7,7 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.location.LocationRequest;
 import java.util.ArrayList;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzbb implements Parcelable.Creator<zzba> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ zzba createFromParcel(Parcel parcel) {
@@ -25,46 +25,45 @@ public final class zzbb implements Parcelable.Creator<zzba> {
         boolean z5 = false;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            switch (SafeParcelReader.getFieldId(readHeader)) {
-                case 1:
-                    locationRequest = (LocationRequest) SafeParcelReader.createParcelable(parcel, readHeader, LocationRequest.CREATOR);
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                default:
-                    SafeParcelReader.skipUnknownField(parcel, readHeader);
-                    break;
-                case 5:
-                    arrayList = SafeParcelReader.createTypedList(parcel, readHeader, ClientIdentity.CREATOR);
-                    break;
-                case 6:
-                    str = SafeParcelReader.createString(parcel, readHeader);
-                    break;
-                case 7:
-                    z = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                case 8:
-                    z2 = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                case 9:
-                    z3 = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                case 10:
-                    str2 = SafeParcelReader.createString(parcel, readHeader);
-                    break;
-                case 11:
-                    z4 = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                case 12:
-                    z5 = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                case 13:
-                    str3 = SafeParcelReader.createString(parcel, readHeader);
-                    break;
-                case 14:
-                    j = SafeParcelReader.readLong(parcel, readHeader);
-                    break;
+            int fieldId = SafeParcelReader.getFieldId(readHeader);
+            if (fieldId != 1) {
+                switch (fieldId) {
+                    case 5:
+                        arrayList = SafeParcelReader.createTypedList(parcel, readHeader, ClientIdentity.CREATOR);
+                        continue;
+                    case 6:
+                        str = SafeParcelReader.createString(parcel, readHeader);
+                        continue;
+                    case 7:
+                        z = SafeParcelReader.readBoolean(parcel, readHeader);
+                        continue;
+                    case 8:
+                        z2 = SafeParcelReader.readBoolean(parcel, readHeader);
+                        continue;
+                    case 9:
+                        z3 = SafeParcelReader.readBoolean(parcel, readHeader);
+                        continue;
+                    case 10:
+                        str2 = SafeParcelReader.createString(parcel, readHeader);
+                        continue;
+                    case 11:
+                        z4 = SafeParcelReader.readBoolean(parcel, readHeader);
+                        continue;
+                    case 12:
+                        z5 = SafeParcelReader.readBoolean(parcel, readHeader);
+                        continue;
+                    case 13:
+                        str3 = SafeParcelReader.createString(parcel, readHeader);
+                        continue;
+                    case 14:
+                        j = SafeParcelReader.readLong(parcel, readHeader);
+                        continue;
+                    default:
+                        SafeParcelReader.skipUnknownField(parcel, readHeader);
+                        continue;
+                }
+            } else {
+                locationRequest = (LocationRequest) SafeParcelReader.createParcelable(parcel, readHeader, LocationRequest.CREATOR);
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

@@ -3,7 +3,7 @@ package com.google.android.gms.internal.clearcut;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzs implements Parcelable.Creator<zzr> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ zzr createFromParcel(Parcel parcel) {

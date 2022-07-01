@@ -1,5 +1,5 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzbx {
     private static final zzbu<?> zzgr = new zzbv();
     private static final zzbu<?> zzgs = zzao();
@@ -7,7 +7,7 @@ final class zzbx {
     private static zzbu<?> zzao() {
         try {
             return (zzbu) Class.forName("com.google.protobuf.ExtensionSchemaFull").getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-        } catch (Exception e) {
+        } catch (Exception unused) {
             return null;
         }
     }

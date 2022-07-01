@@ -2,21 +2,15 @@ package com.google.android.gms.common.internal;
 
 import android.content.Context;
 import android.util.SparseIntArray;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GoogleApiAvailabilityLight;
 import com.google.android.gms.common.api.Api;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaj {
-    private final SparseIntArray zaa;
+    private final SparseIntArray zaa = new SparseIntArray();
     private GoogleApiAvailabilityLight zab;
 
-    public zaj() {
-        this(GoogleApiAvailability.getInstance());
-    }
-
     public zaj(GoogleApiAvailabilityLight googleApiAvailabilityLight) {
-        this.zaa = new SparseIntArray();
         Preconditions.checkNotNull(googleApiAvailabilityLight);
         this.zab = googleApiAvailabilityLight;
     }

@@ -1,8 +1,9 @@
 package com.google.android.gms.common.wrappers;
 
 import android.content.Context;
+import androidx.annotation.RecentlyNonNull;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Wrappers {
     private static Wrappers zzb = new Wrappers();
     private PackageManagerWrapper zza = null;
@@ -17,7 +18,8 @@ public class Wrappers {
         return this.zza;
     }
 
-    public static PackageManagerWrapper packageManager(Context context) {
+    @RecentlyNonNull
+    public static PackageManagerWrapper packageManager(@RecentlyNonNull Context context) {
         return zzb.zza(context);
     }
 }

@@ -5,9 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
 /* renamed from: com.google.android.gms.internal.auth-api.zbc */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zbc {
-    private static final ClassLoader zba = zbc.class.getClassLoader();
+    static {
+        zbc.class.getClassLoader();
+    }
 
     private zbc() {
     }

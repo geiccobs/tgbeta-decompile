@@ -2,7 +2,7 @@ package com.microsoft.appcenter.http;
 
 import com.microsoft.appcenter.http.HttpClient;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 abstract class HttpClientCallDecorator implements Runnable, ServiceCall, ServiceCallback {
     private final HttpClient.CallTemplate mCallTemplate;
     private final HttpClient mDecoratedApi;
@@ -12,11 +12,11 @@ abstract class HttpClientCallDecorator implements Runnable, ServiceCall, Service
     final ServiceCallback mServiceCallback;
     private final String mUrl;
 
-    public HttpClientCallDecorator(HttpClient decoratedApi, String url, String method, Map<String, String> headers, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
-        this.mDecoratedApi = decoratedApi;
-        this.mUrl = url;
-        this.mMethod = method;
-        this.mHeaders = headers;
+    public HttpClientCallDecorator(HttpClient httpClient, String str, String str2, Map<String, String> map, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
+        this.mDecoratedApi = httpClient;
+        this.mUrl = str;
+        this.mMethod = str2;
+        this.mHeaders = map;
         this.mCallTemplate = callTemplate;
         this.mServiceCallback = serviceCallback;
     }
@@ -37,7 +37,7 @@ abstract class HttpClientCallDecorator implements Runnable, ServiceCall, Service
     }
 
     @Override // com.microsoft.appcenter.http.ServiceCallback
-    public void onCallFailed(Exception e) {
-        this.mServiceCallback.onCallFailed(e);
+    public void onCallFailed(Exception exc) {
+        this.mServiceCallback.onCallFailed(exc);
     }
 }

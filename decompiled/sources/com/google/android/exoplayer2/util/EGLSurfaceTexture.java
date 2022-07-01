@@ -1,5 +1,6 @@
 package com.google.android.exoplayer2.util;
 
+import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
@@ -8,18 +9,10 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES20;
 import android.os.Handler;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-/* loaded from: classes3.dex */
+@TargetApi(17)
+/* loaded from: classes.dex */
 public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableListener, Runnable {
     private static final int[] EGL_CONFIG_ATTRIBUTES = {12352, 4, 12324, 8, 12323, 8, 12322, 8, 12321, 8, 12325, 0, 12327, 12344, 12339, 4, 12344};
-    private static final int EGL_PROTECTED_CONTENT_EXT = 12992;
-    private static final int EGL_SURFACE_HEIGHT = 1;
-    private static final int EGL_SURFACE_WIDTH = 1;
-    public static final int SECURE_MODE_NONE = 0;
-    public static final int SECURE_MODE_PROTECTED_PBUFFER = 2;
-    public static final int SECURE_MODE_SURFACELESS_CONTEXT = 1;
     private final TextureImageListener callback;
     private EGLContext context;
     private EGLDisplay display;
@@ -28,21 +21,15 @@ public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableL
     private SurfaceTexture texture;
     private final int[] textureIdHolder;
 
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
     /* loaded from: classes.dex */
-    public @interface SecureMode {
-    }
-
-    /* loaded from: classes3.dex */
     public interface TextureImageListener {
         void onFrameAvailable();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class GlException extends RuntimeException {
-        private GlException(String msg) {
-            super(msg);
+        private GlException(String str) {
+            super(str);
         }
     }
 
@@ -50,19 +37,19 @@ public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableL
         this(handler, null);
     }
 
-    public EGLSurfaceTexture(Handler handler, TextureImageListener callback) {
+    public EGLSurfaceTexture(Handler handler, TextureImageListener textureImageListener) {
         this.handler = handler;
-        this.callback = callback;
+        this.callback = textureImageListener;
         this.textureIdHolder = new int[1];
     }
 
-    public void init(int secureMode) {
+    public void init(int i) {
         EGLDisplay defaultDisplay = getDefaultDisplay();
         this.display = defaultDisplay;
-        EGLConfig config = chooseEGLConfig(defaultDisplay);
-        EGLContext createEGLContext = createEGLContext(this.display, config, secureMode);
+        EGLConfig chooseEGLConfig = chooseEGLConfig(defaultDisplay);
+        EGLContext createEGLContext = createEGLContext(this.display, chooseEGLConfig, i);
         this.context = createEGLContext;
-        this.surface = createEGLSurface(this.display, config, createEGLContext, secureMode);
+        this.surface = createEGLSurface(this.display, chooseEGLConfig, createEGLContext, i);
         generateTextureIds(this.textureIdHolder);
         SurfaceTexture surfaceTexture = new SurfaceTexture(this.textureIdHolder[0]);
         this.texture = surfaceTexture;
@@ -81,10 +68,12 @@ public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableL
         } finally {
             EGLDisplay eGLDisplay = this.display;
             if (eGLDisplay != null && !eGLDisplay.equals(EGL14.EGL_NO_DISPLAY)) {
-                EGL14.eglMakeCurrent(this.display, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+                EGLDisplay eGLDisplay2 = this.display;
+                EGLSurface eGLSurface = EGL14.EGL_NO_SURFACE;
+                EGL14.eglMakeCurrent(eGLDisplay2, eGLSurface, eGLSurface, EGL14.EGL_NO_CONTEXT);
             }
-            EGLSurface eGLSurface = this.surface;
-            if (eGLSurface != null && !eGLSurface.equals(EGL14.EGL_NO_SURFACE)) {
+            EGLSurface eGLSurface2 = this.surface;
+            if (eGLSurface2 != null && !eGLSurface2.equals(EGL14.EGL_NO_SURFACE)) {
                 EGL14.eglDestroySurface(this.display, this.surface);
             }
             EGLContext eGLContext = this.context;
@@ -94,8 +83,8 @@ public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableL
             if (Util.SDK_INT >= 19) {
                 EGL14.eglReleaseThread();
             }
-            EGLDisplay eGLDisplay2 = this.display;
-            if (eGLDisplay2 != null && !eGLDisplay2.equals(EGL14.EGL_NO_DISPLAY)) {
+            EGLDisplay eGLDisplay3 = this.display;
+            if (eGLDisplay3 != null && !eGLDisplay3.equals(EGL14.EGL_NO_DISPLAY)) {
                 EGL14.eglTerminate(this.display);
             }
             this.display = null;
@@ -121,7 +110,7 @@ public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableL
         if (surfaceTexture != null) {
             try {
                 surfaceTexture.updateTexImage();
-            } catch (RuntimeException e) {
+            } catch (RuntimeException unused) {
             }
         }
     }
@@ -134,68 +123,53 @@ public final class EGLSurfaceTexture implements SurfaceTexture.OnFrameAvailableL
     }
 
     private static EGLDisplay getDefaultDisplay() {
-        EGLDisplay display = EGL14.eglGetDisplay(0);
-        if (display == null) {
+        EGLDisplay eglGetDisplay = EGL14.eglGetDisplay(0);
+        if (eglGetDisplay == null) {
             throw new GlException("eglGetDisplay failed");
         }
-        int[] version = new int[2];
-        boolean eglInitialized = EGL14.eglInitialize(display, version, 0, version, 1);
-        if (!eglInitialized) {
+        int[] iArr = new int[2];
+        if (!EGL14.eglInitialize(eglGetDisplay, iArr, 0, iArr, 1)) {
             throw new GlException("eglInitialize failed");
         }
-        return display;
+        return eglGetDisplay;
     }
 
-    private static EGLConfig chooseEGLConfig(EGLDisplay display) {
-        EGLConfig[] configs = new EGLConfig[1];
-        int[] numConfigs = new int[1];
-        boolean success = EGL14.eglChooseConfig(display, EGL_CONFIG_ATTRIBUTES, 0, configs, 0, 1, numConfigs, 0);
-        if (!success || numConfigs[0] <= 0 || configs[0] == null) {
-            throw new GlException(Util.formatInvariant("eglChooseConfig failed: success=%b, numConfigs[0]=%d, configs[0]=%s", Boolean.valueOf(success), Integer.valueOf(numConfigs[0]), configs[0]));
+    private static EGLConfig chooseEGLConfig(EGLDisplay eGLDisplay) {
+        EGLConfig[] eGLConfigArr = new EGLConfig[1];
+        int[] iArr = new int[1];
+        boolean eglChooseConfig = EGL14.eglChooseConfig(eGLDisplay, EGL_CONFIG_ATTRIBUTES, 0, eGLConfigArr, 0, 1, iArr, 0);
+        if (!eglChooseConfig || iArr[0] <= 0 || eGLConfigArr[0] == null) {
+            throw new GlException(Util.formatInvariant("eglChooseConfig failed: success=%b, numConfigs[0]=%d, configs[0]=%s", Boolean.valueOf(eglChooseConfig), Integer.valueOf(iArr[0]), eGLConfigArr[0]));
         }
-        return configs[0];
+        return eGLConfigArr[0];
     }
 
-    private static EGLContext createEGLContext(EGLDisplay display, EGLConfig config, int secureMode) {
-        int[] glAttributes;
-        if (secureMode == 0) {
-            glAttributes = new int[]{12440, 2, 12344};
+    private static EGLContext createEGLContext(EGLDisplay eGLDisplay, EGLConfig eGLConfig, int i) {
+        EGLContext eglCreateContext = EGL14.eglCreateContext(eGLDisplay, eGLConfig, EGL14.EGL_NO_CONTEXT, i == 0 ? new int[]{12440, 2, 12344} : new int[]{12440, 2, 12992, 1, 12344}, 0);
+        if (eglCreateContext != null) {
+            return eglCreateContext;
+        }
+        throw new GlException("eglCreateContext failed");
+    }
+
+    private static EGLSurface createEGLSurface(EGLDisplay eGLDisplay, EGLConfig eGLConfig, EGLContext eGLContext, int i) {
+        EGLSurface eGLSurface;
+        if (i == 1) {
+            eGLSurface = EGL14.EGL_NO_SURFACE;
         } else {
-            glAttributes = new int[]{12440, 2, EGL_PROTECTED_CONTENT_EXT, 1, 12344};
-        }
-        EGLContext context = EGL14.eglCreateContext(display, config, EGL14.EGL_NO_CONTEXT, glAttributes, 0);
-        if (context == null) {
-            throw new GlException("eglCreateContext failed");
-        }
-        return context;
-    }
-
-    private static EGLSurface createEGLSurface(EGLDisplay display, EGLConfig config, EGLContext context, int secureMode) {
-        EGLSurface surface;
-        int[] pbufferAttributes;
-        if (secureMode == 1) {
-            surface = EGL14.EGL_NO_SURFACE;
-        } else {
-            if (secureMode == 2) {
-                pbufferAttributes = new int[]{12375, 1, 12374, 1, EGL_PROTECTED_CONTENT_EXT, 1, 12344};
-            } else {
-                pbufferAttributes = new int[]{12375, 1, 12374, 1, 12344};
-            }
-            EGLSurface surface2 = EGL14.eglCreatePbufferSurface(display, config, pbufferAttributes, 0);
-            if (surface2 == null) {
+            eGLSurface = EGL14.eglCreatePbufferSurface(eGLDisplay, eGLConfig, i == 2 ? new int[]{12375, 1, 12374, 1, 12992, 1, 12344} : new int[]{12375, 1, 12374, 1, 12344}, 0);
+            if (eGLSurface == null) {
                 throw new GlException("eglCreatePbufferSurface failed");
             }
-            surface = surface2;
         }
-        boolean eglMadeCurrent = EGL14.eglMakeCurrent(display, surface, surface, context);
-        if (!eglMadeCurrent) {
-            throw new GlException("eglMakeCurrent failed");
+        if (EGL14.eglMakeCurrent(eGLDisplay, eGLSurface, eGLSurface, eGLContext)) {
+            return eGLSurface;
         }
-        return surface;
+        throw new GlException("eglMakeCurrent failed");
     }
 
-    private static void generateTextureIds(int[] textureIdHolder) {
-        GLES20.glGenTextures(1, textureIdHolder, 0);
+    private static void generateTextureIds(int[] iArr) {
+        GLES20.glGenTextures(1, iArr, 0);
         GlUtil.checkGlError();
     }
 }

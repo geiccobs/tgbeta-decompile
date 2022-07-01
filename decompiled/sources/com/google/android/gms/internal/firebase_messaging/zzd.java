@@ -5,7 +5,7 @@ import com.google.firebase.encoders.config.EncoderConfig;
 import com.google.firebase.messaging.reporting.MessagingClientEvent;
 import com.google.firebase.messaging.reporting.MessagingClientEventExtension;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzd implements Configurator {
     public static final Configurator zza = new zzd();
 

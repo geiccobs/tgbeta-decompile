@@ -17,9 +17,6 @@ import android.widget.TextView;
 import androidx.core.util.Consumer;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,12 +29,15 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Chat;
+import org.telegram.tgnet.TLRPC$Dialog;
+import org.telegram.tgnet.TLRPC$RecentMeUrl;
+import org.telegram.tgnet.TLRPC$TL_contact;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DialogsAdapter;
@@ -58,23 +58,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.PullForegroundDrawable;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.DialogsActivity;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
-    public static final int VIEW_TYPE_ARCHIVE = 9;
-    public static final int VIEW_TYPE_CONTACTS_FLICKER = 13;
-    public static final int VIEW_TYPE_DIALOG = 0;
-    public static final int VIEW_TYPE_DIVIDER = 3;
-    public static final int VIEW_TYPE_EMPTY = 5;
-    public static final int VIEW_TYPE_FLICKER = 1;
-    public static final int VIEW_TYPE_HEADER = 7;
-    public static final int VIEW_TYPE_HEADER_2 = 14;
-    public static final int VIEW_TYPE_LAST_EMPTY = 10;
-    public static final int VIEW_TYPE_ME_URL = 4;
-    public static final int VIEW_TYPE_NEW_CHAT_HINT = 11;
-    public static final int VIEW_TYPE_RECENTLY_VIEWED = 2;
-    public static final int VIEW_TYPE_SHADOW = 8;
-    public static final int VIEW_TYPE_TEXT = 12;
-    public static final int VIEW_TYPE_USER = 6;
     private ArchiveHintCell archiveHintCell;
     private Drawable arrowDrawable;
     private int currentAccount;
@@ -91,7 +76,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
     public int lastDialogsEmptyType = -1;
     private long lastSortTime;
     private Context mContext;
-    private ArrayList<TLRPC.TL_contact> onlineContacts;
+    private ArrayList<TLRPC$TL_contact> onlineContacts;
     private long openedDialogId;
     private DialogsActivity parentFragment;
     private DialogsPreloader preloader;
@@ -101,57 +86,48 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
     private ArrayList<Long> selectedDialogs;
     private boolean showArchiveHint;
 
-    public DialogsAdapter(DialogsActivity fragment, Context context, int type, int folder, boolean onlySelect, ArrayList<Long> selected, int account) {
+    public DialogsAdapter(DialogsActivity dialogsActivity, Context context, int i, int i2, boolean z, ArrayList<Long> arrayList, int i3) {
         this.mContext = context;
-        this.parentFragment = fragment;
-        this.dialogsType = type;
-        this.folderId = folder;
-        this.isOnlySelect = onlySelect;
-        this.hasHints = folder == 0 && type == 0 && !onlySelect;
-        this.selectedDialogs = selected;
-        this.currentAccount = account;
-        if (folder == 1) {
-            SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-            this.showArchiveHint = preferences.getBoolean("archivehint", true);
-            preferences.edit().putBoolean("archivehint", false).commit();
+        this.parentFragment = dialogsActivity;
+        this.dialogsType = i;
+        this.folderId = i2;
+        this.isOnlySelect = z;
+        this.hasHints = i2 == 0 && i == 0 && !z;
+        this.selectedDialogs = arrayList;
+        this.currentAccount = i3;
+        if (i2 == 1) {
+            SharedPreferences globalMainSettings = MessagesController.getGlobalMainSettings();
+            this.showArchiveHint = globalMainSettings.getBoolean("archivehint", true);
+            globalMainSettings.edit().putBoolean("archivehint", false).commit();
         }
-        if (folder == 0) {
+        if (i2 == 0) {
             this.preloader = new DialogsPreloader();
         }
     }
 
-    public void setOpenedDialogId(long id) {
-        this.openedDialogId = id;
+    public void setOpenedDialogId(long j) {
+        this.openedDialogId = j;
     }
 
-    public void onReorderStateChanged(boolean reordering) {
-        this.isReordering = reordering;
+    public void onReorderStateChanged(boolean z) {
+        this.isReordering = z;
     }
 
-    public int fixPosition(int position) {
+    public int fixPosition(int i) {
+        int i2;
         if (this.hasHints) {
-            position -= MessagesController.getInstance(this.currentAccount).hintDialogs.size() + 2;
+            i -= MessagesController.getInstance(this.currentAccount).hintDialogs.size() + 2;
         }
-        if (this.showArchiveHint) {
-            return position - 2;
-        }
-        int i = this.dialogsType;
-        if (i == 11 || i == 13) {
-            return position - 2;
-        }
-        if (i == 12) {
-            return position - 1;
-        }
-        return position;
+        return (this.showArchiveHint || (i2 = this.dialogsType) == 11 || i2 == 13) ? i - 2 : i2 == 12 ? i - 1 : i;
     }
 
     public boolean isDataSetChanged() {
-        int current = this.currentCount;
-        return current != getItemCount() || current == 1;
+        int i = this.currentCount;
+        return i != getItemCount() || i == 1;
     }
 
-    public void setDialogsType(int type) {
-        this.dialogsType = type;
+    public void setDialogsType(int i) {
+        this.dialogsType = i;
         notifyDataSetChanged();
     }
 
@@ -170,10 +146,10 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
         int i3;
         int i4;
         MessagesController messagesController = MessagesController.getInstance(this.currentAccount);
-        ArrayList<TLRPC.Dialog> array = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, this.folderId, this.dialogsListFrozen);
-        int size = array.size();
+        int size = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, this.folderId, this.dialogsListFrozen).size();
         this.dialogsCount = size;
-        boolean z = true;
+        boolean z = false;
+        boolean z2 = true;
         if (!this.forceUpdatingContacts && !this.forceShowEmptyCell && (i3 = this.dialogsType) != 7 && i3 != 8 && i3 != 11 && size == 0 && ((i4 = this.folderId) != 0 || messagesController.isLoadingDialogs(i4) || !MessagesController.getInstance(this.currentAccount).isDialogsEndReached(this.folderId))) {
             this.onlineContacts = null;
             if (BuildVars.LOGS_ENABLED) {
@@ -189,18 +165,13 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
             this.currentCount = 0;
             return 0;
         } else {
-            int count = this.dialogsCount;
-            int i5 = this.dialogsType;
-            if (i5 == 7 || i5 == 8) {
-                if (this.dialogsCount == 0) {
-                    count++;
-                }
-            } else if (!messagesController.isDialogsEndReached(this.folderId) || this.dialogsCount == 0) {
-                count++;
+            int i5 = this.dialogsCount;
+            int i6 = this.dialogsType;
+            if (i6 == 7 || i6 == 8 ? i5 == 0 : !(messagesController.isDialogsEndReached(this.folderId) && this.dialogsCount != 0)) {
+                i5++;
             }
-            boolean hasContacts = false;
             if (this.hasHints) {
-                count += messagesController.hintDialogs.size() + 2;
+                i5 += messagesController.hintDialogs.size() + 2;
             } else if (this.dialogsType == 0 && (i2 = this.folderId) == 0 && messagesController.isDialogsEndReached(i2)) {
                 if (ContactsController.getInstance(this.currentAccount).contacts.isEmpty() && !ContactsController.getInstance(this.currentAccount).doneLoadingContacts && !this.forceUpdatingContacts) {
                     this.onlineContacts = null;
@@ -208,9 +179,9 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                         StringBuilder sb = new StringBuilder();
                         sb.append("DialogsAdapter loadingContacts=");
                         if (!ContactsController.getInstance(this.currentAccount).contacts.isEmpty() || ContactsController.getInstance(this.currentAccount).doneLoadingContacts) {
-                            z = false;
+                            z2 = false;
                         }
-                        sb.append(z);
+                        sb.append(z2);
                         sb.append("dialogsCount=");
                         sb.append(this.dialogsCount);
                         sb.append(" dialogsType=");
@@ -221,21 +192,21 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                     return 0;
                 } else if (messagesController.getAllFoldersDialogsCount() <= 10 && ContactsController.getInstance(this.currentAccount).doneLoadingContacts && !ContactsController.getInstance(this.currentAccount).contacts.isEmpty()) {
                     if (this.onlineContacts == null || this.prevDialogsCount != this.dialogsCount || this.prevContactsCount != ContactsController.getInstance(this.currentAccount).contacts.size()) {
-                        ArrayList<TLRPC.TL_contact> arrayList = new ArrayList<>(ContactsController.getInstance(this.currentAccount).contacts);
+                        ArrayList<TLRPC$TL_contact> arrayList = new ArrayList<>(ContactsController.getInstance(this.currentAccount).contacts);
                         this.onlineContacts = arrayList;
                         this.prevContactsCount = arrayList.size();
                         this.prevDialogsCount = messagesController.dialogs_dict.size();
-                        long selfId = UserConfig.getInstance(this.currentAccount).clientUserId;
-                        int a = 0;
-                        int N = this.onlineContacts.size();
-                        while (a < N) {
-                            long userId = this.onlineContacts.get(a).user_id;
-                            if (userId == selfId || messagesController.dialogs_dict.get(userId) != null) {
-                                this.onlineContacts.remove(a);
-                                a--;
-                                N--;
+                        long j = UserConfig.getInstance(this.currentAccount).clientUserId;
+                        int size2 = this.onlineContacts.size();
+                        int i7 = 0;
+                        while (i7 < size2) {
+                            long j2 = this.onlineContacts.get(i7).user_id;
+                            if (j2 == j || messagesController.dialogs_dict.get(j2) != null) {
+                                this.onlineContacts.remove(i7);
+                                i7--;
+                                size2--;
                             }
-                            a++;
+                            i7++;
                         }
                         if (this.onlineContacts.isEmpty()) {
                             this.onlineContacts = null;
@@ -252,82 +223,73 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                             });
                         }
                     }
-                    ArrayList<TLRPC.TL_contact> arrayList2 = this.onlineContacts;
+                    ArrayList<TLRPC$TL_contact> arrayList2 = this.onlineContacts;
                     if (arrayList2 != null) {
-                        count += arrayList2.size() + 2;
-                        hasContacts = true;
+                        i5 += arrayList2.size() + 2;
+                        z = true;
                     }
                 }
             }
-            int i6 = this.folderId;
-            if (i6 == 0 && !hasContacts && this.dialogsCount == 0 && this.forceUpdatingContacts) {
-                count += 3;
+            int i8 = this.folderId;
+            if (i8 == 0 && !z && this.dialogsCount == 0 && this.forceUpdatingContacts) {
+                i5 += 3;
             }
-            if (i6 == 0 && this.onlineContacts != null && !hasContacts) {
+            if (i8 == 0 && this.onlineContacts != null && !z) {
                 this.onlineContacts = null;
             }
-            if (i6 == 1 && this.showArchiveHint) {
-                count += 2;
+            if (i8 == 1 && this.showArchiveHint) {
+                i5 += 2;
             }
-            if (i6 == 0 && (i = this.dialogsCount) != 0) {
-                count++;
+            if (i8 == 0 && (i = this.dialogsCount) != 0) {
+                i5++;
                 if (i > 10 && this.dialogsType == 0) {
-                    count++;
+                    i5++;
                 }
             }
-            int i7 = this.dialogsType;
-            if (i7 == 11 || i7 == 13) {
-                count += 2;
-            } else if (i7 == 12) {
-                count++;
+            int i9 = this.dialogsType;
+            if (i9 == 11 || i9 == 13) {
+                i5 += 2;
+            } else if (i9 == 12) {
+                i5++;
             }
-            this.currentCount = count;
-            return count;
+            this.currentCount = i5;
+            return i5;
         }
     }
 
     public TLObject getItem(int i) {
         int i2;
         int i3;
-        ArrayList<TLRPC.TL_contact> arrayList = this.onlineContacts;
-        if (arrayList != null && ((i2 = this.dialogsCount) == 0 || i >= i2)) {
-            if (i2 == 0) {
-                i3 = i - 3;
-            } else {
-                i3 = i - (i2 + 2);
-            }
-            if (i3 >= 0 && i3 < arrayList.size()) {
-                return MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.onlineContacts.get(i3).user_id));
+        ArrayList<TLRPC$TL_contact> arrayList = this.onlineContacts;
+        if (arrayList != null && ((i3 = this.dialogsCount) == 0 || i >= i3)) {
+            int i4 = i3 == 0 ? i - 3 : i - (i3 + 2);
+            if (i4 >= 0 && i4 < arrayList.size()) {
+                return MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.onlineContacts.get(i4).user_id));
             }
             return null;
         }
-        if (this.showArchiveHint) {
+        if (this.showArchiveHint || (i2 = this.dialogsType) == 11 || i2 == 13) {
             i -= 2;
-        } else {
-            int i4 = this.dialogsType;
-            if (i4 == 11 || i4 == 13) {
-                i -= 2;
-            } else if (i4 == 12) {
-                i--;
-            }
+        } else if (i2 == 12) {
+            i--;
         }
-        ArrayList<TLRPC.Dialog> arrayList2 = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, this.folderId, this.dialogsListFrozen);
+        ArrayList<TLRPC$Dialog> dialogsArray = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, this.folderId, this.dialogsListFrozen);
         if (this.hasHints) {
-            int count = MessagesController.getInstance(this.currentAccount).hintDialogs.size();
-            if (i < count + 2) {
+            int size = MessagesController.getInstance(this.currentAccount).hintDialogs.size() + 2;
+            if (i < size) {
                 return MessagesController.getInstance(this.currentAccount).hintDialogs.get(i - 1);
             }
-            i -= count + 2;
+            i -= size;
         }
-        if (i >= 0 && i < arrayList2.size()) {
-            return arrayList2.get(i);
+        if (i >= 0 && i < dialogsArray.size()) {
+            return dialogsArray.get(i);
         }
         return null;
     }
 
-    public void sortOnlineContacts(boolean notify) {
+    public void sortOnlineContacts(boolean z) {
         if (this.onlineContacts != null) {
-            if (notify && SystemClock.elapsedRealtime() - this.lastSortTime < AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS) {
+            if (z && SystemClock.elapsedRealtime() - this.lastSortTime < 2000) {
                 return;
             }
             this.lastSortTime = SystemClock.elapsedRealtime();
@@ -337,56 +299,109 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                 Collections.sort(this.onlineContacts, new Comparator() { // from class: org.telegram.ui.Adapters.DialogsAdapter$$ExternalSyntheticLambda3
                     @Override // java.util.Comparator
                     public final int compare(Object obj, Object obj2) {
-                        return DialogsAdapter.lambda$sortOnlineContacts$0(MessagesController.this, currentTime, (TLRPC.TL_contact) obj, (TLRPC.TL_contact) obj2);
+                        int lambda$sortOnlineContacts$0;
+                        lambda$sortOnlineContacts$0 = DialogsAdapter.lambda$sortOnlineContacts$0(MessagesController.this, currentTime, (TLRPC$TL_contact) obj, (TLRPC$TL_contact) obj2);
+                        return lambda$sortOnlineContacts$0;
                     }
                 });
-                if (notify) {
-                    notifyDataSetChanged();
+                if (!z) {
+                    return;
                 }
+                notifyDataSetChanged();
             } catch (Exception e) {
                 FileLog.e(e);
             }
         }
     }
 
-    public static /* synthetic */ int lambda$sortOnlineContacts$0(MessagesController messagesController, int currentTime, TLRPC.TL_contact o1, TLRPC.TL_contact o2) {
-        TLRPC.User user1 = messagesController.getUser(Long.valueOf(o2.user_id));
-        TLRPC.User user2 = messagesController.getUser(Long.valueOf(o1.user_id));
-        int status1 = 0;
-        int status2 = 0;
-        if (user1 != null) {
-            if (user1.self) {
-                status1 = currentTime + 50000;
-            } else if (user1.status != null) {
-                status1 = user1.status.expires;
-            }
-        }
-        if (user2 != null) {
-            if (user2.self) {
-                status2 = currentTime + 50000;
-            } else if (user2.status != null) {
-                status2 = user2.status.expires;
-            }
-        }
-        if (status1 > 0 && status2 > 0) {
-            if (status1 > status2) {
-                return 1;
-            }
-            return status1 < status2 ? -1 : 0;
-        } else if (status1 < 0 && status2 < 0) {
-            if (status1 > status2) {
-                return 1;
-            }
-            return status1 < status2 ? -1 : 0;
-        } else if ((status1 < 0 && status2 > 0) || (status1 == 0 && status2 != 0)) {
-            return -1;
-        } else {
-            return (status2 < 0 || status1 != 0) ? 1 : 0;
-        }
+    /* JADX WARN: Removed duplicated region for block: B:12:0x002b  */
+    /* JADX WARN: Removed duplicated region for block: B:21:0x003d A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:28:0x0048 A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:35:0x0053 A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:40:0x005c A[ADDED_TO_REGION] */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public static /* synthetic */ int lambda$sortOnlineContacts$0(org.telegram.messenger.MessagesController r2, int r3, org.telegram.tgnet.TLRPC$TL_contact r4, org.telegram.tgnet.TLRPC$TL_contact r5) {
+        /*
+            long r0 = r5.user_id
+            java.lang.Long r5 = java.lang.Long.valueOf(r0)
+            org.telegram.tgnet.TLRPC$User r5 = r2.getUser(r5)
+            long r0 = r4.user_id
+            java.lang.Long r4 = java.lang.Long.valueOf(r0)
+            org.telegram.tgnet.TLRPC$User r2 = r2.getUser(r4)
+            r4 = 50000(0xc350, float:7.0065E-41)
+            r0 = 0
+            if (r5 == 0) goto L28
+            boolean r1 = r5.self
+            if (r1 == 0) goto L21
+            int r5 = r3 + r4
+            goto L29
+        L21:
+            org.telegram.tgnet.TLRPC$UserStatus r5 = r5.status
+            if (r5 == 0) goto L28
+            int r5 = r5.expires
+            goto L29
+        L28:
+            r5 = 0
+        L29:
+            if (r2 == 0) goto L38
+            boolean r1 = r2.self
+            if (r1 == 0) goto L31
+            int r3 = r3 + r4
+            goto L39
+        L31:
+            org.telegram.tgnet.TLRPC$UserStatus r2 = r2.status
+            if (r2 == 0) goto L38
+            int r3 = r2.expires
+            goto L39
+        L38:
+            r3 = 0
+        L39:
+            r2 = -1
+            r4 = 1
+            if (r5 <= 0) goto L46
+            if (r3 <= 0) goto L46
+            if (r5 <= r3) goto L42
+            return r4
+        L42:
+            if (r5 >= r3) goto L45
+            return r2
+        L45:
+            return r0
+        L46:
+            if (r5 >= 0) goto L51
+            if (r3 >= 0) goto L51
+            if (r5 <= r3) goto L4d
+            return r4
+        L4d:
+            if (r5 >= r3) goto L50
+            return r2
+        L50:
+            return r0
+        L51:
+            if (r5 >= 0) goto L55
+            if (r3 > 0) goto L59
+        L55:
+            if (r5 != 0) goto L5a
+            if (r3 == 0) goto L5a
+        L59:
+            return r2
+        L5a:
+            if (r3 < 0) goto L60
+            if (r5 == 0) goto L5f
+            goto L60
+        L5f:
+            return r0
+        L60:
+            return r4
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Adapters.DialogsAdapter.lambda$sortOnlineContacts$0(org.telegram.messenger.MessagesController, int, org.telegram.tgnet.TLRPC$TL_contact, org.telegram.tgnet.TLRPC$TL_contact):int");
     }
 
-    public void setDialogsListFrozen(boolean frozen) {
-        this.dialogsListFrozen = frozen;
+    public void setDialogsListFrozen(boolean z) {
+        this.dialogsListFrozen = z;
     }
 
     public ViewPager getArchiveHintCellPager() {
@@ -408,117 +423,137 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
-        if (holder.itemView instanceof DialogCell) {
-            DialogCell dialogCell = (DialogCell) holder.itemView;
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder viewHolder) {
+        View view = viewHolder.itemView;
+        if (view instanceof DialogCell) {
+            DialogCell dialogCell = (DialogCell) view;
             dialogCell.onReorderStateChanged(this.isReordering, false);
-            int position = fixPosition(holder.getAdapterPosition());
-            dialogCell.setDialogIndex(position);
+            dialogCell.setDialogIndex(fixPosition(viewHolder.getAdapterPosition()));
             dialogCell.checkCurrentDialogIndex(this.dialogsListFrozen);
             dialogCell.setChecked(this.selectedDialogs.contains(Long.valueOf(dialogCell.getDialogId())), false);
         }
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-    public boolean isEnabled(RecyclerView.ViewHolder holder) {
-        int viewType = holder.getItemViewType();
-        return (viewType == 1 || viewType == 5 || viewType == 3 || viewType == 8 || viewType == 7 || viewType == 9 || viewType == 10 || viewType == 11 || viewType == 13) ? false : true;
+    public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
+        int itemViewType = viewHolder.getItemViewType();
+        return (itemViewType == 1 || itemViewType == 5 || itemViewType == 3 || itemViewType == 8 || itemViewType == 7 || itemViewType == 9 || itemViewType == 10 || itemViewType == 11 || itemViewType == 13) ? false : true;
     }
 
+    public /* synthetic */ void lambda$onCreateViewHolder$1(View view) {
+        MessagesController.getInstance(this.currentAccount).hintDialogs.clear();
+        MessagesController.getGlobalMainSettings().edit().remove("installReferer").commit();
+        notifyDataSetChanged();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    /* JADX WARN: Type inference failed for: r1v1, types: [android.view.View] */
+    /* JADX WARN: Type inference failed for: r1v10 */
+    /* JADX WARN: Type inference failed for: r1v11, types: [org.telegram.ui.Cells.DialogMeUrlCell] */
+    /* JADX WARN: Type inference failed for: r1v12, types: [org.telegram.ui.Cells.DialogsEmptyCell] */
+    /* JADX WARN: Type inference failed for: r1v13, types: [org.telegram.ui.Cells.UserCell] */
+    /* JADX WARN: Type inference failed for: r1v14, types: [android.view.View, org.telegram.ui.Cells.HeaderCell] */
+    /* JADX WARN: Type inference failed for: r1v15 */
+    /* JADX WARN: Type inference failed for: r1v17, types: [org.telegram.ui.Cells.ArchiveHintCell] */
+    /* JADX WARN: Type inference failed for: r1v18, types: [org.telegram.ui.Adapters.DialogsAdapter$LastEmptyView] */
+    /* JADX WARN: Type inference failed for: r1v20, types: [android.view.View, org.telegram.ui.Cells.HeaderCell] */
+    /* JADX WARN: Type inference failed for: r1v21, types: [org.telegram.ui.Cells.TextCell] */
+    /* JADX WARN: Type inference failed for: r1v3, types: [org.telegram.ui.Cells.DialogCell] */
+    /* JADX WARN: Type inference failed for: r1v4, types: [org.telegram.ui.Cells.ProfileSearchCell] */
+    /* JADX WARN: Type inference failed for: r1v5, types: [org.telegram.ui.Components.FlickerLoadingView] */
+    /* JADX WARN: Type inference failed for: r1v6, types: [android.widget.FrameLayout, org.telegram.ui.Cells.HeaderCell] */
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        ?? r1;
         View view;
-        switch (viewType) {
+        switch (i) {
             case 0:
                 if (this.dialogsType == 2) {
-                    view = new ProfileSearchCell(this.mContext);
+                    r1 = new ProfileSearchCell(this.mContext);
                     break;
                 } else {
-                    DialogCell dialogCell = new DialogCell(this.parentFragment, this.mContext, true, false, this.currentAccount, null);
-                    dialogCell.setArchivedPullAnimation(this.pullForegroundDrawable);
-                    dialogCell.setPreloader(this.preloader);
-                    view = dialogCell;
+                    r1 = new DialogCell(this.parentFragment, this.mContext, true, false, this.currentAccount, null);
+                    r1.setArchivedPullAnimation(this.pullForegroundDrawable);
+                    r1.setPreloader(this.preloader);
                     break;
                 }
             case 1:
             case 13:
-                FlickerLoadingView flickerLoadingView = new FlickerLoadingView(this.mContext);
-                flickerLoadingView.setIsSingleCell(true);
-                int flickerType = viewType == 13 ? 18 : 7;
-                flickerLoadingView.setViewType(flickerType);
-                if (flickerType == 18) {
-                    flickerLoadingView.setIgnoreHeightCheck(true);
+                r1 = new FlickerLoadingView(this.mContext);
+                r1.setIsSingleCell(true);
+                int i2 = i == 13 ? 18 : 7;
+                r1.setViewType(i2);
+                if (i2 == 18) {
+                    r1.setIgnoreHeightCheck(true);
                 }
-                if (viewType == 13) {
-                    flickerLoadingView.setItemsCount((int) ((AndroidUtilities.displaySize.y * 0.5f) / AndroidUtilities.dp(64.0f)));
+                if (i == 13) {
+                    r1.setItemsCount((int) ((AndroidUtilities.displaySize.y * 0.5f) / AndroidUtilities.dp(64.0f)));
+                    break;
                 }
-                view = flickerLoadingView;
                 break;
             case 2:
-                HeaderCell headerCell = new HeaderCell(this.mContext);
-                headerCell.setText(LocaleController.getString("RecentlyViewed", R.string.RecentlyViewed));
+                r1 = new HeaderCell(this.mContext);
+                r1.setText(LocaleController.getString("RecentlyViewed", R.string.RecentlyViewed));
                 TextView textView = new TextView(this.mContext);
                 textView.setTextSize(1, 15.0f);
                 textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-                textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader));
+                textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlueHeader"));
                 textView.setText(LocaleController.getString("RecentlyViewedHide", R.string.RecentlyViewedHide));
-                int i = 3;
+                int i3 = 3;
                 textView.setGravity((LocaleController.isRTL ? 3 : 5) | 16);
                 if (!LocaleController.isRTL) {
-                    i = 5;
+                    i3 = 5;
                 }
-                headerCell.addView(textView, LayoutHelper.createFrame(-1, -1.0f, i | 48, 17.0f, 15.0f, 17.0f, 0.0f));
+                r1.addView(textView, LayoutHelper.createFrame(-1, -1.0f, i3 | 48, 17.0f, 15.0f, 17.0f, 0.0f));
                 textView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Adapters.DialogsAdapter$$ExternalSyntheticLambda0
                     @Override // android.view.View.OnClickListener
                     public final void onClick(View view2) {
-                        DialogsAdapter.this.m1452x3c8bd2a9(view2);
+                        DialogsAdapter.this.lambda$onCreateViewHolder$1(view2);
                     }
                 });
-                view = headerCell;
                 break;
             case 3:
-                FrameLayout frameLayout = new FrameLayout(this.mContext) { // from class: org.telegram.ui.Adapters.DialogsAdapter.2
+                FrameLayout frameLayout = new FrameLayout(this, this.mContext) { // from class: org.telegram.ui.Adapters.DialogsAdapter.2
                     @Override // android.widget.FrameLayout, android.view.View
-                    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(12.0f), C.BUFFER_FLAG_ENCRYPTED));
+                    protected void onMeasure(int i4, int i5) {
+                        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i4), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(12.0f), 1073741824));
                     }
                 };
-                frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
-                View v = new View(this.mContext);
-                v.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-                frameLayout.addView(v, LayoutHelper.createFrame(-1, -1.0f));
-                view = frameLayout;
+                frameLayout.setBackgroundColor(Theme.getColor("windowBackgroundGray"));
+                View view2 = new View(this.mContext);
+                view2.setBackgroundDrawable(Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, "windowBackgroundGrayShadow"));
+                frameLayout.addView(view2, LayoutHelper.createFrame(-1, -1.0f));
+                r1 = frameLayout;
                 break;
             case 4:
-                view = new DialogMeUrlCell(this.mContext);
+                r1 = new DialogMeUrlCell(this.mContext);
                 break;
             case 5:
-                view = new DialogsEmptyCell(this.mContext);
+                r1 = new DialogsEmptyCell(this.mContext);
                 break;
             case 6:
-                view = new UserCell(this.mContext, 8, 0, false);
+                r1 = new UserCell(this.mContext, 8, 0, false);
                 break;
             case 7:
-                view = new HeaderCell(this.mContext);
-                view.setPadding(0, 0, 0, AndroidUtilities.dp(12.0f));
+                r1 = new HeaderCell(this.mContext);
+                r1.setPadding(0, 0, 0, AndroidUtilities.dp(12.0f));
                 break;
             case 8:
-                View view2 = new ShadowSectionCell(this.mContext);
-                Drawable drawable = Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow);
-                CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), drawable);
+                view = new ShadowSectionCell(this.mContext);
+                CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor("windowBackgroundGray")), Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, "windowBackgroundGrayShadow"));
                 combinedDrawable.setFullsize(true);
-                view2.setBackgroundDrawable(combinedDrawable);
-                view = view2;
+                view.setBackgroundDrawable(combinedDrawable);
+                r1 = view;
                 break;
             case 9:
-                this.archiveHintCell = new ArchiveHintCell(this.mContext);
-                view = this.archiveHintCell;
+                r1 = new ArchiveHintCell(this.mContext);
+                this.archiveHintCell = r1;
                 break;
             case 10:
-                view = new LastEmptyView(this.mContext);
+                r1 = new LastEmptyView(this.mContext);
                 break;
             case 11:
-                View view3 = new TextInfoPrivacyCell(this.mContext) { // from class: org.telegram.ui.Adapters.DialogsAdapter.3
+                view = new TextInfoPrivacyCell(this.mContext) { // from class: org.telegram.ui.Adapters.DialogsAdapter.3
                     private long lastUpdateTime;
                     private float moveProgress;
                     private int movement;
@@ -529,9 +564,9 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                     protected void afterTextDraw() {
                         if (DialogsAdapter.this.arrowDrawable != null) {
                             Rect bounds = DialogsAdapter.this.arrowDrawable.getBounds();
-                            Drawable drawable2 = DialogsAdapter.this.arrowDrawable;
-                            int i2 = this.originalX;
-                            drawable2.setBounds(i2, this.originalY, bounds.width() + i2, this.originalY + bounds.height());
+                            Drawable drawable = DialogsAdapter.this.arrowDrawable;
+                            int i4 = this.originalX;
+                            drawable.setBounds(i4, this.originalY, bounds.width() + i4, this.originalY + bounds.height());
                         }
                     }
 
@@ -539,25 +574,25 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                     protected void onTextDraw() {
                         if (DialogsAdapter.this.arrowDrawable != null) {
                             Rect bounds = DialogsAdapter.this.arrowDrawable.getBounds();
-                            int dx = (int) (this.moveProgress * AndroidUtilities.dp(3.0f));
+                            int dp = (int) (this.moveProgress * AndroidUtilities.dp(3.0f));
                             this.originalX = bounds.left;
                             this.originalY = bounds.top;
-                            DialogsAdapter.this.arrowDrawable.setBounds(this.originalX + dx, this.originalY + AndroidUtilities.dp(1.0f), this.originalX + dx + bounds.width(), this.originalY + AndroidUtilities.dp(1.0f) + bounds.height());
-                            long newUpdateTime = SystemClock.elapsedRealtime();
-                            long dt = newUpdateTime - this.lastUpdateTime;
-                            if (dt > 17) {
-                                dt = 17;
+                            DialogsAdapter.this.arrowDrawable.setBounds(this.originalX + dp, this.originalY + AndroidUtilities.dp(1.0f), this.originalX + dp + bounds.width(), this.originalY + AndroidUtilities.dp(1.0f) + bounds.height());
+                            long elapsedRealtime = SystemClock.elapsedRealtime();
+                            long j = elapsedRealtime - this.lastUpdateTime;
+                            if (j > 17) {
+                                j = 17;
                             }
-                            this.lastUpdateTime = newUpdateTime;
+                            this.lastUpdateTime = elapsedRealtime;
                             if (this.movement == 0) {
-                                float f = this.moveProgress + (((float) dt) / 664.0f);
+                                float f = this.moveProgress + (((float) j) / 664.0f);
                                 this.moveProgress = f;
                                 if (f >= 1.0f) {
                                     this.movement = 1;
                                     this.moveProgress = 1.0f;
                                 }
                             } else {
-                                float f2 = this.moveProgress - (((float) dt) / 664.0f);
+                                float f2 = this.moveProgress - (((float) j) / 664.0f);
                                 this.moveProgress = f2;
                                 if (f2 <= 0.0f) {
                                     this.movement = 0;
@@ -568,378 +603,323 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                         }
                     }
                 };
-                Drawable drawable2 = Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow);
-                CombinedDrawable combinedDrawable2 = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), drawable2);
+                CombinedDrawable combinedDrawable2 = new CombinedDrawable(new ColorDrawable(Theme.getColor("windowBackgroundGray")), Theme.getThemedDrawable(this.mContext, (int) R.drawable.greydivider, "windowBackgroundGrayShadow"));
                 combinedDrawable2.setFullsize(true);
-                view3.setBackgroundDrawable(combinedDrawable2);
-                view = view3;
+                view.setBackgroundDrawable(combinedDrawable2);
+                r1 = view;
                 break;
             case 12:
             default:
-                view = new TextCell(this.mContext);
+                r1 = new TextCell(this.mContext);
                 break;
             case 14:
-                HeaderCell cell = new HeaderCell(this.mContext, Theme.key_graySectionText, 16, 0, false);
-                cell.setHeight(32);
-                view = cell;
-                view.setClickable(false);
+                r1 = new HeaderCell(this.mContext, "key_graySectionText", 16, 0, false);
+                r1.setHeight(32);
+                r1.setClickable(false);
                 break;
         }
-        view.setLayoutParams(new RecyclerView.LayoutParams(-1, viewType == 5 ? -1 : -2));
-        return new RecyclerListView.Holder(view);
-    }
-
-    /* renamed from: lambda$onCreateViewHolder$1$org-telegram-ui-Adapters-DialogsAdapter */
-    public /* synthetic */ void m1452x3c8bd2a9(View view1) {
-        MessagesController.getInstance(this.currentAccount).hintDialogs.clear();
-        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        preferences.edit().remove("installReferer").commit();
-        notifyDataSetChanged();
+        r1.setLayoutParams(new RecyclerView.LayoutParams(-1, i == 5 ? -1 : -2));
+        return new RecyclerListView.Holder(r1);
     }
 
     public int dialogsEmptyType() {
         int i = this.dialogsType;
-        if (i != 7 && i != 8) {
-            return this.onlineContacts != null ? 1 : 0;
-        } else if (MessagesController.getInstance(this.currentAccount).isDialogsEndReached(this.folderId)) {
-            return 2;
-        } else {
-            return 3;
-        }
+        return (i == 7 || i == 8) ? MessagesController.getInstance(this.currentAccount).isDialogsEndReached(this.folderId) ? 2 : 3 : this.onlineContacts != null ? 1 : 0;
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int i) {
-        TLRPC.Chat chat;
-        CharSequence title;
-        CharSequence subtitle;
-        TLRPC.Chat chat2;
-        int position;
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+        TLRPC$Chat tLRPC$Chat;
+        String str;
+        TLRPC$Chat chat;
+        int i2;
+        int itemViewType = viewHolder.getItemViewType();
+        String str2 = null;
         boolean z = false;
-        switch (holder.getItemViewType()) {
-            case 0:
-                TLRPC.Dialog dialog = (TLRPC.Dialog) getItem(i);
-                TLRPC.Dialog nextDialog = (TLRPC.Dialog) getItem(i + 1);
-                if (this.dialogsType == 2) {
-                    ProfileSearchCell cell = (ProfileSearchCell) holder.itemView;
-                    long oldDialogId = cell.getDialogId();
-                    if (dialog.id == 0) {
-                        chat = null;
-                    } else {
-                        TLRPC.Chat chat3 = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(-dialog.id));
-                        if (chat3 != null && chat3.migrated_to != null && (chat2 = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(chat3.migrated_to.channel_id))) != null) {
-                            chat = chat2;
+        if (itemViewType == 0) {
+            TLRPC$Dialog tLRPC$Dialog = (TLRPC$Dialog) getItem(i);
+            TLRPC$Dialog tLRPC$Dialog2 = (TLRPC$Dialog) getItem(i + 1);
+            int i3 = this.dialogsType;
+            if (i3 == 2) {
+                ProfileSearchCell profileSearchCell = (ProfileSearchCell) viewHolder.itemView;
+                long dialogId = profileSearchCell.getDialogId();
+                if (tLRPC$Dialog.id != 0) {
+                    TLRPC$Chat chat2 = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(-tLRPC$Dialog.id));
+                    tLRPC$Chat = (chat2 == null || chat2.migrated_to == null || (chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(chat2.migrated_to.channel_id))) == null) ? chat2 : chat;
+                } else {
+                    tLRPC$Chat = null;
+                }
+                if (tLRPC$Chat != null) {
+                    str2 = tLRPC$Chat.title;
+                    if (ChatObject.isChannel(tLRPC$Chat) && !tLRPC$Chat.megagroup) {
+                        int i4 = tLRPC$Chat.participants_count;
+                        if (i4 != 0) {
+                            str = LocaleController.formatPluralStringComma("Subscribers", i4);
+                        } else if (TextUtils.isEmpty(tLRPC$Chat.username)) {
+                            str = LocaleController.getString("ChannelPrivate", R.string.ChannelPrivate).toLowerCase();
                         } else {
-                            chat = chat3;
-                        }
-                    }
-                    if (chat != null) {
-                        CharSequence title2 = chat.title;
-                        if (ChatObject.isChannel(chat) && !chat.megagroup) {
-                            if (chat.participants_count != 0) {
-                                subtitle = LocaleController.formatPluralStringComma("Subscribers", chat.participants_count);
-                                title = title2;
-                            } else {
-                                CharSequence subtitle2 = chat.username;
-                                if (TextUtils.isEmpty(subtitle2)) {
-                                    subtitle = LocaleController.getString("ChannelPrivate", R.string.ChannelPrivate).toLowerCase();
-                                    title = title2;
-                                } else {
-                                    subtitle = LocaleController.getString("ChannelPublic", R.string.ChannelPublic).toLowerCase();
-                                    title = title2;
-                                }
-                            }
-                        } else if (chat.participants_count != 0) {
-                            subtitle = LocaleController.formatPluralStringComma("Members", chat.participants_count);
-                            title = title2;
-                        } else if (chat.has_geo) {
-                            subtitle = LocaleController.getString("MegaLocation", R.string.MegaLocation);
-                            title = title2;
-                        } else {
-                            CharSequence subtitle3 = chat.username;
-                            if (TextUtils.isEmpty(subtitle3)) {
-                                subtitle = LocaleController.getString("MegaPrivate", R.string.MegaPrivate).toLowerCase();
-                                title = title2;
-                            } else {
-                                subtitle = LocaleController.getString("MegaPublic", R.string.MegaPublic).toLowerCase();
-                                title = title2;
-                            }
+                            str = LocaleController.getString("ChannelPublic", R.string.ChannelPublic).toLowerCase();
                         }
                     } else {
-                        subtitle = "";
-                        title = null;
+                        int i5 = tLRPC$Chat.participants_count;
+                        if (i5 != 0) {
+                            str = LocaleController.formatPluralStringComma("Members", i5);
+                        } else if (tLRPC$Chat.has_geo) {
+                            str = LocaleController.getString("MegaLocation", R.string.MegaLocation);
+                        } else if (TextUtils.isEmpty(tLRPC$Chat.username)) {
+                            str = LocaleController.getString("MegaPrivate", R.string.MegaPrivate).toLowerCase();
+                        } else {
+                            str = LocaleController.getString("MegaPublic", R.string.MegaPublic).toLowerCase();
+                        }
                     }
-                    cell.useSeparator = nextDialog != null;
-                    cell.setData(chat, null, title, subtitle, false, false);
-                    boolean contains = this.selectedDialogs.contains(Long.valueOf(cell.getDialogId()));
-                    if (oldDialogId == cell.getDialogId()) {
-                        z = true;
-                    }
-                    cell.setChecked(contains, z);
-                    break;
                 } else {
-                    DialogCell cell2 = (DialogCell) holder.itemView;
-                    cell2.useSeparator = nextDialog != null;
-                    cell2.fullSeparator = dialog.pinned && nextDialog != null && !nextDialog.pinned;
-                    if (this.dialogsType == 0 && AndroidUtilities.isTablet()) {
-                        cell2.setDialogSelected(dialog.id == this.openedDialogId);
-                    }
-                    cell2.setChecked(this.selectedDialogs.contains(Long.valueOf(dialog.id)), false);
-                    cell2.setDialog(dialog, this.dialogsType, this.folderId);
-                    DialogsPreloader dialogsPreloader = this.preloader;
-                    if (dialogsPreloader != null && i < 10) {
-                        dialogsPreloader.add(dialog.id);
-                        break;
-                    }
+                    str = "";
                 }
-                break;
-            case 4:
-                ((DialogMeUrlCell) holder.itemView).setRecentMeUrl((TLRPC.RecentMeUrl) getItem(i));
-                break;
-            case 5:
-                DialogsEmptyCell cell3 = (DialogsEmptyCell) holder.itemView;
-                int fromDialogsEmptyType = this.lastDialogsEmptyType;
-                int dialogsEmptyType = dialogsEmptyType();
-                this.lastDialogsEmptyType = dialogsEmptyType;
-                cell3.setType(dialogsEmptyType);
-                int i2 = this.dialogsType;
-                if (i2 != 7 && i2 != 8) {
-                    cell3.setOnUtyanAnimationEndListener(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsAdapter$$ExternalSyntheticLambda2
-                        @Override // java.lang.Runnable
-                        public final void run() {
-                            DialogsAdapter.this.m1450x3d1e216b();
-                        }
-                    });
-                    cell3.setOnUtyanAnimationUpdateListener(new Consumer() { // from class: org.telegram.ui.Adapters.DialogsAdapter$$ExternalSyntheticLambda1
-                        @Override // androidx.core.util.Consumer
-                        public final void accept(Object obj) {
-                            DialogsAdapter.this.m1451xc9be4c6c((Float) obj);
-                        }
-                    });
-                    if (!cell3.isUtyanAnimationTriggered() && this.dialogsCount == 0) {
-                        this.parentFragment.setContactsAlpha(0.0f);
-                        this.parentFragment.setScrollDisabled(true);
-                    }
-                    if (this.onlineContacts != null && fromDialogsEmptyType == 0) {
-                        if (!cell3.isUtyanAnimationTriggered()) {
-                            cell3.startUtyanCollapseAnimation(true);
-                            break;
-                        }
-                    } else if (this.forceUpdatingContacts) {
-                        if (this.dialogsCount == 0) {
-                            cell3.startUtyanCollapseAnimation(false);
-                            break;
-                        }
-                    } else if (cell3.isUtyanAnimationTriggered() && this.lastDialogsEmptyType == 0) {
-                        cell3.startUtyanExpandAnimation();
-                        break;
-                    }
-                }
-                break;
-            case 6:
-                UserCell cell4 = (UserCell) holder.itemView;
-                int i3 = this.dialogsCount;
-                if (i3 == 0) {
-                    position = i - 3;
-                } else {
-                    position = (i - i3) - 2;
-                }
-                TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.onlineContacts.get(position).user_id));
-                cell4.setData(user, null, null, 0);
-                break;
-            case 7:
-                HeaderCell cell5 = (HeaderCell) holder.itemView;
-                int i4 = this.dialogsType;
-                if (i4 != 11 && i4 != 12 && i4 != 13) {
-                    cell5.setText(LocaleController.getString((this.dialogsCount != 0 || !this.forceUpdatingContacts) ? R.string.YourContacts : R.string.ConnectingYourContacts));
-                    break;
-                } else if (i == 0) {
-                    cell5.setText(LocaleController.getString("ImportHeader", R.string.ImportHeader));
-                    break;
-                } else {
-                    cell5.setText(LocaleController.getString("ImportHeaderContacts", R.string.ImportHeaderContacts));
-                    break;
-                }
-                break;
-            case 11:
-                TextInfoPrivacyCell cell6 = (TextInfoPrivacyCell) holder.itemView;
-                cell6.setText(LocaleController.getString("TapOnThePencil", R.string.TapOnThePencil));
-                if (this.arrowDrawable == null) {
-                    Drawable drawable = this.mContext.getResources().getDrawable(R.drawable.arrow_newchat);
-                    this.arrowDrawable = drawable;
-                    drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4), PorterDuff.Mode.MULTIPLY));
-                }
-                TextView textView = cell6.getTextView();
-                textView.setCompoundDrawablePadding(AndroidUtilities.dp(4.0f));
-                textView.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, (Drawable) null, this.arrowDrawable, (Drawable) null);
-                textView.getLayoutParams().width = -2;
-                break;
-            case 12:
-                TextCell cell7 = (TextCell) holder.itemView;
-                cell7.setColors(Theme.key_windowBackgroundWhiteBlueText4, Theme.key_windowBackgroundWhiteBlueText4);
-                String string = LocaleController.getString("CreateGroupForImport", R.string.CreateGroupForImport);
-                if (this.dialogsCount != 0) {
+                String str3 = str;
+                String str4 = str2;
+                profileSearchCell.useSeparator = tLRPC$Dialog2 != null;
+                profileSearchCell.setData(tLRPC$Chat, null, str4, str3, false, false);
+                boolean contains = this.selectedDialogs.contains(Long.valueOf(profileSearchCell.getDialogId()));
+                if (dialogId == profileSearchCell.getDialogId()) {
                     z = true;
                 }
-                cell7.setTextAndIcon(string, R.drawable.msg_groups_create, z);
-                cell7.setIsInDialogs();
-                cell7.setOffsetFromImage(75);
-                break;
-            case 14:
-                HeaderCell cell8 = (HeaderCell) holder.itemView;
-                cell8.setTextSize(14.0f);
-                cell8.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
-                cell8.setBackgroundColor(Theme.getColor(Theme.key_graySection));
-                switch (((DialogsActivity.DialogsHeader) getItem(i)).headerType) {
-                    case 0:
-                        cell8.setText(LocaleController.getString("MyChannels", R.string.MyChannels));
-                        break;
-                    case 1:
-                        cell8.setText(LocaleController.getString("MyGroups", R.string.MyGroups));
-                        break;
-                    case 2:
-                        cell8.setText(LocaleController.getString("FilterGroups", R.string.FilterGroups));
-                        break;
+                profileSearchCell.setChecked(contains, z);
+            } else {
+                DialogCell dialogCell = (DialogCell) viewHolder.itemView;
+                dialogCell.useSeparator = tLRPC$Dialog2 != null;
+                dialogCell.fullSeparator = tLRPC$Dialog.pinned && tLRPC$Dialog2 != null && !tLRPC$Dialog2.pinned;
+                if (i3 == 0 && AndroidUtilities.isTablet()) {
+                    dialogCell.setDialogSelected(tLRPC$Dialog.id == this.openedDialogId);
                 }
+                dialogCell.setChecked(this.selectedDialogs.contains(Long.valueOf(tLRPC$Dialog.id)), false);
+                dialogCell.setDialog(tLRPC$Dialog, this.dialogsType, this.folderId);
+                DialogsPreloader dialogsPreloader = this.preloader;
+                if (dialogsPreloader != null && i < 10) {
+                    dialogsPreloader.add(tLRPC$Dialog.id);
+                }
+            }
+        } else if (itemViewType == 14) {
+            HeaderCell headerCell = (HeaderCell) viewHolder.itemView;
+            headerCell.setTextSize(14.0f);
+            headerCell.setTextColor(Theme.getColor("windowBackgroundWhiteGrayText"));
+            headerCell.setBackgroundColor(Theme.getColor("graySection"));
+            int i6 = ((DialogsActivity.DialogsHeader) getItem(i)).headerType;
+            if (i6 == 0) {
+                headerCell.setText(LocaleController.getString("MyChannels", R.string.MyChannels));
+            } else if (i6 == 1) {
+                headerCell.setText(LocaleController.getString("MyGroups", R.string.MyGroups));
+            } else if (i6 == 2) {
+                headerCell.setText(LocaleController.getString("FilterGroups", R.string.FilterGroups));
+            }
+        } else if (itemViewType == 4) {
+            ((DialogMeUrlCell) viewHolder.itemView).setRecentMeUrl((TLRPC$RecentMeUrl) getItem(i));
+        } else if (itemViewType == 5) {
+            DialogsEmptyCell dialogsEmptyCell = (DialogsEmptyCell) viewHolder.itemView;
+            int i7 = this.lastDialogsEmptyType;
+            int dialogsEmptyType = dialogsEmptyType();
+            this.lastDialogsEmptyType = dialogsEmptyType;
+            dialogsEmptyCell.setType(dialogsEmptyType);
+            int i8 = this.dialogsType;
+            if (i8 != 7 && i8 != 8) {
+                dialogsEmptyCell.setOnUtyanAnimationEndListener(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsAdapter$$ExternalSyntheticLambda2
+                    @Override // java.lang.Runnable
+                    public final void run() {
+                        DialogsAdapter.this.lambda$onBindViewHolder$2();
+                    }
+                });
+                dialogsEmptyCell.setOnUtyanAnimationUpdateListener(new Consumer() { // from class: org.telegram.ui.Adapters.DialogsAdapter$$ExternalSyntheticLambda1
+                    @Override // androidx.core.util.Consumer
+                    public final void accept(Object obj) {
+                        DialogsAdapter.this.lambda$onBindViewHolder$3((Float) obj);
+                    }
+                });
+                if (!dialogsEmptyCell.isUtyanAnimationTriggered() && this.dialogsCount == 0) {
+                    this.parentFragment.setContactsAlpha(0.0f);
+                    this.parentFragment.setScrollDisabled(true);
+                }
+                if (this.onlineContacts != null && i7 == 0) {
+                    if (!dialogsEmptyCell.isUtyanAnimationTriggered()) {
+                        dialogsEmptyCell.startUtyanCollapseAnimation(true);
+                    }
+                } else if (this.forceUpdatingContacts) {
+                    if (this.dialogsCount == 0) {
+                        dialogsEmptyCell.startUtyanCollapseAnimation(false);
+                    }
+                } else if (dialogsEmptyCell.isUtyanAnimationTriggered() && this.lastDialogsEmptyType == 0) {
+                    dialogsEmptyCell.startUtyanExpandAnimation();
+                }
+            }
+        } else if (itemViewType == 6) {
+            ((UserCell) viewHolder.itemView).setData(MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.onlineContacts.get(this.dialogsCount == 0 ? i - 3 : (i - i2) - 2).user_id)), null, null, 0);
+        } else if (itemViewType == 7) {
+            HeaderCell headerCell2 = (HeaderCell) viewHolder.itemView;
+            int i9 = this.dialogsType;
+            if (i9 != 11 && i9 != 12 && i9 != 13) {
+                headerCell2.setText(LocaleController.getString((this.dialogsCount != 0 || !this.forceUpdatingContacts) ? R.string.YourContacts : R.string.ConnectingYourContacts));
+            } else if (i == 0) {
+                headerCell2.setText(LocaleController.getString("ImportHeader", R.string.ImportHeader));
+            } else {
+                headerCell2.setText(LocaleController.getString("ImportHeaderContacts", R.string.ImportHeaderContacts));
+            }
+        } else if (itemViewType == 11) {
+            TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) viewHolder.itemView;
+            textInfoPrivacyCell.setText(LocaleController.getString("TapOnThePencil", R.string.TapOnThePencil));
+            if (this.arrowDrawable == null) {
+                Drawable drawable = this.mContext.getResources().getDrawable(R.drawable.arrow_newchat);
+                this.arrowDrawable = drawable;
+                drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor("windowBackgroundWhiteGrayText4"), PorterDuff.Mode.MULTIPLY));
+            }
+            TextView textView = textInfoPrivacyCell.getTextView();
+            textView.setCompoundDrawablePadding(AndroidUtilities.dp(4.0f));
+            textView.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, (Drawable) null, this.arrowDrawable, (Drawable) null);
+            textView.getLayoutParams().width = -2;
+        } else if (itemViewType == 12) {
+            TextCell textCell = (TextCell) viewHolder.itemView;
+            textCell.setColors("windowBackgroundWhiteBlueText4", "windowBackgroundWhiteBlueText4");
+            String string = LocaleController.getString("CreateGroupForImport", R.string.CreateGroupForImport);
+            if (this.dialogsCount != 0) {
+                z = true;
+            }
+            textCell.setTextAndIcon(string, R.drawable.msg_groups_create, z);
+            textCell.setIsInDialogs();
+            textCell.setOffsetFromImage(75);
         }
         if (i >= this.dialogsCount + 1) {
-            holder.itemView.setAlpha(1.0f);
+            viewHolder.itemView.setAlpha(1.0f);
         }
     }
 
-    /* renamed from: lambda$onBindViewHolder$2$org-telegram-ui-Adapters-DialogsAdapter */
-    public /* synthetic */ void m1450x3d1e216b() {
+    public /* synthetic */ void lambda$onBindViewHolder$2() {
         this.parentFragment.setScrollDisabled(false);
     }
 
-    /* renamed from: lambda$onBindViewHolder$3$org-telegram-ui-Adapters-DialogsAdapter */
-    public /* synthetic */ void m1451xc9be4c6c(Float progress) {
-        this.parentFragment.setContactsAlpha(progress.floatValue());
+    public /* synthetic */ void lambda$onBindViewHolder$3(Float f) {
+        this.parentFragment.setContactsAlpha(f.floatValue());
     }
 
-    public void setForceUpdatingContacts(boolean forceUpdatingContacts) {
-        this.forceUpdatingContacts = forceUpdatingContacts;
+    public void setForceUpdatingContacts(boolean z) {
+        this.forceUpdatingContacts = z;
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
     public int getItemViewType(int i) {
         int i2;
         int i3 = this.dialogsCount;
-        if (i3 == 0 && this.forceUpdatingContacts) {
-            switch (i) {
-                case 0:
-                    return 5;
-                case 1:
-                    return 8;
-                case 2:
-                    return 7;
-                case 3:
-                    return 13;
-            }
-        } else if (this.onlineContacts != null) {
-            if (i3 == 0) {
-                if (i == 0) {
-                    return 5;
+        if (i3 != 0 || !this.forceUpdatingContacts) {
+            if (this.onlineContacts != null) {
+                if (i3 == 0) {
+                    if (i == 0) {
+                        return 5;
+                    }
+                    if (i == 1) {
+                        return 8;
+                    }
+                    return i == 2 ? 7 : 6;
+                } else if (i < i3) {
+                    return 0;
+                } else {
+                    if (i == i3) {
+                        return 8;
+                    }
+                    if (i == i3 + 1) {
+                        return 7;
+                    }
+                    return i == this.currentCount - 1 ? 10 : 6;
                 }
-                if (i == 1) {
-                    return 8;
+            } else if (this.hasHints) {
+                int size = MessagesController.getInstance(this.currentAccount).hintDialogs.size();
+                int i4 = size + 2;
+                if (i < i4) {
+                    if (i == 0) {
+                        return 2;
+                    }
+                    return i == size + 1 ? 3 : 4;
                 }
-                return i == 2 ? 7 : 6;
-            } else if (i < i3) {
-                return 0;
+                i -= i4;
             } else {
-                if (i == i3) {
-                    return 8;
+                if (!this.showArchiveHint) {
+                    int i5 = this.dialogsType;
+                    if (i5 == 11 || i5 == 13) {
+                        if (i == 0) {
+                            return 7;
+                        }
+                        if (i == 1) {
+                            return 12;
+                        }
+                    } else if (i5 == 12) {
+                        if (i == 0) {
+                            return 7;
+                        }
+                        i--;
+                    }
+                } else if (i == 0) {
+                    return 9;
+                } else {
+                    if (i == 1) {
+                        return 8;
+                    }
                 }
-                if (i == i3 + 1) {
-                    return 7;
-                }
-                return i == this.currentCount - 1 ? 10 : 6;
+                i -= 2;
             }
-        } else if (this.hasHints) {
-            int count = MessagesController.getInstance(this.currentAccount).hintDialogs.size();
-            if (i < count + 2) {
-                if (i == 0) {
-                    return 2;
-                }
-                if (i == count + 1) {
-                    return 3;
-                }
-                return 4;
-            }
-            i -= count + 2;
-        } else if (this.showArchiveHint) {
-            if (i == 0) {
-                return 9;
-            }
+        } else if (i == 0) {
+            return 5;
+        } else {
             if (i == 1) {
                 return 8;
             }
-            i -= 2;
-        } else {
-            int i4 = this.dialogsType;
-            if (i4 == 11 || i4 == 13) {
-                if (i == 0) {
-                    return 7;
-                }
-                if (i == 1) {
-                    return 12;
-                }
-                i -= 2;
-            } else if (i4 == 12) {
-                if (i == 0) {
-                    return 7;
-                }
-                i--;
+            if (i == 2) {
+                return 7;
+            }
+            if (i == 3) {
+                return 13;
             }
         }
-        int i5 = this.folderId;
-        if (i5 == 0 && this.dialogsCount > 10 && i == this.currentCount - 2 && this.dialogsType == 0) {
+        int i6 = this.folderId;
+        if (i6 == 0 && this.dialogsCount > 10 && i == this.currentCount - 2 && this.dialogsType == 0) {
             return 11;
         }
-        int size = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, i5, this.dialogsListFrozen).size();
-        if (i == size) {
-            if (!this.forceShowEmptyCell && (i2 = this.dialogsType) != 7 && i2 != 8 && !MessagesController.getInstance(this.currentAccount).isDialogsEndReached(this.folderId)) {
-                return 1;
+        int size2 = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, i6, this.dialogsListFrozen).size();
+        if (i != size2) {
+            if (i > size2) {
+                return 10;
             }
-            return size == 0 ? 5 : 10;
-        } else if (i > size) {
-            return 10;
-        } else {
             return (this.dialogsType != 2 || !(getItem(i) instanceof DialogsActivity.DialogsHeader)) ? 0 : 14;
+        } else if (!this.forceShowEmptyCell && (i2 = this.dialogsType) != 7 && i2 != 8 && !MessagesController.getInstance(this.currentAccount).isDialogsEndReached(this.folderId)) {
+            return 1;
+        } else {
+            return size2 == 0 ? 5 : 10;
         }
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public void notifyItemMoved(int fromPosition, int toPosition) {
+    public void notifyItemMoved(int i, int i2) {
         char c = 0;
-        ArrayList<TLRPC.Dialog> dialogs = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, this.folderId, false);
-        int fromIndex = fixPosition(fromPosition);
-        int toIndex = fixPosition(toPosition);
-        TLRPC.Dialog fromDialog = dialogs.get(fromIndex);
-        TLRPC.Dialog toDialog = dialogs.get(toIndex);
-        int i = this.dialogsType;
-        if (i == 7 || i == 8) {
+        ArrayList<TLRPC$Dialog> dialogsArray = this.parentFragment.getDialogsArray(this.currentAccount, this.dialogsType, this.folderId, false);
+        int fixPosition = fixPosition(i);
+        int fixPosition2 = fixPosition(i2);
+        TLRPC$Dialog tLRPC$Dialog = dialogsArray.get(fixPosition);
+        TLRPC$Dialog tLRPC$Dialog2 = dialogsArray.get(fixPosition2);
+        int i3 = this.dialogsType;
+        if (i3 == 7 || i3 == 8) {
             MessagesController.DialogFilter[] dialogFilterArr = MessagesController.getInstance(this.currentAccount).selectedDialogFilter;
             if (this.dialogsType == 8) {
                 c = 1;
             }
-            MessagesController.DialogFilter filter = dialogFilterArr[c];
-            int idx1 = filter.pinnedDialogs.get(fromDialog.id);
-            int idx2 = filter.pinnedDialogs.get(toDialog.id);
-            filter.pinnedDialogs.put(fromDialog.id, idx2);
-            filter.pinnedDialogs.put(toDialog.id, idx1);
+            MessagesController.DialogFilter dialogFilter = dialogFilterArr[c];
+            int i4 = dialogFilter.pinnedDialogs.get(tLRPC$Dialog.id);
+            dialogFilter.pinnedDialogs.put(tLRPC$Dialog.id, dialogFilter.pinnedDialogs.get(tLRPC$Dialog2.id));
+            dialogFilter.pinnedDialogs.put(tLRPC$Dialog2.id, i4);
         } else {
-            int oldNum = fromDialog.pinnedNum;
-            fromDialog.pinnedNum = toDialog.pinnedNum;
-            toDialog.pinnedNum = oldNum;
+            int i5 = tLRPC$Dialog.pinnedNum;
+            tLRPC$Dialog.pinnedNum = tLRPC$Dialog2.pinnedNum;
+            tLRPC$Dialog2.pinnedNum = i5;
         }
-        Collections.swap(dialogs, fromIndex, toIndex);
-        super.notifyItemMoved(fromPosition, toPosition);
+        Collections.swap(dialogsArray, fixPosition, fixPosition2);
+        super.notifyItemMoved(i, i2);
     }
 
-    public void setArchivedPullDrawable(PullForegroundDrawable drawable) {
-        this.pullForegroundDrawable = drawable;
+    public void setArchivedPullDrawable(PullForegroundDrawable pullForegroundDrawable) {
+        this.pullForegroundDrawable = pullForegroundDrawable;
     }
 
     public void didDatabaseCleared() {
@@ -963,14 +943,11 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
         }
     }
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public static class DialogsPreloader {
         int currentRequestCount;
         int networkRequestCount;
         boolean resumed;
-        private final int MAX_REQUEST_COUNT = 4;
-        private final int MAX_NETWORK_REQUEST_COUNT = 6;
-        private final int NETWORK_REQUESTS_RESET_TIME = 60000;
         HashSet<Long> dialogsReadyMap = new HashSet<>();
         HashSet<Long> preloadedErrorMap = new HashSet<>();
         HashSet<Long> loadingDialogs = new HashSet<>();
@@ -978,21 +955,27 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
         Runnable clearNetworkRequestCount = new Runnable() { // from class: org.telegram.ui.Adapters.DialogsAdapter$DialogsPreloader$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                DialogsAdapter.DialogsPreloader.this.m1453x8b23716d();
+                DialogsAdapter.DialogsPreloader.this.lambda$new$0();
             }
         };
 
-        /* renamed from: lambda$new$0$org-telegram-ui-Adapters-DialogsAdapter$DialogsPreloader */
-        public /* synthetic */ void m1453x8b23716d() {
+        private boolean preloadIsAvilable() {
+            return false;
+        }
+
+        public void updateList() {
+        }
+
+        public /* synthetic */ void lambda$new$0() {
             this.networkRequestCount = 0;
             start();
         }
 
-        public void add(long dialog_id) {
-            if (isReady(dialog_id) || this.preloadedErrorMap.contains(Long.valueOf(dialog_id)) || this.loadingDialogs.contains(Long.valueOf(dialog_id)) || this.preloadDialogsPool.contains(Long.valueOf(dialog_id))) {
+        public void add(long j) {
+            if (isReady(j) || this.preloadedErrorMap.contains(Long.valueOf(j)) || this.loadingDialogs.contains(Long.valueOf(j)) || this.preloadDialogsPool.contains(Long.valueOf(j))) {
                 return;
             }
-            this.preloadDialogsPool.add(Long.valueOf(dialog_id));
+            this.preloadDialogsPool.add(Long.valueOf(j));
             start();
         }
 
@@ -1000,46 +983,47 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
             if (!preloadIsAvilable() || !this.resumed || this.preloadDialogsPool.isEmpty() || this.currentRequestCount >= 4 || this.networkRequestCount > 6) {
                 return;
             }
-            long dialog_id = this.preloadDialogsPool.remove(0).longValue();
+            long longValue = this.preloadDialogsPool.remove(0).longValue();
             this.currentRequestCount++;
-            this.loadingDialogs.add(Long.valueOf(dialog_id));
-            MessagesController.getInstance(UserConfig.selectedAccount).ensureMessagesLoaded(dialog_id, 0, new AnonymousClass1(dialog_id));
+            this.loadingDialogs.add(Long.valueOf(longValue));
+            MessagesController.getInstance(UserConfig.selectedAccount).ensureMessagesLoaded(longValue, 0, new AnonymousClass1(longValue));
         }
 
         /* renamed from: org.telegram.ui.Adapters.DialogsAdapter$DialogsPreloader$1 */
-        /* loaded from: classes4.dex */
+        /* loaded from: classes3.dex */
         public class AnonymousClass1 implements MessagesController.MessagesLoadedCallback {
             final /* synthetic */ long val$dialog_id;
 
             AnonymousClass1(long j) {
-                DialogsPreloader.this = this$0;
+                DialogsPreloader.this = r1;
                 this.val$dialog_id = j;
             }
 
             @Override // org.telegram.messenger.MessagesController.MessagesLoadedCallback
-            public void onMessagesLoaded(final boolean fromCache) {
+            public void onMessagesLoaded(final boolean z) {
                 final long j = this.val$dialog_id;
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsAdapter$DialogsPreloader$1$$ExternalSyntheticLambda1
                     @Override // java.lang.Runnable
                     public final void run() {
-                        DialogsAdapter.DialogsPreloader.AnonymousClass1.this.m1455xc49b96d0(fromCache, j);
+                        DialogsAdapter.DialogsPreloader.AnonymousClass1.this.lambda$onMessagesLoaded$0(z, j);
                     }
                 });
             }
 
-            /* renamed from: lambda$onMessagesLoaded$0$org-telegram-ui-Adapters-DialogsAdapter$DialogsPreloader$1 */
-            public /* synthetic */ void m1455xc49b96d0(boolean fromCache, long dialog_id) {
-                if (!fromCache) {
-                    DialogsPreloader.this.networkRequestCount++;
-                    if (DialogsPreloader.this.networkRequestCount >= 6) {
-                        AndroidUtilities.cancelRunOnUIThread(DialogsPreloader.this.clearNetworkRequestCount);
-                        AndroidUtilities.runOnUIThread(DialogsPreloader.this.clearNetworkRequestCount, DefaultLoadErrorHandlingPolicy.DEFAULT_TRACK_BLACKLIST_MS);
+            public /* synthetic */ void lambda$onMessagesLoaded$0(boolean z, long j) {
+                DialogsPreloader dialogsPreloader;
+                if (!z) {
+                    DialogsPreloader dialogsPreloader2 = DialogsPreloader.this;
+                    int i = dialogsPreloader2.networkRequestCount + 1;
+                    dialogsPreloader2.networkRequestCount = i;
+                    if (i >= 6) {
+                        AndroidUtilities.cancelRunOnUIThread(dialogsPreloader2.clearNetworkRequestCount);
+                        AndroidUtilities.runOnUIThread(DialogsPreloader.this.clearNetworkRequestCount, 60000L);
                     }
                 }
-                if (DialogsPreloader.this.loadingDialogs.remove(Long.valueOf(dialog_id))) {
-                    DialogsPreloader.this.dialogsReadyMap.add(Long.valueOf(dialog_id));
+                if (DialogsPreloader.this.loadingDialogs.remove(Long.valueOf(j))) {
+                    DialogsPreloader.this.dialogsReadyMap.add(Long.valueOf(j));
                     DialogsPreloader.this.updateList();
-                    DialogsPreloader dialogsPreloader = DialogsPreloader.this;
                     dialogsPreloader.currentRequestCount--;
                     DialogsPreloader.this.start();
                 }
@@ -1051,39 +1035,27 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Adapters.DialogsAdapter$DialogsPreloader$1$$ExternalSyntheticLambda0
                     @Override // java.lang.Runnable
                     public final void run() {
-                        DialogsAdapter.DialogsPreloader.AnonymousClass1.this.m1454x11937a70(j);
+                        DialogsAdapter.DialogsPreloader.AnonymousClass1.this.lambda$onError$1(j);
                     }
                 });
             }
 
-            /* renamed from: lambda$onError$1$org-telegram-ui-Adapters-DialogsAdapter$DialogsPreloader$1 */
-            public /* synthetic */ void m1454x11937a70(long dialog_id) {
-                if (DialogsPreloader.this.loadingDialogs.remove(Long.valueOf(dialog_id))) {
-                    DialogsPreloader.this.preloadedErrorMap.add(Long.valueOf(dialog_id));
-                    DialogsPreloader dialogsPreloader = DialogsPreloader.this;
+            public /* synthetic */ void lambda$onError$1(long j) {
+                DialogsPreloader dialogsPreloader;
+                if (DialogsPreloader.this.loadingDialogs.remove(Long.valueOf(j))) {
+                    DialogsPreloader.this.preloadedErrorMap.add(Long.valueOf(j));
                     dialogsPreloader.currentRequestCount--;
                     DialogsPreloader.this.start();
                 }
             }
         }
 
-        private boolean preloadIsAvilable() {
-            return false;
+        public boolean isReady(long j) {
+            return this.dialogsReadyMap.contains(Long.valueOf(j));
         }
 
-        public void updateList() {
-        }
-
-        public boolean isReady(long currentDialogId) {
-            return this.dialogsReadyMap.contains(Long.valueOf(currentDialogId));
-        }
-
-        public boolean preloadedError(long currendDialogId) {
-            return this.preloadedErrorMap.contains(Long.valueOf(currendDialogId));
-        }
-
-        public void remove(long currentDialogId) {
-            this.preloadDialogsPool.remove(Long.valueOf(currentDialogId));
+        public void remove(long j) {
+            this.preloadDialogsPool.remove(Long.valueOf(j));
         }
 
         public void clear() {
@@ -1111,69 +1083,62 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter {
         return this.currentCount;
     }
 
-    public void setForceShowEmptyCell(boolean forceShowEmptyCell) {
-        this.forceShowEmptyCell = forceShowEmptyCell;
+    public void setForceShowEmptyCell(boolean z) {
+        this.forceShowEmptyCell = z;
     }
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public class LastEmptyView extends View {
         public boolean moving;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public LastEmptyView(Context context) {
             super(context);
-            DialogsAdapter.this = this$0;
+            DialogsAdapter.this = r1;
         }
 
         @Override // android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int height;
+        protected void onMeasure(int i, int i2) {
             int size = DialogsAdapter.this.parentFragment.getDialogsArray(DialogsAdapter.this.currentAccount, DialogsAdapter.this.dialogsType, DialogsAdapter.this.folderId, DialogsAdapter.this.dialogsListFrozen).size();
-            int archiveHeight = 0;
-            boolean hasArchive = DialogsAdapter.this.dialogsType == 0 && MessagesController.getInstance(DialogsAdapter.this.currentAccount).dialogs_dict.get(DialogObject.makeFolderDialogId(1)) != null;
-            View parent = (View) getParent();
-            int blurOffset = 0;
-            if (parent instanceof BlurredRecyclerView) {
-                blurOffset = ((BlurredRecyclerView) parent).blurTopPadding;
-            }
-            int paddingTop = parent.getPaddingTop() - blurOffset;
-            if (size == 0 || (paddingTop == 0 && !hasArchive)) {
-                height = 0;
-            } else {
-                int height2 = View.MeasureSpec.getSize(heightMeasureSpec);
-                if (height2 == 0) {
-                    height2 = parent.getMeasuredHeight();
+            int i3 = 0;
+            boolean z = DialogsAdapter.this.dialogsType == 0 && MessagesController.getInstance(DialogsAdapter.this.currentAccount).dialogs_dict.get(DialogObject.makeFolderDialogId(1)) != null;
+            View view = (View) getParent();
+            int i4 = view instanceof BlurredRecyclerView ? ((BlurredRecyclerView) view).blurTopPadding : 0;
+            int paddingTop = view.getPaddingTop() - i4;
+            if (size != 0 && (paddingTop != 0 || z)) {
+                int size2 = View.MeasureSpec.getSize(i2);
+                if (size2 == 0) {
+                    size2 = view.getMeasuredHeight();
                 }
-                if (height2 == 0) {
-                    height2 = (AndroidUtilities.displaySize.y - ActionBar.getCurrentActionBarHeight()) - (Build.VERSION.SDK_INT >= 21 ? AndroidUtilities.statusBarHeight : 0);
+                if (size2 == 0) {
+                    size2 = (AndroidUtilities.displaySize.y - ActionBar.getCurrentActionBarHeight()) - (Build.VERSION.SDK_INT >= 21 ? AndroidUtilities.statusBarHeight : 0);
                 }
-                int height3 = height2 - blurOffset;
-                int cellHeight = AndroidUtilities.dp(SharedConfig.useThreeLinesLayout ? 78.0f : 72.0f);
-                int dialogsHeight = (size * cellHeight) + (size - 1);
+                int i5 = size2 - i4;
+                int dp = AndroidUtilities.dp(SharedConfig.useThreeLinesLayout ? 78.0f : 72.0f);
+                int i6 = (size * dp) + (size - 1);
                 if (DialogsAdapter.this.onlineContacts != null) {
-                    dialogsHeight += (DialogsAdapter.this.onlineContacts.size() * AndroidUtilities.dp(58.0f)) + (DialogsAdapter.this.onlineContacts.size() - 1) + AndroidUtilities.dp(52.0f);
+                    i6 += (DialogsAdapter.this.onlineContacts.size() * AndroidUtilities.dp(58.0f)) + (DialogsAdapter.this.onlineContacts.size() - 1) + AndroidUtilities.dp(52.0f);
                 }
-                if (hasArchive) {
-                    archiveHeight = cellHeight + 1;
-                }
-                if (dialogsHeight < height3) {
-                    height = (height3 - dialogsHeight) + archiveHeight;
-                    if (paddingTop != 0 && (height = height - AndroidUtilities.statusBarHeight) < 0) {
-                        height = 0;
-                    }
-                } else if (dialogsHeight - height3 < archiveHeight) {
-                    height = archiveHeight - (dialogsHeight - height3);
-                    if (paddingTop != 0) {
-                        height -= AndroidUtilities.statusBarHeight;
-                    }
-                    if (height < 0) {
-                        height = 0;
+                int i7 = z ? dp + 1 : 0;
+                if (i6 < i5) {
+                    int i8 = (i5 - i6) + i7;
+                    if (paddingTop == 0 || (i8 = i8 - AndroidUtilities.statusBarHeight) >= 0) {
+                        i3 = i8;
                     }
                 } else {
-                    height = 0;
+                    int i9 = i6 - i5;
+                    if (i9 < i7) {
+                        int i10 = i7 - i9;
+                        if (paddingTop != 0) {
+                            i10 -= AndroidUtilities.statusBarHeight;
+                        }
+                        if (i10 >= 0) {
+                            i3 = i10;
+                        }
+                    }
                 }
             }
-            setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), height);
+            setMeasuredDimension(View.MeasureSpec.getSize(i), i3);
         }
     }
 }

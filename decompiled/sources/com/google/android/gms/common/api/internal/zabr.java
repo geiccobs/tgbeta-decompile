@@ -11,8 +11,9 @@ import com.google.android.gms.common.internal.RootTelemetryConfiguration;
 import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import org.telegram.messenger.FileLoader;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zabr<T> implements OnCompleteListener<T> {
     private final GoogleApiManager zaa;
     private final int zab;
@@ -41,10 +42,13 @@ public final class zabr<T> implements OnCompleteListener<T> {
         boolean z = true;
         boolean z2 = this.zad > 0;
         RootTelemetryConfiguration config = RootTelemetryConfigManager.getInstance().getConfig();
-        if (config != null) {
-            if (!config.getMethodInvocationTelemetryEnabled()) {
-                return;
-            }
+        if (config == null) {
+            i3 = 5000;
+            i2 = 0;
+            i = 100;
+        } else if (!config.getMethodInvocationTelemetryEnabled()) {
+            return;
+        } else {
             z2 &= config.getMethodTimingTelemetryEnabled();
             i3 = config.getBatchPeriodMillis();
             int maxMethodInvocationsInBatch = config.getMaxMethodInvocationsInBatch();
@@ -63,37 +67,34 @@ public final class zabr<T> implements OnCompleteListener<T> {
             }
             i2 = version;
             i = maxMethodInvocationsInBatch;
-        } else {
-            i3 = 5000;
-            i2 = 0;
-            i = 100;
         }
         GoogleApiManager googleApiManager = this.zaa;
         if (task.isSuccessful()) {
             i5 = 0;
             i4 = 0;
-        } else if (task.isCanceled()) {
-            i5 = 100;
-            i4 = -1;
         } else {
-            Exception exception = task.getException();
-            if (exception instanceof ApiException) {
-                Status status = ((ApiException) exception).getStatus();
-                int statusCode = status.getStatusCode();
-                ConnectionResult connectionResult = status.getConnectionResult();
-                i4 = connectionResult == null ? -1 : connectionResult.getErrorCode();
-                i5 = statusCode;
+            if (task.isCanceled()) {
+                i5 = 100;
             } else {
-                i5 = 101;
-                i4 = -1;
+                Exception exception = task.getException();
+                if (exception instanceof ApiException) {
+                    Status status = ((ApiException) exception).getStatus();
+                    int statusCode = status.getStatusCode();
+                    ConnectionResult connectionResult = status.getConnectionResult();
+                    i4 = connectionResult == null ? -1 : connectionResult.getErrorCode();
+                    i5 = statusCode;
+                } else {
+                    i5 = FileLoader.MEDIA_DIR_VIDEO_PUBLIC;
+                }
             }
+            i4 = -1;
         }
-        if (!z2) {
-            j2 = 0;
-            j = 0;
-        } else {
+        if (z2) {
             j2 = this.zad;
             j = System.currentTimeMillis();
+        } else {
+            j2 = 0;
+            j = 0;
         }
         googleApiManager.zaa(new com.google.android.gms.common.internal.zao(this.zab, i5, i4, j2, j), i2, i3, i);
     }
@@ -106,10 +107,9 @@ public final class zabr<T> implements OnCompleteListener<T> {
             if (telemetryConfiguration.getMethodInvocationTelemetryEnabled() && ((methodInvocationMethodKeyAllowlist = telemetryConfiguration.getMethodInvocationMethodKeyAllowlist()) == null || ArrayUtils.contains(methodInvocationMethodKeyAllowlist, i))) {
                 z = true;
             }
-            if (!z || zaaVar.zam() >= telemetryConfiguration.getMaxMethodInvocationsLogged()) {
-                return null;
+            if (z && zaaVar.zam() < telemetryConfiguration.getMaxMethodInvocationsLogged()) {
+                return telemetryConfiguration;
             }
-            return telemetryConfiguration;
         }
         return null;
     }

@@ -5,13 +5,13 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.EditWidgetActivity;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class ChatsWidgetConfigActivity extends ExternalActionActivity {
     private int creatingAppWidgetId = 0;
 
     @Override // org.telegram.ui.ExternalActionActivity
-    protected boolean handleIntent(Intent intent, boolean isNew, boolean restore, boolean fromPassword, int intentAccount, int state) {
-        if (!checkPasscode(intent, isNew, restore, fromPassword, intentAccount, state)) {
+    protected boolean handleIntent(Intent intent, boolean z, boolean z2, boolean z3, int i, int i2) {
+        if (!checkPasscode(intent, z, z2, z3, i, i2)) {
             return false;
         }
         Bundle extras = intent.getExtras();
@@ -19,23 +19,23 @@ public class ChatsWidgetConfigActivity extends ExternalActionActivity {
             this.creatingAppWidgetId = extras.getInt("appWidgetId", 0);
         }
         if (this.creatingAppWidgetId != 0) {
-            Bundle args = new Bundle();
-            args.putBoolean("onlySelect", true);
-            args.putInt("dialogsType", 10);
-            args.putBoolean("allowSwitchAccount", true);
-            EditWidgetActivity fragment = new EditWidgetActivity(0, this.creatingAppWidgetId);
-            fragment.setDelegate(new EditWidgetActivity.EditWidgetActivityDelegate() { // from class: org.telegram.ui.ChatsWidgetConfigActivity$$ExternalSyntheticLambda0
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("onlySelect", true);
+            bundle.putInt("dialogsType", 10);
+            bundle.putBoolean("allowSwitchAccount", true);
+            EditWidgetActivity editWidgetActivity = new EditWidgetActivity(0, this.creatingAppWidgetId);
+            editWidgetActivity.setDelegate(new EditWidgetActivity.EditWidgetActivityDelegate() { // from class: org.telegram.ui.ChatsWidgetConfigActivity$$ExternalSyntheticLambda0
                 @Override // org.telegram.ui.EditWidgetActivity.EditWidgetActivityDelegate
                 public final void didSelectDialogs(ArrayList arrayList) {
-                    ChatsWidgetConfigActivity.this.m2175lambda$handleIntent$0$orgtelegramuiChatsWidgetConfigActivity(arrayList);
+                    ChatsWidgetConfigActivity.this.lambda$handleIntent$0(arrayList);
                 }
             });
             if (AndroidUtilities.isTablet()) {
                 if (this.layersActionBarLayout.fragmentsStack.isEmpty()) {
-                    this.layersActionBarLayout.addFragmentToStack(fragment);
+                    this.layersActionBarLayout.addFragmentToStack(editWidgetActivity);
                 }
             } else if (this.actionBarLayout.fragmentsStack.isEmpty()) {
-                this.actionBarLayout.addFragmentToStack(fragment);
+                this.actionBarLayout.addFragmentToStack(editWidgetActivity);
             }
             if (!AndroidUtilities.isTablet()) {
                 this.backgroundTablet.setVisibility(8);
@@ -51,11 +51,10 @@ public class ChatsWidgetConfigActivity extends ExternalActionActivity {
         return true;
     }
 
-    /* renamed from: lambda$handleIntent$0$org-telegram-ui-ChatsWidgetConfigActivity */
-    public /* synthetic */ void m2175lambda$handleIntent$0$orgtelegramuiChatsWidgetConfigActivity(ArrayList dialogs) {
-        Intent resultValue = new Intent();
-        resultValue.putExtra("appWidgetId", this.creatingAppWidgetId);
-        setResult(-1, resultValue);
+    public /* synthetic */ void lambda$handleIntent$0(ArrayList arrayList) {
+        Intent intent = new Intent();
+        intent.putExtra("appWidgetId", this.creatingAppWidgetId);
+        setResult(-1, intent);
         finish();
     }
 }

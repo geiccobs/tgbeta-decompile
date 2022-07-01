@@ -2,7 +2,7 @@ package com.microsoft.appcenter.distribute.download.http;
 
 import android.os.AsyncTask;
 import java.io.File;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class HttpConnectionRemoveFileTask extends AsyncTask<Void, Void, Void> {
     private final File mFile;
 
@@ -10,7 +10,7 @@ class HttpConnectionRemoveFileTask extends AsyncTask<Void, Void, Void> {
         this.mFile = file;
     }
 
-    public Void doInBackground(Void... params) {
+    public Void doInBackground(Void... voidArr) {
         this.mFile.delete();
         return null;
     }

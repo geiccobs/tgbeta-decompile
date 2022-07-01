@@ -8,10 +8,8 @@ import com.google.android.exoplayer2.text.SubtitleOutputBuffer;
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.ArrayDeque;
 import java.util.PriorityQueue;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class CeaDecoder implements SubtitleDecoder {
-    private static final int NUM_INPUT_BUFFERS = 10;
-    private static final int NUM_OUTPUT_BUFFERS = 2;
     private final ArrayDeque<CeaInputBuffer> availableInputBuffers = new ArrayDeque<>();
     private final ArrayDeque<SubtitleOutputBuffer> availableOutputBuffers;
     private CeaInputBuffer dequeuedInputBuffer;
@@ -23,10 +21,11 @@ public abstract class CeaDecoder implements SubtitleDecoder {
 
     protected abstract void decode(SubtitleInputBuffer subtitleInputBuffer);
 
-    @Override // com.google.android.exoplayer2.decoder.Decoder
-    public abstract String getName();
-
     protected abstract boolean isNewSubtitleDataAvailable();
+
+    @Override // com.google.android.exoplayer2.decoder.Decoder
+    public void release() {
+    }
 
     public CeaDecoder() {
         for (int i = 0; i < 10; i++) {
@@ -40,8 +39,8 @@ public abstract class CeaDecoder implements SubtitleDecoder {
     }
 
     @Override // com.google.android.exoplayer2.text.SubtitleDecoder
-    public void setPositionUs(long positionUs) {
-        this.playbackPositionUs = positionUs;
+    public void setPositionUs(long j) {
+        this.playbackPositionUs = j;
     }
 
     @Override // com.google.android.exoplayer2.decoder.Decoder
@@ -55,9 +54,9 @@ public abstract class CeaDecoder implements SubtitleDecoder {
         return pollFirst;
     }
 
-    public void queueInputBuffer(SubtitleInputBuffer inputBuffer) throws SubtitleDecoderException {
-        Assertions.checkArgument(inputBuffer == this.dequeuedInputBuffer);
-        if (inputBuffer.isDecodeOnly()) {
+    public void queueInputBuffer(SubtitleInputBuffer subtitleInputBuffer) throws SubtitleDecoderException {
+        Assertions.checkArgument(subtitleInputBuffer == this.dequeuedInputBuffer);
+        if (subtitleInputBuffer.isDecodeOnly()) {
             releaseInputBuffer(this.dequeuedInputBuffer);
         } else {
             CeaInputBuffer ceaInputBuffer = this.dequeuedInputBuffer;
@@ -75,36 +74,36 @@ public abstract class CeaDecoder implements SubtitleDecoder {
             return null;
         }
         while (!this.queuedInputBuffers.isEmpty() && this.queuedInputBuffers.peek().timeUs <= this.playbackPositionUs) {
-            CeaInputBuffer inputBuffer = this.queuedInputBuffers.poll();
-            if (inputBuffer.isEndOfStream()) {
-                SubtitleOutputBuffer outputBuffer = this.availableOutputBuffers.pollFirst();
-                outputBuffer.addFlag(4);
-                releaseInputBuffer(inputBuffer);
-                return outputBuffer;
+            CeaInputBuffer poll = this.queuedInputBuffers.poll();
+            if (poll.isEndOfStream()) {
+                SubtitleOutputBuffer pollFirst = this.availableOutputBuffers.pollFirst();
+                pollFirst.addFlag(4);
+                releaseInputBuffer(poll);
+                return pollFirst;
             }
-            decode(inputBuffer);
+            decode(poll);
             if (isNewSubtitleDataAvailable()) {
-                Subtitle subtitle = createSubtitle();
-                if (!inputBuffer.isDecodeOnly()) {
-                    SubtitleOutputBuffer outputBuffer2 = this.availableOutputBuffers.pollFirst();
-                    outputBuffer2.setContent(inputBuffer.timeUs, subtitle, Long.MAX_VALUE);
-                    releaseInputBuffer(inputBuffer);
-                    return outputBuffer2;
+                Subtitle createSubtitle = createSubtitle();
+                if (!poll.isDecodeOnly()) {
+                    SubtitleOutputBuffer pollFirst2 = this.availableOutputBuffers.pollFirst();
+                    pollFirst2.setContent(poll.timeUs, createSubtitle, Long.MAX_VALUE);
+                    releaseInputBuffer(poll);
+                    return pollFirst2;
                 }
             }
-            releaseInputBuffer(inputBuffer);
+            releaseInputBuffer(poll);
         }
         return null;
     }
 
-    private void releaseInputBuffer(CeaInputBuffer inputBuffer) {
-        inputBuffer.clear();
-        this.availableInputBuffers.add(inputBuffer);
+    private void releaseInputBuffer(CeaInputBuffer ceaInputBuffer) {
+        ceaInputBuffer.clear();
+        this.availableInputBuffers.add(ceaInputBuffer);
     }
 
-    protected void releaseOutputBuffer(SubtitleOutputBuffer outputBuffer) {
-        outputBuffer.clear();
-        this.availableOutputBuffers.add(outputBuffer);
+    protected void releaseOutputBuffer(SubtitleOutputBuffer subtitleOutputBuffer) {
+        subtitleOutputBuffer.clear();
+        this.availableOutputBuffers.add(subtitleOutputBuffer);
     }
 
     @Override // com.google.android.exoplayer2.decoder.Decoder
@@ -121,40 +120,36 @@ public abstract class CeaDecoder implements SubtitleDecoder {
         }
     }
 
-    @Override // com.google.android.exoplayer2.decoder.Decoder
-    public void release() {
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class CeaInputBuffer extends SubtitleInputBuffer implements Comparable<CeaInputBuffer> {
         private long queuedInputBufferCount;
 
         private CeaInputBuffer() {
         }
 
-        public int compareTo(CeaInputBuffer other) {
-            if (isEndOfStream() != other.isEndOfStream()) {
+        public int compareTo(CeaInputBuffer ceaInputBuffer) {
+            if (isEndOfStream() != ceaInputBuffer.isEndOfStream()) {
                 return isEndOfStream() ? 1 : -1;
             }
-            long delta = this.timeUs - other.timeUs;
-            if (delta == 0) {
-                delta = this.queuedInputBufferCount - other.queuedInputBufferCount;
-                if (delta == 0) {
+            long j = this.timeUs - ceaInputBuffer.timeUs;
+            if (j == 0) {
+                j = this.queuedInputBufferCount - ceaInputBuffer.queuedInputBufferCount;
+                if (j == 0) {
                     return 0;
                 }
             }
-            return delta > 0 ? 1 : -1;
+            return j > 0 ? 1 : -1;
         }
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public final class CeaOutputBuffer extends SubtitleOutputBuffer {
         private CeaOutputBuffer() {
             CeaDecoder.this = r1;
         }
 
-        @Override // com.google.android.exoplayer2.text.SubtitleOutputBuffer, com.google.android.exoplayer2.decoder.OutputBuffer
+        @Override // com.google.android.exoplayer2.decoder.OutputBuffer
         public final void release() {
             CeaDecoder.this.releaseOutputBuffer(this);
         }

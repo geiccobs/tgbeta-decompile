@@ -4,9 +4,6 @@ import j$.util.Map;
 import j$.util.function.BiConsumer;
 import j$.util.function.BiFunction;
 import j$.util.function.Function;
-import j$.wrappers.C$r8$wrapper$java$util$function$BiConsumer$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$BiFunction$VWRP;
-import j$.wrappers.C$r8$wrapper$java$util$function$Function$VWRP;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -32,29 +29,14 @@ public abstract class zzx implements Map, Serializable, j$.util.Map {
         return Map.CC.$default$compute(this, obj, biFunction);
     }
 
-    @Override // java.util.Map
-    public /* synthetic */ Object compute(Object obj, java.util.function.BiFunction biFunction) {
-        return compute(obj, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
-    }
-
     @Override // j$.util.Map
     public /* synthetic */ Object computeIfAbsent(Object obj, Function function) {
         return Map.CC.$default$computeIfAbsent(this, obj, function);
     }
 
-    @Override // java.util.Map
-    public /* synthetic */ Object computeIfAbsent(Object obj, java.util.function.Function function) {
-        return computeIfAbsent(obj, C$r8$wrapper$java$util$function$Function$VWRP.convert(function));
-    }
-
     @Override // j$.util.Map
     public /* synthetic */ Object computeIfPresent(Object obj, BiFunction biFunction) {
         return Map.CC.$default$computeIfPresent(this, obj, biFunction);
-    }
-
-    @Override // java.util.Map
-    public /* synthetic */ Object computeIfPresent(Object obj, java.util.function.BiFunction biFunction) {
-        return computeIfPresent(obj, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
     }
 
     @Override // java.util.Map, j$.util.Map
@@ -81,11 +63,6 @@ public abstract class zzx implements Map, Serializable, j$.util.Map {
     @Override // j$.util.Map
     public /* synthetic */ void forEach(BiConsumer biConsumer) {
         Map.CC.$default$forEach(this, biConsumer);
-    }
-
-    @Override // java.util.Map
-    public /* synthetic */ void forEach(java.util.function.BiConsumer biConsumer) {
-        forEach(C$r8$wrapper$java$util$function$BiConsumer$VWRP.convert(biConsumer));
     }
 
     @Override // java.util.Map, j$.util.Map
@@ -125,11 +102,6 @@ public abstract class zzx implements Map, Serializable, j$.util.Map {
         return Map.CC.$default$merge(this, obj, obj2, biFunction);
     }
 
-    @Override // java.util.Map
-    public /* synthetic */ Object merge(Object obj, Object obj2, java.util.function.BiFunction biFunction) {
-        return merge(obj, obj2, C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
-    }
-
     @Override // java.util.Map, j$.util.Map
     @CheckForNull
     @Deprecated
@@ -145,7 +117,7 @@ public abstract class zzx implements Map, Serializable, j$.util.Map {
 
     @Override // java.util.Map, j$.util.Map
     public /* synthetic */ Object putIfAbsent(Object obj, Object obj2) {
-        return Map.CC.$default$putIfAbsent(this, obj, obj2);
+        return get(obj);
     }
 
     @Override // java.util.Map, j$.util.Map
@@ -162,7 +134,7 @@ public abstract class zzx implements Map, Serializable, j$.util.Map {
 
     @Override // java.util.Map, j$.util.Map
     public /* synthetic */ Object replace(Object obj, Object obj2) {
-        return Map.CC.$default$replace(this, obj, obj2);
+        return get(obj);
     }
 
     @Override // java.util.Map, j$.util.Map
@@ -173,11 +145,6 @@ public abstract class zzx implements Map, Serializable, j$.util.Map {
     @Override // j$.util.Map
     public /* synthetic */ void replaceAll(BiFunction biFunction) {
         Map.CC.$default$replaceAll(this, biFunction);
-    }
-
-    @Override // java.util.Map
-    public /* synthetic */ void replaceAll(java.util.function.BiFunction biFunction) {
-        replaceAll(C$r8$wrapper$java$util$function$BiFunction$VWRP.convert(biFunction));
     }
 
     public final String toString() {

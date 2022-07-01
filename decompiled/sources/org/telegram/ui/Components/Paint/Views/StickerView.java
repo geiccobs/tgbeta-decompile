@@ -7,12 +7,14 @@ import android.graphics.RectF;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Document;
+import org.telegram.tgnet.TLRPC$DocumentAttribute;
+import org.telegram.tgnet.TLRPC$TL_documentAttributeSticker;
+import org.telegram.tgnet.TLRPC$TL_maskCoords;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Paint.Views.EntityView;
@@ -20,7 +22,7 @@ import org.telegram.ui.Components.Point;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.Rect;
 import org.telegram.ui.Components.Size;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class StickerView extends EntityView {
     private int anchor;
     private Size baseSize;
@@ -28,9 +30,12 @@ public class StickerView extends EntityView {
     private FrameLayoutDrawer containerView;
     private boolean mirrored;
     private Object parentObject;
-    private TLRPC.Document sticker;
+    private TLRPC$Document sticker;
 
-    /* loaded from: classes5.dex */
+    protected void didSetAnimatedSticker(RLottieDrawable rLottieDrawable) {
+    }
+
+    /* loaded from: classes3.dex */
     public class FrameLayoutDrawer extends FrameLayout {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public FrameLayoutDrawer(Context context) {
@@ -45,30 +50,29 @@ public class StickerView extends EntityView {
         }
     }
 
-    public StickerView(Context context, Point position, Size baseSize, TLRPC.Document sticker, Object parentObject) {
-        this(context, position, 0.0f, 1.0f, baseSize, sticker, parentObject);
-    }
-
-    public StickerView(Context context, Point position, float angle, float scale, Size baseSize, TLRPC.Document sticker, Object parentObject) {
-        super(context, position);
+    public StickerView(Context context, Point point, float f, float f2, Size size, TLRPC$Document tLRPC$Document, Object obj) {
+        super(context, point);
         this.anchor = -1;
+        int i = 0;
         this.mirrored = false;
         this.centerImage = new ImageReceiver();
-        setRotation(angle);
-        setScale(scale);
-        this.sticker = sticker;
-        this.baseSize = baseSize;
-        this.parentObject = parentObject;
-        int a = 0;
+        setRotation(f);
+        setScale(f2);
+        this.sticker = tLRPC$Document;
+        this.baseSize = size;
+        this.parentObject = obj;
         while (true) {
-            if (a >= sticker.attributes.size()) {
+            if (i >= tLRPC$Document.attributes.size()) {
                 break;
             }
-            TLRPC.DocumentAttribute attribute = sticker.attributes.get(a);
-            if (!(attribute instanceof TLRPC.TL_documentAttributeSticker)) {
-                a++;
-            } else if (attribute.mask_coords != null) {
-                this.anchor = attribute.mask_coords.n;
+            TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i);
+            if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeSticker) {
+                TLRPC$TL_maskCoords tLRPC$TL_maskCoords = tLRPC$DocumentAttribute.mask_coords;
+                if (tLRPC$TL_maskCoords != null) {
+                    this.anchor = tLRPC$TL_maskCoords.n;
+                }
+            } else {
+                i++;
             }
         }
         FrameLayoutDrawer frameLayoutDrawer = new FrameLayoutDrawer(context);
@@ -77,12 +81,11 @@ public class StickerView extends EntityView {
         this.centerImage.setAspectFit(true);
         this.centerImage.setInvalidateAll(true);
         this.centerImage.setParentView(this.containerView);
-        TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(sticker.thumbs, 90);
-        this.centerImage.setImage(ImageLocation.getForDocument(sticker), (String) null, ImageLocation.getForDocument(thumb, sticker), (String) null, "webp", parentObject, 1);
+        this.centerImage.setImage(ImageLocation.getForDocument(tLRPC$Document), (String) null, ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(tLRPC$Document.thumbs, 90), tLRPC$Document), (String) null, "webp", obj, 1);
         this.centerImage.setDelegate(new ImageReceiver.ImageReceiverDelegate() { // from class: org.telegram.ui.Components.Paint.Views.StickerView$$ExternalSyntheticLambda0
             @Override // org.telegram.messenger.ImageReceiver.ImageReceiverDelegate
             public final void didSetImage(ImageReceiver imageReceiver, boolean z, boolean z2, boolean z3) {
-                StickerView.this.m2790lambda$new$0$orgtelegramuiComponentsPaintViewsStickerView(imageReceiver, z, z2, z3);
+                StickerView.this.lambda$new$0(imageReceiver, z, z2, z3);
             }
 
             @Override // org.telegram.messenger.ImageReceiver.ImageReceiverDelegate
@@ -93,16 +96,16 @@ public class StickerView extends EntityView {
         updatePosition();
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Components-Paint-Views-StickerView */
-    public /* synthetic */ void m2790lambda$new$0$orgtelegramuiComponentsPaintViewsStickerView(ImageReceiver imageReceiver, boolean set, boolean isThumb, boolean memCache) {
-        RLottieDrawable drawable;
-        if (set && !isThumb && (drawable = imageReceiver.getLottieAnimation()) != null) {
-            didSetAnimatedSticker(drawable);
+    public /* synthetic */ void lambda$new$0(ImageReceiver imageReceiver, boolean z, boolean z2, boolean z3) {
+        RLottieDrawable lottieAnimation;
+        if (!z || z2 || (lottieAnimation = imageReceiver.getLottieAnimation()) == null) {
+            return;
         }
+        didSetAnimatedSticker(lottieAnimation);
     }
 
-    public StickerView(Context context, StickerView stickerView, Point position) {
-        this(context, position, stickerView.getRotation(), stickerView.getScale(), stickerView.baseSize, stickerView.sticker, stickerView.parentObject);
+    public StickerView(Context context, StickerView stickerView, Point point) {
+        this(context, point, stickerView.getRotation(), stickerView.getScale(), stickerView.baseSize, stickerView.sticker, stickerView.parentObject);
         if (stickerView.mirrored) {
             mirror();
         }
@@ -135,14 +138,10 @@ public class StickerView extends EntityView {
 
     @Override // org.telegram.ui.Components.Paint.Views.EntityView
     public void updatePosition() {
-        float halfWidth = this.baseSize.width / 2.0f;
-        float halfHeight = this.baseSize.height / 2.0f;
-        setX(this.position.x - halfWidth);
-        setY(this.position.y - halfHeight);
+        Size size = this.baseSize;
+        setX(this.position.x - (size.width / 2.0f));
+        setY(this.position.y - (size.height / 2.0f));
         updateSelectionView();
-    }
-
-    protected void didSetAnimatedSticker(RLottieDrawable drawable) {
     }
 
     protected void stickerDraw(Canvas canvas) {
@@ -154,42 +153,46 @@ public class StickerView extends EntityView {
             canvas.scale(-1.0f, 1.0f);
             canvas.translate(-this.baseSize.width, 0.0f);
         }
-        this.centerImage.setImageCoords(0.0f, 0.0f, (int) this.baseSize.width, (int) this.baseSize.height);
+        ImageReceiver imageReceiver = this.centerImage;
+        Size size = this.baseSize;
+        imageReceiver.setImageCoords(0.0f, 0.0f, (int) size.width, (int) size.height);
         this.centerImage.draw(canvas);
         canvas.restore();
     }
 
     public long getDuration() {
-        RLottieDrawable rLottieDrawable = this.centerImage.getLottieAnimation();
-        if (rLottieDrawable != null) {
-            return rLottieDrawable.getDuration();
+        RLottieDrawable lottieAnimation = this.centerImage.getLottieAnimation();
+        if (lottieAnimation != null) {
+            return lottieAnimation.getDuration();
         }
-        AnimatedFileDrawable animatedFileDrawable = this.centerImage.getAnimation();
-        if (animatedFileDrawable != null) {
-            return animatedFileDrawable.getDurationMs();
+        AnimatedFileDrawable animation = this.centerImage.getAnimation();
+        if (animation == null) {
+            return 0L;
         }
-        return 0L;
+        return animation.getDurationMs();
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec((int) this.baseSize.width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec((int) this.baseSize.height, C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec((int) this.baseSize.width, 1073741824), View.MeasureSpec.makeMeasureSpec((int) this.baseSize.height, 1073741824));
     }
 
     @Override // org.telegram.ui.Components.Paint.Views.EntityView
     protected Rect getSelectionBounds() {
-        ViewGroup parentView = (ViewGroup) getParent();
-        float scale = parentView.getScaleX();
-        float side = getMeasuredWidth() * (getScale() + 0.4f);
-        return new Rect((this.position.x - (side / 2.0f)) * scale, (this.position.y - (side / 2.0f)) * scale, side * scale, side * scale);
+        float scaleX = ((ViewGroup) getParent()).getScaleX();
+        float measuredWidth = getMeasuredWidth() * (getScale() + 0.4f);
+        Point point = this.position;
+        float f = measuredWidth / 2.0f;
+        float f2 = measuredWidth * scaleX;
+        return new Rect((point.x - f) * scaleX, (point.y - f) * scaleX, f2, f2);
     }
 
     @Override // org.telegram.ui.Components.Paint.Views.EntityView
     protected EntityView.SelectionView createSelectionView() {
-        return new StickerViewSelectionView(getContext());
+        return new StickerViewSelectionView(this, getContext());
     }
 
-    public TLRPC.Document getSticker() {
+    public TLRPC$Document getSticker() {
         return this.sticker;
     }
 
@@ -201,54 +204,50 @@ public class StickerView extends EntityView {
         return this.baseSize;
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class StickerViewSelectionView extends EntityView.SelectionView {
         private Paint arcPaint = new Paint(1);
         private RectF arcRect = new RectF();
 
-        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        public StickerViewSelectionView(Context context) {
+        public StickerViewSelectionView(StickerView stickerView, Context context) {
             super(context);
-            StickerView.this = this$0;
             this.arcPaint.setColor(-1);
             this.arcPaint.setStrokeWidth(AndroidUtilities.dp(1.0f));
             this.arcPaint.setStyle(Paint.Style.STROKE);
         }
 
         @Override // org.telegram.ui.Components.Paint.Views.EntityView.SelectionView
-        protected int pointInsideHandle(float x, float y) {
-            float thickness = AndroidUtilities.dp(1.0f);
-            float radius = AndroidUtilities.dp(19.5f);
-            float inset = radius + thickness;
-            float middle = ((getMeasuredHeight() - (inset * 2.0f)) / 2.0f) + inset;
-            if (x > inset - radius && y > middle - radius && x < inset + radius && y < middle + radius) {
-                return 1;
+        protected int pointInsideHandle(float f, float f2) {
+            float dp = AndroidUtilities.dp(19.5f);
+            float dp2 = AndroidUtilities.dp(1.0f) + dp;
+            float f3 = dp2 * 2.0f;
+            float measuredHeight = ((getMeasuredHeight() - f3) / 2.0f) + dp2;
+            if (f <= dp2 - dp || f2 <= measuredHeight - dp || f >= dp2 + dp || f2 >= measuredHeight + dp) {
+                if (f > ((getMeasuredWidth() - f3) + dp2) - dp && f2 > measuredHeight - dp && f < dp2 + (getMeasuredWidth() - f3) + dp && f2 < measuredHeight + dp) {
+                    return 2;
+                }
+                float measuredWidth = getMeasuredWidth() / 2.0f;
+                return Math.pow((double) (f - measuredWidth), 2.0d) + Math.pow((double) (f2 - measuredWidth), 2.0d) < Math.pow((double) measuredWidth, 2.0d) ? 3 : 0;
             }
-            if (x > ((getMeasuredWidth() - (inset * 2.0f)) + inset) - radius && y > middle - radius && x < (getMeasuredWidth() - (inset * 2.0f)) + inset + radius && y < middle + radius) {
-                return 2;
-            }
-            float selectionRadius = getMeasuredWidth() / 2.0f;
-            if (Math.pow(x - selectionRadius, 2.0d) + Math.pow(y - selectionRadius, 2.0d) < Math.pow(selectionRadius, 2.0d)) {
-                return 3;
-            }
-            return 0;
+            return 1;
         }
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            float thickness = AndroidUtilities.dp(1.0f);
-            float radius = AndroidUtilities.dp(4.5f);
-            float inset = radius + thickness + AndroidUtilities.dp(15.0f);
-            float mainRadius = (getMeasuredWidth() / 2) - inset;
-            this.arcRect.set(inset, inset, (mainRadius * 2.0f) + inset, (mainRadius * 2.0f) + inset);
+            float dp = AndroidUtilities.dp(4.5f);
+            float dp2 = AndroidUtilities.dp(1.0f) + dp + AndroidUtilities.dp(15.0f);
+            float measuredWidth = (getMeasuredWidth() / 2) - dp2;
+            float f = (2.0f * measuredWidth) + dp2;
+            this.arcRect.set(dp2, dp2, f, f);
             for (int i = 0; i < 48; i++) {
-                canvas.drawArc(this.arcRect, (4.0f + 4.0f) * i, 4.0f, false, this.arcPaint);
+                canvas.drawArc(this.arcRect, i * 8.0f, 4.0f, false, this.arcPaint);
             }
-            canvas.drawCircle(inset, inset + mainRadius, radius, this.dotPaint);
-            canvas.drawCircle(inset, inset + mainRadius, radius, this.dotStrokePaint);
-            canvas.drawCircle((mainRadius * 2.0f) + inset, inset + mainRadius, radius, this.dotPaint);
-            canvas.drawCircle((2.0f * mainRadius) + inset, inset + mainRadius, radius, this.dotStrokePaint);
+            float f2 = measuredWidth + dp2;
+            canvas.drawCircle(dp2, f2, dp, this.dotPaint);
+            canvas.drawCircle(dp2, f2, dp, this.dotStrokePaint);
+            canvas.drawCircle(f, f2, dp, this.dotPaint);
+            canvas.drawCircle(f, f2, dp, this.dotStrokePaint);
         }
     }
 }

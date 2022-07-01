@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Iterator;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zzbb implements Serializable, Iterable<Byte> {
     public static final zzbb zzfi = new zzbi(zzci.zzkt);
     private static final zzbf zzfj;

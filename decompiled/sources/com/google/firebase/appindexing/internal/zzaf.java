@@ -5,8 +5,9 @@ import com.google.android.gms.common.internal.Preconditions;
 import com.google.firebase.appindexing.FirebaseAppIndexingException;
 import com.google.firebase.appindexing.FirebaseAppIndexingInvalidArgumentException;
 import com.google.firebase.appindexing.FirebaseAppIndexingTooManyArgumentsException;
+import com.google.firebase.appindexing.zza;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzaf {
     public static FirebaseAppIndexingException zza(Status status, String str) {
         Preconditions.checkNotNull(status);
@@ -25,7 +26,7 @@ public final class zzaf {
             case 17513:
                 return new com.google.firebase.appindexing.zzb(str);
             case 17514:
-                return new com.google.firebase.appindexing.zza(str);
+                return new zza(str);
         }
     }
 }

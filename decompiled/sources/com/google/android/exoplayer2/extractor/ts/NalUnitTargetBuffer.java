@@ -2,7 +2,7 @@ package com.google.android.exoplayer2.extractor.ts;
 
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class NalUnitTargetBuffer {
     private boolean isCompleted;
     private boolean isFilling;
@@ -10,9 +10,9 @@ final class NalUnitTargetBuffer {
     public int nalLength;
     private final int targetType;
 
-    public NalUnitTargetBuffer(int targetType, int initialCapacity) {
-        this.targetType = targetType;
-        byte[] bArr = new byte[initialCapacity + 3];
+    public NalUnitTargetBuffer(int i, int i2) {
+        this.targetType = i;
+        byte[] bArr = new byte[i2 + 3];
         this.nalData = bArr;
         bArr[2] = 1;
     }
@@ -26,10 +26,10 @@ final class NalUnitTargetBuffer {
         return this.isCompleted;
     }
 
-    public void startNalUnit(int type) {
+    public void startNalUnit(int i) {
         boolean z = true;
         Assertions.checkState(!this.isFilling);
-        if (type != this.targetType) {
+        if (i != this.targetType) {
             z = false;
         }
         this.isFilling = z;
@@ -39,26 +39,26 @@ final class NalUnitTargetBuffer {
         }
     }
 
-    public void appendToNalUnit(byte[] data, int offset, int limit) {
+    public void appendToNalUnit(byte[] bArr, int i, int i2) {
         if (!this.isFilling) {
             return;
         }
-        int readLength = limit - offset;
-        byte[] bArr = this.nalData;
-        int length = bArr.length;
-        int i = this.nalLength;
-        if (length < i + readLength) {
-            this.nalData = Arrays.copyOf(bArr, (i + readLength) * 2);
+        int i3 = i2 - i;
+        byte[] bArr2 = this.nalData;
+        int length = bArr2.length;
+        int i4 = this.nalLength;
+        if (length < i4 + i3) {
+            this.nalData = Arrays.copyOf(bArr2, (i4 + i3) * 2);
         }
-        System.arraycopy(data, offset, this.nalData, this.nalLength, readLength);
-        this.nalLength += readLength;
+        System.arraycopy(bArr, i, this.nalData, this.nalLength, i3);
+        this.nalLength += i3;
     }
 
-    public boolean endNalUnit(int discardPadding) {
+    public boolean endNalUnit(int i) {
         if (!this.isFilling) {
             return false;
         }
-        this.nalLength -= discardPadding;
+        this.nalLength -= i;
         this.isFilling = false;
         this.isCompleted = true;
         return true;

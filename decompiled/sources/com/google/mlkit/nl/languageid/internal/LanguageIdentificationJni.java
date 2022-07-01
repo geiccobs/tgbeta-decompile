@@ -8,7 +8,9 @@ import com.google.android.gms.internal.mlkit_language_id.zzai;
 import com.google.android.gms.internal.mlkit_language_id.zzaj;
 import com.google.android.gms.internal.mlkit_language_id.zzcv;
 import com.google.android.gms.internal.mlkit_language_id.zzq;
-import com.google.android.gms.internal.mlkit_language_id.zzy;
+import com.google.android.gms.internal.mlkit_language_id.zzy$zzad;
+import com.google.android.gms.internal.mlkit_language_id.zzy$zzaf;
+import com.google.android.gms.internal.mlkit_language_id.zzy$zzau;
 import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.common.MlKitException;
@@ -24,7 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LanguageIdentificationJni extends ModelResource {
     private static boolean zza;
     private final Context zzb;
@@ -101,10 +103,8 @@ public class LanguageIdentificationJni extends ModelResource {
                     this.zze = nativeInit;
                     if (nativeInit == 0) {
                         throw new MlKitException("Couldn't load language detection model", 13);
-                    } else if (openFd == null) {
-                    } else {
-                        openFd.close();
                     }
+                    openFd.close();
                 } catch (Throwable th) {
                     if (openFd != null) {
                         try {
@@ -128,8 +128,8 @@ public class LanguageIdentificationJni extends ModelResource {
                 }
 
                 @Override // com.google.android.gms.internal.mlkit_language_id.zzcv.zza
-                public final zzy.zzad.zza zza() {
-                    return zzy.zzad.zzb().zza(zzy.zzau.zza().zza(zzy.zzaf.zza().zza(this.zza).zza(zzai.UNKNOWN_ERROR)));
+                public final zzy$zzad.zza zza() {
+                    return zzy$zzad.zzb().zza(zzy$zzau.zza().zza(zzy$zzaf.zza().zza(this.zza).zza(zzai.UNKNOWN_ERROR)));
                 }
             }, zzaj.ON_DEVICE_LANGUAGE_IDENTIFICATION_LOAD);
             throw e2;

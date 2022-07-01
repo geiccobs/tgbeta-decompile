@@ -5,7 +5,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.Status;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zbk extends zbl<Status> {
     public zbk(GoogleApiClient googleApiClient) {
         super(googleApiClient);
@@ -16,7 +16,7 @@ public final class zbk extends zbl<Status> {
         return status;
     }
 
-    @Override // com.google.android.gms.common.api.internal.BaseImplementation.ApiMethodImpl
+    @Override // com.google.android.gms.common.api.internal.BaseImplementation$ApiMethodImpl
     protected final /* bridge */ /* synthetic */ void doExecute(zbe zbeVar) throws RemoteException {
         zbe zbeVar2 = zbeVar;
         ((zbs) zbeVar2.getService()).zbc(new zbj(this), zbeVar2.zba());

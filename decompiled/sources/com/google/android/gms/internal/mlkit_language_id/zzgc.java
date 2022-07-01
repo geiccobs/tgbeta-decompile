@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzgc<T> implements zzgp<T> {
     private final zzfz zza;
     private final zzhh<?, ?> zzb;
@@ -27,19 +27,16 @@ final class zzgc<T> implements zzgp<T> {
         if (!this.zzb.zza(t).equals(this.zzb.zza(t2))) {
             return false;
         }
-        if (this.zzc) {
-            return this.zzd.zza(t).equals(this.zzd.zza(t2));
+        if (!this.zzc) {
+            return true;
         }
-        return true;
+        return this.zzd.zza(t).equals(this.zzd.zza(t2));
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
     public final int zza(T t) {
         int hashCode = this.zzb.zza(t).hashCode();
-        if (this.zzc) {
-            return (hashCode * 53) + this.zzd.zza(t).hashCode();
-        }
-        return hashCode;
+        return this.zzc ? (hashCode * 53) + this.zzd.zza(t).hashCode() : hashCode;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgp
@@ -84,9 +81,6 @@ final class zzgc<T> implements zzgp<T> {
     public final int zzd(T t) {
         zzhh<?, ?> zzhhVar = this.zzb;
         int zzc = zzhhVar.zzc(zzhhVar.zza(t)) + 0;
-        if (this.zzc) {
-            return zzc + this.zzd.zza(t).zzg();
-        }
-        return zzc;
+        return this.zzc ? zzc + this.zzd.zza(t).zzg() : zzc;
     }
 }

@@ -1,18 +1,16 @@
 package com.android.billingclient.api;
 
+import com.google.android.gms.internal.play_billing.zzu;
 import java.util.List;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class QueryProductDetailsParams {
-    private final com.google.android.gms.internal.play_billing.zzu zza;
+    private final zzu zza;
 
     /* compiled from: com.android.billingclient:billing@@5.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class Builder {
-        private com.google.android.gms.internal.play_billing.zzu zza;
-
-        private Builder() {
-        }
+        private zzu zza;
 
         /* synthetic */ Builder(zzbj zzbjVar) {
         }
@@ -32,7 +30,7 @@ public final class QueryProductDetailsParams {
                 z2 |= product.zzb().equals("subs");
             }
             if (!z || !z2) {
-                this.zza = com.google.android.gms.internal.play_billing.zzu.zzk(list);
+                this.zza = zzu.zzk(list);
                 return this;
             }
             throw new IllegalArgumentException("All products should be of the same product type.");
@@ -40,29 +38,26 @@ public final class QueryProductDetailsParams {
     }
 
     /* compiled from: com.android.billingclient:billing@@5.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class Product {
         private final String zza;
         private final String zzb;
 
         /* compiled from: com.android.billingclient:billing@@5.0.0 */
-        /* loaded from: classes3.dex */
+        /* loaded from: classes.dex */
         public static class Builder {
             private String zza;
             private String zzb;
-
-            private Builder() {
-            }
 
             /* synthetic */ Builder(zzbk zzbkVar) {
             }
 
             public Product build() {
                 if (this.zza != null) {
-                    if (this.zzb == null) {
-                        throw new IllegalArgumentException("Product type must be provided.");
+                    if (this.zzb != null) {
+                        return new Product(this, null);
                     }
-                    return new Product(this, null);
+                    throw new IllegalArgumentException("Product type must be provided.");
                 }
                 throw new IllegalArgumentException("Product id must be provided.");
             }
@@ -104,7 +99,7 @@ public final class QueryProductDetailsParams {
         return new Builder(null);
     }
 
-    public final com.google.android.gms.internal.play_billing.zzu zza() {
+    public final zzu zza() {
         return this.zza;
     }
 

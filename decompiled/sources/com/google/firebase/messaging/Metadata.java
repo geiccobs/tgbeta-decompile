@@ -9,13 +9,18 @@ import android.util.Log;
 import com.google.android.gms.common.util.PlatformVersion;
 import com.google.firebase.FirebaseApp;
 import java.util.List;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Metadata {
+    @GuardedBy("this")
     private String appVersionCode;
+    @GuardedBy("this")
     private String appVersionName;
     private final Context context;
+    @GuardedBy("this")
     private int gmsVersionCode;
+    @GuardedBy("this")
     private int iidImplementation = 0;
 
     public Metadata(Context context) {
@@ -31,7 +36,7 @@ public class Metadata {
         if (!applicationId.startsWith("1:")) {
             return applicationId;
         }
-        String[] split = applicationId.split(com.microsoft.appcenter.Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
+        String[] split = applicationId.split(":");
         if (split.length < 2) {
             return null;
         }
@@ -47,10 +52,10 @@ public class Metadata {
             return this.context.getPackageManager().getPackageInfo(str, 0);
         } catch (PackageManager.NameNotFoundException e) {
             String valueOf = String.valueOf(e);
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 23);
+            StringBuilder sb = new StringBuilder(valueOf.length() + 23);
             sb.append("Failed to find package ");
             sb.append(valueOf);
-            Log.w(Constants.TAG, sb.toString());
+            Log.w("FirebaseMessaging", sb.toString());
             return null;
         }
     }
@@ -92,7 +97,7 @@ public class Metadata {
         }
         PackageManager packageManager = this.context.getPackageManager();
         if (packageManager.checkPermission("com.google.android.c2dm.permission.SEND", "com.google.android.gms") == -1) {
-            Log.e(Constants.TAG, "Google Play services missing or without correct permission.");
+            Log.e("FirebaseMessaging", "Google Play services missing or without correct permission.");
             return 0;
         }
         int i2 = 1;
@@ -102,7 +107,7 @@ public class Metadata {
             List<ResolveInfo> queryIntentServices = packageManager.queryIntentServices(intent, 0);
             if (queryIntentServices != null && queryIntentServices.size() > 0) {
                 this.iidImplementation = 1;
-                return i2;
+                return 1;
             }
         }
         Intent intent2 = new Intent("com.google.iid.TOKEN_REQUEST");
@@ -112,7 +117,7 @@ public class Metadata {
             this.iidImplementation = 2;
             return 2;
         }
-        Log.w(Constants.TAG, "Failed to resolve IID implementation package, falling back");
+        Log.w("FirebaseMessaging", "Failed to resolve IID implementation package, falling back");
         if (PlatformVersion.isAtLeastO()) {
             this.iidImplementation = 2;
             i2 = 2;

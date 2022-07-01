@@ -1,135 +1,127 @@
 package com.google.android.exoplayer2.source.dash.manifest;
 
 import java.util.Locale;
-import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class UrlTemplate {
-    private static final String BANDWIDTH = "Bandwidth";
-    private static final int BANDWIDTH_ID = 3;
-    private static final String DEFAULT_FORMAT_TAG = "%01d";
-    private static final String ESCAPED_DOLLAR = "$$";
-    private static final String NUMBER = "Number";
-    private static final int NUMBER_ID = 2;
-    private static final String REPRESENTATION = "RepresentationID";
-    private static final int REPRESENTATION_ID = 1;
-    private static final String TIME = "Time";
-    private static final int TIME_ID = 4;
     private final int identifierCount;
     private final String[] identifierFormatTags;
     private final int[] identifiers;
     private final String[] urlPieces;
 
-    public static UrlTemplate compile(String template) {
-        String[] urlPieces = new String[5];
-        int[] identifiers = new int[4];
-        String[] identifierFormatTags = new String[4];
-        int identifierCount = parseTemplate(template, urlPieces, identifiers, identifierFormatTags);
-        return new UrlTemplate(urlPieces, identifiers, identifierFormatTags, identifierCount);
+    public static UrlTemplate compile(String str) {
+        String[] strArr = new String[5];
+        int[] iArr = new int[4];
+        String[] strArr2 = new String[4];
+        return new UrlTemplate(strArr, iArr, strArr2, parseTemplate(str, strArr, iArr, strArr2));
     }
 
-    private UrlTemplate(String[] urlPieces, int[] identifiers, String[] identifierFormatTags, int identifierCount) {
-        this.urlPieces = urlPieces;
-        this.identifiers = identifiers;
-        this.identifierFormatTags = identifierFormatTags;
-        this.identifierCount = identifierCount;
+    private UrlTemplate(String[] strArr, int[] iArr, String[] strArr2, int i) {
+        this.urlPieces = strArr;
+        this.identifiers = iArr;
+        this.identifierFormatTags = strArr2;
+        this.identifierCount = i;
     }
 
-    public String buildUri(String representationId, long segmentNumber, int bandwidth, long time) {
-        StringBuilder builder = new StringBuilder();
-        int i = 0;
+    public String buildUri(String str, long j, int i, long j2) {
+        StringBuilder sb = new StringBuilder();
+        int i2 = 0;
         while (true) {
-            int i2 = this.identifierCount;
-            if (i < i2) {
-                builder.append(this.urlPieces[i]);
+            int i3 = this.identifierCount;
+            if (i2 < i3) {
+                sb.append(this.urlPieces[i2]);
                 int[] iArr = this.identifiers;
-                if (iArr[i] == 1) {
-                    builder.append(representationId);
-                } else if (iArr[i] == 2) {
-                    builder.append(String.format(Locale.US, this.identifierFormatTags[i], Long.valueOf(segmentNumber)));
-                } else if (iArr[i] == 3) {
-                    builder.append(String.format(Locale.US, this.identifierFormatTags[i], Integer.valueOf(bandwidth)));
-                } else if (iArr[i] == 4) {
-                    builder.append(String.format(Locale.US, this.identifierFormatTags[i], Long.valueOf(time)));
+                if (iArr[i2] == 1) {
+                    sb.append(str);
+                } else if (iArr[i2] == 2) {
+                    sb.append(String.format(Locale.US, this.identifierFormatTags[i2], Long.valueOf(j)));
+                } else if (iArr[i2] == 3) {
+                    sb.append(String.format(Locale.US, this.identifierFormatTags[i2], Integer.valueOf(i)));
+                } else if (iArr[i2] == 4) {
+                    sb.append(String.format(Locale.US, this.identifierFormatTags[i2], Long.valueOf(j2)));
                 }
-                i++;
+                i2++;
             } else {
-                builder.append(this.urlPieces[i2]);
-                return builder.toString();
+                sb.append(this.urlPieces[i3]);
+                return sb.toString();
             }
         }
     }
 
-    private static int parseTemplate(String template, String[] urlPieces, int[] identifiers, String[] identifierFormatTags) {
-        urlPieces[0] = "";
-        int templateIndex = 0;
-        int identifierCount = 0;
-        while (templateIndex < template.length()) {
-            int dollarIndex = template.indexOf("$", templateIndex);
+    private static int parseTemplate(String str, String[] strArr, int[] iArr, String[] strArr2) {
+        String str2;
+        strArr[0] = "";
+        int i = 0;
+        int i2 = 0;
+        while (i < str.length()) {
+            int indexOf = str.indexOf("$", i);
             char c = 65535;
-            if (dollarIndex == -1) {
-                urlPieces[identifierCount] = urlPieces[identifierCount] + template.substring(templateIndex);
-                templateIndex = template.length();
-            } else if (dollarIndex != templateIndex) {
-                urlPieces[identifierCount] = urlPieces[identifierCount] + template.substring(templateIndex, dollarIndex);
-                templateIndex = dollarIndex;
-            } else if (!template.startsWith(ESCAPED_DOLLAR, templateIndex)) {
-                int secondIndex = template.indexOf("$", templateIndex + 1);
-                String identifier = template.substring(templateIndex + 1, secondIndex);
-                if (identifier.equals(REPRESENTATION)) {
-                    identifiers[identifierCount] = 1;
+            if (indexOf == -1) {
+                strArr[i2] = strArr[i2] + str.substring(i);
+                i = str.length();
+            } else if (indexOf != i) {
+                strArr[i2] = strArr[i2] + str.substring(i, indexOf);
+                i = indexOf;
+            } else if (str.startsWith("$$", i)) {
+                strArr[i2] = strArr[i2] + "$";
+                i += 2;
+            } else {
+                int i3 = i + 1;
+                int indexOf2 = str.indexOf("$", i3);
+                String substring = str.substring(i3, indexOf2);
+                if (substring.equals("RepresentationID")) {
+                    iArr[i2] = 1;
                 } else {
-                    int formatTagIndex = identifier.indexOf("%0");
-                    String formatTag = DEFAULT_FORMAT_TAG;
-                    if (formatTagIndex != -1) {
-                        formatTag = identifier.substring(formatTagIndex);
-                        if (!formatTag.endsWith(Theme.DEFAULT_BACKGROUND_SLUG) && !formatTag.endsWith("x")) {
-                            formatTag = formatTag + Theme.DEFAULT_BACKGROUND_SLUG;
+                    int indexOf3 = substring.indexOf("%0");
+                    if (indexOf3 != -1) {
+                        str2 = substring.substring(indexOf3);
+                        if (!str2.endsWith("d") && !str2.endsWith("x")) {
+                            str2 = str2 + "d";
                         }
-                        identifier = identifier.substring(0, formatTagIndex);
+                        substring = substring.substring(0, indexOf3);
+                    } else {
+                        str2 = "%01d";
                     }
-                    switch (identifier.hashCode()) {
+                    substring.hashCode();
+                    switch (substring.hashCode()) {
                         case -1950496919:
-                            if (identifier.equals(NUMBER)) {
+                            if (substring.equals("Number")) {
                                 c = 0;
                                 break;
                             }
                             break;
                         case 2606829:
-                            if (identifier.equals(TIME)) {
-                                c = 2;
+                            if (substring.equals("Time")) {
+                                c = 1;
                                 break;
                             }
                             break;
                         case 38199441:
-                            if (identifier.equals(BANDWIDTH)) {
-                                c = 1;
+                            if (substring.equals("Bandwidth")) {
+                                c = 2;
                                 break;
                             }
                             break;
                     }
                     switch (c) {
                         case 0:
-                            identifiers[identifierCount] = 2;
+                            iArr[i2] = 2;
                             break;
                         case 1:
-                            identifiers[identifierCount] = 3;
+                            iArr[i2] = 4;
                             break;
                         case 2:
-                            identifiers[identifierCount] = 4;
+                            iArr[i2] = 3;
                             break;
                         default:
-                            throw new IllegalArgumentException("Invalid template: " + template);
+                            throw new IllegalArgumentException("Invalid template: " + str);
                     }
-                    identifierFormatTags[identifierCount] = formatTag;
+                    strArr2[i2] = str2;
                 }
-                identifierCount++;
-                urlPieces[identifierCount] = "";
-                templateIndex = secondIndex + 1;
-            } else {
-                urlPieces[identifierCount] = urlPieces[identifierCount] + "$";
-                templateIndex += 2;
+                i2++;
+                strArr[i2] = "";
+                i = indexOf2 + 1;
             }
         }
-        return identifierCount;
+        return i2;
     }
 }

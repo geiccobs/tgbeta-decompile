@@ -5,7 +5,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zab implements IInterface {
     private final IBinder zaa;
     private final String zab;
@@ -24,19 +24,6 @@ public class zab implements IInterface {
         Parcel obtain = Parcel.obtain();
         obtain.writeInterfaceToken(this.zab);
         return obtain;
-    }
-
-    public final Parcel zaa(int i, Parcel parcel) throws RemoteException {
-        parcel = Parcel.obtain();
-        try {
-            this.zaa.transact(2, parcel, parcel, 0);
-            parcel.readException();
-            return parcel;
-        } catch (RuntimeException e) {
-            throw e;
-        } finally {
-            parcel.recycle();
-        }
     }
 
     public final void zab(int i, Parcel parcel) throws RemoteException {

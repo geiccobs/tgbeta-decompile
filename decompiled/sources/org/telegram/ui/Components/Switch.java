@@ -21,11 +21,11 @@ import android.os.Vibrator;
 import android.util.StateSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
-import androidx.core.app.NotificationCompat;
+import androidx.annotation.Keep;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.OneUIUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Switch extends View {
     private boolean attachedToWindow;
     private boolean bitmapsCreated;
@@ -63,7 +63,7 @@ public class Switch extends View {
     private String trackCheckedColorKey;
     private String trackColorKey;
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface OnCheckedChangeListener {
         void onCheckedChanged(Switch r1, boolean z);
     }
@@ -75,10 +75,10 @@ public class Switch extends View {
     public Switch(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.iconProgress = 1.0f;
-        this.trackColorKey = Theme.key_switch2Track;
-        this.trackCheckedColorKey = Theme.key_switch2TrackChecked;
-        this.thumbColorKey = Theme.key_windowBackgroundWhite;
-        this.thumbCheckedColorKey = Theme.key_windowBackgroundWhite;
+        this.trackColorKey = "switch2Track";
+        this.trackCheckedColorKey = "switch2TrackChecked";
+        this.thumbColorKey = "windowBackgroundWhite";
+        this.thumbCheckedColorKey = "windowBackgroundWhite";
         this.pressedState = new int[]{16842910, 16842919};
         this.semHaptics = false;
         this.resourcesProvider = resourcesProvider;
@@ -92,26 +92,30 @@ public class Switch extends View {
         setHapticFeedbackEnabled(true);
     }
 
-    public void setProgress(float value) {
-        if (this.progress == value) {
+    @Keep
+    public void setProgress(float f) {
+        if (this.progress == f) {
             return;
         }
-        this.progress = value;
+        this.progress = f;
         invalidate();
     }
 
+    @Keep
     public float getProgress() {
         return this.progress;
     }
 
-    public void setIconProgress(float value) {
-        if (this.iconProgress == value) {
+    @Keep
+    public void setIconProgress(float f) {
+        if (this.iconProgress == f) {
             return;
         }
-        this.iconProgress = value;
+        this.iconProgress = f;
         invalidate();
     }
 
+    @Keep
     public float getIconProgress() {
         return this.iconProgress;
     }
@@ -132,116 +136,108 @@ public class Switch extends View {
         }
     }
 
-    public void setDrawIconType(int type) {
-        this.drawIconType = type;
+    public void setDrawIconType(int i) {
+        this.drawIconType = i;
     }
 
-    public void setDrawRipple(boolean value) {
+    public void setDrawRipple(boolean z) {
         String str;
         Theme.ResourcesProvider resourcesProvider;
-        Drawable maskDrawable;
-        if (Build.VERSION.SDK_INT < 21 || value == this.drawRipple) {
+        int i = Build.VERSION.SDK_INT;
+        if (i < 21 || z == this.drawRipple) {
             return;
         }
-        this.drawRipple = value;
-        int i = 1;
+        this.drawRipple = z;
+        int i2 = 1;
         if (this.rippleDrawable == null) {
             Paint paint = new Paint(1);
             this.ripplePaint = paint;
             paint.setColor(-1);
-            if (Build.VERSION.SDK_INT >= 23) {
-                maskDrawable = null;
-            } else {
-                maskDrawable = new Drawable() { // from class: org.telegram.ui.Components.Switch.1
-                    @Override // android.graphics.drawable.Drawable
-                    public void draw(Canvas canvas) {
-                        android.graphics.Rect bounds = getBounds();
-                        canvas.drawCircle(bounds.centerX(), bounds.centerY(), AndroidUtilities.dp(18.0f), Switch.this.ripplePaint);
-                    }
+            RippleDrawable rippleDrawable = new RippleDrawable(new ColorStateList(new int[][]{StateSet.WILD_CARD}, new int[]{0}), null, i >= 23 ? null : new Drawable() { // from class: org.telegram.ui.Components.Switch.1
+                @Override // android.graphics.drawable.Drawable
+                public int getOpacity() {
+                    return 0;
+                }
 
-                    @Override // android.graphics.drawable.Drawable
-                    public void setAlpha(int alpha) {
-                    }
+                @Override // android.graphics.drawable.Drawable
+                public void setAlpha(int i3) {
+                }
 
-                    @Override // android.graphics.drawable.Drawable
-                    public void setColorFilter(ColorFilter colorFilter) {
-                    }
+                @Override // android.graphics.drawable.Drawable
+                public void setColorFilter(ColorFilter colorFilter) {
+                }
 
-                    @Override // android.graphics.drawable.Drawable
-                    public int getOpacity() {
-                        return 0;
-                    }
-                };
-            }
-            ColorStateList colorStateList = new ColorStateList(new int[][]{StateSet.WILD_CARD}, new int[]{0});
-            this.rippleDrawable = new RippleDrawable(colorStateList, null, maskDrawable);
-            if (Build.VERSION.SDK_INT >= 23) {
-                this.rippleDrawable.setRadius(AndroidUtilities.dp(18.0f));
+                @Override // android.graphics.drawable.Drawable
+                public void draw(Canvas canvas) {
+                    android.graphics.Rect bounds = getBounds();
+                    canvas.drawCircle(bounds.centerX(), bounds.centerY(), AndroidUtilities.dp(18.0f), Switch.this.ripplePaint);
+                }
+            });
+            this.rippleDrawable = rippleDrawable;
+            if (i >= 23) {
+                rippleDrawable.setRadius(AndroidUtilities.dp(18.0f));
             }
             this.rippleDrawable.setCallback(this);
         }
-        boolean z = this.isChecked;
-        if ((z && this.colorSet != 2) || (!z && this.colorSet != 1)) {
-            if (z) {
+        boolean z2 = this.isChecked;
+        if ((z2 && this.colorSet != 2) || (!z2 && this.colorSet != 1)) {
+            if (z2) {
                 resourcesProvider = this.resourcesProvider;
-                str = Theme.key_switchTrackBlueSelectorChecked;
+                str = "switchTrackBlueSelectorChecked";
             } else {
                 resourcesProvider = this.resourcesProvider;
-                str = Theme.key_switchTrackBlueSelector;
+                str = "switchTrackBlueSelector";
             }
-            int color = Theme.getColor(str, resourcesProvider);
-            ColorStateList colorStateList2 = new ColorStateList(new int[][]{StateSet.WILD_CARD}, new int[]{color});
-            this.rippleDrawable.setColor(colorStateList2);
+            this.rippleDrawable.setColor(new ColorStateList(new int[][]{StateSet.WILD_CARD}, new int[]{Theme.getColor(str, resourcesProvider)}));
             if (this.isChecked) {
-                i = 2;
+                i2 = 2;
             }
-            this.colorSet = i;
+            this.colorSet = i2;
         }
-        int color2 = Build.VERSION.SDK_INT;
-        if (color2 >= 28 && value) {
+        if (i >= 28 && z) {
             this.rippleDrawable.setHotspot(this.isChecked ? 0.0f : AndroidUtilities.dp(100.0f), AndroidUtilities.dp(18.0f));
         }
-        this.rippleDrawable.setState(value ? this.pressedState : StateSet.NOTHING);
+        this.rippleDrawable.setState(z ? this.pressedState : StateSet.NOTHING);
         invalidate();
     }
 
     @Override // android.view.View
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(Drawable drawable) {
         RippleDrawable rippleDrawable;
-        return super.verifyDrawable(who) || ((rippleDrawable = this.rippleDrawable) != null && who == rippleDrawable);
+        return super.verifyDrawable(drawable) || ((rippleDrawable = this.rippleDrawable) != null && drawable == rippleDrawable);
     }
 
-    public void setColors(String track, String trackChecked, String thumb, String thumbChecked) {
-        this.trackColorKey = track;
-        this.trackCheckedColorKey = trackChecked;
-        this.thumbColorKey = thumb;
-        this.thumbCheckedColorKey = thumbChecked;
+    public void setColors(String str, String str2, String str3, String str4) {
+        this.trackColorKey = str;
+        this.trackCheckedColorKey = str2;
+        this.thumbColorKey = str3;
+        this.thumbCheckedColorKey = str4;
     }
 
-    private void animateToCheckedState(boolean newCheckedState) {
+    private void animateToCheckedState(boolean z) {
         float[] fArr = new float[1];
-        fArr[0] = newCheckedState ? 1.0f : 0.0f;
-        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, NotificationCompat.CATEGORY_PROGRESS, fArr);
+        fArr[0] = z ? 1.0f : 0.0f;
+        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, "progress", fArr);
         this.checkAnimator = ofFloat;
         ofFloat.setDuration(this.semHaptics ? 150L : 250L);
         this.checkAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.Switch.2
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animator) {
                 Switch.this.checkAnimator = null;
             }
         });
         this.checkAnimator.start();
     }
 
-    private void animateIcon(boolean newCheckedState) {
+    private void animateIcon(boolean z) {
         float[] fArr = new float[1];
-        fArr[0] = newCheckedState ? 1.0f : 0.0f;
+        fArr[0] = z ? 1.0f : 0.0f;
         ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, "iconProgress", fArr);
         this.iconAnimator = ofFloat;
         ofFloat.setDuration(this.semHaptics ? 150L : 250L);
         this.iconAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.Switch.3
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animator) {
                 Switch.this.iconAnimator = null;
             }
         });
@@ -260,54 +256,54 @@ public class Switch extends View {
         this.attachedToWindow = false;
     }
 
-    public void setOnCheckedChangeListener(OnCheckedChangeListener listener) {
-        this.onCheckedChangeListener = listener;
+    public void setOnCheckedChangeListener(OnCheckedChangeListener onCheckedChangeListener) {
+        this.onCheckedChangeListener = onCheckedChangeListener;
     }
 
-    public void setChecked(boolean checked, boolean animated) {
-        setChecked(checked, this.drawIconType, animated);
+    public void setChecked(boolean z, boolean z2) {
+        setChecked(z, this.drawIconType, z2);
     }
 
-    public void setChecked(boolean checked, int iconType, boolean animated) {
+    public void setChecked(boolean z, int i, boolean z2) {
         float f = 1.0f;
-        if (checked != this.isChecked) {
-            this.isChecked = checked;
-            if (this.attachedToWindow && animated) {
-                vibrateChecked(checked);
-                animateToCheckedState(checked);
+        if (z != this.isChecked) {
+            this.isChecked = z;
+            if (this.attachedToWindow && z2) {
+                vibrateChecked(z);
+                animateToCheckedState(z);
             } else {
                 cancelCheckAnimator();
-                setProgress(checked ? 1.0f : 0.0f);
+                setProgress(z ? 1.0f : 0.0f);
             }
             OnCheckedChangeListener onCheckedChangeListener = this.onCheckedChangeListener;
             if (onCheckedChangeListener != null) {
-                onCheckedChangeListener.onCheckedChanged(this, checked);
+                onCheckedChangeListener.onCheckedChanged(this, z);
             }
         }
-        if (this.drawIconType != iconType) {
-            this.drawIconType = iconType;
-            if (this.attachedToWindow && animated) {
-                animateIcon(iconType == 0);
+        if (this.drawIconType != i) {
+            this.drawIconType = i;
+            if (this.attachedToWindow && z2) {
+                animateIcon(i == 0);
                 return;
             }
             cancelIconAnimator();
-            if (iconType != 0) {
+            if (i != 0) {
                 f = 0.0f;
             }
             setIconProgress(f);
         }
     }
 
-    public void setIcon(int icon) {
-        if (icon != 0) {
-            Drawable mutate = getResources().getDrawable(icon).mutate();
+    public void setIcon(int i) {
+        if (i != 0) {
+            Drawable mutate = getResources().getDrawable(i).mutate();
             this.iconDrawable = mutate;
-            if (mutate != null) {
-                int color = Theme.getColor(this.isChecked ? this.trackCheckedColorKey : this.trackColorKey, this.resourcesProvider);
-                this.lastIconColor = color;
-                mutate.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
+            if (mutate == null) {
                 return;
             }
+            int color = Theme.getColor(this.isChecked ? this.trackCheckedColorKey : this.trackColorKey, this.resourcesProvider);
+            this.lastIconColor = color;
+            mutate.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
             return;
         }
         this.iconDrawable = null;
@@ -321,17 +317,17 @@ public class Switch extends View {
         return this.isChecked;
     }
 
-    public void setOverrideColor(int override) {
-        if (this.overrideColorProgress == override) {
+    public void setOverrideColor(int i) {
+        if (this.overrideColorProgress == i) {
             return;
         }
         if (this.overlayBitmap == null) {
             try {
                 this.overlayBitmap = new Bitmap[2];
                 this.overlayCanvas = new Canvas[2];
-                for (int a = 0; a < 2; a++) {
-                    this.overlayBitmap[a] = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-                    this.overlayCanvas[a] = new Canvas(this.overlayBitmap[a]);
+                for (int i2 = 0; i2 < 2; i2++) {
+                    this.overlayBitmap[i2] = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+                    this.overlayCanvas[i2] = new Canvas(this.overlayBitmap[i2]);
                 }
                 this.overlayMaskBitmap = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
                 this.overlayMaskCanvas = new Canvas(this.overlayMaskBitmap);
@@ -342,61 +338,86 @@ public class Switch extends View {
                 this.overlayMaskPaint = paint2;
                 paint2.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
                 this.bitmapsCreated = true;
-            } catch (Throwable th) {
+            } catch (Throwable unused) {
                 return;
             }
         }
         if (!this.bitmapsCreated) {
             return;
         }
-        this.overrideColorProgress = override;
+        this.overrideColorProgress = i;
         this.overlayCx = 0.0f;
         this.overlayCy = 0.0f;
         this.overlayRad = 0.0f;
         invalidate();
     }
 
-    public void setOverrideColorProgress(float cx, float cy, float rad) {
-        this.overlayCx = cx;
-        this.overlayCy = cy;
-        this.overlayRad = rad;
+    public void setOverrideColorProgress(float f, float f2, float f3) {
+        this.overlayCx = f;
+        this.overlayCy = f2;
+        this.overlayRad = f3;
         invalidate();
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:109:0x01db A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:52:0x01d3  */
+    /* JADX WARN: Code restructure failed: missing block: B:19:0x00a8, code lost:
+        if (r12 == 0) goto L20;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:20:0x00aa, code lost:
+        r16 = 0.0f;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:21:0x00ad, code lost:
+        r16 = 1.0f;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:23:0x00b2, code lost:
+        if (r12 == 0) goto L21;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:68:0x01f1, code lost:
+        if (r1 == 0) goto L69;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:69:0x01f3, code lost:
+        r6 = 0.0f;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:70:0x01f5, code lost:
+        r6 = 1.0f;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:73:0x01fb, code lost:
+        if (r1 == 0) goto L70;
+     */
+    /* JADX WARN: Removed duplicated region for block: B:92:0x03d4  */
+    /* JADX WARN: Removed duplicated region for block: B:93:0x03dd  */
     @Override // android.view.View
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    protected void onDraw(android.graphics.Canvas r53) {
+    protected void onDraw(android.graphics.Canvas r32) {
         /*
-            Method dump skipped, instructions count: 1170
+            Method dump skipped, instructions count: 1010
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.Switch.onDraw(android.graphics.Canvas):void");
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName("android.widget.Switch");
-        info.setCheckable(true);
-        info.setChecked(this.isChecked);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.setClassName("android.widget.Switch");
+        accessibilityNodeInfo.setCheckable(true);
+        accessibilityNodeInfo.setChecked(this.isChecked);
     }
 
-    private void vibrateChecked(boolean toCheck) {
+    private void vibrateChecked(boolean z) {
         try {
-            if (isHapticFeedbackEnabled() && Build.VERSION.SDK_INT >= 28) {
-                Vibrator vibrator = (Vibrator) getContext().getSystemService("vibrator");
-                int slightAmplitude = OneUIUtilities.isOneUI() ? 5 : 15;
-                VibrationEffect vibrationEffect = VibrationEffect.createWaveform(toCheck ? new long[]{80, 25, 15} : new long[]{25, 80, 10}, toCheck ? new int[]{slightAmplitude, 0, 255} : new int[]{0, slightAmplitude, 140}, -1);
-                vibrator.cancel();
-                vibrator.vibrate(vibrationEffect);
-                this.semHaptics = true;
+            if (!isHapticFeedbackEnabled() || Build.VERSION.SDK_INT < 28) {
+                return;
             }
-        } catch (Exception e) {
+            Vibrator vibrator = (Vibrator) getContext().getSystemService("vibrator");
+            int i = OneUIUtilities.isOneUI() ? 5 : 15;
+            VibrationEffect createWaveform = VibrationEffect.createWaveform(z ? new long[]{80, 25, 15} : new long[]{25, 80, 10}, z ? new int[]{i, 0, 255} : new int[]{0, i, 140}, -1);
+            vibrator.cancel();
+            vibrator.vibrate(createWaveform);
+            this.semHaptics = true;
+        } catch (Exception unused) {
         }
     }
 }

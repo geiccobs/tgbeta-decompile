@@ -5,18 +5,9 @@ import com.google.android.exoplayer2.text.Subtitle;
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class Mp4WebvttSubtitle implements Subtitle {
     private final List<Cue> cues;
-
-    public Mp4WebvttSubtitle(List<Cue> cueList) {
-        this.cues = Collections.unmodifiableList(cueList);
-    }
-
-    @Override // com.google.android.exoplayer2.text.Subtitle
-    public int getNextEventTimeIndex(long timeUs) {
-        return timeUs < 0 ? 0 : -1;
-    }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
     public int getEventTimeCount() {
@@ -24,13 +15,22 @@ final class Mp4WebvttSubtitle implements Subtitle {
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public long getEventTime(int index) {
-        Assertions.checkArgument(index == 0);
+    public int getNextEventTimeIndex(long j) {
+        return j < 0 ? 0 : -1;
+    }
+
+    public Mp4WebvttSubtitle(List<Cue> list) {
+        this.cues = Collections.unmodifiableList(list);
+    }
+
+    @Override // com.google.android.exoplayer2.text.Subtitle
+    public long getEventTime(int i) {
+        Assertions.checkArgument(i == 0);
         return 0L;
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public List<Cue> getCues(long timeUs) {
-        return timeUs >= 0 ? this.cues : Collections.emptyList();
+    public List<Cue> getCues(long j) {
+        return j >= 0 ? this.cues : Collections.emptyList();
     }
 }

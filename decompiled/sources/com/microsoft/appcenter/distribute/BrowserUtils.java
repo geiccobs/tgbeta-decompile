@@ -10,77 +10,71 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.CharacterCompat;
+/* loaded from: classes.dex */
 class BrowserUtils {
-    BrowserUtils() {
-    }
-
-    public static void openBrowser(String url, Activity activity) {
+    public static void openBrowser(String str, Activity activity) {
         try {
-            openBrowserWithoutIntentChooser(url, activity);
+            openBrowserWithoutIntentChooser(str, activity);
         } catch (SecurityException e) {
-            AppCenterLog.warn(DistributeConstants.LOG_TAG, "Browser could not be opened by trying to avoid intent chooser, starting implicit intent instead.", e);
-            activity.startActivity(new Intent("android.intent.action.VIEW", Uri.parse(url)));
+            AppCenterLog.warn("AppCenterDistribute", "Browser could not be opened by trying to avoid intent chooser, starting implicit intent instead.", e);
+            activity.startActivity(new Intent("android.intent.action.VIEW", Uri.parse(str)));
         }
     }
 
-    private static void openBrowserWithoutIntentChooser(String url, Activity activity) throws SecurityException {
-        Intent intent = new Intent("android.intent.action.VIEW", Uri.parse(url));
-        List<ResolveInfo> browsers = activity.getPackageManager().queryIntentActivities(intent, 0);
-        if (browsers.isEmpty()) {
-            AppCenterLog.error(DistributeConstants.LOG_TAG, "No browser found on device, abort login.");
+    private static void openBrowserWithoutIntentChooser(String str, Activity activity) throws SecurityException {
+        String str2;
+        String str3;
+        Intent intent = new Intent("android.intent.action.VIEW", Uri.parse(str));
+        List<ResolveInfo> queryIntentActivities = activity.getPackageManager().queryIntentActivities(intent, 0);
+        if (queryIntentActivities.isEmpty()) {
+            AppCenterLog.error("AppCenterDistribute", "No browser found on device, abort login.");
             return;
         }
-        String defaultBrowserPackageName = null;
-        String defaultBrowserClassName = null;
-        ResolveInfo defaultBrowser = activity.getPackageManager().resolveActivity(intent, 65536);
-        if (defaultBrowser != null) {
-            ActivityInfo activityInfo = defaultBrowser.activityInfo;
-            defaultBrowserPackageName = activityInfo.packageName;
-            defaultBrowserClassName = activityInfo.name;
-            AppCenterLog.debug(DistributeConstants.LOG_TAG, "Default browser seems to be " + defaultBrowserPackageName + "/" + defaultBrowserClassName);
+        ResolveInfo resolveActivity = activity.getPackageManager().resolveActivity(intent, CharacterCompat.MIN_SUPPLEMENTARY_CODE_POINT);
+        String str4 = null;
+        if (resolveActivity != null) {
+            ActivityInfo activityInfo = resolveActivity.activityInfo;
+            str2 = activityInfo.packageName;
+            str3 = activityInfo.name;
+            AppCenterLog.debug("AppCenterDistribute", "Default browser seems to be " + str2 + "/" + str3);
+        } else {
+            str3 = null;
+            str2 = null;
         }
-        String selectedPackageName = null;
-        String selectedClassName = null;
-        Iterator<ResolveInfo> it = browsers.iterator();
+        Iterator<ResolveInfo> it = queryIntentActivities.iterator();
         while (true) {
             if (!it.hasNext()) {
+                str3 = null;
                 break;
             }
-            ResolveInfo browser = it.next();
-            ActivityInfo activityInfo2 = browser.activityInfo;
-            if (activityInfo2.packageName.equals(defaultBrowserPackageName) && activityInfo2.name.equals(defaultBrowserClassName)) {
-                selectedPackageName = defaultBrowserPackageName;
-                selectedClassName = defaultBrowserClassName;
-                AppCenterLog.debug(DistributeConstants.LOG_TAG, "And its not the picker.");
+            ActivityInfo activityInfo2 = it.next().activityInfo;
+            if (activityInfo2.packageName.equals(str2) && activityInfo2.name.equals(str3)) {
+                AppCenterLog.debug("AppCenterDistribute", "And its not the picker.");
+                str4 = str2;
                 break;
             }
         }
-        if (defaultBrowser != null && selectedPackageName == null) {
-            AppCenterLog.debug(DistributeConstants.LOG_TAG, "Default browser is actually a picker...");
+        if (resolveActivity != null && str4 == null) {
+            AppCenterLog.debug("AppCenterDistribute", "Default browser is actually a picker...");
         }
-        if (selectedPackageName == null) {
-            AppCenterLog.debug(DistributeConstants.LOG_TAG, "Picking first browser in list.");
-            ResolveInfo browser2 = browsers.iterator().next();
-            ActivityInfo activityInfo3 = browser2.activityInfo;
-            selectedPackageName = activityInfo3.packageName;
-            selectedClassName = activityInfo3.name;
+        if (str4 == null) {
+            AppCenterLog.debug("AppCenterDistribute", "Picking first browser in list.");
+            ActivityInfo activityInfo3 = queryIntentActivities.iterator().next().activityInfo;
+            str4 = activityInfo3.packageName;
+            str3 = activityInfo3.name;
         }
-        AppCenterLog.debug(DistributeConstants.LOG_TAG, "Launch browser=" + selectedPackageName + "/" + selectedClassName);
-        intent.setClassName(selectedPackageName, selectedClassName);
+        AppCenterLog.debug("AppCenterDistribute", "Launch browser=" + str4 + "/" + str3);
+        intent.setClassName(str4, str3);
         activity.startActivity(intent);
     }
 
-    public static String appendUri(String uri, String appendQuery) throws URISyntaxException {
-        String newQuery;
-        URI oldUri = new URI(uri);
-        String newQuery2 = oldUri.getQuery();
-        if (newQuery2 == null) {
-            newQuery = appendQuery;
-        } else {
-            newQuery = newQuery2 + "&" + appendQuery;
+    public static String appendUri(String str, String str2) throws URISyntaxException {
+        URI uri = new URI(str);
+        String query = uri.getQuery();
+        if (query != null) {
+            str2 = query + "&" + str2;
         }
-        URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery, oldUri.getFragment());
-        return newUri.toString();
+        return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), str2, uri.getFragment()).toString();
     }
 }

@@ -2,14 +2,12 @@ package com.google.android.exoplayer2.upstream;
 
 import android.net.Uri;
 import android.util.Base64;
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
 import java.net.URLDecoder;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class DataSchemeDataSource extends BaseDataSource {
-    public static final String SCHEME_DATA = "data";
     private byte[] data;
     private DataSpec dataSpec;
     private int endPosition;
@@ -29,21 +27,22 @@ public final class DataSchemeDataSource extends BaseDataSource {
         if (!"data".equals(scheme)) {
             throw new ParserException("Unsupported scheme: " + scheme);
         }
-        String[] uriParts = Util.split(uri.getSchemeSpecificPart(), ",");
-        if (uriParts.length != 2) {
+        String[] split = Util.split(uri.getSchemeSpecificPart(), ",");
+        if (split.length != 2) {
             throw new ParserException("Unexpected URI format: " + uri);
         }
-        String dataString = uriParts[1];
-        if (uriParts[0].contains(";base64")) {
+        String str = split[1];
+        if (split[0].contains(";base64")) {
             try {
-                this.data = Base64.decode(dataString, 0);
+                this.data = Base64.decode(str, 0);
             } catch (IllegalArgumentException e) {
-                throw new ParserException("Error while parsing Base64 encoded string: " + dataString, e);
+                throw new ParserException("Error while parsing Base64 encoded string: " + str, e);
             }
         } else {
-            this.data = Util.getUtf8Bytes(URLDecoder.decode(dataString, C.ASCII_NAME));
+            this.data = Util.getUtf8Bytes(URLDecoder.decode(str, "US-ASCII"));
         }
-        int length = dataSpec.length != -1 ? ((int) dataSpec.length) + this.readPosition : this.data.length;
+        long j = dataSpec.length;
+        int length = j != -1 ? ((int) j) + this.readPosition : this.data.length;
         this.endPosition = length;
         if (length > this.data.length || this.readPosition > length) {
             this.data = null;
@@ -54,19 +53,19 @@ public final class DataSchemeDataSource extends BaseDataSource {
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] buffer, int offset, int readLength) {
-        if (readLength == 0) {
+    public int read(byte[] bArr, int i, int i2) {
+        if (i2 == 0) {
             return 0;
         }
-        int remainingBytes = this.endPosition - this.readPosition;
-        if (remainingBytes == 0) {
+        int i3 = this.endPosition - this.readPosition;
+        if (i3 == 0) {
             return -1;
         }
-        int readLength2 = Math.min(readLength, remainingBytes);
-        System.arraycopy(Util.castNonNull(this.data), this.readPosition, buffer, offset, readLength2);
-        this.readPosition += readLength2;
-        bytesTransferred(readLength2);
-        return readLength2;
+        int min = Math.min(i2, i3);
+        System.arraycopy(Util.castNonNull(this.data), this.readPosition, bArr, i, min);
+        this.readPosition += min;
+        bytesTransferred(min);
+        return min;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource

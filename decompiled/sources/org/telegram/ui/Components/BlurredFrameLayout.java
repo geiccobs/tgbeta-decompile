@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.SharedConfig;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class BlurredFrameLayout extends FrameLayout {
     public int backgroundPaddingBottom;
     public int backgroundPaddingTop;
@@ -31,27 +31,27 @@ public class BlurredFrameLayout extends FrameLayout {
             }
             this.backgroundPaint.setColor(this.backgroundColor);
             AndroidUtilities.rectTmp2.set(0, this.backgroundPaddingTop, getMeasuredWidth(), getMeasuredHeight() - this.backgroundPaddingBottom);
-            float y = 0.0f;
+            float f = 0.0f;
             View view = this;
             while (true) {
                 sizeNotifierFrameLayout = this.sizeNotifierFrameLayout;
                 if (view == sizeNotifierFrameLayout) {
                     break;
                 }
-                y += view.getY();
+                f += view.getY();
                 view = (View) view.getParent();
             }
-            sizeNotifierFrameLayout.drawBlurRect(canvas, y, AndroidUtilities.rectTmp2, this.backgroundPaint, this.isTopView);
+            sizeNotifierFrameLayout.drawBlurRect(canvas, f, AndroidUtilities.rectTmp2, this.backgroundPaint, this.isTopView);
         }
         super.dispatchDraw(canvas);
     }
 
     @Override // android.view.View
-    public void setBackgroundColor(int color) {
+    public void setBackgroundColor(int i) {
         if (SharedConfig.chatBlurEnabled() && this.sizeNotifierFrameLayout != null) {
-            this.backgroundColor = color;
+            this.backgroundColor = i;
         } else {
-            super.setBackgroundColor(color);
+            super.setBackgroundColor(i);
         }
     }
 

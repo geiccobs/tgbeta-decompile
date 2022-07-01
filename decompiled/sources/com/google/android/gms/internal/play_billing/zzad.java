@@ -18,7 +18,7 @@ final class zzad extends zzy {
         return this.zza.get(obj) != null;
     }
 
-    @Override // com.google.android.gms.internal.play_billing.zzy, com.google.android.gms.internal.play_billing.zzr, java.util.AbstractCollection, java.util.Collection, java.lang.Iterable, java.util.Set
+    @Override // com.google.android.gms.internal.play_billing.zzr, java.util.AbstractCollection, java.util.Collection, java.lang.Iterable, java.util.Set
     public final /* synthetic */ Iterator iterator() {
         return this.zzb.listIterator(0);
     }
@@ -38,13 +38,8 @@ final class zzad extends zzy {
         return this.zzb;
     }
 
-    @Override // com.google.android.gms.internal.play_billing.zzy, com.google.android.gms.internal.play_billing.zzr
+    @Override // com.google.android.gms.internal.play_billing.zzr
     public final zzah zze() {
         return this.zzb.listIterator(0);
-    }
-
-    @Override // com.google.android.gms.internal.play_billing.zzr
-    public final boolean zzf() {
-        throw null;
     }
 }

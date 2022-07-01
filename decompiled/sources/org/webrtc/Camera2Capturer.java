@@ -1,10 +1,13 @@
 package org.webrtc;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.camera2.CameraManager;
+import org.telegram.messenger.R;
 import org.webrtc.CameraSession;
 import org.webrtc.CameraVideoCapturer;
-/* loaded from: classes5.dex */
+@TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+/* loaded from: classes3.dex */
 public class Camera2Capturer extends CameraCapturer {
     private final CameraManager cameraManager;
     private final Context context;
@@ -54,14 +57,14 @@ public class Camera2Capturer extends CameraCapturer {
         super.switchCamera(cameraSwitchHandler, str);
     }
 
-    public Camera2Capturer(Context context, String cameraName, CameraVideoCapturer.CameraEventsHandler eventsHandler) {
-        super(cameraName, eventsHandler, new Camera2Enumerator(context));
+    public Camera2Capturer(Context context, String str, CameraVideoCapturer.CameraEventsHandler cameraEventsHandler) {
+        super(str, cameraEventsHandler, new Camera2Enumerator(context));
         this.context = context;
         this.cameraManager = (CameraManager) context.getSystemService("camera");
     }
 
     @Override // org.webrtc.CameraCapturer
-    protected void createCameraSession(CameraSession.CreateSessionCallback createSessionCallback, CameraSession.Events events, Context applicationContext, SurfaceTextureHelper surfaceTextureHelper, String cameraName, int width, int height, int framerate) {
-        Camera2Session.create(createSessionCallback, events, applicationContext, this.cameraManager, surfaceTextureHelper, cameraName, width, height, framerate);
+    protected void createCameraSession(CameraSession.CreateSessionCallback createSessionCallback, CameraSession.Events events, Context context, SurfaceTextureHelper surfaceTextureHelper, String str, int i, int i2, int i3) {
+        Camera2Session.create(createSessionCallback, events, context, this.cameraManager, surfaceTextureHelper, str, i, i2, i3);
     }
 }

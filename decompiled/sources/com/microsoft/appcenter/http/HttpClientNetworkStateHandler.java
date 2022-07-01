@@ -7,21 +7,21 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class HttpClientNetworkStateHandler extends HttpClientDecorator implements NetworkStateHelper.Listener {
     private final Set<Call> mCalls = new HashSet();
     private final NetworkStateHelper mNetworkStateHelper;
 
-    public HttpClientNetworkStateHandler(HttpClient decoratedApi, NetworkStateHelper networkStateHelper) {
-        super(decoratedApi);
+    public HttpClientNetworkStateHandler(HttpClient httpClient, NetworkStateHelper networkStateHelper) {
+        super(httpClient);
         this.mNetworkStateHelper = networkStateHelper;
         networkStateHelper.addListener(this);
     }
 
     @Override // com.microsoft.appcenter.http.HttpClient
-    public synchronized ServiceCall callAsync(String url, String method, Map<String, String> headers, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
+    public synchronized ServiceCall callAsync(String str, String str2, Map<String, String> map, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
         Call call;
-        call = new Call(this.mDecoratedApi, url, method, headers, callTemplate, serviceCallback);
+        call = new Call(this.mDecoratedApi, str, str2, map, callTemplate, serviceCallback);
         if (this.mNetworkStateHelper.isNetworkConnected()) {
             call.run();
         } else {
@@ -45,8 +45,8 @@ public class HttpClientNetworkStateHandler extends HttpClientDecorator implement
     }
 
     @Override // com.microsoft.appcenter.utils.NetworkStateHelper.Listener
-    public synchronized void onNetworkStateUpdated(boolean connected) {
-        if (connected) {
+    public synchronized void onNetworkStateUpdated(boolean z) {
+        if (z) {
             if (this.mCalls.size() > 0) {
                 AppCenterLog.debug("AppCenter", "Network is available. " + this.mCalls.size() + " pending call(s) to submit now.");
                 for (Call call : this.mCalls) {
@@ -58,17 +58,18 @@ public class HttpClientNetworkStateHandler extends HttpClientDecorator implement
     }
 
     public synchronized void cancelCall(Call call) {
-        if (call.mServiceCall != null) {
-            call.mServiceCall.cancel();
+        ServiceCall serviceCall = call.mServiceCall;
+        if (serviceCall != null) {
+            serviceCall.cancel();
         }
         this.mCalls.remove(call);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public class Call extends HttpClientCallDecorator {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        Call(HttpClient decoratedApi, String url, String method, Map<String, String> headers, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
-            super(decoratedApi, url, method, headers, callTemplate, serviceCallback);
+        Call(HttpClient httpClient, String str, String str2, Map<String, String> map, HttpClient.CallTemplate callTemplate, ServiceCallback serviceCallback) {
+            super(httpClient, str, str2, map, callTemplate, serviceCallback);
             HttpClientNetworkStateHandler.this = r8;
         }
 

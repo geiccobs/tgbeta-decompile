@@ -1,9 +1,8 @@
 package org.webrtc;
 
-import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
 import java.util.HashMap;
 import java.util.Map;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 class H264Utils {
     public static VideoCodecInfo DEFAULT_H264_BASELINE_PROFILE_CODEC = new VideoCodecInfo("H264", getDefaultH264Params(false));
     public static VideoCodecInfo DEFAULT_H264_HIGH_PROFILE_CODEC = new VideoCodecInfo("H264", getDefaultH264Params(true));
@@ -21,15 +20,15 @@ class H264Utils {
     H264Utils() {
     }
 
-    public static Map<String, String> getDefaultH264Params(boolean isHighProfile) {
-        Map<String, String> params = new HashMap<>();
-        params.put("level-asymmetry-allowed", IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE);
-        params.put("packetization-mode", IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE);
-        params.put("profile-level-id", isHighProfile ? "640c1f" : "42e01f");
-        return params;
+    public static Map<String, String> getDefaultH264Params(boolean z) {
+        HashMap hashMap = new HashMap();
+        hashMap.put("level-asymmetry-allowed", "1");
+        hashMap.put("packetization-mode", "1");
+        hashMap.put("profile-level-id", z ? "640c1f" : "42e01f");
+        return hashMap;
     }
 
-    public static boolean isSameH264Profile(Map<String, String> params1, Map<String, String> params2) {
-        return nativeIsSameH264Profile(params1, params2);
+    public static boolean isSameH264Profile(Map<String, String> map, Map<String, String> map2) {
+        return nativeIsSameH264Profile(map, map2);
     }
 }

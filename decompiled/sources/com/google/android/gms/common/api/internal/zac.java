@@ -7,7 +7,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.api.internal.GoogleApiManager;
 import com.google.android.gms.tasks.TaskCompletionSource;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zac<T> extends zad {
     protected final TaskCompletionSource<T> zab;
 
@@ -26,10 +26,6 @@ public abstract class zac<T> extends zad {
     @Override // com.google.android.gms.common.api.internal.zab
     public void zaa(Exception exc) {
         this.zab.trySetException(exc);
-    }
-
-    @Override // com.google.android.gms.common.api.internal.zab
-    public void zaa(zav zavVar, boolean z) {
     }
 
     @Override // com.google.android.gms.common.api.internal.zab

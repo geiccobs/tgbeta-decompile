@@ -1,7 +1,7 @@
 package org.telegram.messenger;
 
 import org.telegram.messenger.MediaController;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public final /* synthetic */ class MediaController$GalleryObserverExternal$$ExternalSyntheticLambda0 implements Runnable {
     public static final /* synthetic */ MediaController$GalleryObserverExternal$$ExternalSyntheticLambda0 INSTANCE = new MediaController$GalleryObserverExternal$$ExternalSyntheticLambda0();
 

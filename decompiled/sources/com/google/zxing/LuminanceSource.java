@@ -1,5 +1,5 @@
 package com.google.zxing;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class LuminanceSource {
     private final int height;
     private final int width;
@@ -8,9 +8,9 @@ public abstract class LuminanceSource {
 
     public abstract byte[] getRow(int i, byte[] bArr);
 
-    public LuminanceSource(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public LuminanceSource(int i, int i2) {
+        this.width = i;
+        this.height = i2;
     }
 
     public final int getWidth() {
@@ -21,52 +21,18 @@ public abstract class LuminanceSource {
         return this.height;
     }
 
-    public boolean isCropSupported() {
-        return false;
-    }
-
-    public LuminanceSource crop(int left, int top, int width, int height) {
-        throw new UnsupportedOperationException("This luminance source does not support cropping.");
-    }
-
-    public boolean isRotateSupported() {
-        return false;
-    }
-
-    public LuminanceSource invert() {
-        return new InvertedLuminanceSource(this);
-    }
-
-    public LuminanceSource rotateCounterClockwise() {
-        throw new UnsupportedOperationException("This luminance source does not support rotation by 90 degrees.");
-    }
-
-    public LuminanceSource rotateCounterClockwise45() {
-        throw new UnsupportedOperationException("This luminance source does not support rotation by 45 degrees.");
-    }
-
     public final String toString() {
-        char c;
         int i = this.width;
-        byte[] row = new byte[i];
-        StringBuilder result = new StringBuilder(this.height * (i + 1));
-        for (int y = 0; y < this.height; y++) {
-            row = getRow(y, row);
-            for (int x = 0; x < this.width; x++) {
-                int luminance = row[x] & 255;
-                if (luminance < 64) {
-                    c = '#';
-                } else if (luminance < 128) {
-                    c = '+';
-                } else if (luminance < 192) {
-                    c = '.';
-                } else {
-                    c = ' ';
-                }
-                result.append(c);
+        byte[] bArr = new byte[i];
+        StringBuilder sb = new StringBuilder(this.height * (i + 1));
+        for (int i2 = 0; i2 < this.height; i2++) {
+            bArr = getRow(i2, bArr);
+            for (int i3 = 0; i3 < this.width; i3++) {
+                int i4 = bArr[i3] & 255;
+                sb.append(i4 < 64 ? '#' : i4 < 128 ? '+' : i4 < 192 ? '.' : ' ');
             }
-            result.append('\n');
+            sb.append('\n');
         }
-        return result.toString();
+        return sb.toString();
     }
 }

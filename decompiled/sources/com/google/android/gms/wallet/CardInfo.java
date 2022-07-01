@@ -2,12 +2,14 @@ package com.google.android.gms.wallet;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import com.google.android.gms.identity.intents.model.UserAddress;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class CardInfo extends AbstractSafeParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<CardInfo> CREATOR = new zze();
     String zza;
     String zzb;
@@ -18,43 +20,15 @@ public final class CardInfo extends AbstractSafeParcelable {
     private CardInfo() {
     }
 
-    public UserAddress getBillingAddress() {
-        return this.zze;
-    }
-
-    public int getCardClass() {
-        int i = this.zzd;
-        switch (i) {
-            case 1:
-            case 2:
-            case 3:
-                return i;
-            default:
-                return 0;
-        }
-    }
-
-    public String getCardDescription() {
-        return this.zza;
-    }
-
-    public String getCardDetails() {
-        return this.zzc;
-    }
-
-    public String getCardNetwork() {
-        return this.zzb;
-    }
-
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel out, int flags) {
-        int beginObjectHeader = SafeParcelWriter.beginObjectHeader(out);
-        SafeParcelWriter.writeString(out, 1, this.zza, false);
-        SafeParcelWriter.writeString(out, 2, this.zzb, false);
-        SafeParcelWriter.writeString(out, 3, this.zzc, false);
-        SafeParcelWriter.writeInt(out, 4, this.zzd);
-        SafeParcelWriter.writeParcelable(out, 5, this.zze, flags, false);
-        SafeParcelWriter.finishObjectHeader(out, beginObjectHeader);
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
+        int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
+        SafeParcelWriter.writeString(parcel, 1, this.zza, false);
+        SafeParcelWriter.writeString(parcel, 2, this.zzb, false);
+        SafeParcelWriter.writeString(parcel, 3, this.zzc, false);
+        SafeParcelWriter.writeInt(parcel, 4, this.zzd);
+        SafeParcelWriter.writeParcelable(parcel, 5, this.zze, i, false);
+        SafeParcelWriter.finishObjectHeader(parcel, beginObjectHeader);
     }
 
     public CardInfo(String str, String str2, String str3, int i, UserAddress userAddress) {

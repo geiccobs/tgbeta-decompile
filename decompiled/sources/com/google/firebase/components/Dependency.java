@@ -1,43 +1,35 @@
 package com.google.firebase.components;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Dependency {
     private final Class<?> anInterface;
     private final int injection;
     private final int type;
 
-    private Dependency(Class<?> anInterface, int type, int injection) {
-        this.anInterface = (Class) Preconditions.checkNotNull(anInterface, "Null dependency anInterface.");
-        this.type = type;
-        this.injection = injection;
+    private Dependency(Class<?> cls, int i, int i2) {
+        this.anInterface = (Class) Preconditions.checkNotNull(cls, "Null dependency anInterface.");
+        this.type = i;
+        this.injection = i2;
     }
 
     @Deprecated
-    public static Dependency optional(Class<?> anInterface) {
-        return new Dependency(anInterface, 0, 0);
+    public static Dependency optional(Class<?> cls) {
+        return new Dependency(cls, 0, 0);
     }
 
-    public static Dependency deferred(Class<?> anInterface) {
-        return new Dependency(anInterface, 0, 2);
+    public static Dependency required(Class<?> cls) {
+        return new Dependency(cls, 1, 0);
     }
 
-    public static Dependency required(Class<?> anInterface) {
-        return new Dependency(anInterface, 1, 0);
+    public static Dependency setOf(Class<?> cls) {
+        return new Dependency(cls, 2, 0);
     }
 
-    public static Dependency setOf(Class<?> anInterface) {
-        return new Dependency(anInterface, 2, 0);
+    public static Dependency optionalProvider(Class<?> cls) {
+        return new Dependency(cls, 0, 1);
     }
 
-    public static Dependency optionalProvider(Class<?> anInterface) {
-        return new Dependency(anInterface, 0, 1);
-    }
-
-    public static Dependency requiredProvider(Class<?> anInterface) {
-        return new Dependency(anInterface, 1, 1);
-    }
-
-    public static Dependency setOfProvider(Class<?> anInterface) {
-        return new Dependency(anInterface, 2, 1);
+    public static Dependency requiredProvider(Class<?> cls) {
+        return new Dependency(cls, 1, 1);
     }
 
     public Class<?> getInterface() {
@@ -60,17 +52,16 @@ public final class Dependency {
         return this.injection == 2;
     }
 
-    public boolean equals(Object o) {
-        if (o instanceof Dependency) {
-            Dependency other = (Dependency) o;
-            return this.anInterface == other.anInterface && this.type == other.type && this.injection == other.injection;
+    public boolean equals(Object obj) {
+        if (obj instanceof Dependency) {
+            Dependency dependency = (Dependency) obj;
+            return this.anInterface == dependency.anInterface && this.type == dependency.type && this.injection == dependency.injection;
         }
         return false;
     }
 
     public int hashCode() {
-        int h = 1000003 ^ this.anInterface.hashCode();
-        return (((h * 1000003) ^ this.type) * 1000003) ^ this.injection;
+        return ((((this.anInterface.hashCode() ^ 1000003) * 1000003) ^ this.type) * 1000003) ^ this.injection;
     }
 
     public String toString() {
@@ -81,20 +72,20 @@ public final class Dependency {
         sb.append(i == 1 ? "required" : i == 0 ? "optional" : "set");
         sb.append(", injection=");
         sb.append(describeInjection(this.injection));
-        StringBuilder sb2 = sb.append("}");
-        return sb2.toString();
+        sb.append("}");
+        return sb.toString();
     }
 
-    private static String describeInjection(int injection) {
-        switch (injection) {
-            case 0:
-                return "direct";
-            case 1:
+    private static String describeInjection(int i) {
+        if (i != 0) {
+            if (i == 1) {
                 return "provider";
-            case 2:
+            }
+            if (i == 2) {
                 return "deferred";
-            default:
-                throw new AssertionError("Unsupported injection: " + injection);
+            }
+            throw new AssertionError("Unsupported injection: " + i);
         }
+        return "direct";
     }
 }

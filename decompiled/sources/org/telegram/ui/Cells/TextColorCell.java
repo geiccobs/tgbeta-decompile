@@ -9,19 +9,17 @@ import android.util.Property;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import androidx.core.internal.view.SupportMenu;
-import androidx.core.view.InputDeviceCompat;
-import com.google.android.exoplayer2.C;
+import androidx.annotation.Keep;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class TextColorCell extends FrameLayout {
     private static Paint colorPaint;
     public static final int[] colors = {-1031100, -29183, -12769, -8792480, -12521994, -12140801, -2984711, -45162, -4473925};
-    public static final int[] colorsToSave = {SupportMenu.CATEGORY_MASK, -29183, InputDeviceCompat.SOURCE_ANY, -16711936, -16711681, -16776961, -2984711, -65281, -1};
+    public static final int[] colorsToSave = {-65536, -29183, -256, -16711936, -16711681, -16776961, -2984711, -65281, -1};
     private float alpha;
     private int currentColor;
     private boolean needDivider;
@@ -41,7 +39,7 @@ public class TextColorCell extends FrameLayout {
         }
         TextView textView = new TextView(context);
         this.textView = textView;
-        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
+        textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText", resourcesProvider));
         this.textView.setTextSize(1, 16.0f);
         this.textView.setLines(1);
         this.textView.setMaxLines(1);
@@ -52,49 +50,51 @@ public class TextColorCell extends FrameLayout {
     }
 
     @Override // android.view.View
-    public void setAlpha(float value) {
-        this.alpha = value;
+    @Keep
+    public void setAlpha(float f) {
+        this.alpha = f;
         invalidate();
     }
 
     @Override // android.view.View
+    @Keep
     public float getAlpha() {
         return this.alpha;
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f) + (this.needDivider ? 1 : 0), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f) + (this.needDivider ? 1 : 0), 1073741824));
     }
 
-    public void setTextAndColor(String text, int color, boolean divider) {
-        this.textView.setText(text);
-        this.needDivider = divider;
-        this.currentColor = color;
-        setWillNotDraw(!divider && color == 0);
+    public void setTextAndColor(String str, int i, boolean z) {
+        this.textView.setText(str);
+        this.needDivider = z;
+        this.currentColor = i;
+        setWillNotDraw(!z && i == 0);
         invalidate();
     }
 
-    public void setEnabled(boolean value, ArrayList<Animator> animators) {
-        super.setEnabled(value);
+    public void setEnabled(boolean z, ArrayList<Animator> arrayList) {
+        super.setEnabled(z);
         float f = 1.0f;
-        if (animators != null) {
+        if (arrayList != null) {
             TextView textView = this.textView;
             Property property = View.ALPHA;
             float[] fArr = new float[1];
-            fArr[0] = value ? 1.0f : 0.5f;
-            animators.add(ObjectAnimator.ofFloat(textView, property, fArr));
+            fArr[0] = z ? 1.0f : 0.5f;
+            arrayList.add(ObjectAnimator.ofFloat(textView, property, fArr));
             Property property2 = View.ALPHA;
             float[] fArr2 = new float[1];
-            if (!value) {
+            if (!z) {
                 f = 0.5f;
             }
             fArr2[0] = f;
-            animators.add(ObjectAnimator.ofFloat(this, property2, fArr2));
+            arrayList.add(ObjectAnimator.ofFloat(this, property2, fArr2));
             return;
         }
-        this.textView.setAlpha(value ? 1.0f : 0.5f);
-        if (!value) {
+        this.textView.setAlpha(z ? 1.0f : 0.5f);
+        if (!z) {
             f = 0.5f;
         }
         setAlpha(f);

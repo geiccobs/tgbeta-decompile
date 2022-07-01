@@ -7,16 +7,14 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CheckBoxSquare;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class CheckBoxCell extends FrameLayout {
-    public static final int TYPE_CHECK_BOX_ROUND = 4;
     private View checkBox;
     private CheckBox2 checkBoxRound;
     private int checkBoxSize;
@@ -28,79 +26,90 @@ public class CheckBoxCell extends FrameLayout {
     private TextView textView;
     private TextView valueTextView;
 
-    public CheckBoxCell(Context context, int type) {
-        this(context, type, 17, null);
+    public CheckBoxCell(Context context, int i) {
+        this(context, i, 17, null);
     }
 
-    public CheckBoxCell(Context context, int type, Theme.ResourcesProvider resourcesProvider) {
-        this(context, type, 17, resourcesProvider);
+    public CheckBoxCell(Context context, int i, Theme.ResourcesProvider resourcesProvider) {
+        this(context, i, 17, resourcesProvider);
     }
 
-    public CheckBoxCell(Context context, int type, int padding, Theme.ResourcesProvider resourcesProvider) {
+    public CheckBoxCell(Context context, int i, int i2, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.checkBoxSize = 18;
         this.resourcesProvider = resourcesProvider;
-        this.currentType = type;
+        this.currentType = i;
         TextView textView = new TextView(context);
         this.textView = textView;
-        int i = 5;
+        int i3 = 5;
         boolean z = true;
-        textView.setTag(Integer.valueOf(getThemedColor((type == 1 || type == 5) ? Theme.key_dialogTextBlack : Theme.key_windowBackgroundWhiteBlackText)));
+        textView.setTag(Integer.valueOf(getThemedColor((i == 1 || i == 5) ? "dialogTextBlack" : "windowBackgroundWhiteBlackText")));
         this.textView.setTextSize(1, 16.0f);
         this.textView.setLines(1);
         this.textView.setMaxLines(1);
         this.textView.setSingleLine(true);
         this.textView.setEllipsize(TextUtils.TruncateAt.END);
-        if (type == 3) {
+        int i4 = 0;
+        if (i == 3) {
             this.textView.setGravity(19);
             addView(this.textView, LayoutHelper.createFrame(-1, -1.0f, 51, 29.0f, 0.0f, 0.0f, 0.0f));
             this.textView.setPadding(0, 0, 0, AndroidUtilities.dp(3.0f));
         } else {
             this.textView.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
-            if (type == 2) {
-                addView(this.textView, LayoutHelper.createFrame(-1, -1.0f, (LocaleController.isRTL ? 5 : 3) | 48, LocaleController.isRTL ? 0 : 29, 0.0f, LocaleController.isRTL ? 29 : 0, 0.0f));
+            if (i == 2) {
+                View view = this.textView;
+                boolean z2 = LocaleController.isRTL;
+                addView(view, LayoutHelper.createFrame(-1, -1.0f, (z2 ? 5 : 3) | 48, z2 ? 0 : 29, 0.0f, z2 ? 29 : 0, 0.0f));
             } else {
-                int offset = type == 4 ? 56 : 46;
-                addView(this.textView, LayoutHelper.createFrame(-1, -1.0f, (LocaleController.isRTL ? 5 : 3) | 48, LocaleController.isRTL ? padding : (padding - 17) + offset, 0.0f, LocaleController.isRTL ? offset + (padding - 17) : padding, 0.0f));
+                int i5 = i == 4 ? 56 : 46;
+                View view2 = this.textView;
+                boolean z3 = LocaleController.isRTL;
+                addView(view2, LayoutHelper.createFrame(-1, -1.0f, (z3 ? 5 : 3) | 48, z3 ? i2 : i5 + (i2 - 17), 0.0f, z3 ? i5 + (i2 - 17) : i2, 0.0f));
             }
         }
         TextView textView2 = new TextView(context);
         this.valueTextView = textView2;
-        textView2.setTag((type == 1 || type == 5) ? Theme.key_dialogTextBlue : Theme.key_windowBackgroundWhiteValueText);
+        textView2.setTag((i == 1 || i == 5) ? "dialogTextBlue" : "windowBackgroundWhiteValueText");
         this.valueTextView.setTextSize(1, 16.0f);
         this.valueTextView.setLines(1);
         this.valueTextView.setMaxLines(1);
         this.valueTextView.setSingleLine(true);
         this.valueTextView.setEllipsize(TextUtils.TruncateAt.END);
         this.valueTextView.setGravity((LocaleController.isRTL ? 3 : 5) | 16);
-        addView(this.valueTextView, LayoutHelper.createFrame(-2, -1.0f, (LocaleController.isRTL ? 3 : 5) | 48, padding, 0.0f, padding, 0.0f));
-        if (type == 4) {
+        float f = i2;
+        addView(this.valueTextView, LayoutHelper.createFrame(-2, -1.0f, (LocaleController.isRTL ? 3 : 5) | 48, f, 0.0f, f, 0.0f));
+        if (i == 4) {
             CheckBox2 checkBox2 = new CheckBox2(context, 21, resourcesProvider);
             this.checkBoxRound = checkBox2;
             this.checkBox = checkBox2;
             checkBox2.setDrawUnchecked(true);
-            int i2 = 0;
             this.checkBoxRound.setChecked(true, false);
             this.checkBoxRound.setDrawBackgroundAsArc(10);
             this.checkBoxSize = 21;
-            addView(this.checkBox, LayoutHelper.createFrame(21, 21, (!LocaleController.isRTL ? 3 : i) | 48, LocaleController.isRTL ? 0 : padding, 16.0f, LocaleController.isRTL ? padding : i2, 0.0f));
+            View view3 = this.checkBox;
+            float f2 = 21;
+            boolean z4 = LocaleController.isRTL;
+            addView(view3, LayoutHelper.createFrame(21, f2, (!z4 ? 3 : i3) | 48, z4 ? 0 : i2, 16.0f, z4 ? i2 : i4, 0.0f));
         } else {
-            int i3 = 0;
-            if (type != 1 && type != 5) {
+            if (i != 1 && i != 5) {
                 z = false;
             }
             CheckBoxSquare checkBoxSquare = new CheckBoxSquare(context, z, resourcesProvider);
             this.checkBoxSquare = checkBoxSquare;
             this.checkBox = checkBoxSquare;
             this.checkBoxSize = 18;
-            if (type == 5) {
-                addView(checkBoxSquare, LayoutHelper.createFrame(18, 18, (!LocaleController.isRTL ? 3 : i) | 16, LocaleController.isRTL ? 0 : padding, 0.0f, LocaleController.isRTL ? padding : i3, 0.0f));
-            } else if (type == 3) {
+            if (i == 5) {
+                float f3 = 18;
+                boolean z5 = LocaleController.isRTL;
+                addView(checkBoxSquare, LayoutHelper.createFrame(18, f3, (!z5 ? 3 : i3) | 16, z5 ? 0 : i2, 0.0f, z5 ? i2 : i4, 0.0f));
+            } else if (i == 3) {
                 addView(checkBoxSquare, LayoutHelper.createFrame(18, 18, 51, 0.0f, 15.0f, 0.0f, 0.0f));
-            } else if (type == 2) {
-                addView(checkBoxSquare, LayoutHelper.createFrame(18, 18, (!LocaleController.isRTL ? 3 : i) | 48, 0.0f, 15.0f, 0.0f, 0.0f));
+            } else if (i == 2) {
+                addView(checkBoxSquare, LayoutHelper.createFrame(18, 18, (!LocaleController.isRTL ? 3 : i3) | 48, 0.0f, 15.0f, 0.0f, 0.0f));
             } else {
-                addView(checkBoxSquare, LayoutHelper.createFrame(18, 18, (!LocaleController.isRTL ? 3 : i) | 48, LocaleController.isRTL ? 0 : padding, 16.0f, LocaleController.isRTL ? padding : i3, 0.0f));
+                float f4 = 18;
+                boolean z6 = LocaleController.isRTL;
+                addView(checkBoxSquare, LayoutHelper.createFrame(18, f4, (!z6 ? 3 : i3) | 48, z6 ? 0 : i2, 16.0f, z6 ? i2 : i4, 0.0f));
             }
         }
         updateTextColor();
@@ -109,59 +118,59 @@ public class CheckBoxCell extends FrameLayout {
     public void updateTextColor() {
         TextView textView = this.textView;
         int i = this.currentType;
-        textView.setTextColor(getThemedColor((i == 1 || i == 5) ? Theme.key_dialogTextBlack : Theme.key_windowBackgroundWhiteBlackText));
+        textView.setTextColor(getThemedColor((i == 1 || i == 5) ? "dialogTextBlack" : "windowBackgroundWhiteBlackText"));
         TextView textView2 = this.textView;
         int i2 = this.currentType;
-        textView2.setLinkTextColor(getThemedColor((i2 == 1 || i2 == 5) ? Theme.key_dialogTextLink : Theme.key_windowBackgroundWhiteLinkText));
+        textView2.setLinkTextColor(getThemedColor((i2 == 1 || i2 == 5) ? "dialogTextLink" : "windowBackgroundWhiteLinkText"));
         TextView textView3 = this.valueTextView;
         int i3 = this.currentType;
-        textView3.setTextColor(getThemedColor((i3 == 1 || i3 == 5) ? Theme.key_dialogTextBlue : Theme.key_windowBackgroundWhiteValueText));
+        textView3.setTextColor(getThemedColor((i3 == 1 || i3 == 5) ? "dialogTextBlue" : "windowBackgroundWhiteValueText"));
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(int i, int i2) {
         if (this.currentType == 3) {
-            int width = View.MeasureSpec.getSize(widthMeasureSpec);
-            this.valueTextView.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(10.0f), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED));
-            this.textView.measure(View.MeasureSpec.makeMeasureSpec(width - AndroidUtilities.dp(34.0f), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED));
-            this.checkBox.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), C.BUFFER_FLAG_ENCRYPTED));
+            int size = View.MeasureSpec.getSize(i);
+            this.valueTextView.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(10.0f), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824));
+            this.textView.measure(View.MeasureSpec.makeMeasureSpec(size - AndroidUtilities.dp(34.0f), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824));
+            this.checkBox.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), 1073741824));
             setMeasuredDimension(this.textView.getMeasuredWidth() + AndroidUtilities.dp(29.0f), AndroidUtilities.dp(50.0f));
         } else if (this.isMultiline) {
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(0, 0));
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(0, 0));
         } else {
-            setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), AndroidUtilities.dp(50.0f) + (this.needDivider ? 1 : 0));
-            int availableWidth = ((getMeasuredWidth() - getPaddingLeft()) - getPaddingRight()) - AndroidUtilities.dp(34.0f);
-            this.valueTextView.measure(View.MeasureSpec.makeMeasureSpec(availableWidth / 2, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(getMeasuredHeight(), C.BUFFER_FLAG_ENCRYPTED));
-            this.textView.measure(View.MeasureSpec.makeMeasureSpec((availableWidth - this.valueTextView.getMeasuredWidth()) - AndroidUtilities.dp(8.0f), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(getMeasuredHeight(), C.BUFFER_FLAG_ENCRYPTED));
-            this.checkBox.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), C.BUFFER_FLAG_ENCRYPTED));
+            setMeasuredDimension(View.MeasureSpec.getSize(i), AndroidUtilities.dp(50.0f) + (this.needDivider ? 1 : 0));
+            int measuredWidth = ((getMeasuredWidth() - getPaddingLeft()) - getPaddingRight()) - AndroidUtilities.dp(34.0f);
+            this.valueTextView.measure(View.MeasureSpec.makeMeasureSpec(measuredWidth / 2, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(getMeasuredHeight(), 1073741824));
+            this.textView.measure(View.MeasureSpec.makeMeasureSpec((measuredWidth - this.valueTextView.getMeasuredWidth()) - AndroidUtilities.dp(8.0f), 1073741824), View.MeasureSpec.makeMeasureSpec(getMeasuredHeight(), 1073741824));
+            this.checkBox.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(this.checkBoxSize), 1073741824));
         }
     }
 
-    public void setTextColor(int color) {
-        this.textView.setTextColor(color);
+    public void setTextColor(int i) {
+        this.textView.setTextColor(i);
     }
 
-    public void setText(CharSequence text, String value, boolean checked, boolean divider) {
-        this.textView.setText(text);
+    public void setText(CharSequence charSequence, String str, boolean z, boolean z2) {
+        this.textView.setText(charSequence);
         CheckBox2 checkBox2 = this.checkBoxRound;
         if (checkBox2 != null) {
-            checkBox2.setChecked(checked, false);
+            checkBox2.setChecked(z, false);
         } else {
-            this.checkBoxSquare.setChecked(checked, false);
+            this.checkBoxSquare.setChecked(z, false);
         }
-        this.valueTextView.setText(value);
-        this.needDivider = divider;
-        setWillNotDraw(!divider);
+        this.valueTextView.setText(str);
+        this.needDivider = z2;
+        setWillNotDraw(!z2);
     }
 
-    public void setNeedDivider(boolean needDivider) {
-        this.needDivider = needDivider;
+    public void setNeedDivider(boolean z) {
+        this.needDivider = z;
     }
 
-    public void setMultiline(boolean value) {
-        this.isMultiline = value;
+    public void setMultiline(boolean z) {
+        this.isMultiline = z;
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.textView.getLayoutParams();
-        FrameLayout.LayoutParams layoutParams1 = (FrameLayout.LayoutParams) this.checkBox.getLayoutParams();
+        FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) this.checkBox.getLayoutParams();
         if (this.isMultiline) {
             this.textView.setLines(0);
             this.textView.setMaxLines(0);
@@ -171,7 +180,7 @@ public class CheckBoxCell extends FrameLayout {
                 this.textView.setPadding(0, 0, 0, AndroidUtilities.dp(5.0f));
                 layoutParams.height = -2;
                 layoutParams.topMargin = AndroidUtilities.dp(10.0f);
-                layoutParams1.topMargin = AndroidUtilities.dp(12.0f);
+                layoutParams2.topMargin = AndroidUtilities.dp(12.0f);
             }
         } else {
             this.textView.setLines(1);
@@ -181,31 +190,31 @@ public class CheckBoxCell extends FrameLayout {
             this.textView.setPadding(0, 0, 0, 0);
             layoutParams.height = -1;
             layoutParams.topMargin = 0;
-            layoutParams1.topMargin = AndroidUtilities.dp(15.0f);
+            layoutParams2.topMargin = AndroidUtilities.dp(15.0f);
         }
         this.textView.setLayoutParams(layoutParams);
-        this.checkBox.setLayoutParams(layoutParams1);
+        this.checkBox.setLayoutParams(layoutParams2);
     }
 
     @Override // android.view.View
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
+    public void setEnabled(boolean z) {
+        super.setEnabled(z);
         float f = 1.0f;
-        this.textView.setAlpha(enabled ? 1.0f : 0.5f);
-        this.valueTextView.setAlpha(enabled ? 1.0f : 0.5f);
+        this.textView.setAlpha(z ? 1.0f : 0.5f);
+        this.valueTextView.setAlpha(z ? 1.0f : 0.5f);
         View view = this.checkBox;
-        if (!enabled) {
+        if (!z) {
             f = 0.5f;
         }
         view.setAlpha(f);
     }
 
-    public void setChecked(boolean checked, boolean animated) {
+    public void setChecked(boolean z, boolean z2) {
         CheckBox2 checkBox2 = this.checkBoxRound;
         if (checkBox2 != null) {
-            checkBox2.setChecked(checked, animated);
+            checkBox2.setChecked(z, z2);
         } else {
-            this.checkBoxSquare.setChecked(checked, animated);
+            this.checkBoxSquare.setChecked(z, z2);
         }
     }
 
@@ -229,39 +238,39 @@ public class CheckBoxCell extends FrameLayout {
         return this.checkBox;
     }
 
-    public void setCheckBoxColor(String background, String background1, String check) {
+    public void setCheckBoxColor(String str, String str2, String str3) {
         CheckBox2 checkBox2 = this.checkBoxRound;
         if (checkBox2 != null) {
-            checkBox2.setColor(background, background, check);
+            checkBox2.setColor(str, str, str3);
         }
     }
 
-    public void setSquareCheckBoxColor(String uncheckedColor, String checkedColor, String checkColor) {
+    public void setSquareCheckBoxColor(String str, String str2, String str3) {
         CheckBoxSquare checkBoxSquare = this.checkBoxSquare;
         if (checkBoxSquare != null) {
-            checkBoxSquare.setColors(uncheckedColor, checkedColor, checkColor);
+            checkBoxSquare.setColors(str, str2, str3);
         }
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
         if (this.needDivider) {
-            int offset = this.currentType == 4 ? 50 : 20;
-            canvas.drawLine(LocaleController.isRTL ? 0.0f : AndroidUtilities.dp(offset), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(offset) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
+            int i = this.currentType == 4 ? 50 : 20;
+            canvas.drawLine(LocaleController.isRTL ? 0.0f : AndroidUtilities.dp(i), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(i) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName("android.widget.CheckBox");
-        info.setCheckable(true);
-        info.setChecked(isChecked());
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.setClassName("android.widget.CheckBox");
+        accessibilityNodeInfo.setCheckable(true);
+        accessibilityNodeInfo.setChecked(isChecked());
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

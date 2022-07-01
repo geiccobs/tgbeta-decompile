@@ -1,10 +1,8 @@
 package androidx.core.view;
 
 import android.view.View;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface NestedScrollingParent {
-    int getNestedScrollAxes();
-
     boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed);
 
     boolean onNestedPreFling(View target, float velocityX, float velocityY);

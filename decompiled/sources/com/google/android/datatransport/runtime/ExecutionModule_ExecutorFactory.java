@@ -3,7 +3,7 @@ package com.google.android.datatransport.runtime;
 import com.google.android.datatransport.runtime.dagger.internal.Factory;
 import com.google.android.datatransport.runtime.dagger.internal.Preconditions;
 import java.util.concurrent.Executor;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ExecutionModule_ExecutorFactory implements Factory<Executor> {
     @Override // javax.inject.Provider
     public Executor get() {
@@ -19,11 +19,8 @@ public final class ExecutionModule_ExecutorFactory implements Factory<Executor> 
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class InstanceHolder {
         private static final ExecutionModule_ExecutorFactory INSTANCE = new ExecutionModule_ExecutorFactory();
-
-        private InstanceHolder() {
-        }
     }
 }

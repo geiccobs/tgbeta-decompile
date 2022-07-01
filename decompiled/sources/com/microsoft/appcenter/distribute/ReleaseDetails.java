@@ -3,19 +3,8 @@ package com.microsoft.appcenter.distribute;
 import android.net.Uri;
 import org.json.JSONException;
 import org.json.JSONObject;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ReleaseDetails {
-    private static final String DISTRIBUTION_GROUP_ID = "distribution_group_id";
-    private static final String DOWNLOAD_URL = "download_url";
-    private static final String ID = "id";
-    private static final String MANDATORY_UPDATE = "mandatory_update";
-    private static final String MIN_API_LEVEL = "android_min_api_level";
-    private static final String PACKAGE_HASHES = "package_hashes";
-    private static final String RELEASE_NOTES = "release_notes";
-    private static final String RELEASE_NOTES_URL = "release_notes_url";
-    private static final String SHORT_VERSION = "short_version";
-    private static final String SIZE = "size";
-    private static final String VERSION = "version";
     private String distributionGroupId;
     private Uri downloadUrl;
     private int id;
@@ -28,29 +17,29 @@ public class ReleaseDetails {
     private long size;
     private int version;
 
-    public static ReleaseDetails parse(String json) throws JSONException {
-        JSONObject object = new JSONObject(json);
+    public static ReleaseDetails parse(String str) throws JSONException {
+        JSONObject jSONObject = new JSONObject(str);
         ReleaseDetails releaseDetails = new ReleaseDetails();
-        releaseDetails.id = object.getInt("id");
-        releaseDetails.version = object.getInt(VERSION);
-        releaseDetails.shortVersion = object.getString(SHORT_VERSION);
-        releaseDetails.size = object.getLong(SIZE);
-        String str = null;
-        releaseDetails.releaseNotes = object.isNull(RELEASE_NOTES) ? null : object.getString(RELEASE_NOTES);
-        releaseDetails.releaseNotesUrl = object.isNull(RELEASE_NOTES_URL) ? null : Uri.parse(object.getString(RELEASE_NOTES_URL));
-        releaseDetails.minApiLevel = object.getInt(MIN_API_LEVEL);
-        Uri parse = Uri.parse(object.getString(DOWNLOAD_URL));
+        releaseDetails.id = jSONObject.getInt("id");
+        releaseDetails.version = jSONObject.getInt("version");
+        releaseDetails.shortVersion = jSONObject.getString("short_version");
+        releaseDetails.size = jSONObject.getLong("size");
+        String str2 = null;
+        releaseDetails.releaseNotes = jSONObject.isNull("release_notes") ? null : jSONObject.getString("release_notes");
+        releaseDetails.releaseNotesUrl = jSONObject.isNull("release_notes_url") ? null : Uri.parse(jSONObject.getString("release_notes_url"));
+        releaseDetails.minApiLevel = jSONObject.getInt("android_min_api_level");
+        Uri parse = Uri.parse(jSONObject.getString("download_url"));
         releaseDetails.downloadUrl = parse;
         String scheme = parse.getScheme();
         if (scheme == null || !scheme.startsWith("http")) {
             throw new JSONException("Invalid download_url scheme.");
         }
-        releaseDetails.mandatoryUpdate = object.getBoolean(MANDATORY_UPDATE);
-        releaseDetails.releaseHash = object.getJSONArray(PACKAGE_HASHES).getString(0);
-        if (!object.isNull(DISTRIBUTION_GROUP_ID)) {
-            str = object.getString(DISTRIBUTION_GROUP_ID);
+        releaseDetails.mandatoryUpdate = jSONObject.getBoolean("mandatory_update");
+        releaseDetails.releaseHash = jSONObject.getJSONArray("package_hashes").getString(0);
+        if (!jSONObject.isNull("distribution_group_id")) {
+            str2 = jSONObject.getString("distribution_group_id");
         }
-        releaseDetails.distributionGroupId = str;
+        releaseDetails.distributionGroupId = str2;
         return releaseDetails;
     }
 

@@ -1,7 +1,7 @@
 package com.google.firebase.remoteconfig.internal;
 
 import java.util.concurrent.Executor;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final /* synthetic */ class ConfigCacheClient$$ExternalSyntheticLambda3 implements Executor {
     public static final /* synthetic */ ConfigCacheClient$$ExternalSyntheticLambda3 INSTANCE = new ConfigCacheClient$$ExternalSyntheticLambda3();
 

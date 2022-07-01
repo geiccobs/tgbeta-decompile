@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public enum zzha implements zzje {
     UNKNOWN_FORMAT(0),
     CONTACT_INFO(1),
@@ -17,12 +17,6 @@ public enum zzha implements zzje {
     DRIVER_LICENSE(12),
     BOARDING_PASS(13);
     
-    private static final zzjh<zzha> zzo = new zzjh<zzha>() { // from class: com.google.android.gms.internal.vision.zzhd
-        @Override // com.google.android.gms.internal.vision.zzjh
-        public final /* synthetic */ zzha zza(int i) {
-            return zzha.zza(i);
-        }
-    };
     private final int zzp;
 
     @Override // com.google.android.gms.internal.vision.zzje
@@ -71,10 +65,15 @@ public enum zzha implements zzje {
 
     @Override // java.lang.Enum
     public final String toString() {
-        return "<" + getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzp + " name=" + name() + '>';
+        return "<" + zzha.class.getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzp + " name=" + name() + '>';
     }
 
     zzha(int i) {
         this.zzp = i;
+    }
+
+    static {
+        new Object() { // from class: com.google.android.gms.internal.vision.zzhd
+        };
     }
 }

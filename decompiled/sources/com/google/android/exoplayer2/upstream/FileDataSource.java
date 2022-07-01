@@ -2,48 +2,27 @@ package com.google.android.exoplayer2.upstream;
 
 import android.net.Uri;
 import android.text.TextUtils;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class FileDataSource extends BaseDataSource {
     private long bytesRemaining;
     private RandomAccessFile file;
     private boolean opened;
     private Uri uri;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class FileDataSourceException extends IOException {
-        public FileDataSourceException(IOException cause) {
-            super(cause);
+        public FileDataSourceException(IOException iOException) {
+            super(iOException);
         }
 
-        public FileDataSourceException(String message, IOException cause) {
-            super(message, cause);
-        }
-    }
-
-    /* loaded from: classes3.dex */
-    public static final class Factory implements DataSource.Factory {
-        private TransferListener listener;
-
-        public Factory setListener(TransferListener listener) {
-            this.listener = listener;
-            return this;
-        }
-
-        @Override // com.google.android.exoplayer2.upstream.DataSource.Factory
-        public FileDataSource createDataSource() {
-            FileDataSource dataSource = new FileDataSource();
-            TransferListener transferListener = this.listener;
-            if (transferListener != null) {
-                dataSource.addTransferListener(transferListener);
-            }
-            return dataSource;
+        public FileDataSourceException(String str, IOException iOException) {
+            super(str, iOException);
         }
     }
 
@@ -60,9 +39,12 @@ public final class FileDataSource extends BaseDataSource {
             RandomAccessFile openLocalFile = openLocalFile(uri);
             this.file = openLocalFile;
             openLocalFile.seek(dataSpec.position);
-            long length = dataSpec.length == -1 ? this.file.length() - dataSpec.position : dataSpec.length;
-            this.bytesRemaining = length;
-            if (length < 0) {
+            long j = dataSpec.length;
+            if (j == -1) {
+                j = this.file.length() - dataSpec.position;
+            }
+            this.bytesRemaining = j;
+            if (j < 0) {
                 throw new EOFException();
             }
             this.opened = true;
@@ -85,20 +67,20 @@ public final class FileDataSource extends BaseDataSource {
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] buffer, int offset, int readLength) throws FileDataSourceException {
-        if (readLength == 0) {
+    public int read(byte[] bArr, int i, int i2) throws FileDataSourceException {
+        if (i2 == 0) {
             return 0;
         }
         if (this.bytesRemaining == 0) {
             return -1;
         }
         try {
-            int bytesRead = ((RandomAccessFile) Util.castNonNull(this.file)).read(buffer, offset, (int) Math.min(this.bytesRemaining, readLength));
-            if (bytesRead > 0) {
-                this.bytesRemaining -= bytesRead;
-                bytesTransferred(bytesRead);
+            int read = ((RandomAccessFile) Util.castNonNull(this.file)).read(bArr, i, (int) Math.min(this.bytesRemaining, i2));
+            if (read > 0) {
+                this.bytesRemaining -= read;
+                bytesTransferred(read);
             }
-            return bytesRead;
+            return read;
         } catch (IOException e) {
             throw new FileDataSourceException(e);
         }

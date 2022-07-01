@@ -2,55 +2,59 @@ package com.google.android.exoplayer2.source.dash.manifest;
 
 import android.net.Uri;
 import com.google.android.exoplayer2.util.UriUtil;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class RangedUri {
     private int hashCode;
     public final long length;
     private final String referenceUri;
     public final long start;
 
-    public RangedUri(String referenceUri, long start, long length) {
-        this.referenceUri = referenceUri == null ? "" : referenceUri;
-        this.start = start;
-        this.length = length;
+    public RangedUri(String str, long j, long j2) {
+        this.referenceUri = str == null ? "" : str;
+        this.start = j;
+        this.length = j2;
     }
 
-    public Uri resolveUri(String baseUri) {
-        return UriUtil.resolveToUri(baseUri, this.referenceUri);
+    public Uri resolveUri(String str) {
+        return UriUtil.resolveToUri(str, this.referenceUri);
     }
 
-    public String resolveUriString(String baseUri) {
-        return UriUtil.resolve(baseUri, this.referenceUri);
+    public String resolveUriString(String str) {
+        return UriUtil.resolve(str, this.referenceUri);
     }
 
-    public RangedUri attemptMerge(RangedUri other, String baseUri) {
-        String resolvedUri = resolveUriString(baseUri);
-        if (other == null || !resolvedUri.equals(other.resolveUriString(baseUri))) {
-            return null;
-        }
-        long j = this.length;
-        if (j != -1) {
-            long j2 = this.start;
-            if (j2 + j == other.start) {
-                long j3 = other.length;
-                return new RangedUri(resolvedUri, j2, j3 == -1 ? -1L : j + j3);
+    public RangedUri attemptMerge(RangedUri rangedUri, String str) {
+        String resolveUriString = resolveUriString(str);
+        if (rangedUri != null && resolveUriString.equals(rangedUri.resolveUriString(str))) {
+            long j = this.length;
+            long j2 = -1;
+            if (j != -1) {
+                long j3 = this.start;
+                if (j3 + j == rangedUri.start) {
+                    long j4 = rangedUri.length;
+                    if (j4 != -1) {
+                        j2 = j + j4;
+                    }
+                    return new RangedUri(resolveUriString, j3, j2);
+                }
             }
-        }
-        long j4 = other.length;
-        if (j4 != -1) {
-            long j5 = other.start;
-            if (j5 + j4 == this.start) {
-                return new RangedUri(resolvedUri, j5, j == -1 ? -1L : j4 + j);
+            long j5 = rangedUri.length;
+            if (j5 != -1) {
+                long j6 = rangedUri.start;
+                if (j6 + j5 == this.start) {
+                    if (j != -1) {
+                        j2 = j5 + j;
+                    }
+                    return new RangedUri(resolveUriString, j6, j2);
+                }
             }
-            return null;
         }
         return null;
     }
 
     public int hashCode() {
         if (this.hashCode == 0) {
-            int result = (17 * 31) + ((int) this.start);
-            this.hashCode = (((result * 31) + ((int) this.length)) * 31) + this.referenceUri.hashCode();
+            this.hashCode = ((((527 + ((int) this.start)) * 31) + ((int) this.length)) * 31) + this.referenceUri.hashCode();
         }
         return this.hashCode;
     }
@@ -59,11 +63,11 @@ public final class RangedUri {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || RangedUri.class != obj.getClass()) {
             return false;
         }
-        RangedUri other = (RangedUri) obj;
-        return this.start == other.start && this.length == other.length && this.referenceUri.equals(other.referenceUri);
+        RangedUri rangedUri = (RangedUri) obj;
+        return this.start == rangedUri.start && this.length == rangedUri.length && this.referenceUri.equals(rangedUri.referenceUri);
     }
 
     public String toString() {

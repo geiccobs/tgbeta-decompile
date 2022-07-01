@@ -1,14 +1,12 @@
 package com.google.android.gms.internal.firebase_messaging;
 
-import androidx.core.app.NotificationCompat;
 import com.google.firebase.encoders.FieldDescriptor;
 import com.google.firebase.encoders.ObjectEncoder;
 import com.google.firebase.encoders.ObjectEncoderContext;
 import com.google.firebase.messaging.reporting.MessagingClientEvent;
-import com.google.firebase.remoteconfig.RemoteConfigConstants;
 import java.io.IOException;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zza implements ObjectEncoder<MessagingClientEvent> {
     static final zza zza = new zza();
     private static final FieldDescriptor zzb;
@@ -48,7 +46,7 @@ final class zza implements ObjectEncoder<MessagingClientEvent> {
         zzv zzvVar5 = new zzv();
         zzvVar5.zza(5);
         zzf = builder5.withProperty(zzvVar5.zzb()).build();
-        FieldDescriptor.Builder builder6 = FieldDescriptor.builder(RemoteConfigConstants.RequestFieldKey.PACKAGE_NAME);
+        FieldDescriptor.Builder builder6 = FieldDescriptor.builder("packageName");
         zzv zzvVar6 = new zzv();
         zzvVar6.zza(6);
         zzg = builder6.withProperty(zzvVar6.zzb()).build();
@@ -72,7 +70,7 @@ final class zza implements ObjectEncoder<MessagingClientEvent> {
         zzv zzvVar11 = new zzv();
         zzvVar11.zza(11);
         zzl = builder11.withProperty(zzvVar11.zzb()).build();
-        FieldDescriptor.Builder builder12 = FieldDescriptor.builder(NotificationCompat.CATEGORY_EVENT);
+        FieldDescriptor.Builder builder12 = FieldDescriptor.builder("event");
         zzv zzvVar12 = new zzv();
         zzvVar12.zza(12);
         zzm = builder12.withProperty(zzvVar12.zzb()).build();
@@ -93,24 +91,24 @@ final class zza implements ObjectEncoder<MessagingClientEvent> {
     private zza() {
     }
 
-    @Override // com.google.firebase.encoders.Encoder
-    public final /* bridge */ /* synthetic */ void encode(Object obj, ObjectEncoderContext objectEncoderContext) throws IOException {
+    @Override // com.google.firebase.encoders.ObjectEncoder
+    public final /* bridge */ /* synthetic */ void encode(Object obj, Object obj2) throws IOException {
         MessagingClientEvent messagingClientEvent = (MessagingClientEvent) obj;
-        ObjectEncoderContext objectEncoderContext2 = objectEncoderContext;
-        objectEncoderContext2.add(zzb, messagingClientEvent.getProjectNumber());
-        objectEncoderContext2.add(zzc, messagingClientEvent.getMessageId());
-        objectEncoderContext2.add(zzd, messagingClientEvent.getInstanceId());
-        objectEncoderContext2.add(zze, messagingClientEvent.getMessageType());
-        objectEncoderContext2.add(zzf, messagingClientEvent.getSdkPlatform());
-        objectEncoderContext2.add(zzg, messagingClientEvent.getPackageName());
-        objectEncoderContext2.add(zzh, messagingClientEvent.getCollapseKey());
-        objectEncoderContext2.add(zzi, messagingClientEvent.getPriority());
-        objectEncoderContext2.add(zzj, messagingClientEvent.getTtl());
-        objectEncoderContext2.add(zzk, messagingClientEvent.getTopic());
-        objectEncoderContext2.add(zzl, messagingClientEvent.getBulkId());
-        objectEncoderContext2.add(zzm, messagingClientEvent.getEvent());
-        objectEncoderContext2.add(zzn, messagingClientEvent.getAnalyticsLabel());
-        objectEncoderContext2.add(zzo, messagingClientEvent.getCampaignId());
-        objectEncoderContext2.add(zzp, messagingClientEvent.getComposerLabel());
+        ObjectEncoderContext objectEncoderContext = (ObjectEncoderContext) obj2;
+        objectEncoderContext.add(zzb, messagingClientEvent.getProjectNumber());
+        objectEncoderContext.add(zzc, messagingClientEvent.getMessageId());
+        objectEncoderContext.add(zzd, messagingClientEvent.getInstanceId());
+        objectEncoderContext.add(zze, messagingClientEvent.getMessageType());
+        objectEncoderContext.add(zzf, messagingClientEvent.getSdkPlatform());
+        objectEncoderContext.add(zzg, messagingClientEvent.getPackageName());
+        objectEncoderContext.add(zzh, messagingClientEvent.getCollapseKey());
+        objectEncoderContext.add(zzi, messagingClientEvent.getPriority());
+        objectEncoderContext.add(zzj, messagingClientEvent.getTtl());
+        objectEncoderContext.add(zzk, messagingClientEvent.getTopic());
+        objectEncoderContext.add(zzl, messagingClientEvent.getBulkId());
+        objectEncoderContext.add(zzm, messagingClientEvent.getEvent());
+        objectEncoderContext.add(zzn, messagingClientEvent.getAnalyticsLabel());
+        objectEncoderContext.add(zzo, messagingClientEvent.getCampaignId());
+        objectEncoderContext.add(zzp, messagingClientEvent.getComposerLabel());
     }
 }

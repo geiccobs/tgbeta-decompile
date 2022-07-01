@@ -1,11 +1,11 @@
 package com.google.firebase.components;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class InvalidRegistrarException extends RuntimeException {
-    public InvalidRegistrarException(String message) {
-        super(message);
+    public InvalidRegistrarException(String str) {
+        super(str);
     }
 
-    public InvalidRegistrarException(String message, Throwable cause) {
-        super(message, cause);
+    public InvalidRegistrarException(String str, Throwable th) {
+        super(str, th);
     }
 }

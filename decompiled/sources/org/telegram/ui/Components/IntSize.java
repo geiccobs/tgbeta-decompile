@@ -1,5 +1,5 @@
 package org.telegram.ui.Components;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class IntSize {
     public int height;
     public int width;
@@ -7,35 +7,24 @@ public class IntSize {
     public IntSize() {
     }
 
-    public IntSize(IntSize size) {
-        this.width = size.width;
-        this.height = size.height;
+    public IntSize(int i, int i2) {
+        this.width = i;
+        this.height = i2;
     }
 
-    public IntSize(int width, int height) {
-        this.width = width;
-        this.height = height;
-    }
-
-    public void set(int width, int height) {
-        this.width = width;
-        this.height = height;
-    }
-
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || IntSize.class != obj.getClass()) {
             return false;
         }
-        IntSize intSize = (IntSize) o;
+        IntSize intSize = (IntSize) obj;
         return this.width == intSize.width && this.height == intSize.height;
     }
 
     public int hashCode() {
-        int result = this.width;
-        return (result * 31) + this.height;
+        return (this.width * 31) + this.height;
     }
 
     public String toString() {

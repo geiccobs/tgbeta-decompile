@@ -1,9 +1,6 @@
 package org.aspectj.lang.reflect;
 
-import java.lang.reflect.Method;
-/* loaded from: classes3.dex */
-public interface MethodSignature extends CodeSignature {
-    Method getMethod();
-
-    Class getReturnType();
+import org.aspectj.lang.Signature;
+/* loaded from: classes.dex */
+public interface MethodSignature extends Signature {
 }

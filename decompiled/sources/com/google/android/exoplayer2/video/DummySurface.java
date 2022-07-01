@@ -1,5 +1,6 @@
 package com.google.android.exoplayer2.video;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
@@ -11,12 +12,11 @@ import com.google.android.exoplayer2.util.EGLSurfaceTexture;
 import com.google.android.exoplayer2.util.GlUtil;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes3.dex */
+@TargetApi(17)
+/* loaded from: classes.dex */
 public final class DummySurface extends Surface {
-    private static final String TAG = "DummySurface";
     private static int secureMode;
     private static boolean secureModeInitialized;
-    public final boolean secure;
     private final DummySurfaceThread thread;
     private boolean threadReleased;
 
@@ -35,21 +35,20 @@ public final class DummySurface extends Surface {
         return z;
     }
 
-    public static DummySurface newInstanceV17(Context context, boolean secure) {
+    public static DummySurface newInstanceV17(Context context, boolean z) {
         assertApiLevel17OrHigher();
         int i = 0;
-        Assertions.checkState(!secure || isSecureSupported(context));
-        DummySurfaceThread thread = new DummySurfaceThread();
-        if (secure) {
+        Assertions.checkState(!z || isSecureSupported(context));
+        DummySurfaceThread dummySurfaceThread = new DummySurfaceThread();
+        if (z) {
             i = secureMode;
         }
-        return thread.init(i);
+        return dummySurfaceThread.init(i);
     }
 
-    private DummySurface(DummySurfaceThread thread, SurfaceTexture surfaceTexture, boolean secure) {
+    private DummySurface(DummySurfaceThread dummySurfaceThread, SurfaceTexture surfaceTexture, boolean z) {
         super(surfaceTexture);
-        this.thread = thread;
-        this.secure = secure;
+        this.thread = dummySurfaceThread;
     }
 
     @Override // android.view.Surface
@@ -64,25 +63,21 @@ public final class DummySurface extends Surface {
     }
 
     private static void assertApiLevel17OrHigher() {
-        if (Util.SDK_INT < 17) {
-            throw new UnsupportedOperationException("Unsupported prior to API level 17");
+        if (Util.SDK_INT >= 17) {
+            return;
         }
+        throw new UnsupportedOperationException("Unsupported prior to API level 17");
     }
 
     private static int getSecureMode(Context context) {
         if (GlUtil.isProtectedContentExtensionSupported(context)) {
-            if (GlUtil.isSurfacelessContextExtensionSupported()) {
-                return 1;
-            }
-            return 2;
+            return GlUtil.isSurfacelessContextExtensionSupported() ? 1 : 2;
         }
         return 0;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class DummySurfaceThread extends HandlerThread implements Handler.Callback {
-        private static final int MSG_INIT = 1;
-        private static final int MSG_RELEASE = 2;
         private EGLSurfaceTexture eglSurfaceTexture;
         private Handler handler;
         private Error initError;
@@ -93,22 +88,23 @@ public final class DummySurface extends Surface {
             super("dummySurface");
         }
 
-        public DummySurface init(int secureMode) {
+        public DummySurface init(int i) {
+            boolean z;
             start();
             this.handler = new Handler(getLooper(), this);
             this.eglSurfaceTexture = new EGLSurfaceTexture(this.handler);
-            boolean wasInterrupted = false;
             synchronized (this) {
-                this.handler.obtainMessage(1, secureMode, 0).sendToTarget();
+                z = false;
+                this.handler.obtainMessage(1, i, 0).sendToTarget();
                 while (this.surface == null && this.initException == null && this.initError == null) {
                     try {
                         wait();
-                    } catch (InterruptedException e) {
-                        wasInterrupted = true;
+                    } catch (InterruptedException unused) {
+                        z = true;
                     }
                 }
             }
-            if (wasInterrupted) {
+            if (z) {
                 Thread.currentThread().interrupt();
             }
             RuntimeException runtimeException = this.initException;
@@ -128,42 +124,42 @@ public final class DummySurface extends Surface {
         }
 
         @Override // android.os.Handler.Callback
-        public boolean handleMessage(Message msg) {
+        public boolean handleMessage(Message message) {
+            int i = message.what;
             try {
-                switch (msg.what) {
-                    case 1:
-                        try {
-                            initInternal(msg.arg1);
-                            synchronized (this) {
-                                notify();
-                            }
-                        } catch (Error e) {
-                            Log.e(DummySurface.TAG, "Failed to initialize dummy surface", e);
-                            this.initError = e;
-                            synchronized (this) {
-                                notify();
-                            }
-                        } catch (RuntimeException e2) {
-                            Log.e(DummySurface.TAG, "Failed to initialize dummy surface", e2);
-                            this.initException = e2;
-                            synchronized (this) {
-                                notify();
-                            }
-                        }
+                if (i != 1) {
+                    if (i != 2) {
                         return true;
-                    case 2:
+                    }
+                    try {
+                        releaseInternal();
+                    } finally {
                         try {
-                            releaseInternal();
+                            return true;
                         } finally {
-                            try {
-                                return true;
-                            } finally {
-                            }
                         }
-                        return true;
-                    default:
-                        return true;
+                    }
+                    return true;
                 }
+                try {
+                    initInternal(message.arg1);
+                    synchronized (this) {
+                        notify();
+                    }
+                } catch (Error e) {
+                    Log.e("DummySurface", "Failed to initialize dummy surface", e);
+                    this.initError = e;
+                    synchronized (this) {
+                        notify();
+                    }
+                } catch (RuntimeException e2) {
+                    Log.e("DummySurface", "Failed to initialize dummy surface", e2);
+                    this.initException = e2;
+                    synchronized (this) {
+                        notify();
+                    }
+                }
+                return true;
             } catch (Throwable th) {
                 synchronized (this) {
                     notify();
@@ -172,10 +168,10 @@ public final class DummySurface extends Surface {
             }
         }
 
-        private void initInternal(int secureMode) {
+        private void initInternal(int i) {
             Assertions.checkNotNull(this.eglSurfaceTexture);
-            this.eglSurfaceTexture.init(secureMode);
-            this.surface = new DummySurface(this, this.eglSurfaceTexture.getSurfaceTexture(), secureMode != 0);
+            this.eglSurfaceTexture.init(i);
+            this.surface = new DummySurface(this, this.eglSurfaceTexture.getSurfaceTexture(), i != 0);
         }
 
         private void releaseInternal() {

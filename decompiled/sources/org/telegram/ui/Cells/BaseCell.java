@@ -5,21 +5,30 @@ import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public abstract class BaseCell extends ViewGroup {
     private boolean checkingForLongPress = false;
     private CheckForLongPress pendingCheckForLongPress = null;
     private int pressCount = 0;
     private CheckForTap pendingCheckForTap = null;
 
-    static /* synthetic */ int access$104(BaseCell x0) {
-        int i = x0.pressCount + 1;
-        x0.pressCount = i;
+    @Override // android.view.View
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    protected boolean onLongPress() {
+        return true;
+    }
+
+    static /* synthetic */ int access$104(BaseCell baseCell) {
+        int i = baseCell.pressCount + 1;
+        baseCell.pressCount = i;
         return i;
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public final class CheckForTap implements Runnable {
         private CheckForTap() {
             BaseCell.this = r1;
@@ -28,34 +37,37 @@ public abstract class BaseCell extends ViewGroup {
         @Override // java.lang.Runnable
         public void run() {
             if (BaseCell.this.pendingCheckForLongPress == null) {
-                BaseCell.this.pendingCheckForLongPress = new CheckForLongPress();
+                BaseCell baseCell = BaseCell.this;
+                baseCell.pendingCheckForLongPress = new CheckForLongPress();
             }
             BaseCell.this.pendingCheckForLongPress.currentPressCount = BaseCell.access$104(BaseCell.this);
-            BaseCell baseCell = BaseCell.this;
-            baseCell.postDelayed(baseCell.pendingCheckForLongPress, ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout());
+            BaseCell baseCell2 = BaseCell.this;
+            baseCell2.postDelayed(baseCell2.pendingCheckForLongPress, ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout());
         }
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public class CheckForLongPress implements Runnable {
         public int currentPressCount;
 
         CheckForLongPress() {
-            BaseCell.this = this$0;
+            BaseCell.this = r1;
         }
 
         @Override // java.lang.Runnable
         public void run() {
-            if (BaseCell.this.checkingForLongPress && BaseCell.this.getParent() != null && this.currentPressCount == BaseCell.this.pressCount) {
-                BaseCell.this.checkingForLongPress = false;
-                BaseCell.this.performHapticFeedback(0);
-                if (BaseCell.this.onLongPress()) {
-                    MotionEvent event = MotionEvent.obtain(0L, 0L, 3, 0.0f, 0.0f, 0);
-                    BaseCell.this.onTouchEvent(event);
-                    event.recycle();
-                }
+            if (!BaseCell.this.checkingForLongPress || BaseCell.this.getParent() == null || this.currentPressCount != BaseCell.this.pressCount) {
+                return;
             }
+            BaseCell.this.checkingForLongPress = false;
+            BaseCell.this.performHapticFeedback(0);
+            if (!BaseCell.this.onLongPress()) {
+                return;
+            }
+            MotionEvent obtain = MotionEvent.obtain(0L, 0L, 3, 0.0f, 0.0f, 0);
+            BaseCell.this.onTouchEvent(obtain);
+            obtain.recycle();
         }
     }
 
@@ -66,23 +78,17 @@ public abstract class BaseCell extends ViewGroup {
         setHapticFeedbackEnabled(true);
     }
 
-    public static void setDrawableBounds(Drawable drawable, int x, int y) {
-        setDrawableBounds(drawable, x, y, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    public static void setDrawableBounds(Drawable drawable, int i, int i2) {
+        setDrawableBounds(drawable, i, i2, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
     }
 
-    public static void setDrawableBounds(Drawable drawable, float x, float y) {
-        setDrawableBounds(drawable, (int) x, (int) y, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    public static void setDrawableBounds(Drawable drawable, float f, float f2) {
+        setDrawableBounds(drawable, (int) f, (int) f2, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
     }
 
-    public static void setDrawableBounds(Drawable drawable, int x, int y, int w, int h) {
+    public static void setDrawableBounds(Drawable drawable, int i, int i2, int i3, int i4) {
         if (drawable != null) {
-            drawable.setBounds(x, y, x + w, y + h);
-        }
-    }
-
-    public static void setDrawableBounds(Drawable drawable, float x, float y, int w, int h) {
-        if (drawable != null) {
-            drawable.setBounds((int) x, (int) y, ((int) x) + w, ((int) y) + h);
+            drawable.setBounds(i, i2, i3 + i, i4 + i2);
         }
     }
 
@@ -107,14 +113,5 @@ public abstract class BaseCell extends ViewGroup {
         if (checkForTap != null) {
             removeCallbacks(checkForTap);
         }
-    }
-
-    @Override // android.view.View
-    public boolean hasOverlappingRendering() {
-        return false;
-    }
-
-    protected boolean onLongPress() {
-        return true;
     }
 }

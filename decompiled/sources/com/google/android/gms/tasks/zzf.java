@@ -1,6 +1,8 @@
 package com.google.android.gms.tasks;
+
+import java.util.concurrent.Executor;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzf implements Runnable {
     private final /* synthetic */ Task zza;
     private final /* synthetic */ zzd zzb;
@@ -23,9 +25,10 @@ final class zzf implements Runnable {
                 this.zzb.onFailure(new NullPointerException("Continuation returned null"));
                 return;
             }
-            task.addOnSuccessListener(TaskExecutors.zza, this.zzb);
-            task.addOnFailureListener(TaskExecutors.zza, this.zzb);
-            task.addOnCanceledListener(TaskExecutors.zza, this.zzb);
+            Executor executor = TaskExecutors.zza;
+            task.addOnSuccessListener(executor, this.zzb);
+            task.addOnFailureListener(executor, this.zzb);
+            task.addOnCanceledListener(executor, this.zzb);
         } catch (RuntimeExecutionException e) {
             if (e.getCause() instanceof Exception) {
                 zzuVar2 = this.zzb.zzc;

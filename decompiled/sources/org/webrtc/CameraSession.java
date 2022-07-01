@@ -1,20 +1,18 @@
 package org.webrtc;
 
-import android.content.Context;
 import android.graphics.Matrix;
-import android.view.WindowManager;
 import org.webrtc.VideoFrame;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public interface CameraSession {
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface CreateSessionCallback {
         void onDone(CameraSession cameraSession);
 
         void onFailure(FailureType failureType, String str);
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface Events {
         void onCameraClosed(CameraSession cameraSession);
 
@@ -27,7 +25,7 @@ public interface CameraSession {
         void onFrameCaptured(CameraSession cameraSession, VideoFrame videoFrame);
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public enum FailureType {
         ERROR,
         DISCONNECTED
@@ -36,31 +34,17 @@ public interface CameraSession {
     void stop();
 
     /* renamed from: org.webrtc.CameraSession$-CC */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public final /* synthetic */ class CC {
-        public static int getDeviceOrientation(Context context) {
-            WindowManager wm = (WindowManager) context.getSystemService("window");
-            switch (wm.getDefaultDisplay().getRotation()) {
-                case 1:
-                    return 90;
-                case 2:
-                    return 180;
-                case 3:
-                    return 270;
-                default:
-                    return 0;
+        public static VideoFrame.TextureBuffer createTextureBufferWithModifiedTransformMatrix(TextureBufferImpl textureBufferImpl, boolean z, int i) {
+            Matrix matrix = new Matrix();
+            matrix.preTranslate(0.5f, 0.5f);
+            if (z) {
+                matrix.preScale(-1.0f, 1.0f);
             }
-        }
-
-        public static VideoFrame.TextureBuffer createTextureBufferWithModifiedTransformMatrix(TextureBufferImpl buffer, boolean mirror, int rotation) {
-            Matrix transformMatrix = new Matrix();
-            transformMatrix.preTranslate(0.5f, 0.5f);
-            if (mirror) {
-                transformMatrix.preScale(-1.0f, 1.0f);
-            }
-            transformMatrix.preRotate(rotation);
-            transformMatrix.preTranslate(-0.5f, -0.5f);
-            return buffer.applyTransformMatrix(transformMatrix, buffer.getWidth(), buffer.getHeight());
+            matrix.preRotate(i);
+            matrix.preTranslate(-0.5f, -0.5f);
+            return textureBufferImpl.applyTransformMatrix(matrix, textureBufferImpl.getWidth(), textureBufferImpl.getHeight());
         }
     }
 }

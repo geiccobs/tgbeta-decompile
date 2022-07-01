@@ -1,13 +1,13 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzdq extends zzdx {
     private final int zzc;
     private final int zzd;
 
     public zzdq(byte[] bArr, int i, int i2) {
         super(bArr);
-        zzb(i, i + i2, bArr.length);
+        zzdn.zzb(i, i + i2, bArr.length);
         this.zzc = i;
         this.zzd = i2;
     }

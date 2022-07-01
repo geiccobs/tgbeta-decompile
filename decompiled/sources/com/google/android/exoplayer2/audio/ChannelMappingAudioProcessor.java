@@ -3,56 +3,54 @@ package com.google.android.exoplayer2.audio;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import com.google.android.exoplayer2.util.Assertions;
 import java.nio.ByteBuffer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class ChannelMappingAudioProcessor extends BaseAudioProcessor {
     private int[] outputChannels;
     private int[] pendingOutputChannels;
 
-    public void setChannelMap(int[] outputChannels) {
-        this.pendingOutputChannels = outputChannels;
+    public void setChannelMap(int[] iArr) {
+        this.pendingOutputChannels = iArr;
     }
 
     @Override // com.google.android.exoplayer2.audio.BaseAudioProcessor
-    public AudioProcessor.AudioFormat onConfigure(AudioProcessor.AudioFormat inputAudioFormat) throws AudioProcessor.UnhandledAudioFormatException {
-        int[] outputChannels = this.pendingOutputChannels;
-        if (outputChannels == null) {
+    public AudioProcessor.AudioFormat onConfigure(AudioProcessor.AudioFormat audioFormat) throws AudioProcessor.UnhandledAudioFormatException {
+        int[] iArr = this.pendingOutputChannels;
+        if (iArr == null) {
             return AudioProcessor.AudioFormat.NOT_SET;
         }
-        if (inputAudioFormat.encoding != 2) {
-            throw new AudioProcessor.UnhandledAudioFormatException(inputAudioFormat);
+        if (audioFormat.encoding != 2) {
+            throw new AudioProcessor.UnhandledAudioFormatException(audioFormat);
         }
-        boolean active = inputAudioFormat.channelCount != outputChannels.length;
+        boolean z = audioFormat.channelCount != iArr.length;
         int i = 0;
-        while (i < outputChannels.length) {
-            int channelIndex = outputChannels[i];
-            if (channelIndex >= inputAudioFormat.channelCount) {
-                throw new AudioProcessor.UnhandledAudioFormatException(inputAudioFormat);
+        while (i < iArr.length) {
+            int i2 = iArr[i];
+            if (i2 >= audioFormat.channelCount) {
+                throw new AudioProcessor.UnhandledAudioFormatException(audioFormat);
             }
-            active |= channelIndex != i;
+            z |= i2 != i;
             i++;
         }
-        if (active) {
-            return new AudioProcessor.AudioFormat(inputAudioFormat.sampleRate, outputChannels.length, 2);
+        if (z) {
+            return new AudioProcessor.AudioFormat(audioFormat.sampleRate, iArr.length, 2);
         }
         return AudioProcessor.AudioFormat.NOT_SET;
     }
 
     @Override // com.google.android.exoplayer2.audio.AudioProcessor
-    public void queueInput(ByteBuffer inputBuffer) {
-        int[] outputChannels = (int[]) Assertions.checkNotNull(this.outputChannels);
-        int position = inputBuffer.position();
-        int limit = inputBuffer.limit();
-        int frameCount = (limit - position) / this.inputAudioFormat.bytesPerFrame;
-        int outputSize = this.outputAudioFormat.bytesPerFrame * frameCount;
-        ByteBuffer buffer = replaceOutputBuffer(outputSize);
+    public void queueInput(ByteBuffer byteBuffer) {
+        int[] iArr = (int[]) Assertions.checkNotNull(this.outputChannels);
+        int position = byteBuffer.position();
+        int limit = byteBuffer.limit();
+        ByteBuffer replaceOutputBuffer = replaceOutputBuffer(((limit - position) / this.inputAudioFormat.bytesPerFrame) * this.outputAudioFormat.bytesPerFrame);
         while (position < limit) {
-            for (int channelIndex : outputChannels) {
-                buffer.putShort(inputBuffer.getShort((channelIndex * 2) + position));
+            for (int i : iArr) {
+                replaceOutputBuffer.putShort(byteBuffer.getShort((i * 2) + position));
             }
             position += this.inputAudioFormat.bytesPerFrame;
         }
-        inputBuffer.position(limit);
-        buffer.flip();
+        byteBuffer.position(limit);
+        replaceOutputBuffer.flip();
     }
 
     @Override // com.google.android.exoplayer2.audio.BaseAudioProcessor

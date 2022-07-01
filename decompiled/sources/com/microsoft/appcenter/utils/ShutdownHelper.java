@@ -1,13 +1,10 @@
 package com.microsoft.appcenter.utils;
 
 import android.os.Process;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ShutdownHelper {
-    ShutdownHelper() {
-    }
-
-    public static void shutdown(int status) {
+    public static void shutdown(int i) {
         Process.killProcess(Process.myPid());
-        System.exit(status);
+        System.exit(i);
     }
 }

@@ -3,13 +3,11 @@ package com.google.android.gms.internal.mlkit_language_id;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzg {
     @NonNullDecl
     public static <T> T zza(@NonNullDecl T t) {
-        if (t == null) {
-            throw new NullPointerException();
-        }
+        t.getClass();
         return t;
     }
 

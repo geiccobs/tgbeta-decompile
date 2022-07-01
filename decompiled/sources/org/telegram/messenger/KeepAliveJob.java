@@ -1,10 +1,9 @@
 package org.telegram.messenger;
 
 import android.content.Intent;
-import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
 import java.util.concurrent.CountDownLatch;
 import org.telegram.messenger.support.JobIntentService;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class KeepAliveJob extends JobIntentService {
     private static volatile CountDownLatch countDownLatch;
     private static volatile boolean startingJob;
@@ -26,8 +25,8 @@ public class KeepAliveJob extends JobIntentService {
             synchronized (sync) {
                 startingJob = true;
             }
-            enqueueWork(ApplicationLoader.applicationContext, KeepAliveJob.class, 1000, new Intent());
-        } catch (Exception e) {
+            JobIntentService.enqueueWork(ApplicationLoader.applicationContext, KeepAliveJob.class, 1000, new Intent());
+        } catch (Exception unused) {
         }
     }
 
@@ -62,18 +61,19 @@ public class KeepAliveJob extends JobIntentService {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("started keep-alive job");
             }
-            Utilities.globalQueue.postRunnable(finishJobByTimeoutRunnable, DefaultLoadErrorHandlingPolicy.DEFAULT_TRACK_BLACKLIST_MS);
+            Utilities.globalQueue.postRunnable(finishJobByTimeoutRunnable, 60000L);
             try {
                 countDownLatch.await();
-            } catch (Throwable th) {
+            } catch (Throwable unused) {
             }
             Utilities.globalQueue.cancelRunnable(finishJobByTimeoutRunnable);
             synchronized (sync) {
                 countDownLatch = null;
             }
-            if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("ended keep-alive job");
+            if (!BuildVars.LOGS_ENABLED) {
+                return;
             }
+            FileLog.d("ended keep-alive job");
         }
     }
 }

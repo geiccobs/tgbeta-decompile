@@ -8,13 +8,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Cleaner {
     private final ReferenceQueue<Object> zza = new ReferenceQueue<>();
     private final Set<zza> zzb = Collections.synchronizedSet(new HashSet());
 
     /* compiled from: com.google.mlkit:common@@17.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Cleanable {
         void clean();
     }
@@ -23,7 +23,7 @@ public class Cleaner {
     }
 
     /* compiled from: com.google.mlkit:common@@17.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class zza extends PhantomReference<Object> implements Cleanable {
         private final Set<zza> zza;
         private final Runnable zzb;
@@ -65,7 +65,7 @@ public class Cleaner {
                 while (!set2.isEmpty()) {
                     try {
                         ((Cleaner.zza) referenceQueue2.remove()).clean();
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException unused) {
                     }
                 }
             }

@@ -8,8 +8,10 @@ import android.os.Build;
 import android.view.Surface;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import org.telegram.messenger.CharacterCompat;
 import org.telegram.messenger.FileLog;
-/* loaded from: classes4.dex */
+import org.telegram.messenger.MediaController;
+/* loaded from: classes.dex */
 public class AudioRecoder {
     private final MediaCodec decoder;
     private ByteBuffer[] decoderInputBuffers;
@@ -30,18 +32,18 @@ public class AudioRecoder {
     public long startTime = 0;
     public long endTime = 0;
 
-    public AudioRecoder(MediaFormat inputAudioFormat, MediaExtractor extractor, int trackIndex) throws IOException {
-        this.extractor = extractor;
-        this.trackIndex = trackIndex;
-        MediaCodec createDecoderByType = MediaCodec.createDecoderByType(inputAudioFormat.getString("mime"));
+    public AudioRecoder(MediaFormat mediaFormat, MediaExtractor mediaExtractor, int i) throws IOException {
+        this.extractor = mediaExtractor;
+        this.trackIndex = i;
+        MediaCodec createDecoderByType = MediaCodec.createDecoderByType(mediaFormat.getString("mime"));
         this.decoder = createDecoderByType;
-        createDecoderByType.configure(inputAudioFormat, (Surface) null, (MediaCrypto) null, 0);
+        createDecoderByType.configure(mediaFormat, (Surface) null, (MediaCrypto) null, 0);
         createDecoderByType.start();
-        MediaCodec createEncoderByType = MediaCodec.createEncoderByType("audio/mp4a-latm");
+        MediaCodec createEncoderByType = MediaCodec.createEncoderByType(MediaController.AUIDO_MIME_TYPE);
         this.encoder = createEncoderByType;
-        MediaFormat createAudioFormat = MediaFormat.createAudioFormat("audio/mp4a-latm", inputAudioFormat.getInteger("sample-rate"), inputAudioFormat.getInteger("channel-count"));
+        MediaFormat createAudioFormat = MediaFormat.createAudioFormat(MediaController.AUIDO_MIME_TYPE, mediaFormat.getInteger("sample-rate"), mediaFormat.getInteger("channel-count"));
         this.format = createAudioFormat;
-        createAudioFormat.setInteger("bitrate", 65536);
+        createAudioFormat.setInteger("bitrate", CharacterCompat.MIN_SUPPLEMENTARY_CODE_POINT);
         createEncoderByType.configure(createAudioFormat, (Surface) null, (MediaCrypto) null, 1);
         createEncoderByType.start();
         this.decoderInputBuffers = createDecoderByType.getInputBuffers();
@@ -61,27 +63,27 @@ public class AudioRecoder {
         }
     }
 
-    public boolean step(MP4Builder muxer, int audioTrackIndex) throws Exception {
-        int encoderOutputBufferIndex;
-        int encoderInputBufferIndex;
-        int decoderOutputBufferIndex;
-        int decoderInputBufferIndex;
-        ByteBuffer decoderInputBuffer;
-        if (!this.extractorDone && (decoderInputBufferIndex = this.decoder.dequeueInputBuffer(2500L)) != -1) {
+    public boolean step(MP4Builder mP4Builder, int i) throws Exception {
+        int dequeueOutputBuffer;
+        int dequeueInputBuffer;
+        int dequeueOutputBuffer2;
+        int dequeueInputBuffer2;
+        ByteBuffer byteBuffer;
+        if (!this.extractorDone && (dequeueInputBuffer2 = this.decoder.dequeueInputBuffer(2500L)) != -1) {
             if (Build.VERSION.SDK_INT >= 21) {
-                decoderInputBuffer = this.decoder.getInputBuffer(decoderInputBufferIndex);
+                byteBuffer = this.decoder.getInputBuffer(dequeueInputBuffer2);
             } else {
-                decoderInputBuffer = this.decoderInputBuffers[decoderInputBufferIndex];
+                byteBuffer = this.decoderInputBuffers[dequeueInputBuffer2];
             }
-            int size = this.extractor.readSampleData(decoderInputBuffer, 0);
-            long presentationTime = this.extractor.getSampleTime();
+            int readSampleData = this.extractor.readSampleData(byteBuffer, 0);
+            long sampleTime = this.extractor.getSampleTime();
             long j = this.endTime;
-            if (j > 0 && presentationTime >= j) {
+            if (j > 0 && sampleTime >= j) {
                 this.encoderDone = true;
                 this.decoderOutputBufferInfo.flags |= 4;
             }
-            if (size >= 0) {
-                this.decoder.queueInputBuffer(decoderInputBufferIndex, 0, size, this.extractor.getSampleTime(), this.extractor.getSampleFlags());
+            if (readSampleData >= 0) {
+                this.decoder.queueInputBuffer(dequeueInputBuffer2, 0, readSampleData, this.extractor.getSampleTime(), this.extractor.getSampleFlags());
             }
             boolean z = !this.extractor.advance();
             this.extractorDone = z;
@@ -89,28 +91,29 @@ public class AudioRecoder {
                 this.decoder.queueInputBuffer(this.decoder.dequeueInputBuffer(2500L), 0, 0, 0L, 4);
             }
         }
-        if (!this.decoderDone && this.pendingAudioDecoderOutputBufferIndex == -1 && (decoderOutputBufferIndex = this.decoder.dequeueOutputBuffer(this.decoderOutputBufferInfo, 2500L)) != -1) {
-            if (decoderOutputBufferIndex == -3) {
+        if (!this.decoderDone && this.pendingAudioDecoderOutputBufferIndex == -1 && (dequeueOutputBuffer2 = this.decoder.dequeueOutputBuffer(this.decoderOutputBufferInfo, 2500L)) != -1) {
+            if (dequeueOutputBuffer2 == -3) {
                 this.decoderOutputBuffers = this.decoder.getOutputBuffers();
-            } else if (decoderOutputBufferIndex != -2) {
+            } else if (dequeueOutputBuffer2 != -2) {
                 if ((this.decoderOutputBufferInfo.flags & 2) != 0) {
-                    this.decoder.releaseOutputBuffer(decoderOutputBufferIndex, false);
+                    this.decoder.releaseOutputBuffer(dequeueOutputBuffer2, false);
                 } else {
-                    this.pendingAudioDecoderOutputBufferIndex = decoderOutputBufferIndex;
+                    this.pendingAudioDecoderOutputBufferIndex = dequeueOutputBuffer2;
                 }
             }
         }
-        if (this.pendingAudioDecoderOutputBufferIndex != -1 && (encoderInputBufferIndex = this.encoder.dequeueInputBuffer(2500L)) != -1) {
-            ByteBuffer encoderInputBuffer = this.encoderInputBuffers[encoderInputBufferIndex];
-            int size2 = this.decoderOutputBufferInfo.size;
-            long presentationTime2 = this.decoderOutputBufferInfo.presentationTimeUs;
-            if (size2 >= 0) {
-                ByteBuffer decoderOutputBuffer = this.decoderOutputBuffers[this.pendingAudioDecoderOutputBufferIndex].duplicate();
-                decoderOutputBuffer.position(this.decoderOutputBufferInfo.offset);
-                decoderOutputBuffer.limit(this.decoderOutputBufferInfo.offset + size2);
-                encoderInputBuffer.position(0);
-                encoderInputBuffer.put(decoderOutputBuffer);
-                this.encoder.queueInputBuffer(encoderInputBufferIndex, 0, size2, presentationTime2, this.decoderOutputBufferInfo.flags);
+        if (this.pendingAudioDecoderOutputBufferIndex != -1 && (dequeueInputBuffer = this.encoder.dequeueInputBuffer(2500L)) != -1) {
+            ByteBuffer byteBuffer2 = this.encoderInputBuffers[dequeueInputBuffer];
+            MediaCodec.BufferInfo bufferInfo = this.decoderOutputBufferInfo;
+            int i2 = bufferInfo.size;
+            long j2 = bufferInfo.presentationTimeUs;
+            if (i2 >= 0) {
+                ByteBuffer duplicate = this.decoderOutputBuffers[this.pendingAudioDecoderOutputBufferIndex].duplicate();
+                duplicate.position(this.decoderOutputBufferInfo.offset);
+                duplicate.limit(this.decoderOutputBufferInfo.offset + i2);
+                byteBuffer2.position(0);
+                byteBuffer2.put(duplicate);
+                this.encoder.queueInputBuffer(dequeueInputBuffer, 0, i2, j2, this.decoderOutputBufferInfo.flags);
             }
             this.decoder.releaseOutputBuffer(this.pendingAudioDecoderOutputBufferIndex, false);
             this.pendingAudioDecoderOutputBufferIndex = -1;
@@ -118,21 +121,22 @@ public class AudioRecoder {
                 this.decoderDone = true;
             }
         }
-        if (!this.encoderDone && (encoderOutputBufferIndex = this.encoder.dequeueOutputBuffer(this.encoderOutputBufferInfo, 2500L)) != -1) {
-            if (encoderOutputBufferIndex == -3) {
+        if (!this.encoderDone && (dequeueOutputBuffer = this.encoder.dequeueOutputBuffer(this.encoderOutputBufferInfo, 2500L)) != -1) {
+            if (dequeueOutputBuffer == -3) {
                 this.encoderOutputBuffers = this.encoder.getOutputBuffers();
-            } else if (encoderOutputBufferIndex != -2) {
-                ByteBuffer encoderOutputBuffer = this.encoderOutputBuffers[encoderOutputBufferIndex];
-                if ((this.encoderOutputBufferInfo.flags & 2) != 0) {
-                    this.encoder.releaseOutputBuffer(encoderOutputBufferIndex, false);
+            } else if (dequeueOutputBuffer != -2) {
+                ByteBuffer byteBuffer3 = this.encoderOutputBuffers[dequeueOutputBuffer];
+                MediaCodec.BufferInfo bufferInfo2 = this.encoderOutputBufferInfo;
+                if ((bufferInfo2.flags & 2) != 0) {
+                    this.encoder.releaseOutputBuffer(dequeueOutputBuffer, false);
                 } else {
-                    if (this.encoderOutputBufferInfo.size != 0) {
-                        muxer.writeSampleData(audioTrackIndex, encoderOutputBuffer, this.encoderOutputBufferInfo, false);
+                    if (bufferInfo2.size != 0) {
+                        mP4Builder.writeSampleData(i, byteBuffer3, bufferInfo2, false);
                     }
                     if ((this.encoderOutputBufferInfo.flags & 4) != 0) {
                         this.encoderDone = true;
                     }
-                    this.encoder.releaseOutputBuffer(encoderOutputBufferIndex, false);
+                    this.encoder.releaseOutputBuffer(dequeueOutputBuffer, false);
                 }
             }
         }

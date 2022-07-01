@@ -1,15 +1,12 @@
 package com.google.firebase.platforminfo;
 
 import kotlin.KotlinVersion;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class KotlinDetector {
-    private KotlinDetector() {
-    }
-
     public static String detectVersion() {
         try {
             return KotlinVersion.CURRENT.toString();
-        } catch (NoClassDefFoundError e) {
+        } catch (NoClassDefFoundError unused) {
             return null;
         }
     }

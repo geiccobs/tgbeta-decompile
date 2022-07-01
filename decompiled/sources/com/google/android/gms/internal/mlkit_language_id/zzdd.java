@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public enum zzdd implements zzet {
     UNRECOGNIZED(0),
     CODE_128(1),
@@ -19,8 +19,6 @@ public enum zzdd implements zzet {
     DATABAR(14),
     TEZ_CODE(16);
     
-    private static final zzes<zzdd> zzq = new zzes<zzdd>() { // from class: com.google.android.gms.internal.mlkit_language_id.zzdc
-    };
     private final int zzr;
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzet
@@ -34,10 +32,15 @@ public enum zzdd implements zzet {
 
     @Override // java.lang.Enum
     public final String toString() {
-        return "<" + getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzr + " name=" + name() + '>';
+        return "<" + zzdd.class.getName() + '@' + Integer.toHexString(System.identityHashCode(this)) + " number=" + this.zzr + " name=" + name() + '>';
     }
 
     zzdd(int i) {
         this.zzr = i;
+    }
+
+    static {
+        new Object() { // from class: com.google.android.gms.internal.mlkit_language_id.zzdc
+        };
     }
 }

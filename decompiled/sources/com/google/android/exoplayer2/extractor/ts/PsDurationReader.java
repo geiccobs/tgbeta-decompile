@@ -1,23 +1,20 @@
 package com.google.android.exoplayer2.extractor.ts;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.audio.SilenceSkippingAudioProcessor;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.extractor.PositionHolder;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.TimestampAdjuster;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
-/* loaded from: classes3.dex */
-public final class PsDurationReader {
-    private static final int TIMESTAMP_SEARCH_BYTES = 20000;
+/* loaded from: classes.dex */
+final class PsDurationReader {
     private boolean isDurationRead;
     private boolean isFirstScrValueRead;
     private boolean isLastScrValueRead;
     private final TimestampAdjuster scrTimestampAdjuster = new TimestampAdjuster(0);
-    private long firstScrValue = C.TIME_UNSET;
-    private long lastScrValue = C.TIME_UNSET;
-    private long durationUs = C.TIME_UNSET;
+    private long firstScrValue = -9223372036854775807L;
+    private long lastScrValue = -9223372036854775807L;
+    private long durationUs = -9223372036854775807L;
     private final ParsableByteArray packetBuffer = new ParsableByteArray();
 
     public boolean isDurationReadFinished() {
@@ -28,119 +25,117 @@ public final class PsDurationReader {
         return this.scrTimestampAdjuster;
     }
 
-    public int readDuration(ExtractorInput input, PositionHolder seekPositionHolder) throws IOException, InterruptedException {
+    public int readDuration(ExtractorInput extractorInput, PositionHolder positionHolder) throws IOException, InterruptedException {
         if (!this.isLastScrValueRead) {
-            return readLastScrValue(input, seekPositionHolder);
+            return readLastScrValue(extractorInput, positionHolder);
         }
-        if (this.lastScrValue == C.TIME_UNSET) {
-            return finishReadDuration(input);
+        if (this.lastScrValue == -9223372036854775807L) {
+            return finishReadDuration(extractorInput);
         }
         if (!this.isFirstScrValueRead) {
-            return readFirstScrValue(input, seekPositionHolder);
+            return readFirstScrValue(extractorInput, positionHolder);
         }
         long j = this.firstScrValue;
-        if (j == C.TIME_UNSET) {
-            return finishReadDuration(input);
+        if (j == -9223372036854775807L) {
+            return finishReadDuration(extractorInput);
         }
-        long minScrPositionUs = this.scrTimestampAdjuster.adjustTsTimestamp(j);
-        long maxScrPositionUs = this.scrTimestampAdjuster.adjustTsTimestamp(this.lastScrValue);
-        this.durationUs = maxScrPositionUs - minScrPositionUs;
-        return finishReadDuration(input);
+        this.durationUs = this.scrTimestampAdjuster.adjustTsTimestamp(this.lastScrValue) - this.scrTimestampAdjuster.adjustTsTimestamp(j);
+        return finishReadDuration(extractorInput);
     }
 
     public long getDurationUs() {
         return this.durationUs;
     }
 
-    public static long readScrValueFromPack(ParsableByteArray packetBuffer) {
-        int originalPosition = packetBuffer.getPosition();
-        if (packetBuffer.bytesLeft() < 9) {
-            return C.TIME_UNSET;
+    public static long readScrValueFromPack(ParsableByteArray parsableByteArray) {
+        int position = parsableByteArray.getPosition();
+        if (parsableByteArray.bytesLeft() < 9) {
+            return -9223372036854775807L;
         }
-        byte[] scrBytes = new byte[9];
-        packetBuffer.readBytes(scrBytes, 0, scrBytes.length);
-        packetBuffer.setPosition(originalPosition);
-        return !checkMarkerBits(scrBytes) ? C.TIME_UNSET : readScrValueFromPackHeader(scrBytes);
+        byte[] bArr = new byte[9];
+        parsableByteArray.readBytes(bArr, 0, 9);
+        parsableByteArray.setPosition(position);
+        if (checkMarkerBits(bArr)) {
+            return readScrValueFromPackHeader(bArr);
+        }
+        return -9223372036854775807L;
     }
 
-    private int finishReadDuration(ExtractorInput input) {
+    private int finishReadDuration(ExtractorInput extractorInput) {
         this.packetBuffer.reset(Util.EMPTY_BYTE_ARRAY);
         this.isDurationRead = true;
-        input.resetPeekPosition();
+        extractorInput.resetPeekPosition();
         return 0;
     }
 
-    private int readFirstScrValue(ExtractorInput input, PositionHolder seekPositionHolder) throws IOException, InterruptedException {
-        int bytesToSearch = (int) Math.min((long) SilenceSkippingAudioProcessor.DEFAULT_PADDING_SILENCE_US, input.getLength());
-        if (input.getPosition() != 0) {
-            seekPositionHolder.position = 0;
+    private int readFirstScrValue(ExtractorInput extractorInput, PositionHolder positionHolder) throws IOException, InterruptedException {
+        int min = (int) Math.min(20000L, extractorInput.getLength());
+        long j = 0;
+        if (extractorInput.getPosition() != j) {
+            positionHolder.position = j;
             return 1;
         }
-        this.packetBuffer.reset(bytesToSearch);
-        input.resetPeekPosition();
-        input.peekFully(this.packetBuffer.data, 0, bytesToSearch);
+        this.packetBuffer.reset(min);
+        extractorInput.resetPeekPosition();
+        extractorInput.peekFully(this.packetBuffer.data, 0, min);
         this.firstScrValue = readFirstScrValueFromBuffer(this.packetBuffer);
         this.isFirstScrValueRead = true;
         return 0;
     }
 
-    private long readFirstScrValueFromBuffer(ParsableByteArray packetBuffer) {
-        int searchStartPosition = packetBuffer.getPosition();
-        int searchEndPosition = packetBuffer.limit();
-        for (int searchPosition = searchStartPosition; searchPosition < searchEndPosition - 3; searchPosition++) {
-            int nextStartCode = peekIntAtPosition(packetBuffer.data, searchPosition);
-            if (nextStartCode == 442) {
-                packetBuffer.setPosition(searchPosition + 4);
-                long scrValue = readScrValueFromPack(packetBuffer);
-                if (scrValue != C.TIME_UNSET) {
-                    return scrValue;
+    private long readFirstScrValueFromBuffer(ParsableByteArray parsableByteArray) {
+        int limit = parsableByteArray.limit();
+        for (int position = parsableByteArray.getPosition(); position < limit - 3; position++) {
+            if (peekIntAtPosition(parsableByteArray.data, position) == 442) {
+                parsableByteArray.setPosition(position + 4);
+                long readScrValueFromPack = readScrValueFromPack(parsableByteArray);
+                if (readScrValueFromPack != -9223372036854775807L) {
+                    return readScrValueFromPack;
                 }
             }
         }
-        return C.TIME_UNSET;
+        return -9223372036854775807L;
     }
 
-    private int readLastScrValue(ExtractorInput input, PositionHolder seekPositionHolder) throws IOException, InterruptedException {
-        long inputLength = input.getLength();
-        int bytesToSearch = (int) Math.min((long) SilenceSkippingAudioProcessor.DEFAULT_PADDING_SILENCE_US, inputLength);
-        long searchStartPosition = inputLength - bytesToSearch;
-        if (input.getPosition() != searchStartPosition) {
-            seekPositionHolder.position = searchStartPosition;
+    private int readLastScrValue(ExtractorInput extractorInput, PositionHolder positionHolder) throws IOException, InterruptedException {
+        long length = extractorInput.getLength();
+        int min = (int) Math.min(20000L, length);
+        long j = length - min;
+        if (extractorInput.getPosition() != j) {
+            positionHolder.position = j;
             return 1;
         }
-        this.packetBuffer.reset(bytesToSearch);
-        input.resetPeekPosition();
-        input.peekFully(this.packetBuffer.data, 0, bytesToSearch);
+        this.packetBuffer.reset(min);
+        extractorInput.resetPeekPosition();
+        extractorInput.peekFully(this.packetBuffer.data, 0, min);
         this.lastScrValue = readLastScrValueFromBuffer(this.packetBuffer);
         this.isLastScrValueRead = true;
         return 0;
     }
 
-    private long readLastScrValueFromBuffer(ParsableByteArray packetBuffer) {
-        int searchStartPosition = packetBuffer.getPosition();
-        int searchEndPosition = packetBuffer.limit();
-        for (int searchPosition = searchEndPosition - 4; searchPosition >= searchStartPosition; searchPosition--) {
-            int nextStartCode = peekIntAtPosition(packetBuffer.data, searchPosition);
-            if (nextStartCode == 442) {
-                packetBuffer.setPosition(searchPosition + 4);
-                long scrValue = readScrValueFromPack(packetBuffer);
-                if (scrValue != C.TIME_UNSET) {
-                    return scrValue;
+    private long readLastScrValueFromBuffer(ParsableByteArray parsableByteArray) {
+        int position = parsableByteArray.getPosition();
+        for (int limit = parsableByteArray.limit() - 4; limit >= position; limit--) {
+            if (peekIntAtPosition(parsableByteArray.data, limit) == 442) {
+                parsableByteArray.setPosition(limit + 4);
+                long readScrValueFromPack = readScrValueFromPack(parsableByteArray);
+                if (readScrValueFromPack != -9223372036854775807L) {
+                    return readScrValueFromPack;
                 }
             }
         }
-        return C.TIME_UNSET;
+        return -9223372036854775807L;
     }
 
-    private int peekIntAtPosition(byte[] data, int position) {
-        return ((data[position] & 255) << 24) | ((data[position + 1] & 255) << 16) | ((data[position + 2] & 255) << 8) | (data[position + 3] & 255);
+    private int peekIntAtPosition(byte[] bArr, int i) {
+        return (bArr[i + 3] & 255) | ((bArr[i] & 255) << 24) | ((bArr[i + 1] & 255) << 16) | ((bArr[i + 2] & 255) << 8);
     }
 
-    private static boolean checkMarkerBits(byte[] scrBytes) {
-        return (scrBytes[0] & 196) == 68 && (scrBytes[2] & 4) == 4 && (scrBytes[4] & 4) == 4 && (scrBytes[5] & 1) == 1 && (scrBytes[8] & 3) == 3;
+    private static boolean checkMarkerBits(byte[] bArr) {
+        return (bArr[0] & 196) == 68 && (bArr[2] & 4) == 4 && (bArr[4] & 4) == 4 && (bArr[5] & 1) == 1 && (bArr[8] & 3) == 3;
     }
 
-    private static long readScrValueFromPackHeader(byte[] scrBytes) {
-        return (((scrBytes[0] & 56) >> 3) << 30) | ((scrBytes[0] & 3) << 28) | ((scrBytes[1] & 255) << 20) | (((scrBytes[2] & 248) >> 3) << 15) | ((scrBytes[2] & 3) << 13) | ((scrBytes[3] & 255) << 5) | ((scrBytes[4] & 248) >> 3);
+    private static long readScrValueFromPackHeader(byte[] bArr) {
+        return (((bArr[0] & 56) >> 3) << 30) | ((bArr[0] & 3) << 28) | ((bArr[1] & 255) << 20) | (((bArr[2] & 248) >> 3) << 15) | ((bArr[2] & 3) << 13) | ((bArr[3] & 255) << 5) | ((bArr[4] & 248) >> 3);
     }
 }

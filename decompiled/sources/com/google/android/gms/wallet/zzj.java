@@ -2,7 +2,7 @@ package com.google.android.gms.wallet;
 
 import com.google.android.gms.common.Feature;
 /* compiled from: com.google.android.gms:play-services-wallet@@18.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzj {
     public static final Feature zza;
     public static final Feature zzb;

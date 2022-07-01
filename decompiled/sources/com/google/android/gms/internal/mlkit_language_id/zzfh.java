@@ -1,15 +1,15 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzfh extends zzdi<String> implements zzfg, RandomAccess {
     private static final zzfh zza;
-    private static final zzfg zzb;
     private final List<Object> zzc;
 
     public zzfh() {
@@ -41,7 +41,7 @@ public final class zzfh extends zzdi<String> implements zzfg, RandomAccess {
             collection = ((zzfg) collection).zzb();
         }
         boolean addAll = this.zzc.addAll(i, collection);
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return addAll;
     }
 
@@ -49,14 +49,14 @@ public final class zzfh extends zzdi<String> implements zzfg, RandomAccess {
     public final void clear() {
         zzc();
         this.zzc.clear();
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzfg
     public final void zza(zzdn zzdnVar) {
         zzc();
         this.zzc.add(zzdnVar);
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzfg
@@ -81,66 +81,28 @@ public final class zzfh extends zzdi<String> implements zzfg, RandomAccess {
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzfg
     public final zzfg a_() {
-        if (zza()) {
-            return new zzhi(this);
-        }
-        return this;
+        return zza() ? new zzhi(this) : this;
     }
 
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         zzc();
         return zza(this.zzc.set(i, (String) obj));
     }
 
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractCollection, java.util.Collection, java.util.List
-    public final /* bridge */ /* synthetic */ boolean retainAll(Collection collection) {
-        return super.retainAll(collection);
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractCollection, java.util.Collection, java.util.List
-    public final /* bridge */ /* synthetic */ boolean removeAll(Collection collection) {
-        return super.removeAll(collection);
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractCollection, java.util.Collection, java.util.List
-    public final /* bridge */ /* synthetic */ boolean remove(Object obj) {
-        return super.remove(obj);
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzc();
         Object remove = this.zzc.remove(i);
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return zza(remove);
     }
 
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, com.google.android.gms.internal.mlkit_language_id.zzew
-    public final /* bridge */ /* synthetic */ boolean zza() {
-        return super.zza();
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zzc();
         this.zzc.add(i, (String) obj);
-        this.modCount++;
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List
-    public final /* bridge */ /* synthetic */ boolean add(Object obj) {
-        return super.add(obj);
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.Collection, java.util.List
-    public final /* bridge */ /* synthetic */ int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzdi, java.util.AbstractList, java.util.Collection, java.util.List
-    public final /* bridge */ /* synthetic */ boolean equals(Object obj) {
-        return super.equals(obj);
+        ((AbstractList) this).modCount++;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzew
@@ -161,24 +123,23 @@ public final class zzfh extends zzdi<String> implements zzfg, RandomAccess {
         }
         if (obj instanceof zzdn) {
             zzdn zzdnVar = (zzdn) obj;
-            String zzb2 = zzdnVar.zzb();
+            String zzb = zzdnVar.zzb();
             if (zzdnVar.zzc()) {
-                this.zzc.set(i, zzb2);
+                this.zzc.set(i, zzb);
             }
-            return zzb2;
+            return zzb;
         }
         byte[] bArr = (byte[]) obj;
-        String zzb3 = zzeq.zzb(bArr);
+        String zzb2 = zzeq.zzb(bArr);
         if (zzeq.zza(bArr)) {
-            this.zzc.set(i, zzb3);
+            this.zzc.set(i, zzb2);
         }
-        return zzb3;
+        return zzb2;
     }
 
     static {
         zzfh zzfhVar = new zzfh();
         zza = zzfhVar;
         zzfhVar.b_();
-        zzb = zzfhVar;
     }
 }

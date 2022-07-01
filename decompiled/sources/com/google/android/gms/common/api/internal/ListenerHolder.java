@@ -2,18 +2,20 @@ package com.google.android.gms.common.api.internal;
 
 import android.os.Looper;
 import android.os.Message;
+import androidx.annotation.RecentlyNonNull;
+import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.internal.Preconditions;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ListenerHolder<L> {
     private final zaa zaa;
     private volatile L zab;
     private volatile ListenerKey<L> zac;
 
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Notifier<L> {
-        void notifyListener(L l);
+        void notifyListener(@RecentlyNonNull L l);
 
         void onNotifyListenerFailed();
     }
@@ -26,7 +28,7 @@ public final class ListenerHolder<L> {
 
     /* JADX INFO: Access modifiers changed from: private */
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public final class zaa extends com.google.android.gms.internal.base.zas {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public zaa(Looper looper) {
@@ -46,7 +48,7 @@ public final class ListenerHolder<L> {
     }
 
     /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class ListenerKey<L> {
         private final L zaa;
         private final String zab;
@@ -72,13 +74,9 @@ public final class ListenerHolder<L> {
         }
     }
 
-    public final void notifyListener(Notifier<? super L> notifier) {
+    public final void notifyListener(@RecentlyNonNull Notifier<? super L> notifier) {
         Preconditions.checkNotNull(notifier, "Notifier must not be null");
         this.zaa.sendMessage(this.zaa.obtainMessage(1, notifier));
-    }
-
-    public final boolean hasListener() {
-        return this.zab != null;
     }
 
     public final void clear() {
@@ -86,6 +84,7 @@ public final class ListenerHolder<L> {
         this.zac = null;
     }
 
+    @RecentlyNullable
     public final ListenerKey<L> getListenerKey() {
         return this.zac;
     }

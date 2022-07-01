@@ -1,5 +1,5 @@
 package org.telegram.ui.Components;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Rect {
     public float height;
     public float width;
@@ -9,10 +9,10 @@ public class Rect {
     public Rect() {
     }
 
-    public Rect(float x, float y, float width, float height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    public Rect(float f, float f2, float f3, float f4) {
+        this.x = f;
+        this.y = f2;
+        this.width = f3;
+        this.height = f4;
     }
 }

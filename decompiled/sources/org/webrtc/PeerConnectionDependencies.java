@@ -1,12 +1,12 @@
 package org.webrtc;
 
 import org.webrtc.PeerConnection;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public final class PeerConnectionDependencies {
     private final PeerConnection.Observer observer;
     private final SSLCertificateVerifier sslCertificateVerifier;
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class Builder {
         private PeerConnection.Observer observer;
         private SSLCertificateVerifier sslCertificateVerifier;
@@ -15,8 +15,8 @@ public final class PeerConnectionDependencies {
             this.observer = observer;
         }
 
-        public Builder setSSLCertificateVerifier(SSLCertificateVerifier sslCertificateVerifier) {
-            this.sslCertificateVerifier = sslCertificateVerifier;
+        public Builder setSSLCertificateVerifier(SSLCertificateVerifier sSLCertificateVerifier) {
+            this.sslCertificateVerifier = sSLCertificateVerifier;
             return this;
         }
 
@@ -37,8 +37,8 @@ public final class PeerConnectionDependencies {
         return this.sslCertificateVerifier;
     }
 
-    private PeerConnectionDependencies(PeerConnection.Observer observer, SSLCertificateVerifier sslCertificateVerifier) {
+    private PeerConnectionDependencies(PeerConnection.Observer observer, SSLCertificateVerifier sSLCertificateVerifier) {
         this.observer = observer;
-        this.sslCertificateVerifier = sslCertificateVerifier;
+        this.sslCertificateVerifier = sSLCertificateVerifier;
     }
 }

@@ -3,7 +3,7 @@ package com.google.android.gms.flags;
 import android.os.IInterface;
 import android.os.RemoteException;
 import com.google.android.gms.dynamic.IObjectWrapper;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface zzc extends IInterface {
     boolean getBooleanFlagValue(String str, boolean z, int i) throws RemoteException;
 

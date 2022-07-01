@@ -3,38 +3,38 @@ package org.telegram.ui.Components;
 import android.text.TextPaint;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.TextStyleSpan;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class URLSpanBotCommand extends URLSpanNoUnderline {
     public static boolean enabled = true;
     public int currentType;
     private TextStyleSpan.TextStyleRun style;
 
-    public URLSpanBotCommand(String url, int type) {
-        this(url, type, null);
+    public URLSpanBotCommand(String str, int i) {
+        this(str, i, null);
     }
 
-    public URLSpanBotCommand(String url, int type, TextStyleSpan.TextStyleRun run) {
-        super(url);
-        this.currentType = type;
-        this.style = run;
+    public URLSpanBotCommand(String str, int i, TextStyleSpan.TextStyleRun textStyleRun) {
+        super(str);
+        this.currentType = i;
+        this.style = textStyleRun;
     }
 
     @Override // org.telegram.ui.Components.URLSpanNoUnderline, android.text.style.ClickableSpan, android.text.style.CharacterStyle
-    public void updateDrawState(TextPaint p) {
-        super.updateDrawState(p);
+    public void updateDrawState(TextPaint textPaint) {
+        super.updateDrawState(textPaint);
         int i = this.currentType;
         if (i == 2) {
-            p.setColor(-1);
+            textPaint.setColor(-1);
         } else if (i == 1) {
-            p.setColor(Theme.getColor(enabled ? Theme.key_chat_messageLinkOut : Theme.key_chat_messageTextOut));
+            textPaint.setColor(Theme.getColor(enabled ? "chat_messageLinkOut" : "chat_messageTextOut"));
         } else {
-            p.setColor(Theme.getColor(enabled ? Theme.key_chat_messageLinkIn : Theme.key_chat_messageTextIn));
+            textPaint.setColor(Theme.getColor(enabled ? "chat_messageLinkIn" : "chat_messageTextIn"));
         }
         TextStyleSpan.TextStyleRun textStyleRun = this.style;
         if (textStyleRun != null) {
-            textStyleRun.applyStyle(p);
+            textStyleRun.applyStyle(textPaint);
         } else {
-            p.setUnderlineText(false);
+            textPaint.setUnderlineText(false);
         }
     }
 }

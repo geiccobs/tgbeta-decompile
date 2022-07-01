@@ -6,7 +6,7 @@ import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface AudioRendererEventListener {
     void onAudioDecoderInitialized(String str, long j, long j2);
 
@@ -20,70 +20,46 @@ public interface AudioRendererEventListener {
 
     void onAudioSinkUnderrun(int i, long j, long j2);
 
-    /* renamed from: com.google.android.exoplayer2.audio.AudioRendererEventListener$-CC */
-    /* loaded from: classes3.dex */
-    public final /* synthetic */ class CC {
-        public static void $default$onAudioEnabled(AudioRendererEventListener _this, DecoderCounters counters) {
-        }
-
-        public static void $default$onAudioSessionId(AudioRendererEventListener _this, int audioSessionId) {
-        }
-
-        public static void $default$onAudioDecoderInitialized(AudioRendererEventListener _this, String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-        }
-
-        public static void $default$onAudioInputFormatChanged(AudioRendererEventListener _this, Format format) {
-        }
-
-        public static void $default$onAudioSinkUnderrun(AudioRendererEventListener _this, int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
-        }
-
-        public static void $default$onAudioDisabled(AudioRendererEventListener _this, DecoderCounters counters) {
-        }
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class EventDispatcher {
         private final Handler handler;
         private final AudioRendererEventListener listener;
 
-        public EventDispatcher(Handler handler, AudioRendererEventListener listener) {
-            this.handler = listener != null ? (Handler) Assertions.checkNotNull(handler) : null;
-            this.listener = listener;
+        public EventDispatcher(Handler handler, AudioRendererEventListener audioRendererEventListener) {
+            this.handler = audioRendererEventListener != null ? (Handler) Assertions.checkNotNull(handler) : null;
+            this.listener = audioRendererEventListener;
         }
 
         public void enabled(final DecoderCounters decoderCounters) {
             Handler handler = this.handler;
             if (handler != null) {
-                handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda4
+                handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda3
                     @Override // java.lang.Runnable
                     public final void run() {
-                        AudioRendererEventListener.EventDispatcher.this.m44x5024e2cf(decoderCounters);
+                        AudioRendererEventListener.EventDispatcher.this.lambda$enabled$0(decoderCounters);
                     }
                 });
             }
         }
 
-        /* renamed from: lambda$enabled$0$com-google-android-exoplayer2-audio-AudioRendererEventListener$EventDispatcher */
-        public /* synthetic */ void m44x5024e2cf(DecoderCounters decoderCounters) {
+        public /* synthetic */ void lambda$enabled$0(DecoderCounters decoderCounters) {
             ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioEnabled(decoderCounters);
         }
 
-        public void decoderInitialized(final String decoderName, final long initializedTimestampMs, final long initializationDurationMs) {
+        public void decoderInitialized(final String str, final long j, final long j2) {
             Handler handler = this.handler;
             if (handler != null) {
                 handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda5
                     @Override // java.lang.Runnable
                     public final void run() {
-                        AudioRendererEventListener.EventDispatcher.this.m42x34ee4b45(decoderName, initializedTimestampMs, initializationDurationMs);
+                        AudioRendererEventListener.EventDispatcher.this.lambda$decoderInitialized$1(str, j, j2);
                     }
                 });
             }
         }
 
-        /* renamed from: lambda$decoderInitialized$1$com-google-android-exoplayer2-audio-AudioRendererEventListener$EventDispatcher */
-        public /* synthetic */ void m42x34ee4b45(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioDecoderInitialized(decoderName, initializedTimestampMs, initializationDurationMs);
+        public /* synthetic */ void lambda$decoderInitialized$1(String str, long j, long j2) {
+            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioDecoderInitialized(str, j, j2);
         }
 
         public void inputFormatChanged(final Format format) {
@@ -92,68 +68,64 @@ public interface AudioRendererEventListener {
                 handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda2
                     @Override // java.lang.Runnable
                     public final void run() {
-                        AudioRendererEventListener.EventDispatcher.this.m45xd066461(format);
+                        AudioRendererEventListener.EventDispatcher.this.lambda$inputFormatChanged$2(format);
                     }
                 });
             }
         }
 
-        /* renamed from: lambda$inputFormatChanged$2$com-google-android-exoplayer2-audio-AudioRendererEventListener$EventDispatcher */
-        public /* synthetic */ void m45xd066461(Format format) {
+        public /* synthetic */ void lambda$inputFormatChanged$2(Format format) {
             ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioInputFormatChanged(format);
         }
 
-        public void audioTrackUnderrun(final int bufferSize, final long bufferSizeMs, final long elapsedSinceLastFeedMs) {
+        public void audioTrackUnderrun(final int i, final long j, final long j2) {
             Handler handler = this.handler;
             if (handler != null) {
                 handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda1
                     @Override // java.lang.Runnable
                     public final void run() {
-                        AudioRendererEventListener.EventDispatcher.this.m41x5537f30b(bufferSize, bufferSizeMs, elapsedSinceLastFeedMs);
+                        AudioRendererEventListener.EventDispatcher.this.lambda$audioTrackUnderrun$3(i, j, j2);
                     }
                 });
             }
         }
 
-        /* renamed from: lambda$audioTrackUnderrun$3$com-google-android-exoplayer2-audio-AudioRendererEventListener$EventDispatcher */
-        public /* synthetic */ void m41x5537f30b(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
-            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioSinkUnderrun(bufferSize, bufferSizeMs, elapsedSinceLastFeedMs);
+        public /* synthetic */ void lambda$audioTrackUnderrun$3(int i, long j, long j2) {
+            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioSinkUnderrun(i, j, j2);
         }
 
-        public void disabled(final DecoderCounters counters) {
-            counters.ensureUpdated();
+        public void disabled(final DecoderCounters decoderCounters) {
+            decoderCounters.ensureUpdated();
             Handler handler = this.handler;
             if (handler != null) {
-                handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda3
+                handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda4
                     @Override // java.lang.Runnable
                     public final void run() {
-                        AudioRendererEventListener.EventDispatcher.this.m43xedbdbb96(counters);
+                        AudioRendererEventListener.EventDispatcher.this.lambda$disabled$4(decoderCounters);
                     }
                 });
             }
         }
 
-        /* renamed from: lambda$disabled$4$com-google-android-exoplayer2-audio-AudioRendererEventListener$EventDispatcher */
-        public /* synthetic */ void m43xedbdbb96(DecoderCounters counters) {
-            counters.ensureUpdated();
-            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioDisabled(counters);
+        public /* synthetic */ void lambda$disabled$4(DecoderCounters decoderCounters) {
+            decoderCounters.ensureUpdated();
+            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioDisabled(decoderCounters);
         }
 
-        public void audioSessionId(final int audioSessionId) {
+        public void audioSessionId(final int i) {
             Handler handler = this.handler;
             if (handler != null) {
                 handler.post(new Runnable() { // from class: com.google.android.exoplayer2.audio.AudioRendererEventListener$EventDispatcher$$ExternalSyntheticLambda0
                     @Override // java.lang.Runnable
                     public final void run() {
-                        AudioRendererEventListener.EventDispatcher.this.m40xa05bc76(audioSessionId);
+                        AudioRendererEventListener.EventDispatcher.this.lambda$audioSessionId$5(i);
                     }
                 });
             }
         }
 
-        /* renamed from: lambda$audioSessionId$5$com-google-android-exoplayer2-audio-AudioRendererEventListener$EventDispatcher */
-        public /* synthetic */ void m40xa05bc76(int audioSessionId) {
-            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioSessionId(audioSessionId);
+        public /* synthetic */ void lambda$audioSessionId$5(int i) {
+            ((AudioRendererEventListener) Util.castNonNull(this.listener)).onAudioSessionId(i);
         }
     }
 }

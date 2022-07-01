@@ -1,14 +1,11 @@
 package androidx.loader.content;
 
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Handler;
 import androidx.core.util.DebugUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Loader<D> {
-    Context mContext;
     int mId;
     OnLoadCompleteListener<D> mListener;
     OnLoadCanceledListener<D> mOnLoadCanceledListener;
@@ -18,43 +15,44 @@ public class Loader<D> {
     boolean mContentChanged = false;
     boolean mProcessingChange = false;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface OnLoadCanceledListener<D> {
         void onLoadCanceled(Loader<D> loader);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface OnLoadCompleteListener<D> {
         void onLoadComplete(Loader<D> loader, D d);
     }
 
-    /* loaded from: classes3.dex */
-    public final class ForceLoadContentObserver extends ContentObserver {
-        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        public ForceLoadContentObserver() {
-            super(new Handler());
-            Loader.this = this$0;
-        }
+    protected void onAbandon() {
+    }
 
-        @Override // android.database.ContentObserver
-        public boolean deliverSelfNotifications() {
-            return true;
-        }
+    protected boolean onCancelLoad() {
+        throw null;
+    }
 
-        @Override // android.database.ContentObserver
-        public void onChange(boolean selfChange) {
-            Loader.this.onContentChanged();
-        }
+    public void onForceLoad() {
+    }
+
+    protected void onReset() {
+    }
+
+    protected void onStartLoading() {
+        throw null;
+    }
+
+    protected void onStopLoading() {
     }
 
     public Loader(Context context) {
-        this.mContext = context.getApplicationContext();
+        context.getApplicationContext();
     }
 
-    public void deliverResult(D data) {
+    public void deliverResult(D d) {
         OnLoadCompleteListener<D> onLoadCompleteListener = this.mListener;
         if (onLoadCompleteListener != null) {
-            onLoadCompleteListener.onLoadComplete(this, data);
+            onLoadCompleteListener.onLoadComplete(this, d);
         }
     }
 
@@ -65,61 +63,28 @@ public class Loader<D> {
         }
     }
 
-    public Context getContext() {
-        return this.mContext;
-    }
-
-    public int getId() {
-        return this.mId;
-    }
-
-    public void registerListener(int id, OnLoadCompleteListener<D> listener) {
+    public void registerListener(int i, OnLoadCompleteListener<D> onLoadCompleteListener) {
         if (this.mListener != null) {
             throw new IllegalStateException("There is already a listener registered");
         }
-        this.mListener = listener;
-        this.mId = id;
+        this.mListener = onLoadCompleteListener;
+        this.mId = i;
     }
 
-    public void unregisterListener(OnLoadCompleteListener<D> listener) {
-        OnLoadCompleteListener<D> onLoadCompleteListener = this.mListener;
-        if (onLoadCompleteListener == null) {
-            throw new IllegalStateException("No listener register");
+    public void unregisterListener(OnLoadCompleteListener<D> onLoadCompleteListener) {
+        OnLoadCompleteListener<D> onLoadCompleteListener2 = this.mListener;
+        if (onLoadCompleteListener2 != null) {
+            if (onLoadCompleteListener2 != onLoadCompleteListener) {
+                throw new IllegalArgumentException("Attempting to unregister the wrong listener");
+            }
+            this.mListener = null;
+            return;
         }
-        if (onLoadCompleteListener != listener) {
-            throw new IllegalArgumentException("Attempting to unregister the wrong listener");
-        }
-        this.mListener = null;
-    }
-
-    public void registerOnLoadCanceledListener(OnLoadCanceledListener<D> listener) {
-        if (this.mOnLoadCanceledListener != null) {
-            throw new IllegalStateException("There is already a listener registered");
-        }
-        this.mOnLoadCanceledListener = listener;
-    }
-
-    public void unregisterOnLoadCanceledListener(OnLoadCanceledListener<D> listener) {
-        OnLoadCanceledListener<D> onLoadCanceledListener = this.mOnLoadCanceledListener;
-        if (onLoadCanceledListener == null) {
-            throw new IllegalStateException("No listener register");
-        }
-        if (onLoadCanceledListener != listener) {
-            throw new IllegalArgumentException("Attempting to unregister the wrong listener");
-        }
-        this.mOnLoadCanceledListener = null;
-    }
-
-    public boolean isStarted() {
-        return this.mStarted;
+        throw new IllegalStateException("No listener register");
     }
 
     public boolean isAbandoned() {
         return this.mAbandoned;
-    }
-
-    public boolean isReset() {
-        return this.mReset;
     }
 
     public final void startLoading() {
@@ -129,22 +94,12 @@ public class Loader<D> {
         onStartLoading();
     }
 
-    protected void onStartLoading() {
-    }
-
     public boolean cancelLoad() {
         return onCancelLoad();
     }
 
-    protected boolean onCancelLoad() {
-        return false;
-    }
-
     public void forceLoad() {
         onForceLoad();
-    }
-
-    public void onForceLoad() {
     }
 
     public void stopLoading() {
@@ -152,15 +107,9 @@ public class Loader<D> {
         onStopLoading();
     }
 
-    protected void onStopLoading() {
-    }
-
     public void abandon() {
         this.mAbandoned = true;
         onAbandon();
-    }
-
-    protected void onAbandon() {
     }
 
     public void reset() {
@@ -170,16 +119,6 @@ public class Loader<D> {
         this.mAbandoned = false;
         this.mContentChanged = false;
         this.mProcessingChange = false;
-    }
-
-    public void onReset() {
-    }
-
-    public boolean takeContentChanged() {
-        boolean res = this.mContentChanged;
-        this.mContentChanged = false;
-        this.mProcessingChange |= res;
-        return res;
     }
 
     public void commitContentChanged() {
@@ -200,9 +139,9 @@ public class Loader<D> {
         }
     }
 
-    public String dataToString(D data) {
+    public String dataToString(D d) {
         StringBuilder sb = new StringBuilder(64);
-        DebugUtils.buildShortClassTag(data, sb);
+        DebugUtils.buildShortClassTag(d, sb);
         sb.append("}");
         return sb.toString();
     }
@@ -217,27 +156,27 @@ public class Loader<D> {
     }
 
     @Deprecated
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
-        writer.print(prefix);
-        writer.print("mId=");
-        writer.print(this.mId);
-        writer.print(" mListener=");
-        writer.println(this.mListener);
+    public void dump(String str, FileDescriptor fileDescriptor, PrintWriter printWriter, String[] strArr) {
+        printWriter.print(str);
+        printWriter.print("mId=");
+        printWriter.print(this.mId);
+        printWriter.print(" mListener=");
+        printWriter.println(this.mListener);
         if (this.mStarted || this.mContentChanged || this.mProcessingChange) {
-            writer.print(prefix);
-            writer.print("mStarted=");
-            writer.print(this.mStarted);
-            writer.print(" mContentChanged=");
-            writer.print(this.mContentChanged);
-            writer.print(" mProcessingChange=");
-            writer.println(this.mProcessingChange);
+            printWriter.print(str);
+            printWriter.print("mStarted=");
+            printWriter.print(this.mStarted);
+            printWriter.print(" mContentChanged=");
+            printWriter.print(this.mContentChanged);
+            printWriter.print(" mProcessingChange=");
+            printWriter.println(this.mProcessingChange);
         }
         if (this.mAbandoned || this.mReset) {
-            writer.print(prefix);
-            writer.print("mAbandoned=");
-            writer.print(this.mAbandoned);
-            writer.print(" mReset=");
-            writer.println(this.mReset);
+            printWriter.print(str);
+            printWriter.print("mAbandoned=");
+            printWriter.print(this.mAbandoned);
+            printWriter.print(" mReset=");
+            printWriter.println(this.mReset);
         }
     }
 }

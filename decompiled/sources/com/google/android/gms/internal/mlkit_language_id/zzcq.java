@@ -4,7 +4,7 @@ import android.content.Context;
 import com.google.firebase.components.ComponentContainer;
 import com.google.firebase.components.ComponentFactory;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final /* synthetic */ class zzcq implements ComponentFactory {
     static final ComponentFactory zza = new zzcq();
 

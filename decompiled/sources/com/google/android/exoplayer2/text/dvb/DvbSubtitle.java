@@ -3,17 +3,13 @@ package com.google.android.exoplayer2.text.dvb;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.Subtitle;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class DvbSubtitle implements Subtitle {
     private final List<Cue> cues;
 
-    public DvbSubtitle(List<Cue> cues) {
-        this.cues = cues;
-    }
-
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public int getNextEventTimeIndex(long timeUs) {
-        return -1;
+    public long getEventTime(int i) {
+        return 0L;
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
@@ -22,12 +18,16 @@ final class DvbSubtitle implements Subtitle {
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public long getEventTime(int index) {
-        return 0L;
+    public int getNextEventTimeIndex(long j) {
+        return -1;
+    }
+
+    public DvbSubtitle(List<Cue> list) {
+        this.cues = list;
     }
 
     @Override // com.google.android.exoplayer2.text.Subtitle
-    public List<Cue> getCues(long timeUs) {
+    public List<Cue> getCues(long j) {
         return this.cues;
     }
 }

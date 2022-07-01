@@ -3,45 +3,14 @@ package com.google.firebase.analytics.connector;
 import android.os.Bundle;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 /* compiled from: com.google.firebase:firebase-measurement-connector@@19.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface AnalyticsConnector {
 
     /* compiled from: com.google.firebase:firebase-measurement-connector@@19.0.0 */
-    /* loaded from: classes3.dex */
-    public interface AnalyticsConnectorHandle {
-        void registerEventNames(Set<String> set);
-
-        void unregister();
-
-        void unregisterEventNames();
-    }
-
-    /* compiled from: com.google.firebase:firebase-measurement-connector@@19.0.0 */
-    /* loaded from: classes3.dex */
-    public interface AnalyticsConnectorListener {
-        void onMessageTriggered(int i, Bundle bundle);
-    }
-
-    /* compiled from: com.google.firebase:firebase-measurement-connector@@19.0.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class ConditionalUserProperty {
-        public boolean active;
-        public long creationTimestamp;
-        public String expiredEventName;
-        public Bundle expiredEventParams;
         public String name;
-        public String origin;
-        public long timeToLive;
-        public String timedOutEventName;
-        public Bundle timedOutEventParams;
-        public String triggerEventName;
-        public long triggerTimeout;
-        public String triggeredEventName;
-        public Bundle triggeredEventParams;
-        public long triggeredTimestamp;
-        public Object value;
     }
 
     void clearConditionalUserProperty(String str, String str2, Bundle bundle);
@@ -53,8 +22,6 @@ public interface AnalyticsConnector {
     Map<String, Object> getUserProperties(boolean z);
 
     void logEvent(String str, String str2, Bundle bundle);
-
-    AnalyticsConnectorHandle registerAnalyticsConnectorListener(String str, AnalyticsConnectorListener analyticsConnectorListener);
 
     void setConditionalUserProperty(ConditionalUserProperty conditionalUserProperty);
 

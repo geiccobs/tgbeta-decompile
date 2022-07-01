@@ -1,14 +1,13 @@
 package com.google.android.exoplayer2.util;
 
+import android.annotation.TargetApi;
 import android.os.Trace;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.R;
+/* loaded from: classes.dex */
 public final class TraceUtil {
-    private TraceUtil() {
-    }
-
-    public static void beginSection(String sectionName) {
+    public static void beginSection(String str) {
         if (Util.SDK_INT >= 18) {
-            beginSectionV18(sectionName);
+            beginSectionV18(str);
         }
     }
 
@@ -18,10 +17,12 @@ public final class TraceUtil {
         }
     }
 
-    private static void beginSectionV18(String sectionName) {
-        Trace.beginSection(sectionName);
+    @TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+    private static void beginSectionV18(String str) {
+        Trace.beginSection(str);
     }
 
+    @TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
     private static void endSectionV18() {
         Trace.endSection();
     }

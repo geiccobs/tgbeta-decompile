@@ -5,7 +5,7 @@ import android.os.SystemClock;
 import android.view.View;
 import androidx.core.math.MathUtils;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class AnimatedFloat {
     private boolean firstSet;
     private View parent;
@@ -18,73 +18,55 @@ public class AnimatedFloat {
     private long transitionStart;
     private float value;
 
-    public AnimatedFloat() {
+    public AnimatedFloat(long j, TimeInterpolator timeInterpolator) {
         this.transitionDelay = 0L;
         this.transitionDuration = 200L;
         this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
         this.parent = null;
+        this.transitionDuration = j;
+        this.transitionInterpolator = timeInterpolator;
         this.firstSet = true;
     }
 
-    public AnimatedFloat(long transitionDuration, TimeInterpolator transitionInterpolator) {
+    public AnimatedFloat(long j, long j2, TimeInterpolator timeInterpolator) {
         this.transitionDelay = 0L;
         this.transitionDuration = 200L;
         this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
         this.parent = null;
-        this.transitionDuration = transitionDuration;
-        this.transitionInterpolator = transitionInterpolator;
+        this.transitionDelay = j;
+        this.transitionDuration = j2;
+        this.transitionInterpolator = timeInterpolator;
         this.firstSet = true;
     }
 
-    public AnimatedFloat(long transitionDelay, long transitionDuration, TimeInterpolator transitionInterpolator) {
+    public AnimatedFloat(View view) {
         this.transitionDelay = 0L;
         this.transitionDuration = 200L;
         this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
-        this.parent = null;
-        this.transitionDelay = transitionDelay;
-        this.transitionDuration = transitionDuration;
-        this.transitionInterpolator = transitionInterpolator;
+        this.parent = view;
         this.firstSet = true;
     }
 
-    public AnimatedFloat(View parentToInvalidate) {
+    public AnimatedFloat(View view, long j, TimeInterpolator timeInterpolator) {
         this.transitionDelay = 0L;
         this.transitionDuration = 200L;
         this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
-        this.parent = parentToInvalidate;
+        this.parent = view;
+        this.transitionDuration = j;
+        this.transitionInterpolator = timeInterpolator;
         this.firstSet = true;
     }
 
-    public AnimatedFloat(View parentToInvalidate, long transitionDuration, TimeInterpolator transitionInterpolator) {
+    public AnimatedFloat(float f, View view, long j, long j2, TimeInterpolator timeInterpolator) {
         this.transitionDelay = 0L;
         this.transitionDuration = 200L;
         this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
-        this.parent = parentToInvalidate;
-        this.transitionDuration = transitionDuration;
-        this.transitionInterpolator = transitionInterpolator;
-        this.firstSet = true;
-    }
-
-    public AnimatedFloat(float initialValue, View parentToInvalidate) {
-        this.transitionDelay = 0L;
-        this.transitionDuration = 200L;
-        this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
-        this.parent = parentToInvalidate;
-        this.targetValue = initialValue;
-        this.value = initialValue;
-        this.firstSet = false;
-    }
-
-    public AnimatedFloat(float initialValue, View parentToInvalidate, long transitionDelay, long transitionDuration, TimeInterpolator transitionInterpolator) {
-        this.transitionDelay = 0L;
-        this.transitionDuration = 200L;
-        this.transitionInterpolator = CubicBezierInterpolator.DEFAULT;
-        this.parent = parentToInvalidate;
-        this.targetValue = initialValue;
-        this.value = initialValue;
-        this.transitionDelay = transitionDelay;
-        this.transitionDuration = transitionDuration;
-        this.transitionInterpolator = transitionInterpolator;
+        this.parent = view;
+        this.targetValue = f;
+        this.value = f;
+        this.transitionDelay = j;
+        this.transitionDuration = j2;
+        this.transitionInterpolator = timeInterpolator;
         this.firstSet = false;
     }
 
@@ -92,29 +74,29 @@ public class AnimatedFloat {
         return this.value;
     }
 
-    public float set(float mustBe) {
-        return set(mustBe, false);
+    public float set(float f) {
+        return set(f, false);
     }
 
-    public float set(float mustBe, boolean force) {
-        long now = SystemClock.elapsedRealtime();
-        if (force || this.firstSet) {
-            this.targetValue = mustBe;
-            this.value = mustBe;
+    public float set(float f, boolean z) {
+        long elapsedRealtime = SystemClock.elapsedRealtime();
+        if (z || this.firstSet) {
+            this.targetValue = f;
+            this.value = f;
             this.transition = false;
             this.firstSet = false;
-        } else if (Math.abs(this.targetValue - mustBe) > 1.0E-4f) {
+        } else if (Math.abs(this.targetValue - f) > 1.0E-4f) {
             this.transition = true;
-            this.targetValue = mustBe;
+            this.targetValue = f;
             this.startValue = this.value;
-            this.transitionStart = now;
+            this.transitionStart = elapsedRealtime;
         }
         if (this.transition) {
-            float t = MathUtils.clamp(((float) ((now - this.transitionStart) - this.transitionDelay)) / ((float) this.transitionDuration), 0.0f, 1.0f);
-            if (now - this.transitionStart >= this.transitionDelay) {
-                this.value = AndroidUtilities.lerp(this.startValue, this.targetValue, this.transitionInterpolator.getInterpolation(t));
+            float clamp = MathUtils.clamp(((float) ((elapsedRealtime - this.transitionStart) - this.transitionDelay)) / ((float) this.transitionDuration), 0.0f, 1.0f);
+            if (elapsedRealtime - this.transitionStart >= this.transitionDelay) {
+                this.value = AndroidUtilities.lerp(this.startValue, this.targetValue, this.transitionInterpolator.getInterpolation(clamp));
             }
-            if (t >= 1.0f) {
+            if (clamp >= 1.0f) {
                 this.transition = false;
             } else {
                 View view = this.parent;
@@ -126,7 +108,7 @@ public class AnimatedFloat {
         return this.value;
     }
 
-    public void setParent(View parent) {
-        this.parent = parent;
+    public void setParent(View view) {
+        this.parent = view;
     }
 }

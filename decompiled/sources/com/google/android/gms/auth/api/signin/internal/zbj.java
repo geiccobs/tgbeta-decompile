@@ -3,7 +3,7 @@ package com.google.android.gms.auth.api.signin.internal;
 import android.os.RemoteException;
 import com.google.android.gms.common.api.Status;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zbj extends zba {
     final /* synthetic */ zbk zba;
 

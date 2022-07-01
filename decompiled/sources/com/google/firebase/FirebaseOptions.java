@@ -6,15 +6,8 @@ import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.StringResourceValueReader;
 import com.google.android.gms.common.util.Strings;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class FirebaseOptions {
-    private static final String API_KEY_RESOURCE_NAME = "google_api_key";
-    private static final String APP_ID_RESOURCE_NAME = "google_app_id";
-    private static final String DATABASE_URL_RESOURCE_NAME = "firebase_database_url";
-    private static final String GA_TRACKING_ID_RESOURCE_NAME = "ga_trackingId";
-    private static final String GCM_SENDER_ID_RESOURCE_NAME = "gcm_defaultSenderId";
-    private static final String PROJECT_ID_RESOURCE_NAME = "project_id";
-    private static final String STORAGE_BUCKET_RESOURCE_NAME = "google_storage_bucket";
     private final String apiKey;
     private final String applicationId;
     private final String databaseUrl;
@@ -23,87 +16,24 @@ public final class FirebaseOptions {
     private final String projectId;
     private final String storageBucket;
 
-    /* loaded from: classes3.dex */
-    public static final class Builder {
-        private String apiKey;
-        private String applicationId;
-        private String databaseUrl;
-        private String gaTrackingId;
-        private String gcmSenderId;
-        private String projectId;
-        private String storageBucket;
-
-        public Builder() {
-        }
-
-        public Builder(FirebaseOptions options) {
-            this.applicationId = options.applicationId;
-            this.apiKey = options.apiKey;
-            this.databaseUrl = options.databaseUrl;
-            this.gaTrackingId = options.gaTrackingId;
-            this.gcmSenderId = options.gcmSenderId;
-            this.storageBucket = options.storageBucket;
-            this.projectId = options.projectId;
-        }
-
-        public Builder setApiKey(String apiKey) {
-            this.apiKey = Preconditions.checkNotEmpty(apiKey, "ApiKey must be set.");
-            return this;
-        }
-
-        public Builder setApplicationId(String applicationId) {
-            this.applicationId = Preconditions.checkNotEmpty(applicationId, "ApplicationId must be set.");
-            return this;
-        }
-
-        public Builder setDatabaseUrl(String databaseUrl) {
-            this.databaseUrl = databaseUrl;
-            return this;
-        }
-
-        public Builder setGaTrackingId(String gaTrackingId) {
-            this.gaTrackingId = gaTrackingId;
-            return this;
-        }
-
-        public Builder setGcmSenderId(String gcmSenderId) {
-            this.gcmSenderId = gcmSenderId;
-            return this;
-        }
-
-        public Builder setStorageBucket(String storageBucket) {
-            this.storageBucket = storageBucket;
-            return this;
-        }
-
-        public Builder setProjectId(String projectId) {
-            this.projectId = projectId;
-            return this;
-        }
-
-        public FirebaseOptions build() {
-            return new FirebaseOptions(this.applicationId, this.apiKey, this.databaseUrl, this.gaTrackingId, this.gcmSenderId, this.storageBucket, this.projectId);
-        }
-    }
-
-    private FirebaseOptions(String applicationId, String apiKey, String databaseUrl, String gaTrackingId, String gcmSenderId, String storageBucket, String projectId) {
-        Preconditions.checkState(!Strings.isEmptyOrWhitespace(applicationId), "ApplicationId must be set.");
-        this.applicationId = applicationId;
-        this.apiKey = apiKey;
-        this.databaseUrl = databaseUrl;
-        this.gaTrackingId = gaTrackingId;
-        this.gcmSenderId = gcmSenderId;
-        this.storageBucket = storageBucket;
-        this.projectId = projectId;
+    private FirebaseOptions(String str, String str2, String str3, String str4, String str5, String str6, String str7) {
+        Preconditions.checkState(!Strings.isEmptyOrWhitespace(str), "ApplicationId must be set.");
+        this.applicationId = str;
+        this.apiKey = str2;
+        this.databaseUrl = str3;
+        this.gaTrackingId = str4;
+        this.gcmSenderId = str5;
+        this.storageBucket = str6;
+        this.projectId = str7;
     }
 
     public static FirebaseOptions fromResource(Context context) {
-        StringResourceValueReader reader = new StringResourceValueReader(context);
-        String applicationId = reader.getString(APP_ID_RESOURCE_NAME);
-        if (TextUtils.isEmpty(applicationId)) {
+        StringResourceValueReader stringResourceValueReader = new StringResourceValueReader(context);
+        String string = stringResourceValueReader.getString("google_app_id");
+        if (TextUtils.isEmpty(string)) {
             return null;
         }
-        return new FirebaseOptions(applicationId, reader.getString(API_KEY_RESOURCE_NAME), reader.getString(DATABASE_URL_RESOURCE_NAME), reader.getString(GA_TRACKING_ID_RESOURCE_NAME), reader.getString(GCM_SENDER_ID_RESOURCE_NAME), reader.getString(STORAGE_BUCKET_RESOURCE_NAME), reader.getString(PROJECT_ID_RESOURCE_NAME));
+        return new FirebaseOptions(string, stringResourceValueReader.getString("google_api_key"), stringResourceValueReader.getString("firebase_database_url"), stringResourceValueReader.getString("ga_trackingId"), stringResourceValueReader.getString("gcm_defaultSenderId"), stringResourceValueReader.getString("google_storage_bucket"), stringResourceValueReader.getString("project_id"));
     }
 
     public String getApiKey() {
@@ -114,32 +44,20 @@ public final class FirebaseOptions {
         return this.applicationId;
     }
 
-    public String getDatabaseUrl() {
-        return this.databaseUrl;
-    }
-
-    public String getGaTrackingId() {
-        return this.gaTrackingId;
-    }
-
     public String getGcmSenderId() {
         return this.gcmSenderId;
-    }
-
-    public String getStorageBucket() {
-        return this.storageBucket;
     }
 
     public String getProjectId() {
         return this.projectId;
     }
 
-    public boolean equals(Object o) {
-        if (!(o instanceof FirebaseOptions)) {
+    public boolean equals(Object obj) {
+        if (!(obj instanceof FirebaseOptions)) {
             return false;
         }
-        FirebaseOptions other = (FirebaseOptions) o;
-        return Objects.equal(this.applicationId, other.applicationId) && Objects.equal(this.apiKey, other.apiKey) && Objects.equal(this.databaseUrl, other.databaseUrl) && Objects.equal(this.gaTrackingId, other.gaTrackingId) && Objects.equal(this.gcmSenderId, other.gcmSenderId) && Objects.equal(this.storageBucket, other.storageBucket) && Objects.equal(this.projectId, other.projectId);
+        FirebaseOptions firebaseOptions = (FirebaseOptions) obj;
+        return Objects.equal(this.applicationId, firebaseOptions.applicationId) && Objects.equal(this.apiKey, firebaseOptions.apiKey) && Objects.equal(this.databaseUrl, firebaseOptions.databaseUrl) && Objects.equal(this.gaTrackingId, firebaseOptions.gaTrackingId) && Objects.equal(this.gcmSenderId, firebaseOptions.gcmSenderId) && Objects.equal(this.storageBucket, firebaseOptions.storageBucket) && Objects.equal(this.projectId, firebaseOptions.projectId);
     }
 
     public int hashCode() {

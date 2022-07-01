@@ -4,12 +4,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import org.telegram.ui.Components.voip.VoIPHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class VoIPFeedbackActivity extends Activity {
     @Override // android.app.Activity
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle bundle) {
         getWindow().addFlags(524288);
-        super.onCreate(savedInstanceState);
+        super.onCreate(bundle);
         overridePendingTransition(0, 0);
         setContentView(new View(this));
         VoIPHelper.showRateAlert(this, new Runnable() { // from class: org.telegram.ui.VoIPFeedbackActivity$$ExternalSyntheticLambda0

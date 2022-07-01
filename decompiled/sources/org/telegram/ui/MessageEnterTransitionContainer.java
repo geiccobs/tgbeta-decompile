@@ -1,11 +1,13 @@
 package org.telegram.ui;
 
+import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 import android.view.View;
 import android.view.ViewGroup;
 import java.util.ArrayList;
 import org.telegram.messenger.NotificationCenter;
-/* loaded from: classes4.dex */
+@SuppressLint({"ViewConstructor"})
+/* loaded from: classes3.dex */
 public class MessageEnterTransitionContainer extends View {
     private final int currentAccount;
     private final ViewGroup parent;
@@ -13,24 +15,23 @@ public class MessageEnterTransitionContainer extends View {
     Runnable hideRunnable = new Runnable() { // from class: org.telegram.ui.MessageEnterTransitionContainer$$ExternalSyntheticLambda0
         @Override // java.lang.Runnable
         public final void run() {
-            MessageEnterTransitionContainer.this.m3905lambda$new$0$orgtelegramuiMessageEnterTransitionContainer();
+            MessageEnterTransitionContainer.this.lambda$new$0();
         }
     };
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public interface Transition {
         void onDraw(Canvas canvas);
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-MessageEnterTransitionContainer */
-    public /* synthetic */ void m3905lambda$new$0$orgtelegramuiMessageEnterTransitionContainer() {
+    public /* synthetic */ void lambda$new$0() {
         setVisibility(8);
     }
 
-    public MessageEnterTransitionContainer(ViewGroup parent, int currentAccount) {
-        super(parent.getContext());
-        this.parent = parent;
-        this.currentAccount = currentAccount;
+    public MessageEnterTransitionContainer(ViewGroup viewGroup, int i) {
+        super(viewGroup.getContext());
+        this.parent = viewGroup;
+        this.currentAccount = i;
     }
 
     public void addTransition(Transition transition) {
@@ -59,7 +60,8 @@ public class MessageEnterTransitionContainer extends View {
         if (this.transitions.isEmpty() && getVisibility() != 8) {
             NotificationCenter.getInstance(this.currentAccount).removeDelayed(this.hideRunnable);
             NotificationCenter.getInstance(this.currentAccount).doOnIdle(this.hideRunnable);
-        } else if (!this.transitions.isEmpty() && getVisibility() != 0) {
+        } else if (this.transitions.isEmpty() || getVisibility() == 0) {
+        } else {
             NotificationCenter.getInstance(this.currentAccount).removeDelayed(this.hideRunnable);
             setVisibility(0);
         }

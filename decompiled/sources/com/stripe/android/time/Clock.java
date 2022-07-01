@@ -1,12 +1,12 @@
 package com.stripe.android.time;
 
 import java.util.Calendar;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Clock {
     private static Clock instance;
     protected Calendar calendarInstance;
 
-    public static Clock getInstance() {
+    protected static Clock getInstance() {
         if (instance == null) {
             instance = new Clock();
         }

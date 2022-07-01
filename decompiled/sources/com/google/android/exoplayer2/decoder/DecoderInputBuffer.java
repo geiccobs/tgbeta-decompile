@@ -1,16 +1,9 @@
 package com.google.android.exoplayer2.decoder;
 
-import com.google.android.exoplayer2.C;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class DecoderInputBuffer extends Buffer {
-    public static final int BUFFER_REPLACEMENT_MODE_DIRECT = 2;
-    public static final int BUFFER_REPLACEMENT_MODE_DISABLED = 0;
-    public static final int BUFFER_REPLACEMENT_MODE_NORMAL = 1;
     private final int bufferReplacementMode;
     public final CryptoInfo cryptoInfo = new CryptoInfo();
     public ByteBuffer data;
@@ -18,50 +11,44 @@ public class DecoderInputBuffer extends Buffer {
     public long timeUs;
     public boolean waitingForKeys;
 
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    public @interface BufferReplacementMode {
-    }
-
     public static DecoderInputBuffer newFlagsOnlyInstance() {
         return new DecoderInputBuffer(0);
     }
 
-    public DecoderInputBuffer(int bufferReplacementMode) {
-        this.bufferReplacementMode = bufferReplacementMode;
+    public DecoderInputBuffer(int i) {
+        this.bufferReplacementMode = i;
     }
 
     @EnsuresNonNull({"supplementalData"})
-    public void resetSupplementalData(int length) {
+    public void resetSupplementalData(int i) {
         ByteBuffer byteBuffer = this.supplementalData;
-        if (byteBuffer == null || byteBuffer.capacity() < length) {
-            this.supplementalData = ByteBuffer.allocate(length);
+        if (byteBuffer == null || byteBuffer.capacity() < i) {
+            this.supplementalData = ByteBuffer.allocate(i);
         } else {
             this.supplementalData.clear();
         }
     }
 
     @EnsuresNonNull({"data"})
-    public void ensureSpaceForWrite(int length) {
+    public void ensureSpaceForWrite(int i) {
         ByteBuffer byteBuffer = this.data;
         if (byteBuffer == null) {
-            this.data = createReplacementByteBuffer(length);
+            this.data = createReplacementByteBuffer(i);
             return;
         }
         int capacity = byteBuffer.capacity();
         int position = this.data.position();
-        int requiredCapacity = position + length;
-        if (capacity >= requiredCapacity) {
+        int i2 = i + position;
+        if (capacity >= i2) {
             return;
         }
-        ByteBuffer newData = createReplacementByteBuffer(requiredCapacity);
-        newData.order(this.data.order());
+        ByteBuffer createReplacementByteBuffer = createReplacementByteBuffer(i2);
+        createReplacementByteBuffer.order(this.data.order());
         if (position > 0) {
             this.data.flip();
-            newData.put(this.data);
+            createReplacementByteBuffer.put(this.data);
         }
-        this.data = newData;
+        this.data = createReplacementByteBuffer;
     }
 
     public final boolean isFlagsOnly() {
@@ -69,7 +56,7 @@ public class DecoderInputBuffer extends Buffer {
     }
 
     public final boolean isEncrypted() {
-        return getFlag(C.BUFFER_FLAG_ENCRYPTED);
+        return getFlag(1073741824);
     }
 
     public final void flip() {
@@ -94,16 +81,16 @@ public class DecoderInputBuffer extends Buffer {
         this.waitingForKeys = false;
     }
 
-    private ByteBuffer createReplacementByteBuffer(int requiredCapacity) {
-        int i = this.bufferReplacementMode;
-        if (i == 1) {
-            return ByteBuffer.allocate(requiredCapacity);
+    private ByteBuffer createReplacementByteBuffer(int i) {
+        int i2 = this.bufferReplacementMode;
+        if (i2 == 1) {
+            return ByteBuffer.allocate(i);
         }
-        if (i == 2) {
-            return ByteBuffer.allocateDirect(requiredCapacity);
+        if (i2 == 2) {
+            return ByteBuffer.allocateDirect(i);
         }
         ByteBuffer byteBuffer = this.data;
-        int currentCapacity = byteBuffer == null ? 0 : byteBuffer.capacity();
-        throw new IllegalStateException("Buffer too small (" + currentCapacity + " < " + requiredCapacity + ")");
+        int capacity = byteBuffer == null ? 0 : byteBuffer.capacity();
+        throw new IllegalStateException("Buffer too small (" + capacity + " < " + i + ")");
     }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zzde<MessageType extends zzde<MessageType, BuilderType>, BuilderType extends zzdh<MessageType, BuilderType>> implements zzfz {
     protected int zza = 0;
 
@@ -19,7 +19,7 @@ public abstract class zzde<MessageType extends zzde<MessageType, BuilderType>, B
             return zzc.zza();
         } catch (IOException e) {
             String name = getClass().getName();
-            StringBuilder sb = new StringBuilder(String.valueOf(name).length() + 62 + String.valueOf("ByteString").length());
+            StringBuilder sb = new StringBuilder(name.length() + 62 + "ByteString".length());
             sb.append("Serializing ");
             sb.append(name);
             sb.append(" to a ");
@@ -38,7 +38,7 @@ public abstract class zzde<MessageType extends zzde<MessageType, BuilderType>, B
             return bArr;
         } catch (IOException e) {
             String name = getClass().getName();
-            StringBuilder sb = new StringBuilder(String.valueOf(name).length() + 62 + String.valueOf("byte array").length());
+            StringBuilder sb = new StringBuilder(name.length() + 62 + "byte array".length());
             sb.append("Serializing ");
             sb.append(name);
             sb.append(" to a ");

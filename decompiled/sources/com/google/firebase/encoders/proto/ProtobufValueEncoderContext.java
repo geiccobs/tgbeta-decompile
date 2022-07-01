@@ -4,21 +4,21 @@ import com.google.firebase.encoders.EncodingException;
 import com.google.firebase.encoders.FieldDescriptor;
 import com.google.firebase.encoders.ValueEncoderContext;
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ProtobufValueEncoderContext implements ValueEncoderContext {
     private FieldDescriptor field;
     private final ProtobufDataEncoderContext objEncoderCtx;
     private boolean encoded = false;
     private boolean skipDefault = false;
 
-    public ProtobufValueEncoderContext(ProtobufDataEncoderContext objEncoderCtx) {
-        this.objEncoderCtx = objEncoderCtx;
+    public ProtobufValueEncoderContext(ProtobufDataEncoderContext protobufDataEncoderContext) {
+        this.objEncoderCtx = protobufDataEncoderContext;
     }
 
-    public void resetContext(FieldDescriptor field, boolean skipDefault) {
+    public void resetContext(FieldDescriptor fieldDescriptor, boolean z) {
         this.encoded = false;
-        this.field = field;
-        this.skipDefault = skipDefault;
+        this.field = fieldDescriptor;
+        this.skipDefault = z;
     }
 
     private void checkNotUsed() {
@@ -29,51 +29,16 @@ public class ProtobufValueEncoderContext implements ValueEncoderContext {
     }
 
     @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(String value) throws IOException {
+    public ValueEncoderContext add(String str) throws IOException {
         checkNotUsed();
-        this.objEncoderCtx.add(this.field, value, this.skipDefault);
+        this.objEncoderCtx.add(this.field, str, this.skipDefault);
         return this;
     }
 
     @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(float value) throws IOException {
+    public ValueEncoderContext add(boolean z) throws IOException {
         checkNotUsed();
-        this.objEncoderCtx.add(this.field, value, this.skipDefault);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(double value) throws IOException {
-        checkNotUsed();
-        this.objEncoderCtx.add(this.field, value, this.skipDefault);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(int value) throws IOException {
-        checkNotUsed();
-        this.objEncoderCtx.add(this.field, value, this.skipDefault);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(long value) throws IOException {
-        checkNotUsed();
-        this.objEncoderCtx.add(this.field, value, this.skipDefault);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(boolean value) throws IOException {
-        checkNotUsed();
-        this.objEncoderCtx.add(this.field, value, this.skipDefault);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public ValueEncoderContext add(byte[] bytes) throws IOException {
-        checkNotUsed();
-        this.objEncoderCtx.add(this.field, bytes, this.skipDefault);
+        this.objEncoderCtx.add(this.field, z, this.skipDefault);
         return this;
     }
 }

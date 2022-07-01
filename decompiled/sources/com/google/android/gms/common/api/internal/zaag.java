@@ -4,10 +4,12 @@ import android.content.Context;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailabilityLight;
 import com.google.android.gms.common.api.Api;
+import com.google.android.gms.signin.zae;
 import java.util.ArrayList;
 import java.util.Map;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaag extends zaap {
     final /* synthetic */ zaaf zaa;
     private final Map<Api.Client, zaah> zab;
@@ -20,13 +22,14 @@ public final class zaag extends zaap {
     }
 
     @Override // com.google.android.gms.common.api.internal.zaap
+    @GuardedBy("mLock")
     public final void zaa() {
         GoogleApiAvailabilityLight googleApiAvailabilityLight;
         boolean z;
         Context context;
         zaaz zaazVar;
-        com.google.android.gms.signin.zae zaeVar;
-        com.google.android.gms.signin.zae zaeVar2;
+        zae zaeVar;
+        zae zaeVar2;
         zaaz zaazVar2;
         Context context2;
         Context context3;
@@ -47,10 +50,9 @@ public final class zaag extends zaap {
         int i = -1;
         int i2 = 0;
         if (arrayList.isEmpty()) {
-            ArrayList arrayList3 = arrayList2;
-            int size = arrayList3.size();
+            int size = arrayList2.size();
             while (i2 < size) {
-                Object obj = arrayList3.get(i2);
+                Object obj = arrayList2.get(i2);
                 i2++;
                 context3 = this.zaa.zac;
                 i = zajVar.zaa(context3, (Api.Client) obj);
@@ -59,10 +61,9 @@ public final class zaag extends zaap {
                 }
             }
         } else {
-            ArrayList arrayList4 = arrayList;
-            int size2 = arrayList4.size();
+            int size2 = arrayList.size();
             while (i2 < size2) {
-                Object obj2 = arrayList4.get(i2);
+                Object obj2 = arrayList.get(i2);
                 i2++;
                 context2 = this.zaa.zac;
                 i = zajVar.zaa(context2, (Api.Client) obj2);

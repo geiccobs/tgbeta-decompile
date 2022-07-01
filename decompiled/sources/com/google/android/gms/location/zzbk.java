@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzbk implements Parcelable.Creator<zzbj> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ zzbj createFromParcel(Parcel parcel) {
@@ -14,21 +14,15 @@ public final class zzbk implements Parcelable.Creator<zzbj> {
         String str3 = str2;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            switch (SafeParcelReader.getFieldId(readHeader)) {
-                case 1:
-                    str2 = SafeParcelReader.createString(parcel, readHeader);
-                    break;
-                case 2:
-                    str3 = SafeParcelReader.createString(parcel, readHeader);
-                    break;
-                case 3:
-                case 4:
-                default:
-                    SafeParcelReader.skipUnknownField(parcel, readHeader);
-                    break;
-                case 5:
-                    str = SafeParcelReader.createString(parcel, readHeader);
-                    break;
+            int fieldId = SafeParcelReader.getFieldId(readHeader);
+            if (fieldId == 1) {
+                str2 = SafeParcelReader.createString(parcel, readHeader);
+            } else if (fieldId == 2) {
+                str3 = SafeParcelReader.createString(parcel, readHeader);
+            } else if (fieldId == 5) {
+                str = SafeParcelReader.createString(parcel, readHeader);
+            } else {
+                SafeParcelReader.skipUnknownField(parcel, readHeader);
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

@@ -1,16 +1,16 @@
 package androidx.lifecycle;
 
 import androidx.lifecycle.Lifecycle;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class FullLifecycleObserverAdapter implements GenericLifecycleObserver {
     private final FullLifecycleObserver mObserver;
 
-    public FullLifecycleObserverAdapter(FullLifecycleObserver observer) {
-        this.mObserver = observer;
+    public FullLifecycleObserverAdapter(FullLifecycleObserver fullLifecycleObserver) {
+        this.mObserver = fullLifecycleObserver;
     }
 
     /* renamed from: androidx.lifecycle.FullLifecycleObserverAdapter$1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$androidx$lifecycle$Lifecycle$Event;
 
@@ -19,55 +19,55 @@ public class FullLifecycleObserverAdapter implements GenericLifecycleObserver {
             $SwitchMap$androidx$lifecycle$Lifecycle$Event = iArr;
             try {
                 iArr[Lifecycle.Event.ON_CREATE.ordinal()] = 1;
-            } catch (NoSuchFieldError e) {
+            } catch (NoSuchFieldError unused) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_START.ordinal()] = 2;
-            } catch (NoSuchFieldError e2) {
+            } catch (NoSuchFieldError unused2) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_RESUME.ordinal()] = 3;
-            } catch (NoSuchFieldError e3) {
+            } catch (NoSuchFieldError unused3) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_PAUSE.ordinal()] = 4;
-            } catch (NoSuchFieldError e4) {
+            } catch (NoSuchFieldError unused4) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_STOP.ordinal()] = 5;
-            } catch (NoSuchFieldError e5) {
+            } catch (NoSuchFieldError unused5) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_DESTROY.ordinal()] = 6;
-            } catch (NoSuchFieldError e6) {
+            } catch (NoSuchFieldError unused6) {
             }
             try {
                 $SwitchMap$androidx$lifecycle$Lifecycle$Event[Lifecycle.Event.ON_ANY.ordinal()] = 7;
-            } catch (NoSuchFieldError e7) {
+            } catch (NoSuchFieldError unused7) {
             }
         }
     }
 
     @Override // androidx.lifecycle.GenericLifecycleObserver
-    public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {
+    public void onStateChanged(LifecycleOwner lifecycleOwner, Lifecycle.Event event) {
         switch (AnonymousClass1.$SwitchMap$androidx$lifecycle$Lifecycle$Event[event.ordinal()]) {
             case 1:
-                this.mObserver.onCreate(source);
+                this.mObserver.onCreate(lifecycleOwner);
                 return;
             case 2:
-                this.mObserver.onStart(source);
+                this.mObserver.onStart(lifecycleOwner);
                 return;
             case 3:
-                this.mObserver.onResume(source);
+                this.mObserver.onResume(lifecycleOwner);
                 return;
             case 4:
-                this.mObserver.onPause(source);
+                this.mObserver.onPause(lifecycleOwner);
                 return;
             case 5:
-                this.mObserver.onStop(source);
+                this.mObserver.onStop(lifecycleOwner);
                 return;
             case 6:
-                this.mObserver.onDestroy(source);
+                this.mObserver.onDestroy(lifecycleOwner);
                 return;
             case 7:
                 throw new IllegalArgumentException("ON_ANY must not been send by anybody");

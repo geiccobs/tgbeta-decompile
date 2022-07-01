@@ -3,7 +3,7 @@ package com.google.android.gms.internal.firebase_messaging;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzo extends WeakReference<Throwable> {
     private final int zza;
 
@@ -13,14 +13,16 @@ final class zzo extends WeakReference<Throwable> {
     }
 
     public final boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass()) {
-            return false;
+        if (obj != null && obj.getClass() == zzo.class) {
+            if (this == obj) {
+                return true;
+            }
+            zzo zzoVar = (zzo) obj;
+            if (this.zza == zzoVar.zza && get() == zzoVar.get()) {
+                return true;
+            }
         }
-        if (this == obj) {
-            return true;
-        }
-        zzo zzoVar = (zzo) obj;
-        return this.zza == zzoVar.zza && get() == zzoVar.get();
+        return false;
     }
 
     public final int hashCode() {

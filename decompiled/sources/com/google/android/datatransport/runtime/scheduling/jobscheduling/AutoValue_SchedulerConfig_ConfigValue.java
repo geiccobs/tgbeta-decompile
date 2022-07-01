@@ -2,16 +2,16 @@ package com.google.android.datatransport.runtime.scheduling.jobscheduling;
 
 import com.google.android.datatransport.runtime.scheduling.jobscheduling.SchedulerConfig;
 import java.util.Set;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class AutoValue_SchedulerConfig_ConfigValue extends SchedulerConfig.ConfigValue {
     private final long delta;
     private final Set<SchedulerConfig.Flag> flags;
     private final long maxAllowedDelay;
 
-    private AutoValue_SchedulerConfig_ConfigValue(long delta, long maxAllowedDelay, Set<SchedulerConfig.Flag> flags) {
-        this.delta = delta;
-        this.maxAllowedDelay = maxAllowedDelay;
-        this.flags = flags;
+    private AutoValue_SchedulerConfig_ConfigValue(long j, long j2, Set<SchedulerConfig.Flag> set) {
+        this.delta = j;
+        this.maxAllowedDelay = j2;
+        this.flags = set;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
@@ -36,66 +36,65 @@ final class AutoValue_SchedulerConfig_ConfigValue extends SchedulerConfig.Config
         return "ConfigValue{delta=" + this.delta + ", maxAllowedDelay=" + this.maxAllowedDelay + ", flags=" + this.flags + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof SchedulerConfig.ConfigValue)) {
+        if (!(obj instanceof SchedulerConfig.ConfigValue)) {
             return false;
         }
-        SchedulerConfig.ConfigValue that = (SchedulerConfig.ConfigValue) o;
-        return this.delta == that.getDelta() && this.maxAllowedDelay == that.getMaxAllowedDelay() && this.flags.equals(that.getFlags());
+        SchedulerConfig.ConfigValue configValue = (SchedulerConfig.ConfigValue) obj;
+        return this.delta == configValue.getDelta() && this.maxAllowedDelay == configValue.getMaxAllowedDelay() && this.flags.equals(configValue.getFlags());
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
         long j = this.delta;
         long j2 = this.maxAllowedDelay;
-        return ((((h$ ^ ((int) (j ^ (j >>> 32)))) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003) ^ this.flags.hashCode();
+        return this.flags.hashCode() ^ ((((((int) (j ^ (j >>> 32))) ^ 1000003) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003);
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder extends SchedulerConfig.ConfigValue.Builder {
         private Long delta;
         private Set<SchedulerConfig.Flag> flags;
         private Long maxAllowedDelay;
 
         @Override // com.google.android.datatransport.runtime.scheduling.jobscheduling.SchedulerConfig.ConfigValue.Builder
-        public SchedulerConfig.ConfigValue.Builder setDelta(long delta) {
-            this.delta = Long.valueOf(delta);
+        public SchedulerConfig.ConfigValue.Builder setDelta(long j) {
+            this.delta = Long.valueOf(j);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.jobscheduling.SchedulerConfig.ConfigValue.Builder
-        public SchedulerConfig.ConfigValue.Builder setMaxAllowedDelay(long maxAllowedDelay) {
-            this.maxAllowedDelay = Long.valueOf(maxAllowedDelay);
+        public SchedulerConfig.ConfigValue.Builder setMaxAllowedDelay(long j) {
+            this.maxAllowedDelay = Long.valueOf(j);
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.jobscheduling.SchedulerConfig.ConfigValue.Builder
-        public SchedulerConfig.ConfigValue.Builder setFlags(Set<SchedulerConfig.Flag> flags) {
-            if (flags == null) {
+        public SchedulerConfig.ConfigValue.Builder setFlags(Set<SchedulerConfig.Flag> set) {
+            if (set == null) {
                 throw new NullPointerException("Null flags");
             }
-            this.flags = flags;
+            this.flags = set;
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.scheduling.jobscheduling.SchedulerConfig.ConfigValue.Builder
         public SchedulerConfig.ConfigValue build() {
-            String missing = "";
+            String str = "";
             if (this.delta == null) {
-                missing = missing + " delta";
+                str = str + " delta";
             }
             if (this.maxAllowedDelay == null) {
-                missing = missing + " maxAllowedDelay";
+                str = str + " maxAllowedDelay";
             }
             if (this.flags == null) {
-                missing = missing + " flags";
+                str = str + " flags";
             }
-            if (!missing.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + missing);
+            if (!str.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + str);
             }
             return new AutoValue_SchedulerConfig_ConfigValue(this.delta.longValue(), this.maxAllowedDelay.longValue(), this.flags);
         }

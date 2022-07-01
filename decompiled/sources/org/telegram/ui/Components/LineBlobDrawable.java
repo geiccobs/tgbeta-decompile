@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import java.util.Random;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class LineBlobDrawable {
     private final float N;
     public float maxRadius;
@@ -14,40 +14,41 @@ public class LineBlobDrawable {
     private float[] radiusNext;
     private float[] speed;
     public Path path = new Path();
-    public Paint paint = new Paint(1);
     final Random random = new Random();
 
-    public LineBlobDrawable(int n) {
-        this.N = n;
-        this.radius = new float[n + 1];
-        this.radiusNext = new float[n + 1];
-        this.progress = new float[n + 1];
-        this.speed = new float[n + 1];
-        for (int i = 0; i <= this.N; i++) {
-            generateBlob(this.radius, i);
-            generateBlob(this.radiusNext, i);
-            this.progress[i] = 0.0f;
+    public LineBlobDrawable(int i) {
+        new Paint(1);
+        this.N = i;
+        int i2 = i + 1;
+        this.radius = new float[i2];
+        this.radiusNext = new float[i2];
+        this.progress = new float[i2];
+        this.speed = new float[i2];
+        for (int i3 = 0; i3 <= this.N; i3++) {
+            generateBlob(this.radius, i3);
+            generateBlob(this.radiusNext, i3);
+            this.progress[i3] = 0.0f;
         }
     }
 
-    private void generateBlob(float[] radius, int i) {
+    private void generateBlob(float[] fArr, int i) {
         float f = this.maxRadius;
         float f2 = this.minRadius;
-        float radDif = f - f2;
-        radius[i] = f2 + (Math.abs((this.random.nextInt() % 100.0f) / 100.0f) * radDif);
-        float[] fArr = this.speed;
+        fArr[i] = f2 + (Math.abs((this.random.nextInt() % 100.0f) / 100.0f) * (f - f2));
+        float[] fArr2 = this.speed;
         double abs = Math.abs(this.random.nextInt() % 100.0f) / 100.0f;
         Double.isNaN(abs);
-        fArr[i] = (float) ((abs * 0.003d) + 0.017d);
+        fArr2[i] = (float) ((abs * 0.003d) + 0.017d);
     }
 
-    public void update(float amplitude, float speedScale) {
+    public void update(float f, float f2) {
         for (int i = 0; i <= this.N; i++) {
             float[] fArr = this.progress;
-            fArr[i] = fArr[i] + (this.speed[i] * BlobDrawable.MIN_SPEED) + (this.speed[i] * amplitude * BlobDrawable.MAX_SPEED * speedScale);
-            float[] fArr2 = this.progress;
-            if (fArr2[i] >= 1.0f) {
-                fArr2[i] = 0.0f;
+            float f3 = fArr[i];
+            float[] fArr2 = this.speed;
+            fArr[i] = f3 + (fArr2[i] * BlobDrawable.MIN_SPEED) + (fArr2[i] * f * BlobDrawable.MAX_SPEED * f2);
+            if (fArr[i] >= 1.0f) {
+                fArr[i] = 0.0f;
                 float[] fArr3 = this.radius;
                 float[] fArr4 = this.radiusNext;
                 fArr3[i] = fArr4[i];
@@ -56,51 +57,42 @@ public class LineBlobDrawable {
         }
     }
 
-    public void draw(float left, float top, float right, float bottom, Canvas canvas, Paint paint, float pinnedTop, float progressToPinned) {
+    public void draw(float f, float f2, float f3, float f4, Canvas canvas, Paint paint, float f5, float f6) {
         this.path.reset();
-        this.path.moveTo(right, bottom);
-        this.path.lineTo(left, bottom);
+        this.path.moveTo(f3, f4);
+        this.path.lineTo(f, f4);
         int i = 0;
         while (true) {
-            float f = this.N;
-            if (i <= f) {
-                if (i == 0) {
-                    float progress = this.progress[i];
-                    float r1 = (this.radius[i] * (1.0f - progress)) + (this.radiusNext[i] * progress);
-                    float y = ((top - r1) * progressToPinned) + ((1.0f - progressToPinned) * pinnedTop);
-                    this.path.lineTo(left, y);
-                } else {
-                    float[] fArr = this.progress;
-                    float progress2 = fArr[i - 1];
-                    float[] fArr2 = this.radius;
-                    float f2 = fArr2[i - 1] * (1.0f - progress2);
-                    float[] fArr3 = this.radiusNext;
-                    float r12 = f2 + (fArr3[i - 1] * progress2);
-                    float progressNext = fArr[i];
-                    float r2 = (fArr2[i] * (1.0f - progressNext)) + (fArr3[i] * progressNext);
-                    float x1 = ((right - left) / f) * (i - 1);
-                    float x2 = ((right - left) / f) * i;
-                    float cx = ((x2 - x1) / 2.0f) + x1;
-                    float y1 = ((top - r12) * progressToPinned) + ((1.0f - progressToPinned) * pinnedTop);
-                    float y2 = ((1.0f - progressToPinned) * pinnedTop) + ((top - r2) * progressToPinned);
-                    this.path.cubicTo(cx, y1, cx, y2, x2, y2);
-                    if (i == this.N) {
-                        this.path.lineTo(right, bottom);
-                    }
-                }
-                i++;
-            } else {
+            float f7 = i;
+            float f8 = this.N;
+            if (f7 > f8) {
                 canvas.drawPath(this.path, paint);
                 return;
             }
-        }
-    }
-
-    public void generateBlob() {
-        for (int i = 0; i < this.N; i++) {
-            generateBlob(this.radius, i);
-            generateBlob(this.radiusNext, i);
-            this.progress[i] = 0.0f;
+            if (i == 0) {
+                float f9 = this.progress[i];
+                this.path.lineTo(f, ((f2 - ((this.radius[i] * (1.0f - f9)) + (this.radiusNext[i] * f9))) * f6) + (f5 * (1.0f - f6)));
+            } else {
+                float[] fArr = this.progress;
+                int i2 = i - 1;
+                float f10 = fArr[i2];
+                float[] fArr2 = this.radius;
+                float f11 = fArr2[i2] * (1.0f - f10);
+                float[] fArr3 = this.radiusNext;
+                float f12 = fArr[i];
+                float f13 = (fArr2[i] * (1.0f - f12)) + (fArr3[i] * f12);
+                float f14 = f3 - f;
+                float f15 = (f14 / f8) * i2;
+                float f16 = (f14 / f8) * f7;
+                float f17 = f15 + ((f16 - f15) / 2.0f);
+                float f18 = (1.0f - f6) * f5;
+                float f19 = ((f2 - f13) * f6) + f18;
+                this.path.cubicTo(f17, ((f2 - (f11 + (fArr3[i2] * f10))) * f6) + f18, f17, f19, f16, f19);
+                if (f7 == this.N) {
+                    this.path.lineTo(f3, f4);
+                }
+            }
+            i++;
         }
     }
 }

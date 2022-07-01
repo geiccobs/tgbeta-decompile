@@ -1,10 +1,9 @@
 package org.telegram.ui.Components;
 
 import android.content.Context;
-import android.util.AttributeSet;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class CircularViewPager extends ViewPager {
     private Adapter adapter;
 
@@ -14,67 +13,32 @@ public class CircularViewPager extends ViewPager {
             private int scrollState;
 
             @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (position == CircularViewPager.this.getCurrentItem() && positionOffset == 0.0f && this.scrollState == 1) {
+            public void onPageSelected(int i) {
+            }
+
+            @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
+            public void onPageScrolled(int i, float f, int i2) {
+                if (i == CircularViewPager.this.getCurrentItem() && f == 0.0f && this.scrollState == 1) {
                     checkCurrentItem();
                 }
             }
 
             @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-            public void onPageSelected(int position) {
-            }
-
-            @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-            public void onPageScrollStateChanged(int state) {
-                if (state == 0) {
+            public void onPageScrollStateChanged(int i) {
+                if (i == 0) {
                     checkCurrentItem();
                 }
-                this.scrollState = state;
+                this.scrollState = i;
             }
 
             private void checkCurrentItem() {
                 if (CircularViewPager.this.adapter != null) {
-                    int position = CircularViewPager.this.getCurrentItem();
-                    int newPosition = CircularViewPager.this.adapter.getExtraCount() + CircularViewPager.this.adapter.getRealPosition(position);
-                    if (position != newPosition) {
-                        CircularViewPager.this.setCurrentItem(newPosition, false);
+                    int currentItem = CircularViewPager.this.getCurrentItem();
+                    int extraCount = CircularViewPager.this.adapter.getExtraCount() + CircularViewPager.this.adapter.getRealPosition(currentItem);
+                    if (currentItem == extraCount) {
+                        return;
                     }
-                }
-            }
-        });
-    }
-
-    public CircularViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        addOnPageChangeListener(new ViewPager.OnPageChangeListener() { // from class: org.telegram.ui.Components.CircularViewPager.1
-            private int scrollState;
-
-            @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (position == CircularViewPager.this.getCurrentItem() && positionOffset == 0.0f && this.scrollState == 1) {
-                    checkCurrentItem();
-                }
-            }
-
-            @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-            public void onPageSelected(int position) {
-            }
-
-            @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-            public void onPageScrollStateChanged(int state) {
-                if (state == 0) {
-                    checkCurrentItem();
-                }
-                this.scrollState = state;
-            }
-
-            private void checkCurrentItem() {
-                if (CircularViewPager.this.adapter != null) {
-                    int position = CircularViewPager.this.getCurrentItem();
-                    int newPosition = CircularViewPager.this.adapter.getExtraCount() + CircularViewPager.this.adapter.getRealPosition(position);
-                    if (position != newPosition) {
-                        CircularViewPager.this.setCurrentItem(newPosition, false);
-                    }
+                    CircularViewPager.this.setCurrentItem(extraCount, false);
                 }
             }
         });
@@ -82,9 +46,9 @@ public class CircularViewPager extends ViewPager {
 
     @Override // androidx.viewpager.widget.ViewPager
     @Deprecated
-    public void setAdapter(PagerAdapter adapter) {
-        if (adapter instanceof Adapter) {
-            setAdapter((Adapter) adapter);
+    public void setAdapter(PagerAdapter pagerAdapter) {
+        if (pagerAdapter instanceof Adapter) {
+            setAdapter((Adapter) pagerAdapter);
             return;
         }
         throw new IllegalArgumentException();
@@ -98,20 +62,18 @@ public class CircularViewPager extends ViewPager {
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static abstract class Adapter extends PagerAdapter {
         public abstract int getExtraCount();
 
-        public int getRealPosition(int adapterPosition) {
+        public int getRealPosition(int i) {
             int count = getCount();
             int extraCount = getExtraCount();
-            if (adapterPosition < extraCount) {
-                return ((count - (extraCount * 2)) - ((extraCount - adapterPosition) - 1)) - 1;
+            if (i < extraCount) {
+                return ((count - (extraCount * 2)) - ((extraCount - i) - 1)) - 1;
             }
-            if (adapterPosition >= count - extraCount) {
-                return adapterPosition - (count - extraCount);
-            }
-            return adapterPosition - extraCount;
+            int i2 = count - extraCount;
+            return i >= i2 ? i - i2 : i - extraCount;
         }
     }
 }

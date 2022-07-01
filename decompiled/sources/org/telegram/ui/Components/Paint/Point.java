@@ -1,23 +1,17 @@
 package org.telegram.ui.Components.Paint;
 
 import android.graphics.PointF;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Point {
     public boolean edge;
     public double x;
     public double y;
     public double z;
 
-    public Point(double x, double y, double z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    public Point(Point point) {
-        this.x = point.x;
-        this.y = point.y;
-        this.z = point.z;
+    public Point(double d, double d2, double d3) {
+        this.x = d;
+        this.y = d2;
+        this.z = d3;
     }
 
     public boolean equals(Object obj) {
@@ -30,22 +24,12 @@ public class Point {
         if (!(obj instanceof Point)) {
             return false;
         }
-        Point other = (Point) obj;
-        return this.x == other.x && this.y == other.y && this.z == other.z;
+        Point point = (Point) obj;
+        return this.x == point.x && this.y == point.y && this.z == point.z;
     }
 
-    public Point multiplySum(Point point, double scalar) {
-        return new Point((this.x + point.x) * scalar, (this.y + point.y) * scalar, (this.z + point.z) * scalar);
-    }
-
-    Point multiplyAndAdd(double scalar, Point point) {
-        return new Point((this.x * scalar) + point.x, (this.y * scalar) + point.y, (this.z * scalar) + point.z);
-    }
-
-    void alteringAddMultiplication(Point point, double scalar) {
-        this.x += point.x * scalar;
-        this.y += point.y * scalar;
-        this.z += point.z * scalar;
+    public Point multiplySum(Point point, double d) {
+        return new Point((this.x + point.x) * d, (this.y + point.y) * d, (this.z + point.z) * d);
     }
 
     public Point add(Point point) {
@@ -56,20 +40,8 @@ public class Point {
         return new Point(this.x - point.x, this.y - point.y, this.z - point.z);
     }
 
-    public Point multiplyByScalar(double scalar) {
-        return new Point(this.x * scalar, this.y * scalar, this.z * scalar);
-    }
-
-    Point getNormalized() {
-        return multiplyByScalar(1.0d / getMagnitude());
-    }
-
-    private double getMagnitude() {
-        double d = this.x;
-        double d2 = this.y;
-        double d3 = (d * d) + (d2 * d2);
-        double d4 = this.z;
-        return Math.sqrt(d3 + (d4 * d4));
+    public Point multiplyByScalar(double d) {
+        return new Point(this.x * d, this.y * d, this.z * d);
     }
 
     public float getDistanceTo(Point point) {

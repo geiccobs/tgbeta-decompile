@@ -6,19 +6,20 @@ import com.google.android.gms.common.internal.ClientIdentity;
 import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
+import com.google.android.gms.location.zzs;
 import java.util.Collections;
 import java.util.List;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzj extends AbstractSafeParcelable {
-    final com.google.android.gms.location.zzs zzc;
+    final zzs zzc;
     final List<ClientIdentity> zzd;
     final String zze;
     static final List<ClientIdentity> zza = Collections.emptyList();
-    static final com.google.android.gms.location.zzs zzb = new com.google.android.gms.location.zzs();
+    static final zzs zzb = new zzs();
     public static final Parcelable.Creator<zzj> CREATOR = new zzk();
 
-    public zzj(com.google.android.gms.location.zzs zzsVar, List<ClientIdentity> list, String str) {
+    public zzj(zzs zzsVar, List<ClientIdentity> list, String str) {
         this.zzc = zzsVar;
         this.zzd = list;
         this.zze = str;
@@ -40,8 +41,8 @@ public final class zzj extends AbstractSafeParcelable {
         String valueOf = String.valueOf(this.zzc);
         String valueOf2 = String.valueOf(this.zzd);
         String str = this.zze;
-        int length = String.valueOf(valueOf).length();
-        StringBuilder sb = new StringBuilder(length + 77 + String.valueOf(valueOf2).length() + String.valueOf(str).length());
+        int length = valueOf.length();
+        StringBuilder sb = new StringBuilder(length + 77 + valueOf2.length() + String.valueOf(str).length());
         sb.append("DeviceOrientationRequestInternal{deviceOrientationRequest=");
         sb.append(valueOf);
         sb.append(", clients=");

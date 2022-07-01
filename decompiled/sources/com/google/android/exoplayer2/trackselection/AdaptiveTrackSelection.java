@@ -1,6 +1,5 @@
 package com.google.android.exoplayer2.trackselection;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.chunk.MediaChunk;
@@ -10,18 +9,11 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.Util;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class AdaptiveTrackSelection extends BaseTrackSelection {
-    public static final float DEFAULT_BANDWIDTH_FRACTION = 0.7f;
-    public static final float DEFAULT_BUFFERED_FRACTION_TO_LIVE_EDGE_FOR_QUALITY_INCREASE = 0.75f;
-    public static final int DEFAULT_MAX_DURATION_FOR_QUALITY_DECREASE_MS = 25000;
-    public static final int DEFAULT_MIN_DURATION_FOR_QUALITY_INCREASE_MS = 10000;
-    public static final int DEFAULT_MIN_DURATION_TO_RETAIN_AFTER_DISCARD_MS = 25000;
-    public static final long DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS = 2000;
     private final BandwidthProvider bandwidthProvider;
     private final float bufferedFractionToLiveEdgeForQualityIncrease;
     private final Clock clock;
@@ -34,12 +26,17 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
     private int reason;
     private int selectedIndex;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface BandwidthProvider {
         long getAllocatedBandwidth();
     }
 
-    /* loaded from: classes3.dex */
+    @Override // com.google.android.exoplayer2.trackselection.TrackSelection
+    public Object getSelectionData() {
+        return null;
+    }
+
+    /* loaded from: classes.dex */
     public static class Factory implements TrackSelection.Factory {
         private final float bandwidthFraction;
         private final BandwidthMeter bandwidthMeter;
@@ -50,152 +47,133 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
         private final int minDurationToRetainAfterDiscardMs;
         private final long minTimeBetweenBufferReevaluationMs;
 
-        public Factory() {
-            this(10000, 25000, 25000, 0.7f, 0.75f, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS, Clock.DEFAULT);
-        }
-
         @Deprecated
         public Factory(BandwidthMeter bandwidthMeter) {
-            this(bandwidthMeter, 10000, 25000, 25000, 0.7f, 0.75f, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS, Clock.DEFAULT);
-        }
-
-        public Factory(int minDurationForQualityIncreaseMs, int maxDurationForQualityDecreaseMs, int minDurationToRetainAfterDiscardMs, float bandwidthFraction) {
-            this(minDurationForQualityIncreaseMs, maxDurationForQualityDecreaseMs, minDurationToRetainAfterDiscardMs, bandwidthFraction, 0.75f, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS, Clock.DEFAULT);
+            this(bandwidthMeter, 10000, 25000, 25000, 0.7f, 0.75f, 2000L, Clock.DEFAULT);
         }
 
         @Deprecated
-        public Factory(BandwidthMeter bandwidthMeter, int minDurationForQualityIncreaseMs, int maxDurationForQualityDecreaseMs, int minDurationToRetainAfterDiscardMs, float bandwidthFraction) {
-            this(bandwidthMeter, minDurationForQualityIncreaseMs, maxDurationForQualityDecreaseMs, minDurationToRetainAfterDiscardMs, bandwidthFraction, 0.75f, AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS, Clock.DEFAULT);
-        }
-
-        public Factory(int minDurationForQualityIncreaseMs, int maxDurationForQualityDecreaseMs, int minDurationToRetainAfterDiscardMs, float bandwidthFraction, float bufferedFractionToLiveEdgeForQualityIncrease, long minTimeBetweenBufferReevaluationMs, Clock clock) {
-            this(null, minDurationForQualityIncreaseMs, maxDurationForQualityDecreaseMs, minDurationToRetainAfterDiscardMs, bandwidthFraction, bufferedFractionToLiveEdgeForQualityIncrease, minTimeBetweenBufferReevaluationMs, clock);
-        }
-
-        @Deprecated
-        public Factory(BandwidthMeter bandwidthMeter, int minDurationForQualityIncreaseMs, int maxDurationForQualityDecreaseMs, int minDurationToRetainAfterDiscardMs, float bandwidthFraction, float bufferedFractionToLiveEdgeForQualityIncrease, long minTimeBetweenBufferReevaluationMs, Clock clock) {
+        public Factory(BandwidthMeter bandwidthMeter, int i, int i2, int i3, float f, float f2, long j, Clock clock) {
             this.bandwidthMeter = bandwidthMeter;
-            this.minDurationForQualityIncreaseMs = minDurationForQualityIncreaseMs;
-            this.maxDurationForQualityDecreaseMs = maxDurationForQualityDecreaseMs;
-            this.minDurationToRetainAfterDiscardMs = minDurationToRetainAfterDiscardMs;
-            this.bandwidthFraction = bandwidthFraction;
-            this.bufferedFractionToLiveEdgeForQualityIncrease = bufferedFractionToLiveEdgeForQualityIncrease;
-            this.minTimeBetweenBufferReevaluationMs = minTimeBetweenBufferReevaluationMs;
+            this.minDurationForQualityIncreaseMs = i;
+            this.maxDurationForQualityDecreaseMs = i2;
+            this.minDurationToRetainAfterDiscardMs = i3;
+            this.bandwidthFraction = f;
+            this.bufferedFractionToLiveEdgeForQualityIncrease = f2;
+            this.minTimeBetweenBufferReevaluationMs = j;
             this.clock = clock;
         }
 
         @Override // com.google.android.exoplayer2.trackselection.TrackSelection.Factory
-        public final TrackSelection[] createTrackSelections(TrackSelection.Definition[] definitions, BandwidthMeter bandwidthMeter) {
-            if (this.bandwidthMeter != null) {
-                bandwidthMeter = this.bandwidthMeter;
+        public final TrackSelection[] createTrackSelections(TrackSelection.Definition[] definitionArr, BandwidthMeter bandwidthMeter) {
+            BandwidthMeter bandwidthMeter2 = this.bandwidthMeter;
+            if (bandwidthMeter2 != null) {
+                bandwidthMeter = bandwidthMeter2;
             }
-            TrackSelection[] selections = new TrackSelection[definitions.length];
-            int totalFixedBandwidth = 0;
-            for (int i = 0; i < definitions.length; i++) {
-                TrackSelection.Definition definition = definitions[i];
-                if (definition != null && definition.tracks.length == 1) {
-                    selections[i] = new FixedTrackSelection(definition.group, definition.tracks[0], definition.reason, definition.data);
-                    int trackBitrate = definition.group.getFormat(definition.tracks[0]).bitrate;
-                    if (trackBitrate != -1) {
-                        totalFixedBandwidth += trackBitrate;
+            TrackSelection[] trackSelectionArr = new TrackSelection[definitionArr.length];
+            int i = 0;
+            for (int i2 = 0; i2 < definitionArr.length; i2++) {
+                TrackSelection.Definition definition = definitionArr[i2];
+                if (definition != null) {
+                    int[] iArr = definition.tracks;
+                    if (iArr.length == 1) {
+                        trackSelectionArr[i2] = new FixedTrackSelection(definition.group, iArr[0], definition.reason, definition.data);
+                        int i3 = definition.group.getFormat(definition.tracks[0]).bitrate;
+                        if (i3 != -1) {
+                            i += i3;
+                        }
                     }
                 }
             }
-            List<AdaptiveTrackSelection> adaptiveSelections = new ArrayList<>();
-            for (int i2 = 0; i2 < definitions.length; i2++) {
-                TrackSelection.Definition definition2 = definitions[i2];
-                if (definition2 != null && definition2.tracks.length > 1) {
-                    AdaptiveTrackSelection adaptiveSelection = createAdaptiveTrackSelection(definition2.group, bandwidthMeter, definition2.tracks, totalFixedBandwidth);
-                    adaptiveSelections.add(adaptiveSelection);
-                    selections[i2] = adaptiveSelection;
-                }
-            }
-            int i3 = adaptiveSelections.size();
-            if (i3 > 1) {
-                long[][] adaptiveTrackBitrates = new long[adaptiveSelections.size()];
-                for (int i4 = 0; i4 < adaptiveSelections.size(); i4++) {
-                    AdaptiveTrackSelection adaptiveSelection2 = adaptiveSelections.get(i4);
-                    adaptiveTrackBitrates[i4] = new long[adaptiveSelection2.length()];
-                    for (int j = 0; j < adaptiveSelection2.length(); j++) {
-                        adaptiveTrackBitrates[i4][j] = adaptiveSelection2.getFormat((adaptiveSelection2.length() - j) - 1).bitrate;
+            ArrayList arrayList = new ArrayList();
+            for (int i4 = 0; i4 < definitionArr.length; i4++) {
+                TrackSelection.Definition definition2 = definitionArr[i4];
+                if (definition2 != null) {
+                    int[] iArr2 = definition2.tracks;
+                    if (iArr2.length > 1) {
+                        AdaptiveTrackSelection createAdaptiveTrackSelection = createAdaptiveTrackSelection(definition2.group, bandwidthMeter, iArr2, i);
+                        arrayList.add(createAdaptiveTrackSelection);
+                        trackSelectionArr[i4] = createAdaptiveTrackSelection;
                     }
                 }
-                long[][][] bandwidthCheckpoints = AdaptiveTrackSelection.getAllocationCheckpoints(adaptiveTrackBitrates);
-                for (int i5 = 0; i5 < adaptiveSelections.size(); i5++) {
-                    adaptiveSelections.get(i5).experimental_setBandwidthAllocationCheckpoints(bandwidthCheckpoints[i5]);
+            }
+            if (arrayList.size() > 1) {
+                long[][] jArr = new long[arrayList.size()];
+                for (int i5 = 0; i5 < arrayList.size(); i5++) {
+                    AdaptiveTrackSelection adaptiveTrackSelection = (AdaptiveTrackSelection) arrayList.get(i5);
+                    jArr[i5] = new long[adaptiveTrackSelection.length()];
+                    for (int i6 = 0; i6 < adaptiveTrackSelection.length(); i6++) {
+                        jArr[i5][i6] = adaptiveTrackSelection.getFormat((adaptiveTrackSelection.length() - i6) - 1).bitrate;
+                    }
+                }
+                long[][][] allocationCheckpoints = AdaptiveTrackSelection.getAllocationCheckpoints(jArr);
+                for (int i7 = 0; i7 < arrayList.size(); i7++) {
+                    ((AdaptiveTrackSelection) arrayList.get(i7)).experimental_setBandwidthAllocationCheckpoints(allocationCheckpoints[i7]);
                 }
             }
-            return selections;
+            return trackSelectionArr;
         }
 
-        protected AdaptiveTrackSelection createAdaptiveTrackSelection(TrackGroup group, BandwidthMeter bandwidthMeter, int[] tracks, int totalFixedTrackBandwidth) {
-            return new AdaptiveTrackSelection(group, tracks, new DefaultBandwidthProvider(bandwidthMeter, this.bandwidthFraction, totalFixedTrackBandwidth), this.minDurationForQualityIncreaseMs, this.maxDurationForQualityDecreaseMs, this.minDurationToRetainAfterDiscardMs, this.bufferedFractionToLiveEdgeForQualityIncrease, this.minTimeBetweenBufferReevaluationMs, this.clock);
+        protected AdaptiveTrackSelection createAdaptiveTrackSelection(TrackGroup trackGroup, BandwidthMeter bandwidthMeter, int[] iArr, int i) {
+            return new AdaptiveTrackSelection(trackGroup, iArr, new DefaultBandwidthProvider(bandwidthMeter, this.bandwidthFraction, i), this.minDurationForQualityIncreaseMs, this.maxDurationForQualityDecreaseMs, this.minDurationToRetainAfterDiscardMs, this.bufferedFractionToLiveEdgeForQualityIncrease, this.minTimeBetweenBufferReevaluationMs, this.clock);
         }
     }
 
-    public AdaptiveTrackSelection(TrackGroup group, int[] tracks, BandwidthMeter bandwidthMeter) {
-        this(group, tracks, bandwidthMeter, 0L, 10000L, 25000L, 25000L, 0.7f, 0.75f, DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS, Clock.DEFAULT);
-    }
-
-    public AdaptiveTrackSelection(TrackGroup group, int[] tracks, BandwidthMeter bandwidthMeter, long reservedBandwidth, long minDurationForQualityIncreaseMs, long maxDurationForQualityDecreaseMs, long minDurationToRetainAfterDiscardMs, float bandwidthFraction, float bufferedFractionToLiveEdgeForQualityIncrease, long minTimeBetweenBufferReevaluationMs, Clock clock) {
-        this(group, tracks, new DefaultBandwidthProvider(bandwidthMeter, bandwidthFraction, reservedBandwidth), minDurationForQualityIncreaseMs, maxDurationForQualityDecreaseMs, minDurationToRetainAfterDiscardMs, bufferedFractionToLiveEdgeForQualityIncrease, minTimeBetweenBufferReevaluationMs, clock);
-    }
-
-    private AdaptiveTrackSelection(TrackGroup group, int[] tracks, BandwidthProvider bandwidthProvider, long minDurationForQualityIncreaseMs, long maxDurationForQualityDecreaseMs, long minDurationToRetainAfterDiscardMs, float bufferedFractionToLiveEdgeForQualityIncrease, long minTimeBetweenBufferReevaluationMs, Clock clock) {
-        super(group, tracks);
+    private AdaptiveTrackSelection(TrackGroup trackGroup, int[] iArr, BandwidthProvider bandwidthProvider, long j, long j2, long j3, float f, long j4, Clock clock) {
+        super(trackGroup, iArr);
         this.bandwidthProvider = bandwidthProvider;
-        this.minDurationForQualityIncreaseUs = minDurationForQualityIncreaseMs * 1000;
-        this.maxDurationForQualityDecreaseUs = maxDurationForQualityDecreaseMs * 1000;
-        this.minDurationToRetainAfterDiscardUs = 1000 * minDurationToRetainAfterDiscardMs;
-        this.bufferedFractionToLiveEdgeForQualityIncrease = bufferedFractionToLiveEdgeForQualityIncrease;
-        this.minTimeBetweenBufferReevaluationMs = minTimeBetweenBufferReevaluationMs;
+        this.minDurationForQualityIncreaseUs = j * 1000;
+        this.maxDurationForQualityDecreaseUs = j2 * 1000;
+        this.minDurationToRetainAfterDiscardUs = j3 * 1000;
+        this.bufferedFractionToLiveEdgeForQualityIncrease = f;
+        this.minTimeBetweenBufferReevaluationMs = j4;
         this.clock = clock;
         this.playbackSpeed = 1.0f;
         this.reason = 0;
-        this.lastBufferEvaluationMs = C.TIME_UNSET;
+        this.lastBufferEvaluationMs = -9223372036854775807L;
     }
 
-    public void experimental_setBandwidthAllocationCheckpoints(long[][] allocationCheckpoints) {
-        ((DefaultBandwidthProvider) this.bandwidthProvider).experimental_setBandwidthAllocationCheckpoints(allocationCheckpoints);
+    public void experimental_setBandwidthAllocationCheckpoints(long[][] jArr) {
+        ((DefaultBandwidthProvider) this.bandwidthProvider).experimental_setBandwidthAllocationCheckpoints(jArr);
     }
 
     @Override // com.google.android.exoplayer2.trackselection.BaseTrackSelection, com.google.android.exoplayer2.trackselection.TrackSelection
     public void enable() {
-        this.lastBufferEvaluationMs = C.TIME_UNSET;
+        this.lastBufferEvaluationMs = -9223372036854775807L;
     }
 
     @Override // com.google.android.exoplayer2.trackselection.BaseTrackSelection, com.google.android.exoplayer2.trackselection.TrackSelection
-    public void onPlaybackSpeed(float playbackSpeed) {
-        this.playbackSpeed = playbackSpeed;
+    public void onPlaybackSpeed(float f) {
+        this.playbackSpeed = f;
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public void updateSelectedTrack(long playbackPositionUs, long bufferedDurationUs, long availableDurationUs, List<? extends MediaChunk> queue, MediaChunkIterator[] mediaChunkIterators) {
-        long nowMs = this.clock.elapsedRealtime();
+    public void updateSelectedTrack(long j, long j2, long j3, List<? extends MediaChunk> list, MediaChunkIterator[] mediaChunkIteratorArr) {
+        long elapsedRealtime = this.clock.elapsedRealtime();
         if (this.reason == 0) {
             this.reason = 1;
-            this.selectedIndex = determineIdealSelectedIndex(nowMs);
+            this.selectedIndex = determineIdealSelectedIndex(elapsedRealtime);
             return;
         }
-        int currentSelectedIndex = this.selectedIndex;
-        int determineIdealSelectedIndex = determineIdealSelectedIndex(nowMs);
+        int i = this.selectedIndex;
+        int determineIdealSelectedIndex = determineIdealSelectedIndex(elapsedRealtime);
         this.selectedIndex = determineIdealSelectedIndex;
-        if (determineIdealSelectedIndex == currentSelectedIndex) {
+        if (determineIdealSelectedIndex == i) {
             return;
         }
-        if (!isBlacklisted(currentSelectedIndex, nowMs)) {
-            Format currentFormat = getFormat(currentSelectedIndex);
-            Format selectedFormat = getFormat(this.selectedIndex);
-            if (selectedFormat.bitrate > currentFormat.bitrate && bufferedDurationUs < minDurationForQualityIncreaseUs(availableDurationUs)) {
-                this.selectedIndex = currentSelectedIndex;
-            }
-            if (selectedFormat.bitrate < currentFormat.bitrate && bufferedDurationUs >= this.maxDurationForQualityDecreaseUs) {
-                this.selectedIndex = currentSelectedIndex;
+        if (!isBlacklisted(i, elapsedRealtime)) {
+            Format format = getFormat(i);
+            Format format2 = getFormat(this.selectedIndex);
+            if (format2.bitrate > format.bitrate && j2 < minDurationForQualityIncreaseUs(j3)) {
+                this.selectedIndex = i;
+            } else if (format2.bitrate < format.bitrate && j2 >= this.maxDurationForQualityDecreaseUs) {
+                this.selectedIndex = i;
             }
         }
-        if (this.selectedIndex != currentSelectedIndex) {
-            this.reason = 3;
+        if (this.selectedIndex == i) {
+            return;
         }
+        this.reason = 3;
     }
 
     @Override // com.google.android.exoplayer2.trackselection.TrackSelection
@@ -208,200 +186,190 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
         return this.reason;
     }
 
-    @Override // com.google.android.exoplayer2.trackselection.TrackSelection
-    public Object getSelectionData() {
-        return null;
-    }
-
     @Override // com.google.android.exoplayer2.trackselection.BaseTrackSelection, com.google.android.exoplayer2.trackselection.TrackSelection
-    public int evaluateQueueSize(long playbackPositionUs, List<? extends MediaChunk> queue) {
-        AdaptiveTrackSelection adaptiveTrackSelection = this;
-        List<? extends MediaChunk> list = queue;
-        long nowMs = adaptiveTrackSelection.clock.elapsedRealtime();
-        if (!adaptiveTrackSelection.shouldEvaluateQueueSize(nowMs)) {
-            return queue.size();
+    public int evaluateQueueSize(long j, List<? extends MediaChunk> list) {
+        int i;
+        int i2;
+        long elapsedRealtime = this.clock.elapsedRealtime();
+        if (!shouldEvaluateQueueSize(elapsedRealtime)) {
+            return list.size();
         }
-        adaptiveTrackSelection.lastBufferEvaluationMs = nowMs;
-        if (queue.isEmpty()) {
+        this.lastBufferEvaluationMs = elapsedRealtime;
+        if (list.isEmpty()) {
             return 0;
         }
-        int queueSize = queue.size();
-        MediaChunk lastChunk = list.get(queueSize - 1);
-        long playoutBufferedDurationBeforeLastChunkUs = Util.getPlayoutDurationForMediaDuration(lastChunk.startTimeUs - playbackPositionUs, adaptiveTrackSelection.playbackSpeed);
+        int size = list.size();
+        long playoutDurationForMediaDuration = Util.getPlayoutDurationForMediaDuration(list.get(size - 1).startTimeUs - j, this.playbackSpeed);
         long minDurationToRetainAfterDiscardUs = getMinDurationToRetainAfterDiscardUs();
-        if (playoutBufferedDurationBeforeLastChunkUs < minDurationToRetainAfterDiscardUs) {
-            return queueSize;
+        if (playoutDurationForMediaDuration < minDurationToRetainAfterDiscardUs) {
+            return size;
         }
-        int idealSelectedIndex = adaptiveTrackSelection.determineIdealSelectedIndex(nowMs);
-        Format idealFormat = adaptiveTrackSelection.getFormat(idealSelectedIndex);
-        int i = 0;
-        while (i < queueSize) {
-            MediaChunk chunk = list.get(i);
-            Format format = chunk.trackFormat;
-            long nowMs2 = nowMs;
-            long mediaDurationBeforeThisChunkUs = chunk.startTimeUs - playbackPositionUs;
-            long playoutDurationBeforeThisChunkUs = Util.getPlayoutDurationForMediaDuration(mediaDurationBeforeThisChunkUs, adaptiveTrackSelection.playbackSpeed);
-            if (playoutDurationBeforeThisChunkUs < minDurationToRetainAfterDiscardUs || format.bitrate >= idealFormat.bitrate || format.height == -1 || format.height >= 720 || format.width == -1 || format.width >= 1280 || format.height >= idealFormat.height) {
-                i++;
-                adaptiveTrackSelection = this;
-                list = queue;
-                nowMs = nowMs2;
-            } else {
-                return i;
+        Format format = getFormat(determineIdealSelectedIndex(elapsedRealtime));
+        for (int i3 = 0; i3 < size; i3++) {
+            MediaChunk mediaChunk = list.get(i3);
+            Format format2 = mediaChunk.trackFormat;
+            if (Util.getPlayoutDurationForMediaDuration(mediaChunk.startTimeUs - j, this.playbackSpeed) >= minDurationToRetainAfterDiscardUs && format2.bitrate < format.bitrate && (i = format2.height) != -1 && i < 720 && (i2 = format2.width) != -1 && i2 < 1280 && i < format.height) {
+                return i3;
             }
         }
-        return queueSize;
+        return size;
     }
 
-    protected boolean canSelectFormat(Format format, int trackBitrate, float playbackSpeed, long effectiveBitrate) {
-        return ((long) Math.round(((float) trackBitrate) * playbackSpeed)) <= effectiveBitrate;
+    protected boolean canSelectFormat(Format format, int i, float f, long j) {
+        return ((long) Math.round(((float) i) * f)) <= j;
     }
 
-    protected boolean shouldEvaluateQueueSize(long nowMs) {
-        long j = this.lastBufferEvaluationMs;
-        return j == C.TIME_UNSET || nowMs - j >= this.minTimeBetweenBufferReevaluationMs;
+    protected boolean shouldEvaluateQueueSize(long j) {
+        long j2 = this.lastBufferEvaluationMs;
+        return j2 == -9223372036854775807L || j - j2 >= this.minTimeBetweenBufferReevaluationMs;
     }
 
     protected long getMinDurationToRetainAfterDiscardUs() {
         return this.minDurationToRetainAfterDiscardUs;
     }
 
-    private int determineIdealSelectedIndex(long nowMs) {
-        long effectiveBitrate = this.bandwidthProvider.getAllocatedBandwidth();
-        int lowestBitrateNonBlacklistedIndex = 0;
-        for (int i = 0; i < this.length; i++) {
-            if (nowMs == Long.MIN_VALUE || !isBlacklisted(i, nowMs)) {
-                Format format = getFormat(i);
-                if (canSelectFormat(format, format.bitrate, this.playbackSpeed, effectiveBitrate)) {
-                    return i;
+    private int determineIdealSelectedIndex(long j) {
+        long allocatedBandwidth = this.bandwidthProvider.getAllocatedBandwidth();
+        int i = 0;
+        for (int i2 = 0; i2 < this.length; i2++) {
+            if (j == Long.MIN_VALUE || !isBlacklisted(i2, j)) {
+                Format format = getFormat(i2);
+                if (canSelectFormat(format, format.bitrate, this.playbackSpeed, allocatedBandwidth)) {
+                    return i2;
                 }
-                lowestBitrateNonBlacklistedIndex = i;
+                i = i2;
             }
         }
-        return lowestBitrateNonBlacklistedIndex;
+        return i;
     }
 
-    private long minDurationForQualityIncreaseUs(long availableDurationUs) {
-        boolean isAvailableDurationTooShort = availableDurationUs != C.TIME_UNSET && availableDurationUs <= this.minDurationForQualityIncreaseUs;
-        if (isAvailableDurationTooShort) {
-            return ((float) availableDurationUs) * this.bufferedFractionToLiveEdgeForQualityIncrease;
+    private long minDurationForQualityIncreaseUs(long j) {
+        if (j != -9223372036854775807L && j <= this.minDurationForQualityIncreaseUs) {
+            return ((float) j) * this.bufferedFractionToLiveEdgeForQualityIncrease;
         }
         return this.minDurationForQualityIncreaseUs;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class DefaultBandwidthProvider implements BandwidthProvider {
         private long[][] allocationCheckpoints;
         private final float bandwidthFraction;
         private final BandwidthMeter bandwidthMeter;
         private final long reservedBandwidth;
 
-        DefaultBandwidthProvider(BandwidthMeter bandwidthMeter, float bandwidthFraction, long reservedBandwidth) {
+        DefaultBandwidthProvider(BandwidthMeter bandwidthMeter, float f, long j) {
             this.bandwidthMeter = bandwidthMeter;
-            this.bandwidthFraction = bandwidthFraction;
-            this.reservedBandwidth = reservedBandwidth;
+            this.bandwidthFraction = f;
+            this.reservedBandwidth = j;
         }
 
         @Override // com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection.BandwidthProvider
         public long getAllocatedBandwidth() {
             long[][] jArr;
-            long totalBandwidth = ((float) this.bandwidthMeter.getBitrateEstimate()) * this.bandwidthFraction;
-            long allocatableBandwidth = Math.max(0L, totalBandwidth - this.reservedBandwidth);
+            long max = Math.max(0L, (((float) this.bandwidthMeter.getBitrateEstimate()) * this.bandwidthFraction) - this.reservedBandwidth);
             if (this.allocationCheckpoints == null) {
-                return allocatableBandwidth;
+                return max;
             }
-            int nextIndex = 1;
+            int i = 1;
             while (true) {
                 jArr = this.allocationCheckpoints;
-                if (nextIndex >= jArr.length - 1 || jArr[nextIndex][0] >= allocatableBandwidth) {
+                if (i >= jArr.length - 1 || jArr[i][0] >= max) {
                     break;
                 }
-                nextIndex++;
+                i++;
             }
-            long[] previous = jArr[nextIndex - 1];
-            long[] next = jArr[nextIndex];
-            float fractionBetweenCheckpoints = ((float) (allocatableBandwidth - previous[0])) / ((float) (next[0] - previous[0]));
-            return previous[1] + (((float) (next[1] - previous[1])) * fractionBetweenCheckpoints);
+            long[] jArr2 = jArr[i - 1];
+            long[] jArr3 = jArr[i];
+            return jArr2[1] + ((((float) (max - jArr2[0])) / ((float) (jArr3[0] - jArr2[0]))) * ((float) (jArr3[1] - jArr2[1])));
         }
 
-        void experimental_setBandwidthAllocationCheckpoints(long[][] allocationCheckpoints) {
-            Assertions.checkArgument(allocationCheckpoints.length >= 2);
-            this.allocationCheckpoints = allocationCheckpoints;
+        void experimental_setBandwidthAllocationCheckpoints(long[][] jArr) {
+            Assertions.checkArgument(jArr.length >= 2);
+            this.allocationCheckpoints = jArr;
         }
     }
 
-    public static long[][][] getAllocationCheckpoints(long[][] trackBitrates) {
-        double[][] logBitrates = getLogArrayValues(trackBitrates);
-        double[][] switchPoints = getSwitchPoints(logBitrates);
-        int checkpointCount = countArrayElements(switchPoints) + 3;
-        long[][][] checkpoints = (long[][][]) Array.newInstance(long.class, logBitrates.length, checkpointCount, 2);
-        int[] currentSelection = new int[logBitrates.length];
-        setCheckpointValues(checkpoints, 1, trackBitrates, currentSelection);
-        for (int checkpointIndex = 2; checkpointIndex < checkpointCount - 1; checkpointIndex++) {
-            int nextUpdateIndex = 0;
-            double nextUpdateSwitchPoint = Double.MAX_VALUE;
-            for (int i = 0; i < logBitrates.length; i++) {
-                if (currentSelection[i] + 1 != logBitrates[i].length) {
-                    double switchPoint = switchPoints[i][currentSelection[i]];
-                    if (switchPoint < nextUpdateSwitchPoint) {
-                        nextUpdateSwitchPoint = switchPoint;
-                        nextUpdateIndex = i;
+    public static long[][][] getAllocationCheckpoints(long[][] jArr) {
+        int i;
+        double[][] logArrayValues = getLogArrayValues(jArr);
+        double[][] switchPoints = getSwitchPoints(logArrayValues);
+        int countArrayElements = countArrayElements(switchPoints) + 3;
+        long[][][] jArr2 = (long[][][]) Array.newInstance(long.class, logArrayValues.length, countArrayElements, 2);
+        int[] iArr = new int[logArrayValues.length];
+        setCheckpointValues(jArr2, 1, jArr, iArr);
+        int i2 = 2;
+        while (true) {
+            i = countArrayElements - 1;
+            if (i2 >= i) {
+                break;
+            }
+            double d = Double.MAX_VALUE;
+            int i3 = 0;
+            for (int i4 = 0; i4 < logArrayValues.length; i4++) {
+                if (iArr[i4] + 1 != logArrayValues[i4].length) {
+                    double d2 = switchPoints[i4][iArr[i4]];
+                    if (d2 < d) {
+                        i3 = i4;
+                        d = d2;
                     }
                 }
             }
-            int i2 = currentSelection[nextUpdateIndex];
-            currentSelection[nextUpdateIndex] = i2 + 1;
-            setCheckpointValues(checkpoints, checkpointIndex, trackBitrates, currentSelection);
+            iArr[i3] = iArr[i3] + 1;
+            setCheckpointValues(jArr2, i2, jArr, iArr);
+            i2++;
         }
-        for (long[][] points : checkpoints) {
-            points[checkpointCount - 1][0] = points[checkpointCount - 2][0] * 2;
-            points[checkpointCount - 1][1] = points[checkpointCount - 2][1] * 2;
+        for (long[][] jArr3 : jArr2) {
+            int i5 = countArrayElements - 2;
+            jArr3[i][0] = jArr3[i5][0] * 2;
+            jArr3[i][1] = jArr3[i5][1] * 2;
         }
-        return checkpoints;
+        return jArr2;
     }
 
-    private static double[][] getLogArrayValues(long[][] values) {
-        double[][] logValues = new double[values.length];
-        for (int i = 0; i < values.length; i++) {
-            logValues[i] = new double[values[i].length];
-            for (int j = 0; j < values[i].length; j++) {
-                logValues[i][j] = values[i][j] == -1 ? FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE : Math.log(values[i][j]);
+    private static double[][] getLogArrayValues(long[][] jArr) {
+        double[][] dArr = new double[jArr.length];
+        for (int i = 0; i < jArr.length; i++) {
+            dArr[i] = new double[jArr[i].length];
+            for (int i2 = 0; i2 < jArr[i].length; i2++) {
+                dArr[i][i2] = jArr[i][i2] == -1 ? 0.0d : Math.log(jArr[i][i2]);
             }
         }
-        return logValues;
+        return dArr;
     }
 
-    private static double[][] getSwitchPoints(double[][] logBitrates) {
-        double[][] switchPoints = new double[logBitrates.length];
-        for (int i = 0; i < logBitrates.length; i++) {
-            switchPoints[i] = new double[logBitrates[i].length - 1];
-            if (switchPoints[i].length != 0) {
-                double totalBitrateDiff = logBitrates[i][logBitrates[i].length - 1] - logBitrates[i][0];
-                for (int j = 0; j < logBitrates[i].length - 1; j++) {
-                    double switchBitrate = (logBitrates[i][j] + logBitrates[i][j + 1]) * 0.5d;
-                    switchPoints[i][j] = totalBitrateDiff == FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE ? 1.0d : (switchBitrate - logBitrates[i][0]) / totalBitrateDiff;
+    private static double[][] getSwitchPoints(double[][] dArr) {
+        double[][] dArr2 = new double[dArr.length];
+        for (int i = 0; i < dArr.length; i++) {
+            dArr2[i] = new double[dArr[i].length - 1];
+            if (dArr2[i].length != 0) {
+                double d = dArr[i][dArr[i].length - 1] - dArr[i][0];
+                int i2 = 0;
+                while (i2 < dArr[i].length - 1) {
+                    int i3 = i2 + 1;
+                    dArr2[i][i2] = d == 0.0d ? 1.0d : (((dArr[i][i2] + dArr[i][i3]) * 0.5d) - dArr[i][0]) / d;
+                    i2 = i3;
                 }
             }
         }
-        return switchPoints;
+        return dArr2;
     }
 
-    private static int countArrayElements(double[][] array) {
-        int count = 0;
-        for (double[] subArray : array) {
-            count += subArray.length;
+    private static int countArrayElements(double[][] dArr) {
+        int i = 0;
+        for (double[] dArr2 : dArr) {
+            i += dArr2.length;
         }
-        return count;
+        return i;
     }
 
-    private static void setCheckpointValues(long[][][] checkpoints, int checkpointIndex, long[][] trackBitrates, int[] selectedTracks) {
-        long totalBitrate = 0;
-        for (int i = 0; i < checkpoints.length; i++) {
-            checkpoints[i][checkpointIndex][1] = trackBitrates[i][selectedTracks[i]];
-            totalBitrate += checkpoints[i][checkpointIndex][1];
+    private static void setCheckpointValues(long[][][] jArr, int i, long[][] jArr2, int[] iArr) {
+        long j = 0;
+        for (int i2 = 0; i2 < jArr.length; i2++) {
+            jArr[i2][i][1] = jArr2[i2][iArr[i2]];
+            j += jArr[i2][i][1];
         }
-        for (long[][] points : checkpoints) {
-            points[checkpointIndex][0] = totalBitrate;
+        for (long[][] jArr3 : jArr) {
+            jArr3[i][0] = j;
         }
     }
 }

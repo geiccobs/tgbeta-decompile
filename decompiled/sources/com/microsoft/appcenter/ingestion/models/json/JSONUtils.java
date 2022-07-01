@@ -10,108 +10,105 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class JSONUtils {
-    JSONUtils() {
-    }
-
-    public static Integer readInteger(JSONObject object, String key) throws JSONException {
-        if (object.has(key)) {
-            return Integer.valueOf(object.getInt(key));
+    public static Integer readInteger(JSONObject jSONObject, String str) throws JSONException {
+        if (jSONObject.has(str)) {
+            return Integer.valueOf(jSONObject.getInt(str));
         }
         return null;
     }
 
-    public static Long readLong(JSONObject object, String key) throws JSONException {
-        if (object.has(key)) {
-            return Long.valueOf(object.getLong(key));
+    public static Long readLong(JSONObject jSONObject, String str) throws JSONException {
+        if (jSONObject.has(str)) {
+            return Long.valueOf(jSONObject.getLong(str));
         }
         return null;
     }
 
-    public static Boolean readBoolean(JSONObject object, String key) throws JSONException {
-        if (object.has(key)) {
-            return Boolean.valueOf(object.getBoolean(key));
+    public static Boolean readBoolean(JSONObject jSONObject, String str) throws JSONException {
+        if (jSONObject.has(str)) {
+            return Boolean.valueOf(jSONObject.getBoolean(str));
         }
         return null;
     }
 
-    public static Map<String, String> readMap(JSONObject object, String key) throws JSONException {
-        JSONObject jProperties = object.optJSONObject(key);
-        if (jProperties == null) {
+    public static Map<String, String> readMap(JSONObject jSONObject, String str) throws JSONException {
+        JSONObject optJSONObject = jSONObject.optJSONObject(str);
+        if (optJSONObject == null) {
             return null;
         }
-        Map<String, String> properties = new HashMap<>(jProperties.length());
-        Iterator<String> subKeys = jProperties.keys();
-        while (subKeys.hasNext()) {
-            String subKey = subKeys.next();
-            properties.put(subKey, jProperties.getString(subKey));
+        HashMap hashMap = new HashMap(optJSONObject.length());
+        Iterator<String> keys = optJSONObject.keys();
+        while (keys.hasNext()) {
+            String next = keys.next();
+            hashMap.put(next, optJSONObject.getString(next));
         }
-        return properties;
+        return hashMap;
     }
 
-    public static <M extends Model> List<M> readArray(JSONObject object, String key, ModelFactory<M> factory) throws JSONException {
-        JSONArray jArray = object.optJSONArray(key);
-        if (jArray == null) {
+    public static <M extends Model> List<M> readArray(JSONObject jSONObject, String str, ModelFactory<M> modelFactory) throws JSONException {
+        JSONArray optJSONArray = jSONObject.optJSONArray(str);
+        if (optJSONArray == null) {
             return null;
         }
-        List<M> array = factory.createList(jArray.length());
-        for (int i = 0; i < jArray.length(); i++) {
-            JSONObject jModel = jArray.getJSONObject(i);
-            M model = factory.create();
-            model.read(jModel);
-            array.add(model);
+        List<M> createList = modelFactory.createList(optJSONArray.length());
+        for (int i = 0; i < optJSONArray.length(); i++) {
+            JSONObject jSONObject2 = optJSONArray.getJSONObject(i);
+            M create = modelFactory.create();
+            create.read(jSONObject2);
+            createList.add(create);
         }
-        return array;
+        return createList;
     }
 
-    public static List<String> readStringArray(JSONObject object, String key) throws JSONException {
-        JSONArray jArray = object.optJSONArray(key);
-        if (jArray == null) {
+    public static List<String> readStringArray(JSONObject jSONObject, String str) throws JSONException {
+        JSONArray optJSONArray = jSONObject.optJSONArray(str);
+        if (optJSONArray == null) {
             return null;
         }
-        List<String> array = new ArrayList<>(jArray.length());
-        for (int i = 0; i < jArray.length(); i++) {
-            array.add(jArray.getString(i));
+        ArrayList arrayList = new ArrayList(optJSONArray.length());
+        for (int i = 0; i < optJSONArray.length(); i++) {
+            arrayList.add(optJSONArray.getString(i));
         }
-        return array;
+        return arrayList;
     }
 
-    public static void write(JSONStringer writer, String key, Object value) throws JSONException {
-        if (value != null) {
-            writer.key(key).value(value);
+    public static void write(JSONStringer jSONStringer, String str, Object obj) throws JSONException {
+        if (obj != null) {
+            jSONStringer.key(str).value(obj);
         }
     }
 
-    public static void writeMap(JSONStringer writer, String key, Map<String, String> value) throws JSONException {
-        if (value != null) {
-            writer.key(key).object();
-            for (Map.Entry<String, String> property : value.entrySet()) {
-                writer.key(property.getKey()).value(property.getValue());
+    public static void writeMap(JSONStringer jSONStringer, String str, Map<String, String> map) throws JSONException {
+        if (map != null) {
+            jSONStringer.key(str).object();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                jSONStringer.key(entry.getKey()).value(entry.getValue());
             }
-            writer.endObject();
+            jSONStringer.endObject();
         }
     }
 
-    public static void writeArray(JSONStringer writer, String key, List<? extends Model> value) throws JSONException {
-        if (value != null) {
-            writer.key(key).array();
-            for (Model model : value) {
-                writer.object();
-                model.write(writer);
-                writer.endObject();
+    public static void writeArray(JSONStringer jSONStringer, String str, List<? extends Model> list) throws JSONException {
+        if (list != null) {
+            jSONStringer.key(str).array();
+            for (Model model : list) {
+                jSONStringer.object();
+                model.write(jSONStringer);
+                jSONStringer.endObject();
             }
-            writer.endArray();
+            jSONStringer.endArray();
         }
     }
 
-    public static void writeStringArray(JSONStringer writer, String key, List<String> values) throws JSONException {
-        if (values != null) {
-            writer.key(key).array();
-            for (String value : values) {
-                writer.value(value);
+    public static void writeStringArray(JSONStringer jSONStringer, String str, List<String> list) throws JSONException {
+        if (list != null) {
+            jSONStringer.key(str).array();
+            for (String str2 : list) {
+                jSONStringer.value(str2);
             }
-            writer.endArray();
+            jSONStringer.endArray();
         }
     }
 }

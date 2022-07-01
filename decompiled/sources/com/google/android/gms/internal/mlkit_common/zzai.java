@@ -2,7 +2,7 @@ package com.google.android.gms.internal.mlkit_common;
 
 import java.util.List;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzai extends zzad<E> {
     private final transient int zza;
     private final transient int zzb;

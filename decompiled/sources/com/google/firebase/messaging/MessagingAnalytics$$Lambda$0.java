@@ -3,7 +3,7 @@ package com.google.firebase.messaging;
 import com.google.android.datatransport.Transformer;
 import com.google.firebase.messaging.reporting.MessagingClientEventExtension;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final /* synthetic */ class MessagingAnalytics$$Lambda$0 implements Transformer {
     static final Transformer $instance = new MessagingAnalytics$$Lambda$0();
 

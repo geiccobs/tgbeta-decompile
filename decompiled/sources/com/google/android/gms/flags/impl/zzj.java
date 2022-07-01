@@ -2,9 +2,9 @@ package com.google.android.gms.flags.impl;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzj {
-    private static SharedPreferences zzw = null;
+    private static SharedPreferences zzw;
 
     public static SharedPreferences zza(Context context) throws Exception {
         SharedPreferences sharedPreferences;

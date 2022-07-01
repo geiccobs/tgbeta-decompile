@@ -2,18 +2,13 @@ package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.data.DataHolder;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class zzg extends zzm {
     private zzg() {
     }
 
     public /* synthetic */ zzg(zzf zzfVar) {
         this();
-    }
-
-    @Override // com.google.android.gms.internal.clearcut.zzl
-    public void zza(Status status) {
-        throw new UnsupportedOperationException();
     }
 
     @Override // com.google.android.gms.internal.clearcut.zzl

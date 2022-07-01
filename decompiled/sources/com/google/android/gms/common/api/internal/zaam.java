@@ -5,9 +5,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.Preconditions;
+import com.google.android.gms.signin.zae;
 import java.util.concurrent.locks.Lock;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zaam implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private final /* synthetic */ zaaf zaa;
 
@@ -16,17 +17,17 @@ final class zaam implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient
     }
 
     @Override // com.google.android.gms.common.api.internal.ConnectionCallbacks
-    public final void onConnected(Bundle bundle) {
-        ClientSettings clientSettings;
-        com.google.android.gms.signin.zae zaeVar;
-        clientSettings = this.zaa.zar;
-        ClientSettings clientSettings2 = (ClientSettings) Preconditions.checkNotNull(clientSettings);
-        zaeVar = this.zaa.zak;
-        ((com.google.android.gms.signin.zae) Preconditions.checkNotNull(zaeVar)).zaa(new zaak(this.zaa));
+    public final void onConnectionSuspended(int i) {
     }
 
     @Override // com.google.android.gms.common.api.internal.ConnectionCallbacks
-    public final void onConnectionSuspended(int i) {
+    public final void onConnected(Bundle bundle) {
+        ClientSettings clientSettings;
+        zae zaeVar;
+        clientSettings = this.zaa.zar;
+        ClientSettings clientSettings2 = (ClientSettings) Preconditions.checkNotNull(clientSettings);
+        zaeVar = this.zaa.zak;
+        ((zae) Preconditions.checkNotNull(zaeVar)).zaa(new zaak(this.zaa));
     }
 
     @Override // com.google.android.gms.common.api.internal.OnConnectionFailedListener

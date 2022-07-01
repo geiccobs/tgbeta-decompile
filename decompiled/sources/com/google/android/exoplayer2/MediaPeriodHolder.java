@@ -13,9 +13,8 @@ import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
 import com.google.android.exoplayer2.upstream.Allocator;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class MediaPeriodHolder {
-    private static final String TAG = "MediaPeriodHolder";
     public boolean hasEnabledTracks;
     public MediaPeriodInfo info;
     private final boolean[] mayRetainStreamFlags;
@@ -31,33 +30,34 @@ final class MediaPeriodHolder {
     private TrackSelectorResult trackSelectorResult;
     public final Object uid;
 
-    public MediaPeriodHolder(RendererCapabilities[] rendererCapabilities, long rendererPositionOffsetUs, TrackSelector trackSelector, Allocator allocator, MediaSource mediaSource, MediaPeriodInfo info, TrackSelectorResult emptyTrackSelectorResult) {
-        this.rendererCapabilities = rendererCapabilities;
-        this.rendererPositionOffsetUs = rendererPositionOffsetUs;
+    public MediaPeriodHolder(RendererCapabilities[] rendererCapabilitiesArr, long j, TrackSelector trackSelector, Allocator allocator, MediaSource mediaSource, MediaPeriodInfo mediaPeriodInfo, TrackSelectorResult trackSelectorResult) {
+        this.rendererCapabilities = rendererCapabilitiesArr;
+        this.rendererPositionOffsetUs = j;
         this.trackSelector = trackSelector;
         this.mediaSource = mediaSource;
-        this.uid = info.id.periodUid;
-        this.info = info;
-        this.trackSelectorResult = emptyTrackSelectorResult;
-        this.sampleStreams = new SampleStream[rendererCapabilities.length];
-        this.mayRetainStreamFlags = new boolean[rendererCapabilities.length];
-        this.mediaPeriod = createMediaPeriod(info.id, mediaSource, allocator, info.startPositionUs, info.endPositionUs);
+        MediaSource.MediaPeriodId mediaPeriodId = mediaPeriodInfo.id;
+        this.uid = mediaPeriodId.periodUid;
+        this.info = mediaPeriodInfo;
+        this.trackSelectorResult = trackSelectorResult;
+        this.sampleStreams = new SampleStream[rendererCapabilitiesArr.length];
+        this.mayRetainStreamFlags = new boolean[rendererCapabilitiesArr.length];
+        this.mediaPeriod = createMediaPeriod(mediaPeriodId, mediaSource, allocator, mediaPeriodInfo.startPositionUs, mediaPeriodInfo.endPositionUs);
     }
 
-    public long toRendererTime(long periodTimeUs) {
-        return getRendererOffset() + periodTimeUs;
+    public long toRendererTime(long j) {
+        return j + getRendererOffset();
     }
 
-    public long toPeriodTime(long rendererTimeUs) {
-        return rendererTimeUs - getRendererOffset();
+    public long toPeriodTime(long j) {
+        return j - getRendererOffset();
     }
 
     public long getRendererOffset() {
         return this.rendererPositionOffsetUs;
     }
 
-    public void setRendererOffset(long rendererPositionOffsetUs) {
-        this.rendererPositionOffsetUs = rendererPositionOffsetUs;
+    public void setRendererOffset(long j) {
+        this.rendererPositionOffsetUs = j;
     }
 
     public long getStartPositionRendererTime() {
@@ -83,63 +83,63 @@ final class MediaPeriodHolder {
         return this.mediaPeriod.getNextLoadPositionUs();
     }
 
-    public void handlePrepared(float playbackSpeed, Timeline timeline) throws ExoPlaybackException {
+    public void handlePrepared(float f, Timeline timeline) throws ExoPlaybackException {
         this.prepared = true;
         this.trackGroups = this.mediaPeriod.getTrackGroups();
-        TrackSelectorResult selectorResult = selectTracks(playbackSpeed, timeline);
-        long newStartPositionUs = applyTrackSelection(selectorResult, this.info.startPositionUs, false);
-        this.rendererPositionOffsetUs += this.info.startPositionUs - newStartPositionUs;
-        this.info = this.info.copyWithStartPositionUs(newStartPositionUs);
+        long applyTrackSelection = applyTrackSelection(selectTracks(f, timeline), this.info.startPositionUs, false);
+        long j = this.rendererPositionOffsetUs;
+        MediaPeriodInfo mediaPeriodInfo = this.info;
+        this.rendererPositionOffsetUs = j + (mediaPeriodInfo.startPositionUs - applyTrackSelection);
+        this.info = mediaPeriodInfo.copyWithStartPositionUs(applyTrackSelection);
     }
 
-    public void reevaluateBuffer(long rendererPositionUs) {
+    public void reevaluateBuffer(long j) {
         Assertions.checkState(isLoadingMediaPeriod());
         if (this.prepared) {
-            this.mediaPeriod.reevaluateBuffer(toPeriodTime(rendererPositionUs));
+            this.mediaPeriod.reevaluateBuffer(toPeriodTime(j));
         }
     }
 
-    public void continueLoading(long rendererPositionUs) {
+    public void continueLoading(long j) {
         Assertions.checkState(isLoadingMediaPeriod());
-        long loadingPeriodPositionUs = toPeriodTime(rendererPositionUs);
-        this.mediaPeriod.continueLoading(loadingPeriodPositionUs);
+        this.mediaPeriod.continueLoading(toPeriodTime(j));
     }
 
-    public TrackSelectorResult selectTracks(float playbackSpeed, Timeline timeline) throws ExoPlaybackException {
+    public TrackSelectorResult selectTracks(float f, Timeline timeline) throws ExoPlaybackException {
         TrackSelection[] all;
-        TrackSelectorResult selectorResult = this.trackSelector.selectTracks(this.rendererCapabilities, getTrackGroups(), this.info.id, timeline);
-        for (TrackSelection trackSelection : selectorResult.selections.getAll()) {
+        TrackSelectorResult selectTracks = this.trackSelector.selectTracks(this.rendererCapabilities, getTrackGroups(), this.info.id, timeline);
+        for (TrackSelection trackSelection : selectTracks.selections.getAll()) {
             if (trackSelection != null) {
-                trackSelection.onPlaybackSpeed(playbackSpeed);
+                trackSelection.onPlaybackSpeed(f);
             }
         }
-        return selectorResult;
+        return selectTracks;
     }
 
-    public long applyTrackSelection(TrackSelectorResult trackSelectorResult, long positionUs, boolean forceRecreateStreams) {
-        return applyTrackSelection(trackSelectorResult, positionUs, forceRecreateStreams, new boolean[this.rendererCapabilities.length]);
+    public long applyTrackSelection(TrackSelectorResult trackSelectorResult, long j, boolean z) {
+        return applyTrackSelection(trackSelectorResult, j, z, new boolean[this.rendererCapabilities.length]);
     }
 
-    public long applyTrackSelection(TrackSelectorResult newTrackSelectorResult, long positionUs, boolean forceRecreateStreams, boolean[] streamResetFlags) {
+    public long applyTrackSelection(TrackSelectorResult trackSelectorResult, long j, boolean z, boolean[] zArr) {
         int i = 0;
         while (true) {
-            boolean z = false;
-            if (i >= newTrackSelectorResult.length) {
+            boolean z2 = true;
+            if (i >= trackSelectorResult.length) {
                 break;
             }
-            boolean[] zArr = this.mayRetainStreamFlags;
-            if (!forceRecreateStreams && newTrackSelectorResult.isEquivalent(this.trackSelectorResult, i)) {
-                z = true;
+            boolean[] zArr2 = this.mayRetainStreamFlags;
+            if (z || !trackSelectorResult.isEquivalent(this.trackSelectorResult, i)) {
+                z2 = false;
             }
-            zArr[i] = z;
+            zArr2[i] = z2;
             i++;
         }
         disassociateNoSampleRenderersWithEmptySampleStream(this.sampleStreams);
         disableTrackSelectionsInResult();
-        this.trackSelectorResult = newTrackSelectorResult;
+        this.trackSelectorResult = trackSelectorResult;
         enableTrackSelectionsInResult();
-        TrackSelectionArray trackSelections = newTrackSelectorResult.selections;
-        long positionUs2 = this.mediaPeriod.selectTracks(trackSelections.getAll(), this.mayRetainStreamFlags, this.sampleStreams, streamResetFlags, positionUs);
+        TrackSelectionArray trackSelectionArray = trackSelectorResult.selections;
+        long selectTracks = this.mediaPeriod.selectTracks(trackSelectionArray.getAll(), this.mayRetainStreamFlags, this.sampleStreams, zArr, j);
         associateNoSampleRenderersWithEmptySampleStream(this.sampleStreams);
         this.hasEnabledTracks = false;
         int i2 = 0;
@@ -147,16 +147,16 @@ final class MediaPeriodHolder {
             SampleStream[] sampleStreamArr = this.sampleStreams;
             if (i2 < sampleStreamArr.length) {
                 if (sampleStreamArr[i2] != null) {
-                    Assertions.checkState(newTrackSelectorResult.isRendererEnabled(i2));
+                    Assertions.checkState(trackSelectorResult.isRendererEnabled(i2));
                     if (this.rendererCapabilities[i2].getTrackType() != 6) {
                         this.hasEnabledTracks = true;
                     }
                 } else {
-                    Assertions.checkState(trackSelections.get(i2) == null);
+                    Assertions.checkState(trackSelectionArray.get(i2) == null);
                 }
                 i2++;
             } else {
-                return positionUs2;
+                return selectTracks;
             }
         }
     }
@@ -166,12 +166,12 @@ final class MediaPeriodHolder {
         releaseMediaPeriod(this.info.endPositionUs, this.mediaSource, this.mediaPeriod);
     }
 
-    public void setNext(MediaPeriodHolder nextMediaPeriodHolder) {
-        if (nextMediaPeriodHolder == this.next) {
+    public void setNext(MediaPeriodHolder mediaPeriodHolder) {
+        if (mediaPeriodHolder == this.next) {
             return;
         }
         disableTrackSelectionsInResult();
-        this.next = nextMediaPeriodHolder;
+        this.next = mediaPeriodHolder;
         enableTrackSelectionsInResult();
     }
 
@@ -191,12 +191,18 @@ final class MediaPeriodHolder {
         if (!isLoadingMediaPeriod()) {
             return;
         }
-        for (int i = 0; i < this.trackSelectorResult.length; i++) {
-            boolean rendererEnabled = this.trackSelectorResult.isRendererEnabled(i);
+        int i = 0;
+        while (true) {
+            TrackSelectorResult trackSelectorResult = this.trackSelectorResult;
+            if (i >= trackSelectorResult.length) {
+                return;
+            }
+            boolean isRendererEnabled = trackSelectorResult.isRendererEnabled(i);
             TrackSelection trackSelection = this.trackSelectorResult.selections.get(i);
-            if (rendererEnabled && trackSelection != null) {
+            if (isRendererEnabled && trackSelection != null) {
                 trackSelection.enable();
             }
+            i++;
         }
     }
 
@@ -204,22 +210,28 @@ final class MediaPeriodHolder {
         if (!isLoadingMediaPeriod()) {
             return;
         }
-        for (int i = 0; i < this.trackSelectorResult.length; i++) {
-            boolean rendererEnabled = this.trackSelectorResult.isRendererEnabled(i);
+        int i = 0;
+        while (true) {
+            TrackSelectorResult trackSelectorResult = this.trackSelectorResult;
+            if (i >= trackSelectorResult.length) {
+                return;
+            }
+            boolean isRendererEnabled = trackSelectorResult.isRendererEnabled(i);
             TrackSelection trackSelection = this.trackSelectorResult.selections.get(i);
-            if (rendererEnabled && trackSelection != null) {
+            if (isRendererEnabled && trackSelection != null) {
                 trackSelection.disable();
             }
+            i++;
         }
     }
 
-    private void disassociateNoSampleRenderersWithEmptySampleStream(SampleStream[] sampleStreams) {
+    private void disassociateNoSampleRenderersWithEmptySampleStream(SampleStream[] sampleStreamArr) {
         int i = 0;
         while (true) {
             RendererCapabilities[] rendererCapabilitiesArr = this.rendererCapabilities;
             if (i < rendererCapabilitiesArr.length) {
                 if (rendererCapabilitiesArr[i].getTrackType() == 6) {
-                    sampleStreams[i] = null;
+                    sampleStreamArr[i] = null;
                 }
                 i++;
             } else {
@@ -228,13 +240,13 @@ final class MediaPeriodHolder {
         }
     }
 
-    private void associateNoSampleRenderersWithEmptySampleStream(SampleStream[] sampleStreams) {
+    private void associateNoSampleRenderersWithEmptySampleStream(SampleStream[] sampleStreamArr) {
         int i = 0;
         while (true) {
             RendererCapabilities[] rendererCapabilitiesArr = this.rendererCapabilities;
             if (i < rendererCapabilitiesArr.length) {
                 if (rendererCapabilitiesArr[i].getTrackType() == 6 && this.trackSelectorResult.isRendererEnabled(i)) {
-                    sampleStreams[i] = new EmptySampleStream();
+                    sampleStreamArr[i] = new EmptySampleStream();
                 }
                 i++;
             } else {
@@ -247,23 +259,20 @@ final class MediaPeriodHolder {
         return this.next == null;
     }
 
-    private static MediaPeriod createMediaPeriod(MediaSource.MediaPeriodId id, MediaSource mediaSource, Allocator allocator, long startPositionUs, long endPositionUs) {
-        MediaPeriod mediaPeriod = mediaSource.createPeriod(id, allocator, startPositionUs);
-        if (endPositionUs != C.TIME_UNSET && endPositionUs != Long.MIN_VALUE) {
-            return new ClippingMediaPeriod(mediaPeriod, true, 0L, endPositionUs);
-        }
-        return mediaPeriod;
+    private static MediaPeriod createMediaPeriod(MediaSource.MediaPeriodId mediaPeriodId, MediaSource mediaSource, Allocator allocator, long j, long j2) {
+        MediaPeriod createPeriod = mediaSource.createPeriod(mediaPeriodId, allocator, j);
+        return (j2 == -9223372036854775807L || j2 == Long.MIN_VALUE) ? createPeriod : new ClippingMediaPeriod(createPeriod, true, 0L, j2);
     }
 
-    private static void releaseMediaPeriod(long endPositionUs, MediaSource mediaSource, MediaPeriod mediaPeriod) {
+    private static void releaseMediaPeriod(long j, MediaSource mediaSource, MediaPeriod mediaPeriod) {
         try {
-            if (endPositionUs != C.TIME_UNSET && endPositionUs != Long.MIN_VALUE) {
+            if (j != -9223372036854775807L && j != Long.MIN_VALUE) {
                 mediaSource.releasePeriod(((ClippingMediaPeriod) mediaPeriod).mediaPeriod);
             } else {
                 mediaSource.releasePeriod(mediaPeriod);
             }
         } catch (RuntimeException e) {
-            Log.e(TAG, "Period release failed.", e);
+            Log.e("MediaPeriodHolder", "Period release failed.", e);
         }
     }
 }

@@ -1,10 +1,12 @@
 package com.google.android.gms.maps;
 
+import com.google.android.gms.internal.maps.zzx;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.internal.zzas;
 import com.google.android.gms.maps.model.Marker;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
-public final class zza extends com.google.android.gms.maps.internal.zzas {
+/* loaded from: classes.dex */
+public final class zza extends zzas {
     final /* synthetic */ GoogleMap.OnMarkerClickListener zza;
 
     public zza(GoogleMap googleMap, GoogleMap.OnMarkerClickListener onMarkerClickListener) {
@@ -12,7 +14,7 @@ public final class zza extends com.google.android.gms.maps.internal.zzas {
     }
 
     @Override // com.google.android.gms.maps.internal.zzat
-    public final boolean zzb(com.google.android.gms.internal.maps.zzx zzxVar) {
+    public final boolean zzb(zzx zzxVar) {
         return this.zza.onMarkerClick(new Marker(zzxVar));
     }
 }

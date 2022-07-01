@@ -1,13 +1,13 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
-public final class zzhw extends zzid {
+/* loaded from: classes.dex */
+final class zzhw extends zzid {
     private final int zzc;
     private final int zzd;
 
     public zzhw(byte[] bArr, int i, int i2) {
         super(bArr);
-        zzb(i, i + i2, bArr.length);
+        zzht.zzb(i, i + i2, bArr.length);
         this.zzc = i;
         this.zzd = i2;
     }
@@ -32,7 +32,6 @@ public final class zzhw extends zzid {
         return this.zzb[this.zzc + i];
     }
 
-    /* JADX INFO: Access modifiers changed from: package-private */
     @Override // com.google.android.gms.internal.vision.zzid, com.google.android.gms.internal.vision.zzht
     public final byte zzb(int i) {
         return this.zzb[this.zzc + i];
@@ -43,15 +42,8 @@ public final class zzhw extends zzid {
         return this.zzd;
     }
 
-    /* JADX INFO: Access modifiers changed from: protected */
     @Override // com.google.android.gms.internal.vision.zzid
-    public final int zze() {
+    protected final int zze() {
         return this.zzc;
-    }
-
-    /* JADX INFO: Access modifiers changed from: protected */
-    @Override // com.google.android.gms.internal.vision.zzid, com.google.android.gms.internal.vision.zzht
-    public final void zza(byte[] bArr, int i, int i2, int i3) {
-        System.arraycopy(this.zzb, zze(), bArr, 0, i3);
     }
 }

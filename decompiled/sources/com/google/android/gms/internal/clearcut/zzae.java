@@ -1,5 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,18 +14,17 @@ import androidx.core.content.PermissionChecker;
 import javax.annotation.Nullable;
 /* loaded from: classes.dex */
 public abstract class zzae<T> {
+    private static final Object zzdn = new Object();
+    private static volatile Boolean zzdp;
+    private static volatile Boolean zzdq;
+    @SuppressLint({"StaticFieldLeak"})
+    private static Context zzh;
     private final zzao zzdr;
     final String zzds;
     private final String zzdt;
     private final T zzdu;
-    private T zzdv;
     private volatile zzab zzdw;
     private volatile SharedPreferences zzdx;
-    private static final Object zzdn = new Object();
-    private static Context zzh = null;
-    private static boolean zzdo = false;
-    private static volatile Boolean zzdp = null;
-    private static volatile Boolean zzdq = null;
 
     private zzae(zzao zzaoVar, String str, T t) {
         String str2;
@@ -32,7 +33,6 @@ public abstract class zzae<T> {
         String str5;
         Uri uri;
         Uri uri2;
-        this.zzdv = null;
         this.zzdw = null;
         this.zzdx = null;
         str2 = zzaoVar.zzef;
@@ -77,7 +77,6 @@ public abstract class zzae<T> {
                 }
                 zzh = context;
             }
-            zzdo = false;
         }
     }
 
@@ -96,7 +95,7 @@ public abstract class zzae<T> {
     private static <V> V zza(zzam<V> zzamVar) {
         try {
             return zzamVar.zzp();
-        } catch (SecurityException e) {
+        } catch (SecurityException unused) {
             long clearCallingIdentity = Binder.clearCallingIdentity();
             try {
                 return zzamVar.zzp();
@@ -129,6 +128,7 @@ public abstract class zzae<T> {
     }
 
     @Nullable
+    @TargetApi(24)
     private final T zzl() {
         Uri uri;
         String str;

@@ -1,9 +1,8 @@
 package com.google.android.gms.internal.clearcut;
 
-import com.microsoft.appcenter.ingestion.models.CommonProperties;
 import java.util.List;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzdr {
     public static String zza(zzdo zzdoVar, String str) {
         StringBuilder sb = new StringBuilder();
@@ -13,20 +12,20 @@ public final class zzdr {
         return sb.toString();
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:79:0x01f2, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:79:0x01e6, code lost:
         if (((java.lang.Boolean) r11).booleanValue() == false) goto L80;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:80:0x01f4, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:80:0x01e8, code lost:
         r7 = true;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:85:0x0203, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:85:0x01f7, code lost:
         if (((java.lang.Integer) r11).intValue() == 0) goto L80;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:89:0x0214, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:89:0x0208, code lost:
         if (((java.lang.Float) r11).floatValue() == 0.0f) goto L80;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:93:0x0226, code lost:
-        if (((java.lang.Double) r11).doubleValue() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE) goto L80;
+    /* JADX WARN: Code restructure failed: missing block: B:93:0x021a, code lost:
+        if (((java.lang.Double) r11).doubleValue() == 0.0d) goto L80;
      */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
@@ -34,7 +33,7 @@ public final class zzdr {
     */
     private static void zza(com.google.android.gms.internal.clearcut.zzdo r18, java.lang.StringBuilder r19, int r20) {
         /*
-            Method dump skipped, instructions count: 702
+            Method dump skipped, instructions count: 688
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.clearcut.zzdr.zza(com.google.android.gms.internal.clearcut.zzdo, java.lang.StringBuilder, int):void");
@@ -81,7 +80,7 @@ public final class zzdr {
                 Map.Entry entry2 = (Map.Entry) obj;
                 int i4 = i + 2;
                 zza(sb, i4, "key", entry2.getKey());
-                zza(sb, i4, CommonProperties.VALUE, entry2.getValue());
+                zza(sb, i4, "value", entry2.getValue());
                 sb.append("\n");
                 while (i2 < i) {
                     sb.append(' ');

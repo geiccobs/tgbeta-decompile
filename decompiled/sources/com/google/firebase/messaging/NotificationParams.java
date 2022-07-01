@@ -6,47 +6,44 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
-import com.google.firebase.messaging.Constants;
-import com.microsoft.appcenter.ingestion.models.properties.StringTypedProperty;
 import java.util.Arrays;
 import java.util.MissingFormatArgumentException;
 import org.json.JSONArray;
 import org.json.JSONException;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class NotificationParams {
     private final Bundle data;
 
-    public NotificationParams(Bundle data) {
-        if (data == null) {
+    public NotificationParams(Bundle bundle) {
+        if (bundle == null) {
             throw new NullPointerException("data");
         }
-        this.data = new Bundle(data);
+        this.data = new Bundle(bundle);
     }
 
     private static int getLightColor(String str) {
         int parseColor = Color.parseColor(str);
-        if (parseColor == -16777216) {
-            throw new IllegalArgumentException("Transparent color is invalid");
+        if (parseColor != -16777216) {
+            return parseColor;
         }
-        return parseColor;
+        throw new IllegalArgumentException("Transparent color is invalid");
     }
 
     private static boolean isAnalyticsKey(String str) {
-        return str.startsWith(Constants.AnalyticsKeys.PREFIX) || str.equals(Constants.MessagePayloadKeys.FROM);
+        return str.startsWith("google.c.a.") || str.equals("from");
     }
 
     private static boolean isReservedKey(String str) {
-        return str.startsWith(Constants.MessagePayloadKeys.RESERVED_CLIENT_LIB_PREFIX) || str.startsWith(Constants.MessageNotificationKeys.NOTIFICATION_PREFIX) || str.startsWith(Constants.MessageNotificationKeys.NOTIFICATION_PREFIX_OLD);
+        return str.startsWith("google.c.") || str.startsWith("gcm.n.") || str.startsWith("gcm.notification.");
     }
 
     private static String keyWithOldPrefix(String str) {
-        return !str.startsWith(Constants.MessageNotificationKeys.NOTIFICATION_PREFIX) ? str : str.replace(Constants.MessageNotificationKeys.NOTIFICATION_PREFIX, Constants.MessageNotificationKeys.NOTIFICATION_PREFIX_OLD);
+        return !str.startsWith("gcm.n.") ? str : str.replace("gcm.n.", "gcm.notification.");
     }
 
     private String normalizePrefix(String str) {
-        if (!this.data.containsKey(str) && str.startsWith(Constants.MessageNotificationKeys.NOTIFICATION_PREFIX)) {
+        if (!this.data.containsKey(str) && str.startsWith("gcm.n.")) {
             String keyWithOldPrefix = keyWithOldPrefix(str);
             if (this.data.containsKey(keyWithOldPrefix)) {
                 return keyWithOldPrefix;
@@ -56,21 +53,21 @@ public class NotificationParams {
     }
 
     private static String userFriendlyKey(String str) {
-        return str.startsWith(Constants.MessageNotificationKeys.NOTIFICATION_PREFIX) ? str.substring(6) : str;
+        return str.startsWith("gcm.n.") ? str.substring(6) : str;
     }
 
-    public boolean getBoolean(String key) {
-        String key2 = getString(key);
-        return IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE.equals(key2) || Boolean.parseBoolean(key2);
+    public boolean getBoolean(String str) {
+        String string = getString(str);
+        return "1".equals(string) || Boolean.parseBoolean(string);
     }
 
-    public Integer getInteger(String key) {
-        String string = getString(key);
+    public Integer getInteger(String str) {
+        String string = getString(str);
         if (!TextUtils.isEmpty(string)) {
             try {
                 return Integer.valueOf(Integer.parseInt(string));
-            } catch (NumberFormatException e) {
-                String userFriendlyKey = userFriendlyKey(key);
+            } catch (NumberFormatException unused) {
+                String userFriendlyKey = userFriendlyKey(str);
                 StringBuilder sb = new StringBuilder(String.valueOf(userFriendlyKey).length() + 38 + String.valueOf(string).length());
                 sb.append("Couldn't parse value of ");
                 sb.append(userFriendlyKey);
@@ -84,13 +81,13 @@ public class NotificationParams {
         return null;
     }
 
-    public JSONArray getJSONArray(String key) {
-        String string = getString(key);
+    public JSONArray getJSONArray(String str) {
+        String string = getString(str);
         if (!TextUtils.isEmpty(string)) {
             try {
                 return new JSONArray(string);
-            } catch (JSONException e) {
-                String userFriendlyKey = userFriendlyKey(key);
+            } catch (JSONException unused) {
+                String userFriendlyKey = userFriendlyKey(str);
                 StringBuilder sb = new StringBuilder(String.valueOf(userFriendlyKey).length() + 50 + String.valueOf(string).length());
                 sb.append("Malformed JSON for key ");
                 sb.append(userFriendlyKey);
@@ -105,7 +102,7 @@ public class NotificationParams {
     }
 
     public int[] getLightSettings() {
-        JSONArray jSONArray = getJSONArray(Constants.MessageNotificationKeys.LIGHT_SETTINGS);
+        JSONArray jSONArray = getJSONArray("gcm.n.light_settings");
         if (jSONArray == null) {
             return null;
         }
@@ -121,7 +118,7 @@ public class NotificationParams {
         } catch (IllegalArgumentException e) {
             String valueOf = String.valueOf(jSONArray);
             String message = e.getMessage();
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 60 + String.valueOf(message).length());
+            StringBuilder sb = new StringBuilder(valueOf.length() + 60 + String.valueOf(message).length());
             sb.append("LightSettings is invalid: ");
             sb.append(valueOf);
             sb.append(". ");
@@ -129,9 +126,9 @@ public class NotificationParams {
             sb.append(". Skipping setting LightSettings");
             Log.w("NotificationParams", sb.toString());
             return null;
-        } catch (JSONException e2) {
+        } catch (JSONException unused) {
             String valueOf2 = String.valueOf(jSONArray);
-            StringBuilder sb2 = new StringBuilder(String.valueOf(valueOf2).length() + 58);
+            StringBuilder sb2 = new StringBuilder(valueOf2.length() + 58);
             sb2.append("LightSettings is invalid: ");
             sb2.append(valueOf2);
             sb2.append(". Skipping setting LightSettings");
@@ -141,9 +138,9 @@ public class NotificationParams {
     }
 
     public Uri getLink() {
-        String string = getString(Constants.MessageNotificationKeys.LINK_ANDROID);
+        String string = getString("gcm.n.link_android");
         if (TextUtils.isEmpty(string)) {
-            string = getString(Constants.MessageNotificationKeys.LINK);
+            string = getString("gcm.n.link");
         }
         if (!TextUtils.isEmpty(string)) {
             return Uri.parse(string);
@@ -151,8 +148,8 @@ public class NotificationParams {
         return null;
     }
 
-    public Object[] getLocalizationArgsForKey(String key) {
-        JSONArray jSONArray = getJSONArray(String.valueOf(key).concat(Constants.MessageNotificationKeys.TEXT_ARGS_SUFFIX));
+    public Object[] getLocalizationArgsForKey(String str) {
+        JSONArray jSONArray = getJSONArray(String.valueOf(str).concat("_loc_args"));
         if (jSONArray == null) {
             return null;
         }
@@ -164,34 +161,34 @@ public class NotificationParams {
         return strArr;
     }
 
-    public String getLocalizationResourceForKey(String key) {
-        return getString(String.valueOf(key).concat(Constants.MessageNotificationKeys.TEXT_RESOURCE_SUFFIX));
+    public String getLocalizationResourceForKey(String str) {
+        return getString(String.valueOf(str).concat("_loc_key"));
     }
 
-    public String getLocalizedString(Resources resources, String packageName, String key) {
-        String localizationResourceForKey = getLocalizationResourceForKey(key);
+    public String getLocalizedString(Resources resources, String str, String str2) {
+        String localizationResourceForKey = getLocalizationResourceForKey(str2);
         if (TextUtils.isEmpty(localizationResourceForKey)) {
             return null;
         }
-        int identifier = resources.getIdentifier(localizationResourceForKey, StringTypedProperty.TYPE, packageName);
+        int identifier = resources.getIdentifier(localizationResourceForKey, "string", str);
         if (identifier == 0) {
-            String userFriendlyKey = userFriendlyKey(String.valueOf(key).concat(Constants.MessageNotificationKeys.TEXT_RESOURCE_SUFFIX));
-            StringBuilder sb = new StringBuilder(String.valueOf(userFriendlyKey).length() + 49 + String.valueOf(key).length());
+            String userFriendlyKey = userFriendlyKey(String.valueOf(str2).concat("_loc_key"));
+            StringBuilder sb = new StringBuilder(String.valueOf(userFriendlyKey).length() + 49 + String.valueOf(str2).length());
             sb.append(userFriendlyKey);
             sb.append(" resource not found: ");
-            sb.append(key);
+            sb.append(str2);
             sb.append(" Default value will be used.");
             Log.w("NotificationParams", sb.toString());
             return null;
         }
-        Object[] localizationArgsForKey = getLocalizationArgsForKey(key);
+        Object[] localizationArgsForKey = getLocalizationArgsForKey(str2);
         if (localizationArgsForKey == null) {
             return resources.getString(identifier);
         }
         try {
             return resources.getString(identifier, localizationArgsForKey);
         } catch (MissingFormatArgumentException e) {
-            String userFriendlyKey2 = userFriendlyKey(key);
+            String userFriendlyKey2 = userFriendlyKey(str2);
             String arrays = Arrays.toString(localizationArgsForKey);
             StringBuilder sb2 = new StringBuilder(String.valueOf(userFriendlyKey2).length() + 58 + String.valueOf(arrays).length());
             sb2.append("Missing format argument for ");
@@ -204,13 +201,13 @@ public class NotificationParams {
         }
     }
 
-    public Long getLong(String key) {
-        String string = getString(key);
+    public Long getLong(String str) {
+        String string = getString(str);
         if (!TextUtils.isEmpty(string)) {
             try {
                 return Long.valueOf(Long.parseLong(string));
-            } catch (NumberFormatException e) {
-                String userFriendlyKey = userFriendlyKey(key);
+            } catch (NumberFormatException unused) {
+                String userFriendlyKey = userFriendlyKey(str);
                 StringBuilder sb = new StringBuilder(String.valueOf(userFriendlyKey).length() + 38 + String.valueOf(string).length());
                 sb.append("Couldn't parse value of ");
                 sb.append(userFriendlyKey);
@@ -225,11 +222,11 @@ public class NotificationParams {
     }
 
     public String getNotificationChannelId() {
-        return getString(Constants.MessageNotificationKeys.CHANNEL);
+        return getString("gcm.n.android_channel_id");
     }
 
     public Integer getNotificationCount() {
-        Integer integer = getInteger(Constants.MessageNotificationKeys.NOTIFICATION_COUNT);
+        Integer integer = getInteger("gcm.n.notification_count");
         if (integer == null) {
             return null;
         }
@@ -237,16 +234,16 @@ public class NotificationParams {
             return integer;
         }
         String valueOf = String.valueOf(integer);
-        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 67);
+        StringBuilder sb = new StringBuilder(valueOf.length() + 67);
         sb.append("notificationCount is invalid: ");
         sb.append(valueOf);
         sb.append(". Skipping setting notificationCount.");
-        Log.w(Constants.TAG, sb.toString());
+        Log.w("FirebaseMessaging", sb.toString());
         return null;
     }
 
     public Integer getNotificationPriority() {
-        Integer integer = getInteger(Constants.MessageNotificationKeys.NOTIFICATION_PRIORITY);
+        Integer integer = getInteger("gcm.n.notification_priority");
         if (integer == null) {
             return null;
         }
@@ -254,30 +251,30 @@ public class NotificationParams {
             return integer;
         }
         String valueOf = String.valueOf(integer);
-        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 72);
+        StringBuilder sb = new StringBuilder(valueOf.length() + 72);
         sb.append("notificationPriority is invalid ");
         sb.append(valueOf);
         sb.append(". Skipping setting notificationPriority.");
-        Log.w(Constants.TAG, sb.toString());
+        Log.w("FirebaseMessaging", sb.toString());
         return null;
     }
 
-    public String getPossiblyLocalizedString(Resources resources, String packageName, String key) {
-        String string = getString(key);
-        return !TextUtils.isEmpty(string) ? string : getLocalizedString(resources, packageName, key);
+    public String getPossiblyLocalizedString(Resources resources, String str, String str2) {
+        String string = getString(str2);
+        return !TextUtils.isEmpty(string) ? string : getLocalizedString(resources, str, str2);
     }
 
     public String getSoundResourceName() {
-        String string = getString(Constants.MessageNotificationKeys.SOUND_2);
-        return TextUtils.isEmpty(string) ? getString(Constants.MessageNotificationKeys.SOUND) : string;
+        String string = getString("gcm.n.sound2");
+        return TextUtils.isEmpty(string) ? getString("gcm.n.sound") : string;
     }
 
-    public String getString(String key) {
-        return this.data.getString(normalizePrefix(key));
+    public String getString(String str) {
+        return this.data.getString(normalizePrefix(str));
     }
 
     public long[] getVibrateTimings() {
-        JSONArray jSONArray = getJSONArray(Constants.MessageNotificationKeys.VIBRATE_TIMINGS);
+        JSONArray jSONArray = getJSONArray("gcm.n.vibrate_timings");
         if (jSONArray == null) {
             return null;
         }
@@ -291,9 +288,9 @@ public class NotificationParams {
                 jArr[i] = jSONArray.optLong(i);
             }
             return jArr;
-        } catch (NumberFormatException | JSONException e) {
+        } catch (NumberFormatException | JSONException unused) {
             String valueOf = String.valueOf(jSONArray);
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 74);
+            StringBuilder sb = new StringBuilder(valueOf.length() + 74);
             sb.append("User defined vibrateTimings is invalid: ");
             sb.append(valueOf);
             sb.append(". Skipping setting vibrateTimings.");
@@ -303,7 +300,7 @@ public class NotificationParams {
     }
 
     public Integer getVisibility() {
-        Integer integer = getInteger(Constants.MessageNotificationKeys.VISIBILITY);
+        Integer integer = getInteger("gcm.n.visibility");
         if (integer == null) {
             return null;
         }
@@ -311,20 +308,12 @@ public class NotificationParams {
             return integer;
         }
         String valueOf = String.valueOf(integer);
-        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 53);
+        StringBuilder sb = new StringBuilder(valueOf.length() + 53);
         sb.append("visibility is invalid: ");
         sb.append(valueOf);
         sb.append(". Skipping setting visibility.");
         Log.w("NotificationParams", sb.toString());
         return null;
-    }
-
-    public boolean hasImage() {
-        return !TextUtils.isEmpty(getString(Constants.MessageNotificationKeys.IMAGE_URL));
-    }
-
-    public boolean isNotification() {
-        return getBoolean(Constants.MessageNotificationKeys.ENABLE_NOTIFICATION);
     }
 
     public Bundle paramsForAnalyticsIntent() {
@@ -347,7 +336,7 @@ public class NotificationParams {
         return bundle;
     }
 
-    public static boolean isNotification(Bundle data) {
-        return IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE.equals(data.getString(Constants.MessageNotificationKeys.ENABLE_NOTIFICATION)) || IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE.equals(data.getString(keyWithOldPrefix(Constants.MessageNotificationKeys.ENABLE_NOTIFICATION)));
+    public static boolean isNotification(Bundle bundle) {
+        return "1".equals(bundle.getString("gcm.n.e")) || "1".equals(bundle.getString(keyWithOldPrefix("gcm.n.e")));
     }
 }

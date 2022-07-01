@@ -5,71 +5,49 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import androidx.core.content.ContextCompat;
-import com.google.firebase.DataCollectionDefaultChange;
-import com.google.firebase.events.Event;
 import com.google.firebase.events.Publisher;
-/* loaded from: classes3.dex */
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
 public class DataCollectionConfigStorage {
-    public static final String DATA_COLLECTION_DEFAULT_ENABLED = "firebase_data_collection_default_enabled";
-    private static final String FIREBASE_APP_PREFS = "com.google.firebase.common.prefs:";
     private boolean dataCollectionDefaultEnabled = readAutoDataCollectionEnabled();
     private final Context deviceProtectedContext;
     private final Publisher publisher;
     private final SharedPreferences sharedPreferences;
 
-    public DataCollectionConfigStorage(Context applicationContext, String persistenceKey, Publisher publisher) {
-        Context directBootSafe = directBootSafe(applicationContext);
+    public DataCollectionConfigStorage(Context context, String str, Publisher publisher) {
+        Context directBootSafe = directBootSafe(context);
         this.deviceProtectedContext = directBootSafe;
-        this.sharedPreferences = directBootSafe.getSharedPreferences(FIREBASE_APP_PREFS + persistenceKey, 0);
+        this.sharedPreferences = directBootSafe.getSharedPreferences("com.google.firebase.common.prefs:" + str, 0);
         this.publisher = publisher;
     }
 
-    private static Context directBootSafe(Context applicationContext) {
-        if (Build.VERSION.SDK_INT < 24) {
-            return applicationContext;
-        }
-        return ContextCompat.createDeviceProtectedStorageContext(applicationContext);
+    private static Context directBootSafe(Context context) {
+        return Build.VERSION.SDK_INT < 24 ? context : ContextCompat.createDeviceProtectedStorageContext(context);
     }
 
     public synchronized boolean isEnabled() {
         return this.dataCollectionDefaultEnabled;
     }
 
-    private synchronized void updateDataCollectionDefaultEnabled(boolean enabled) {
-        if (this.dataCollectionDefaultEnabled != enabled) {
-            this.dataCollectionDefaultEnabled = enabled;
-            this.publisher.publish(new Event<>(DataCollectionDefaultChange.class, new DataCollectionDefaultChange(enabled)));
-        }
-    }
-
-    public synchronized void setEnabled(Boolean enabled) {
-        if (enabled == null) {
-            this.sharedPreferences.edit().remove(DATA_COLLECTION_DEFAULT_ENABLED).apply();
-            updateDataCollectionDefaultEnabled(readManifestDataCollectionEnabled());
-        } else {
-            boolean apiSetting = Boolean.TRUE.equals(enabled);
-            this.sharedPreferences.edit().putBoolean(DATA_COLLECTION_DEFAULT_ENABLED, apiSetting).apply();
-            updateDataCollectionDefaultEnabled(apiSetting);
-        }
-    }
-
     private boolean readManifestDataCollectionEnabled() {
         ApplicationInfo applicationInfo;
+        Bundle bundle;
         try {
             PackageManager packageManager = this.deviceProtectedContext.getPackageManager();
-            if (packageManager != null && (applicationInfo = packageManager.getApplicationInfo(this.deviceProtectedContext.getPackageName(), 128)) != null && applicationInfo.metaData != null && applicationInfo.metaData.containsKey(DATA_COLLECTION_DEFAULT_ENABLED)) {
-                return applicationInfo.metaData.getBoolean(DATA_COLLECTION_DEFAULT_ENABLED);
+            if (packageManager != null && (applicationInfo = packageManager.getApplicationInfo(this.deviceProtectedContext.getPackageName(), ConnectionsManager.RequestFlagNeedQuickAck)) != null && (bundle = applicationInfo.metaData) != null && bundle.containsKey("firebase_data_collection_default_enabled")) {
+                return applicationInfo.metaData.getBoolean("firebase_data_collection_default_enabled");
             }
             return true;
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException unused) {
             return true;
         }
     }
 
     private boolean readAutoDataCollectionEnabled() {
-        if (this.sharedPreferences.contains(DATA_COLLECTION_DEFAULT_ENABLED)) {
-            return this.sharedPreferences.getBoolean(DATA_COLLECTION_DEFAULT_ENABLED, true);
+        if (this.sharedPreferences.contains("firebase_data_collection_default_enabled")) {
+            return this.sharedPreferences.getBoolean("firebase_data_collection_default_enabled", true);
         }
         return readManifestDataCollectionEnabled();
     }

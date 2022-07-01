@@ -3,15 +3,15 @@ package com.google.android.datatransport.runtime;
 import com.google.android.datatransport.Priority;
 import com.google.android.datatransport.runtime.TransportContext;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class AutoValue_TransportContext extends TransportContext {
     private final String backendName;
     private final byte[] extras;
     private final Priority priority;
 
-    private AutoValue_TransportContext(String backendName, byte[] extras, Priority priority) {
-        this.backendName = backendName;
-        this.extras = extras;
+    private AutoValue_TransportContext(String str, byte[] bArr, Priority priority) {
+        this.backendName = str;
+        this.extras = bArr;
         this.priority = priority;
     }
 
@@ -30,16 +30,16 @@ final class AutoValue_TransportContext extends TransportContext {
         return this.priority;
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof TransportContext)) {
+        if (!(obj instanceof TransportContext)) {
             return false;
         }
-        TransportContext that = (TransportContext) o;
-        if (this.backendName.equals(that.getBackendName())) {
-            if (Arrays.equals(this.extras, that instanceof AutoValue_TransportContext ? ((AutoValue_TransportContext) that).extras : that.getExtras()) && this.priority.equals(that.getPriority())) {
+        TransportContext transportContext = (TransportContext) obj;
+        if (this.backendName.equals(transportContext.getBackendName())) {
+            if (Arrays.equals(this.extras, transportContext instanceof AutoValue_TransportContext ? ((AutoValue_TransportContext) transportContext).extras : transportContext.getExtras()) && this.priority.equals(transportContext.getPriority())) {
                 return true;
             }
         }
@@ -47,29 +47,28 @@ final class AutoValue_TransportContext extends TransportContext {
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
-        return ((((h$ ^ this.backendName.hashCode()) * 1000003) ^ Arrays.hashCode(this.extras)) * 1000003) ^ this.priority.hashCode();
+        return ((((this.backendName.hashCode() ^ 1000003) * 1000003) ^ Arrays.hashCode(this.extras)) * 1000003) ^ this.priority.hashCode();
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder extends TransportContext.Builder {
         private String backendName;
         private byte[] extras;
         private Priority priority;
 
         @Override // com.google.android.datatransport.runtime.TransportContext.Builder
-        public TransportContext.Builder setBackendName(String backendName) {
-            if (backendName == null) {
+        public TransportContext.Builder setBackendName(String str) {
+            if (str == null) {
                 throw new NullPointerException("Null backendName");
             }
-            this.backendName = backendName;
+            this.backendName = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.runtime.TransportContext.Builder
-        public TransportContext.Builder setExtras(byte[] extras) {
-            this.extras = extras;
+        public TransportContext.Builder setExtras(byte[] bArr) {
+            this.extras = bArr;
             return this;
         }
 
@@ -84,15 +83,15 @@ final class AutoValue_TransportContext extends TransportContext {
 
         @Override // com.google.android.datatransport.runtime.TransportContext.Builder
         public TransportContext build() {
-            String missing = "";
+            String str = "";
             if (this.backendName == null) {
-                missing = missing + " backendName";
+                str = str + " backendName";
             }
             if (this.priority == null) {
-                missing = missing + " priority";
+                str = str + " priority";
             }
-            if (!missing.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + missing);
+            if (!str.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + str);
             }
             return new AutoValue_TransportContext(this.backendName, this.extras, this.priority);
         }

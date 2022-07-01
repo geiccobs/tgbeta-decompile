@@ -1,13 +1,15 @@
 package com.google.android.gms.internal.clearcut;
 
-import com.google.android.exoplayer2.C;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzfy {
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
-    private static final Charset ISO_8859_1 = Charset.forName(C.ISO88591_NAME);
     public static final Object zzrr = new Object();
+
+    static {
+        Charset.forName("UTF-8");
+        Charset.forName("ISO-8859-1");
+    }
 
     public static boolean equals(int[] iArr, int[] iArr2) {
         return (iArr == null || iArr.length == 0) ? iArr2 == null || iArr2.length == 0 : Arrays.equals(iArr, iArr2);
@@ -82,8 +84,9 @@ public final class zzfy {
     }
 
     public static void zza(zzfu zzfuVar, zzfu zzfuVar2) {
-        if (zzfuVar.zzrj != null) {
-            zzfuVar2.zzrj = (zzfw) zzfuVar.zzrj.clone();
+        zzfw zzfwVar = zzfuVar.zzrj;
+        if (zzfwVar != null) {
+            zzfuVar2.zzrj = (zzfw) zzfwVar.clone();
         }
     }
 

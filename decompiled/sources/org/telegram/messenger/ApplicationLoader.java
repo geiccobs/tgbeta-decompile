@@ -1,5 +1,6 @@
 package org.telegram.messenger;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -9,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -20,56 +20,54 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import androidx.core.app.NotificationCompat;
 import androidx.multidex.MultiDex;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import java.io.File;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.Components.ForegroundDetector;
 import org.telegram.ui.LauncherIconController;
 /* loaded from: classes.dex */
 public class ApplicationLoader extends Application {
-    public static volatile Context applicationContext;
-    public static volatile Handler applicationHandler;
-    public static boolean canDrawOverlays;
-    private static ConnectivityManager connectivityManager;
-    public static volatile NetworkInfo currentNetworkInfo;
-    public static boolean hasPlayServices;
-    private static long lastNetworkCheckTypeTime;
-    public static volatile long mainInterfacePausedStageQueueTime;
+    @SuppressLint({"StaticFieldLeak"})
+    public static volatile Context applicationContext = null;
+    public static volatile Handler applicationHandler = null;
+    private static volatile boolean applicationInited = false;
+    public static boolean canDrawOverlays = false;
+    private static ConnectivityManager connectivityManager = null;
+    public static volatile NetworkInfo currentNetworkInfo = null;
+    public static volatile boolean externalInterfacePaused = true;
+    public static boolean hasPlayServices = false;
+    public static volatile boolean isScreenOn = false;
+    private static int lastKnownNetworkType = -1;
+    private static long lastNetworkCheckTypeTime = 0;
+    public static volatile boolean mainInterfacePaused = true;
+    public static volatile boolean mainInterfacePausedStageQueue = true;
+    public static volatile long mainInterfacePausedStageQueueTime = 0;
+    public static volatile boolean mainInterfaceStopped = true;
     private static volatile ConnectivityManager.NetworkCallback networkCallback;
     public static long startTime;
-    private static volatile boolean applicationInited = false;
-    private static int lastKnownNetworkType = -1;
-    public static volatile boolean isScreenOn = false;
-    public static volatile boolean mainInterfacePaused = true;
-    public static volatile boolean mainInterfaceStopped = true;
-    public static volatile boolean externalInterfacePaused = true;
-    public static volatile boolean mainInterfacePausedStageQueue = true;
 
     @Override // android.content.ContextWrapper
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
         MultiDex.install(this);
     }
 
     public static File getFilesDirFixed() {
-        for (int a = 0; a < 10; a++) {
-            File path = applicationContext.getFilesDir();
-            if (path != null) {
-                return path;
+        for (int i = 0; i < 10; i++) {
+            File filesDir = applicationContext.getFilesDir();
+            if (filesDir != null) {
+                return filesDir;
             }
         }
         try {
-            ApplicationInfo info = applicationContext.getApplicationInfo();
-            File path2 = new File(info.dataDir, "files");
-            path2.mkdirs();
-            return path2;
+            File file = new File(applicationContext.getApplicationInfo().dataDir, "files");
+            file.mkdirs();
+            return file;
         } catch (Exception e) {
             FileLog.e(e);
             return new File("/data/data/org.telegram.messenger/files");
@@ -88,35 +86,32 @@ public class ApplicationLoader extends Application {
         }
         try {
             connectivityManager = (ConnectivityManager) applicationContext.getSystemService("connectivity");
-            BroadcastReceiver networkStateReceiver = new BroadcastReceiver() { // from class: org.telegram.messenger.ApplicationLoader.1
+            applicationContext.registerReceiver(new BroadcastReceiver() { // from class: org.telegram.messenger.ApplicationLoader.1
                 @Override // android.content.BroadcastReceiver
                 public void onReceive(Context context, Intent intent) {
                     try {
                         ApplicationLoader.currentNetworkInfo = ApplicationLoader.connectivityManager.getActiveNetworkInfo();
-                    } catch (Throwable th) {
+                    } catch (Throwable unused) {
                     }
-                    boolean isSlow = ApplicationLoader.isConnectionSlow();
-                    for (int a = 0; a < 4; a++) {
-                        ConnectionsManager.getInstance(a).checkConnection();
-                        FileLoader.getInstance(a).onNetworkChanged(isSlow);
+                    boolean isConnectionSlow = ApplicationLoader.isConnectionSlow();
+                    for (int i = 0; i < 4; i++) {
+                        ConnectionsManager.getInstance(i).checkConnection();
+                        FileLoader.getInstance(i).onNetworkChanged(isConnectionSlow);
                     }
                 }
-            };
-            applicationContext.registerReceiver(networkStateReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+            }, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         } catch (Exception e2) {
             e2.printStackTrace();
         }
         try {
-            IntentFilter filter = new IntentFilter("android.intent.action.SCREEN_ON");
-            filter.addAction("android.intent.action.SCREEN_OFF");
-            BroadcastReceiver mReceiver = new ScreenReceiver();
-            applicationContext.registerReceiver(mReceiver, filter);
+            IntentFilter intentFilter = new IntentFilter("android.intent.action.SCREEN_ON");
+            intentFilter.addAction("android.intent.action.SCREEN_OFF");
+            applicationContext.registerReceiver(new ScreenReceiver(), intentFilter);
         } catch (Exception e3) {
             e3.printStackTrace();
         }
         try {
-            PowerManager pm = (PowerManager) applicationContext.getSystemService("power");
-            isScreenOn = pm.isScreenOn();
+            isScreenOn = ((PowerManager) applicationContext.getSystemService("power")).isScreenOn();
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("screen state = " + isScreenOn);
             }
@@ -125,29 +120,28 @@ public class ApplicationLoader extends Application {
         }
         SharedConfig.loadConfig();
         SharedPrefsHelper.init(applicationContext);
-        for (int a = 0; a < 4; a++) {
-            UserConfig.getInstance(a).loadConfig();
-            MessagesController.getInstance(a);
-            if (a == 0) {
-                SharedConfig.pushStringStatus = "__FIREBASE_GENERATING_SINCE_" + ConnectionsManager.getInstance(a).getCurrentTime() + "__";
+        for (int i = 0; i < 4; i++) {
+            UserConfig.getInstance(i).loadConfig();
+            MessagesController.getInstance(i);
+            if (i == 0) {
+                SharedConfig.pushStringStatus = "__FIREBASE_GENERATING_SINCE_" + ConnectionsManager.getInstance(i).getCurrentTime() + "__";
             } else {
-                ConnectionsManager.getInstance(a);
+                ConnectionsManager.getInstance(i);
             }
-            TLRPC.User user = UserConfig.getInstance(a).getCurrentUser();
-            if (user != null) {
-                MessagesController.getInstance(a).putUser(user, true);
-                SendMessagesHelper.getInstance(a).checkUnsentMessages();
+            TLRPC$User currentUser = UserConfig.getInstance(i).getCurrentUser();
+            if (currentUser != null) {
+                MessagesController.getInstance(i).putUser(currentUser, true);
+                SendMessagesHelper.getInstance(i).checkUnsentMessages();
             }
         }
-        ApplicationLoader app = (ApplicationLoader) applicationContext;
-        app.initPlayServices();
+        ((ApplicationLoader) applicationContext).initPlayServices();
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("app initied");
         }
         MediaController.getInstance();
-        for (int a2 = 0; a2 < 4; a2++) {
-            ContactsController.getInstance(a2).checkAppAccount();
-            DownloadController.getInstance(a2);
+        for (int i2 = 0; i2 < 4; i2++) {
+            ContactsController.getInstance(i2).checkAppAccount();
+            DownloadController.getInstance(i2);
         }
         ChatThemeController.init();
         BillingController.getInstance().startConnection();
@@ -157,7 +151,7 @@ public class ApplicationLoader extends Application {
     public void onCreate() {
         try {
             applicationContext = getApplicationContext();
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
         }
         super.onCreate();
         if (BuildVars.LOGS_ENABLED) {
@@ -167,6 +161,7 @@ public class ApplicationLoader extends Application {
             startTime = elapsedRealtime;
             sb.append(elapsedRealtime);
             FileLog.d(sb.toString());
+            FileLog.d("buildVersion = " + BuildVars.BUILD_VERSION);
         }
         if (applicationContext == null) {
             applicationContext = getApplicationContext();
@@ -176,9 +171,9 @@ public class ApplicationLoader extends Application {
         new ForegroundDetector(this) { // from class: org.telegram.messenger.ApplicationLoader.2
             @Override // org.telegram.ui.Components.ForegroundDetector, android.app.Application.ActivityLifecycleCallbacks
             public void onActivityStarted(Activity activity) {
-                boolean wasInBackground = isBackground();
+                boolean isBackground = isBackground();
                 super.onActivityStarted(activity);
-                if (wasInBackground) {
+                if (isBackground) {
                     ApplicationLoader.ensureCurrentNetworkGet(true);
                 }
             }
@@ -192,33 +187,31 @@ public class ApplicationLoader extends Application {
     }
 
     public static void startPushService() {
-        boolean enabled;
-        SharedPreferences preferences = MessagesController.getGlobalNotificationsSettings();
-        if (preferences.contains("pushService")) {
-            enabled = preferences.getBoolean("pushService", true);
+        boolean z;
+        SharedPreferences globalNotificationsSettings = MessagesController.getGlobalNotificationsSettings();
+        if (globalNotificationsSettings.contains("pushService")) {
+            z = globalNotificationsSettings.getBoolean("pushService", true);
         } else {
-            enabled = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", false);
+            z = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", false);
         }
-        if (enabled) {
+        if (z) {
             try {
                 applicationContext.startService(new Intent(applicationContext, NotificationsService.class));
                 return;
-            } catch (Throwable th) {
+            } catch (Throwable unused) {
                 return;
             }
         }
         applicationContext.stopService(new Intent(applicationContext, NotificationsService.class));
-        PendingIntent pintent = PendingIntent.getService(applicationContext, 0, new Intent(applicationContext, NotificationsService.class), 0);
-        AlarmManager alarm = (AlarmManager) applicationContext.getSystemService(NotificationCompat.CATEGORY_ALARM);
-        alarm.cancel(pintent);
+        ((AlarmManager) applicationContext.getSystemService("alarm")).cancel(PendingIntent.getService(applicationContext, 0, new Intent(applicationContext, NotificationsService.class), 0));
     }
 
     @Override // android.app.Application, android.content.ComponentCallbacks
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
         try {
-            LocaleController.getInstance().onDeviceConfigurationChange(newConfig);
-            AndroidUtilities.checkDisplaySize(applicationContext, newConfig);
+            LocaleController.getInstance().onDeviceConfigurationChange(configuration);
+            AndroidUtilities.checkDisplaySize(applicationContext, configuration);
             VideoCapturerDevice.checkScreenCapturerSize();
         } catch (Exception e) {
             e.printStackTrace();
@@ -229,20 +222,19 @@ public class ApplicationLoader extends Application {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.ApplicationLoader$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                ApplicationLoader.this.m112xd905017d();
+                ApplicationLoader.this.lambda$initPlayServices$2();
             }
         }, 1000L);
     }
 
-    /* renamed from: lambda$initPlayServices$2$org-telegram-messenger-ApplicationLoader */
-    public /* synthetic */ void m112xd905017d() {
+    public /* synthetic */ void lambda$initPlayServices$2() {
         boolean checkPlayServices = checkPlayServices();
         hasPlayServices = checkPlayServices;
         if (checkPlayServices) {
-            String currentPushString = SharedConfig.pushString;
-            if (!TextUtils.isEmpty(currentPushString)) {
+            String str = SharedConfig.pushString;
+            if (!TextUtils.isEmpty(str)) {
                 if (BuildVars.DEBUG_PRIVATE_VERSION && BuildVars.LOGS_ENABLED) {
-                    FileLog.d("GCM regId = " + currentPushString);
+                    FileLog.d("GCM regId = " + str);
                 }
             } else if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("GCM Registration not found.");
@@ -261,8 +253,8 @@ public class ApplicationLoader extends Application {
         try {
             SharedConfig.pushStringGetTimeStart = SystemClock.elapsedRealtime();
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(ApplicationLoader$$ExternalSyntheticLambda0.INSTANCE);
-        } catch (Throwable e) {
-            FileLog.e(e);
+        } catch (Throwable th) {
+            FileLog.e(th);
         }
     }
 
@@ -276,44 +268,45 @@ public class ApplicationLoader extends Application {
             GcmPushListenerService.sendRegistrationToServer(null);
             return;
         }
-        String token = (String) task.getResult();
-        if (!TextUtils.isEmpty(token)) {
-            GcmPushListenerService.sendRegistrationToServer(token);
+        String str = (String) task.getResult();
+        if (TextUtils.isEmpty(str)) {
+            return;
         }
+        GcmPushListenerService.sendRegistrationToServer(str);
     }
 
     private boolean checkPlayServices() {
         try {
-            int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-            return resultCode == 0;
+            return GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) == 0;
         } catch (Exception e) {
             FileLog.e(e);
             return true;
         }
     }
 
-    public static void ensureCurrentNetworkGet(boolean force) {
-        if (force || currentNetworkInfo == null) {
+    public static void ensureCurrentNetworkGet(boolean z) {
+        if (z || currentNetworkInfo == null) {
             try {
                 if (connectivityManager == null) {
                     connectivityManager = (ConnectivityManager) applicationContext.getSystemService("connectivity");
                 }
                 currentNetworkInfo = connectivityManager.getActiveNetworkInfo();
-                if (Build.VERSION.SDK_INT >= 24 && networkCallback == null) {
-                    networkCallback = new ConnectivityManager.NetworkCallback() { // from class: org.telegram.messenger.ApplicationLoader.3
-                        @Override // android.net.ConnectivityManager.NetworkCallback
-                        public void onAvailable(Network network) {
-                            int unused = ApplicationLoader.lastKnownNetworkType = -1;
-                        }
-
-                        @Override // android.net.ConnectivityManager.NetworkCallback
-                        public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
-                            int unused = ApplicationLoader.lastKnownNetworkType = -1;
-                        }
-                    };
-                    connectivityManager.registerDefaultNetworkCallback(networkCallback);
+                if (Build.VERSION.SDK_INT < 24 || networkCallback != null) {
+                    return;
                 }
-            } catch (Throwable th) {
+                networkCallback = new ConnectivityManager.NetworkCallback() { // from class: org.telegram.messenger.ApplicationLoader.3
+                    @Override // android.net.ConnectivityManager.NetworkCallback
+                    public void onAvailable(Network network) {
+                        int unused = ApplicationLoader.lastKnownNetworkType = -1;
+                    }
+
+                    @Override // android.net.ConnectivityManager.NetworkCallback
+                    public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
+                        int unused = ApplicationLoader.lastKnownNetworkType = -1;
+                    }
+                };
+                connectivityManager.registerDefaultNetworkCallback(networkCallback);
+            } catch (Throwable unused) {
             }
         }
     }
@@ -366,16 +359,12 @@ public class ApplicationLoader extends Application {
         try {
             ensureCurrentNetworkGet(false);
             if (currentNetworkInfo != null && currentNetworkInfo.getType() == 0) {
-                switch (currentNetworkInfo.getSubtype()) {
-                    case 1:
-                    case 2:
-                    case 4:
-                    case 7:
-                    case 11:
-                        return true;
+                int subtype = currentNetworkInfo.getSubtype();
+                if (subtype == 1 || subtype == 2 || subtype == 4 || subtype == 7 || subtype == 11) {
+                    return true;
                 }
             }
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
         }
         return false;
     }
@@ -391,12 +380,9 @@ public class ApplicationLoader extends Application {
             return 0;
         }
         if (currentNetworkInfo.getType() != 1 && currentNetworkInfo.getType() != 9) {
-            if (!currentNetworkInfo.isRoaming()) {
-                return 0;
-            }
-            return 2;
+            return currentNetworkInfo.isRoaming() ? 2 : 0;
         }
-        if (Build.VERSION.SDK_INT >= 24 && (((i = lastKnownNetworkType) == 0 || i == 1) && System.currentTimeMillis() - lastNetworkCheckTypeTime < DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS)) {
+        if (Build.VERSION.SDK_INT >= 24 && (((i = lastKnownNetworkType) == 0 || i == 1) && System.currentTimeMillis() - lastNetworkCheckTypeTime < 5000)) {
             return lastKnownNetworkType;
         }
         if (connectivityManager.isActiveNetworkMetered()) {
@@ -412,23 +398,20 @@ public class ApplicationLoader extends Application {
         if (isConnectedOrConnectingToWiFi()) {
             return 1;
         }
-        if (isRoaming()) {
-            return 2;
-        }
-        return 0;
+        return isRoaming() ? 2 : 0;
     }
 
     public static boolean isNetworkOnlineFast() {
         try {
             ensureCurrentNetworkGet(false);
             if (currentNetworkInfo != null && !currentNetworkInfo.isConnectedOrConnecting() && !currentNetworkInfo.isAvailable()) {
-                NetworkInfo netInfo = connectivityManager.getNetworkInfo(0);
-                if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(0);
+                if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
                     return true;
                 }
-                NetworkInfo netInfo2 = connectivityManager.getNetworkInfo(1);
-                if (netInfo2 != null) {
-                    if (netInfo2.isConnectedOrConnecting()) {
+                NetworkInfo networkInfo2 = connectivityManager.getNetworkInfo(1);
+                if (networkInfo2 != null) {
+                    if (networkInfo2.isConnectedOrConnecting()) {
                         return true;
                     }
                 }
@@ -444,17 +427,17 @@ public class ApplicationLoader extends Application {
     public static boolean isNetworkOnlineRealtime() {
         try {
             ConnectivityManager connectivityManager2 = (ConnectivityManager) applicationContext.getSystemService("connectivity");
-            NetworkInfo netInfo = connectivityManager2.getActiveNetworkInfo();
-            if (netInfo != null && (netInfo.isConnectedOrConnecting() || netInfo.isAvailable())) {
+            NetworkInfo activeNetworkInfo = connectivityManager2.getActiveNetworkInfo();
+            if (activeNetworkInfo != null && (activeNetworkInfo.isConnectedOrConnecting() || activeNetworkInfo.isAvailable())) {
                 return true;
             }
-            NetworkInfo netInfo2 = connectivityManager2.getNetworkInfo(0);
-            if (netInfo2 != null && netInfo2.isConnectedOrConnecting()) {
+            NetworkInfo networkInfo = connectivityManager2.getNetworkInfo(0);
+            if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
                 return true;
             }
-            NetworkInfo netInfo3 = connectivityManager2.getNetworkInfo(1);
-            if (netInfo3 != null) {
-                if (netInfo3.isConnectedOrConnecting()) {
+            NetworkInfo networkInfo2 = connectivityManager2.getNetworkInfo(1);
+            if (networkInfo2 != null) {
+                if (networkInfo2.isConnectedOrConnecting()) {
                     return true;
                 }
             }
@@ -466,13 +449,10 @@ public class ApplicationLoader extends Application {
     }
 
     public static boolean isNetworkOnline() {
-        boolean result = isNetworkOnlineRealtime();
-        if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            boolean result2 = isNetworkOnlineFast();
-            if (result != result2) {
-                FileLog.d("network online mismatch");
-            }
+        boolean isNetworkOnlineRealtime = isNetworkOnlineRealtime();
+        if (BuildVars.DEBUG_PRIVATE_VERSION && isNetworkOnlineRealtime != isNetworkOnlineFast()) {
+            FileLog.d("network online mismatch");
         }
-        return result;
+        return isNetworkOnlineRealtime;
     }
 }

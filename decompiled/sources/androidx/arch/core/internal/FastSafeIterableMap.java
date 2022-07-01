@@ -3,7 +3,7 @@ package androidx.arch.core.internal;
 import androidx.arch.core.internal.SafeIterableMap;
 import java.util.HashMap;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class FastSafeIterableMap<K, V> extends SafeIterableMap<K, V> {
     private HashMap<K, SafeIterableMap.Entry<K, V>> mHashMap = new HashMap<>();
 
@@ -13,24 +13,24 @@ public class FastSafeIterableMap<K, V> extends SafeIterableMap<K, V> {
     }
 
     @Override // androidx.arch.core.internal.SafeIterableMap
-    public V putIfAbsent(K key, V v) {
-        SafeIterableMap.Entry<K, V> current = get(key);
-        if (current != null) {
-            return current.mValue;
+    public V putIfAbsent(K k, V v) {
+        SafeIterableMap.Entry<K, V> entry = get(k);
+        if (entry != null) {
+            return entry.mValue;
         }
-        this.mHashMap.put(key, put(key, v));
+        this.mHashMap.put(k, put(k, v));
         return null;
     }
 
     @Override // androidx.arch.core.internal.SafeIterableMap
-    public V remove(K key) {
-        V removed = (V) super.remove(key);
-        this.mHashMap.remove(key);
-        return removed;
+    public V remove(K k) {
+        V v = (V) super.remove(k);
+        this.mHashMap.remove(k);
+        return v;
     }
 
-    public boolean contains(K key) {
-        return this.mHashMap.containsKey(key);
+    public boolean contains(K k) {
+        return this.mHashMap.containsKey(k);
     }
 
     public Map.Entry<K, V> ceil(K k) {

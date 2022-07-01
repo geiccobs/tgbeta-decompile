@@ -5,32 +5,32 @@ import android.view.MotionEvent;
 import android.view.View;
 import androidx.core.view.GestureDetectorCompat;
 import java.util.List;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class SpoilersClickDetector {
     private GestureDetectorCompat gestureDetector;
     private boolean trackingTap;
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface OnSpoilerClickedListener {
         void onSpoilerClicked(SpoilerEffect spoilerEffect, float f, float f2);
     }
 
-    public SpoilersClickDetector(View v, List<SpoilerEffect> spoilers, OnSpoilerClickedListener clickedListener) {
-        this(v, spoilers, true, clickedListener);
+    public SpoilersClickDetector(View view, List<SpoilerEffect> list, OnSpoilerClickedListener onSpoilerClickedListener) {
+        this(view, list, true, onSpoilerClickedListener);
     }
 
-    public SpoilersClickDetector(final View v, final List<SpoilerEffect> spoilers, final boolean offsetPadding, final OnSpoilerClickedListener clickedListener) {
-        this.gestureDetector = new GestureDetectorCompat(v.getContext(), new GestureDetector.SimpleOnGestureListener() { // from class: org.telegram.ui.Components.spoilers.SpoilersClickDetector.1
+    public SpoilersClickDetector(final View view, final List<SpoilerEffect> list, final boolean z, final OnSpoilerClickedListener onSpoilerClickedListener) {
+        this.gestureDetector = new GestureDetectorCompat(view.getContext(), new GestureDetector.SimpleOnGestureListener() { // from class: org.telegram.ui.Components.spoilers.SpoilersClickDetector.1
             @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
-            public boolean onDown(MotionEvent e) {
-                int x = (int) e.getX();
-                int y = ((int) e.getY()) + v.getScrollY();
-                if (offsetPadding) {
-                    x -= v.getPaddingLeft();
-                    y -= v.getPaddingTop();
+            public boolean onDown(MotionEvent motionEvent) {
+                int x = (int) motionEvent.getX();
+                int y = ((int) motionEvent.getY()) + view.getScrollY();
+                if (z) {
+                    x -= view.getPaddingLeft();
+                    y -= view.getPaddingTop();
                 }
-                for (SpoilerEffect eff : spoilers) {
-                    if (eff.getBounds().contains(x, y)) {
+                for (SpoilerEffect spoilerEffect : list) {
+                    if (spoilerEffect.getBounds().contains(x, y)) {
                         SpoilersClickDetector.this.trackingTap = true;
                         return true;
                     }
@@ -39,19 +39,19 @@ public class SpoilersClickDetector {
             }
 
             @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
-            public boolean onSingleTapUp(MotionEvent e) {
+            public boolean onSingleTapUp(MotionEvent motionEvent) {
                 if (SpoilersClickDetector.this.trackingTap) {
-                    v.playSoundEffect(0);
+                    view.playSoundEffect(0);
                     SpoilersClickDetector.this.trackingTap = false;
-                    int x = (int) e.getX();
-                    int y = ((int) e.getY()) + v.getScrollY();
-                    if (offsetPadding) {
-                        x -= v.getPaddingLeft();
-                        y -= v.getPaddingTop();
+                    int x = (int) motionEvent.getX();
+                    int y = ((int) motionEvent.getY()) + view.getScrollY();
+                    if (z) {
+                        x -= view.getPaddingLeft();
+                        y -= view.getPaddingTop();
                     }
-                    for (SpoilerEffect eff : spoilers) {
-                        if (eff.getBounds().contains(x, y)) {
-                            clickedListener.onSpoilerClicked(eff, x, y);
+                    for (SpoilerEffect spoilerEffect : list) {
+                        if (spoilerEffect.getBounds().contains(x, y)) {
+                            onSpoilerClickedListener.onSpoilerClicked(spoilerEffect, x, y);
                             return true;
                         }
                     }
@@ -61,7 +61,7 @@ public class SpoilersClickDetector {
         });
     }
 
-    public boolean onTouchEvent(MotionEvent ev) {
-        return this.gestureDetector.onTouchEvent(ev);
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        return this.gestureDetector.onTouchEvent(motionEvent);
     }
 }

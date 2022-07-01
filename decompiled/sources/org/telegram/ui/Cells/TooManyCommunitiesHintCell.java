@@ -12,10 +12,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class TooManyCommunitiesHintCell extends FrameLayout {
     private TextView headerTextView;
     private FrameLayout imageLayout;
@@ -26,17 +26,17 @@ public class TooManyCommunitiesHintCell extends FrameLayout {
         super(context);
         ImageView imageView = new ImageView(context);
         this.imageView = imageView;
-        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_nameMessage_threeLines), PorterDuff.Mode.MULTIPLY));
+        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor("chats_nameMessage_threeLines"), PorterDuff.Mode.MULTIPLY));
         TextView textView = new TextView(context);
         this.headerTextView = textView;
-        textView.setTextColor(Theme.getColor(Theme.key_chats_nameMessage_threeLines));
+        textView.setTextColor(Theme.getColor("chats_nameMessage_threeLines"));
         this.headerTextView.setTextSize(1, 20.0f);
         this.headerTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         this.headerTextView.setGravity(17);
         addView(this.headerTextView, LayoutHelper.createFrame(-1, -2.0f, 51, 52.0f, 75.0f, 52.0f, 0.0f));
         TextView textView2 = new TextView(context);
         this.messageTextView = textView2;
-        textView2.setTextColor(Theme.getColor(Theme.key_chats_message));
+        textView2.setTextColor(Theme.getColor("chats_message"));
         this.messageTextView.setTextSize(1, 14.0f);
         this.messageTextView.setGravity(17);
         addView(this.messageTextView, LayoutHelper.createFrame(-1, -2.0f, 51, 36.0f, 110.0f, 36.0f, 0.0f));
@@ -45,19 +45,19 @@ public class TooManyCommunitiesHintCell extends FrameLayout {
         textPaint.setTextSize(AndroidUtilities.dp(12.0f));
         textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         final Paint paint = new Paint(1);
-        FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.Cells.TooManyCommunitiesHintCell.1
+        FrameLayout frameLayout = new FrameLayout(this, context) { // from class: org.telegram.ui.Cells.TooManyCommunitiesHintCell.1
             RectF rect = new RectF();
 
             @Override // android.view.View
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
-                paint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteRedText));
+                paint.setColor(Theme.getColor("windowBackgroundWhiteRedText"));
                 canvas.save();
                 canvas.translate((getMeasuredWidth() - textPaint.measureText(r5)) - AndroidUtilities.dp(8.0f), AndroidUtilities.dpf2(7.0f));
                 this.rect.set(0.0f, 0.0f, textPaint.measureText(r5), textPaint.getTextSize());
                 this.rect.inset(-AndroidUtilities.dp(6.0f), -AndroidUtilities.dp(3.0f));
-                float r = (textPaint.getTextSize() / 2.0f) + AndroidUtilities.dp(3.0f);
-                canvas.drawRoundRect(this.rect, r, r, paint);
+                float textSize = (textPaint.getTextSize() / 2.0f) + AndroidUtilities.dp(3.0f);
+                canvas.drawRoundRect(this.rect, textSize, textSize, paint);
                 canvas.drawText(r5, 0.0f, textPaint.getTextSize() - AndroidUtilities.dpf2(2.0f), textPaint);
                 canvas.restore();
             }
@@ -70,7 +70,7 @@ public class TooManyCommunitiesHintCell extends FrameLayout {
         this.imageView.setImageResource(R.drawable.groups_limit1);
     }
 
-    public void setMessageText(String message) {
-        this.messageTextView.setText(message);
+    public void setMessageText(String str) {
+        this.messageTextView.setText(str);
     }
 }

@@ -1,5 +1,5 @@
 package androidx.lifecycle;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 interface FullLifecycleObserver extends LifecycleObserver {
     void onCreate(LifecycleOwner lifecycleOwner);
 

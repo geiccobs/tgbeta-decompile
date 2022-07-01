@@ -1,112 +1,71 @@
 package com.google.android.exoplayer2.util;
 
 import android.text.TextUtils;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.UnknownHostException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Log {
-    public static final int LOG_LEVEL_ALL = 0;
-    public static final int LOG_LEVEL_ERROR = 3;
-    public static final int LOG_LEVEL_INFO = 1;
-    public static final int LOG_LEVEL_OFF = Integer.MAX_VALUE;
-    public static final int LOG_LEVEL_WARNING = 2;
     private static int logLevel = 0;
     private static boolean logStackTraces = true;
 
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    @interface LogLevel {
-    }
-
-    private Log() {
-    }
-
-    public static int getLogLevel() {
-        return logLevel;
-    }
-
-    public boolean getLogStackTraces() {
-        return logStackTraces;
-    }
-
-    public static void setLogLevel(int logLevel2) {
-        logLevel = logLevel2;
-    }
-
-    public static void setLogStackTraces(boolean logStackTraces2) {
-        logStackTraces = logStackTraces2;
-    }
-
-    public static void d(String tag, String message) {
+    public static void d(String str, String str2) {
         if (logLevel == 0) {
-            android.util.Log.d(tag, message);
+            android.util.Log.d(str, str2);
         }
     }
 
-    public static void d(String tag, String message, Throwable throwable) {
-        d(tag, appendThrowableString(message, throwable));
-    }
-
-    public static void i(String tag, String message) {
+    public static void i(String str, String str2) {
         if (logLevel <= 1) {
-            android.util.Log.i(tag, message);
+            android.util.Log.i(str, str2);
         }
     }
 
-    public static void i(String tag, String message, Throwable throwable) {
-        i(tag, appendThrowableString(message, throwable));
-    }
-
-    public static void w(String tag, String message) {
+    public static void w(String str, String str2) {
         if (logLevel <= 2) {
-            android.util.Log.w(tag, message);
+            android.util.Log.w(str, str2);
         }
     }
 
-    public static void w(String tag, String message, Throwable throwable) {
-        w(tag, appendThrowableString(message, throwable));
+    public static void w(String str, String str2, Throwable th) {
+        w(str, appendThrowableString(str2, th));
     }
 
-    public static void e(String tag, String message) {
+    public static void e(String str, String str2) {
         if (logLevel <= 3) {
-            android.util.Log.e(tag, message);
+            android.util.Log.e(str, str2);
         }
     }
 
-    public static void e(String tag, String message, Throwable throwable) {
-        e(tag, appendThrowableString(message, throwable));
+    public static void e(String str, String str2, Throwable th) {
+        e(str, appendThrowableString(str2, th));
     }
 
-    public static String getThrowableString(Throwable throwable) {
-        if (throwable == null) {
+    public static String getThrowableString(Throwable th) {
+        if (th == null) {
             return null;
         }
-        if (isCausedByUnknownHostException(throwable)) {
+        if (isCausedByUnknownHostException(th)) {
             return "UnknownHostException (no network)";
         }
         if (!logStackTraces) {
-            return throwable.getMessage();
+            return th.getMessage();
         }
-        return android.util.Log.getStackTraceString(throwable).trim().replace("\t", "    ");
+        return android.util.Log.getStackTraceString(th).trim().replace("\t", "    ");
     }
 
-    private static String appendThrowableString(String message, Throwable throwable) {
-        String throwableString = getThrowableString(throwable);
+    private static String appendThrowableString(String str, Throwable th) {
+        String throwableString = getThrowableString(th);
         if (!TextUtils.isEmpty(throwableString)) {
-            return message + "\n  " + throwableString.replace("\n", "\n  ") + '\n';
+            return str + "\n  " + throwableString.replace("\n", "\n  ") + '\n';
         }
-        return message;
+        return str;
     }
 
-    private static boolean isCausedByUnknownHostException(Throwable throwable) {
-        while (throwable != null) {
-            if (throwable instanceof UnknownHostException) {
+    private static boolean isCausedByUnknownHostException(Throwable th) {
+        while (th != null) {
+            if (th instanceof UnknownHostException) {
                 return true;
             }
-            throwable = throwable.getCause();
+            th = th.getCause();
         }
         return false;
     }

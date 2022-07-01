@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzkd implements zzkl {
     private zzkl[] zza;
 
@@ -26,7 +26,7 @@ final class zzkd implements zzkl {
                 return zzklVar.zzb(cls);
             }
         }
-        String valueOf = String.valueOf(cls.getName());
-        throw new UnsupportedOperationException(valueOf.length() != 0 ? "No factory is available for message type: ".concat(valueOf) : new String("No factory is available for message type: "));
+        String name = cls.getName();
+        throw new UnsupportedOperationException(name.length() != 0 ? "No factory is available for message type: ".concat(name) : new String("No factory is available for message type: "));
     }
 }

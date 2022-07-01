@@ -1,94 +1,79 @@
 package com.google.android.exoplayer2.extractor;
 
 import com.google.android.exoplayer2.ParserException;
-import com.google.android.exoplayer2.extractor.ts.PsExtractor;
 import com.google.android.exoplayer2.util.FlacStreamMetadata;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class FlacFrameReader {
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class SampleNumberHolder {
         public long sampleNumber;
     }
 
-    public static boolean checkAndReadFrameHeader(ParsableByteArray data, FlacStreamMetadata flacStreamMetadata, int frameStartMarker, SampleNumberHolder sampleNumberHolder) {
-        int frameStartPosition = data.getPosition();
-        long frameHeaderBytes = data.readUnsignedInt();
-        if ((frameHeaderBytes >>> 16) != frameStartMarker) {
+    public static boolean checkAndReadFrameHeader(ParsableByteArray parsableByteArray, FlacStreamMetadata flacStreamMetadata, int i, SampleNumberHolder sampleNumberHolder) {
+        int position = parsableByteArray.getPosition();
+        long readUnsignedInt = parsableByteArray.readUnsignedInt();
+        long j = readUnsignedInt >>> 16;
+        if (j != i) {
             return false;
         }
-        boolean isBlockSizeVariable = ((frameHeaderBytes >>> 16) & 1) == 1;
-        int blockSizeKey = (int) ((frameHeaderBytes >> 12) & 15);
-        int sampleRateKey = (int) ((frameHeaderBytes >> 8) & 15);
-        int channelAssignmentKey = (int) ((frameHeaderBytes >> 4) & 15);
-        int bitsPerSampleKey = (int) ((frameHeaderBytes >> 1) & 7);
-        boolean reservedBit = (frameHeaderBytes & 1) == 1;
-        if (!checkChannelAssignment(channelAssignmentKey, flacStreamMetadata)) {
-            return false;
-        }
-        if (!checkBitsPerSample(bitsPerSampleKey, flacStreamMetadata) || reservedBit) {
-            return false;
-        }
-        return checkAndReadFirstSampleNumber(data, flacStreamMetadata, isBlockSizeVariable, sampleNumberHolder) && checkAndReadBlockSizeSamples(data, flacStreamMetadata, blockSizeKey) && checkAndReadSampleRate(data, flacStreamMetadata, sampleRateKey) && checkAndReadCrc(data, frameStartPosition);
+        return checkChannelAssignment((int) (15 & (readUnsignedInt >> 4)), flacStreamMetadata) && checkBitsPerSample((int) ((readUnsignedInt >> 1) & 7), flacStreamMetadata) && !(((readUnsignedInt & 1) > 1L ? 1 : ((readUnsignedInt & 1) == 1L ? 0 : -1)) == 0) && checkAndReadFirstSampleNumber(parsableByteArray, flacStreamMetadata, ((j & 1) > 1L ? 1 : ((j & 1) == 1L ? 0 : -1)) == 0, sampleNumberHolder) && checkAndReadBlockSizeSamples(parsableByteArray, flacStreamMetadata, (int) ((readUnsignedInt >> 12) & 15)) && checkAndReadSampleRate(parsableByteArray, flacStreamMetadata, (int) ((readUnsignedInt >> 8) & 15)) && checkAndReadCrc(parsableByteArray, position);
     }
 
-    public static boolean checkFrameHeaderFromPeek(ExtractorInput input, FlacStreamMetadata flacStreamMetadata, int frameStartMarker, SampleNumberHolder sampleNumberHolder) throws IOException, InterruptedException {
-        long originalPeekPosition = input.getPeekPosition();
-        byte[] frameStartBytes = new byte[2];
-        input.peekFully(frameStartBytes, 0, 2);
-        int frameStart = ((frameStartBytes[0] & 255) << 8) | (frameStartBytes[1] & 255);
-        if (frameStart != frameStartMarker) {
-            input.resetPeekPosition();
-            input.advancePeekPosition((int) (originalPeekPosition - input.getPosition()));
+    public static boolean checkFrameHeaderFromPeek(ExtractorInput extractorInput, FlacStreamMetadata flacStreamMetadata, int i, SampleNumberHolder sampleNumberHolder) throws IOException, InterruptedException {
+        long peekPosition = extractorInput.getPeekPosition();
+        byte[] bArr = new byte[2];
+        extractorInput.peekFully(bArr, 0, 2);
+        if ((((bArr[0] & 255) << 8) | (bArr[1] & 255)) != i) {
+            extractorInput.resetPeekPosition();
+            extractorInput.advancePeekPosition((int) (peekPosition - extractorInput.getPosition()));
             return false;
         }
-        ParsableByteArray scratch = new ParsableByteArray(16);
-        System.arraycopy(frameStartBytes, 0, scratch.data, 0, 2);
-        int totalBytesPeeked = ExtractorUtil.peekToLength(input, scratch.data, 2, 14);
-        scratch.setLimit(totalBytesPeeked);
-        input.resetPeekPosition();
-        input.advancePeekPosition((int) (originalPeekPosition - input.getPosition()));
-        return checkAndReadFrameHeader(scratch, flacStreamMetadata, frameStartMarker, sampleNumberHolder);
+        ParsableByteArray parsableByteArray = new ParsableByteArray(16);
+        System.arraycopy(bArr, 0, parsableByteArray.data, 0, 2);
+        parsableByteArray.setLimit(ExtractorUtil.peekToLength(extractorInput, parsableByteArray.data, 2, 14));
+        extractorInput.resetPeekPosition();
+        extractorInput.advancePeekPosition((int) (peekPosition - extractorInput.getPosition()));
+        return checkAndReadFrameHeader(parsableByteArray, flacStreamMetadata, i, sampleNumberHolder);
     }
 
-    public static long getFirstSampleNumber(ExtractorInput input, FlacStreamMetadata flacStreamMetadata) throws IOException, InterruptedException {
-        input.resetPeekPosition();
-        boolean isBlockSizeVariable = true;
-        input.advancePeekPosition(1);
-        byte[] blockingStrategyByte = new byte[1];
-        input.peekFully(blockingStrategyByte, 0, 1);
-        if ((blockingStrategyByte[0] & 1) != 1) {
-            isBlockSizeVariable = false;
+    public static long getFirstSampleNumber(ExtractorInput extractorInput, FlacStreamMetadata flacStreamMetadata) throws IOException, InterruptedException {
+        extractorInput.resetPeekPosition();
+        boolean z = true;
+        extractorInput.advancePeekPosition(1);
+        byte[] bArr = new byte[1];
+        extractorInput.peekFully(bArr, 0, 1);
+        if ((bArr[0] & 1) != 1) {
+            z = false;
         }
-        input.advancePeekPosition(2);
-        int maxUtf8SampleNumberSize = isBlockSizeVariable ? 7 : 6;
-        ParsableByteArray scratch = new ParsableByteArray(maxUtf8SampleNumberSize);
-        int totalBytesPeeked = ExtractorUtil.peekToLength(input, scratch.data, 0, maxUtf8SampleNumberSize);
-        scratch.setLimit(totalBytesPeeked);
-        input.resetPeekPosition();
+        extractorInput.advancePeekPosition(2);
+        int i = z ? 7 : 6;
+        ParsableByteArray parsableByteArray = new ParsableByteArray(i);
+        parsableByteArray.setLimit(ExtractorUtil.peekToLength(extractorInput, parsableByteArray.data, 0, i));
+        extractorInput.resetPeekPosition();
         SampleNumberHolder sampleNumberHolder = new SampleNumberHolder();
-        if (!checkAndReadFirstSampleNumber(scratch, flacStreamMetadata, isBlockSizeVariable, sampleNumberHolder)) {
+        if (!checkAndReadFirstSampleNumber(parsableByteArray, flacStreamMetadata, z, sampleNumberHolder)) {
             throw new ParserException();
         }
         return sampleNumberHolder.sampleNumber;
     }
 
-    public static int readFrameBlockSizeSamplesFromKey(ParsableByteArray data, int blockSizeKey) {
-        switch (blockSizeKey) {
+    public static int readFrameBlockSizeSamplesFromKey(ParsableByteArray parsableByteArray, int i) {
+        switch (i) {
             case 1:
-                return PsExtractor.AUDIO_STREAM;
+                return 192;
             case 2:
             case 3:
             case 4:
             case 5:
-                return 576 << (blockSizeKey - 2);
+                return 576 << (i - 2);
             case 6:
-                return data.readUnsignedByte() + 1;
+                return parsableByteArray.readUnsignedByte() + 1;
             case 7:
-                return data.readUnsignedShort() + 1;
+                return parsableByteArray.readUnsignedShort() + 1;
             case 8:
             case 9:
             case 10:
@@ -97,62 +82,59 @@ public final class FlacFrameReader {
             case 13:
             case 14:
             case 15:
-                return 256 << (blockSizeKey - 8);
+                return 256 << (i - 8);
             default:
                 return -1;
         }
     }
 
-    private static boolean checkChannelAssignment(int channelAssignmentKey, FlacStreamMetadata flacStreamMetadata) {
-        return channelAssignmentKey <= 7 ? channelAssignmentKey == flacStreamMetadata.channels - 1 : channelAssignmentKey <= 10 && flacStreamMetadata.channels == 2;
+    private static boolean checkChannelAssignment(int i, FlacStreamMetadata flacStreamMetadata) {
+        return i <= 7 ? i == flacStreamMetadata.channels - 1 : i <= 10 && flacStreamMetadata.channels == 2;
     }
 
-    private static boolean checkBitsPerSample(int bitsPerSampleKey, FlacStreamMetadata flacStreamMetadata) {
-        return bitsPerSampleKey == 0 || bitsPerSampleKey == flacStreamMetadata.bitsPerSampleLookupKey;
+    private static boolean checkBitsPerSample(int i, FlacStreamMetadata flacStreamMetadata) {
+        return i == 0 || i == flacStreamMetadata.bitsPerSampleLookupKey;
     }
 
-    private static boolean checkAndReadFirstSampleNumber(ParsableByteArray data, FlacStreamMetadata flacStreamMetadata, boolean isBlockSizeVariable, SampleNumberHolder sampleNumberHolder) {
+    private static boolean checkAndReadFirstSampleNumber(ParsableByteArray parsableByteArray, FlacStreamMetadata flacStreamMetadata, boolean z, SampleNumberHolder sampleNumberHolder) {
         try {
-            long utf8Value = data.readUtf8EncodedLong();
-            sampleNumberHolder.sampleNumber = isBlockSizeVariable ? utf8Value : flacStreamMetadata.maxBlockSizeSamples * utf8Value;
+            long readUtf8EncodedLong = parsableByteArray.readUtf8EncodedLong();
+            if (!z) {
+                readUtf8EncodedLong *= flacStreamMetadata.maxBlockSizeSamples;
+            }
+            sampleNumberHolder.sampleNumber = readUtf8EncodedLong;
             return true;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException unused) {
             return false;
         }
     }
 
-    private static boolean checkAndReadBlockSizeSamples(ParsableByteArray data, FlacStreamMetadata flacStreamMetadata, int blockSizeKey) {
-        int blockSizeSamples = readFrameBlockSizeSamplesFromKey(data, blockSizeKey);
-        return blockSizeSamples != -1 && blockSizeSamples <= flacStreamMetadata.maxBlockSizeSamples;
+    private static boolean checkAndReadBlockSizeSamples(ParsableByteArray parsableByteArray, FlacStreamMetadata flacStreamMetadata, int i) {
+        int readFrameBlockSizeSamplesFromKey = readFrameBlockSizeSamplesFromKey(parsableByteArray, i);
+        return readFrameBlockSizeSamplesFromKey != -1 && readFrameBlockSizeSamplesFromKey <= flacStreamMetadata.maxBlockSizeSamples;
     }
 
-    private static boolean checkAndReadSampleRate(ParsableByteArray data, FlacStreamMetadata flacStreamMetadata, int sampleRateKey) {
-        int expectedSampleRate = flacStreamMetadata.sampleRate;
-        if (sampleRateKey == 0) {
+    private static boolean checkAndReadSampleRate(ParsableByteArray parsableByteArray, FlacStreamMetadata flacStreamMetadata, int i) {
+        int i2 = flacStreamMetadata.sampleRate;
+        if (i == 0) {
             return true;
         }
-        if (sampleRateKey <= 11) {
-            return sampleRateKey == flacStreamMetadata.sampleRateLookupKey;
-        } else if (sampleRateKey == 12) {
-            return data.readUnsignedByte() * 1000 == expectedSampleRate;
-        } else if (sampleRateKey > 14) {
+        if (i <= 11) {
+            return i == flacStreamMetadata.sampleRateLookupKey;
+        } else if (i == 12) {
+            return parsableByteArray.readUnsignedByte() * 1000 == i2;
+        } else if (i > 14) {
             return false;
         } else {
-            int sampleRate = data.readUnsignedShort();
-            if (sampleRateKey == 14) {
-                sampleRate *= 10;
+            int readUnsignedShort = parsableByteArray.readUnsignedShort();
+            if (i == 14) {
+                readUnsignedShort *= 10;
             }
-            return sampleRate == expectedSampleRate;
+            return readUnsignedShort == i2;
         }
     }
 
-    private static boolean checkAndReadCrc(ParsableByteArray data, int frameStartPosition) {
-        int crc = data.readUnsignedByte();
-        int frameEndPosition = data.getPosition();
-        int expectedCrc = Util.crc8(data.data, frameStartPosition, frameEndPosition - 1, 0);
-        return crc == expectedCrc;
-    }
-
-    private FlacFrameReader() {
+    private static boolean checkAndReadCrc(ParsableByteArray parsableByteArray, int i) {
+        return parsableByteArray.readUnsignedByte() == Util.crc8(parsableByteArray.data, i, parsableByteArray.getPosition() - 1, 0);
     }
 }

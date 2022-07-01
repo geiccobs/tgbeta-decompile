@@ -2,7 +2,7 @@ package com.google.android.gms.internal.clearcut;
 
 import android.content.SharedPreferences;
 import android.util.Log;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzaj extends zzae<Boolean> {
     public zzaj(zzao zzaoVar, String str, Boolean bool) {
         super(zzaoVar, str, bool, null);
@@ -22,10 +22,10 @@ public final class zzaj extends zzae<Boolean> {
     @Override // com.google.android.gms.internal.clearcut.zzae
     public final /* synthetic */ Boolean zzb(String str) {
         if (zzy.zzcr.matcher(str).matches()) {
-            return true;
+            return Boolean.TRUE;
         }
         if (zzy.zzcs.matcher(str).matches()) {
-            return false;
+            return Boolean.FALSE;
         }
         String str2 = this.zzds;
         StringBuilder sb = new StringBuilder(String.valueOf(str2).length() + 28 + String.valueOf(str).length());

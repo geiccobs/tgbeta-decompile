@@ -5,7 +5,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.internal.ListenerHolders;
 import com.google.android.gms.location.LocationListener;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzv extends zzx {
     final /* synthetic */ LocationListener zza;
 
@@ -15,7 +15,7 @@ final class zzv extends zzx {
         this.zza = locationListener;
     }
 
-    @Override // com.google.android.gms.common.api.internal.BaseImplementation.ApiMethodImpl
+    @Override // com.google.android.gms.common.api.internal.BaseImplementation$ApiMethodImpl
     protected final /* bridge */ /* synthetic */ void doExecute(zzaz zzazVar) throws RemoteException {
         zzazVar.zzF(ListenerHolders.createListenerKey(this.zza, LocationListener.class.getSimpleName()), new zzy(this));
     }

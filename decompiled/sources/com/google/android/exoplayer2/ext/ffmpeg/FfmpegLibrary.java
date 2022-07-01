@@ -2,8 +2,8 @@ package com.google.android.exoplayer2.ext.ffmpeg;
 
 import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
 import com.google.android.exoplayer2.util.Log;
-import com.google.android.exoplayer2.util.MimeTypes;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.MediaController;
+/* loaded from: classes.dex */
 public final class FfmpegLibrary {
     private static final String TAG = "FfmpegLibrary";
 
@@ -22,185 +22,164 @@ public final class FfmpegLibrary {
         return ffmpegGetVersion();
     }
 
-    public static boolean supportsFormat(String mimeType) {
-        String codecName = getCodecName(mimeType);
+    public static boolean supportsFormat(String str) {
+        String codecName = getCodecName(str);
         if (codecName == null) {
             return false;
         }
-        if (!ffmpegHasDecoder(codecName)) {
-            Log.w(TAG, "No " + codecName + " decoder available. Check the FFmpeg build configuration.");
-            return false;
+        if (ffmpegHasDecoder(codecName)) {
+            return true;
         }
-        return true;
+        Log.w(TAG, "No " + codecName + " decoder available. Check the FFmpeg build configuration.");
+        return false;
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    public static String getCodecName(String mimeType) {
-        char c;
-        switch (mimeType.hashCode()) {
+    public static String getCodecName(String str) {
+        str.hashCode();
+        char c = 65535;
+        switch (str.hashCode()) {
             case -2123537834:
-                if (mimeType.equals(MimeTypes.AUDIO_E_AC3_JOC)) {
-                    c = 6;
-                    break;
-                }
-                c = 65535;
-                break;
-            case -1606874997:
-                if (mimeType.equals(MimeTypes.AUDIO_AMR_WB)) {
-                    c = '\r';
-                    break;
-                }
-                c = 65535;
-                break;
-            case -1095064472:
-                if (mimeType.equals(MimeTypes.AUDIO_DTS)) {
-                    c = '\b';
-                    break;
-                }
-                c = 65535;
-                break;
-            case -1003765268:
-                if (mimeType.equals(MimeTypes.AUDIO_VORBIS)) {
-                    c = '\n';
-                    break;
-                }
-                c = 65535;
-                break;
-            case -432837260:
-                if (mimeType.equals(MimeTypes.AUDIO_MPEG_L1)) {
-                    c = 2;
-                    break;
-                }
-                c = 65535;
-                break;
-            case -432837259:
-                if (mimeType.equals(MimeTypes.AUDIO_MPEG_L2)) {
-                    c = 3;
-                    break;
-                }
-                c = 65535;
-                break;
-            case -53558318:
-                if (mimeType.equals("audio/mp4a-latm")) {
+                if (str.equals("audio/eac3-joc")) {
                     c = 0;
                     break;
                 }
-                c = 65535;
                 break;
-            case 187078296:
-                if (mimeType.equals(MimeTypes.AUDIO_AC3)) {
-                    c = 4;
-                    break;
-                }
-                c = 65535;
-                break;
-            case 1503095341:
-                if (mimeType.equals(MimeTypes.AUDIO_AMR_NB)) {
-                    c = '\f';
-                    break;
-                }
-                c = 65535;
-                break;
-            case 1504470054:
-                if (mimeType.equals(MimeTypes.AUDIO_ALAC)) {
-                    c = 15;
-                    break;
-                }
-                c = 65535;
-                break;
-            case 1504578661:
-                if (mimeType.equals(MimeTypes.AUDIO_E_AC3)) {
-                    c = 5;
-                    break;
-                }
-                c = 65535;
-                break;
-            case 1504619009:
-                if (mimeType.equals(MimeTypes.AUDIO_FLAC)) {
-                    c = 14;
-                    break;
-                }
-                c = 65535;
-                break;
-            case 1504831518:
-                if (mimeType.equals(MimeTypes.AUDIO_MPEG)) {
+            case -1606874997:
+                if (str.equals("audio/amr-wb")) {
                     c = 1;
                     break;
                 }
-                c = 65535;
                 break;
-            case 1504891608:
-                if (mimeType.equals(MimeTypes.AUDIO_OPUS)) {
-                    c = 11;
+            case -1095064472:
+                if (str.equals("audio/vnd.dts")) {
+                    c = 2;
                     break;
                 }
-                c = 65535;
                 break;
-            case 1505942594:
-                if (mimeType.equals(MimeTypes.AUDIO_DTS_HD)) {
-                    c = '\t';
+            case -1003765268:
+                if (str.equals("audio/vorbis")) {
+                    c = 3;
                     break;
                 }
-                c = 65535;
                 break;
-            case 1556697186:
-                if (mimeType.equals(MimeTypes.AUDIO_TRUEHD)) {
+            case -432837260:
+                if (str.equals("audio/mpeg-L1")) {
+                    c = 4;
+                    break;
+                }
+                break;
+            case -432837259:
+                if (str.equals("audio/mpeg-L2")) {
+                    c = 5;
+                    break;
+                }
+                break;
+            case -53558318:
+                if (str.equals(MediaController.AUIDO_MIME_TYPE)) {
+                    c = 6;
+                    break;
+                }
+                break;
+            case 187078296:
+                if (str.equals("audio/ac3")) {
                     c = 7;
                     break;
                 }
-                c = 65535;
                 break;
-            case 1903231877:
-                if (mimeType.equals(MimeTypes.AUDIO_ALAW)) {
-                    c = 17;
+            case 1503095341:
+                if (str.equals("audio/3gpp")) {
+                    c = '\b';
                     break;
                 }
-                c = 65535;
                 break;
-            case 1903589369:
-                if (mimeType.equals(MimeTypes.AUDIO_MLAW)) {
+            case 1504470054:
+                if (str.equals("audio/alac")) {
+                    c = '\t';
+                    break;
+                }
+                break;
+            case 1504578661:
+                if (str.equals("audio/eac3")) {
+                    c = '\n';
+                    break;
+                }
+                break;
+            case 1504619009:
+                if (str.equals("audio/flac")) {
+                    c = 11;
+                    break;
+                }
+                break;
+            case 1504831518:
+                if (str.equals("audio/mpeg")) {
+                    c = '\f';
+                    break;
+                }
+                break;
+            case 1504891608:
+                if (str.equals("audio/opus")) {
+                    c = '\r';
+                    break;
+                }
+                break;
+            case 1505942594:
+                if (str.equals("audio/vnd.dts.hd")) {
+                    c = 14;
+                    break;
+                }
+                break;
+            case 1556697186:
+                if (str.equals("audio/true-hd")) {
+                    c = 15;
+                    break;
+                }
+                break;
+            case 1903231877:
+                if (str.equals("audio/g711-alaw")) {
                     c = 16;
                     break;
                 }
-                c = 65535;
                 break;
-            default:
-                c = 65535;
+            case 1903589369:
+                if (str.equals("audio/g711-mlaw")) {
+                    c = 17;
+                    break;
+                }
                 break;
         }
         switch (c) {
             case 0:
-                return "aac";
-            case 1:
-            case 2:
-            case 3:
-                return "mp3";
-            case 4:
-                return "ac3";
-            case 5:
-            case 6:
-                return "eac3";
-            case 7:
-                return "truehd";
-            case '\b':
-            case '\t':
-                return "dca";
             case '\n':
-                return "vorbis";
-            case 11:
-                return "opus";
-            case '\f':
-                return "amrnb";
-            case '\r':
+                return "eac3";
+            case 1:
                 return "amrwb";
+            case 2:
             case 14:
-                return "flac";
-            case 15:
+                return "dca";
+            case 3:
+                return "vorbis";
+            case 4:
+            case 5:
+            case '\f':
+                return "mp3";
+            case 6:
+                return "aac";
+            case 7:
+                return "ac3";
+            case '\b':
+                return "amrnb";
+            case '\t':
                 return "alac";
+            case 11:
+                return "flac";
+            case '\r':
+                return "opus";
+            case 15:
+                return "truehd";
             case 16:
-                return "pcm_mulaw";
-            case 17:
                 return "pcm_alaw";
+            case 17:
+                return "pcm_mulaw";
             default:
                 return null;
         }

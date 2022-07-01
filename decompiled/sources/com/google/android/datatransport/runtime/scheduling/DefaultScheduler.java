@@ -11,8 +11,7 @@ import com.google.android.datatransport.runtime.scheduling.persistence.EventStor
 import com.google.android.datatransport.runtime.synchronization.SynchronizationGuard;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
-import javax.inject.Inject;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class DefaultScheduler implements Scheduler {
     private static final Logger LOGGER = Logger.getLogger(TransportRuntime.class.getName());
     private final BackendRegistry backendRegistry;
@@ -21,53 +20,52 @@ public class DefaultScheduler implements Scheduler {
     private final SynchronizationGuard guard;
     private final WorkScheduler workScheduler;
 
-    @Inject
-    public DefaultScheduler(Executor executor, BackendRegistry backendRegistry, WorkScheduler workScheduler, EventStore eventStore, SynchronizationGuard guard) {
+    public DefaultScheduler(Executor executor, BackendRegistry backendRegistry, WorkScheduler workScheduler, EventStore eventStore, SynchronizationGuard synchronizationGuard) {
         this.executor = executor;
         this.backendRegistry = backendRegistry;
         this.workScheduler = workScheduler;
         this.eventStore = eventStore;
-        this.guard = guard;
+        this.guard = synchronizationGuard;
     }
 
     @Override // com.google.android.datatransport.runtime.scheduling.Scheduler
-    public void schedule(final TransportContext transportContext, final EventInternal event, final TransportScheduleCallback callback) {
+    public void schedule(final TransportContext transportContext, final EventInternal eventInternal, final TransportScheduleCallback transportScheduleCallback) {
         this.executor.execute(new Runnable() { // from class: com.google.android.datatransport.runtime.scheduling.DefaultScheduler$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                DefaultScheduler.this.m7x41d0caed(transportContext, callback, event);
+                DefaultScheduler.this.lambda$schedule$1(transportContext, transportScheduleCallback, eventInternal);
             }
         });
     }
 
-    /* renamed from: lambda$schedule$1$com-google-android-datatransport-runtime-scheduling-DefaultScheduler */
-    public /* synthetic */ void m7x41d0caed(final TransportContext transportContext, TransportScheduleCallback callback, EventInternal event) {
+    public /* synthetic */ void lambda$schedule$1(final TransportContext transportContext, TransportScheduleCallback transportScheduleCallback, EventInternal eventInternal) {
         try {
             TransportBackend transportBackend = this.backendRegistry.get(transportContext.getBackendName());
             if (transportBackend == null) {
-                String errorMsg = String.format("Transport backend '%s' is not registered", transportContext.getBackendName());
-                LOGGER.warning(errorMsg);
-                callback.onSchedule(new IllegalArgumentException(errorMsg));
+                String format = String.format("Transport backend '%s' is not registered", transportContext.getBackendName());
+                LOGGER.warning(format);
+                transportScheduleCallback.onSchedule(new IllegalArgumentException(format));
                 return;
             }
-            final EventInternal decoratedEvent = transportBackend.decorate(event);
+            final EventInternal decorate = transportBackend.decorate(eventInternal);
             this.guard.runCriticalSection(new SynchronizationGuard.CriticalSection() { // from class: com.google.android.datatransport.runtime.scheduling.DefaultScheduler$$ExternalSyntheticLambda0
                 @Override // com.google.android.datatransport.runtime.synchronization.SynchronizationGuard.CriticalSection
                 public final Object execute() {
-                    return DefaultScheduler.this.m6x8f06a4e(transportContext, decoratedEvent);
+                    Object lambda$schedule$0;
+                    lambda$schedule$0 = DefaultScheduler.this.lambda$schedule$0(transportContext, decorate);
+                    return lambda$schedule$0;
                 }
             });
-            callback.onSchedule(null);
+            transportScheduleCallback.onSchedule(null);
         } catch (Exception e) {
             Logger logger = LOGGER;
             logger.warning("Error scheduling event " + e.getMessage());
-            callback.onSchedule(e);
+            transportScheduleCallback.onSchedule(e);
         }
     }
 
-    /* renamed from: lambda$schedule$0$com-google-android-datatransport-runtime-scheduling-DefaultScheduler */
-    public /* synthetic */ Object m6x8f06a4e(TransportContext transportContext, EventInternal decoratedEvent) {
-        this.eventStore.persist(transportContext, decoratedEvent);
+    public /* synthetic */ Object lambda$schedule$0(TransportContext transportContext, EventInternal eventInternal) {
+        this.eventStore.persist(transportContext, eventInternal);
         this.workScheduler.schedule(transportContext, 1);
         return null;
     }

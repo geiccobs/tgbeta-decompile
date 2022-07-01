@@ -4,15 +4,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzil implements zzmr {
     private final zzii zza;
 
     public static zzil zza(zzii zziiVar) {
-        if (zziiVar.zza != null) {
-            return zziiVar.zza;
-        }
-        return new zzil(zziiVar);
+        zzil zzilVar = zziiVar.zza;
+        return zzilVar != null ? zzilVar : new zzil(zziiVar);
     }
 
     private zzil(zzii zziiVar) {

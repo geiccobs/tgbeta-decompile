@@ -5,7 +5,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import java.util.Random;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class CircleBezierDrawable {
     private final float L;
     private final int N;
@@ -22,12 +22,12 @@ public class CircleBezierDrawable {
     public float cubicBezierK = 1.0f;
     final Random random = new Random();
 
-    public CircleBezierDrawable(int n) {
-        this.N = n;
-        double d = n * 2;
+    public CircleBezierDrawable(int i) {
+        this.N = i;
+        double d = i * 2;
         Double.isNaN(d);
         this.L = (float) (Math.tan(3.141592653589793d / d) * 1.3333333333333333d);
-        this.randomAdditionals = new float[n];
+        this.randomAdditionals = new float[i];
         calculateRandomAdditionals();
     }
 
@@ -37,50 +37,50 @@ public class CircleBezierDrawable {
         }
     }
 
-    public void setAdditionals(int[] additionals) {
+    public void setAdditionals(int[] iArr) {
         for (int i = 0; i < this.N; i += 2) {
             float[] fArr = this.randomAdditionals;
-            fArr[i] = additionals[i / 2];
+            fArr[i] = iArr[i / 2];
             fArr[i + 1] = 0.0f;
         }
     }
 
-    public void draw(float cX, float cY, Canvas canvas, Paint paint) {
-        float f = this.radius;
-        float f2 = this.idleStateDiff;
-        float f3 = this.radiusDiff;
-        float r1 = (f - (f2 / 2.0f)) - (f3 / 2.0f);
-        float r2 = f + (f3 / 2.0f) + (f2 / 2.0f);
-        float l = this.L * Math.max(r1, r2) * this.cubicBezierK;
+    public void draw(float f, float f2, Canvas canvas, Paint paint) {
+        float f3 = this.radius;
+        float f4 = this.idleStateDiff;
+        float f5 = this.radiusDiff;
+        float f6 = (f3 - (f4 / 2.0f)) - (f5 / 2.0f);
+        float f7 = f3 + (f5 / 2.0f) + (f4 / 2.0f);
+        float max = this.L * Math.max(f6, f7) * this.cubicBezierK;
         this.path.reset();
-        for (int i = 0; i < this.N; i++) {
+        int i = 0;
+        while (i < this.N) {
             this.m.reset();
-            this.m.setRotate((360.0f / this.N) * i, cX, cY);
-            float f4 = i % 2 == 0 ? r1 : r2;
-            float f5 = this.randomK;
+            this.m.setRotate((360.0f / this.N) * i, f, f2);
+            float f8 = i % 2 == 0 ? f6 : f7;
+            float f9 = this.randomK;
             float[] fArr = this.randomAdditionals;
-            float r = f4 + (fArr[i] * f5);
+            float f10 = f8 + (fArr[i] * f9);
             float[] fArr2 = this.pointStart;
-            fArr2[0] = cX;
-            fArr2[1] = cY - r;
-            fArr2[2] = cX + l + (f5 * fArr[i] * this.L);
-            fArr2[3] = cY - r;
+            fArr2[0] = f;
+            float f11 = f2 - f10;
+            fArr2[1] = f11;
+            fArr2[2] = f + max + (f9 * fArr[i] * this.L);
+            fArr2[3] = f11;
             this.m.mapPoints(fArr2);
-            int j = i + 1;
-            if (j >= this.N) {
-                j = 0;
-            }
-            float f6 = j % 2 == 0 ? r1 : r2;
-            float f7 = this.randomK;
+            int i2 = i + 1;
+            int i3 = i2 >= this.N ? 0 : i2;
+            float f12 = i3 % 2 == 0 ? f6 : f7;
+            float f13 = this.randomK;
             float[] fArr3 = this.randomAdditionals;
-            float r3 = f6 + (fArr3[j] * f7);
             float[] fArr4 = this.pointEnd;
-            fArr4[0] = cX;
-            fArr4[1] = cY - r3;
-            fArr4[2] = (cX - l) + (f7 * fArr3[j] * this.L);
-            fArr4[3] = cY - r3;
+            fArr4[0] = f;
+            float f14 = f2 - (f12 + (fArr3[i3] * f13));
+            fArr4[1] = f14;
+            fArr4[2] = (f - max) + (f13 * fArr3[i3] * this.L);
+            fArr4[3] = f14;
             this.m.reset();
-            this.m.setRotate((360.0f / this.N) * j, cX, cY);
+            this.m.setRotate((360.0f / this.N) * i3, f, f2);
             this.m.mapPoints(this.pointEnd);
             if (i == 0) {
                 Path path = this.path;
@@ -89,18 +89,15 @@ public class CircleBezierDrawable {
             }
             Path path2 = this.path;
             float[] fArr6 = this.pointStart;
-            float f8 = fArr6[2];
-            float f9 = fArr6[3];
+            float f15 = fArr6[2];
+            float f16 = fArr6[3];
             float[] fArr7 = this.pointEnd;
-            path2.cubicTo(f8, f9, fArr7[2], fArr7[3], fArr7[0], fArr7[1]);
+            path2.cubicTo(f15, f16, fArr7[2], fArr7[3], fArr7[0], fArr7[1]);
+            i = i2;
         }
         canvas.save();
-        canvas.rotate(this.globalRotate, cX, cY);
+        canvas.rotate(this.globalRotate, f, f2);
         canvas.drawPath(this.path, paint);
         canvas.restore();
-    }
-
-    public void setRandomAdditions(float randomK) {
-        this.randomK = randomK;
     }
 }

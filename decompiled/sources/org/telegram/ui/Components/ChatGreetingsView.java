@@ -13,31 +13,34 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.messenger.beta.R;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Document;
+import org.telegram.tgnet.TLRPC$DocumentAttribute;
+import org.telegram.tgnet.TLRPC$TL_documentAttributeImageSize;
+import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class ChatGreetingsView extends LinearLayout {
     private final int currentAccount;
     private TextView descriptionView;
     boolean ignoreLayot;
     private Listener listener;
-    private TLRPC.Document preloadedGreetingsSticker;
+    private TLRPC$Document preloadedGreetingsSticker;
     private final Theme.ResourcesProvider resourcesProvider;
     public BackupImageView stickerToSendView;
     private TextView titleView;
     boolean wasDraw;
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface Listener {
-        void onGreetings(TLRPC.Document document);
+        void onGreetings(TLRPC$Document tLRPC$Document);
     }
 
-    public ChatGreetingsView(Context context, TLRPC.User user, int distance, int currentAccount, TLRPC.Document sticker, Theme.ResourcesProvider resourcesProvider) {
+    public ChatGreetingsView(Context context, TLRPC$User tLRPC$User, int i, int i2, TLRPC$Document tLRPC$Document, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         setOrientation(1);
-        this.currentAccount = currentAccount;
+        this.currentAccount = i2;
         this.resourcesProvider = resourcesProvider;
         TextView textView = new TextView(context);
         this.titleView = textView;
@@ -53,95 +56,97 @@ public class ChatGreetingsView extends LinearLayout {
         addView(this.descriptionView, LayoutHelper.createLinear(-1, -2, 20.0f, 12.0f, 20.0f, 0.0f));
         addView(this.stickerToSendView, LayoutHelper.createLinear(112, 112, 1, 0, 16, 0, 16));
         updateColors();
-        if (distance <= 0) {
+        if (i <= 0) {
             this.titleView.setText(LocaleController.getString("NoMessages", R.string.NoMessages));
             this.descriptionView.setText(LocaleController.getString("NoMessagesGreetingsDescription", R.string.NoMessagesGreetingsDescription));
         } else {
-            this.titleView.setText(LocaleController.formatString("NearbyPeopleGreetingsMessage", R.string.NearbyPeopleGreetingsMessage, user.first_name, LocaleController.formatDistance(distance, 1)));
+            this.titleView.setText(LocaleController.formatString("NearbyPeopleGreetingsMessage", R.string.NearbyPeopleGreetingsMessage, tLRPC$User.first_name, LocaleController.formatDistance(i, 1)));
             this.descriptionView.setText(LocaleController.getString("NearbyPeopleGreetingsDescription", R.string.NearbyPeopleGreetingsDescription));
         }
         this.stickerToSendView.setContentDescription(this.descriptionView.getText());
-        this.preloadedGreetingsSticker = sticker;
-        if (sticker == null) {
-            this.preloadedGreetingsSticker = MediaDataController.getInstance(currentAccount).getGreetingsSticker();
+        this.preloadedGreetingsSticker = tLRPC$Document;
+        if (tLRPC$Document == null) {
+            this.preloadedGreetingsSticker = MediaDataController.getInstance(i2).getGreetingsSticker();
         }
     }
 
-    private void setSticker(final TLRPC.Document sticker) {
-        if (sticker == null) {
+    private void setSticker(final TLRPC$Document tLRPC$Document) {
+        if (tLRPC$Document == null) {
             return;
         }
-        SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(sticker, Theme.key_chat_serviceBackground, 1.0f);
+        SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(tLRPC$Document, "chat_serviceBackground", 1.0f);
         if (svgThumb != null) {
-            this.stickerToSendView.setImage(ImageLocation.getForDocument(sticker), createFilter(sticker), svgThumb, 0, sticker);
+            this.stickerToSendView.setImage(ImageLocation.getForDocument(tLRPC$Document), createFilter(tLRPC$Document), svgThumb, 0, tLRPC$Document);
         } else {
-            TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(sticker.thumbs, 90);
-            this.stickerToSendView.setImage(ImageLocation.getForDocument(sticker), createFilter(sticker), ImageLocation.getForDocument(thumb, sticker), (String) null, 0, sticker);
+            this.stickerToSendView.setImage(ImageLocation.getForDocument(tLRPC$Document), createFilter(tLRPC$Document), ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(tLRPC$Document.thumbs, 90), tLRPC$Document), (String) null, 0, tLRPC$Document);
         }
         this.stickerToSendView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.ChatGreetingsView$$ExternalSyntheticLambda0
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                ChatGreetingsView.this.m2515lambda$setSticker$0$orgtelegramuiComponentsChatGreetingsView(sticker, view);
+                ChatGreetingsView.this.lambda$setSticker$0(tLRPC$Document, view);
             }
         });
     }
 
-    /* renamed from: lambda$setSticker$0$org-telegram-ui-Components-ChatGreetingsView */
-    public /* synthetic */ void m2515lambda$setSticker$0$orgtelegramuiComponentsChatGreetingsView(TLRPC.Document sticker, View v) {
+    public /* synthetic */ void lambda$setSticker$0(TLRPC$Document tLRPC$Document, View view) {
         Listener listener = this.listener;
         if (listener != null) {
-            listener.onGreetings(sticker);
+            listener.onGreetings(tLRPC$Document);
         }
     }
 
-    public static String createFilter(TLRPC.Document document) {
-        float maxWidth;
-        float maxHeight;
-        int photoWidth = 0;
-        int photoHeight = 0;
+    public static String createFilter(TLRPC$Document tLRPC$Document) {
+        float f;
+        float f2;
+        int i;
+        int i2;
         if (AndroidUtilities.isTablet()) {
-            maxHeight = AndroidUtilities.getMinTabletSide() * 0.4f;
-            maxWidth = maxHeight;
+            f2 = AndroidUtilities.getMinTabletSide();
+            f = 0.4f;
         } else {
-            maxHeight = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) * 0.5f;
-            maxWidth = maxHeight;
+            android.graphics.Point point = AndroidUtilities.displaySize;
+            f2 = Math.min(point.x, point.y);
+            f = 0.5f;
         }
-        int a = 0;
+        float f3 = f2 * f;
+        int i3 = 0;
         while (true) {
-            if (a >= document.attributes.size()) {
+            if (i3 >= tLRPC$Document.attributes.size()) {
+                i = 0;
+                i2 = 0;
                 break;
             }
-            TLRPC.DocumentAttribute attribute = document.attributes.get(a);
-            if (!(attribute instanceof TLRPC.TL_documentAttributeImageSize)) {
-                a++;
-            } else {
-                photoWidth = attribute.w;
-                photoHeight = attribute.h;
+            TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i3);
+            if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeImageSize) {
+                i = tLRPC$DocumentAttribute.w;
+                i2 = tLRPC$DocumentAttribute.h;
                 break;
             }
+            i3++;
         }
-        if (MessageObject.isAnimatedStickerDocument(document, true) && photoWidth == 0 && photoHeight == 0) {
-            photoHeight = 512;
-            photoWidth = 512;
+        if (MessageObject.isAnimatedStickerDocument(tLRPC$Document, true) && i == 0 && i2 == 0) {
+            i = 512;
+            i2 = 512;
         }
-        if (photoWidth == 0) {
-            photoHeight = (int) maxHeight;
-            photoWidth = photoHeight + AndroidUtilities.dp(100.0f);
+        if (i == 0) {
+            i2 = (int) f3;
+            i = i2 + AndroidUtilities.dp(100.0f);
         }
-        int photoHeight2 = (int) (photoHeight * (maxWidth / photoWidth));
-        int photoWidth2 = (int) maxWidth;
-        if (photoHeight2 > maxHeight) {
-            photoWidth2 = (int) (photoWidth2 * (maxHeight / photoHeight2));
-            photoHeight2 = (int) maxHeight;
+        int i4 = (int) (i2 * (f3 / i));
+        int i5 = (int) f3;
+        float f4 = i4;
+        if (f4 > f3) {
+            i5 = (int) (i5 * (f3 / f4));
+            i4 = i5;
         }
-        int w = (int) (photoWidth2 / AndroidUtilities.density);
-        int h = (int) (photoHeight2 / AndroidUtilities.density);
-        return String.format(Locale.US, "%d_%d", Integer.valueOf(w), Integer.valueOf(h));
+        float f5 = i5;
+        float f6 = AndroidUtilities.density;
+        return String.format(Locale.US, "%d_%d", Integer.valueOf((int) (f5 / f6)), Integer.valueOf((int) (i4 / f6)));
     }
 
     private void updateColors() {
-        this.titleView.setTextColor(getThemedColor(Theme.key_chat_serviceText));
-        this.descriptionView.setTextColor(getThemedColor(Theme.key_chat_serviceText));
+        this.titleView.setTextColor(getThemedColor("chat_serviceText"));
+        this.descriptionView.setTextColor(getThemedColor("chat_serviceText"));
     }
 
     public void setListener(Listener listener) {
@@ -149,12 +154,12 @@ public class ChatGreetingsView extends LinearLayout {
     }
 
     @Override // android.widget.LinearLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(int i, int i2) {
         this.ignoreLayot = true;
         this.descriptionView.setVisibility(0);
         this.stickerToSendView.setVisibility(0);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (getMeasuredHeight() > View.MeasureSpec.getSize(heightMeasureSpec)) {
+        super.onMeasure(i, i2);
+        if (getMeasuredHeight() > View.MeasureSpec.getSize(i2)) {
             this.descriptionView.setVisibility(8);
             this.stickerToSendView.setVisibility(8);
         } else {
@@ -162,7 +167,7 @@ public class ChatGreetingsView extends LinearLayout {
             this.stickerToSendView.setVisibility(0);
         }
         this.ignoreLayot = false;
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        super.onMeasure(i, i2);
     }
 
     @Override // android.view.ViewGroup, android.view.View
@@ -195,17 +200,18 @@ public class ChatGreetingsView extends LinearLayout {
 
     private void fetchSticker() {
         if (this.preloadedGreetingsSticker == null) {
-            TLRPC.Document greetingsSticker = MediaDataController.getInstance(this.currentAccount).getGreetingsSticker();
+            TLRPC$Document greetingsSticker = MediaDataController.getInstance(this.currentAccount).getGreetingsSticker();
             this.preloadedGreetingsSticker = greetingsSticker;
-            if (this.wasDraw) {
-                setSticker(greetingsSticker);
+            if (!this.wasDraw) {
+                return;
             }
+            setSticker(greetingsSticker);
         }
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

@@ -8,14 +8,13 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.view.View;
-import androidx.core.app.NotificationCompat;
+import androidx.annotation.Keep;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class GroupCreateCheckBox extends View {
-    private static Paint eraser = null;
-    private static Paint eraser2 = null;
-    private static final float progressBounceDiff = 0.2f;
+    private static Paint eraser;
+    private static Paint eraser2;
     private boolean attachedToWindow;
     private Paint backgroundInnerPaint;
     private Paint backgroundPaint;
@@ -28,9 +27,9 @@ public class GroupCreateCheckBox extends View {
     private float progress;
     private boolean isCheckAnimation = true;
     private float checkScale = 1.0f;
-    private String backgroundKey = Theme.key_checkboxCheck;
-    private String checkKey = Theme.key_checkboxCheck;
-    private String innerKey = Theme.key_checkbox;
+    private String backgroundKey = "checkboxCheck";
+    private String checkKey = "checkboxCheck";
+    private String innerKey = "checkbox";
 
     public GroupCreateCheckBox(Context context) {
         super(context);
@@ -58,10 +57,10 @@ public class GroupCreateCheckBox extends View {
         updateColors();
     }
 
-    public void setColorKeysOverrides(String check, String inner, String back) {
-        this.checkKey = check;
-        this.innerKey = inner;
-        this.backgroundKey = back;
+    public void setColorKeysOverrides(String str, String str2, String str3) {
+        this.checkKey = str;
+        this.innerKey = str2;
+        this.backgroundKey = str3;
         updateColors();
     }
 
@@ -72,20 +71,22 @@ public class GroupCreateCheckBox extends View {
         invalidate();
     }
 
-    public void setProgress(float value) {
-        if (this.progress == value) {
+    @Keep
+    public void setProgress(float f) {
+        if (this.progress == f) {
             return;
         }
-        this.progress = value;
+        this.progress = f;
         invalidate();
     }
 
+    @Keep
     public float getProgress() {
         return this.progress;
     }
 
-    public void setCheckScale(float value) {
-        this.checkScale = value;
+    public void setCheckScale(float f) {
+        this.checkScale = f;
     }
 
     private void cancelCheckAnimator() {
@@ -95,11 +96,11 @@ public class GroupCreateCheckBox extends View {
         }
     }
 
-    private void animateToCheckedState(boolean newCheckedState) {
-        this.isCheckAnimation = newCheckedState;
+    private void animateToCheckedState(boolean z) {
+        this.isCheckAnimation = z;
         float[] fArr = new float[1];
-        fArr[0] = newCheckedState ? 1.0f : 0.0f;
-        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, NotificationCompat.CATEGORY_PROGRESS, fArr);
+        fArr[0] = z ? 1.0f : 0.0f;
+        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this, "progress", fArr);
         this.checkAnimator = ofFloat;
         ofFloat.setDuration(300L);
         this.checkAnimator.start();
@@ -118,63 +119,62 @@ public class GroupCreateCheckBox extends View {
         this.attachedToWindow = false;
     }
 
-    public void setChecked(boolean checked, boolean animated) {
-        if (checked == this.isChecked) {
+    public void setChecked(boolean z, boolean z2) {
+        if (z == this.isChecked) {
             return;
         }
-        this.isChecked = checked;
-        if (this.attachedToWindow && animated) {
-            animateToCheckedState(checked);
+        this.isChecked = z;
+        if (this.attachedToWindow && z2) {
+            animateToCheckedState(z);
             return;
         }
         cancelCheckAnimator();
-        setProgress(checked ? 1.0f : 0.0f);
+        setProgress(z ? 1.0f : 0.0f);
     }
 
-    public boolean isChecked() {
-        return this.isChecked;
-    }
-
-    public void setInnerRadDiff(int value) {
-        this.innerRadDiff = value;
+    public void setInnerRadDiff(int i) {
+        this.innerRadDiff = i;
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        float radDiff;
+        float f;
         if (getVisibility() == 0 && this.progress != 0.0f) {
-            int cx = getMeasuredWidth() / 2;
-            int cy = getMeasuredHeight() / 2;
+            int measuredWidth = getMeasuredWidth() / 2;
+            int measuredHeight = getMeasuredHeight() / 2;
             eraser2.setStrokeWidth(AndroidUtilities.dp(30.0f));
             this.drawBitmap.eraseColor(0);
-            float f = this.progress;
-            float roundProgress = f >= 0.5f ? 1.0f : f / 0.5f;
-            float checkProgress = f < 0.5f ? 0.0f : (f - 0.5f) / 0.5f;
+            float f2 = this.progress;
+            float f3 = f2 >= 0.5f ? 1.0f : f2 / 0.5f;
+            float f4 = f2 < 0.5f ? 0.0f : (f2 - 0.5f) / 0.5f;
             if (!this.isCheckAnimation) {
-                f = 1.0f - f;
+                f2 = 1.0f - f2;
             }
-            float roundProgressCheckState = f;
-            if (roundProgressCheckState < 0.2f) {
-                radDiff = (AndroidUtilities.dp(2.0f) * roundProgressCheckState) / 0.2f;
+            if (f2 < 0.2f) {
+                f = (AndroidUtilities.dp(2.0f) * f2) / 0.2f;
             } else {
-                radDiff = roundProgressCheckState < 0.4f ? AndroidUtilities.dp(2.0f) - ((AndroidUtilities.dp(2.0f) * (roundProgressCheckState - 0.2f)) / 0.2f) : 0.0f;
+                f = f2 < 0.4f ? AndroidUtilities.dp(2.0f) - ((AndroidUtilities.dp(2.0f) * (f2 - 0.2f)) / 0.2f) : 0.0f;
             }
-            if (checkProgress != 0.0f) {
-                canvas.drawCircle(cx, cy, ((cx - AndroidUtilities.dp(2.0f)) + (AndroidUtilities.dp(2.0f) * checkProgress)) - radDiff, this.backgroundPaint);
+            if (f4 != 0.0f) {
+                canvas.drawCircle(measuredWidth, measuredHeight, ((measuredWidth - AndroidUtilities.dp(2.0f)) + (AndroidUtilities.dp(2.0f) * f4)) - f, this.backgroundPaint);
             }
-            float innerRad = (cx - this.innerRadDiff) - radDiff;
-            this.bitmapCanvas.drawCircle(cx, cy, innerRad, this.backgroundInnerPaint);
-            this.bitmapCanvas.drawCircle(cx, cy, (1.0f - roundProgress) * innerRad, eraser);
+            float f5 = (measuredWidth - this.innerRadDiff) - f;
+            float f6 = measuredWidth;
+            float f7 = measuredHeight;
+            this.bitmapCanvas.drawCircle(f6, f7, f5, this.backgroundInnerPaint);
+            this.bitmapCanvas.drawCircle(f6, f7, f5 * (1.0f - f3), eraser);
             canvas.drawBitmap(this.drawBitmap, 0.0f, 0.0f, (Paint) null);
-            float checkSide = AndroidUtilities.dp(10.0f) * checkProgress * this.checkScale;
-            float smallCheckSide = AndroidUtilities.dp(5.0f) * checkProgress * this.checkScale;
-            int x = cx - AndroidUtilities.dp(1.0f);
-            int y = cy + AndroidUtilities.dp(4.0f);
-            float side = (float) Math.sqrt((smallCheckSide * smallCheckSide) / 2.0f);
-            canvas.drawLine(x, y, x - side, y - side, this.checkPaint);
-            float side2 = (float) Math.sqrt((checkSide * checkSide) / 2.0f);
-            int x2 = x - AndroidUtilities.dp(1.2f);
-            canvas.drawLine(x2, y, x2 + side2, y - side2, this.checkPaint);
+            float dp = AndroidUtilities.dp(10.0f) * f4 * this.checkScale;
+            float dp2 = AndroidUtilities.dp(5.0f) * f4 * this.checkScale;
+            int dp3 = measuredWidth - AndroidUtilities.dp(1.0f);
+            int dp4 = measuredHeight + AndroidUtilities.dp(4.0f);
+            float sqrt = (float) Math.sqrt((dp2 * dp2) / 2.0f);
+            float f8 = dp3;
+            float f9 = dp4;
+            canvas.drawLine(f8, f9, f8 - sqrt, f9 - sqrt, this.checkPaint);
+            float sqrt2 = (float) Math.sqrt((dp * dp) / 2.0f);
+            float dp5 = dp3 - AndroidUtilities.dp(1.2f);
+            canvas.drawLine(dp5, f9, dp5 + sqrt2, f9 - sqrt2, this.checkPaint);
         }
     }
 }

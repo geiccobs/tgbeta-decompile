@@ -1,18 +1,18 @@
 package com.google.android.gms.common.util.concurrent;
 
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Preconditions;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class NumberedThreadFactory implements ThreadFactory {
     private final String zza;
-    private final int zzb;
     private final AtomicInteger zzc;
     private final ThreadFactory zzd;
 
-    public NumberedThreadFactory(String str) {
+    public NumberedThreadFactory(@RecentlyNonNull String str) {
         this(str, 0);
     }
 
@@ -20,11 +20,11 @@ public class NumberedThreadFactory implements ThreadFactory {
         this.zzc = new AtomicInteger();
         this.zzd = Executors.defaultThreadFactory();
         this.zza = (String) Preconditions.checkNotNull(str, "Name must not be null");
-        this.zzb = 0;
     }
 
     @Override // java.util.concurrent.ThreadFactory
-    public Thread newThread(Runnable runnable) {
+    @RecentlyNonNull
+    public Thread newThread(@RecentlyNonNull Runnable runnable) {
         Thread newThread = this.zzd.newThread(new zza(runnable, 0));
         String str = this.zza;
         int andIncrement = this.zzc.getAndIncrement();

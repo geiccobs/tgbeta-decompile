@@ -6,11 +6,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.api.internal.BaseImplementation;
 import com.google.android.gms.common.internal.Preconditions;
 import java.util.Set;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaaa implements zaaw {
     private final zaaz zaa;
     private boolean zab = false;
@@ -24,12 +23,20 @@ public final class zaaa implements zaaw {
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
-    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation.ApiMethodImpl<R, A>> T zaa(T t) {
+    public final void zaa(Bundle bundle) {
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zaaw
+    public final void zaa(ConnectionResult connectionResult, Api<?> api, boolean z) {
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zaaw
+    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation$ApiMethodImpl<R, A>> T zaa(T t) {
         return (T) zab(t);
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
-    public final <A extends Api.AnyClient, T extends BaseImplementation.ApiMethodImpl<? extends Result, A>> T zab(T t) {
+    public final <A extends Api.AnyClient, T extends BaseImplementation$ApiMethodImpl<? extends Result, A>> T zab(T t) {
         try {
             this.zaa.zad.zae.zaa(t);
             zaar zaarVar = this.zaa.zad;
@@ -40,7 +47,7 @@ public final class zaaa implements zaaw {
             } else {
                 t.run(client);
             }
-        } catch (DeadObjectException e) {
+        } catch (DeadObjectException unused) {
             this.zaa.zaa(new zaad(this, this));
         }
         return t;
@@ -69,14 +76,6 @@ public final class zaaa implements zaaw {
             this.zab = false;
             this.zaa.zaa(new zaac(this, this));
         }
-    }
-
-    @Override // com.google.android.gms.common.api.internal.zaaw
-    public final void zaa(Bundle bundle) {
-    }
-
-    @Override // com.google.android.gms.common.api.internal.zaaw
-    public final void zaa(ConnectionResult connectionResult, Api<?> api, boolean z) {
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw

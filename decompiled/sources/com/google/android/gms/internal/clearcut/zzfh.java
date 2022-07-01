@@ -1,7 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.nio.ByteBuffer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzfh extends zzfg {
     @Override // com.google.android.gms.internal.clearcut.zzfg
     final int zzb(int i, byte[] bArr, int i2, int i3) {
@@ -80,6 +80,6 @@ final class zzfh extends zzfg {
 
     @Override // com.google.android.gms.internal.clearcut.zzfg
     public final void zzb(CharSequence charSequence, ByteBuffer byteBuffer) {
-        zzc(charSequence, byteBuffer);
+        zzfg.zzc(charSequence, byteBuffer);
     }
 }

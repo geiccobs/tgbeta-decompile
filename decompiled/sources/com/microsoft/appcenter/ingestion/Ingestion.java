@@ -5,7 +5,7 @@ import com.microsoft.appcenter.http.ServiceCallback;
 import com.microsoft.appcenter.ingestion.models.LogContainer;
 import java.io.Closeable;
 import java.util.UUID;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface Ingestion extends Closeable {
     void reopen();
 

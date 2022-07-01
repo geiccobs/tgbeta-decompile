@@ -19,11 +19,10 @@ import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.KeyboardHideHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class KeyboardHideHelper {
     public static boolean ENABLED = false;
     private int bottomNavBarSize;
-    private View enterView;
     private float fromY;
     private WindowInsetsAnimationController insetsController;
     private int keyboardSize;
@@ -36,39 +35,36 @@ public class KeyboardHideHelper {
     private View view;
     private boolean isKeyboard = false;
     private boolean movingKeyboard = false;
-    private boolean exactlyMovingKeyboard = false;
     private boolean endingMovingKeyboard = false;
     private boolean startedOutsideView = false;
     private boolean startedAtBottom = false;
 
-    public boolean onTouch(AdjustPanLayoutHelper panLayoutHelper, View view, RecyclerListView listView, ChatActivityEnterView enterView, ChatActivity ca, MotionEvent ev) {
-        boolean z;
+    public boolean onTouch(AdjustPanLayoutHelper adjustPanLayoutHelper, View view, RecyclerListView recyclerListView, ChatActivityEnterView chatActivityEnterView, ChatActivity chatActivity, MotionEvent motionEvent) {
         int i;
         if (!ENABLED) {
             return false;
         }
-        this.panLayoutHelper = panLayoutHelper;
+        this.panLayoutHelper = adjustPanLayoutHelper;
         this.view = view;
-        this.enterView = enterView;
-        if (view != null && enterView != null && Build.VERSION.SDK_INT >= 30) {
-            boolean isKeyboardVisible = view.getRootWindowInsets().getInsets(WindowInsetsCompat.Type.ime()).bottom > 0;
-            if (!this.movingKeyboard && !isKeyboardVisible && !this.endingMovingKeyboard) {
+        if (view != null && chatActivityEnterView != null && Build.VERSION.SDK_INT >= 30) {
+            boolean z = view.getRootWindowInsets().getInsets(WindowInsetsCompat.Type.ime()).bottom > 0;
+            if (!this.movingKeyboard && !z && !this.endingMovingKeyboard) {
                 return false;
             }
-            boolean insideEnterView = ev.getY() >= ((float) enterView.getTop());
-            if (ev.getAction() == 0) {
-                this.startedOutsideView = !insideEnterView;
-                this.startedAtBottom = !listView.canScrollVertically(1);
+            boolean z2 = motionEvent.getY() >= ((float) chatActivityEnterView.getTop());
+            if (motionEvent.getAction() == 0) {
+                this.startedOutsideView = !z2;
+                this.startedAtBottom = !recyclerListView.canScrollVertically(1);
             }
             float f = 0.0f;
-            if (!this.movingKeyboard && insideEnterView && this.startedOutsideView && ev.getAction() == 2) {
+            if (!this.movingKeyboard && z2 && this.startedOutsideView && motionEvent.getAction() == 2) {
                 this.movingKeyboard = true;
-                boolean z2 = !enterView.isPopupShowing();
-                this.isKeyboard = z2;
-                if (z2) {
+                boolean z3 = !chatActivityEnterView.isPopupShowing();
+                this.isKeyboard = z3;
+                if (z3) {
                     i = view.getRootWindowInsets().getInsets(WindowInsetsCompat.Type.ime()).bottom;
                 } else {
-                    i = enterView.getEmojiPadding();
+                    i = chatActivityEnterView.getEmojiPadding();
                 }
                 this.keyboardSize = i;
                 this.bottomNavBarSize = view.getRootWindowInsets().getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
@@ -88,80 +84,72 @@ public class KeyboardHideHelper {
                         KeyboardHideHelper.this.insetsController = null;
                     }
                 });
-                this.fromY = ev.getRawY();
-                this.exactlyMovingKeyboard = false;
-                panLayoutHelper.setEnabled(false);
+                this.fromY = motionEvent.getRawY();
+                adjustPanLayoutHelper.setEnabled(false);
                 update(0.0f, false);
-                listView.stopScroll();
+                recyclerListView.stopScroll();
                 this.lastDifferentT = 0.0f;
                 this.lastT = 0.0f;
                 this.rawT = 0.0f;
                 this.t = 0.0f;
-                panLayoutHelper.OnTransitionStart(true, view.getHeight());
+                adjustPanLayoutHelper.OnTransitionStart(true, view.getHeight());
                 if (this.tracker == null) {
                     this.tracker = VelocityTracker.obtain();
                 }
                 this.tracker.clear();
             }
-            if (!this.movingKeyboard) {
-                return false;
-            }
-            this.tracker.addMovement(ev);
-            float rawY = (ev.getRawY() - this.fromY) / this.keyboardSize;
-            this.rawT = rawY;
-            this.t = MathUtils.clamp(rawY, 0.0f, 1.0f);
-            if (ev.getAction() != 1 && ev.getAction() != 3) {
-                update(this.t, true);
-                float f2 = this.lastT;
-                float f3 = this.t;
-                if (f2 != f3) {
-                    this.lastDifferentT = f2;
+            if (this.movingKeyboard) {
+                this.tracker.addMovement(motionEvent);
+                float rawY = (motionEvent.getRawY() - this.fromY) / this.keyboardSize;
+                this.rawT = rawY;
+                this.t = MathUtils.clamp(rawY, 0.0f, 1.0f);
+                if (motionEvent.getAction() == 1 || motionEvent.getAction() == 3) {
+                    this.movingKeyboard = false;
+                    this.endingMovingKeyboard = true;
+                    this.tracker.computeCurrentVelocity(1000);
+                    float f2 = this.t;
+                    boolean z4 = (f2 > 0.15f && f2 >= this.lastDifferentT) || f2 > 0.8f;
+                    if (z4) {
+                        f = 1.0f;
+                    }
+                    ValueAnimator ofFloat = ValueAnimator.ofFloat(f2, f);
+                    ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.KeyboardHideHelper$$ExternalSyntheticLambda0
+                        @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                        public final void onAnimationUpdate(ValueAnimator valueAnimator) {
+                            KeyboardHideHelper.this.lambda$onTouch$0(valueAnimator);
+                        }
+                    });
+                    ofFloat.addListener(new AnonymousClass2(z4, f, adjustPanLayoutHelper, view));
+                    ofFloat.setInterpolator(CubicBezierInterpolator.EASE_OUT);
+                    ofFloat.setDuration(200L);
+                    ofFloat.start();
+                    if (z4 && this.startedAtBottom && chatActivity != null) {
+                        chatActivity.scrollToLastMessage(true);
+                    }
+                    this.startedOutsideView = false;
+                    return true;
                 }
-                this.lastT = f3;
+                update(this.t, true);
+                float f3 = this.lastT;
+                float f4 = this.t;
+                if (f3 != f4) {
+                    this.lastDifferentT = f3;
+                }
+                this.lastT = f4;
                 return true;
             }
-            this.movingKeyboard = false;
-            this.exactlyMovingKeyboard = false;
-            this.endingMovingKeyboard = true;
-            this.tracker.computeCurrentVelocity(1000);
-            float f4 = this.t;
-            boolean end = (f4 > 0.15f && f4 >= this.lastDifferentT) || f4 > 0.8f;
-            if (end) {
-                f = 1.0f;
-            }
-            float endT = f;
-            ValueAnimator va = ValueAnimator.ofFloat(f4, endT);
-            va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.KeyboardHideHelper$$ExternalSyntheticLambda0
-                @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    KeyboardHideHelper.this.m3579lambda$onTouch$0$orgtelegramuiKeyboardHideHelper(valueAnimator);
-                }
-            });
-            va.addListener(new AnonymousClass2(end, endT, panLayoutHelper, view));
-            va.setInterpolator(CubicBezierInterpolator.EASE_OUT);
-            va.setDuration(200L);
-            va.start();
-            if (!end || !this.startedAtBottom || ca == null) {
-                z = true;
-            } else {
-                z = true;
-                ca.scrollToLastMessage(true);
-            }
-            this.startedOutsideView = false;
-            return z;
         }
         return false;
     }
 
-    /* renamed from: lambda$onTouch$0$org-telegram-ui-KeyboardHideHelper */
-    public /* synthetic */ void m3579lambda$onTouch$0$orgtelegramuiKeyboardHideHelper(ValueAnimator a) {
-        float floatValue = ((Float) a.getAnimatedValue()).floatValue();
+    public /* synthetic */ void lambda$onTouch$0(ValueAnimator valueAnimator) {
+        float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         this.t = floatValue;
         update(floatValue, true);
     }
 
     /* renamed from: org.telegram.ui.KeyboardHideHelper$2 */
-    /* loaded from: classes4.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass2 extends AnimatorListenerAdapter {
         final /* synthetic */ boolean val$end;
         final /* synthetic */ float val$endT;
@@ -169,7 +157,7 @@ public class KeyboardHideHelper {
         final /* synthetic */ View val$view;
 
         AnonymousClass2(boolean z, float f, AdjustPanLayoutHelper adjustPanLayoutHelper, View view) {
-            KeyboardHideHelper.this = this$0;
+            KeyboardHideHelper.this = r1;
             this.val$end = z;
             this.val$endT = f;
             this.val$panLayoutHelper = adjustPanLayoutHelper;
@@ -177,7 +165,7 @@ public class KeyboardHideHelper {
         }
 
         @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-        public void onAnimationEnd(Animator animation) {
+        public void onAnimationEnd(Animator animator) {
             if (KeyboardHideHelper.this.insetsController != null && KeyboardHideHelper.this.isKeyboard) {
                 KeyboardHideHelper.this.insetsController.finish(!this.val$end);
             }
@@ -189,14 +177,13 @@ public class KeyboardHideHelper {
             view.post(new Runnable() { // from class: org.telegram.ui.KeyboardHideHelper$2$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    KeyboardHideHelper.AnonymousClass2.this.m3580lambda$onAnimationEnd$0$orgtelegramuiKeyboardHideHelper$2(adjustPanLayoutHelper);
+                    KeyboardHideHelper.AnonymousClass2.this.lambda$onAnimationEnd$0(adjustPanLayoutHelper);
                 }
             });
         }
 
-        /* renamed from: lambda$onAnimationEnd$0$org-telegram-ui-KeyboardHideHelper$2 */
-        public /* synthetic */ void m3580lambda$onAnimationEnd$0$orgtelegramuiKeyboardHideHelper$2(AdjustPanLayoutHelper panLayoutHelper) {
-            panLayoutHelper.setEnabled(true);
+        public /* synthetic */ void lambda$onAnimationEnd$0(AdjustPanLayoutHelper adjustPanLayoutHelper) {
+            adjustPanLayoutHelper.setEnabled(true);
             KeyboardHideHelper.this.endingMovingKeyboard = false;
         }
     }
@@ -205,17 +192,19 @@ public class KeyboardHideHelper {
         return ENABLED && (this.movingKeyboard || this.endingMovingKeyboard) && this.rawT >= 0.0f;
     }
 
-    public void update(float t, boolean withKeyboard) {
+    public void update(float f, boolean z) {
+        WindowInsetsAnimationController windowInsetsAnimationController;
         if (this.isKeyboard) {
-            float y = Math.max((((1.0f - t) * this.keyboardSize) - this.bottomNavBarSize) - 1.0f, 0.0f);
-            this.panLayoutHelper.OnPanTranslationUpdate(y, t, true);
-            ((View) ((View) this.view.getParent()).getParent()).setTranslationY(-y);
-            if (withKeyboard && this.insetsController != null && Build.VERSION.SDK_INT >= 30) {
-                this.insetsController.setInsetsAndAlpha(Insets.of(0, 0, 0, (int) (this.keyboardSize * (1.0f - t))), 1.0f, t);
+            float f2 = 1.0f - f;
+            float max = Math.max(((this.keyboardSize * f2) - this.bottomNavBarSize) - 1.0f, 0.0f);
+            this.panLayoutHelper.OnPanTranslationUpdate(max, f, true);
+            ((View) ((View) this.view.getParent()).getParent()).setTranslationY(-max);
+            if (!z || (windowInsetsAnimationController = this.insetsController) == null || Build.VERSION.SDK_INT < 30) {
                 return;
             }
+            windowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, (int) (this.keyboardSize * f2)), 1.0f, f);
             return;
         }
-        this.panLayoutHelper.OnPanTranslationUpdate((1.0f - t) * this.keyboardSize, t, true);
+        this.panLayoutHelper.OnPanTranslationUpdate((1.0f - f) * this.keyboardSize, f, true);
     }
 }

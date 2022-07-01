@@ -1,95 +1,63 @@
 package com.google.android.exoplayer2.util;
 
-import android.os.Looper;
 import android.text.TextUtils;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Assertions {
-    private Assertions() {
-    }
-
-    public static void checkArgument(boolean expression) {
-        if (!expression) {
-            throw new IllegalArgumentException();
+    public static void checkArgument(boolean z) {
+        if (z) {
+            return;
         }
+        throw new IllegalArgumentException();
     }
 
-    public static void checkArgument(boolean expression, Object errorMessage) {
-        if (!expression) {
-            throw new IllegalArgumentException(String.valueOf(errorMessage));
+    public static void checkArgument(boolean z, Object obj) {
+        if (z) {
+            return;
         }
+        throw new IllegalArgumentException(String.valueOf(obj));
     }
 
-    public static int checkIndex(int index, int start, int limit) {
-        if (index < start || index >= limit) {
+    public static int checkIndex(int i, int i2, int i3) {
+        if (i < i2 || i >= i3) {
             throw new IndexOutOfBoundsException();
         }
-        return index;
+        return i;
     }
 
-    public static void checkState(boolean expression) {
-        if (!expression) {
-            throw new IllegalStateException();
+    public static void checkState(boolean z) {
+        if (z) {
+            return;
         }
+        throw new IllegalStateException();
     }
 
-    public static void checkState(boolean expression, Object errorMessage) {
-        if (!expression) {
-            throw new IllegalStateException(String.valueOf(errorMessage));
+    public static void checkState(boolean z, Object obj) {
+        if (z) {
+            return;
         }
-    }
-
-    @EnsuresNonNull({"#1"})
-    public static <T> T checkStateNotNull(T reference) {
-        if (reference == null) {
-            throw new IllegalStateException();
-        }
-        return reference;
+        throw new IllegalStateException(String.valueOf(obj));
     }
 
     @EnsuresNonNull({"#1"})
-    public static <T> T checkStateNotNull(T reference, Object errorMessage) {
-        if (reference == null) {
-            throw new IllegalStateException(String.valueOf(errorMessage));
+    public static <T> T checkStateNotNull(T t) {
+        if (t != null) {
+            return t;
         }
-        return reference;
+        throw new IllegalStateException();
     }
 
     @EnsuresNonNull({"#1"})
-    public static <T> T checkNotNull(T reference) {
-        if (reference == null) {
-            throw new NullPointerException();
-        }
-        return reference;
+    public static <T> T checkNotNull(T t) {
+        t.getClass();
+        return t;
     }
 
     @EnsuresNonNull({"#1"})
-    public static <T> T checkNotNull(T reference, Object errorMessage) {
-        if (reference == null) {
-            throw new NullPointerException(String.valueOf(errorMessage));
+    public static String checkNotEmpty(String str) {
+        if (!TextUtils.isEmpty(str)) {
+            return str;
         }
-        return reference;
-    }
-
-    @EnsuresNonNull({"#1"})
-    public static String checkNotEmpty(String string) {
-        if (TextUtils.isEmpty(string)) {
-            throw new IllegalArgumentException();
-        }
-        return string;
-    }
-
-    @EnsuresNonNull({"#1"})
-    public static String checkNotEmpty(String string, Object errorMessage) {
-        if (TextUtils.isEmpty(string)) {
-            throw new IllegalArgumentException(String.valueOf(errorMessage));
-        }
-        return string;
-    }
-
-    public static void checkMainThread() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new IllegalStateException("Not in applications main thread");
-        }
+        throw new IllegalArgumentException();
     }
 }

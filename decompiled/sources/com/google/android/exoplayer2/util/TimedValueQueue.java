@@ -1,9 +1,8 @@
 package com.google.android.exoplayer2.util;
 
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class TimedValueQueue<V> {
-    private static final int INITIAL_BUFFER_SIZE = 10;
     private int first;
     private int size;
     private long[] timestamps;
@@ -13,15 +12,15 @@ public final class TimedValueQueue<V> {
         this(10);
     }
 
-    public TimedValueQueue(int initialBufferSize) {
-        this.timestamps = new long[initialBufferSize];
-        this.values = (V[]) newArray(initialBufferSize);
+    public TimedValueQueue(int i) {
+        this.timestamps = new long[i];
+        this.values = (V[]) newArray(i);
     }
 
-    public synchronized void add(long timestamp, V value) {
-        clearBufferOnTimeDiscontinuity(timestamp);
+    public synchronized void add(long j, V v) {
+        clearBufferOnTimeDiscontinuity(j);
         doubleCapacityIfFull();
-        addUnchecked(timestamp, value);
+        addUnchecked(j, v);
     }
 
     public synchronized void clear() {
@@ -30,21 +29,13 @@ public final class TimedValueQueue<V> {
         Arrays.fill(this.values, (Object) null);
     }
 
-    public synchronized int size() {
-        return this.size;
+    public synchronized V pollFloor(long j) {
+        return poll(j, true);
     }
 
-    public synchronized V pollFloor(long timestamp) {
-        return poll(timestamp, true);
-    }
-
-    public synchronized V poll(long timestamp) {
-        return poll(timestamp, false);
-    }
-
-    private V poll(long timestamp, boolean onlyOlder) {
-        V value = null;
-        long previousTimeDiff = Long.MAX_VALUE;
+    private V poll(long j, boolean z) {
+        long j2 = Long.MAX_VALUE;
+        V v = null;
         while (true) {
             int i = this.size;
             if (i <= 0) {
@@ -52,63 +43,63 @@ public final class TimedValueQueue<V> {
             }
             long[] jArr = this.timestamps;
             int i2 = this.first;
-            long timeDiff = timestamp - jArr[i2];
-            if (timeDiff < 0 && (onlyOlder || (-timeDiff) >= previousTimeDiff)) {
+            long j3 = j - jArr[i2];
+            if (j3 < 0 && (z || (-j3) >= j2)) {
                 break;
             }
-            previousTimeDiff = timeDiff;
             V[] vArr = this.values;
-            value = vArr[i2];
+            v = vArr[i2];
             vArr[i2] = null;
             this.first = (i2 + 1) % vArr.length;
             this.size = i - 1;
+            j2 = j3;
         }
-        return value;
+        return v;
     }
 
-    private void clearBufferOnTimeDiscontinuity(long timestamp) {
+    private void clearBufferOnTimeDiscontinuity(long j) {
         int i = this.size;
         if (i > 0) {
-            int last = ((this.first + i) - 1) % this.values.length;
-            if (timestamp <= this.timestamps[last]) {
-                clear();
+            if (j > this.timestamps[((this.first + i) - 1) % this.values.length]) {
+                return;
             }
+            clear();
         }
     }
 
     private void doubleCapacityIfFull() {
-        int capacity = this.values.length;
-        if (this.size < capacity) {
+        int length = this.values.length;
+        if (this.size < length) {
             return;
         }
-        int newCapacity = capacity * 2;
-        long[] newTimestamps = new long[newCapacity];
-        V[] newValues = (V[]) newArray(newCapacity);
-        int i = this.first;
-        int length = capacity - i;
-        System.arraycopy(this.timestamps, i, newTimestamps, 0, length);
-        System.arraycopy(this.values, this.first, newValues, 0, length);
+        int i = length * 2;
+        long[] jArr = new long[i];
+        V[] vArr = (V[]) newArray(i);
         int i2 = this.first;
-        if (i2 > 0) {
-            System.arraycopy(this.timestamps, 0, newTimestamps, length, i2);
-            System.arraycopy(this.values, 0, newValues, length, this.first);
+        int i3 = length - i2;
+        System.arraycopy(this.timestamps, i2, jArr, 0, i3);
+        System.arraycopy(this.values, this.first, vArr, 0, i3);
+        int i4 = this.first;
+        if (i4 > 0) {
+            System.arraycopy(this.timestamps, 0, jArr, i3, i4);
+            System.arraycopy(this.values, 0, vArr, i3, this.first);
         }
-        this.timestamps = newTimestamps;
-        this.values = newValues;
+        this.timestamps = jArr;
+        this.values = vArr;
         this.first = 0;
     }
 
-    private void addUnchecked(long timestamp, V value) {
+    private void addUnchecked(long j, V v) {
         int i = this.first;
         int i2 = this.size;
         V[] vArr = this.values;
-        int next = (i + i2) % vArr.length;
-        this.timestamps[next] = timestamp;
-        vArr[next] = value;
+        int length = (i + i2) % vArr.length;
+        this.timestamps[length] = j;
+        vArr[length] = v;
         this.size = i2 + 1;
     }
 
-    private static <V> V[] newArray(int length) {
-        return (V[]) new Object[length];
+    private static <V> V[] newArray(int i) {
+        return (V[]) new Object[i];
     }
 }

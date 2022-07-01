@@ -6,17 +6,14 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ManagedErrorLog extends AbstractErrorLog {
-    private static final String EXCEPTION = "exception";
-    private static final String THREADS = "threads";
-    public static final String TYPE = "managedError";
     private Exception exception;
     private List<Thread> threads;
 
     @Override // com.microsoft.appcenter.ingestion.models.Log
     public String getType() {
-        return TYPE;
+        return "managedError";
     }
 
     public Exception getException() {
@@ -31,62 +28,61 @@ public class ManagedErrorLog extends AbstractErrorLog {
         return this.threads;
     }
 
-    public void setThreads(List<Thread> threads) {
-        this.threads = threads;
+    public void setThreads(List<Thread> list) {
+        this.threads = list;
     }
 
     @Override // com.microsoft.appcenter.crashes.ingestion.models.AbstractErrorLog, com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) throws JSONException {
-        super.read(object);
-        if (object.has(EXCEPTION)) {
-            JSONObject jException = object.getJSONObject(EXCEPTION);
+    public void read(JSONObject jSONObject) throws JSONException {
+        super.read(jSONObject);
+        if (jSONObject.has("exception")) {
+            JSONObject jSONObject2 = jSONObject.getJSONObject("exception");
             Exception exception = new Exception();
-            exception.read(jException);
+            exception.read(jSONObject2);
             setException(exception);
         }
-        setThreads(JSONUtils.readArray(object, THREADS, ThreadFactory.getInstance()));
+        setThreads(JSONUtils.readArray(jSONObject, "threads", ThreadFactory.getInstance()));
     }
 
     @Override // com.microsoft.appcenter.crashes.ingestion.models.AbstractErrorLog, com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        super.write(writer);
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        super.write(jSONStringer);
         if (getException() != null) {
-            writer.key(EXCEPTION).object();
-            this.exception.write(writer);
-            writer.endObject();
+            jSONStringer.key("exception").object();
+            this.exception.write(jSONStringer);
+            jSONStringer.endObject();
         }
-        JSONUtils.writeArray(writer, THREADS, getThreads());
+        JSONUtils.writeArray(jSONStringer, "threads", getThreads());
     }
 
     @Override // com.microsoft.appcenter.crashes.ingestion.models.AbstractErrorLog, com.microsoft.appcenter.ingestion.models.AbstractLog
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
+        if (obj == null || ManagedErrorLog.class != obj.getClass() || !super.equals(obj)) {
             return false;
         }
-        ManagedErrorLog that = (ManagedErrorLog) o;
+        ManagedErrorLog managedErrorLog = (ManagedErrorLog) obj;
         Exception exception = this.exception;
-        if (exception == null ? that.exception != null : !exception.equals(that.exception)) {
+        if (exception == null ? managedErrorLog.exception != null : !exception.equals(managedErrorLog.exception)) {
             return false;
         }
         List<Thread> list = this.threads;
-        return list != null ? list.equals(that.threads) : that.threads == null;
+        List<Thread> list2 = managedErrorLog.threads;
+        return list != null ? list.equals(list2) : list2 == null;
     }
 
     @Override // com.microsoft.appcenter.crashes.ingestion.models.AbstractErrorLog, com.microsoft.appcenter.ingestion.models.AbstractLog
     public int hashCode() {
-        int result = super.hashCode();
-        int i = result * 31;
+        int hashCode = super.hashCode() * 31;
         Exception exception = this.exception;
-        int i2 = 0;
-        int result2 = i + (exception != null ? exception.hashCode() : 0);
-        int result3 = result2 * 31;
+        int i = 0;
+        int hashCode2 = (hashCode + (exception != null ? exception.hashCode() : 0)) * 31;
         List<Thread> list = this.threads;
         if (list != null) {
-            i2 = list.hashCode();
+            i = list.hashCode();
         }
-        return result3 + i2;
+        return hashCode2 + i;
     }
 }

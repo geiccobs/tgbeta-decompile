@@ -3,9 +3,11 @@ package com.google.android.gms.internal.clearcut;
 import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzc {
-    private static final ClassLoader zzd = zzc.class.getClassLoader();
+    static {
+        zzc.class.getClassLoader();
+    }
 
     private zzc() {
     }

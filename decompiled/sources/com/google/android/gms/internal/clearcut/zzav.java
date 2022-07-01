@@ -4,15 +4,9 @@ import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
 import java.util.RandomAccess;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 abstract class zzav<E> extends AbstractList<E> implements zzcn<E> {
     private boolean zzfa = true;
-
-    @Override // java.util.AbstractList, java.util.List
-    public void add(int i, E e) {
-        zzw();
-        super.add(i, e);
-    }
 
     @Override // java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List
     public boolean add(E e) {
@@ -72,12 +66,6 @@ abstract class zzav<E> extends AbstractList<E> implements zzcn<E> {
         return i;
     }
 
-    @Override // java.util.AbstractList, java.util.List
-    public E remove(int i) {
-        zzw();
-        return (E) super.remove(i);
-    }
-
     @Override // java.util.AbstractCollection, java.util.Collection, java.util.List
     public boolean remove(Object obj) {
         zzw();
@@ -94,12 +82,6 @@ abstract class zzav<E> extends AbstractList<E> implements zzcn<E> {
     public boolean retainAll(Collection<?> collection) {
         zzw();
         return super.retainAll(collection);
-    }
-
-    @Override // java.util.AbstractList, java.util.List
-    public E set(int i, E e) {
-        zzw();
-        return (E) super.set(i, e);
     }
 
     @Override // com.google.android.gms.internal.clearcut.zzcn

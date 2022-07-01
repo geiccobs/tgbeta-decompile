@@ -1,10 +1,10 @@
 package com.google.android.exoplayer2.upstream;
 
 import android.os.Handler;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface BandwidthMeter {
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface EventListener {
         void onBandwidthSample(int i, long j, long j2);
     }

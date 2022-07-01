@@ -2,7 +2,7 @@ package com.microsoft.appcenter.http;
 
 import android.text.TextUtils;
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class HttpException extends IOException {
     private final HttpResponse mHttpResponse;
 
@@ -11,26 +11,25 @@ public class HttpException extends IOException {
         this.mHttpResponse = httpResponse;
     }
 
-    private static String getDetailMessage(int status, String payload) {
-        if (TextUtils.isEmpty(payload)) {
-            return String.valueOf(status);
+    private static String getDetailMessage(int i, String str) {
+        if (TextUtils.isEmpty(str)) {
+            return String.valueOf(i);
         }
-        return status + " - " + payload;
+        return i + " - " + str;
     }
 
     public HttpResponse getHttpResponse() {
         return this.mHttpResponse;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
+        if (obj != null && HttpException.class == obj.getClass()) {
+            return this.mHttpResponse.equals(((HttpException) obj).mHttpResponse);
         }
-        HttpException that = (HttpException) o;
-        return this.mHttpResponse.equals(that.mHttpResponse);
+        return false;
     }
 
     public int hashCode() {

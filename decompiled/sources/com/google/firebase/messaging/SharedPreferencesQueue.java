@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.concurrent.Executor;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class SharedPreferencesQueue {
     private final SharedPreferences sharedPreferences;
     private final Executor syncExecutor;
@@ -43,7 +43,7 @@ public final class SharedPreferencesQueue {
             if (!TextUtils.isEmpty(string) && string.contains(this.itemSeparator)) {
                 String[] split = string.split(this.itemSeparator, -1);
                 if (split.length == 0) {
-                    Log.e(Constants.TAG, "Corrupted queue. Please check the queue contents and item separator provided");
+                    Log.e("FirebaseMessaging", "Corrupted queue. Please check the queue contents and item separator provided");
                 }
                 for (String str : split) {
                     if (!TextUtils.isEmpty(str)) {
@@ -75,18 +75,6 @@ public final class SharedPreferencesQueue {
                 this.arg$1.bridge$lambda$0$SharedPreferencesQueue();
             }
         });
-    }
-
-    public boolean add(String str) {
-        boolean add;
-        if (TextUtils.isEmpty(str) || str.contains(this.itemSeparator)) {
-            return false;
-        }
-        synchronized (this.internalQueue) {
-            add = this.internalQueue.add(str);
-            checkAndSyncState(add);
-        }
-        return add;
     }
 
     public String peek() {

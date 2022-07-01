@@ -2,7 +2,7 @@ package com.google.android.gms.internal.vision;
 
 import java.io.IOException;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzhl {
     public static int zza(byte[] bArr, int i, zzhn zzhnVar) {
         int i2 = i + 1;
@@ -46,12 +46,11 @@ public final class zzhl {
         int i11 = i9 | ((b4 & Byte.MAX_VALUE) << 28);
         while (true) {
             int i12 = i10 + 1;
-            if (bArr[i10] < 0) {
-                i10 = i12;
-            } else {
+            if (bArr[i10] >= 0) {
                 zzhnVar.zza = i11;
                 return i12;
             }
+            i10 = i12;
         }
     }
 
@@ -97,29 +96,29 @@ public final class zzhl {
     public static int zzc(byte[] bArr, int i, zzhn zzhnVar) throws zzjk {
         int zza = zza(bArr, i, zzhnVar);
         int i2 = zzhnVar.zza;
-        if (i2 < 0) {
-            throw zzjk.zzb();
+        if (i2 >= 0) {
+            if (i2 == 0) {
+                zzhnVar.zzc = "";
+                return zza;
+            }
+            zzhnVar.zzc = new String(bArr, zza, i2, zzjf.zza);
+            return zza + i2;
         }
-        if (i2 == 0) {
-            zzhnVar.zzc = "";
-            return zza;
-        }
-        zzhnVar.zzc = new String(bArr, zza, i2, zzjf.zza);
-        return zza + i2;
+        throw zzjk.zzb();
     }
 
     public static int zzd(byte[] bArr, int i, zzhn zzhnVar) throws zzjk {
         int zza = zza(bArr, i, zzhnVar);
         int i2 = zzhnVar.zza;
-        if (i2 < 0) {
-            throw zzjk.zzb();
+        if (i2 >= 0) {
+            if (i2 == 0) {
+                zzhnVar.zzc = "";
+                return zza;
+            }
+            zzhnVar.zzc = zzmd.zzb(bArr, zza, i2);
+            return zza + i2;
         }
-        if (i2 == 0) {
-            zzhnVar.zzc = "";
-            return zza;
-        }
-        zzhnVar.zzc = zzmd.zzb(bArr, zza, i2);
-        return zza + i2;
+        throw zzjk.zzb();
     }
 
     public static int zze(byte[] bArr, int i, zzhn zzhnVar) throws zzjk {
@@ -140,24 +139,21 @@ public final class zzhl {
     }
 
     public static int zza(zzlc zzlcVar, byte[] bArr, int i, int i2, zzhn zzhnVar) throws IOException {
-        int i3;
-        int i4 = i + 1;
-        int i5 = bArr[i];
-        if (i5 >= 0) {
-            i3 = i4;
-        } else {
-            int zza = zza(i5, bArr, i4, zzhnVar);
-            i5 = zzhnVar.zza;
-            i3 = zza;
+        int i3 = i + 1;
+        int i4 = bArr[i];
+        if (i4 < 0) {
+            i3 = zza(i4, bArr, i3, zzhnVar);
+            i4 = zzhnVar.zza;
         }
-        if (i5 < 0 || i5 > i2 - i3) {
+        int i5 = i3;
+        if (i4 < 0 || i4 > i2 - i5) {
             throw zzjk.zza();
         }
-        Object zza2 = zzlcVar.zza();
-        int i6 = i5 + i3;
-        zzlcVar.zza(zza2, bArr, i3, i6, zzhnVar);
-        zzlcVar.zzc(zza2);
-        zzhnVar.zzc = zza2;
+        Object zza = zzlcVar.zza();
+        int i6 = i4 + i5;
+        zzlcVar.zza(zza, bArr, i5, i6, zzhnVar);
+        zzlcVar.zzc(zza);
+        zzhnVar.zzc = zza;
         return i6;
     }
 
@@ -193,10 +189,10 @@ public final class zzhl {
             zza = zza(bArr, zza, zzhnVar);
             zzjdVar.zzc(zzhnVar.zza);
         }
-        if (zza != i2) {
-            throw zzjk.zza();
+        if (zza == i2) {
+            return zza;
         }
-        return zza;
+        throw zzjk.zza();
     }
 
     public static int zza(zzlc<?> zzlcVar, int i, byte[] bArr, int i2, int i3, zzjl<?> zzjlVar, zzhn zzhnVar) throws IOException {
@@ -214,96 +210,98 @@ public final class zzhl {
     }
 
     public static int zza(int i, byte[] bArr, int i2, int i3, zzlx zzlxVar, zzhn zzhnVar) throws zzjk {
-        if ((i >>> 3) == 0) {
-            throw zzjk.zzd();
-        }
-        switch (i & 7) {
-            case 0:
+        if ((i >>> 3) != 0) {
+            int i4 = i & 7;
+            if (i4 == 0) {
                 int zzb = zzb(bArr, i2, zzhnVar);
                 zzlxVar.zza(i, Long.valueOf(zzhnVar.zzb));
                 return zzb;
-            case 1:
+            } else if (i4 == 1) {
                 zzlxVar.zza(i, Long.valueOf(zzb(bArr, i2)));
                 return i2 + 8;
-            case 2:
+            } else if (i4 == 2) {
                 int zza = zza(bArr, i2, zzhnVar);
-                int i4 = zzhnVar.zza;
-                if (i4 < 0) {
+                int i5 = zzhnVar.zza;
+                if (i5 < 0) {
                     throw zzjk.zzb();
                 }
-                if (i4 > bArr.length - zza) {
+                if (i5 > bArr.length - zza) {
                     throw zzjk.zza();
                 }
-                if (i4 == 0) {
+                if (i5 == 0) {
                     zzlxVar.zza(i, zzht.zza);
                 } else {
-                    zzlxVar.zza(i, zzht.zza(bArr, zza, i4));
+                    zzlxVar.zza(i, zzht.zza(bArr, zza, i5));
                 }
-                return zza + i4;
-            case 3:
+                return zza + i5;
+            } else if (i4 != 3) {
+                if (i4 == 5) {
+                    zzlxVar.zza(i, Integer.valueOf(zza(bArr, i2)));
+                    return i2 + 4;
+                }
+                throw zzjk.zzd();
+            } else {
                 zzlx zzb2 = zzlx.zzb();
-                int i5 = (i & (-8)) | 4;
-                int i6 = 0;
+                int i6 = (i & (-8)) | 4;
+                int i7 = 0;
                 while (true) {
-                    if (i2 < i3) {
-                        int zza2 = zza(bArr, i2, zzhnVar);
-                        int i7 = zzhnVar.zza;
-                        if (i7 == i5) {
-                            i6 = i7;
-                            i2 = zza2;
-                        } else {
-                            i6 = i7;
-                            i2 = zza(i7, bArr, zza2, i3, zzb2, zzhnVar);
-                        }
+                    if (i2 >= i3) {
+                        break;
                     }
+                    int zza2 = zza(bArr, i2, zzhnVar);
+                    int i8 = zzhnVar.zza;
+                    i7 = i8;
+                    if (i8 == i6) {
+                        i2 = zza2;
+                        break;
+                    }
+                    int zza3 = zza(i7, bArr, zza2, i3, zzb2, zzhnVar);
+                    i7 = i8;
+                    i2 = zza3;
                 }
-                if (i2 > i3 || i6 != i5) {
+                if (i2 > i3 || i7 != i6) {
                     throw zzjk.zzg();
                 }
                 zzlxVar.zza(i, zzb2);
                 return i2;
-            case 4:
-            default:
-                throw zzjk.zzd();
-            case 5:
-                zzlxVar.zza(i, Integer.valueOf(zza(bArr, i2)));
-                return i2 + 4;
+            }
         }
+        throw zzjk.zzd();
     }
 
     public static int zza(int i, byte[] bArr, int i2, int i3, zzhn zzhnVar) throws zzjk {
-        if ((i >>> 3) == 0) {
-            throw zzjk.zzd();
-        }
-        switch (i & 7) {
-            case 0:
+        if ((i >>> 3) != 0) {
+            int i4 = i & 7;
+            if (i4 == 0) {
                 return zzb(bArr, i2, zzhnVar);
-            case 1:
+            }
+            if (i4 == 1) {
                 return i2 + 8;
-            case 2:
+            }
+            if (i4 == 2) {
                 return zza(bArr, i2, zzhnVar) + zzhnVar.zza;
-            case 3:
-                int i4 = (i & (-8)) | 4;
-                int i5 = 0;
-                while (i2 < i3) {
-                    i2 = zza(bArr, i2, zzhnVar);
-                    i5 = zzhnVar.zza;
-                    if (i5 != i4) {
-                        i2 = zza(i5, bArr, i2, i3, zzhnVar);
-                    } else if (i2 <= i3 || i5 != i4) {
-                        throw zzjk.zzg();
-                    } else {
-                        return i2;
-                    }
+            }
+            if (i4 != 3) {
+                if (i4 != 5) {
+                    throw zzjk.zzd();
                 }
-                if (i2 <= i3) {
-                }
-                throw zzjk.zzg();
-            case 4:
-            default:
-                throw zzjk.zzd();
-            case 5:
                 return i2 + 4;
+            }
+            int i5 = (i & (-8)) | 4;
+            int i6 = 0;
+            while (i2 < i3) {
+                i2 = zza(bArr, i2, zzhnVar);
+                i6 = zzhnVar.zza;
+                if (i6 == i5) {
+                    break;
+                }
+                i2 = zza(i6, bArr, i2, i3, zzhnVar);
+            }
+            if (i2 <= i3 && i6 == i5) {
+                return i2;
+            }
+            throw zzjk.zzg();
         }
+        throw zzjk.zzd();
     }
 }

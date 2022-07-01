@@ -1,9 +1,10 @@
 package com.google.android.gms.maps;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.internal.zzs;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
-public final class zzv extends com.google.android.gms.maps.internal.zzs {
+/* loaded from: classes.dex */
+public final class zzv extends zzs {
     final /* synthetic */ GoogleMap.OnCameraMoveListener zza;
 
     public zzv(GoogleMap googleMap, GoogleMap.OnCameraMoveListener onCameraMoveListener) {

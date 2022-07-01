@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import android.content.DialogInterface;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class SearchViewPager$$ExternalSyntheticLambda1 implements DialogInterface.OnClickListener {
     public static final /* synthetic */ SearchViewPager$$ExternalSyntheticLambda1 INSTANCE = new SearchViewPager$$ExternalSyntheticLambda1();
 

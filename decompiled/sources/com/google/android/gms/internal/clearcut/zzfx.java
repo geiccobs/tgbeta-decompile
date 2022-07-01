@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzfx implements Cloneable {
     private Object value;
     private zzfv<?, ?> zzrp;
@@ -22,7 +22,6 @@ final class zzfx implements Cloneable {
         Object clone;
         zzfx zzfxVar = new zzfx();
         try {
-            zzfxVar.zzrp = this.zzrp;
             List<Object> list = this.zzrq;
             if (list == null) {
                 zzfxVar.zzrq = null;
@@ -82,26 +81,21 @@ final class zzfx implements Cloneable {
             return false;
         }
         zzfx zzfxVar = (zzfx) obj;
-        if (this.value == null || zzfxVar.value == null) {
-            List<Object> list2 = this.zzrq;
-            if (list2 != null && (list = zzfxVar.zzrq) != null) {
-                return list2.equals(list);
+        if (this.value != null && zzfxVar.value != null) {
+            if (this.zzrp == zzfxVar.zzrp) {
+                throw null;
             }
-            try {
-                return Arrays.equals(toByteArray(), zzfxVar.toByteArray());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-        zzfv<?, ?> zzfvVar = this.zzrp;
-        if (zzfvVar != zzfxVar.zzrp) {
             return false;
         }
-        if (!zzfvVar.zzrk.isArray()) {
-            return this.value.equals(zzfxVar.value);
+        List<Object> list2 = this.zzrq;
+        if (list2 != null && (list = zzfxVar.zzrq) != null) {
+            return list2.equals(list);
         }
-        Object obj2 = this.value;
-        return obj2 instanceof byte[] ? Arrays.equals((byte[]) obj2, (byte[]) zzfxVar.value) : obj2 instanceof int[] ? Arrays.equals((int[]) obj2, (int[]) zzfxVar.value) : obj2 instanceof long[] ? Arrays.equals((long[]) obj2, (long[]) zzfxVar.value) : obj2 instanceof float[] ? Arrays.equals((float[]) obj2, (float[]) zzfxVar.value) : obj2 instanceof double[] ? Arrays.equals((double[]) obj2, (double[]) zzfxVar.value) : obj2 instanceof boolean[] ? Arrays.equals((boolean[]) obj2, (boolean[]) zzfxVar.value) : Arrays.deepEquals((Object[]) obj2, (Object[]) zzfxVar.value);
+        try {
+            return Arrays.equals(toByteArray(), zzfxVar.toByteArray());
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public final int hashCode() {

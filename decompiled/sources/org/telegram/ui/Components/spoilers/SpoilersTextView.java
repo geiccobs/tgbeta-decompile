@@ -8,7 +8,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.text.Layout;
 import android.text.Spanned;
 import android.view.MotionEvent;
 import android.widget.TextView;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Stack;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.spoilers.SpoilersClickDetector;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class SpoilersTextView extends TextView {
     private boolean isSpoilersRevealed;
     private Paint xRefPaint;
@@ -27,7 +26,7 @@ public class SpoilersTextView extends TextView {
     private SpoilersClickDetector clickDetector = new SpoilersClickDetector(this, this.spoilers, new SpoilersClickDetector.OnSpoilerClickedListener() { // from class: org.telegram.ui.Components.spoilers.SpoilersTextView$$ExternalSyntheticLambda2
         @Override // org.telegram.ui.Components.spoilers.SpoilersClickDetector.OnSpoilerClickedListener
         public final void onSpoilerClicked(SpoilerEffect spoilerEffect, float f, float f2) {
-            SpoilersTextView.this.m3226x69fa7571(spoilerEffect, f, f2);
+            SpoilersTextView.this.lambda$new$2(spoilerEffect, f, f2);
         }
     });
 
@@ -35,74 +34,71 @@ public class SpoilersTextView extends TextView {
         super(context);
     }
 
-    /* renamed from: lambda$new$2$org-telegram-ui-Components-spoilers-SpoilersTextView */
-    public /* synthetic */ void m3226x69fa7571(SpoilerEffect eff, float x, float y) {
+    public /* synthetic */ void lambda$new$2(SpoilerEffect spoilerEffect, float f, float f2) {
         if (this.isSpoilersRevealed) {
             return;
         }
-        eff.setOnRippleEndCallback(new Runnable() { // from class: org.telegram.ui.Components.spoilers.SpoilersTextView$$ExternalSyntheticLambda1
+        spoilerEffect.setOnRippleEndCallback(new Runnable() { // from class: org.telegram.ui.Components.spoilers.SpoilersTextView$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                SpoilersTextView.this.m3225x4fdef6d2();
+                SpoilersTextView.this.lambda$new$1();
             }
         });
-        float rad = (float) Math.sqrt(Math.pow(getWidth(), 2.0d) + Math.pow(getHeight(), 2.0d));
-        for (SpoilerEffect ef : this.spoilers) {
-            ef.startRipple(x, y, rad);
+        float sqrt = (float) Math.sqrt(Math.pow(getWidth(), 2.0d) + Math.pow(getHeight(), 2.0d));
+        for (SpoilerEffect spoilerEffect2 : this.spoilers) {
+            spoilerEffect2.startRipple(f, f2, sqrt);
         }
     }
 
-    /* renamed from: lambda$new$1$org-telegram-ui-Components-spoilers-SpoilersTextView */
-    public /* synthetic */ void m3225x4fdef6d2() {
-        post(new Runnable() { // from class: org.telegram.ui.Components.spoilers.SpoilersTextView$$ExternalSyntheticLambda0
+    public /* synthetic */ void lambda$new$1() {
+        post(new Runnable() { // from class: org.telegram.ui.Components.spoilers.SpoilersTextView$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                SpoilersTextView.this.m3224x35c37833();
+                SpoilersTextView.this.lambda$new$0();
             }
         });
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Components-spoilers-SpoilersTextView */
-    public /* synthetic */ void m3224x35c37833() {
+    public /* synthetic */ void lambda$new$0() {
         this.isSpoilersRevealed = true;
         invalidateSpoilers();
     }
 
     @Override // android.view.View
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        if (this.clickDetector.onTouchEvent(event)) {
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        if (this.clickDetector.onTouchEvent(motionEvent)) {
             return true;
         }
-        return super.dispatchTouchEvent(event);
+        return super.dispatchTouchEvent(motionEvent);
     }
 
     @Override // android.widget.TextView
-    public void setText(CharSequence text, TextView.BufferType type) {
+    public void setText(CharSequence charSequence, TextView.BufferType bufferType) {
         this.isSpoilersRevealed = false;
-        super.setText(text, type);
+        super.setText(charSequence, bufferType);
     }
 
     @Override // android.widget.TextView
-    protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-        super.onTextChanged(text, start, lengthBefore, lengthAfter);
+    protected void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        super.onTextChanged(charSequence, i, i2, i3);
         invalidateSpoilers();
     }
 
     @Override // android.view.View
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onSizeChanged(int i, int i2, int i3, int i4) {
+        super.onSizeChanged(i, i2, i3, i4);
         invalidateSpoilers();
     }
 
     @Override // android.widget.TextView, android.view.View
     public void onDraw(Canvas canvas) {
-        int pl = getPaddingLeft();
-        int pt = getPaddingTop();
+        int paddingLeft = getPaddingLeft();
+        int paddingTop = getPaddingTop();
         canvas.save();
         this.path.rewind();
-        for (SpoilerEffect eff : this.spoilers) {
-            Rect bounds = eff.getBounds();
-            this.path.addRect(bounds.left + pl, bounds.top + pt, bounds.right + pl, bounds.bottom + pt, Path.Direction.CW);
+        for (SpoilerEffect spoilerEffect : this.spoilers) {
+            Rect bounds = spoilerEffect.getBounds();
+            this.path.addRect(bounds.left + paddingLeft, bounds.top + paddingTop, bounds.right + paddingLeft, bounds.bottom + paddingTop, Path.Direction.CW);
         }
         canvas.clipPath(this.path, Region.Op.DIFFERENCE);
         super.onDraw(canvas);
@@ -117,18 +113,18 @@ public class SpoilersTextView extends TextView {
         super.onDraw(canvas);
         canvas.restore();
         if (!this.spoilers.isEmpty()) {
-            boolean useAlphaLayer = this.spoilers.get(0).getRippleProgress() != -1.0f;
-            if (useAlphaLayer) {
+            boolean z = this.spoilers.get(0).getRippleProgress() != -1.0f;
+            if (z) {
                 canvas.saveLayer(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight(), null, 31);
             } else {
                 canvas.save();
             }
             canvas.translate(getPaddingLeft(), getPaddingTop() + AndroidUtilities.dp(2.0f));
-            for (SpoilerEffect eff2 : this.spoilers) {
-                eff2.setColor(getPaint().getColor());
-                eff2.draw(canvas);
+            for (SpoilerEffect spoilerEffect2 : this.spoilers) {
+                spoilerEffect2.setColor(getPaint().getColor());
+                spoilerEffect2.draw(canvas);
             }
-            if (useAlphaLayer) {
+            if (z) {
                 this.path.rewind();
                 this.spoilers.get(0).getRipplePath(this.path);
                 if (this.xRefPaint == null) {
@@ -154,8 +150,7 @@ public class SpoilersTextView extends TextView {
             invalidate();
             return;
         }
-        Layout layout = getLayout();
-        if (layout != null && (getText() instanceof Spanned)) {
+        if (getLayout() != null && (getText() instanceof Spanned)) {
             SpoilerEffect.addSpoilers(this, this.spoilersPool, this.spoilers);
         }
         invalidate();

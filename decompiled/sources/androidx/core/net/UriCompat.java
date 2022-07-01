@@ -1,52 +1,48 @@
 package androidx.core.net;
 
 import android.net.Uri;
-import com.microsoft.appcenter.Constants;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class UriCompat {
-    private UriCompat() {
-    }
-
     public static String toSafeString(Uri uri) {
         String scheme = uri.getScheme();
-        String ssp = uri.getSchemeSpecificPart();
+        String schemeSpecificPart = uri.getSchemeSpecificPart();
         if (scheme != null) {
             if (scheme.equalsIgnoreCase("tel") || scheme.equalsIgnoreCase("sip") || scheme.equalsIgnoreCase("sms") || scheme.equalsIgnoreCase("smsto") || scheme.equalsIgnoreCase("mailto") || scheme.equalsIgnoreCase("nfc")) {
-                StringBuilder builder = new StringBuilder(64);
-                builder.append(scheme);
-                builder.append(':');
-                if (ssp != null) {
-                    for (int i = 0; i < ssp.length(); i++) {
-                        char c = ssp.charAt(i);
-                        if (c == '-' || c == '@' || c == '.') {
-                            builder.append(c);
+                StringBuilder sb = new StringBuilder(64);
+                sb.append(scheme);
+                sb.append(':');
+                if (schemeSpecificPart != null) {
+                    for (int i = 0; i < schemeSpecificPart.length(); i++) {
+                        char charAt = schemeSpecificPart.charAt(i);
+                        if (charAt == '-' || charAt == '@' || charAt == '.') {
+                            sb.append(charAt);
                         } else {
-                            builder.append('x');
+                            sb.append('x');
                         }
                     }
                 }
-                return builder.toString();
+                return sb.toString();
             } else if (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https") || scheme.equalsIgnoreCase("ftp") || scheme.equalsIgnoreCase("rtsp")) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("//");
+                StringBuilder sb2 = new StringBuilder();
+                sb2.append("//");
                 String str = "";
-                sb.append(uri.getHost() != null ? uri.getHost() : str);
+                sb2.append(uri.getHost() != null ? uri.getHost() : str);
                 if (uri.getPort() != -1) {
-                    str = Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + uri.getPort();
+                    str = ":" + uri.getPort();
                 }
-                sb.append(str);
-                sb.append("/...");
-                ssp = sb.toString();
+                sb2.append(str);
+                sb2.append("/...");
+                schemeSpecificPart = sb2.toString();
             }
         }
-        StringBuilder builder2 = new StringBuilder(64);
+        StringBuilder sb3 = new StringBuilder(64);
         if (scheme != null) {
-            builder2.append(scheme);
-            builder2.append(':');
+            sb3.append(scheme);
+            sb3.append(':');
         }
-        if (ssp != null) {
-            builder2.append(ssp);
+        if (schemeSpecificPart != null) {
+            sb3.append(schemeSpecificPart);
         }
-        return builder2.toString();
+        return sb3.toString();
     }
 }

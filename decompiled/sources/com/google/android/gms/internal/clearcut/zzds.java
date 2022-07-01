@@ -1,17 +1,15 @@
 package com.google.android.gms.internal.clearcut;
 
-import androidx.core.text.HtmlCompat;
 import com.google.android.gms.internal.clearcut.zzcg;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.googlecode.mp4parser.authoring.tracks.h265.NalUnitTypes;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.telegram.messenger.R;
 import org.telegram.messenger.voip.VoIPService;
-import org.telegram.ui.Components.UndoView;
+import org.telegram.tgnet.ConnectionsManager;
 import sun.misc.Unsafe;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzds<T> implements zzef<T> {
     private static final Unsafe zzmh = zzfd.zzef();
     private final int[] zzmi;
@@ -21,7 +19,6 @@ final class zzds<T> implements zzef<T> {
     private final int zzmm;
     private final zzdo zzmn;
     private final boolean zzmo;
-    private final boolean zzmp;
     private final boolean zzmq;
     private final boolean zzmr;
     private final int[] zzms;
@@ -39,7 +36,7 @@ final class zzds<T> implements zzef<T> {
         this.zzmk = i;
         this.zzml = i2;
         this.zzmm = i3;
-        this.zzmp = zzdoVar instanceof zzcg;
+        boolean z3 = zzdoVar instanceof zzcg;
         this.zzmq = z;
         this.zzmo = zzbuVar != null && zzbuVar.zze(zzdoVar);
         this.zzmr = false;
@@ -159,7 +156,7 @@ final class zzds<T> implements zzef<T> {
                     return i9;
                 }
                 return i;
-            case UndoView.ACTION_USERNAME_COPIED /* 56 */:
+            case 56:
             case VoIPService.CALL_MIN_LAYER /* 65 */:
                 if (i5 == 1) {
                     obj = Long.valueOf(zzax.zzd(bArr, i));
@@ -169,7 +166,7 @@ final class zzds<T> implements zzef<T> {
                     return i9;
                 }
                 return i;
-            case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
+            case 57:
             case 64:
                 if (i5 == 5) {
                     obj2 = Integer.valueOf(zzax.zzc(bArr, i));
@@ -179,7 +176,7 @@ final class zzds<T> implements zzef<T> {
                     return i9;
                 }
                 return i;
-            case UndoView.ACTION_TEXT_COPIED /* 58 */:
+            case 58:
                 if (i5 == 0) {
                     i9 = zzax.zzb(bArr, i, zzayVar);
                     obj3 = Boolean.valueOf(zzayVar.zzfe != 0);
@@ -207,7 +204,7 @@ final class zzds<T> implements zzef<T> {
                     }
                 }
                 return i;
-            case UndoView.ACTION_PHONE_COPIED /* 60 */:
+            case 60:
                 if (i5 == 2) {
                     i9 = zza(zzad(i8), bArr, i, i2, zzayVar);
                     Object object = unsafe.getInt(t, j3) == i4 ? unsafe.getObject(t, j) : null;
@@ -220,7 +217,7 @@ final class zzds<T> implements zzef<T> {
                     return i9;
                 }
                 return i;
-            case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
+            case 61:
                 if (i5 == 2) {
                     i9 = zzax.zza(bArr, i, zzayVar);
                     i11 = zzayVar.zzfd;
@@ -236,7 +233,7 @@ final class zzds<T> implements zzef<T> {
                     return i9;
                 }
                 return i;
-            case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
+            case 63:
                 if (i5 == 0) {
                     int zza = zzax.zza(bArr, i, zzayVar);
                     int i12 = zzayVar.zzfd;
@@ -380,50 +377,14 @@ final class zzds<T> implements zzef<T> {
             unsafe.putObject(t, j, zzk);
             object = zzk;
         }
-        zzdh<?, ?> zzl = this.zzmz.zzl(zzae);
-        Map<?, ?> zzg = this.zzmz.zzg(object);
+        this.zzmz.zzl(zzae);
+        this.zzmz.zzg(object);
         int zza = zzax.zza(bArr, i, zzayVar);
         int i5 = zzayVar.zzfd;
         if (i5 < 0 || i5 > i2 - zza) {
             throw zzco.zzbl();
         }
-        int i6 = i5 + zza;
-        Object obj = (K) zzl.zzmc;
-        Object obj2 = (V) zzl.zzdu;
-        while (zza < i6) {
-            int i7 = zza + 1;
-            int i8 = bArr[zza];
-            if (i8 < 0) {
-                i7 = zzax.zza(i8, bArr, i7, zzayVar);
-                i8 = zzayVar.zzfd;
-            }
-            int i9 = i7;
-            int i10 = i8 & 7;
-            switch (i8 >>> 3) {
-                case 1:
-                    if (i10 != zzl.zzmb.zzel()) {
-                        break;
-                    } else {
-                        zza = zza(bArr, i9, i2, zzl.zzmb, (Class<?>) null, zzayVar);
-                        obj = (K) zzayVar.zzff;
-                        continue;
-                    }
-                case 2:
-                    if (i10 != zzl.zzmd.zzel()) {
-                        break;
-                    } else {
-                        zza = zza(bArr, i9, i2, zzl.zzmd, zzl.zzdu.getClass(), zzayVar);
-                        obj2 = (V) zzayVar.zzff;
-                        continue;
-                    }
-            }
-            zza = zzax.zza(i8, bArr, i9, i2, zzayVar);
-        }
-        if (zza != i6) {
-            throw zzco.zzbo();
-        }
-        zzg.put(obj, obj2);
-        return i6;
+        throw null;
     }
 
     /* JADX WARN: Removed duplicated region for block: B:130:0x0370 A[ADDED_TO_REGION] */
@@ -437,75 +398,6 @@ final class zzds<T> implements zzef<T> {
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.clearcut.zzds.zza(java.lang.Object, byte[], int, int, int, com.google.android.gms.internal.clearcut.zzay):int");
-    }
-
-    private static int zza(byte[] bArr, int i, int i2, zzfl zzflVar, Class<?> cls, zzay zzayVar) throws IOException {
-        int zzb;
-        Object valueOf;
-        Object obj;
-        Object obj2;
-        int i3;
-        long j;
-        switch (zzdt.zzgq[zzflVar.ordinal()]) {
-            case 1:
-                zzb = zzax.zzb(bArr, i, zzayVar);
-                valueOf = Boolean.valueOf(zzayVar.zzfe != 0);
-                zzayVar.zzff = valueOf;
-                return zzb;
-            case 2:
-                return zzax.zze(bArr, i, zzayVar);
-            case 3:
-                obj = Double.valueOf(zzax.zze(bArr, i));
-                zzayVar.zzff = obj;
-                return i + 8;
-            case 4:
-            case 5:
-                obj2 = Integer.valueOf(zzax.zzc(bArr, i));
-                zzayVar.zzff = obj2;
-                return i + 4;
-            case 6:
-            case 7:
-                obj = Long.valueOf(zzax.zzd(bArr, i));
-                zzayVar.zzff = obj;
-                return i + 8;
-            case 8:
-                obj2 = Float.valueOf(zzax.zzf(bArr, i));
-                zzayVar.zzff = obj2;
-                return i + 4;
-            case 9:
-            case 10:
-            case 11:
-                zzb = zzax.zza(bArr, i, zzayVar);
-                i3 = zzayVar.zzfd;
-                valueOf = Integer.valueOf(i3);
-                zzayVar.zzff = valueOf;
-                return zzb;
-            case 12:
-            case 13:
-                zzb = zzax.zzb(bArr, i, zzayVar);
-                j = zzayVar.zzfe;
-                valueOf = Long.valueOf(j);
-                zzayVar.zzff = valueOf;
-                return zzb;
-            case 14:
-                return zza((zzef) zzea.zzcm().zze(cls), bArr, i, i2, zzayVar);
-            case 15:
-                zzb = zzax.zza(bArr, i, zzayVar);
-                i3 = zzbk.zzm(zzayVar.zzfd);
-                valueOf = Integer.valueOf(i3);
-                zzayVar.zzff = valueOf;
-                return zzb;
-            case 16:
-                zzb = zzax.zzb(bArr, i, zzayVar);
-                j = zzbk.zza(zzayVar.zzfe);
-                valueOf = Long.valueOf(j);
-                zzayVar.zzff = valueOf;
-                return zzb;
-            case 17:
-                return zzax.zzd(bArr, i, zzayVar);
-            default:
-                throw new RuntimeException("unsupported field type.");
-        }
     }
 
     public static <T> zzds<T> zza(Class<T> cls, zzdm zzdmVar, zzdw zzdwVar, zzcy zzcyVar, zzex<?, ?> zzexVar, zzbu<?> zzbuVar, zzdj zzdjVar) {
@@ -664,7 +556,7 @@ final class zzds<T> implements zzef<T> {
         long j = zzag & 1048575;
         switch ((zzag & 267386880) >>> 20) {
             case 0:
-                return zzfd.zzn(t, j) != FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE;
+                return zzfd.zzn(t, j) != 0.0d;
             case 1:
                 return zzfd.zzm(t, j) != 0.0f;
             case 2:
@@ -1038,213 +930,209 @@ final class zzds<T> implements zzef<T> {
 
     @Override // com.google.android.gms.internal.clearcut.zzef
     public final void zzc(T t, T t2) {
-        if (t2 != null) {
-            for (int i = 0; i < this.zzmi.length; i += 4) {
-                int zzag = zzag(i);
-                long j = 1048575 & zzag;
-                int i2 = this.zzmi[i];
-                switch ((zzag & 267386880) >>> 20) {
-                    case 0:
-                        if (zza((zzds<T>) t2, i)) {
-                            zzfd.zza(t, j, zzfd.zzn(t2, j));
-                            zzb((zzds<T>) t, i);
-                            break;
-                        } else {
-                            break;
-                        }
-                    case 1:
-                        if (zza((zzds<T>) t2, i)) {
-                            zzfd.zza((Object) t, j, zzfd.zzm(t2, j));
-                            zzb((zzds<T>) t, i);
-                            break;
-                        } else {
-                            break;
-                        }
-                    case 2:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+        t2.getClass();
+        for (int i = 0; i < this.zzmi.length; i += 4) {
+            int zzag = zzag(i);
+            long j = 1048575 & zzag;
+            int i2 = this.zzmi[i];
+            switch ((zzag & 267386880) >>> 20) {
+                case 0:
+                    if (zza((zzds<T>) t2, i)) {
+                        zzfd.zza(t, j, zzfd.zzn(t2, j));
                         zzb((zzds<T>) t, i);
                         break;
-                    case 3:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+                    } else {
+                        break;
+                    }
+                case 1:
+                    if (zza((zzds<T>) t2, i)) {
+                        zzfd.zza((Object) t, j, zzfd.zzm(t2, j));
                         zzb((zzds<T>) t, i);
                         break;
-                    case 4:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    } else {
+                        break;
+                    }
+                case 2:
+                    if (!zza((zzds<T>) t2, i)) {
+                        break;
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 3:
+                    if (!zza((zzds<T>) t2, i)) {
+                        break;
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 4:
+                    if (!zza((zzds<T>) t2, i)) {
+                        break;
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 5:
+                    if (!zza((zzds<T>) t2, i)) {
+                        break;
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 6:
+                    if (!zza((zzds<T>) t2, i)) {
+                        break;
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 7:
+                    if (zza((zzds<T>) t2, i)) {
+                        zzfd.zza(t, j, zzfd.zzl(t2, j));
                         zzb((zzds<T>) t, i);
                         break;
-                    case 5:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
-                        zzb((zzds<T>) t, i);
+                    } else {
                         break;
-                    case 6:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                case 8:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 7:
-                        if (zza((zzds<T>) t2, i)) {
-                            zzfd.zza(t, j, zzfd.zzl(t2, j));
-                            zzb((zzds<T>) t, i);
-                            break;
-                        } else {
-                            break;
-                        }
-                    case 8:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza(t, j, zzfd.zzo(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza(t, j, zzfd.zzo(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 9:
+                case 17:
+                    zza(t, t2, i);
+                    break;
+                case 10:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 9:
-                    case 17:
-                        zza(t, t2, i);
+                    }
+                    zzfd.zza(t, j, zzfd.zzo(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 11:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 10:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza(t, j, zzfd.zzo(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 12:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 11:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 13:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 12:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 14:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 13:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 15:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 14:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case 16:
+                    if (!zza((zzds<T>) t2, i)) {
                         break;
-                    case 15:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzj(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
+                    zzb((zzds<T>) t, i);
+                    break;
+                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
+                case 24:
+                case 25:
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                case ConnectionsManager.RequestFlagForceDownload /* 32 */:
+                case 33:
+                case 34:
+                case 35:
+                case 36:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 48:
+                case 49:
+                    this.zzmw.zza(t, t2, j);
+                    break;
+                case 50:
+                    zzeh.zza(this.zzmz, t, t2, j);
+                    break;
+                case 51:
+                case 52:
+                case 53:
+                case 54:
+                case 55:
+                case 56:
+                case 57:
+                case 58:
+                case 59:
+                    if (!zza((zzds<T>) t2, i2, i)) {
                         break;
-                    case 16:
-                        if (!zza((zzds<T>) t2, i)) {
-                            break;
-                        }
-                        zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
-                        zzb((zzds<T>) t, i);
+                    }
+                    zzfd.zza(t, j, zzfd.zzo(t2, j));
+                    zzb((zzds<T>) t, i2, i);
+                    break;
+                case 60:
+                case 68:
+                    zzb(t, t2, i);
+                    break;
+                case 61:
+                case 62:
+                case 63:
+                case 64:
+                case VoIPService.CALL_MIN_LAYER /* 65 */:
+                case 66:
+                case 67:
+                    if (!zza((zzds<T>) t2, i2, i)) {
                         break;
-                    case 18:
-                    case 19:
-                    case 20:
-                    case 21:
-                    case 22:
-                    case 23:
-                    case 24:
-                    case 25:
-                    case 26:
-                    case 27:
-                    case 28:
-                    case NalUnitTypes.NAL_TYPE_RSV_VCL29 /* 29 */:
-                    case 30:
-                    case 31:
-                    case 32:
-                    case 33:
-                    case 34:
-                    case 35:
-                    case 36:
-                    case 37:
-                    case 38:
-                    case 39:
-                    case 40:
-                    case 41:
-                    case 42:
-                    case 43:
-                    case 44:
-                    case 45:
-                    case 46:
-                    case 47:
-                    case 48:
-                    case 49:
-                        this.zzmw.zza(t, t2, j);
-                        break;
-                    case 50:
-                        zzeh.zza(this.zzmz, t, t2, j);
-                        break;
-                    case 51:
-                    case 52:
-                    case 53:
-                    case 54:
-                    case 55:
-                    case UndoView.ACTION_USERNAME_COPIED /* 56 */:
-                    case UndoView.ACTION_HASHTAG_COPIED /* 57 */:
-                    case UndoView.ACTION_TEXT_COPIED /* 58 */:
-                    case 59:
-                        if (!zza((zzds<T>) t2, i2, i)) {
-                            break;
-                        }
-                        zzfd.zza(t, j, zzfd.zzo(t2, j));
-                        zzb((zzds<T>) t, i2, i);
-                        break;
-                    case UndoView.ACTION_PHONE_COPIED /* 60 */:
-                    case 68:
-                        zzb(t, t2, i);
-                        break;
-                    case UndoView.ACTION_SHARE_BACKGROUND /* 61 */:
-                    case 62:
-                    case HtmlCompat.FROM_HTML_MODE_COMPACT /* 63 */:
-                    case 64:
-                    case VoIPService.CALL_MIN_LAYER /* 65 */:
-                    case 66:
-                    case 67:
-                        if (!zza((zzds<T>) t2, i2, i)) {
-                            break;
-                        }
-                        zzfd.zza(t, j, zzfd.zzo(t2, j));
-                        zzb((zzds<T>) t, i2, i);
-                        break;
-                }
+                    }
+                    zzfd.zza(t, j, zzfd.zzo(t2, j));
+                    zzb((zzds<T>) t, i2, i);
+                    break;
             }
-            if (this.zzmq) {
-                return;
-            }
+        }
+        if (!this.zzmq) {
             zzeh.zza(this.zzmx, t, t2);
             if (!this.zzmo) {
                 return;
             }
             zzeh.zza(this.zzmy, t, t2);
-            return;
         }
-        throw new NullPointerException();
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
@@ -1433,24 +1321,74 @@ final class zzds<T> implements zzef<T> {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:72:0x00c2 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:75:0x00f0 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:78:0x0104 A[SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:79:0x0104 A[SYNTHETIC] */
-    /* JADX WARN: Type inference failed for: r7v15 */
-    /* JADX WARN: Type inference failed for: r7v17, types: [com.google.android.gms.internal.clearcut.zzef] */
-    /* JADX WARN: Type inference failed for: r7v20 */
-    /* JADX WARN: Type inference failed for: r7v7, types: [com.google.android.gms.internal.clearcut.zzef] */
     @Override // com.google.android.gms.internal.clearcut.zzef
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public final boolean zzo(T r17) {
-        /*
-            Method dump skipped, instructions count: 314
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.clearcut.zzds.zzo(java.lang.Object):boolean");
+    public final boolean zzo(T t) {
+        int i;
+        int i2;
+        boolean z;
+        int[] iArr = this.zzms;
+        if (iArr != null && iArr.length != 0) {
+            int i3 = -1;
+            int length = iArr.length;
+            int i4 = 0;
+            for (int i5 = 0; i5 < length; i5 = i + 1) {
+                int i6 = iArr[i5];
+                int zzai = zzai(i6);
+                int zzag = zzag(zzai);
+                if (!this.zzmq) {
+                    int i7 = this.zzmi[zzai + 2];
+                    int i8 = i7 & 1048575;
+                    i2 = 1 << (i7 >>> 20);
+                    if (i8 != i3) {
+                        i = i5;
+                        i4 = zzmh.getInt(t, i8);
+                        i3 = i8;
+                    } else {
+                        i = i5;
+                    }
+                } else {
+                    i = i5;
+                    i2 = 0;
+                }
+                if (((268435456 & zzag) != 0) && !zza((zzds<T>) t, zzai, i4, i2)) {
+                    return false;
+                }
+                int i9 = (267386880 & zzag) >>> 20;
+                if (i9 != 9 && i9 != 17) {
+                    if (i9 != 27) {
+                        if (i9 == 60 || i9 == 68) {
+                            if (zza((zzds<T>) t, i6, zzai) && !zza(t, zzag, zzad(zzai))) {
+                                return false;
+                            }
+                        } else if (i9 != 49) {
+                            if (i9 == 50 && !this.zzmz.zzh(zzfd.zzo(t, zzag & 1048575)).isEmpty()) {
+                                this.zzmz.zzl(zzae(zzai));
+                                throw null;
+                            }
+                        }
+                    }
+                    List list = (List) zzfd.zzo(t, zzag & 1048575);
+                    if (!list.isEmpty()) {
+                        zzef zzad = zzad(zzai);
+                        for (int i10 = 0; i10 < list.size(); i10++) {
+                            if (!zzad.zzo(list.get(i10))) {
+                                z = false;
+                                break;
+                            }
+                        }
+                    }
+                    z = true;
+                    if (!z) {
+                        return false;
+                    }
+                } else if (zza((zzds<T>) t, zzai, i4, i2) && !zza(t, zzag, zzad(zzai))) {
+                    return false;
+                }
+            }
+            if (this.zzmo && !this.zzmy.zza(t).isInitialized()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

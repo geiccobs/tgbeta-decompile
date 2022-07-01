@@ -9,8 +9,9 @@ import com.google.android.gms.common.Feature;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
+import com.google.android.gms.location.zzu;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzi extends GmsClient<zzam> {
     protected final zzbg<zzam> zze = new zzh(this);
     private final String zzf;
@@ -38,7 +39,7 @@ public class zzi extends GmsClient<zzam> {
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient
     public final Feature[] getApiFeatures() {
-        return com.google.android.gms.location.zzu.zzf;
+        return zzu.zzf;
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import org.webrtc.EglBase;
 import org.webrtc.VideoDecoderFactory;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class DefaultVideoDecoderFactory implements VideoDecoderFactory {
     private final VideoDecoderFactory hardwareVideoDecoderFactory;
     private final VideoDecoderFactory platformSoftwareVideoDecoderFactory;
@@ -15,41 +15,41 @@ public class DefaultVideoDecoderFactory implements VideoDecoderFactory {
         return VideoDecoderFactory.CC.$default$createDecoder(this, str);
     }
 
-    public DefaultVideoDecoderFactory(EglBase.Context eglContext) {
+    public DefaultVideoDecoderFactory(EglBase.Context context) {
         this.softwareVideoDecoderFactory = new SoftwareVideoDecoderFactory();
-        this.hardwareVideoDecoderFactory = new HardwareVideoDecoderFactory(eglContext);
-        this.platformSoftwareVideoDecoderFactory = new PlatformSoftwareVideoDecoderFactory(eglContext);
+        this.hardwareVideoDecoderFactory = new HardwareVideoDecoderFactory(context);
+        this.platformSoftwareVideoDecoderFactory = new PlatformSoftwareVideoDecoderFactory(context);
     }
 
-    DefaultVideoDecoderFactory(VideoDecoderFactory hardwareVideoDecoderFactory) {
+    DefaultVideoDecoderFactory(VideoDecoderFactory videoDecoderFactory) {
         this.softwareVideoDecoderFactory = new SoftwareVideoDecoderFactory();
-        this.hardwareVideoDecoderFactory = hardwareVideoDecoderFactory;
+        this.hardwareVideoDecoderFactory = videoDecoderFactory;
         this.platformSoftwareVideoDecoderFactory = null;
     }
 
     @Override // org.webrtc.VideoDecoderFactory
-    public VideoDecoder createDecoder(VideoCodecInfo codecType) {
+    public VideoDecoder createDecoder(VideoCodecInfo videoCodecInfo) {
         VideoDecoderFactory videoDecoderFactory;
-        VideoDecoder softwareDecoder = this.softwareVideoDecoderFactory.createDecoder(codecType);
-        VideoDecoder hardwareDecoder = this.hardwareVideoDecoderFactory.createDecoder(codecType);
-        if (softwareDecoder == null && (videoDecoderFactory = this.platformSoftwareVideoDecoderFactory) != null) {
-            softwareDecoder = videoDecoderFactory.createDecoder(codecType);
+        VideoDecoder createDecoder = this.softwareVideoDecoderFactory.createDecoder(videoCodecInfo);
+        VideoDecoder createDecoder2 = this.hardwareVideoDecoderFactory.createDecoder(videoCodecInfo);
+        if (createDecoder == null && (videoDecoderFactory = this.platformSoftwareVideoDecoderFactory) != null) {
+            createDecoder = videoDecoderFactory.createDecoder(videoCodecInfo);
         }
-        if (hardwareDecoder == null || softwareDecoder == null) {
-            return hardwareDecoder != null ? hardwareDecoder : softwareDecoder;
+        if (createDecoder2 == null || createDecoder == null) {
+            return createDecoder2 != null ? createDecoder2 : createDecoder;
         }
-        return new VideoDecoderFallback(softwareDecoder, hardwareDecoder);
+        return new VideoDecoderFallback(createDecoder, createDecoder2);
     }
 
     @Override // org.webrtc.VideoDecoderFactory
     public VideoCodecInfo[] getSupportedCodecs() {
-        LinkedHashSet<VideoCodecInfo> supportedCodecInfos = new LinkedHashSet<>();
-        supportedCodecInfos.addAll(Arrays.asList(this.softwareVideoDecoderFactory.getSupportedCodecs()));
-        supportedCodecInfos.addAll(Arrays.asList(this.hardwareVideoDecoderFactory.getSupportedCodecs()));
+        LinkedHashSet linkedHashSet = new LinkedHashSet();
+        linkedHashSet.addAll(Arrays.asList(this.softwareVideoDecoderFactory.getSupportedCodecs()));
+        linkedHashSet.addAll(Arrays.asList(this.hardwareVideoDecoderFactory.getSupportedCodecs()));
         VideoDecoderFactory videoDecoderFactory = this.platformSoftwareVideoDecoderFactory;
         if (videoDecoderFactory != null) {
-            supportedCodecInfos.addAll(Arrays.asList(videoDecoderFactory.getSupportedCodecs()));
+            linkedHashSet.addAll(Arrays.asList(videoDecoderFactory.getSupportedCodecs()));
         }
-        return (VideoCodecInfo[]) supportedCodecInfos.toArray(new VideoCodecInfo[supportedCodecInfos.size()]);
+        return (VideoCodecInfo[]) linkedHashSet.toArray(new VideoCodecInfo[linkedHashSet.size()]);
     }
 }

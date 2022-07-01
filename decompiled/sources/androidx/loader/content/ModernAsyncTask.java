@@ -16,20 +16,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.telegram.tgnet.ConnectionsManager;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class ModernAsyncTask<Params, Progress, Result> {
-    private static final int CORE_POOL_SIZE = 5;
-    private static final int KEEP_ALIVE = 1;
-    private static final String LOG_TAG = "AsyncTask";
-    private static final int MAXIMUM_POOL_SIZE = 128;
-    private static final int MESSAGE_POST_PROGRESS = 2;
-    private static final int MESSAGE_POST_RESULT = 1;
     public static final Executor THREAD_POOL_EXECUTOR;
-    private static volatile Executor sDefaultExecutor;
     private static InternalHandler sHandler;
     private static final BlockingQueue<Runnable> sPoolWorkQueue;
     private static final ThreadFactory sThreadFactory;
@@ -39,7 +32,7 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
     final AtomicBoolean mCancelled = new AtomicBoolean();
     final AtomicBoolean mTaskInvoked = new AtomicBoolean();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum Status {
         PENDING,
         RUNNING,
@@ -48,21 +41,31 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
 
     protected abstract Result doInBackground(Params... paramsArr);
 
+    protected void onCancelled() {
+    }
+
+    protected void onPostExecute(Result result) {
+    }
+
+    protected void onPreExecute() {
+    }
+
+    protected void onProgressUpdate(Progress... progressArr) {
+    }
+
     static {
         ThreadFactory threadFactory = new ThreadFactory() { // from class: androidx.loader.content.ModernAsyncTask.1
             private final AtomicInteger mCount = new AtomicInteger(1);
 
             @Override // java.util.concurrent.ThreadFactory
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "ModernAsyncTask #" + this.mCount.getAndIncrement());
+            public Thread newThread(Runnable runnable) {
+                return new Thread(runnable, "ModernAsyncTask #" + this.mCount.getAndIncrement());
             }
         };
         sThreadFactory = threadFactory;
         LinkedBlockingQueue linkedBlockingQueue = new LinkedBlockingQueue(10);
         sPoolWorkQueue = linkedBlockingQueue;
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 128, 1L, TimeUnit.SECONDS, linkedBlockingQueue, threadFactory);
-        THREAD_POOL_EXECUTOR = threadPoolExecutor;
-        sDefaultExecutor = threadPoolExecutor;
+        THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(5, (int) ConnectionsManager.RequestFlagNeedQuickAck, 1L, TimeUnit.SECONDS, linkedBlockingQueue, threadFactory);
     }
 
     private static Handler getHandler() {
@@ -76,20 +79,15 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
         return internalHandler;
     }
 
-    public static void setDefaultExecutor(Executor exec) {
-        sDefaultExecutor = exec;
-    }
-
     public ModernAsyncTask() {
         WorkerRunnable<Params, Result> workerRunnable = new WorkerRunnable<Params, Result>() { // from class: androidx.loader.content.ModernAsyncTask.2
-            /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.concurrent.Callable
             public Result call() throws Exception {
                 ModernAsyncTask.this.mTaskInvoked.set(true);
                 Result result = null;
                 try {
                     Process.setThreadPriority(10);
-                    result = ModernAsyncTask.this.doInBackground(this.mParams);
+                    result = (Result) ModernAsyncTask.this.doInBackground(this.mParams);
                     Binder.flushPendingCommands();
                     return result;
                 } finally {
@@ -101,77 +99,47 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
             @Override // java.util.concurrent.FutureTask
             protected void done() {
                 try {
-                    Result result = get();
-                    ModernAsyncTask.this.postResultIfNotInvoked(result);
+                    ModernAsyncTask.this.postResultIfNotInvoked(get());
                 } catch (InterruptedException e) {
-                    Log.w(ModernAsyncTask.LOG_TAG, e);
-                } catch (CancellationException e2) {
+                    Log.w("AsyncTask", e);
+                } catch (CancellationException unused) {
                     ModernAsyncTask.this.postResultIfNotInvoked(null);
-                } catch (ExecutionException e3) {
-                    throw new RuntimeException("An error occurred while executing doInBackground()", e3.getCause());
-                } catch (Throwable t) {
-                    throw new RuntimeException("An error occurred while executing doInBackground()", t);
+                } catch (ExecutionException e2) {
+                    throw new RuntimeException("An error occurred while executing doInBackground()", e2.getCause());
+                } catch (Throwable th) {
+                    throw new RuntimeException("An error occurred while executing doInBackground()", th);
                 }
             }
         };
     }
 
     void postResultIfNotInvoked(Result result) {
-        boolean wasTaskInvoked = this.mTaskInvoked.get();
-        if (!wasTaskInvoked) {
+        if (!this.mTaskInvoked.get()) {
             postResult(result);
         }
     }
 
     Result postResult(Result result) {
-        Message message = getHandler().obtainMessage(1, new AsyncTaskResult(this, result));
-        message.sendToTarget();
+        getHandler().obtainMessage(1, new AsyncTaskResult(this, result)).sendToTarget();
         return result;
-    }
-
-    public final Status getStatus() {
-        return this.mStatus;
-    }
-
-    protected void onPreExecute() {
-    }
-
-    protected void onPostExecute(Result result) {
-    }
-
-    protected void onProgressUpdate(Progress... values) {
     }
 
     protected void onCancelled(Result result) {
         onCancelled();
     }
 
-    protected void onCancelled() {
-    }
-
     public final boolean isCancelled() {
         return this.mCancelled.get();
     }
 
-    public final boolean cancel(boolean mayInterruptIfRunning) {
+    public final boolean cancel(boolean z) {
         this.mCancelled.set(true);
-        return this.mFuture.cancel(mayInterruptIfRunning);
+        return this.mFuture.cancel(z);
     }
 
-    public final Result get() throws InterruptedException, ExecutionException {
-        return this.mFuture.get();
-    }
-
-    public final Result get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return this.mFuture.get(timeout, unit);
-    }
-
-    public final ModernAsyncTask<Params, Progress, Result> execute(Params... params) {
-        return executeOnExecutor(sDefaultExecutor, params);
-    }
-
+    /* JADX INFO: Access modifiers changed from: package-private */
     /* renamed from: androidx.loader.content.ModernAsyncTask$4 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static /* synthetic */ class AnonymousClass4 {
         static final /* synthetic */ int[] $SwitchMap$androidx$loader$content$ModernAsyncTask$Status;
 
@@ -180,41 +148,31 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
             $SwitchMap$androidx$loader$content$ModernAsyncTask$Status = iArr;
             try {
                 iArr[Status.RUNNING.ordinal()] = 1;
-            } catch (NoSuchFieldError e) {
+            } catch (NoSuchFieldError unused) {
             }
             try {
                 $SwitchMap$androidx$loader$content$ModernAsyncTask$Status[Status.FINISHED.ordinal()] = 2;
-            } catch (NoSuchFieldError e2) {
+            } catch (NoSuchFieldError unused2) {
             }
         }
     }
 
-    public final ModernAsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec, Params... params) {
+    public final ModernAsyncTask<Params, Progress, Result> executeOnExecutor(Executor executor, Params... paramsArr) {
         if (this.mStatus != Status.PENDING) {
-            switch (AnonymousClass4.$SwitchMap$androidx$loader$content$ModernAsyncTask$Status[this.mStatus.ordinal()]) {
-                case 1:
-                    throw new IllegalStateException("Cannot execute task: the task is already running.");
-                case 2:
-                    throw new IllegalStateException("Cannot execute task: the task has already been executed (a task can be executed only once)");
-                default:
-                    throw new IllegalStateException("We should never reach this state");
+            int i = AnonymousClass4.$SwitchMap$androidx$loader$content$ModernAsyncTask$Status[this.mStatus.ordinal()];
+            if (i == 1) {
+                throw new IllegalStateException("Cannot execute task: the task is already running.");
             }
+            if (i == 2) {
+                throw new IllegalStateException("Cannot execute task: the task has already been executed (a task can be executed only once)");
+            }
+            throw new IllegalStateException("We should never reach this state");
         }
         this.mStatus = Status.RUNNING;
         onPreExecute();
-        this.mWorker.mParams = params;
-        exec.execute(this.mFuture);
+        this.mWorker.mParams = paramsArr;
+        executor.execute(this.mFuture);
         return this;
-    }
-
-    public static void execute(Runnable runnable) {
-        sDefaultExecutor.execute(runnable);
-    }
-
-    protected final void publishProgress(Progress... values) {
-        if (!isCancelled()) {
-            getHandler().obtainMessage(2, new AsyncTaskResult(this, values)).sendToTarget();
-        }
     }
 
     void finish(Result result) {
@@ -226,7 +184,7 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
         this.mStatus = Status.FINISHED;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class InternalHandler extends Handler {
         InternalHandler() {
             super(Looper.getMainLooper());
@@ -234,22 +192,20 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
 
         /* JADX WARN: Multi-variable type inference failed */
         @Override // android.os.Handler
-        public void handleMessage(Message msg) {
-            AsyncTaskResult result = (AsyncTaskResult) msg.obj;
-            switch (msg.what) {
-                case 1:
-                    result.mTask.finish(result.mData[0]);
-                    return;
-                case 2:
-                    result.mTask.onProgressUpdate(result.mData);
-                    return;
-                default:
-                    return;
+        public void handleMessage(Message message) {
+            AsyncTaskResult asyncTaskResult = (AsyncTaskResult) message.obj;
+            int i = message.what;
+            if (i == 1) {
+                asyncTaskResult.mTask.finish(asyncTaskResult.mData[0]);
+            } else if (i != 2) {
+            } else {
+                asyncTaskResult.mTask.onProgressUpdate(asyncTaskResult.mData);
             }
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* JADX INFO: Access modifiers changed from: private */
+    /* loaded from: classes.dex */
     public static abstract class WorkerRunnable<Params, Result> implements Callable<Result> {
         Params[] mParams;
 
@@ -257,14 +213,14 @@ public abstract class ModernAsyncTask<Params, Progress, Result> {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class AsyncTaskResult<Data> {
         final Data[] mData;
         final ModernAsyncTask mTask;
 
-        AsyncTaskResult(ModernAsyncTask task, Data... data) {
-            this.mTask = task;
-            this.mData = data;
+        AsyncTaskResult(ModernAsyncTask modernAsyncTask, Data... dataArr) {
+            this.mTask = modernAsyncTask;
+            this.mData = dataArr;
         }
     }
 }

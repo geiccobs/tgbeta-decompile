@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzbn implements Parcelable.Creator<LocationSettingsStates> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ LocationSettingsStates createFromParcel(Parcel parcel) {

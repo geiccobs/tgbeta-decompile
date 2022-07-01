@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zav {
     private final Map<BasePendingResult<?>, Boolean> zaa = DesugarCollections.synchronizedMap(new WeakHashMap());
     private final Map<TaskCompletionSource<?>, Boolean> zab = DesugarCollections.synchronizedMap(new WeakHashMap());

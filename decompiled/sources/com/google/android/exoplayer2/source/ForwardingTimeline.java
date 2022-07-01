@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.source;
 
 import com.google.android.exoplayer2.Timeline;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class ForwardingTimeline extends Timeline {
     protected final Timeline timeline;
 
@@ -15,28 +15,18 @@ public abstract class ForwardingTimeline extends Timeline {
     }
 
     @Override // com.google.android.exoplayer2.Timeline
-    public int getNextWindowIndex(int windowIndex, int repeatMode, boolean shuffleModeEnabled) {
-        return this.timeline.getNextWindowIndex(windowIndex, repeatMode, shuffleModeEnabled);
+    public int getLastWindowIndex(boolean z) {
+        return this.timeline.getLastWindowIndex(z);
     }
 
     @Override // com.google.android.exoplayer2.Timeline
-    public int getPreviousWindowIndex(int windowIndex, int repeatMode, boolean shuffleModeEnabled) {
-        return this.timeline.getPreviousWindowIndex(windowIndex, repeatMode, shuffleModeEnabled);
+    public int getFirstWindowIndex(boolean z) {
+        return this.timeline.getFirstWindowIndex(z);
     }
 
     @Override // com.google.android.exoplayer2.Timeline
-    public int getLastWindowIndex(boolean shuffleModeEnabled) {
-        return this.timeline.getLastWindowIndex(shuffleModeEnabled);
-    }
-
-    @Override // com.google.android.exoplayer2.Timeline
-    public int getFirstWindowIndex(boolean shuffleModeEnabled) {
-        return this.timeline.getFirstWindowIndex(shuffleModeEnabled);
-    }
-
-    @Override // com.google.android.exoplayer2.Timeline
-    public Timeline.Window getWindow(int windowIndex, Timeline.Window window, long defaultPositionProjectionUs) {
-        return this.timeline.getWindow(windowIndex, window, defaultPositionProjectionUs);
+    public Timeline.Window getWindow(int i, Timeline.Window window, long j) {
+        return this.timeline.getWindow(i, window, j);
     }
 
     @Override // com.google.android.exoplayer2.Timeline
@@ -45,17 +35,17 @@ public abstract class ForwardingTimeline extends Timeline {
     }
 
     @Override // com.google.android.exoplayer2.Timeline
-    public Timeline.Period getPeriod(int periodIndex, Timeline.Period period, boolean setIds) {
-        return this.timeline.getPeriod(periodIndex, period, setIds);
+    public Timeline.Period getPeriod(int i, Timeline.Period period, boolean z) {
+        return this.timeline.getPeriod(i, period, z);
     }
 
     @Override // com.google.android.exoplayer2.Timeline
-    public int getIndexOfPeriod(Object uid) {
-        return this.timeline.getIndexOfPeriod(uid);
+    public int getIndexOfPeriod(Object obj) {
+        return this.timeline.getIndexOfPeriod(obj);
     }
 
     @Override // com.google.android.exoplayer2.Timeline
-    public Object getUidOfPeriod(int periodIndex) {
-        return this.timeline.getUidOfPeriod(periodIndex);
+    public Object getUidOfPeriod(int i) {
+        return this.timeline.getUidOfPeriod(i);
     }
 }

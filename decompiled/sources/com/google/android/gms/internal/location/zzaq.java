@@ -4,7 +4,7 @@ import com.google.android.gms.common.api.internal.ListenerHolder;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzaq implements ListenerHolder.Notifier<LocationCallback> {
     final /* synthetic */ LocationAvailability zza;
 

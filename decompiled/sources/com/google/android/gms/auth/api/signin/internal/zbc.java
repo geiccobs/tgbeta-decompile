@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zbc extends AsyncTaskLoader<Void> implements SignInConnectionListener {
     private final Semaphore zba = new Semaphore(0);
     private final Set<GoogleApiClient> zbb;

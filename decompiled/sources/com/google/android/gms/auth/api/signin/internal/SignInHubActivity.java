@@ -5,15 +5,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import androidx.annotation.RecentlyNonNull;
 import androidx.fragment.app.FragmentActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.auth.api.signin.SignInAccount;
+import com.google.android.gms.common.annotation.KeepName;
 import com.google.android.gms.common.api.Status;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
-/* loaded from: classes3.dex */
+@KeepName
+/* loaded from: classes.dex */
 public class SignInHubActivity extends FragmentActivity {
     private static boolean zba = false;
     private boolean zbb = false;
@@ -46,7 +47,7 @@ public class SignInHubActivity extends FragmentActivity {
         intent.putExtra("config", this.zbc);
         try {
             startActivityForResult(intent, 40962);
-        } catch (ActivityNotFoundException e) {
+        } catch (ActivityNotFoundException unused) {
             this.zbb = true;
             Log.w("AuthSignInClient", "Could not launch sign in Intent. Google Play Service is probably being updated...");
             zbd(17);
@@ -54,7 +55,7 @@ public class SignInHubActivity extends FragmentActivity {
     }
 
     @Override // android.app.Activity, android.view.Window.Callback
-    public final boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+    public final boolean dispatchPopulateAccessibilityEvent(@RecentlyNonNull AccessibilityEvent accessibilityEvent) {
         return true;
     }
 
@@ -64,41 +65,36 @@ public class SignInHubActivity extends FragmentActivity {
             return;
         }
         setResult(0);
-        switch (i) {
-            case 40962:
-                if (intent != null) {
-                    SignInAccount signInAccount = (SignInAccount) intent.getParcelableExtra(GoogleSignInApi.EXTRA_SIGN_IN_ACCOUNT);
-                    if (signInAccount == null || signInAccount.zba() == null) {
-                        if (intent.hasExtra("errorCode")) {
-                            int intExtra = intent.getIntExtra("errorCode", 8);
-                            if (intExtra == 13) {
-                                intExtra = GoogleSignInStatusCodes.SIGN_IN_CANCELLED;
-                            }
-                            zbd(intExtra);
-                            return;
-                        }
-                    } else {
-                        GoogleSignInAccount zba2 = signInAccount.zba();
-                        zbn zbc = zbn.zbc(this);
-                        GoogleSignInOptions zba3 = this.zbc.zba();
-                        if (zba2 != null) {
-                            zbc.zbe(zba3, zba2);
-                            intent.removeExtra(GoogleSignInApi.EXTRA_SIGN_IN_ACCOUNT);
-                            intent.putExtra("googleSignInAccount", zba2);
-                            this.zbd = true;
-                            this.zbe = i2;
-                            this.zbf = intent;
-                            zbc();
-                            return;
-                        }
-                        throw null;
-                    }
-                }
-                zbd(8);
-                return;
-            default:
-                return;
+        if (i != 40962) {
+            return;
         }
+        if (intent != null) {
+            SignInAccount signInAccount = (SignInAccount) intent.getParcelableExtra("signInAccount");
+            if (signInAccount == null || signInAccount.zba() == null) {
+                if (intent.hasExtra("errorCode")) {
+                    int intExtra = intent.getIntExtra("errorCode", 8);
+                    if (intExtra == 13) {
+                        intExtra = 12501;
+                    }
+                    zbd(intExtra);
+                    return;
+                }
+            } else {
+                GoogleSignInAccount zba2 = signInAccount.zba();
+                zbn zbc = zbn.zbc(this);
+                GoogleSignInOptions zba3 = this.zbc.zba();
+                zba2.getClass();
+                zbc.zbe(zba3, zba2);
+                intent.removeExtra("signInAccount");
+                intent.putExtra("googleSignInAccount", zba2);
+                this.zbd = true;
+                this.zbe = i2;
+                this.zbf = intent;
+                zbc();
+                return;
+            }
+        }
+        zbd(8);
     }
 
     @Override // androidx.fragment.app.FragmentActivity, androidx.core.app.ComponentActivity, android.app.Activity
@@ -106,54 +102,45 @@ public class SignInHubActivity extends FragmentActivity {
         super.onCreate(bundle);
         Intent intent = getIntent();
         String action = intent.getAction();
-        if (action != null) {
-            if ("com.google.android.gms.auth.NO_IMPL".equals(action)) {
-                zbd(GoogleSignInStatusCodes.SIGN_IN_FAILED);
-                return;
-            } else if (action.equals("com.google.android.gms.auth.GOOGLE_SIGN_IN") || action.equals("com.google.android.gms.auth.APPAUTH_SIGN_IN")) {
-                Bundle bundleExtra = intent.getBundleExtra("config");
-                if (bundleExtra != null) {
-                    SignInConfiguration signInConfiguration = (SignInConfiguration) bundleExtra.getParcelable("config");
-                    if (signInConfiguration == null) {
-                        Log.e("AuthSignInClient", "Activity started with invalid configuration.");
-                        setResult(0);
-                        finish();
-                        return;
-                    }
-                    this.zbc = signInConfiguration;
-                    if (bundle == null) {
-                        if (zba) {
-                            setResult(0);
-                            zbd(GoogleSignInStatusCodes.SIGN_IN_CURRENTLY_IN_PROGRESS);
-                            return;
-                        }
-                        zba = true;
-                        zbe(action);
-                        return;
-                    }
-                    boolean z = bundle.getBoolean("signingInGoogleApiClients");
-                    this.zbd = z;
-                    if (z) {
-                        this.zbe = bundle.getInt("signInResultCode");
-                        Intent intent2 = (Intent) bundle.getParcelable("signInResultData");
-                        if (intent2 != null) {
-                            this.zbf = intent2;
-                            zbc();
-                            return;
-                        }
-                        throw null;
-                    }
-                    return;
-                }
-                throw null;
-            } else {
-                String valueOf = String.valueOf(intent.getAction());
-                Log.e("AuthSignInClient", valueOf.length() != 0 ? "Unknown action: ".concat(valueOf) : new String("Unknown action: "));
+        action.getClass();
+        if ("com.google.android.gms.auth.NO_IMPL".equals(action)) {
+            zbd(12500);
+        } else if (action.equals("com.google.android.gms.auth.GOOGLE_SIGN_IN") || action.equals("com.google.android.gms.auth.APPAUTH_SIGN_IN")) {
+            Bundle bundleExtra = intent.getBundleExtra("config");
+            bundleExtra.getClass();
+            SignInConfiguration signInConfiguration = (SignInConfiguration) bundleExtra.getParcelable("config");
+            if (signInConfiguration == null) {
+                Log.e("AuthSignInClient", "Activity started with invalid configuration.");
+                setResult(0);
                 finish();
                 return;
             }
+            this.zbc = signInConfiguration;
+            if (bundle == null) {
+                if (zba) {
+                    setResult(0);
+                    zbd(12502);
+                    return;
+                }
+                zba = true;
+                zbe(action);
+                return;
+            }
+            boolean z = bundle.getBoolean("signingInGoogleApiClients");
+            this.zbd = z;
+            if (!z) {
+                return;
+            }
+            this.zbe = bundle.getInt("signInResultCode");
+            Intent intent2 = (Intent) bundle.getParcelable("signInResultData");
+            intent2.getClass();
+            this.zbf = intent2;
+            zbc();
+        } else {
+            String valueOf = String.valueOf(intent.getAction());
+            Log.e("AuthSignInClient", valueOf.length() != 0 ? "Unknown action: ".concat(valueOf) : new String("Unknown action: "));
+            finish();
         }
-        throw null;
     }
 
     @Override // androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -163,7 +150,7 @@ public class SignInHubActivity extends FragmentActivity {
     }
 
     @Override // androidx.fragment.app.FragmentActivity, androidx.core.app.ComponentActivity, android.app.Activity
-    public final void onSaveInstanceState(Bundle bundle) {
+    public final void onSaveInstanceState(@RecentlyNonNull Bundle bundle) {
         super.onSaveInstanceState(bundle);
         bundle.putBoolean("signingInGoogleApiClients", this.zbd);
         if (this.zbd) {

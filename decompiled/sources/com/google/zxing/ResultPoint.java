@@ -1,14 +1,14 @@
 package com.google.zxing;
 
 import com.google.zxing.common.detector.MathUtils;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ResultPoint {
     private final float x;
     private final float y;
 
-    public ResultPoint(float x, float y) {
-        this.x = x;
-        this.y = y;
+    public ResultPoint(float f, float f2) {
+        this.x = f;
+        this.y = f2;
     }
 
     public final float getX() {
@@ -19,10 +19,10 @@ public class ResultPoint {
         return this.y;
     }
 
-    public final boolean equals(Object other) {
-        if (other instanceof ResultPoint) {
-            ResultPoint otherPoint = (ResultPoint) other;
-            return this.x == otherPoint.x && this.y == otherPoint.y;
+    public final boolean equals(Object obj) {
+        if (obj instanceof ResultPoint) {
+            ResultPoint resultPoint = (ResultPoint) obj;
+            return this.x == resultPoint.x && this.y == resultPoint.y;
         }
         return false;
     }
@@ -35,43 +35,43 @@ public class ResultPoint {
         return "(" + this.x + ',' + this.y + ')';
     }
 
-    public static void orderBestPatterns(ResultPoint[] patterns) {
-        ResultPoint pointC;
-        ResultPoint pointA;
-        ResultPoint pointB;
-        float zeroOneDistance = distance(patterns[0], patterns[1]);
-        float oneTwoDistance = distance(patterns[1], patterns[2]);
-        float zeroTwoDistance = distance(patterns[0], patterns[2]);
-        if (oneTwoDistance >= zeroOneDistance && oneTwoDistance >= zeroTwoDistance) {
-            pointB = patterns[0];
-            pointA = patterns[1];
-            pointC = patterns[2];
-        } else if (zeroTwoDistance >= oneTwoDistance && zeroTwoDistance >= zeroOneDistance) {
-            pointB = patterns[1];
-            pointA = patterns[0];
-            pointC = patterns[2];
+    public static void orderBestPatterns(ResultPoint[] resultPointArr) {
+        ResultPoint resultPoint;
+        ResultPoint resultPoint2;
+        ResultPoint resultPoint3;
+        float distance = distance(resultPointArr[0], resultPointArr[1]);
+        float distance2 = distance(resultPointArr[1], resultPointArr[2]);
+        float distance3 = distance(resultPointArr[0], resultPointArr[2]);
+        if (distance2 >= distance && distance2 >= distance3) {
+            resultPoint3 = resultPointArr[0];
+            resultPoint2 = resultPointArr[1];
+            resultPoint = resultPointArr[2];
+        } else if (distance3 >= distance2 && distance3 >= distance) {
+            resultPoint3 = resultPointArr[1];
+            resultPoint2 = resultPointArr[0];
+            resultPoint = resultPointArr[2];
         } else {
-            pointB = patterns[2];
-            pointA = patterns[0];
-            pointC = patterns[1];
+            resultPoint3 = resultPointArr[2];
+            resultPoint2 = resultPointArr[0];
+            resultPoint = resultPointArr[1];
         }
-        if (crossProductZ(pointA, pointB, pointC) < 0.0f) {
-            ResultPoint temp = pointA;
-            pointA = pointC;
-            pointC = temp;
+        if (crossProductZ(resultPoint2, resultPoint3, resultPoint) < 0.0f) {
+            ResultPoint resultPoint4 = resultPoint;
+            resultPoint = resultPoint2;
+            resultPoint2 = resultPoint4;
         }
-        patterns[0] = pointA;
-        patterns[1] = pointB;
-        patterns[2] = pointC;
+        resultPointArr[0] = resultPoint2;
+        resultPointArr[1] = resultPoint3;
+        resultPointArr[2] = resultPoint;
     }
 
-    public static float distance(ResultPoint pattern1, ResultPoint pattern2) {
-        return MathUtils.distance(pattern1.x, pattern1.y, pattern2.x, pattern2.y);
+    public static float distance(ResultPoint resultPoint, ResultPoint resultPoint2) {
+        return MathUtils.distance(resultPoint.x, resultPoint.y, resultPoint2.x, resultPoint2.y);
     }
 
-    private static float crossProductZ(ResultPoint pointA, ResultPoint pointB, ResultPoint pointC) {
-        float bX = pointB.x;
-        float bY = pointB.y;
-        return ((pointC.x - bX) * (pointA.y - bY)) - ((pointC.y - bY) * (pointA.x - bX));
+    private static float crossProductZ(ResultPoint resultPoint, ResultPoint resultPoint2, ResultPoint resultPoint3) {
+        float f = resultPoint2.x;
+        float f2 = resultPoint2.y;
+        return ((resultPoint3.x - f) * (resultPoint.y - f2)) - ((resultPoint3.y - f2) * (resultPoint.x - f));
     }
 }

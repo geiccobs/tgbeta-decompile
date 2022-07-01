@@ -1,55 +1,54 @@
 package com.google.android.exoplayer2.extractor.mp4;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class TrackEncryptionBox {
-    private static final String TAG = "TrackEncryptionBox";
     public final TrackOutput.CryptoData cryptoData;
     public final byte[] defaultInitializationVector;
     public final boolean isEncrypted;
     public final int perSampleIvSize;
     public final String schemeType;
 
-    public TrackEncryptionBox(boolean isEncrypted, String schemeType, int perSampleIvSize, byte[] keyId, int defaultEncryptedBlocks, int defaultClearBlocks, byte[] defaultInitializationVector) {
-        boolean z = true;
-        Assertions.checkArgument((defaultInitializationVector != null ? false : z) ^ (perSampleIvSize == 0));
-        this.isEncrypted = isEncrypted;
-        this.schemeType = schemeType;
-        this.perSampleIvSize = perSampleIvSize;
-        this.defaultInitializationVector = defaultInitializationVector;
-        this.cryptoData = new TrackOutput.CryptoData(schemeToCryptoMode(schemeType), keyId, defaultEncryptedBlocks, defaultClearBlocks);
+    public TrackEncryptionBox(boolean z, String str, int i, byte[] bArr, int i2, int i3, byte[] bArr2) {
+        boolean z2 = true;
+        Assertions.checkArgument((bArr2 != null ? false : z2) ^ (i == 0));
+        this.isEncrypted = z;
+        this.schemeType = str;
+        this.perSampleIvSize = i;
+        this.defaultInitializationVector = bArr2;
+        this.cryptoData = new TrackOutput.CryptoData(schemeToCryptoMode(str), bArr, i2, i3);
     }
 
-    private static int schemeToCryptoMode(String schemeType) {
-        if (schemeType == null) {
+    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
+    private static int schemeToCryptoMode(String str) {
+        if (str == null) {
             return 1;
         }
         char c = 65535;
-        switch (schemeType.hashCode()) {
+        switch (str.hashCode()) {
             case 3046605:
-                if (schemeType.equals(C.CENC_TYPE_cbc1)) {
-                    c = 2;
-                    break;
-                }
-                break;
-            case 3046671:
-                if (schemeType.equals(C.CENC_TYPE_cbcs)) {
-                    c = 3;
-                    break;
-                }
-                break;
-            case 3049879:
-                if (schemeType.equals(C.CENC_TYPE_cenc)) {
+                if (str.equals("cbc1")) {
                     c = 0;
                     break;
                 }
                 break;
-            case 3049895:
-                if (schemeType.equals(C.CENC_TYPE_cens)) {
+            case 3046671:
+                if (str.equals("cbcs")) {
                     c = 1;
+                    break;
+                }
+                break;
+            case 3049879:
+                if (str.equals("cenc")) {
+                    c = 2;
+                    break;
+                }
+                break;
+            case 3049895:
+                if (str.equals("cens")) {
+                    c = 3;
                     break;
                 }
                 break;
@@ -57,13 +56,14 @@ public final class TrackEncryptionBox {
         switch (c) {
             case 0:
             case 1:
-                return 1;
+                return 2;
             case 2:
             case 3:
-                return 2;
+                break;
             default:
-                Log.w(TAG, "Unsupported protection scheme type '" + schemeType + "'. Assuming AES-CTR crypto mode.");
-                return 1;
+                Log.w("TrackEncryptionBox", "Unsupported protection scheme type '" + str + "'. Assuming AES-CTR crypto mode.");
+                break;
         }
+        return 1;
     }
 }

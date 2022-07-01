@@ -9,37 +9,11 @@ import android.net.Uri;
 import android.util.Log;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.firebase.FirebaseApp;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class FirebaseInitProvider extends ContentProvider {
-    static final String EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.google.firebase.firebaseinitprovider";
-    private static final String TAG = "FirebaseInitProvider";
-
     @Override // android.content.ContentProvider
-    public void attachInfo(Context context, ProviderInfo info) {
-        checkContentProviderAuthority(info);
-        super.attachInfo(context, info);
-    }
-
-    @Override // android.content.ContentProvider
-    public boolean onCreate() {
-        if (FirebaseApp.initializeApp(getContext()) == null) {
-            Log.i(TAG, "FirebaseApp initialization unsuccessful");
-            return false;
-        }
-        Log.i(TAG, "FirebaseApp initialization successful");
-        return false;
-    }
-
-    private static void checkContentProviderAuthority(ProviderInfo info) {
-        Preconditions.checkNotNull(info, "FirebaseInitProvider ProviderInfo cannot be null.");
-        if (EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY.equals(info.authority)) {
-            throw new IllegalStateException("Incorrect provider authority in manifest. Most likely due to a missing applicationId variable in application's build.gradle.");
-        }
-    }
-
-    @Override // android.content.ContentProvider
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+    public int delete(Uri uri, String str, String[] strArr) {
+        return 0;
     }
 
     @Override // android.content.ContentProvider
@@ -48,17 +22,41 @@ public class FirebaseInitProvider extends ContentProvider {
     }
 
     @Override // android.content.ContentProvider
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, ContentValues contentValues) {
         return null;
     }
 
     @Override // android.content.ContentProvider
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public Cursor query(Uri uri, String[] strArr, String str, String[] strArr2, String str2) {
+        return null;
+    }
+
+    @Override // android.content.ContentProvider
+    public int update(Uri uri, ContentValues contentValues, String str, String[] strArr) {
         return 0;
     }
 
     @Override // android.content.ContentProvider
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+    public void attachInfo(Context context, ProviderInfo providerInfo) {
+        checkContentProviderAuthority(providerInfo);
+        super.attachInfo(context, providerInfo);
+    }
+
+    @Override // android.content.ContentProvider
+    public boolean onCreate() {
+        if (FirebaseApp.initializeApp(getContext()) == null) {
+            Log.i("FirebaseInitProvider", "FirebaseApp initialization unsuccessful");
+            return false;
+        }
+        Log.i("FirebaseInitProvider", "FirebaseApp initialization successful");
+        return false;
+    }
+
+    private static void checkContentProviderAuthority(ProviderInfo providerInfo) {
+        Preconditions.checkNotNull(providerInfo, "FirebaseInitProvider ProviderInfo cannot be null.");
+        if (!"com.google.firebase.firebaseinitprovider".equals(providerInfo.authority)) {
+            return;
+        }
+        throw new IllegalStateException("Incorrect provider authority in manifest. Most likely due to a missing applicationId variable in application's build.gradle.");
     }
 }

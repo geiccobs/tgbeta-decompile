@@ -16,240 +16,205 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.Bitmaps;
 import org.telegram.messenger.DocumentObject;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class ThemePreviewDrawable extends BitmapDrawable {
-    private DocumentObject.ThemeDocument themeDocument;
-
-    public ThemePreviewDrawable(File pattern, DocumentObject.ThemeDocument document) {
-        super(createPreview(pattern, document));
-        this.themeDocument = document;
+    public ThemePreviewDrawable(File file, DocumentObject.ThemeDocument themeDocument) {
+        super(createPreview(file, themeDocument));
     }
 
-    public DocumentObject.ThemeDocument getThemeDocument() {
-        return this.themeDocument;
-    }
-
-    /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r7v19, types: [android.graphics.drawable.ColorDrawable] */
-    private static Bitmap createPreview(File pattern, DocumentObject.ThemeDocument themeDocument) {
-        Integer gradientRotation;
-        Drawable otherDrawable;
-        Drawable emojiDrawable;
-        Drawable micDrawable;
-        Theme.MessageDrawable[] messageDrawable;
-        boolean hasBackground;
-        int patternColor;
-        float scaleFactor;
+    private static Bitmap createPreview(File file, DocumentObject.ThemeDocument themeDocument) {
+        boolean z;
+        int i;
+        MotionBackgroundDrawable motionBackgroundDrawable;
+        Drawable drawable;
+        boolean z2;
+        Bitmap bitmap;
+        Bitmap decodeFile;
         new RectF();
         Paint paint = new Paint();
-        Bitmap bitmap = Bitmaps.createBitmap(560, 678, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        HashMap<String, Integer> baseColors = Theme.getThemeFileValues(null, themeDocument.baseTheme.assetName, null);
-        final HashMap<String, Integer> colors = new HashMap<>(baseColors);
-        themeDocument.accent.fillAccentColors(baseColors, colors);
-        int actionBarColor = Theme.getPreviewColor(colors, Theme.key_actionBarDefault);
-        int actionBarIconColor = Theme.getPreviewColor(colors, Theme.key_actionBarDefaultIcon);
-        int messageFieldColor = Theme.getPreviewColor(colors, Theme.key_chat_messagePanelBackground);
-        int messageFieldIconColor = Theme.getPreviewColor(colors, Theme.key_chat_messagePanelIcons);
-        int messageInColor = Theme.getPreviewColor(colors, Theme.key_chat_inBubble);
-        int messageOutColor = Theme.getPreviewColor(colors, Theme.key_chat_outBubble);
-        Integer backgroundColor = colors.get(Theme.key_chat_wallpaper);
-        Integer gradientToColor1 = colors.get(Theme.key_chat_wallpaper_gradient_to1);
-        Integer gradientToColor2 = colors.get(Theme.key_chat_wallpaper_gradient_to2);
-        Integer gradientToColor3 = colors.get(Theme.key_chat_wallpaper_gradient_to3);
-        Integer gradientRotation2 = colors.get(Theme.key_chat_wallpaper_gradient_rotation);
-        if (gradientRotation2 != null) {
-            gradientRotation = gradientRotation2;
-        } else {
-            gradientRotation = 45;
+        Bitmap createBitmap = Bitmaps.createBitmap(560, 678, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(createBitmap);
+        HashMap<String, Integer> themeFileValues = Theme.getThemeFileValues(null, themeDocument.baseTheme.assetName, null);
+        final HashMap<String, Integer> hashMap = new HashMap<>(themeFileValues);
+        themeDocument.accent.fillAccentColors(themeFileValues, hashMap);
+        int previewColor = Theme.getPreviewColor(hashMap, "actionBarDefault");
+        int previewColor2 = Theme.getPreviewColor(hashMap, "actionBarDefaultIcon");
+        int previewColor3 = Theme.getPreviewColor(hashMap, "chat_messagePanelBackground");
+        int previewColor4 = Theme.getPreviewColor(hashMap, "chat_messagePanelIcons");
+        int previewColor5 = Theme.getPreviewColor(hashMap, "chat_inBubble");
+        int previewColor6 = Theme.getPreviewColor(hashMap, "chat_outBubble");
+        Integer num = hashMap.get("chat_wallpaper");
+        Integer num2 = hashMap.get("chat_wallpaper_gradient_to");
+        Integer num3 = hashMap.get("key_chat_wallpaper_gradient_to2");
+        Integer num4 = hashMap.get("key_chat_wallpaper_gradient_to3");
+        Integer num5 = hashMap.get("chat_wallpaper_gradient_rotation");
+        if (num5 == null) {
+            num5 = 45;
         }
-        Drawable backDrawable = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_back).mutate();
-        Theme.setDrawableColor(backDrawable, actionBarIconColor);
-        Drawable otherDrawable2 = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_dots).mutate();
-        Theme.setDrawableColor(otherDrawable2, actionBarIconColor);
-        Drawable emojiDrawable2 = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_smile).mutate();
-        Theme.setDrawableColor(emojiDrawable2, messageFieldIconColor);
-        Drawable micDrawable2 = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_mic).mutate();
-        Theme.setDrawableColor(micDrawable2, messageFieldIconColor);
-        Theme.MessageDrawable[] messageDrawable2 = new Theme.MessageDrawable[2];
-        int a = 0;
-        while (true) {
-            otherDrawable = otherDrawable2;
-            emojiDrawable = emojiDrawable2;
-            boolean z = true;
-            if (a >= 2) {
-                break;
+        Drawable mutate = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_back).mutate();
+        Theme.setDrawableColor(mutate, previewColor2);
+        Drawable mutate2 = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_dots).mutate();
+        Theme.setDrawableColor(mutate2, previewColor2);
+        Drawable mutate3 = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_smile).mutate();
+        Theme.setDrawableColor(mutate3, previewColor4);
+        Drawable mutate4 = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.preview_mic).mutate();
+        Theme.setDrawableColor(mutate4, previewColor4);
+        Theme.MessageDrawable[] messageDrawableArr = new Theme.MessageDrawable[2];
+        int i2 = 0;
+        while (i2 < 2) {
+            Drawable drawable2 = mutate2;
+            boolean z3 = true;
+            Paint paint2 = paint;
+            int i3 = previewColor;
+            if (i2 != 1) {
+                z3 = false;
             }
-            if (a != 1) {
-                z = false;
-            }
-            Drawable backDrawable2 = backDrawable;
-            int messageFieldColor2 = messageFieldColor;
-            messageDrawable2[a] = new Theme.MessageDrawable(2, z, false) { // from class: org.telegram.ui.Components.ThemePreviewDrawable.1
+            messageDrawableArr[i2] = new Theme.MessageDrawable(2, z3, false) { // from class: org.telegram.ui.Components.ThemePreviewDrawable.1
                 @Override // org.telegram.ui.ActionBar.Theme.MessageDrawable
-                protected int getColor(String key) {
-                    Integer color = (Integer) colors.get(key);
-                    if (color == null) {
-                        return Theme.getColor(key);
+                protected int getColor(String str) {
+                    Integer num6 = (Integer) hashMap.get(str);
+                    if (num6 == null) {
+                        return Theme.getColor(str);
                     }
-                    return color.intValue();
+                    return num6.intValue();
                 }
 
                 @Override // org.telegram.ui.ActionBar.Theme.MessageDrawable
-                protected Integer getCurrentColor(String key) {
-                    return (Integer) colors.get(key);
+                protected Integer getCurrentColor(String str) {
+                    return (Integer) hashMap.get(str);
                 }
             };
-            Theme.setDrawableColor(messageDrawable2[a], a == 1 ? messageOutColor : messageInColor);
-            a++;
-            otherDrawable2 = otherDrawable;
-            emojiDrawable2 = emojiDrawable;
-            backDrawable = backDrawable2;
-            messageFieldColor = messageFieldColor2;
+            Theme.setDrawableColor(messageDrawableArr[i2], i2 == 1 ? previewColor6 : previewColor5);
+            i2++;
+            mutate2 = drawable2;
+            paint = paint2;
+            previewColor = i3;
         }
-        Drawable backDrawable3 = backDrawable;
-        int messageFieldColor3 = messageFieldColor;
-        if (backgroundColor == null) {
-            micDrawable = micDrawable2;
-            messageDrawable = messageDrawable2;
-            hasBackground = false;
-        } else {
-            BitmapDrawable bitmapDrawable = null;
-            MotionBackgroundDrawable motionBackgroundDrawable = null;
-            if (gradientToColor1 == null) {
-                bitmapDrawable = new ColorDrawable(backgroundColor.intValue());
-                patternColor = AndroidUtilities.getPatternColor(backgroundColor.intValue());
+        Paint paint3 = paint;
+        int i4 = previewColor;
+        Drawable drawable3 = mutate2;
+        if (num != null) {
+            if (num2 == null) {
+                drawable = new ColorDrawable(num.intValue());
+                i = AndroidUtilities.getPatternColor(num.intValue());
+                motionBackgroundDrawable = null;
             } else {
-                int patternColor2 = gradientToColor2.intValue();
-                if (patternColor2 != 0) {
-                    motionBackgroundDrawable = new MotionBackgroundDrawable(backgroundColor.intValue(), gradientToColor1.intValue(), gradientToColor2.intValue(), gradientToColor3.intValue(), true);
+                if (num3.intValue() != 0) {
+                    motionBackgroundDrawable = new MotionBackgroundDrawable(num.intValue(), num2.intValue(), num3.intValue(), num4.intValue(), true);
+                    drawable = null;
                 } else {
-                    int[] gradientColors = {backgroundColor.intValue(), gradientToColor1.intValue()};
-                    bitmapDrawable = BackgroundGradientDrawable.createDitheredGradientBitmapDrawable(gradientRotation.intValue(), gradientColors, bitmap.getWidth(), bitmap.getHeight() - 120);
+                    drawable = BackgroundGradientDrawable.createDitheredGradientBitmapDrawable(num5.intValue(), new int[]{num.intValue(), num2.intValue()}, createBitmap.getWidth(), createBitmap.getHeight() - 120);
+                    motionBackgroundDrawable = null;
                 }
-                patternColor = AndroidUtilities.getPatternColor(AndroidUtilities.getAverageColor(backgroundColor.intValue(), gradientToColor1.intValue()));
+                i = AndroidUtilities.getPatternColor(AndroidUtilities.getAverageColor(num.intValue(), num2.intValue()));
             }
-            if (bitmapDrawable == null) {
-                messageDrawable = messageDrawable2;
+            if (drawable != null) {
+                z2 = false;
+                drawable.setBounds(0, 120, createBitmap.getWidth(), createBitmap.getHeight() - 120);
+                drawable.draw(canvas);
             } else {
-                messageDrawable = messageDrawable2;
-                bitmapDrawable.setBounds(0, 120, bitmap.getWidth(), bitmap.getHeight() - 120);
-                bitmapDrawable.draw(canvas);
+                z2 = false;
             }
-            Bitmap patternBitmap = null;
-            if (pattern == null) {
-                micDrawable = micDrawable2;
-            } else {
+            if (file != null) {
                 if ("application/x-tgwallpattern".equals(themeDocument.mime_type)) {
-                    micDrawable = micDrawable2;
-                    patternBitmap = SvgHelper.getBitmap(pattern, 560, 678, false);
+                    decodeFile = SvgHelper.getBitmap(file, 560, 678, z2);
                 } else {
-                    BitmapFactory.Options opts = new BitmapFactory.Options();
-                    opts.inSampleSize = 1;
-                    opts.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(pattern.getAbsolutePath(), opts);
-                    float photoW = opts.outWidth;
-                    float photoH = opts.outHeight;
-                    if (560 >= 678 && photoW > photoH) {
-                        micDrawable = micDrawable2;
-                        scaleFactor = Math.max(photoW / 560, photoH / 678);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 1;
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+                    float f = options.outWidth;
+                    float f2 = options.outHeight;
+                    float min = Math.min(f / 560, f2 / 678);
+                    if (min < 1.2f) {
+                        min = 1.0f;
+                    }
+                    options.inJustDecodeBounds = false;
+                    if (min > 1.0f && (f > 560 || f2 > 678)) {
+                        int i5 = 1;
+                        do {
+                            i5 *= 2;
+                        } while (i5 * 2 < min);
+                        options.inSampleSize = i5;
                     } else {
-                        micDrawable = micDrawable2;
-                        scaleFactor = Math.min(photoW / 560, photoH / 678);
+                        options.inSampleSize = (int) min;
                     }
-                    if (scaleFactor < 1.2f) {
-                        scaleFactor = 1.0f;
-                    }
-                    opts.inJustDecodeBounds = false;
-                    if (scaleFactor > 1.0f && (photoW > 560 || photoH > 678)) {
-                        int sample = 1;
-                        while (true) {
-                            sample *= 2;
-                            float photoH2 = photoH;
-                            if (sample * 2 >= scaleFactor) {
-                                break;
-                            }
-                            photoH = photoH2;
-                        }
-                        opts.inSampleSize = sample;
-                        patternBitmap = BitmapFactory.decodeFile(pattern.getAbsolutePath(), opts);
-                    }
-                    opts.inSampleSize = (int) scaleFactor;
-                    patternBitmap = BitmapFactory.decodeFile(pattern.getAbsolutePath(), opts);
+                    decodeFile = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
                 }
-                if (patternBitmap != null) {
+                bitmap = decodeFile;
+                if (bitmap != null) {
                     if (motionBackgroundDrawable != null) {
-                        motionBackgroundDrawable.setPatternBitmap((int) (themeDocument.accent.patternIntensity * 100.0f), patternBitmap);
-                        motionBackgroundDrawable.setBounds(0, 120, bitmap.getWidth(), bitmap.getHeight() - 120);
+                        motionBackgroundDrawable.setPatternBitmap((int) (themeDocument.accent.patternIntensity * 100.0f), bitmap);
+                        motionBackgroundDrawable.setBounds(0, 120, createBitmap.getWidth(), createBitmap.getHeight() - 120);
                         motionBackgroundDrawable.draw(canvas);
                     } else {
-                        Paint backgroundPaint = new Paint(2);
+                        Paint paint4 = new Paint(2);
                         if (themeDocument.accent.patternIntensity >= 0.0f) {
-                            backgroundPaint.setColorFilter(new PorterDuffColorFilter(patternColor, PorterDuff.Mode.SRC_IN));
+                            paint4.setColorFilter(new PorterDuffColorFilter(i, PorterDuff.Mode.SRC_IN));
                         }
-                        backgroundPaint.setAlpha(255);
-                        float scale = Math.max(560 / patternBitmap.getWidth(), 678 / patternBitmap.getHeight());
-                        int w = (int) (patternBitmap.getWidth() * scale);
-                        int h = (int) (patternBitmap.getHeight() * scale);
+                        paint4.setAlpha(255);
+                        float max = Math.max(560 / bitmap.getWidth(), 678 / bitmap.getHeight());
                         canvas.save();
-                        canvas.translate((560 - w) / 2, (678 - h) / 2);
-                        canvas.scale(scale, scale);
-                        canvas.drawBitmap(patternBitmap, 0.0f, 0.0f, backgroundPaint);
+                        canvas.translate((560 - ((int) (bitmap.getWidth() * max))) / 2, (678 - ((int) (bitmap.getHeight() * max))) / 2);
+                        canvas.scale(max, max);
+                        canvas.drawBitmap(bitmap, 0.0f, 0.0f, paint4);
                         canvas.restore();
                     }
                 }
+            } else {
+                bitmap = null;
             }
-            if (patternBitmap == null && motionBackgroundDrawable != null) {
-                motionBackgroundDrawable.setBounds(0, 120, bitmap.getWidth(), bitmap.getHeight() - 120);
+            if (bitmap == null && motionBackgroundDrawable != null) {
+                motionBackgroundDrawable.setBounds(0, 120, createBitmap.getWidth(), createBitmap.getHeight() - 120);
                 motionBackgroundDrawable.draw(canvas);
             }
-            hasBackground = true;
+            z = true;
+        } else {
+            z = false;
         }
-        if (!hasBackground) {
-            Drawable catsDrawable = Theme.createDefaultWallpaper(bitmap.getWidth(), bitmap.getHeight() - 120);
-            catsDrawable.setBounds(0, 120, bitmap.getWidth(), bitmap.getHeight() - 120);
-            catsDrawable.draw(canvas);
+        if (!z) {
+            Drawable createDefaultWallpaper = Theme.createDefaultWallpaper(createBitmap.getWidth(), createBitmap.getHeight() - 120);
+            createDefaultWallpaper.setBounds(0, 120, createBitmap.getWidth(), createBitmap.getHeight() - 120);
+            createDefaultWallpaper.draw(canvas);
         }
-        paint.setColor(actionBarColor);
-        Theme.MessageDrawable[] messageDrawable3 = messageDrawable;
-        canvas.drawRect(0.0f, 0.0f, bitmap.getWidth(), 120.0f, paint);
-        if (backDrawable3 != null) {
-            int y = (120 - backDrawable3.getIntrinsicHeight()) / 2;
-            backDrawable3.setBounds(13, y, backDrawable3.getIntrinsicWidth() + 13, backDrawable3.getIntrinsicHeight() + y);
-            backDrawable3.draw(canvas);
+        paint3.setColor(i4);
+        canvas.drawRect(0.0f, 0.0f, createBitmap.getWidth(), 120.0f, paint3);
+        if (mutate != null) {
+            int intrinsicHeight = (120 - mutate.getIntrinsicHeight()) / 2;
+            mutate.setBounds(13, intrinsicHeight, mutate.getIntrinsicWidth() + 13, mutate.getIntrinsicHeight() + intrinsicHeight);
+            mutate.draw(canvas);
         }
-        if (otherDrawable != null) {
-            int x = (bitmap.getWidth() - otherDrawable.getIntrinsicWidth()) - 10;
-            int y2 = (120 - otherDrawable.getIntrinsicHeight()) / 2;
-            otherDrawable.setBounds(x, y2, otherDrawable.getIntrinsicWidth() + x, otherDrawable.getIntrinsicHeight() + y2);
-            otherDrawable.draw(canvas);
+        if (drawable3 != null) {
+            int width = (createBitmap.getWidth() - drawable3.getIntrinsicWidth()) - 10;
+            int intrinsicHeight2 = (120 - drawable3.getIntrinsicHeight()) / 2;
+            drawable3.setBounds(width, intrinsicHeight2, drawable3.getIntrinsicWidth() + width, drawable3.getIntrinsicHeight() + intrinsicHeight2);
+            drawable3.draw(canvas);
         }
-        messageDrawable3[1].setBounds(161, 216, bitmap.getWidth() - 20, 308);
-        messageDrawable3[1].setTop(0, 560, 522, false, false);
-        messageDrawable3[1].draw(canvas);
-        messageDrawable3[1].setBounds(161, 430, bitmap.getWidth() - 20, 522);
-        messageDrawable3[1].setTop(430, 560, 522, false, false);
-        messageDrawable3[1].draw(canvas);
-        messageDrawable3[0].setBounds(20, 323, 399, 415);
-        messageDrawable3[0].setTop(323, 560, 522, false, false);
-        messageDrawable3[0].draw(canvas);
-        paint.setColor(messageFieldColor3);
-        canvas.drawRect(0.0f, bitmap.getHeight() - 120, bitmap.getWidth(), bitmap.getHeight(), paint);
-        if (emojiDrawable != null) {
-            int y3 = (bitmap.getHeight() - 120) + ((120 - emojiDrawable.getIntrinsicHeight()) / 2);
-            emojiDrawable.setBounds(22, y3, emojiDrawable.getIntrinsicWidth() + 22, emojiDrawable.getIntrinsicHeight() + y3);
-            emojiDrawable.draw(canvas);
+        messageDrawableArr[1].setBounds(161, 216, createBitmap.getWidth() - 20, 308);
+        messageDrawableArr[1].setTop(0, 560, 522, false, false);
+        messageDrawableArr[1].draw(canvas);
+        messageDrawableArr[1].setBounds(161, 430, createBitmap.getWidth() - 20, 522);
+        messageDrawableArr[1].setTop(430, 560, 522, false, false);
+        messageDrawableArr[1].draw(canvas);
+        messageDrawableArr[0].setBounds(20, 323, 399, 415);
+        messageDrawableArr[0].setTop(323, 560, 522, false, false);
+        messageDrawableArr[0].draw(canvas);
+        paint3.setColor(previewColor3);
+        canvas.drawRect(0.0f, createBitmap.getHeight() - 120, createBitmap.getWidth(), createBitmap.getHeight(), paint3);
+        if (mutate3 != null) {
+            int height = (createBitmap.getHeight() - 120) + ((120 - mutate3.getIntrinsicHeight()) / 2);
+            mutate3.setBounds(22, height, mutate3.getIntrinsicWidth() + 22, mutate3.getIntrinsicHeight() + height);
+            mutate3.draw(canvas);
         }
-        if (micDrawable != null) {
-            int x2 = (bitmap.getWidth() - micDrawable.getIntrinsicWidth()) - 22;
-            int y4 = (bitmap.getHeight() - 120) + ((120 - micDrawable.getIntrinsicHeight()) / 2);
-            Drawable micDrawable3 = micDrawable;
-            micDrawable3.setBounds(x2, y4, micDrawable.getIntrinsicWidth() + x2, micDrawable.getIntrinsicHeight() + y4);
-            micDrawable3.draw(canvas);
+        if (mutate4 != null) {
+            int width2 = (createBitmap.getWidth() - mutate4.getIntrinsicWidth()) - 22;
+            int height2 = (createBitmap.getHeight() - 120) + ((120 - mutate4.getIntrinsicHeight()) / 2);
+            mutate4.setBounds(width2, height2, mutate4.getIntrinsicWidth() + width2, mutate4.getIntrinsicHeight() + height2);
+            mutate4.draw(canvas);
         }
-        return bitmap;
+        return createBitmap;
     }
 }

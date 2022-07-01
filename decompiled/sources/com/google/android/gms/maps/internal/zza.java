@@ -1,16 +1,15 @@
 package com.google.android.gms.maps.internal;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zza {
     public static Boolean zza(byte b) {
-        switch (b) {
-            case 0:
-                return Boolean.FALSE;
-            case 1:
+        if (b != 0) {
+            if (b == 1) {
                 return Boolean.TRUE;
-            default:
-                return null;
+            }
+            return null;
         }
+        return Boolean.FALSE;
     }
 
     public static byte zzb(Boolean bool) {

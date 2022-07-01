@@ -1,19 +1,8 @@
 package androidx.dynamicanimation.animation;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-/* loaded from: classes3.dex */
-public final class SpringForce implements Force {
-    public static final float DAMPING_RATIO_HIGH_BOUNCY = 0.2f;
-    public static final float DAMPING_RATIO_LOW_BOUNCY = 0.75f;
-    public static final float DAMPING_RATIO_MEDIUM_BOUNCY = 0.5f;
-    public static final float DAMPING_RATIO_NO_BOUNCY = 1.0f;
-    public static final float STIFFNESS_HIGH = 10000.0f;
-    public static final float STIFFNESS_LOW = 200.0f;
-    public static final float STIFFNESS_MEDIUM = 1500.0f;
-    public static final float STIFFNESS_VERY_LOW = 50.0f;
-    private static final double UNSET = Double.MAX_VALUE;
-    private static final double VELOCITY_THRESHOLD_MULTIPLIER = 62.5d;
+/* loaded from: classes.dex */
+public final class SpringForce {
     private double mDampedFreq;
     double mDampingRatio;
     private double mFinalPosition;
@@ -29,48 +18,39 @@ public final class SpringForce implements Force {
         this.mNaturalFreq = Math.sqrt(1500.0d);
         this.mDampingRatio = 0.5d;
         this.mInitialized = false;
-        this.mFinalPosition = UNSET;
+        this.mFinalPosition = Double.MAX_VALUE;
         this.mMassState = new DynamicAnimation.MassState();
     }
 
-    public SpringForce(float finalPosition) {
+    public SpringForce(float f) {
         this.mNaturalFreq = Math.sqrt(1500.0d);
         this.mDampingRatio = 0.5d;
         this.mInitialized = false;
-        this.mFinalPosition = UNSET;
+        this.mFinalPosition = Double.MAX_VALUE;
         this.mMassState = new DynamicAnimation.MassState();
-        this.mFinalPosition = finalPosition;
+        this.mFinalPosition = f;
     }
 
-    public SpringForce setStiffness(float stiffness) {
-        if (stiffness <= 0.0f) {
+    public SpringForce setStiffness(float f) {
+        if (f <= 0.0f) {
             throw new IllegalArgumentException("Spring stiffness constant must be positive.");
         }
-        this.mNaturalFreq = Math.sqrt(stiffness);
+        this.mNaturalFreq = Math.sqrt(f);
         this.mInitialized = false;
         return this;
     }
 
-    public float getStiffness() {
-        double d = this.mNaturalFreq;
-        return (float) (d * d);
-    }
-
-    public SpringForce setDampingRatio(float dampingRatio) {
-        if (dampingRatio < 0.0f) {
+    public SpringForce setDampingRatio(float f) {
+        if (f < 0.0f) {
             throw new IllegalArgumentException("Damping ratio must be non-negative");
         }
-        this.mDampingRatio = dampingRatio;
+        this.mDampingRatio = f;
         this.mInitialized = false;
         return this;
     }
 
-    public float getDampingRatio() {
-        return (float) this.mDampingRatio;
-    }
-
-    public SpringForce setFinalPosition(float finalPosition) {
-        this.mFinalPosition = finalPosition;
+    public SpringForce setFinalPosition(float f) {
+        this.mFinalPosition = f;
         return this;
     }
 
@@ -78,33 +58,15 @@ public final class SpringForce implements Force {
         return (float) this.mFinalPosition;
     }
 
-    @Override // androidx.dynamicanimation.animation.Force
-    public float getAcceleration(float lastDisplacement, float lastVelocity) {
-        float lastDisplacement2 = lastDisplacement - getFinalPosition();
-        double d = this.mNaturalFreq;
-        double k = d * d;
-        double c = d * 2.0d * this.mDampingRatio;
-        double d2 = lastDisplacement2;
-        Double.isNaN(d2);
-        double d3 = (-k) * d2;
-        double d4 = lastVelocity;
-        Double.isNaN(d4);
-        return (float) (d3 - (d4 * c));
-    }
-
-    @Override // androidx.dynamicanimation.animation.Force
-    public boolean isAtEquilibrium(float value, float velocity) {
-        if (Math.abs(velocity) < this.mVelocityThreshold && Math.abs(value - getFinalPosition()) < this.mValueThreshold) {
-            return true;
-        }
-        return false;
+    public boolean isAtEquilibrium(float f, float f2) {
+        return ((double) Math.abs(f2)) < this.mVelocityThreshold && ((double) Math.abs(f - getFinalPosition())) < this.mValueThreshold;
     }
 
     private void init() {
         if (this.mInitialized) {
             return;
         }
-        if (this.mFinalPosition == UNSET) {
+        if (this.mFinalPosition == Double.MAX_VALUE) {
             throw new IllegalStateException("Error: Final position of the spring must be set before the animation starts");
         }
         double d = this.mDampingRatio;
@@ -114,63 +76,63 @@ public final class SpringForce implements Force {
             double d3 = this.mDampingRatio;
             double d4 = this.mNaturalFreq;
             this.mGammaMinus = ((-d3) * d4) - (d4 * Math.sqrt((d3 * d3) - 1.0d));
-        } else if (d >= FirebaseRemoteConfig.DEFAULT_VALUE_FOR_DOUBLE && d < 1.0d) {
+        } else if (d >= 0.0d && d < 1.0d) {
             this.mDampedFreq = this.mNaturalFreq * Math.sqrt(1.0d - (d * d));
         }
         this.mInitialized = true;
     }
 
-    public DynamicAnimation.MassState updateValues(double lastDisplacement, double lastVelocity, long timeElapsed) {
-        double displacement;
-        double cosCoeff;
+    public DynamicAnimation.MassState updateValues(double d, double d2, long j) {
+        double d3;
+        double d4;
         init();
-        double d = timeElapsed;
-        Double.isNaN(d);
-        double deltaT = d / 1000.0d;
-        double lastDisplacement2 = lastDisplacement - this.mFinalPosition;
-        double displacement2 = this.mDampingRatio;
-        if (displacement2 > 1.0d) {
-            double d2 = this.mGammaMinus;
-            double d3 = this.mGammaPlus;
-            double coeffA = lastDisplacement2 - (((d2 * lastDisplacement2) - lastVelocity) / (d2 - d3));
-            double coeffB = ((d2 * lastDisplacement2) - lastVelocity) / (d2 - d3);
-            displacement = (Math.pow(2.718281828459045d, d2 * deltaT) * coeffA) + (Math.pow(2.718281828459045d, this.mGammaPlus * deltaT) * coeffB);
-            double d4 = this.mGammaMinus;
-            double pow = coeffA * d4 * Math.pow(2.718281828459045d, d4 * deltaT);
-            double d5 = this.mGammaPlus;
-            double currentVelocity = pow + (coeffB * d5 * Math.pow(2.718281828459045d, d5 * deltaT));
-            cosCoeff = currentVelocity;
-        } else if (displacement2 == 1.0d) {
-            double d6 = this.mNaturalFreq;
-            double coeffB2 = lastVelocity + (d6 * lastDisplacement2);
-            double pow2 = ((coeffB2 * deltaT) + lastDisplacement2) * Math.pow(2.718281828459045d, (-this.mNaturalFreq) * deltaT);
-            double d7 = this.mNaturalFreq;
-            double currentVelocity2 = (pow2 * (-d7)) + (Math.pow(2.718281828459045d, (-d7) * deltaT) * coeffB2);
-            displacement = Math.pow(2.718281828459045d, (-d6) * deltaT) * ((coeffB2 * deltaT) + lastDisplacement2);
-            cosCoeff = currentVelocity2;
+        double d5 = j;
+        Double.isNaN(d5);
+        double d6 = d5 / 1000.0d;
+        double d7 = d - this.mFinalPosition;
+        double d8 = this.mDampingRatio;
+        if (d8 > 1.0d) {
+            double d9 = this.mGammaMinus;
+            double d10 = this.mGammaPlus;
+            double d11 = d7 - (((d9 * d7) - d2) / (d9 - d10));
+            double d12 = ((d7 * d9) - d2) / (d9 - d10);
+            d4 = (Math.pow(2.718281828459045d, d9 * d6) * d11) + (Math.pow(2.718281828459045d, this.mGammaPlus * d6) * d12);
+            double d13 = this.mGammaMinus;
+            double pow = d11 * d13 * Math.pow(2.718281828459045d, d13 * d6);
+            double d14 = this.mGammaPlus;
+            d3 = pow + (d12 * d14 * Math.pow(2.718281828459045d, d14 * d6));
+        } else if (d8 == 1.0d) {
+            double d15 = this.mNaturalFreq;
+            double d16 = d2 + (d15 * d7);
+            double d17 = d7 + (d16 * d6);
+            d4 = Math.pow(2.718281828459045d, (-d15) * d6) * d17;
+            double pow2 = d17 * Math.pow(2.718281828459045d, (-this.mNaturalFreq) * d6);
+            double d18 = this.mNaturalFreq;
+            d3 = (d16 * Math.pow(2.718281828459045d, (-d18) * d6)) + (pow2 * (-d18));
         } else {
-            double d8 = 1.0d / this.mDampedFreq;
-            double d9 = this.mNaturalFreq;
-            double sinCoeff = d8 * ((displacement2 * d9 * lastDisplacement2) + lastVelocity);
-            double displacement3 = Math.pow(2.718281828459045d, (-displacement2) * d9 * deltaT) * ((Math.cos(this.mDampedFreq * deltaT) * lastDisplacement2) + (Math.sin(this.mDampedFreq * deltaT) * sinCoeff));
-            double d10 = this.mNaturalFreq;
-            double lastDisplacement3 = this.mDampingRatio;
-            double d11 = (-d10) * displacement3 * lastDisplacement3;
-            double pow3 = Math.pow(2.718281828459045d, (-lastDisplacement3) * d10 * deltaT);
-            double d12 = this.mDampedFreq;
-            double sin = (-d12) * lastDisplacement2 * Math.sin(d12 * deltaT);
-            double d13 = this.mDampedFreq;
-            displacement = displacement3;
-            cosCoeff = d11 + (pow3 * (sin + (d13 * sinCoeff * Math.cos(d13 * deltaT))));
+            double d19 = 1.0d / this.mDampedFreq;
+            double d20 = this.mNaturalFreq;
+            double d21 = d19 * ((d8 * d20 * d7) + d2);
+            double pow3 = Math.pow(2.718281828459045d, (-d8) * d20 * d6) * ((Math.cos(this.mDampedFreq * d6) * d7) + (Math.sin(this.mDampedFreq * d6) * d21));
+            double d22 = this.mNaturalFreq;
+            double d23 = this.mDampingRatio;
+            double d24 = (-d22) * pow3 * d23;
+            double pow4 = Math.pow(2.718281828459045d, (-d23) * d22 * d6);
+            double d25 = this.mDampedFreq;
+            double sin = (-d25) * d7 * Math.sin(d25 * d6);
+            double d26 = this.mDampedFreq;
+            d3 = d24 + (pow4 * (sin + (d21 * d26 * Math.cos(d26 * d6))));
+            d4 = pow3;
         }
-        this.mMassState.mValue = (float) (this.mFinalPosition + displacement);
-        this.mMassState.mVelocity = (float) cosCoeff;
-        return this.mMassState;
+        DynamicAnimation.MassState massState = this.mMassState;
+        massState.mValue = (float) (d4 + this.mFinalPosition);
+        massState.mVelocity = (float) d3;
+        return massState;
     }
 
-    public void setValueThreshold(double threshold) {
-        double abs = Math.abs(threshold);
+    public void setValueThreshold(double d) {
+        double abs = Math.abs(d);
         this.mValueThreshold = abs;
-        this.mVelocityThreshold = abs * VELOCITY_THRESHOLD_MULTIPLIER;
+        this.mVelocityThreshold = abs * 62.5d;
     }
 }

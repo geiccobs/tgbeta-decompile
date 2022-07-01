@@ -9,28 +9,26 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class TLS1_2SocketFactory extends SSLSocketFactory {
+    private static final String[] ENABLED_PROTOCOLS = {"TLSv1.2"};
     private final SSLSocketFactory delegate;
-    private static final String TLS1_2_PROTOCOL = "TLSv1.2";
-    private static final String[] ENABLED_PROTOCOLS = {TLS1_2_PROTOCOL};
 
     public TLS1_2SocketFactory() {
-        SSLSocketFactory socketFactory = null;
+        SSLSocketFactory sSLSocketFactory = null;
         try {
-            SSLContext sc = SSLContext.getInstance(TLS1_2_PROTOCOL);
-            sc.init(null, null, null);
-            socketFactory = sc.getSocketFactory();
-        } catch (KeyManagementException e) {
-        } catch (NoSuchAlgorithmException e2) {
+            SSLContext sSLContext = SSLContext.getInstance("TLSv1.2");
+            sSLContext.init(null, null, null);
+            sSLSocketFactory = sSLContext.getSocketFactory();
+        } catch (KeyManagementException | NoSuchAlgorithmException unused) {
         }
-        this.delegate = socketFactory != null ? socketFactory : HttpsURLConnection.getDefaultSSLSocketFactory();
+        this.delegate = sSLSocketFactory == null ? HttpsURLConnection.getDefaultSSLSocketFactory() : sSLSocketFactory;
     }
 
     private SSLSocket forceTLS1_2(Socket socket) {
-        SSLSocket sslSocket = (SSLSocket) socket;
-        sslSocket.setEnabledProtocols(ENABLED_PROTOCOLS);
-        return sslSocket;
+        SSLSocket sSLSocket = (SSLSocket) socket;
+        sSLSocket.setEnabledProtocols(ENABLED_PROTOCOLS);
+        return sSLSocket;
     }
 
     @Override // javax.net.ssl.SSLSocketFactory
@@ -49,27 +47,27 @@ class TLS1_2SocketFactory extends SSLSocketFactory {
     }
 
     @Override // javax.net.SocketFactory
-    public SSLSocket createSocket(String host, int port) throws IOException {
-        return forceTLS1_2(this.delegate.createSocket(host, port));
+    public SSLSocket createSocket(String str, int i) throws IOException {
+        return forceTLS1_2(this.delegate.createSocket(str, i));
     }
 
     @Override // javax.net.SocketFactory
-    public SSLSocket createSocket(InetAddress host, int port) throws IOException {
-        return forceTLS1_2(this.delegate.createSocket(host, port));
+    public SSLSocket createSocket(InetAddress inetAddress, int i) throws IOException {
+        return forceTLS1_2(this.delegate.createSocket(inetAddress, i));
     }
 
     @Override // javax.net.SocketFactory
-    public SSLSocket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
-        return forceTLS1_2(this.delegate.createSocket(host, port, localHost, localPort));
+    public SSLSocket createSocket(String str, int i, InetAddress inetAddress, int i2) throws IOException {
+        return forceTLS1_2(this.delegate.createSocket(str, i, inetAddress, i2));
     }
 
     @Override // javax.net.SocketFactory
-    public SSLSocket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
-        return forceTLS1_2(this.delegate.createSocket(address, port, localAddress, localPort));
+    public SSLSocket createSocket(InetAddress inetAddress, int i, InetAddress inetAddress2, int i2) throws IOException {
+        return forceTLS1_2(this.delegate.createSocket(inetAddress, i, inetAddress2, i2));
     }
 
     @Override // javax.net.ssl.SSLSocketFactory
-    public SSLSocket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
-        return forceTLS1_2(this.delegate.createSocket(socket, host, port, autoClose));
+    public SSLSocket createSocket(Socket socket, String str, int i, boolean z) throws IOException {
+        return forceTLS1_2(this.delegate.createSocket(socket, str, i, z));
     }
 }

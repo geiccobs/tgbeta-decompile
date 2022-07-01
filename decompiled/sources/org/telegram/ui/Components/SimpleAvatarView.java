@@ -7,15 +7,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.AttributeSet;
+import android.graphics.RectF;
 import android.view.View;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.tgnet.TLObject;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class SimpleAvatarView extends View {
-    public static final int SELECT_ANIMATION_DURATION = 200;
     private ValueAnimator animator;
     private boolean isAvatarHidden;
     private float selectProgress;
@@ -25,20 +24,6 @@ public class SimpleAvatarView extends View {
 
     public SimpleAvatarView(Context context) {
         super(context);
-        this.avatarImage.setRoundRadius(AndroidUtilities.dp(28.0f));
-        this.selectPaint.setStrokeWidth(AndroidUtilities.dp(2.0f));
-        this.selectPaint.setStyle(Paint.Style.STROKE);
-    }
-
-    public SimpleAvatarView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        this.avatarImage.setRoundRadius(AndroidUtilities.dp(28.0f));
-        this.selectPaint.setStrokeWidth(AndroidUtilities.dp(2.0f));
-        this.selectPaint.setStyle(Paint.Style.STROKE);
-    }
-
-    public SimpleAvatarView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
         this.avatarImage.setRoundRadius(AndroidUtilities.dp(28.0f));
         this.selectPaint.setStrokeWidth(AndroidUtilities.dp(2.0f));
         this.selectPaint.setStyle(Paint.Style.STROKE);
@@ -60,25 +45,27 @@ public class SimpleAvatarView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.save();
-        float scale = (this.selectProgress * 0.1f) + 0.9f;
-        canvas.scale(scale, scale);
-        this.selectPaint.setColor(Theme.getColor(Theme.key_dialogTextBlue));
+        float f = (this.selectProgress * 0.1f) + 0.9f;
+        canvas.scale(f, f);
+        this.selectPaint.setColor(Theme.getColor("dialogTextBlue"));
         Paint paint = this.selectPaint;
         paint.setAlpha((int) (Color.alpha(paint.getColor()) * this.selectProgress));
-        float stroke = this.selectPaint.getStrokeWidth();
-        AndroidUtilities.rectTmp.set(stroke, stroke, getWidth() - stroke, getHeight() - stroke);
-        canvas.drawArc(AndroidUtilities.rectTmp, -90.0f, this.selectProgress * 360.0f, false, this.selectPaint);
+        float strokeWidth = this.selectPaint.getStrokeWidth();
+        RectF rectF = AndroidUtilities.rectTmp;
+        rectF.set(strokeWidth, strokeWidth, getWidth() - strokeWidth, getHeight() - strokeWidth);
+        canvas.drawArc(rectF, -90.0f, this.selectProgress * 360.0f, false, this.selectPaint);
         canvas.restore();
         if (!this.isAvatarHidden) {
-            float pad = this.selectPaint.getStrokeWidth() * 2.5f * this.selectProgress;
-            this.avatarImage.setImageCoords(pad, pad, getWidth() - (pad * 2.0f), getHeight() - (2.0f * pad));
+            float strokeWidth2 = this.selectPaint.getStrokeWidth() * 2.5f * this.selectProgress;
+            float f2 = 2.0f * strokeWidth2;
+            this.avatarImage.setImageCoords(strokeWidth2, strokeWidth2, getWidth() - f2, getHeight() - f2);
             this.avatarImage.draw(canvas);
         }
     }
 
-    public void setAvatar(TLObject obj) {
-        this.avatarDrawable.setInfo(obj);
-        this.avatarImage.setForUserOrChat(obj, this.avatarDrawable);
+    public void setAvatar(TLObject tLObject) {
+        this.avatarDrawable.setInfo(tLObject);
+        this.avatarImage.setForUserOrChat(tLObject, this.avatarDrawable);
     }
 
     @Override // android.view.View
@@ -86,51 +73,50 @@ public class SimpleAvatarView extends View {
         return this.selectProgress == 1.0f;
     }
 
-    public void setSelected(boolean s, boolean animate) {
+    public void setSelected(boolean z, boolean z2) {
         ValueAnimator valueAnimator = this.animator;
         if (valueAnimator != null) {
             valueAnimator.cancel();
         }
-        float to = 1.0f;
-        if (animate) {
-            if (!s) {
-                to = 0.0f;
+        float f = 1.0f;
+        if (z2) {
+            if (!z) {
+                f = 0.0f;
             }
-            ValueAnimator anim = ValueAnimator.ofFloat(this.selectProgress, to).setDuration(200L);
-            anim.setInterpolator(CubicBezierInterpolator.DEFAULT);
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.SimpleAvatarView$$ExternalSyntheticLambda0
+            ValueAnimator duration = ValueAnimator.ofFloat(this.selectProgress, f).setDuration(200L);
+            duration.setInterpolator(CubicBezierInterpolator.DEFAULT);
+            duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.SimpleAvatarView$$ExternalSyntheticLambda0
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                    SimpleAvatarView.this.m3058lambda$setSelected$0$orgtelegramuiComponentsSimpleAvatarView(valueAnimator2);
+                    SimpleAvatarView.this.lambda$setSelected$0(valueAnimator2);
                 }
             });
-            anim.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.SimpleAvatarView.1
+            duration.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.SimpleAvatarView.1
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animation) {
-                    if (SimpleAvatarView.this.animator == animation) {
+                public void onAnimationEnd(Animator animator) {
+                    if (SimpleAvatarView.this.animator == animator) {
                         SimpleAvatarView.this.animator = null;
                     }
                 }
             });
-            anim.start();
-            this.animator = anim;
+            duration.start();
+            this.animator = duration;
             return;
         }
-        if (!s) {
-            to = 0.0f;
+        if (!z) {
+            f = 0.0f;
         }
-        this.selectProgress = to;
+        this.selectProgress = f;
         invalidate();
     }
 
-    /* renamed from: lambda$setSelected$0$org-telegram-ui-Components-SimpleAvatarView */
-    public /* synthetic */ void m3058lambda$setSelected$0$orgtelegramuiComponentsSimpleAvatarView(ValueAnimator animation) {
-        this.selectProgress = ((Float) animation.getAnimatedValue()).floatValue();
+    public /* synthetic */ void lambda$setSelected$0(ValueAnimator valueAnimator) {
+        this.selectProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         invalidate();
     }
 
-    public void setHideAvatar(boolean h) {
-        this.isAvatarHidden = h;
+    public void setHideAvatar(boolean z) {
+        this.isAvatarHidden = z;
         invalidate();
     }
 }

@@ -2,7 +2,7 @@ package com.microsoft.appcenter.crashes.ingestion.models.json;
 
 import com.microsoft.appcenter.crashes.ingestion.models.ManagedErrorLog;
 import com.microsoft.appcenter.ingestion.models.json.AbstractLogFactory;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ManagedErrorLogFactory extends AbstractLogFactory {
     private static final ManagedErrorLogFactory sInstance = new ManagedErrorLogFactory();
 

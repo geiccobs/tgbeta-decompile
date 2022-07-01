@@ -3,7 +3,7 @@ package com.google.android.gms.internal.vision;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzff extends WeakReference<Throwable> {
     private final int zza;
 
@@ -20,16 +20,15 @@ final class zzff extends WeakReference<Throwable> {
     }
 
     public final boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass()) {
-            return false;
+        if (obj != null && obj.getClass() == zzff.class) {
+            if (this == obj) {
+                return true;
+            }
+            zzff zzffVar = (zzff) obj;
+            if (this.zza == zzffVar.zza && get() == zzffVar.get()) {
+                return true;
+            }
         }
-        if (this == obj) {
-            return true;
-        }
-        zzff zzffVar = (zzff) obj;
-        if (this.zza != zzffVar.zza || get() != zzffVar.get()) {
-            return false;
-        }
-        return true;
+        return false;
     }
 }

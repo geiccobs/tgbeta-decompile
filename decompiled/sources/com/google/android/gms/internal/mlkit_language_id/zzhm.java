@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.security.PrivilegedExceptionAction;
 import sun.misc.Unsafe;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzhm implements PrivilegedExceptionAction<Unsafe> {
     @Override // java.security.PrivilegedExceptionAction
     public final /* synthetic */ Unsafe run() throws Exception {

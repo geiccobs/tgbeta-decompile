@@ -5,37 +5,37 @@ import com.google.android.exoplayer2.metadata.id3.Id3Decoder;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.EOFException;
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Id3Peeker {
     private final ParsableByteArray scratch = new ParsableByteArray(10);
 
-    public Metadata peekId3Data(ExtractorInput input, Id3Decoder.FramePredicate id3FramePredicate) throws IOException, InterruptedException {
-        int peekedId3Bytes = 0;
+    public Metadata peekId3Data(ExtractorInput extractorInput, Id3Decoder.FramePredicate framePredicate) throws IOException, InterruptedException {
         Metadata metadata = null;
+        int i = 0;
         while (true) {
             try {
-                input.peekFully(this.scratch.data, 0, 10);
+                extractorInput.peekFully(this.scratch.data, 0, 10);
                 this.scratch.setPosition(0);
                 if (this.scratch.readUnsignedInt24() != 4801587) {
                     break;
                 }
                 this.scratch.skipBytes(3);
-                int framesLength = this.scratch.readSynchSafeInt();
-                int tagLength = framesLength + 10;
+                int readSynchSafeInt = this.scratch.readSynchSafeInt();
+                int i2 = readSynchSafeInt + 10;
                 if (metadata == null) {
-                    byte[] id3Data = new byte[tagLength];
-                    System.arraycopy(this.scratch.data, 0, id3Data, 0, 10);
-                    input.peekFully(id3Data, 10, framesLength);
-                    metadata = new Id3Decoder(id3FramePredicate).decode(id3Data, tagLength);
+                    byte[] bArr = new byte[i2];
+                    System.arraycopy(this.scratch.data, 0, bArr, 0, 10);
+                    extractorInput.peekFully(bArr, 10, readSynchSafeInt);
+                    metadata = new Id3Decoder(framePredicate).decode(bArr, i2);
                 } else {
-                    input.advancePeekPosition(framesLength);
+                    extractorInput.advancePeekPosition(readSynchSafeInt);
                 }
-                peekedId3Bytes += tagLength;
-            } catch (EOFException e) {
+                i += i2;
+            } catch (EOFException unused) {
             }
         }
-        input.resetPeekPosition();
-        input.advancePeekPosition(peekedId3Bytes);
+        extractorInput.resetPeekPosition();
+        extractorInput.advancePeekPosition(i);
         return metadata;
     }
 }

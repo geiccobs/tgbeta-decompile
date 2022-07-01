@@ -6,17 +6,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import androidx.lifecycle.ViewModelStore;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class FragmentState implements Parcelable {
     public static final Parcelable.Creator<FragmentState> CREATOR = new Parcelable.Creator<FragmentState>() { // from class: androidx.fragment.app.FragmentState.1
         @Override // android.os.Parcelable.Creator
-        public FragmentState createFromParcel(Parcel in) {
-            return new FragmentState(in);
+        public FragmentState createFromParcel(Parcel parcel) {
+            return new FragmentState(parcel);
         }
 
         @Override // android.os.Parcelable.Creator
-        public FragmentState[] newArray(int size) {
-            return new FragmentState[size];
+        public FragmentState[] newArray(int i) {
+            return new FragmentState[i];
         }
     };
     final Bundle mArguments;
@@ -32,43 +32,48 @@ public final class FragmentState implements Parcelable {
     Bundle mSavedFragmentState;
     final String mTag;
 
-    public FragmentState(Fragment frag) {
-        this.mClassName = frag.getClass().getName();
-        this.mIndex = frag.mIndex;
-        this.mFromLayout = frag.mFromLayout;
-        this.mFragmentId = frag.mFragmentId;
-        this.mContainerId = frag.mContainerId;
-        this.mTag = frag.mTag;
-        this.mRetainInstance = frag.mRetainInstance;
-        this.mDetached = frag.mDetached;
-        this.mArguments = frag.mArguments;
-        this.mHidden = frag.mHidden;
+    @Override // android.os.Parcelable
+    public int describeContents() {
+        return 0;
     }
 
-    FragmentState(Parcel in) {
-        this.mClassName = in.readString();
-        this.mIndex = in.readInt();
+    public FragmentState(Fragment fragment) {
+        this.mClassName = fragment.getClass().getName();
+        this.mIndex = fragment.mIndex;
+        this.mFromLayout = fragment.mFromLayout;
+        this.mFragmentId = fragment.mFragmentId;
+        this.mContainerId = fragment.mContainerId;
+        this.mTag = fragment.mTag;
+        this.mRetainInstance = fragment.mRetainInstance;
+        this.mDetached = fragment.mDetached;
+        this.mArguments = fragment.mArguments;
+        this.mHidden = fragment.mHidden;
+    }
+
+    FragmentState(Parcel parcel) {
+        this.mClassName = parcel.readString();
+        this.mIndex = parcel.readInt();
         boolean z = true;
-        this.mFromLayout = in.readInt() != 0;
-        this.mFragmentId = in.readInt();
-        this.mContainerId = in.readInt();
-        this.mTag = in.readString();
-        this.mRetainInstance = in.readInt() != 0;
-        this.mDetached = in.readInt() != 0;
-        this.mArguments = in.readBundle();
-        this.mHidden = in.readInt() == 0 ? false : z;
-        this.mSavedFragmentState = in.readBundle();
+        this.mFromLayout = parcel.readInt() != 0;
+        this.mFragmentId = parcel.readInt();
+        this.mContainerId = parcel.readInt();
+        this.mTag = parcel.readString();
+        this.mRetainInstance = parcel.readInt() != 0;
+        this.mDetached = parcel.readInt() != 0;
+        this.mArguments = parcel.readBundle();
+        this.mHidden = parcel.readInt() == 0 ? false : z;
+        this.mSavedFragmentState = parcel.readBundle();
     }
 
-    public Fragment instantiate(FragmentHostCallback host, FragmentContainer container, Fragment parent, FragmentManagerNonConfig childNonConfig, ViewModelStore viewModelStore) {
+    public Fragment instantiate(FragmentHostCallback fragmentHostCallback, FragmentContainer fragmentContainer, Fragment fragment, FragmentManagerNonConfig fragmentManagerNonConfig, ViewModelStore viewModelStore) {
         if (this.mInstance == null) {
-            Context context = host.getContext();
+            Context context = fragmentHostCallback.getContext();
             Bundle bundle = this.mArguments;
             if (bundle != null) {
                 bundle.setClassLoader(context.getClassLoader());
             }
-            if (container != null) {
-                this.mInstance = container.instantiate(context, this.mClassName, this.mArguments);
+            if (fragmentContainer != null) {
+                this.mInstance = fragmentContainer.instantiate(context, this.mClassName, this.mArguments);
             } else {
                 this.mInstance = Fragment.instantiate(context, this.mClassName, this.mArguments);
             }
@@ -77,42 +82,39 @@ public final class FragmentState implements Parcelable {
                 bundle2.setClassLoader(context.getClassLoader());
                 this.mInstance.mSavedFragmentState = this.mSavedFragmentState;
             }
-            this.mInstance.setIndex(this.mIndex, parent);
-            this.mInstance.mFromLayout = this.mFromLayout;
-            this.mInstance.mRestored = true;
-            this.mInstance.mFragmentId = this.mFragmentId;
-            this.mInstance.mContainerId = this.mContainerId;
-            this.mInstance.mTag = this.mTag;
-            this.mInstance.mRetainInstance = this.mRetainInstance;
-            this.mInstance.mDetached = this.mDetached;
-            this.mInstance.mHidden = this.mHidden;
-            this.mInstance.mFragmentManager = host.mFragmentManager;
+            this.mInstance.setIndex(this.mIndex, fragment);
+            Fragment fragment2 = this.mInstance;
+            fragment2.mFromLayout = this.mFromLayout;
+            fragment2.mRestored = true;
+            fragment2.mFragmentId = this.mFragmentId;
+            fragment2.mContainerId = this.mContainerId;
+            fragment2.mTag = this.mTag;
+            fragment2.mRetainInstance = this.mRetainInstance;
+            fragment2.mDetached = this.mDetached;
+            fragment2.mHidden = this.mHidden;
+            fragment2.mFragmentManager = fragmentHostCallback.mFragmentManager;
             if (FragmentManagerImpl.DEBUG) {
                 Log.v("FragmentManager", "Instantiated fragment " + this.mInstance);
             }
         }
-        this.mInstance.mChildNonConfig = childNonConfig;
-        this.mInstance.mViewModelStore = viewModelStore;
-        return this.mInstance;
+        Fragment fragment3 = this.mInstance;
+        fragment3.mChildNonConfig = fragmentManagerNonConfig;
+        fragment3.mViewModelStore = viewModelStore;
+        return fragment3;
     }
 
     @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override // android.os.Parcelable
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mClassName);
-        dest.writeInt(this.mIndex);
-        dest.writeInt(this.mFromLayout ? 1 : 0);
-        dest.writeInt(this.mFragmentId);
-        dest.writeInt(this.mContainerId);
-        dest.writeString(this.mTag);
-        dest.writeInt(this.mRetainInstance ? 1 : 0);
-        dest.writeInt(this.mDetached ? 1 : 0);
-        dest.writeBundle(this.mArguments);
-        dest.writeInt(this.mHidden ? 1 : 0);
-        dest.writeBundle(this.mSavedFragmentState);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(this.mClassName);
+        parcel.writeInt(this.mIndex);
+        parcel.writeInt(this.mFromLayout ? 1 : 0);
+        parcel.writeInt(this.mFragmentId);
+        parcel.writeInt(this.mContainerId);
+        parcel.writeString(this.mTag);
+        parcel.writeInt(this.mRetainInstance ? 1 : 0);
+        parcel.writeInt(this.mDetached ? 1 : 0);
+        parcel.writeBundle(this.mArguments);
+        parcel.writeInt(this.mHidden ? 1 : 0);
+        parcel.writeBundle(this.mSavedFragmentState);
     }
 }

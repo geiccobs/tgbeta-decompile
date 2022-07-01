@@ -2,43 +2,10 @@ package com.google.android.gms.internal.vision;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import java.nio.ByteBuffer;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzw {
-    public static Bitmap zza(Bitmap bitmap, zzs zzsVar) {
-        int i;
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        if (zzsVar.zze != 0) {
-            Matrix matrix = new Matrix();
-            switch (zzsVar.zze) {
-                case 0:
-                    i = 0;
-                    break;
-                case 1:
-                    i = 90;
-                    break;
-                case 2:
-                    i = 180;
-                    break;
-                case 3:
-                    i = 270;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported rotation degree.");
-            }
-            matrix.postRotate(i);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
-        }
-        if (zzsVar.zze == 1 || zzsVar.zze == 3) {
-            zzsVar.zza = height;
-            zzsVar.zzb = width;
-        }
-        return bitmap;
-    }
-
     public static ByteBuffer zza(Bitmap bitmap, boolean z) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();

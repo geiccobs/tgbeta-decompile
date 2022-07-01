@@ -5,28 +5,16 @@ import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.extractor.ExtractorOutput;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.TimestampAdjuster;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface TsPayloadReader {
-    public static final int FLAG_DATA_ALIGNMENT_INDICATOR = 4;
-    public static final int FLAG_PAYLOAD_UNIT_START_INDICATOR = 1;
-    public static final int FLAG_RANDOM_ACCESS_INDICATOR = 2;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Factory {
         SparseArray<TsPayloadReader> createInitialPayloadReaders();
 
         TsPayloadReader createPayloadReader(int i, EsInfo esInfo);
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    public @interface Flags {
     }
 
     void consume(ParsableByteArray parsableByteArray, int i) throws ParserException;
@@ -35,63 +23,60 @@ public interface TsPayloadReader {
 
     void seek();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class EsInfo {
         public final byte[] descriptorBytes;
         public final List<DvbSubtitleInfo> dvbSubtitleInfos;
         public final String language;
         public final int streamType;
 
-        public EsInfo(int streamType, String language, List<DvbSubtitleInfo> dvbSubtitleInfos, byte[] descriptorBytes) {
-            List<DvbSubtitleInfo> list;
-            this.streamType = streamType;
-            this.language = language;
-            if (dvbSubtitleInfos == null) {
-                list = Collections.emptyList();
+        public EsInfo(int i, String str, List<DvbSubtitleInfo> list, byte[] bArr) {
+            List<DvbSubtitleInfo> list2;
+            this.streamType = i;
+            this.language = str;
+            if (list == null) {
+                list2 = Collections.emptyList();
             } else {
-                list = Collections.unmodifiableList(dvbSubtitleInfos);
+                list2 = Collections.unmodifiableList(list);
             }
-            this.dvbSubtitleInfos = list;
-            this.descriptorBytes = descriptorBytes;
+            this.dvbSubtitleInfos = list2;
+            this.descriptorBytes = bArr;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class DvbSubtitleInfo {
         public final byte[] initializationData;
         public final String language;
-        public final int type;
 
-        public DvbSubtitleInfo(String language, int type, byte[] initializationData) {
-            this.language = language;
-            this.type = type;
-            this.initializationData = initializationData;
+        public DvbSubtitleInfo(String str, int i, byte[] bArr) {
+            this.language = str;
+            this.initializationData = bArr;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class TrackIdGenerator {
-        private static final int ID_UNSET = Integer.MIN_VALUE;
         private final int firstTrackId;
         private String formatId;
         private final String formatIdPrefix;
         private int trackId;
         private final int trackIdIncrement;
 
-        public TrackIdGenerator(int firstTrackId, int trackIdIncrement) {
-            this(Integer.MIN_VALUE, firstTrackId, trackIdIncrement);
+        public TrackIdGenerator(int i, int i2) {
+            this(Integer.MIN_VALUE, i, i2);
         }
 
-        public TrackIdGenerator(int programNumber, int firstTrackId, int trackIdIncrement) {
+        public TrackIdGenerator(int i, int i2, int i3) {
             String str;
-            if (programNumber != Integer.MIN_VALUE) {
-                str = programNumber + "/";
+            if (i != Integer.MIN_VALUE) {
+                str = i + "/";
             } else {
                 str = "";
             }
             this.formatIdPrefix = str;
-            this.firstTrackId = firstTrackId;
-            this.trackIdIncrement = trackIdIncrement;
+            this.firstTrackId = i2;
+            this.trackIdIncrement = i3;
             this.trackId = Integer.MIN_VALUE;
         }
 
@@ -112,9 +97,10 @@ public interface TsPayloadReader {
         }
 
         private void maybeThrowUninitializedError() {
-            if (this.trackId == Integer.MIN_VALUE) {
-                throw new IllegalStateException("generateNewId() must be called before retrieving ids.");
+            if (this.trackId != Integer.MIN_VALUE) {
+                return;
             }
+            throw new IllegalStateException("generateNewId() must be called before retrieving ids.");
         }
     }
 }

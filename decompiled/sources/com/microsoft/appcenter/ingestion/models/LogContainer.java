@@ -1,7 +1,7 @@
 package com.microsoft.appcenter.ingestion.models;
 
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LogContainer {
     private List<Log> logs;
 
@@ -9,20 +9,20 @@ public class LogContainer {
         return this.logs;
     }
 
-    public void setLogs(List<Log> logs) {
-        this.logs = logs;
+    public void setLogs(List<Log> list) {
+        this.logs = list;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || LogContainer.class != obj.getClass()) {
             return false;
         }
-        LogContainer container = (LogContainer) o;
         List<Log> list = this.logs;
-        return list != null ? list.equals(container.logs) : container.logs == null;
+        List<Log> list2 = ((LogContainer) obj).logs;
+        return list != null ? list.equals(list2) : list2 == null;
     }
 
     public int hashCode() {

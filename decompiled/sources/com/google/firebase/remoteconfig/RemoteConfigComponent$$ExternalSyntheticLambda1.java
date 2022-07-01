@@ -1,7 +1,8 @@
 package com.google.firebase.remoteconfig;
 
+import com.google.firebase.analytics.connector.AnalyticsConnector;
 import com.google.firebase.inject.Provider;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final /* synthetic */ class RemoteConfigComponent$$ExternalSyntheticLambda1 implements Provider {
     public static final /* synthetic */ RemoteConfigComponent$$ExternalSyntheticLambda1 INSTANCE = new RemoteConfigComponent$$ExternalSyntheticLambda1();
 
@@ -10,6 +11,8 @@ public final /* synthetic */ class RemoteConfigComponent$$ExternalSyntheticLambd
 
     @Override // com.google.firebase.inject.Provider
     public final Object get() {
-        return RemoteConfigComponent.lambda$getFetchHandler$0();
+        AnalyticsConnector lambda$getFetchHandler$0;
+        lambda$getFetchHandler$0 = RemoteConfigComponent.lambda$getFetchHandler$0();
+        return lambda$getFetchHandler$0;
     }
 }

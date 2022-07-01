@@ -5,12 +5,11 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import androidx.lifecycle.Lifecycle;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ReportFragment extends Fragment {
-    private static final String REPORT_FRAGMENT_TAG = "androidx.lifecycle.LifecycleDispatcher.report_fragment_tag";
     private ActivityInitializationListener mProcessListener;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface ActivityInitializationListener {
         void onCreate();
 
@@ -20,38 +19,34 @@ public class ReportFragment extends Fragment {
     }
 
     public static void injectIfNeededIn(Activity activity) {
-        FragmentManager manager = activity.getFragmentManager();
-        if (manager.findFragmentByTag(REPORT_FRAGMENT_TAG) == null) {
-            manager.beginTransaction().add(new ReportFragment(), REPORT_FRAGMENT_TAG).commit();
-            manager.executePendingTransactions();
+        FragmentManager fragmentManager = activity.getFragmentManager();
+        if (fragmentManager.findFragmentByTag("androidx.lifecycle.LifecycleDispatcher.report_fragment_tag") == null) {
+            fragmentManager.beginTransaction().add(new ReportFragment(), "androidx.lifecycle.LifecycleDispatcher.report_fragment_tag").commit();
+            fragmentManager.executePendingTransactions();
         }
     }
 
-    static ReportFragment get(Activity activity) {
-        return (ReportFragment) activity.getFragmentManager().findFragmentByTag(REPORT_FRAGMENT_TAG);
-    }
-
-    private void dispatchCreate(ActivityInitializationListener listener) {
-        if (listener != null) {
-            listener.onCreate();
+    private void dispatchCreate(ActivityInitializationListener activityInitializationListener) {
+        if (activityInitializationListener != null) {
+            activityInitializationListener.onCreate();
         }
     }
 
-    private void dispatchStart(ActivityInitializationListener listener) {
-        if (listener != null) {
-            listener.onStart();
+    private void dispatchStart(ActivityInitializationListener activityInitializationListener) {
+        if (activityInitializationListener != null) {
+            activityInitializationListener.onStart();
         }
     }
 
-    private void dispatchResume(ActivityInitializationListener listener) {
-        if (listener != null) {
-            listener.onResume();
+    private void dispatchResume(ActivityInitializationListener activityInitializationListener) {
+        if (activityInitializationListener != null) {
+            activityInitializationListener.onResume();
         }
     }
 
     @Override // android.app.Fragment
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
         dispatchCreate(this.mProcessListener);
         dispatch(Lifecycle.Event.ON_CREATE);
     }
@@ -93,15 +88,13 @@ public class ReportFragment extends Fragment {
         Activity activity = getActivity();
         if (activity instanceof LifecycleRegistryOwner) {
             ((LifecycleRegistryOwner) activity).getLifecycle().handleLifecycleEvent(event);
-        } else if (activity instanceof LifecycleOwner) {
+        } else if (!(activity instanceof LifecycleOwner)) {
+        } else {
             Lifecycle lifecycle = ((LifecycleOwner) activity).getLifecycle();
-            if (lifecycle instanceof LifecycleRegistry) {
-                ((LifecycleRegistry) lifecycle).handleLifecycleEvent(event);
+            if (!(lifecycle instanceof LifecycleRegistry)) {
+                return;
             }
+            ((LifecycleRegistry) lifecycle).handleLifecycleEvent(event);
         }
-    }
-
-    void setProcessListener(ActivityInitializationListener processListener) {
-        this.mProcessListener = processListener;
     }
 }

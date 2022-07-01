@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.vision;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzmh extends zzme {
     @Override // com.google.android.gms.internal.vision.zzme
     final int zza(int i, byte[] bArr, int i2, int i3) {
@@ -15,48 +15,48 @@ final class zzmh extends zzme {
         while (i2 < i3) {
             int i4 = i2 + 1;
             byte b = bArr[i2];
-            if (b >= 0) {
-                i2 = i4;
-            } else if (b < -32) {
-                if (i4 >= i3) {
-                    return b;
-                }
-                if (b >= -62) {
-                    i2 = i4 + 1;
-                    if (bArr[i4] > -65) {
+            if (b < 0) {
+                if (b < -32) {
+                    if (i4 >= i3) {
+                        return b;
                     }
-                }
-                return -1;
-            } else if (b < -16) {
-                if (i4 < i3 - 1) {
-                    int i5 = i4 + 1;
-                    byte b2 = bArr[i4];
-                    if (b2 <= -65 && ((b != -32 || b2 >= -96) && (b != -19 || b2 < -96))) {
-                        i2 = i5 + 1;
-                        if (bArr[i5] > -65) {
+                    if (b >= -62) {
+                        i2 = i4 + 1;
+                        if (bArr[i4] > -65) {
                         }
                     }
                     return -1;
-                }
-                zzd = zzmd.zzd(bArr, i4, i3);
-                return zzd;
-            } else if (i4 < i3 - 2) {
-                int i6 = i4 + 1;
-                byte b3 = bArr[i4];
-                if (b3 <= -65 && (((b << 28) + (b3 + 112)) >> 30) == 0) {
-                    int i7 = i6 + 1;
-                    if (bArr[i6] <= -65) {
-                        int i8 = i7 + 1;
-                        if (bArr[i7] <= -65) {
-                            i2 = i8;
+                } else if (b >= -16) {
+                    if (i4 < i3 - 2) {
+                        int i5 = i4 + 1;
+                        byte b2 = bArr[i4];
+                        if (b2 <= -65 && (((b << 28) + (b2 + 112)) >> 30) == 0) {
+                            int i6 = i5 + 1;
+                            if (bArr[i5] <= -65) {
+                                i4 = i6 + 1;
+                                if (bArr[i6] > -65) {
+                                }
+                            }
+                        }
+                        return -1;
+                    }
+                    zzd2 = zzmd.zzd(bArr, i4, i3);
+                    return zzd2;
+                } else if (i4 < i3 - 1) {
+                    int i7 = i4 + 1;
+                    byte b3 = bArr[i4];
+                    if (b3 <= -65 && ((b != -32 || b3 >= -96) && (b != -19 || b3 < -96))) {
+                        i2 = i7 + 1;
+                        if (bArr[i7] > -65) {
                         }
                     }
+                    return -1;
+                } else {
+                    zzd = zzmd.zzd(bArr, i4, i3);
+                    return zzd;
                 }
-                return -1;
-            } else {
-                zzd2 = zzmd.zzd(bArr, i4, i3);
-                return zzd2;
             }
+            i2 = i4;
         }
         return 0;
     }
@@ -109,13 +109,14 @@ final class zzmh extends zzme {
                 if (!zze) {
                     zzf = zzmf.zzf(b2);
                     if (zzf) {
-                        if (i6 >= i3 - 1) {
+                        if (i6 < i3 - 1) {
+                            int i8 = i6 + 1;
+                            zzmf.zzb(b2, bArr[i6], bArr[i8], cArr, i5);
+                            i = i8 + 1;
+                            i5++;
+                        } else {
                             throw zzjk.zzh();
                         }
-                        int i8 = i6 + 1;
-                        zzmf.zzb(b2, bArr[i6], bArr[i8], cArr, i5);
-                        i = i8 + 1;
-                        i5++;
                     } else if (i6 >= i3 - 2) {
                         throw zzjk.zzh();
                     } else {
@@ -138,7 +139,7 @@ final class zzmh extends zzme {
         return new String(cArr, 0, i5);
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:12:0x001f, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:12:0x001d, code lost:
         return r10 + r0;
      */
     @Override // com.google.android.gms.internal.vision.zzme
@@ -148,7 +149,7 @@ final class zzmh extends zzme {
     */
     public final int zza(java.lang.CharSequence r8, byte[] r9, int r10, int r11) {
         /*
-            Method dump skipped, instructions count: 259
+            Method dump skipped, instructions count: 256
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.vision.zzmh.zza(java.lang.CharSequence, byte[], int, int):int");

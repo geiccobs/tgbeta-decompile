@@ -1,8 +1,8 @@
 package org.webrtc;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class AudioSource extends MediaSource {
-    public AudioSource(long nativeSource) {
-        super(nativeSource);
+    public AudioSource(long j) {
+        super(j);
     }
 
     public long getNativeAudioSource() {

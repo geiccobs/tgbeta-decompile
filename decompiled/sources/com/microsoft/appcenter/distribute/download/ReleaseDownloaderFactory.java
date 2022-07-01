@@ -6,7 +6,7 @@ import com.microsoft.appcenter.distribute.ReleaseDetails;
 import com.microsoft.appcenter.distribute.download.ReleaseDownloader;
 import com.microsoft.appcenter.distribute.download.http.HttpConnectionReleaseDownloader;
 import com.microsoft.appcenter.distribute.download.manager.DownloadManagerReleaseDownloader;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ReleaseDownloaderFactory {
     public static ReleaseDownloader create(Context context, ReleaseDetails releaseDetails, ReleaseDownloader.Listener listener) {
         if (Build.VERSION.SDK_INT < 21) {

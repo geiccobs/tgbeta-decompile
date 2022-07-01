@@ -1,5 +1,5 @@
 package org.telegram.messenger;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public final /* synthetic */ class NotificationCenter$$ExternalSyntheticLambda1 implements Runnable {
     public final /* synthetic */ NotificationCenter f$0;
 

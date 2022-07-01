@@ -7,34 +7,14 @@ import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import java.util.Arrays;
-import java.util.BitSet;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzg extends AbstractSafeParcelable {
     public static final Parcelable.Creator<zzg> CREATOR = new zzh();
     final zzk[] zza;
     public final String zzb;
     public final boolean zzc;
     public final Account zzd;
-
-    public zzg(String str, boolean z, Account account, zzk... zzkVarArr) {
-        this(zzkVarArr, str, z, account);
-        if (zzkVarArr != null) {
-            int length = zzq.zza.length;
-            BitSet bitSet = new BitSet(10);
-            for (zzk zzkVar : zzkVarArr) {
-                int i = zzkVar.zzd;
-                if (i != -1) {
-                    if (!bitSet.get(i)) {
-                        bitSet.set(i);
-                    } else {
-                        String valueOf = String.valueOf(zzq.zza(i));
-                        throw new IllegalArgumentException(valueOf.length() != 0 ? "Duplicate global search section type ".concat(valueOf) : new String("Duplicate global search section type "));
-                    }
-                }
-            }
-        }
-    }
 
     public final boolean equals(Object obj) {
         if (obj instanceof zzg) {

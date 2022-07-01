@@ -1,11 +1,12 @@
 package com.google.android.gms.internal.vision;
 
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.RandomAccess;
+import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
-public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, RandomAccess {
+/* loaded from: classes.dex */
+public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw {
     private static final zzjd zza;
     private int[] zzb;
     private int zzc;
@@ -32,7 +33,7 @@ public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, Ra
         int[] iArr = this.zzb;
         System.arraycopy(iArr, i2, iArr, i, this.zzc - i2);
         this.zzc -= i2 - i;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.Collection, java.util.List
@@ -123,7 +124,7 @@ public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, Ra
             return false;
         }
         int i2 = this.zzc;
-        if (Integer.MAX_VALUE - i2 < i) {
+        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -133,7 +134,7 @@ public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, Ra
         }
         System.arraycopy(zzjdVar.zzb, 0, this.zzb, this.zzc, zzjdVar.zzc);
         this.zzc = i3;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return true;
     }
 
@@ -153,7 +154,7 @@ public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, Ra
         return sb.toString();
     }
 
-    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         int intValue = ((Integer) obj).intValue();
         zzc();
@@ -175,11 +176,11 @@ public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, Ra
             System.arraycopy(iArr, i + 1, iArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return Integer.valueOf(i3);
     }
 
-    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         int i2;
         int intValue = ((Integer) obj).intValue();
@@ -198,7 +199,7 @@ public final class zzjd extends zzhj<Integer> implements zzjl<Integer>, zzkw, Ra
         }
         this.zzb[i] = intValue;
         this.zzc++;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
     @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.AbstractCollection, java.util.Collection, java.util.List

@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzfa extends AbstractList<String> implements zzcx, RandomAccess {
     private final zzcx zzpb;
 

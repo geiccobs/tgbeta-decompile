@@ -2,9 +2,8 @@ package com.google.android.exoplayer2.source.dash.manifest;
 
 import java.util.Collections;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class AdaptationSet {
-    public static final int ID_UNSET = -1;
     public final List<Descriptor> accessibilityDescriptors;
     public final List<Descriptor> essentialProperties;
     public final int id;
@@ -12,12 +11,12 @@ public class AdaptationSet {
     public final List<Descriptor> supplementalProperties;
     public final int type;
 
-    public AdaptationSet(int id, int type, List<Representation> representations, List<Descriptor> accessibilityDescriptors, List<Descriptor> essentialProperties, List<Descriptor> supplementalProperties) {
-        this.id = id;
-        this.type = type;
-        this.representations = Collections.unmodifiableList(representations);
-        this.accessibilityDescriptors = Collections.unmodifiableList(accessibilityDescriptors);
-        this.essentialProperties = Collections.unmodifiableList(essentialProperties);
-        this.supplementalProperties = Collections.unmodifiableList(supplementalProperties);
+    public AdaptationSet(int i, int i2, List<Representation> list, List<Descriptor> list2, List<Descriptor> list3, List<Descriptor> list4) {
+        this.id = i;
+        this.type = i2;
+        this.representations = Collections.unmodifiableList(list);
+        this.accessibilityDescriptors = Collections.unmodifiableList(list2);
+        this.essentialProperties = Collections.unmodifiableList(list3);
+        this.supplementalProperties = Collections.unmodifiableList(list4);
     }
 }

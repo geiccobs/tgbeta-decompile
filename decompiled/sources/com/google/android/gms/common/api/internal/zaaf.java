@@ -10,11 +10,11 @@ import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.internal.BaseImplementation;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.IAccountAccessor;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.signin.SignInOptions;
+import com.google.android.gms.signin.zae;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,8 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaaf implements zaaw {
     private final zaaz zaa;
     private final Lock zab;
@@ -33,7 +34,7 @@ public final class zaaf implements zaaw {
     private ConnectionResult zae;
     private int zaf;
     private int zah;
-    private com.google.android.gms.signin.zae zak;
+    private zae zak;
     private boolean zal;
     private boolean zam;
     private boolean zan;
@@ -42,13 +43,13 @@ public final class zaaf implements zaaw {
     private boolean zaq;
     private final ClientSettings zar;
     private final Map<Api<?>, Boolean> zas;
-    private final Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> zat;
+    private final Api.AbstractClientBuilder<? extends zae, SignInOptions> zat;
     private int zag = 0;
     private final Bundle zai = new Bundle();
     private final Set<Api.AnyClientKey> zaj = new HashSet();
     private ArrayList<Future<?>> zau = new ArrayList<>();
 
-    public zaaf(zaaz zaazVar, ClientSettings clientSettings, Map<Api<?>, Boolean> map, GoogleApiAvailabilityLight googleApiAvailabilityLight, Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> abstractClientBuilder, Lock lock, Context context) {
+    public zaaf(zaaz zaazVar, ClientSettings clientSettings, Map<Api<?>, Boolean> map, GoogleApiAvailabilityLight googleApiAvailabilityLight, Api.AbstractClientBuilder<? extends zae, SignInOptions> abstractClientBuilder, Lock lock, Context context) {
         this.zaa = zaazVar;
         this.zar = clientSettings;
         this.zas = map;
@@ -58,7 +59,16 @@ public final class zaaf implements zaaw {
         this.zac = context;
     }
 
+    private static String zac(int i) {
+        return i != 0 ? i != 1 ? "UNKNOWN" : "STEP_GETTING_REMOTE_SERVICE" : "STEP_SERVICE_BINDINGS_AND_SIGN_IN";
+    }
+
     @Override // com.google.android.gms.common.api.internal.zaaw
+    public final void zac() {
+    }
+
+    @Override // com.google.android.gms.common.api.internal.zaaw
+    @GuardedBy("mLock")
     public final void zaa() {
         this.zaa.zab.clear();
         this.zam = false;
@@ -91,7 +101,7 @@ public final class zaaf implements zaaw {
             Preconditions.checkNotNull(this.zat);
             this.zar.zaa(Integer.valueOf(System.identityHashCode(this.zaa.zad)));
             zaam zaamVar = new zaam(this, null);
-            Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> abstractClientBuilder = this.zat;
+            Api.AbstractClientBuilder<? extends zae, SignInOptions> abstractClientBuilder = this.zat;
             Context context = this.zac;
             Looper looper = this.zaa.zad.getLooper();
             ClientSettings clientSettings = this.zar;
@@ -101,6 +111,7 @@ public final class zaaf implements zaaw {
         this.zau.add(zaba.zaa().submit(new zaag(this, hashMap)));
     }
 
+    @GuardedBy("mLock")
     public final boolean zad() {
         int i = this.zah - 1;
         this.zah = i;
@@ -112,71 +123,75 @@ public final class zaaf implements zaaw {
             Log.wtf("GACConnecting", "GoogleApiClient received too many callbacks for the given step. Clients may be in an unexpected state; GoogleApiClient will now disconnect.", new Exception());
             zab(new ConnectionResult(8, null));
             return false;
-        } else if (this.zae == null) {
-            return true;
-        } else {
-            this.zaa.zac = this.zaf;
-            zab(this.zae);
-            return false;
         }
+        ConnectionResult connectionResult = this.zae;
+        if (connectionResult == null) {
+            return true;
+        }
+        this.zaa.zac = this.zaf;
+        zab(connectionResult);
+        return false;
     }
 
+    @GuardedBy("mLock")
     public final void zaa(com.google.android.gms.signin.internal.zak zakVar) {
         if (!zab(0)) {
             return;
         }
         ConnectionResult zaa = zakVar.zaa();
-        if (!zaa.isSuccess()) {
-            if (zaa(zaa)) {
-                zag();
-                zae();
+        if (zaa.isSuccess()) {
+            com.google.android.gms.common.internal.zau zauVar = (com.google.android.gms.common.internal.zau) Preconditions.checkNotNull(zakVar.zab());
+            ConnectionResult zab = zauVar.zab();
+            if (!zab.isSuccess()) {
+                String valueOf = String.valueOf(zab);
+                StringBuilder sb = new StringBuilder(valueOf.length() + 48);
+                sb.append("Sign-in succeeded with resolve account failure: ");
+                sb.append(valueOf);
+                Log.wtf("GACConnecting", sb.toString(), new Exception());
+                zab(zab);
                 return;
             }
+            this.zan = true;
+            this.zao = (IAccountAccessor) Preconditions.checkNotNull(zauVar.zaa());
+            this.zap = zauVar.zac();
+            this.zaq = zauVar.zad();
+            zae();
+        } else if (zaa(zaa)) {
+            zag();
+            zae();
+        } else {
             zab(zaa);
-            return;
         }
-        com.google.android.gms.common.internal.zau zauVar = (com.google.android.gms.common.internal.zau) Preconditions.checkNotNull(zakVar.zab());
-        ConnectionResult zab = zauVar.zab();
-        if (!zab.isSuccess()) {
-            String valueOf = String.valueOf(zab);
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 48);
-            sb.append("Sign-in succeeded with resolve account failure: ");
-            sb.append(valueOf);
-            Log.wtf("GACConnecting", sb.toString(), new Exception());
-            zab(zab);
-            return;
-        }
-        this.zan = true;
-        this.zao = (IAccountAccessor) Preconditions.checkNotNull(zauVar.zaa());
-        this.zap = zauVar.zac();
-        this.zaq = zauVar.zad();
-        zae();
     }
 
+    @GuardedBy("mLock")
     public final void zae() {
         if (this.zah != 0) {
             return;
         }
-        if (!this.zam || this.zan) {
-            ArrayList arrayList = new ArrayList();
-            this.zag = 1;
-            this.zah = this.zaa.zaa.size();
-            for (Api.AnyClientKey<?> anyClientKey : this.zaa.zaa.keySet()) {
-                if (this.zaa.zab.containsKey(anyClientKey)) {
-                    if (zad()) {
-                        zaf();
-                    }
-                } else {
-                    arrayList.add(this.zaa.zaa.get(anyClientKey));
+        if (this.zam && !this.zan) {
+            return;
+        }
+        ArrayList arrayList = new ArrayList();
+        this.zag = 1;
+        this.zah = this.zaa.zaa.size();
+        for (Api.AnyClientKey<?> anyClientKey : this.zaa.zaa.keySet()) {
+            if (this.zaa.zab.containsKey(anyClientKey)) {
+                if (zad()) {
+                    zaf();
                 }
-            }
-            if (!arrayList.isEmpty()) {
-                this.zau.add(zaba.zaa().submit(new zaal(this, arrayList)));
+            } else {
+                arrayList.add(this.zaa.zaa.get(anyClientKey));
             }
         }
+        if (arrayList.isEmpty()) {
+            return;
+        }
+        this.zau.add(zaba.zaa().submit(new zaal(this, arrayList)));
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
+    @GuardedBy("mLock")
     public final void zaa(Bundle bundle) {
         if (!zab(1)) {
             return;
@@ -184,26 +199,30 @@ public final class zaaf implements zaaw {
         if (bundle != null) {
             this.zai.putAll(bundle);
         }
-        if (zad()) {
-            zaf();
+        if (!zad()) {
+            return;
         }
+        zaf();
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
+    @GuardedBy("mLock")
     public final void zaa(ConnectionResult connectionResult, Api<?> api, boolean z) {
         if (!zab(1)) {
             return;
         }
         zab(connectionResult, api, z);
-        if (zad()) {
-            zaf();
+        if (!zad()) {
+            return;
         }
+        zaf();
     }
 
+    @GuardedBy("mLock")
     private final void zaf() {
         this.zaa.zai();
         zaba.zaa().execute(new zaae(this));
-        com.google.android.gms.signin.zae zaeVar = this.zak;
+        zae zaeVar = this.zak;
         if (zaeVar != null) {
             if (this.zap) {
                 zaeVar.zaa((IAccountAccessor) Preconditions.checkNotNull(this.zao), this.zaq);
@@ -217,21 +236,18 @@ public final class zaaf implements zaaw {
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
-    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation.ApiMethodImpl<R, A>> T zaa(T t) {
+    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation$ApiMethodImpl<R, A>> T zaa(T t) {
         this.zaa.zad.zaa.add(t);
         return t;
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
-    public final <A extends Api.AnyClient, T extends BaseImplementation.ApiMethodImpl<? extends Result, A>> T zab(T t) {
+    public final <A extends Api.AnyClient, T extends BaseImplementation$ApiMethodImpl<? extends Result, A>> T zab(T t) {
         throw new IllegalStateException("GoogleApiClient is not connected yet.");
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
-    public final void zac() {
-    }
-
-    @Override // com.google.android.gms.common.api.internal.zaaw
+    @GuardedBy("mLock")
     public final boolean zab() {
         zah();
         zaa(true);
@@ -240,13 +256,15 @@ public final class zaaf implements zaaw {
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw
+    @GuardedBy("mLock")
     public final void zaa(int i) {
         zab(new ConnectionResult(8, null));
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:11:0x0024, code lost:
-        if (r7 != false) goto L12;
+    /* JADX WARN: Code restructure failed: missing block: B:10:0x0022, code lost:
+        if ((r5.hasResolution() || r4.zad.getErrorResolutionIntent(r5.getErrorCode()) != null) != false) goto L11;
      */
+    @javax.annotation.concurrent.GuardedBy("mLock")
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
@@ -258,37 +276,34 @@ public final class zaaf implements zaaw {
             int r0 = r0.getPriority()
             r1 = 0
             r2 = 1
-            if (r7 == 0) goto L26
+            if (r7 == 0) goto L24
             boolean r7 = r5.hasResolution()
-            if (r7 == 0) goto L15
+            if (r7 == 0) goto L14
+        L12:
             r7 = 1
-            goto L24
-        L15:
+            goto L22
+        L14:
             com.google.android.gms.common.GoogleApiAvailabilityLight r7 = r4.zad
             int r3 = r5.getErrorCode()
             android.content.Intent r7 = r7.getErrorResolutionIntent(r3)
-            if (r7 == 0) goto L23
-            r7 = 1
-            goto L24
-        L23:
+            if (r7 == 0) goto L21
+            goto L12
+        L21:
             r7 = 0
+        L22:
+            if (r7 == 0) goto L2d
         L24:
-            if (r7 == 0) goto L2f
-        L26:
             com.google.android.gms.common.ConnectionResult r7 = r4.zae
-            if (r7 == 0) goto L30
+            if (r7 == 0) goto L2c
             int r7 = r4.zaf
-            if (r0 >= r7) goto L2f
-            goto L30
-        L2f:
-            goto L31
-        L30:
+            if (r0 >= r7) goto L2d
+        L2c:
             r1 = 1
-        L31:
-            if (r1 == 0) goto L37
+        L2d:
+            if (r1 == 0) goto L33
             r4.zae = r5
             r4.zaf = r0
-        L37:
+        L33:
             com.google.android.gms.common.api.internal.zaaz r7 = r4.zaa
             java.util.Map<com.google.android.gms.common.api.Api$AnyClientKey<?>, com.google.android.gms.common.ConnectionResult> r7 = r7.zab
             com.google.android.gms.common.api.Api$AnyClientKey r6 = r6.zac()
@@ -298,6 +313,7 @@ public final class zaaf implements zaaw {
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.common.api.internal.zaaf.zab(com.google.android.gms.common.ConnectionResult, com.google.android.gms.common.api.Api, boolean):void");
     }
 
+    @GuardedBy("mLock")
     public final void zag() {
         this.zam = false;
         this.zaa.zad.zac = Collections.emptySet();
@@ -308,10 +324,12 @@ public final class zaaf implements zaaw {
         }
     }
 
+    @GuardedBy("mLock")
     public final boolean zaa(ConnectionResult connectionResult) {
         return this.zal && !connectionResult.hasResolution();
     }
 
+    @GuardedBy("mLock")
     public final void zab(ConnectionResult connectionResult) {
         zah();
         zaa(!connectionResult.hasResolution());
@@ -319,8 +337,9 @@ public final class zaaf implements zaaw {
         this.zaa.zae.zaa(connectionResult);
     }
 
+    @GuardedBy("mLock")
     private final void zaa(boolean z) {
-        com.google.android.gms.signin.zae zaeVar = this.zak;
+        zae zaeVar = this.zak;
         if (zaeVar != null) {
             if (zaeVar.isConnected() && z) {
                 zaeVar.zaa();
@@ -357,11 +376,12 @@ public final class zaaf implements zaaw {
         return hashSet;
     }
 
+    @GuardedBy("mLock")
     public final boolean zab(int i) {
         if (this.zag != i) {
             Log.w("GACConnecting", this.zaa.zad.zac());
             String valueOf = String.valueOf(this);
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 23);
+            StringBuilder sb = new StringBuilder(valueOf.length() + 23);
             sb.append("Unexpected callback in ");
             sb.append(valueOf);
             Log.w("GACConnecting", sb.toString());
@@ -382,16 +402,5 @@ public final class zaaf implements zaaw {
             return false;
         }
         return true;
-    }
-
-    private static String zac(int i) {
-        switch (i) {
-            case 0:
-                return "STEP_SERVICE_BINDINGS_AND_SIGN_IN";
-            case 1:
-                return "STEP_GETTING_REMOTE_SERVICE";
-            default:
-                return "UNKNOWN";
-        }
     }
 }

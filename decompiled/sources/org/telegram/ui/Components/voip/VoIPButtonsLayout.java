@@ -4,9 +4,8 @@ import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class VoIPButtonsLayout extends FrameLayout {
     int childPadding;
     int childWidth;
@@ -19,68 +18,67 @@ public class VoIPButtonsLayout extends FrameLayout {
     }
 
     @Override // android.view.ViewGroup, android.view.View
-    public boolean dispatchTouchEvent(MotionEvent ev) {
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
         if (!isEnabled()) {
             return false;
         }
-        return super.dispatchTouchEvent(ev);
+        return super.dispatchTouchEvent(motionEvent);
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = View.MeasureSpec.getSize(widthMeasureSpec);
+    protected void onMeasure(int i, int i2) {
+        int size = View.MeasureSpec.getSize(i);
         this.visibleChildCount = 0;
-        for (int i = 0; i < getChildCount(); i++) {
-            if (getChildAt(i).getVisibility() != 8) {
+        for (int i3 = 0; i3 < getChildCount(); i3++) {
+            if (getChildAt(i3).getVisibility() != 8) {
                 this.visibleChildCount++;
             }
         }
-        int i2 = this.childSize;
-        this.childWidth = AndroidUtilities.dp(i2);
-        int maxChildHeigth = 0;
-        this.childPadding = ((width / getChildCount()) - this.childWidth) / 2;
-        for (int i3 = 0; i3 < getChildCount(); i3++) {
-            if (getChildAt(i3).getVisibility() != 8) {
-                getChildAt(i3).measure(View.MeasureSpec.makeMeasureSpec(this.childWidth, C.BUFFER_FLAG_ENCRYPTED), heightMeasureSpec);
-                if (getChildAt(i3).getMeasuredHeight() > maxChildHeigth) {
-                    maxChildHeigth = getChildAt(i3).getMeasuredHeight();
+        this.childWidth = AndroidUtilities.dp(this.childSize);
+        this.childPadding = ((size / getChildCount()) - this.childWidth) / 2;
+        int i4 = 0;
+        for (int i5 = 0; i5 < getChildCount(); i5++) {
+            if (getChildAt(i5).getVisibility() != 8) {
+                getChildAt(i5).measure(View.MeasureSpec.makeMeasureSpec(this.childWidth, 1073741824), i2);
+                if (getChildAt(i5).getMeasuredHeight() > i4) {
+                    i4 = getChildAt(i5).getMeasuredHeight();
                 }
             }
         }
-        int h = Math.max(maxChildHeigth, AndroidUtilities.dp(80.0f));
-        setMeasuredDimension(width, h);
+        setMeasuredDimension(size, Math.max(i4, AndroidUtilities.dp(80.0f)));
     }
 
     @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
         if (this.startPadding) {
-            int startFrom = (int) (((getChildCount() - this.visibleChildCount) / 2.0f) * (this.childWidth + (this.childPadding * 2)));
-            for (int i = 0; i < getChildCount(); i++) {
-                View child = getChildAt(i);
-                if (child.getVisibility() != 8) {
-                    int i2 = this.childPadding;
-                    child.layout(startFrom + i2, 0, i2 + startFrom + child.getMeasuredWidth(), child.getMeasuredHeight());
-                    startFrom += (this.childPadding * 2) + child.getMeasuredWidth();
+            int childCount = (int) (((getChildCount() - this.visibleChildCount) / 2.0f) * (this.childWidth + (this.childPadding * 2)));
+            for (int i5 = 0; i5 < getChildCount(); i5++) {
+                View childAt = getChildAt(i5);
+                if (childAt.getVisibility() != 8) {
+                    int i6 = this.childPadding;
+                    childAt.layout(childCount + i6, 0, i6 + childCount + childAt.getMeasuredWidth(), childAt.getMeasuredHeight());
+                    childCount += (this.childPadding * 2) + childAt.getMeasuredWidth();
                 }
             }
             return;
         }
-        int padding = this.visibleChildCount > 0 ? (getMeasuredWidth() - this.childWidth) / (this.visibleChildCount - 1) : 0;
-        int k = 0;
-        for (int i3 = 0; i3 < getChildCount(); i3++) {
-            View child2 = getChildAt(i3);
-            if (child2.getVisibility() != 8) {
-                child2.layout(k * padding, 0, (k * padding) + child2.getMeasuredWidth(), child2.getMeasuredHeight());
-                k++;
+        int measuredWidth = this.visibleChildCount > 0 ? (getMeasuredWidth() - this.childWidth) / (this.visibleChildCount - 1) : 0;
+        int i7 = 0;
+        for (int i8 = 0; i8 < getChildCount(); i8++) {
+            View childAt2 = getChildAt(i8);
+            if (childAt2.getVisibility() != 8) {
+                int i9 = i7 * measuredWidth;
+                childAt2.layout(i9, 0, childAt2.getMeasuredWidth() + i9, childAt2.getMeasuredHeight());
+                i7++;
             }
         }
     }
 
-    public void setChildSize(int childSize) {
-        this.childSize = childSize;
+    public void setChildSize(int i) {
+        this.childSize = i;
     }
 
-    public void setUseStartPadding(boolean startPadding) {
-        this.startPadding = startPadding;
+    public void setUseStartPadding(boolean z) {
+        this.startPadding = z;
     }
 }

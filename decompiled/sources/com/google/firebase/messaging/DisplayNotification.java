@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat;
 import com.google.android.gms.common.util.PlatformVersion;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.messaging.CommonNotificationBuilder;
-import com.google.firebase.messaging.Constants;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -20,7 +19,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class DisplayNotification {
     private final Context context;
     private final Executor networkIoExecutor;
@@ -59,14 +58,14 @@ class DisplayNotification {
     }
 
     private void showNotification(CommonNotificationBuilder.DisplayNotificationInfo displayNotificationInfo) {
-        if (Log.isLoggable(Constants.TAG, 3)) {
-            Log.d(Constants.TAG, "Showing notification");
+        if (Log.isLoggable("FirebaseMessaging", 3)) {
+            Log.d("FirebaseMessaging", "Showing notification");
         }
         ((NotificationManager) this.context.getSystemService("notification")).notify(displayNotificationInfo.tag, displayNotificationInfo.id, displayNotificationInfo.notificationBuilder.build());
     }
 
     private ImageDownload startImageDownloadInBackground() {
-        ImageDownload create = ImageDownload.create(this.params.getString(Constants.MessageNotificationKeys.IMAGE_URL));
+        ImageDownload create = ImageDownload.create(this.params.getString("gcm.n.image"));
         if (create != null) {
             create.start(this.networkIoExecutor);
         }
@@ -81,24 +80,24 @@ class DisplayNotification {
             Bitmap bitmap = (Bitmap) Tasks.await(imageDownload.getTask(), 5L, TimeUnit.SECONDS);
             builder.setLargeIcon(bitmap);
             builder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null));
-        } catch (InterruptedException e) {
-            Log.w(Constants.TAG, "Interrupted while downloading image, showing notification without it");
+        } catch (InterruptedException unused) {
+            Log.w("FirebaseMessaging", "Interrupted while downloading image, showing notification without it");
             imageDownload.close();
             Thread.currentThread().interrupt();
-        } catch (ExecutionException e2) {
-            String valueOf = String.valueOf(e2.getCause());
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 26);
+        } catch (ExecutionException e) {
+            String valueOf = String.valueOf(e.getCause());
+            StringBuilder sb = new StringBuilder(valueOf.length() + 26);
             sb.append("Failed to download image: ");
             sb.append(valueOf);
-            Log.w(Constants.TAG, sb.toString());
-        } catch (TimeoutException e3) {
-            Log.w(Constants.TAG, "Failed to download image in time, showing notification without it");
+            Log.w("FirebaseMessaging", sb.toString());
+        } catch (TimeoutException unused2) {
+            Log.w("FirebaseMessaging", "Failed to download image in time, showing notification without it");
             imageDownload.close();
         }
     }
 
     public boolean handleNotification() {
-        if (this.params.getBoolean(Constants.MessageNotificationKeys.NO_UI)) {
+        if (this.params.getBoolean("gcm.n.noui")) {
             return true;
         }
         if (isAppForeground()) {

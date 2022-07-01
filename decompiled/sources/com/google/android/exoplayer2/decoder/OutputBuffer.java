@@ -1,5 +1,5 @@
 package com.google.android.exoplayer2.decoder;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class OutputBuffer extends Buffer {
     public int skippedOutputBufferCount;
     public long timeUs;

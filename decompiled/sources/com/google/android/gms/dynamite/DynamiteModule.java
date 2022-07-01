@@ -8,47 +8,55 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
+import androidx.annotation.RecentlyNonNull;
+import androidx.annotation.RecentlyNullable;
 import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.util.CrashUtils;
+import com.google.android.gms.common.util.DynamiteApi;
 import com.google.android.gms.dynamic.IObjectWrapper;
 import com.google.android.gms.dynamic.ObjectWrapper;
-import com.microsoft.appcenter.Constants;
 import dalvik.system.DelegateLastClassLoader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class DynamiteModule {
-    private static Boolean zza;
-    private static zzl zzb;
-    private static zzn zzc;
-    private static String zzd;
-    private final Context zzj;
+    @GuardedBy("DynamiteModule.class")
+    private static Boolean zza = null;
+    @GuardedBy("DynamiteModule.class")
+    private static zzl zzb = null;
+    @GuardedBy("DynamiteModule.class")
+    private static zzn zzc = null;
+    @GuardedBy("DynamiteModule.class")
+    private static String zzd = null;
+    @GuardedBy("DynamiteModule.class")
     private static int zze = -1;
+    private final Context zzj;
     private static final ThreadLocal<zza> zzf = new ThreadLocal<>();
     private static final ThreadLocal<Long> zzg = new com.google.android.gms.dynamite.zza();
     private static final VersionPolicy.zzb zzh = new com.google.android.gms.dynamite.zzb();
+    @RecentlyNonNull
     public static final VersionPolicy PREFER_REMOTE = new zze();
-    public static final VersionPolicy PREFER_LOCAL = new zzd();
-    public static final VersionPolicy PREFER_REMOTE_VERSION_NO_FORCE_STAGING = new zzg();
-    public static final VersionPolicy PREFER_HIGHEST_OR_LOCAL_VERSION = new zzf();
-    public static final VersionPolicy PREFER_HIGHEST_OR_LOCAL_VERSION_NO_FORCE_STAGING = new zzi();
+    @RecentlyNonNull
     public static final VersionPolicy PREFER_HIGHEST_OR_REMOTE_VERSION = new zzh();
-    private static final VersionPolicy zzi = new zzj();
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    @DynamiteApi
+    /* loaded from: classes.dex */
     public static class DynamiteLoaderClassLoader {
+        @RecentlyNullable
+        @GuardedBy("DynamiteLoaderClassLoader.class")
         public static ClassLoader sClassLoader;
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface VersionPolicy {
 
         /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-        /* loaded from: classes3.dex */
+        /* loaded from: classes.dex */
         public static class zza {
             public int zza = 0;
             public int zzb = 0;
@@ -56,7 +64,7 @@ public final class DynamiteModule {
         }
 
         /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-        /* loaded from: classes3.dex */
+        /* loaded from: classes.dex */
         public interface zzb {
             int zza(Context context, String str);
 
@@ -67,7 +75,7 @@ public final class DynamiteModule {
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class zza {
         public Cursor zza;
 
@@ -79,7 +87,8 @@ public final class DynamiteModule {
         }
     }
 
-    public static DynamiteModule load(Context context, VersionPolicy versionPolicy, String str) throws LoadingException {
+    @RecentlyNonNull
+    public static DynamiteModule load(@RecentlyNonNull Context context, @RecentlyNonNull VersionPolicy versionPolicy, @RecentlyNonNull String str) throws LoadingException {
         ThreadLocal<zza> threadLocal = zzf;
         zza zzaVar = threadLocal.get();
         zza zzaVar2 = new zza(null);
@@ -94,36 +103,38 @@ public final class DynamiteModule {
             StringBuilder sb = new StringBuilder(String.valueOf(str).length() + 68 + String.valueOf(str).length());
             sb.append("Considering local module ");
             sb.append(str);
-            sb.append(Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
+            sb.append(":");
             sb.append(i);
             sb.append(" and remote module ");
             sb.append(str);
-            sb.append(Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
+            sb.append(":");
             sb.append(i2);
             Log.i("DynamiteModule", sb.toString());
-            if (zza2.zzc == 0 || ((zza2.zzc == -1 && zza2.zza == 0) || (zza2.zzc == 1 && zza2.zzb == 0))) {
-                int i3 = zza2.zza;
-                int i4 = zza2.zzb;
+            int i3 = zza2.zzc;
+            if (i3 == 0 || ((i3 == -1 && zza2.zza == 0) || (i3 == 1 && zza2.zzb == 0))) {
+                int i4 = zza2.zza;
+                int i5 = zza2.zzb;
                 StringBuilder sb2 = new StringBuilder(91);
                 sb2.append("No acceptable module found. Local version is ");
-                sb2.append(i3);
-                sb2.append(" and remote version is ");
                 sb2.append(i4);
+                sb2.append(" and remote version is ");
+                sb2.append(i5);
                 sb2.append(".");
                 throw new LoadingException(sb2.toString(), (com.google.android.gms.dynamite.zza) null);
-            } else if (zza2.zzc == -1) {
+            } else if (i3 == -1) {
                 DynamiteModule zza3 = zza(context, str);
                 if (longValue == 0) {
                     threadLocal2.remove();
                 } else {
                     threadLocal2.set(Long.valueOf(longValue));
                 }
-                if (zzaVar2.zza != null) {
-                    zzaVar2.zza.close();
+                Cursor cursor = zzaVar2.zza;
+                if (cursor != null) {
+                    cursor.close();
                 }
                 threadLocal.set(zzaVar);
                 return zza3;
-            } else if (zza2.zzc == 1) {
+            } else if (i3 == 1) {
                 try {
                     DynamiteModule zza4 = zza(context, str, zza2.zzb);
                     if (longValue == 0) {
@@ -131,23 +142,26 @@ public final class DynamiteModule {
                     } else {
                         threadLocal2.set(Long.valueOf(longValue));
                     }
-                    if (zzaVar2.zza != null) {
-                        zzaVar2.zza.close();
+                    Cursor cursor2 = zzaVar2.zza;
+                    if (cursor2 != null) {
+                        cursor2.close();
                     }
                     threadLocal.set(zzaVar);
                     return zza4;
                 } catch (LoadingException e) {
                     String valueOf = String.valueOf(e.getMessage());
                     Log.w("DynamiteModule", valueOf.length() != 0 ? "Failed to load remote module: ".concat(valueOf) : new String("Failed to load remote module: "));
-                    if (zza2.zza != 0 && versionPolicy.zza(context, str, new zzb(zza2.zza, 0)).zzc == -1) {
+                    int i6 = zza2.zza;
+                    if (i6 != 0 && versionPolicy.zza(context, str, new zzb(i6, 0)).zzc == -1) {
                         DynamiteModule zza5 = zza(context, str);
                         if (longValue == 0) {
                             zzg.remove();
                         } else {
                             zzg.set(Long.valueOf(longValue));
                         }
-                        if (zzaVar2.zza != null) {
-                            zzaVar2.zza.close();
+                        Cursor cursor3 = zzaVar2.zza;
+                        if (cursor3 != null) {
+                            cursor3.close();
                         }
                         zzf.set(zzaVar);
                         return zza5;
@@ -155,10 +169,10 @@ public final class DynamiteModule {
                     throw new LoadingException("Remote load failed. No local fallback found.", e, null);
                 }
             } else {
-                int i5 = zza2.zzc;
+                int i7 = zza2.zzc;
                 StringBuilder sb3 = new StringBuilder(47);
                 sb3.append("VersionPolicy returned invalid code:");
-                sb3.append(i5);
+                sb3.append(i7);
                 throw new LoadingException(sb3.toString(), (com.google.android.gms.dynamite.zza) null);
             }
         } catch (Throwable th) {
@@ -167,8 +181,9 @@ public final class DynamiteModule {
             } else {
                 zzg.set(Long.valueOf(longValue));
             }
-            if (zzaVar2.zza != null) {
-                zzaVar2.zza.close();
+            Cursor cursor4 = zzaVar2.zza;
+            if (cursor4 != null) {
+                cursor4.close();
             }
             zzf.set(zzaVar);
             throw th;
@@ -176,7 +191,7 @@ public final class DynamiteModule {
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class LoadingException extends Exception {
         private LoadingException(String str) {
             super(str);
@@ -195,11 +210,11 @@ public final class DynamiteModule {
         }
     }
 
+    /* JADX INFO: Access modifiers changed from: private */
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class zzb implements VersionPolicy.zzb {
         private final int zza;
-        private final int zzb = 0;
 
         public zzb(int i, int i2) {
             this.zza = i;
@@ -216,7 +231,7 @@ public final class DynamiteModule {
         }
     }
 
-    public static int getLocalVersion(Context context, String str) {
+    public static int getLocalVersion(@RecentlyNonNull Context context, @RecentlyNonNull String str) {
         try {
             ClassLoader classLoader = context.getApplicationContext().getClassLoader();
             StringBuilder sb = new StringBuilder(String.valueOf(str).length() + 61);
@@ -228,7 +243,7 @@ public final class DynamiteModule {
             Field declaredField2 = loadClass.getDeclaredField("MODULE_VERSION");
             if (!Objects.equal(declaredField.get(null), str)) {
                 String valueOf = String.valueOf(declaredField.get(null));
-                StringBuilder sb2 = new StringBuilder(String.valueOf(valueOf).length() + 51 + String.valueOf(str).length());
+                StringBuilder sb2 = new StringBuilder(valueOf.length() + 51 + String.valueOf(str).length());
                 sb2.append("Module descriptor id '");
                 sb2.append(valueOf);
                 sb2.append("' didn't match expected id '");
@@ -238,21 +253,21 @@ public final class DynamiteModule {
                 return 0;
             }
             return declaredField2.getInt(null);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException unused) {
             StringBuilder sb3 = new StringBuilder(String.valueOf(str).length() + 45);
             sb3.append("Local module descriptor class for ");
             sb3.append(str);
             sb3.append(" not found.");
             Log.w("DynamiteModule", sb3.toString());
             return 0;
-        } catch (Exception e2) {
-            String valueOf2 = String.valueOf(e2.getMessage());
+        } catch (Exception e) {
+            String valueOf2 = String.valueOf(e.getMessage());
             Log.e("DynamiteModule", valueOf2.length() != 0 ? "Failed to load module descriptor class: ".concat(valueOf2) : new String("Failed to load module descriptor class: "));
             return 0;
         }
     }
 
-    public static int zza(Context context, String str, boolean z) {
+    public static int zza(@RecentlyNonNull Context context, @RecentlyNonNull String str, boolean z) {
         Field declaredField;
         ClassLoader classLoader;
         try {
@@ -263,7 +278,7 @@ public final class DynamiteModule {
                         declaredField = context.getApplicationContext().getClassLoader().loadClass(DynamiteLoaderClassLoader.class.getName()).getDeclaredField("sClassLoader");
                     } catch (ClassNotFoundException | IllegalAccessException | NoSuchFieldException e) {
                         String valueOf = String.valueOf(e);
-                        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 30);
+                        StringBuilder sb = new StringBuilder(valueOf.length() + 30);
                         sb.append("Failed to load module via V2: ");
                         sb.append(valueOf);
                         Log.w("DynamiteModule", sb.toString());
@@ -277,7 +292,7 @@ public final class DynamiteModule {
                             } else {
                                 try {
                                     zza(classLoader2);
-                                } catch (LoadingException e2) {
+                                } catch (LoadingException unused) {
                                 }
                                 bool = Boolean.TRUE;
                             }
@@ -300,7 +315,7 @@ public final class DynamiteModule {
                                     return zzc2;
                                 }
                                 return zzc2;
-                            } catch (LoadingException e3) {
+                            } catch (LoadingException unused2) {
                                 declaredField.set(null, ClassLoader.getSystemClassLoader());
                                 bool = Boolean.FALSE;
                             }
@@ -311,8 +326,8 @@ public final class DynamiteModule {
                 if (bool.booleanValue()) {
                     try {
                         return zzc(context, str, z);
-                    } catch (LoadingException e4) {
-                        String valueOf2 = String.valueOf(e4.getMessage());
+                    } catch (LoadingException e2) {
+                        String valueOf2 = String.valueOf(e2.getMessage());
                         Log.w("DynamiteModule", valueOf2.length() != 0 ? "Failed to retrieve remote module version: ".concat(valueOf2) : new String("Failed to retrieve remote module version: "));
                         return 0;
                     }
@@ -335,50 +350,50 @@ public final class DynamiteModule {
         try {
             try {
                 int zzb2 = zza2.zzb();
-                if (zzb2 >= 3) {
-                    Cursor cursor2 = (Cursor) ObjectWrapper.unwrap(zza2.zza(ObjectWrapper.wrap(context), str, z, zzg.get().longValue()));
-                    if (cursor2 != null) {
-                        try {
-                            if (cursor2.moveToFirst()) {
-                                int i = cursor2.getInt(0);
-                                if (i <= 0 || !zza(cursor2)) {
-                                    cursor = cursor2;
-                                }
-                                if (cursor != null) {
-                                    cursor.close();
-                                }
-                                return i;
-                            }
-                        } catch (RemoteException e2) {
-                            e = e2;
-                            cursor = cursor2;
-                            String valueOf = String.valueOf(e.getMessage());
-                            Log.w("DynamiteModule", valueOf.length() != 0 ? "Failed to retrieve remote module version: ".concat(valueOf) : new String("Failed to retrieve remote module version: "));
-                            if (cursor != null) {
-                                cursor.close();
-                            }
-                            return 0;
-                        } catch (Throwable th) {
-                            th = th;
-                            cursor = cursor2;
-                            if (cursor != null) {
-                                cursor.close();
-                            }
-                            throw th;
-                        }
+                if (zzb2 < 3) {
+                    if (zzb2 == 2) {
+                        Log.w("DynamiteModule", "IDynamite loader version = 2, no high precision latency measurement.");
+                        return zza2.zzb(ObjectWrapper.wrap(context), str, z);
                     }
-                    Log.w("DynamiteModule", "Failed to retrieve remote module version.");
-                    if (cursor2 != null) {
-                        cursor2.close();
-                    }
-                    return 0;
-                } else if (zzb2 == 2) {
-                    Log.w("DynamiteModule", "IDynamite loader version = 2, no high precision latency measurement.");
-                    return zza2.zzb(ObjectWrapper.wrap(context), str, z);
-                } else {
                     Log.w("DynamiteModule", "IDynamite loader version < 2, falling back to getModuleVersion2");
                     return zza2.zza(ObjectWrapper.wrap(context), str, z);
                 }
+                Cursor cursor2 = (Cursor) ObjectWrapper.unwrap(zza2.zza(ObjectWrapper.wrap(context), str, z, zzg.get().longValue()));
+                if (cursor2 != null) {
+                    try {
+                        if (cursor2.moveToFirst()) {
+                            int i = cursor2.getInt(0);
+                            if (i <= 0 || !zza(cursor2)) {
+                                cursor = cursor2;
+                            }
+                            if (cursor != null) {
+                                cursor.close();
+                            }
+                            return i;
+                        }
+                    } catch (RemoteException e2) {
+                        e = e2;
+                        cursor = cursor2;
+                        String valueOf = String.valueOf(e.getMessage());
+                        Log.w("DynamiteModule", valueOf.length() != 0 ? "Failed to retrieve remote module version: ".concat(valueOf) : new String("Failed to retrieve remote module version: "));
+                        if (cursor != null) {
+                            cursor.close();
+                        }
+                        return 0;
+                    } catch (Throwable th) {
+                        th = th;
+                        cursor = cursor2;
+                        if (cursor != null) {
+                            cursor.close();
+                        }
+                        throw th;
+                    }
+                }
+                Log.w("DynamiteModule", "Failed to retrieve remote module version.");
+                if (cursor2 != null) {
+                    cursor2.close();
+                }
+                return 0;
             } catch (RemoteException e3) {
                 e = e3;
             }
@@ -387,10 +402,10 @@ public final class DynamiteModule {
         }
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:21:0x0076, code lost:
-        if (zza(r10) != false) goto L23;
+    /* JADX WARN: Code restructure failed: missing block: B:21:0x0073, code lost:
+        if (zza(r10) != false) goto L26;
      */
-    /* JADX WARN: Removed duplicated region for block: B:43:0x00b0  */
+    /* JADX WARN: Removed duplicated region for block: B:46:0x00ad  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
@@ -398,107 +413,107 @@ public final class DynamiteModule {
     private static int zzc(android.content.Context r10, java.lang.String r11, boolean r12) throws com.google.android.gms.dynamite.DynamiteModule.LoadingException {
         /*
             r0 = 0
-            java.lang.ThreadLocal<java.lang.Long> r1 = com.google.android.gms.dynamite.DynamiteModule.zzg     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            java.lang.Object r1 = r1.get()     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            java.lang.Long r1 = (java.lang.Long) r1     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            long r1 = r1.longValue()     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            android.content.ContentResolver r3 = r10.getContentResolver()     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            if (r12 == 0) goto L18
+            java.lang.ThreadLocal<java.lang.Long> r1 = com.google.android.gms.dynamite.DynamiteModule.zzg     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            java.lang.Object r1 = r1.get()     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            java.lang.Long r1 = (java.lang.Long) r1     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            long r1 = r1.longValue()     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            android.content.ContentResolver r3 = r10.getContentResolver()     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            if (r12 == 0) goto L16
             java.lang.String r10 = "api_force_staging"
-            goto L1a
-        L18:
+            goto L18
+        L16:
             java.lang.String r10 = "api"
-        L1a:
-            android.net.Uri$Builder r12 = new android.net.Uri$Builder     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            r12.<init>()     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
+        L18:
+            android.net.Uri$Builder r12 = new android.net.Uri$Builder     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            r12.<init>()     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
             java.lang.String r4 = "content"
-            android.net.Uri$Builder r12 = r12.scheme(r4)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
+            android.net.Uri$Builder r12 = r12.scheme(r4)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
             java.lang.String r4 = "com.google.android.gms.chimera"
-            android.net.Uri$Builder r12 = r12.authority(r4)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            android.net.Uri$Builder r10 = r12.path(r10)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            android.net.Uri$Builder r10 = r10.appendPath(r11)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
+            android.net.Uri$Builder r12 = r12.authority(r4)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            android.net.Uri$Builder r10 = r12.path(r10)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            android.net.Uri$Builder r10 = r10.appendPath(r11)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
             java.lang.String r11 = "requestStartTime"
-            java.lang.String r12 = java.lang.String.valueOf(r1)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            android.net.Uri$Builder r10 = r10.appendQueryParameter(r11, r12)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            android.net.Uri r4 = r10.build()     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
+            java.lang.String r12 = java.lang.String.valueOf(r1)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            android.net.Uri$Builder r10 = r10.appendQueryParameter(r11, r12)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            android.net.Uri r4 = r10.build()     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
             r5 = 0
             r6 = 0
             r7 = 0
             r8 = 0
-            android.database.Cursor r10 = r3.query(r4, r5, r6, r7, r8)     // Catch: java.lang.Throwable -> L9b java.lang.Exception -> L9d
-            if (r10 == 0) goto L83
-            boolean r11 = r10.moveToFirst()     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-            if (r11 == 0) goto L83
+            android.database.Cursor r10 = r3.query(r4, r5, r6, r7, r8)     // Catch: java.lang.Throwable -> L98 java.lang.Exception -> L9a
+            if (r10 == 0) goto L80
+            boolean r11 = r10.moveToFirst()     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+            if (r11 == 0) goto L80
             r11 = 0
-            int r11 = r10.getInt(r11)     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-            if (r11 <= 0) goto L7c
+            int r11 = r10.getInt(r11)     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+            if (r11 <= 0) goto L79
             java.lang.Class<com.google.android.gms.dynamite.DynamiteModule> r12 = com.google.android.gms.dynamite.DynamiteModule.class
-            monitor-enter(r12)     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
+            monitor-enter(r12)     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
             r1 = 2
-            java.lang.String r1 = r10.getString(r1)     // Catch: java.lang.Throwable -> L79
-            com.google.android.gms.dynamite.DynamiteModule.zzd = r1     // Catch: java.lang.Throwable -> L79
+            java.lang.String r1 = r10.getString(r1)     // Catch: java.lang.Throwable -> L76
+            com.google.android.gms.dynamite.DynamiteModule.zzd = r1     // Catch: java.lang.Throwable -> L76
             java.lang.String r1 = "loaderVersion"
-            int r1 = r10.getColumnIndex(r1)     // Catch: java.lang.Throwable -> L79
-            if (r1 < 0) goto L71
-            int r1 = r10.getInt(r1)     // Catch: java.lang.Throwable -> L79
-            com.google.android.gms.dynamite.DynamiteModule.zze = r1     // Catch: java.lang.Throwable -> L79
-        L71:
-            monitor-exit(r12)     // Catch: java.lang.Throwable -> L79
-            boolean r12 = zza(r10)     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-            if (r12 == 0) goto L7c
-            goto L7d
-        L79:
+            int r1 = r10.getColumnIndex(r1)     // Catch: java.lang.Throwable -> L76
+            if (r1 < 0) goto L6e
+            int r1 = r10.getInt(r1)     // Catch: java.lang.Throwable -> L76
+            com.google.android.gms.dynamite.DynamiteModule.zze = r1     // Catch: java.lang.Throwable -> L76
+        L6e:
+            monitor-exit(r12)     // Catch: java.lang.Throwable -> L76
+            boolean r12 = zza(r10)     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+            if (r12 == 0) goto L79
+            goto L7a
+        L76:
             r11 = move-exception
-            monitor-exit(r12)     // Catch: java.lang.Throwable -> L79
-            throw r11     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-        L7c:
+            monitor-exit(r12)     // Catch: java.lang.Throwable -> L76
+            throw r11     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+        L79:
             r0 = r10
-        L7d:
-            if (r0 == 0) goto L82
+        L7a:
+            if (r0 == 0) goto L7f
             r0.close()
-        L82:
+        L7f:
             return r11
-        L83:
+        L80:
             java.lang.String r11 = "DynamiteModule"
             java.lang.String r12 = "Failed to retrieve remote module version."
-            android.util.Log.w(r11, r12)     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-            com.google.android.gms.dynamite.DynamiteModule$LoadingException r11 = new com.google.android.gms.dynamite.DynamiteModule$LoadingException     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
+            android.util.Log.w(r11, r12)     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+            com.google.android.gms.dynamite.DynamiteModule$LoadingException r11 = new com.google.android.gms.dynamite.DynamiteModule$LoadingException     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
             java.lang.String r12 = "Failed to connect to dynamite module ContentResolver."
-            r11.<init>(r12, r0)     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-            throw r11     // Catch: java.lang.Throwable -> L92 java.lang.Exception -> L96
-        L92:
+            r11.<init>(r12, r0)     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+            throw r11     // Catch: java.lang.Throwable -> L8f java.lang.Exception -> L93
+        L8f:
             r11 = move-exception
             r0 = r10
             r10 = r11
-            goto Lae
-        L96:
+            goto Lab
+        L93:
             r11 = move-exception
             r9 = r11
             r11 = r10
             r10 = r9
-            goto L9f
-        L9b:
+            goto L9c
+        L98:
             r10 = move-exception
-            goto Lae
-        L9d:
+            goto Lab
+        L9a:
             r10 = move-exception
             r11 = r0
-        L9f:
-            boolean r12 = r10 instanceof com.google.android.gms.dynamite.DynamiteModule.LoadingException     // Catch: java.lang.Throwable -> Lac
-            if (r12 == 0) goto La4
-            throw r10     // Catch: java.lang.Throwable -> Lac
-        La4:
-            com.google.android.gms.dynamite.DynamiteModule$LoadingException r12 = new com.google.android.gms.dynamite.DynamiteModule$LoadingException     // Catch: java.lang.Throwable -> Lac
+        L9c:
+            boolean r12 = r10 instanceof com.google.android.gms.dynamite.DynamiteModule.LoadingException     // Catch: java.lang.Throwable -> La9
+            if (r12 == 0) goto La1
+            throw r10     // Catch: java.lang.Throwable -> La9
+        La1:
+            com.google.android.gms.dynamite.DynamiteModule$LoadingException r12 = new com.google.android.gms.dynamite.DynamiteModule$LoadingException     // Catch: java.lang.Throwable -> La9
             java.lang.String r1 = "V2 version check failed"
-            r12.<init>(r1, r10, r0)     // Catch: java.lang.Throwable -> Lac
-            throw r12     // Catch: java.lang.Throwable -> Lac
-        Lac:
+            r12.<init>(r1, r10, r0)     // Catch: java.lang.Throwable -> La9
+            throw r12     // Catch: java.lang.Throwable -> La9
+        La9:
             r10 = move-exception
             r0 = r11
-        Lae:
-            if (r0 == 0) goto Lb3
+        Lab:
+            if (r0 == 0) goto Lb0
             r0.close()
-        Lb3:
+        Lb0:
             throw r10
         */
         throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.dynamite.DynamiteModule.zzc(android.content.Context, java.lang.String, boolean):int");
@@ -506,14 +521,14 @@ public final class DynamiteModule {
 
     private static boolean zza(Cursor cursor) {
         zza zzaVar = zzf.get();
-        if (zzaVar != null && zzaVar.zza == null) {
-            zzaVar.zza = cursor;
-            return true;
+        if (zzaVar == null || zzaVar.zza != null) {
+            return false;
         }
-        return false;
+        zzaVar.zza = cursor;
+        return true;
     }
 
-    public static int getRemoteVersion(Context context, String str) {
+    public static int getRemoteVersion(@RecentlyNonNull Context context, @RecentlyNonNull String str) {
         return zza(context, str, false);
     }
 
@@ -593,18 +608,19 @@ public final class DynamiteModule {
                         zzlVar = new zzk(iBinder);
                     }
                 }
+                if (zzlVar != null) {
+                    zzb = zzlVar;
+                    return zzlVar;
+                }
             } catch (Exception e) {
                 String valueOf = String.valueOf(e.getMessage());
                 Log.e("DynamiteModule", valueOf.length() != 0 ? "Failed to load IDynamiteLoader from GmsCore: ".concat(valueOf) : new String("Failed to load IDynamiteLoader from GmsCore: "));
             }
-            if (zzlVar == null) {
-                return null;
-            }
-            zzb = zzlVar;
-            return zzlVar;
+            return null;
         }
     }
 
+    @RecentlyNonNull
     public final Context getModuleContext() {
         return this.zzj;
     }
@@ -653,6 +669,7 @@ public final class DynamiteModule {
         return valueOf;
     }
 
+    @GuardedBy("DynamiteModule.class")
     private static void zza(ClassLoader classLoader) throws LoadingException {
         zzn zznVar;
         try {
@@ -673,7 +690,8 @@ public final class DynamiteModule {
         }
     }
 
-    public final IBinder instantiate(String str) throws LoadingException {
+    @RecentlyNonNull
+    public final IBinder instantiate(@RecentlyNonNull String str) throws LoadingException {
         try {
             return (IBinder) this.zzj.getClassLoader().loadClass(str).newInstance();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
@@ -684,5 +702,13 @@ public final class DynamiteModule {
 
     private DynamiteModule(Context context) {
         this.zzj = (Context) Preconditions.checkNotNull(context);
+    }
+
+    static {
+        new zzd();
+        new zzg();
+        new zzf();
+        new zzi();
+        new zzj();
     }
 }

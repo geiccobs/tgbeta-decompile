@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.extractor;
 
 import com.google.android.exoplayer2.util.Assertions;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface SeekMap {
     long getDurationUs();
 
@@ -9,23 +9,23 @@ public interface SeekMap {
 
     boolean isSeekable();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class Unseekable implements SeekMap {
         private final long durationUs;
         private final SeekPoints startSeekPoints;
 
-        public Unseekable(long durationUs) {
-            this(durationUs, 0L);
-        }
-
-        public Unseekable(long durationUs, long startPosition) {
-            this.durationUs = durationUs;
-            this.startSeekPoints = new SeekPoints(startPosition == 0 ? SeekPoint.START : new SeekPoint(0L, startPosition));
-        }
-
         @Override // com.google.android.exoplayer2.extractor.SeekMap
         public boolean isSeekable() {
             return false;
+        }
+
+        public Unseekable(long j) {
+            this(j, 0L);
+        }
+
+        public Unseekable(long j, long j2) {
+            this.durationUs = j;
+            this.startSeekPoints = new SeekPoints(j2 == 0 ? SeekPoint.START : new SeekPoint(0L, j2));
         }
 
         @Override // com.google.android.exoplayer2.extractor.SeekMap
@@ -34,23 +34,23 @@ public interface SeekMap {
         }
 
         @Override // com.google.android.exoplayer2.extractor.SeekMap
-        public SeekPoints getSeekPoints(long timeUs) {
+        public SeekPoints getSeekPoints(long j) {
             return this.startSeekPoints;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class SeekPoints {
         public final SeekPoint first;
         public final SeekPoint second;
 
-        public SeekPoints(SeekPoint point) {
-            this(point, point);
+        public SeekPoints(SeekPoint seekPoint) {
+            this(seekPoint, seekPoint);
         }
 
-        public SeekPoints(SeekPoint first, SeekPoint second) {
-            this.first = (SeekPoint) Assertions.checkNotNull(first);
-            this.second = (SeekPoint) Assertions.checkNotNull(second);
+        public SeekPoints(SeekPoint seekPoint, SeekPoint seekPoint2) {
+            this.first = (SeekPoint) Assertions.checkNotNull(seekPoint);
+            this.second = (SeekPoint) Assertions.checkNotNull(seekPoint2);
         }
 
         public String toString() {
@@ -72,11 +72,11 @@ public interface SeekMap {
             if (this == obj) {
                 return true;
             }
-            if (obj == null || getClass() != obj.getClass()) {
+            if (obj == null || SeekPoints.class != obj.getClass()) {
                 return false;
             }
-            SeekPoints other = (SeekPoints) obj;
-            return this.first.equals(other.first) && this.second.equals(other.second);
+            SeekPoints seekPoints = (SeekPoints) obj;
+            return this.first.equals(seekPoints.first) && this.second.equals(seekPoints.second);
         }
 
         public int hashCode() {

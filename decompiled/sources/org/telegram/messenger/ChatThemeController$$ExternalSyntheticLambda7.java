@@ -2,8 +2,8 @@ package org.telegram.messenger;
 
 import android.util.Pair;
 import org.telegram.tgnet.ResultCallback;
-import org.telegram.tgnet.TLRPC;
-/* loaded from: classes4.dex */
+import org.telegram.tgnet.TLRPC$TL_error;
+/* loaded from: classes.dex */
 public final /* synthetic */ class ChatThemeController$$ExternalSyntheticLambda7 implements ResultCallback {
     public static final /* synthetic */ ChatThemeController$$ExternalSyntheticLambda7 INSTANCE = new ChatThemeController$$ExternalSyntheticLambda7();
 
@@ -16,12 +16,7 @@ public final /* synthetic */ class ChatThemeController$$ExternalSyntheticLambda7
     }
 
     @Override // org.telegram.tgnet.ResultCallback
-    public /* synthetic */ void onError(Throwable th) {
-        ResultCallback.CC.$default$onError(this, th);
-    }
-
-    @Override // org.telegram.tgnet.ResultCallback
-    public /* synthetic */ void onError(TLRPC.TL_error tL_error) {
-        ResultCallback.CC.$default$onError(this, tL_error);
+    public /* synthetic */ void onError(TLRPC$TL_error tLRPC$TL_error) {
+        ResultCallback.CC.$default$onError(this, tLRPC$TL_error);
     }
 }

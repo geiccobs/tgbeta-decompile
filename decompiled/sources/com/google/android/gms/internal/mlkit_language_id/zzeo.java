@@ -8,30 +8,27 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, BuilderType extends zzb<MessageType, BuilderType>> extends zzde<MessageType, BuilderType> {
     private static Map<Object, zzeo<?, ?>> zzd = new ConcurrentHashMap();
     protected zzhg zzb = zzhg.zza();
     private int zzc = -1;
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     protected static class zza<T extends zzeo<T, ?>> extends zzdj<T> {
-        private final T zza;
-
         public zza(T t) {
-            this.zza = t;
         }
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static abstract class zzc<MessageType extends zzc<MessageType, BuilderType>, BuilderType extends zzd<MessageType, BuilderType>> extends zzeo<MessageType, BuilderType> implements zzgb {
         protected zzej<zzf> zzc = zzej.zza();
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zze {
         public static final int zza = 1;
         public static final int zzb = 2;
@@ -49,7 +46,7 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
 
     /* JADX INFO: Access modifiers changed from: package-private */
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class zzf implements zzel<zzf> {
         @Override // com.google.android.gms.internal.mlkit_language_id.zzel
         public final int zza() {
@@ -95,7 +92,7 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
     public abstract Object zza(int i, Object obj, Object obj2);
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static abstract class zzd<MessageType extends zzc<MessageType, BuilderType>, BuilderType extends zzd<MessageType, BuilderType>> extends zzb<MessageType, BuilderType> implements zzgb {
         public zzd(MessageType messagetype) {
             super(messagetype);
@@ -104,7 +101,8 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
         @Override // com.google.android.gms.internal.mlkit_language_id.zzeo.zzb
         public void zzc() {
             super.zzc();
-            ((zzc) this.zza).zzc = (zzej) ((zzc) this.zza).zzc.clone();
+            MessageType messagetype = this.zza;
+            ((zzc) messagetype).zzc = (zzej) ((zzc) messagetype).zzc.clone();
         }
 
         @Override // com.google.android.gms.internal.mlkit_language_id.zzeo.zzb
@@ -127,15 +125,17 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
     }
 
     public int hashCode() {
-        if (this.zza != 0) {
-            return this.zza;
+        int i = this.zza;
+        if (i != 0) {
+            return i;
         }
-        this.zza = zzgk.zza().zza((zzgk) this).zza(this);
-        return this.zza;
+        int zza2 = zzgk.zza().zza((zzgk) this).zza(this);
+        this.zza = zza2;
+        return zza2;
     }
 
     /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static abstract class zzb<MessageType extends zzeo<MessageType, BuilderType>, BuilderType extends zzb<MessageType, BuilderType>> extends zzdh<MessageType, BuilderType> {
         protected MessageType zza;
         protected boolean zzb = false;
@@ -152,11 +152,6 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
             this.zza = messagetype;
         }
 
-        @Override // com.google.android.gms.internal.mlkit_language_id.zzgb
-        public final boolean zzi() {
-            return zzeo.zza(this.zza, false);
-        }
-
         /* renamed from: zzd */
         public MessageType zzf() {
             if (this.zzb) {
@@ -171,10 +166,10 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
         /* renamed from: zze */
         public final MessageType zzg() {
             MessageType messagetype = (MessageType) zzf();
-            if (!messagetype.zzi()) {
-                throw new zzhe(messagetype);
+            if (messagetype.zzi()) {
+                return messagetype;
             }
-            return messagetype;
+            throw new zzhe(messagetype);
         }
 
         public final BuilderType zza(MessageType messagetype) {
@@ -196,18 +191,12 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
             return zza((zzb<MessageType, BuilderType>) ((zzeo) zzdeVar));
         }
 
-        @Override // com.google.android.gms.internal.mlkit_language_id.zzdh
-        public final /* synthetic */ zzdh zzb() {
-            return (zzb) clone();
-        }
-
         @Override // com.google.android.gms.internal.mlkit_language_id.zzgb
         public final /* synthetic */ zzfz zzn() {
             return this.zzc;
         }
 
         /* JADX WARN: Multi-variable type inference failed */
-        @Override // com.google.android.gms.internal.mlkit_language_id.zzdh
         public /* synthetic */ Object clone() throws CloneNotSupportedException {
             zzb zzbVar = (zzb) this.zzc.zza(zze.zze, null, null);
             zzbVar.zza((zzb) ((zzeo) zzf()));
@@ -235,7 +224,7 @@ public abstract class zzeo<MessageType extends zzeo<MessageType, BuilderType>, B
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzgb
     public final boolean zzi() {
-        return zza(this, Boolean.TRUE.booleanValue());
+        return zza(this, true);
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */

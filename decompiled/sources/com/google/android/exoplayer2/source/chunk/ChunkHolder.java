@@ -1,5 +1,5 @@
 package com.google.android.exoplayer2.source.chunk;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ChunkHolder {
     public Chunk chunk;
     public boolean endOfStream;

@@ -1,54 +1,39 @@
 package com.google.android.exoplayer2.extractor.ts;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.util.ParsableByteArray;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class TsUtil {
-    public static int findSyncBytePosition(byte[] data, int startPosition, int limitPosition) {
-        int position = startPosition;
-        while (position < limitPosition && data[position] != 71) {
-            position++;
+    public static int findSyncBytePosition(byte[] bArr, int i, int i2) {
+        while (i < i2 && bArr[i] != 71) {
+            i++;
         }
-        return position;
+        return i;
     }
 
-    public static long readPcrFromPacket(ParsableByteArray packetBuffer, int startOfPacket, int pcrPid) {
-        packetBuffer.setPosition(startOfPacket);
-        if (packetBuffer.bytesLeft() < 5) {
-            return C.TIME_UNSET;
+    public static long readPcrFromPacket(ParsableByteArray parsableByteArray, int i, int i2) {
+        parsableByteArray.setPosition(i);
+        if (parsableByteArray.bytesLeft() < 5) {
+            return -9223372036854775807L;
         }
-        int tsPacketHeader = packetBuffer.readInt();
-        if ((8388608 & tsPacketHeader) != 0) {
-            return C.TIME_UNSET;
+        int readInt = parsableByteArray.readInt();
+        if ((8388608 & readInt) != 0 || ((2096896 & readInt) >> 8) != i2) {
+            return -9223372036854775807L;
         }
-        int pid = (2096896 & tsPacketHeader) >> 8;
-        if (pid != pcrPid) {
-            return C.TIME_UNSET;
-        }
-        boolean pcrFlagSet = true;
-        boolean adaptationFieldExists = (tsPacketHeader & 32) != 0;
-        if (!adaptationFieldExists) {
-            return C.TIME_UNSET;
-        }
-        int adaptationFieldLength = packetBuffer.readUnsignedByte();
-        if (adaptationFieldLength >= 7 && packetBuffer.bytesLeft() >= 7) {
-            int flags = packetBuffer.readUnsignedByte();
-            if ((flags & 16) != 16) {
-                pcrFlagSet = false;
+        boolean z = true;
+        if (((readInt & 32) != 0) && parsableByteArray.readUnsignedByte() >= 7 && parsableByteArray.bytesLeft() >= 7) {
+            if ((parsableByteArray.readUnsignedByte() & 16) != 16) {
+                z = false;
             }
-            if (pcrFlagSet) {
-                byte[] pcrBytes = new byte[6];
-                packetBuffer.readBytes(pcrBytes, 0, pcrBytes.length);
-                return readPcrValueFromPcrBytes(pcrBytes);
+            if (z) {
+                byte[] bArr = new byte[6];
+                parsableByteArray.readBytes(bArr, 0, 6);
+                return readPcrValueFromPcrBytes(bArr);
             }
         }
-        return C.TIME_UNSET;
+        return -9223372036854775807L;
     }
 
-    private static long readPcrValueFromPcrBytes(byte[] pcrBytes) {
-        return ((pcrBytes[0] & 255) << 25) | ((pcrBytes[1] & 255) << 17) | ((pcrBytes[2] & 255) << 9) | ((pcrBytes[3] & 255) << 1) | ((255 & pcrBytes[4]) >> 7);
-    }
-
-    private TsUtil() {
+    private static long readPcrValueFromPcrBytes(byte[] bArr) {
+        return ((bArr[0] & 255) << 25) | ((bArr[1] & 255) << 17) | ((bArr[2] & 255) << 9) | ((bArr[3] & 255) << 1) | ((255 & bArr[4]) >> 7);
     }
 }

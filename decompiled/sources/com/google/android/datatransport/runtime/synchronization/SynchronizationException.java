@@ -1,7 +1,7 @@
 package com.google.android.datatransport.runtime.synchronization;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class SynchronizationException extends RuntimeException {
-    public SynchronizationException(String message, Throwable cause) {
-        super(message, cause);
+    public SynchronizationException(String str, Throwable th) {
+        super(str, th);
     }
 }

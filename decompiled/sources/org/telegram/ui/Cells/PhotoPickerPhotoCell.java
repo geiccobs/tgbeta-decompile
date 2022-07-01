@@ -10,24 +10,19 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
-import com.microsoft.appcenter.Constants;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.beta.R;
-import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.Theme;
+import org.telegram.messenger.R;
+import org.telegram.tgnet.TLRPC$PhotoSize;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.GroupCallActivity;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class PhotoPickerPhotoCell extends FrameLayout {
-    private Paint backgroundPaint = new Paint();
     public CheckBox2 checkBox;
     public FrameLayout checkFrame;
     private int extraWidth;
@@ -38,6 +33,7 @@ public class PhotoPickerPhotoCell extends FrameLayout {
 
     public PhotoPickerPhotoCell(Context context) {
         super(context);
+        new Paint();
         setWillNotDraw(false);
         BackupImageView backupImageView = new BackupImageView(context);
         this.imageView = backupImageView;
@@ -46,7 +42,7 @@ public class PhotoPickerPhotoCell extends FrameLayout {
         FrameLayout frameLayout = new FrameLayout(context);
         this.checkFrame = frameLayout;
         addView(frameLayout, LayoutHelper.createFrame(42, 42, 53));
-        FrameLayout frameLayout2 = new FrameLayout(context) { // from class: org.telegram.ui.Cells.PhotoPickerPhotoCell.1
+        FrameLayout frameLayout2 = new FrameLayout(this, context) { // from class: org.telegram.ui.Cells.PhotoPickerPhotoCell.1
             private Path path = new Path();
             float[] radii = new float[8];
             private RectF rect = new RectF();
@@ -68,7 +64,7 @@ public class PhotoPickerPhotoCell extends FrameLayout {
                 this.path.reset();
                 this.path.addRoundRect(this.rect, this.radii, Path.Direction.CW);
                 this.path.close();
-                this.paint.setColor(Theme.ACTION_BAR_PHOTO_VIEWER_COLOR);
+                this.paint.setColor(2130706432);
                 canvas.drawPath(this.path, this.paint);
             }
         };
@@ -76,9 +72,9 @@ public class PhotoPickerPhotoCell extends FrameLayout {
         frameLayout2.setWillNotDraw(false);
         this.videoInfoContainer.setPadding(AndroidUtilities.dp(3.0f), 0, AndroidUtilities.dp(3.0f), 0);
         addView(this.videoInfoContainer, LayoutHelper.createFrame(-1, 16, 83));
-        ImageView imageView1 = new ImageView(context);
-        imageView1.setImageResource(R.drawable.ic_video);
-        this.videoInfoContainer.addView(imageView1, LayoutHelper.createFrame(-2, -2, 19));
+        ImageView imageView = new ImageView(context);
+        imageView.setImageResource(R.drawable.ic_video);
+        this.videoInfoContainer.addView(imageView, LayoutHelper.createFrame(-2, -2, 19));
         TextView textView = new TextView(context);
         this.videoTextView = textView;
         textView.setTextColor(-1);
@@ -88,15 +84,15 @@ public class PhotoPickerPhotoCell extends FrameLayout {
         CheckBox2 checkBox2 = new CheckBox2(context, 24);
         this.checkBox = checkBox2;
         checkBox2.setDrawBackgroundAsArc(11);
-        this.checkBox.setColor(Theme.key_chat_attachCheckBoxBackground, Theme.key_chat_attachPhotoBackground, Theme.key_chat_attachCheckBoxCheck);
+        this.checkBox.setColor("chat_attachCheckBoxBackground", "chat_attachPhotoBackground", "chat_attachCheckBoxCheck");
         addView(this.checkBox, LayoutHelper.createFrame(26, 26.0f, 51, 55.0f, 4.0f, 0.0f, 0.0f));
         this.checkBox.setVisibility(0);
         setFocusable(true);
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(this.itemWidth + this.extraWidth, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(this.itemWidth, C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(this.itemWidth + this.extraWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(this.itemWidth, 1073741824));
     }
 
     @Override // android.view.ViewGroup, android.view.View
@@ -105,29 +101,27 @@ public class PhotoPickerPhotoCell extends FrameLayout {
         updateColors();
     }
 
-    public void setItemWidth(int width, int extra) {
-        this.itemWidth = width;
-        this.extraWidth = extra;
-        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.checkFrame.getLayoutParams();
-        layoutParams.rightMargin = extra;
-        FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) this.imageView.getLayoutParams();
-        layoutParams2.rightMargin = extra;
-        FrameLayout.LayoutParams layoutParams3 = (FrameLayout.LayoutParams) this.videoInfoContainer.getLayoutParams();
-        layoutParams3.rightMargin = extra;
+    public void setItemWidth(int i, int i2) {
+        this.itemWidth = i;
+        this.extraWidth = i2;
+        ((FrameLayout.LayoutParams) this.checkFrame.getLayoutParams()).rightMargin = i2;
+        ((FrameLayout.LayoutParams) this.imageView.getLayoutParams()).rightMargin = i2;
+        ((FrameLayout.LayoutParams) this.videoInfoContainer.getLayoutParams()).rightMargin = i2;
     }
 
     public void updateColors() {
-        this.checkBox.setColor(Theme.key_chat_attachCheckBoxBackground, Theme.key_chat_attachPhotoBackground, Theme.key_chat_attachCheckBoxCheck);
+        this.checkBox.setColor("chat_attachCheckBoxBackground", "chat_attachPhotoBackground", "chat_attachCheckBoxCheck");
     }
 
-    public void setNum(int num) {
-        this.checkBox.setNum(num);
+    public void setNum(int i) {
+        this.checkBox.setNum(i);
     }
 
     public void setImage(MediaController.PhotoEntry photoEntry) {
-        Drawable thumb = getResources().getDrawable(R.drawable.nophotos);
-        if (photoEntry.thumbPath != null) {
-            this.imageView.setImage(photoEntry.thumbPath, null, thumb);
+        Drawable drawable = getResources().getDrawable(R.drawable.nophotos);
+        String str = photoEntry.thumbPath;
+        if (str != null) {
+            this.imageView.setImage(str, null, drawable);
         } else if (photoEntry.path != null) {
             this.imageView.setOrientation(photoEntry.orientation, true);
             if (photoEntry.isVideo) {
@@ -135,37 +129,46 @@ public class PhotoPickerPhotoCell extends FrameLayout {
                 this.videoTextView.setText(AndroidUtilities.formatShortDuration(photoEntry.duration));
                 setContentDescription(LocaleController.getString("AttachVideo", R.string.AttachVideo) + ", " + LocaleController.formatDuration(photoEntry.duration));
                 BackupImageView backupImageView = this.imageView;
-                backupImageView.setImage("vthumb://" + photoEntry.imageId + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + photoEntry.path, null, thumb);
+                backupImageView.setImage("vthumb://" + photoEntry.imageId + ":" + photoEntry.path, null, drawable);
                 return;
             }
             this.videoInfoContainer.setVisibility(4);
             setContentDescription(LocaleController.getString("AttachPhoto", R.string.AttachPhoto));
             BackupImageView backupImageView2 = this.imageView;
-            backupImageView2.setImage("thumb://" + photoEntry.imageId + Constants.COMMON_SCHEMA_PREFIX_SEPARATOR + photoEntry.path, null, thumb);
+            backupImageView2.setImage("thumb://" + photoEntry.imageId + ":" + photoEntry.path, null, drawable);
         } else {
-            this.imageView.setImageDrawable(thumb);
+            this.imageView.setImageDrawable(drawable);
         }
     }
 
     public void setImage(MediaController.SearchImage searchImage) {
-        Drawable thumb = getResources().getDrawable(R.drawable.nophotos);
-        if (searchImage.thumbPhotoSize != null) {
-            this.imageView.setImage(ImageLocation.getForPhoto(searchImage.thumbPhotoSize, searchImage.photo), (String) null, thumb, searchImage);
-        } else if (searchImage.photoSize != null) {
-            this.imageView.setImage(ImageLocation.getForPhoto(searchImage.photoSize, searchImage.photo), "80_80", thumb, searchImage);
-        } else if (searchImage.thumbPath != null) {
-            this.imageView.setImage(searchImage.thumbPath, null, thumb);
-        } else if (searchImage.thumbUrl != null && searchImage.thumbUrl.length() > 0) {
-            this.imageView.setImage(searchImage.thumbUrl, null, thumb);
+        Drawable drawable = getResources().getDrawable(R.drawable.nophotos);
+        TLRPC$PhotoSize tLRPC$PhotoSize = searchImage.thumbPhotoSize;
+        if (tLRPC$PhotoSize != null) {
+            this.imageView.setImage(ImageLocation.getForPhoto(tLRPC$PhotoSize, searchImage.photo), (String) null, drawable, searchImage);
+            return;
+        }
+        TLRPC$PhotoSize tLRPC$PhotoSize2 = searchImage.photoSize;
+        if (tLRPC$PhotoSize2 != null) {
+            this.imageView.setImage(ImageLocation.getForPhoto(tLRPC$PhotoSize2, searchImage.photo), "80_80", drawable, searchImage);
+            return;
+        }
+        String str = searchImage.thumbPath;
+        if (str != null) {
+            this.imageView.setImage(str, null, drawable);
+            return;
+        }
+        String str2 = searchImage.thumbUrl;
+        if (str2 != null && str2.length() > 0) {
+            this.imageView.setImage(searchImage.thumbUrl, null, drawable);
         } else if (MessageObject.isDocumentHasThumb(searchImage.document)) {
-            TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(searchImage.document.thumbs, GroupCallActivity.TABLET_LIST_SIZE);
-            this.imageView.setImage(ImageLocation.getForDocument(photoSize, searchImage.document), (String) null, thumb, searchImage);
+            this.imageView.setImage(ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(searchImage.document.thumbs, 320), searchImage.document), (String) null, drawable, searchImage);
         } else {
-            this.imageView.setImageDrawable(thumb);
+            this.imageView.setImageDrawable(drawable);
         }
     }
 
-    public void setChecked(int num, boolean checked, boolean animated) {
-        this.checkBox.setChecked(num, checked, animated);
+    public void setChecked(int i, boolean z, boolean z2) {
+        this.checkBox.setChecked(i, z, z2);
     }
 }

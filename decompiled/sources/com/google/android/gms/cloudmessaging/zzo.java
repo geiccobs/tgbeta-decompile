@@ -6,7 +6,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzo {
     private final Messenger zza;
     private final zza zzb;
@@ -16,7 +16,7 @@ final class zzo {
         if ("android.os.IMessenger".equals(interfaceDescriptor)) {
             this.zza = new Messenger(iBinder);
             this.zzb = null;
-        } else if (IMessengerCompat.DESCRIPTOR.equals(interfaceDescriptor)) {
+        } else if ("com.google.android.gms.iid.IMessengerCompat".equals(interfaceDescriptor)) {
             this.zzb = new zza(iBinder);
             this.zza = null;
         } else {

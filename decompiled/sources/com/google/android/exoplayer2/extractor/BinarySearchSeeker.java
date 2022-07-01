@@ -1,14 +1,10 @@
 package com.google.android.exoplayer2.extractor;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.extractor.SeekMap;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class BinarySearchSeeker {
     private static final long MAX_SKIP_BYTES = 262144;
     private final int minimumSearchRange;
@@ -16,122 +12,121 @@ public abstract class BinarySearchSeeker {
     protected SeekOperationParams seekOperationParams;
     protected final TimestampSeeker timestampSeeker;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
+    public static final class DefaultSeekTimestampConverter implements SeekTimestampConverter {
+        @Override // com.google.android.exoplayer2.extractor.BinarySearchSeeker.SeekTimestampConverter
+        public long timeUsToTargetTime(long j) {
+            return j;
+        }
+    }
+
+    /* loaded from: classes.dex */
     public interface SeekTimestampConverter {
         long timeUsToTargetTime(long j);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface TimestampSeeker {
+
+        /* renamed from: com.google.android.exoplayer2.extractor.BinarySearchSeeker$TimestampSeeker$-CC */
+        /* loaded from: classes.dex */
+        public final /* synthetic */ class CC {
+            public static void $default$onSeekFinished(TimestampSeeker timestampSeeker) {
+            }
+        }
+
         void onSeekFinished();
 
         TimestampSearchResult searchForTimestamp(ExtractorInput extractorInput, long j) throws IOException, InterruptedException;
-
-        /* renamed from: com.google.android.exoplayer2.extractor.BinarySearchSeeker$TimestampSeeker$-CC */
-        /* loaded from: classes3.dex */
-        public final /* synthetic */ class CC {
-            public static void $default$onSeekFinished(TimestampSeeker _this) {
-            }
-        }
     }
 
-    /* loaded from: classes3.dex */
-    public static final class DefaultSeekTimestampConverter implements SeekTimestampConverter {
-        @Override // com.google.android.exoplayer2.extractor.BinarySearchSeeker.SeekTimestampConverter
-        public long timeUsToTargetTime(long timeUs) {
-            return timeUs;
-        }
+    protected void onSeekOperationFinished(boolean z, long j) {
     }
 
-    public BinarySearchSeeker(SeekTimestampConverter seekTimestampConverter, TimestampSeeker timestampSeeker, long durationUs, long floorTimePosition, long ceilingTimePosition, long floorBytePosition, long ceilingBytePosition, long approxBytesPerFrame, int minimumSearchRange) {
+    public BinarySearchSeeker(SeekTimestampConverter seekTimestampConverter, TimestampSeeker timestampSeeker, long j, long j2, long j3, long j4, long j5, long j6, int i) {
         this.timestampSeeker = timestampSeeker;
-        this.minimumSearchRange = minimumSearchRange;
-        this.seekMap = new BinarySearchSeekMap(seekTimestampConverter, durationUs, floorTimePosition, ceilingTimePosition, floorBytePosition, ceilingBytePosition, approxBytesPerFrame);
+        this.minimumSearchRange = i;
+        this.seekMap = new BinarySearchSeekMap(seekTimestampConverter, j, j2, j3, j4, j5, j6);
     }
 
     public final SeekMap getSeekMap() {
         return this.seekMap;
     }
 
-    public final void setSeekTargetUs(long timeUs) {
+    public final void setSeekTargetUs(long j) {
         SeekOperationParams seekOperationParams = this.seekOperationParams;
-        if (seekOperationParams != null && seekOperationParams.getSeekTimeUs() == timeUs) {
-            return;
+        if (seekOperationParams == null || seekOperationParams.getSeekTimeUs() != j) {
+            this.seekOperationParams = createSeekParamsForTargetTimeUs(j);
         }
-        this.seekOperationParams = createSeekParamsForTargetTimeUs(timeUs);
     }
 
     public final boolean isSeeking() {
         return this.seekOperationParams != null;
     }
 
-    public int handlePendingSeek(ExtractorInput input, PositionHolder seekPositionHolder) throws InterruptedException, IOException {
+    public int handlePendingSeek(ExtractorInput extractorInput, PositionHolder positionHolder) throws InterruptedException, IOException {
         TimestampSeeker timestampSeeker = (TimestampSeeker) Assertions.checkNotNull(this.timestampSeeker);
         while (true) {
             SeekOperationParams seekOperationParams = (SeekOperationParams) Assertions.checkNotNull(this.seekOperationParams);
-            long floorPosition = seekOperationParams.getFloorBytePosition();
-            long ceilingPosition = seekOperationParams.getCeilingBytePosition();
-            long searchPosition = seekOperationParams.getNextSearchBytePosition();
-            if (ceilingPosition - floorPosition <= this.minimumSearchRange) {
-                markSeekOperationFinished(false, floorPosition);
-                return seekToPosition(input, floorPosition, seekPositionHolder);
-            } else if (!skipInputUntilPosition(input, searchPosition)) {
-                return seekToPosition(input, searchPosition, seekPositionHolder);
+            long floorBytePosition = seekOperationParams.getFloorBytePosition();
+            long ceilingBytePosition = seekOperationParams.getCeilingBytePosition();
+            long nextSearchBytePosition = seekOperationParams.getNextSearchBytePosition();
+            if (ceilingBytePosition - floorBytePosition <= this.minimumSearchRange) {
+                markSeekOperationFinished(false, floorBytePosition);
+                return seekToPosition(extractorInput, floorBytePosition, positionHolder);
+            } else if (!skipInputUntilPosition(extractorInput, nextSearchBytePosition)) {
+                return seekToPosition(extractorInput, nextSearchBytePosition, positionHolder);
             } else {
-                input.resetPeekPosition();
-                TimestampSearchResult timestampSearchResult = timestampSeeker.searchForTimestamp(input, seekOperationParams.getTargetTimePosition());
-                switch (timestampSearchResult.type) {
-                    case -3:
-                        markSeekOperationFinished(false, searchPosition);
-                        return seekToPosition(input, searchPosition, seekPositionHolder);
-                    case -2:
-                        seekOperationParams.updateSeekFloor(timestampSearchResult.timestampToUpdate, timestampSearchResult.bytePositionToUpdate);
-                        break;
-                    case -1:
-                        seekOperationParams.updateSeekCeiling(timestampSearchResult.timestampToUpdate, timestampSearchResult.bytePositionToUpdate);
-                        break;
-                    case 0:
-                        markSeekOperationFinished(true, timestampSearchResult.bytePositionToUpdate);
-                        skipInputUntilPosition(input, timestampSearchResult.bytePositionToUpdate);
-                        return seekToPosition(input, timestampSearchResult.bytePositionToUpdate, seekPositionHolder);
-                    default:
-                        throw new IllegalStateException("Invalid case");
+                extractorInput.resetPeekPosition();
+                TimestampSearchResult searchForTimestamp = timestampSeeker.searchForTimestamp(extractorInput, seekOperationParams.getTargetTimePosition());
+                int i = searchForTimestamp.type;
+                if (i == -3) {
+                    markSeekOperationFinished(false, nextSearchBytePosition);
+                    return seekToPosition(extractorInput, nextSearchBytePosition, positionHolder);
+                } else if (i == -2) {
+                    seekOperationParams.updateSeekFloor(searchForTimestamp.timestampToUpdate, searchForTimestamp.bytePositionToUpdate);
+                } else if (i != -1) {
+                    if (i == 0) {
+                        markSeekOperationFinished(true, searchForTimestamp.bytePositionToUpdate);
+                        skipInputUntilPosition(extractorInput, searchForTimestamp.bytePositionToUpdate);
+                        return seekToPosition(extractorInput, searchForTimestamp.bytePositionToUpdate, positionHolder);
+                    }
+                    throw new IllegalStateException("Invalid case");
+                } else {
+                    seekOperationParams.updateSeekCeiling(searchForTimestamp.timestampToUpdate, searchForTimestamp.bytePositionToUpdate);
                 }
             }
         }
     }
 
-    protected SeekOperationParams createSeekParamsForTargetTimeUs(long timeUs) {
-        return new SeekOperationParams(timeUs, this.seekMap.timeUsToTargetTime(timeUs), this.seekMap.floorTimePosition, this.seekMap.ceilingTimePosition, this.seekMap.floorBytePosition, this.seekMap.ceilingBytePosition, this.seekMap.approxBytesPerFrame);
+    protected SeekOperationParams createSeekParamsForTargetTimeUs(long j) {
+        return new SeekOperationParams(j, this.seekMap.timeUsToTargetTime(j), this.seekMap.floorTimePosition, this.seekMap.ceilingTimePosition, this.seekMap.floorBytePosition, this.seekMap.ceilingBytePosition, this.seekMap.approxBytesPerFrame);
     }
 
-    protected final void markSeekOperationFinished(boolean foundTargetFrame, long resultPosition) {
+    protected final void markSeekOperationFinished(boolean z, long j) {
         this.seekOperationParams = null;
         this.timestampSeeker.onSeekFinished();
-        onSeekOperationFinished(foundTargetFrame, resultPosition);
+        onSeekOperationFinished(z, j);
     }
 
-    protected void onSeekOperationFinished(boolean foundTargetFrame, long resultPosition) {
-    }
-
-    protected final boolean skipInputUntilPosition(ExtractorInput input, long position) throws IOException, InterruptedException {
-        long bytesToSkip = position - input.getPosition();
-        if (bytesToSkip >= 0 && bytesToSkip <= MAX_SKIP_BYTES) {
-            input.skipFully((int) bytesToSkip);
-            return true;
+    protected final boolean skipInputUntilPosition(ExtractorInput extractorInput, long j) throws IOException, InterruptedException {
+        long position = j - extractorInput.getPosition();
+        if (position < 0 || position > MAX_SKIP_BYTES) {
+            return false;
         }
-        return false;
+        extractorInput.skipFully((int) position);
+        return true;
     }
 
-    protected final int seekToPosition(ExtractorInput input, long position, PositionHolder seekPositionHolder) {
-        if (position == input.getPosition()) {
+    protected final int seekToPosition(ExtractorInput extractorInput, long j, PositionHolder positionHolder) {
+        if (j == extractorInput.getPosition()) {
             return 0;
         }
-        seekPositionHolder.position = position;
+        positionHolder.position = j;
         return 1;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class SeekOperationParams {
         private final long approxBytesPerFrame;
         private long ceilingBytePosition;
@@ -142,28 +137,23 @@ public abstract class BinarySearchSeeker {
         private final long seekTimeUs;
         private final long targetTimePosition;
 
-        protected static long calculateNextSearchBytePosition(long targetTimePosition, long floorTimePosition, long ceilingTimePosition, long floorBytePosition, long ceilingBytePosition, long approxBytesPerFrame) {
-            if (floorBytePosition + 1 >= ceilingBytePosition || floorTimePosition + 1 >= ceilingTimePosition) {
-                return floorBytePosition;
+        protected static long calculateNextSearchBytePosition(long j, long j2, long j3, long j4, long j5, long j6) {
+            if (j4 + 1 >= j5 || j2 + 1 >= j3) {
+                return j4;
             }
-            long seekTimeDuration = targetTimePosition - floorTimePosition;
-            float estimatedBytesPerTimeUnit = ((float) (ceilingBytePosition - floorBytePosition)) / ((float) (ceilingTimePosition - floorTimePosition));
-            long bytesToSkip = ((float) seekTimeDuration) * estimatedBytesPerTimeUnit;
-            long confidenceInterval = bytesToSkip / 20;
-            long estimatedFramePosition = (floorBytePosition + bytesToSkip) - approxBytesPerFrame;
-            long estimatedPosition = estimatedFramePosition - confidenceInterval;
-            return Util.constrainValue(estimatedPosition, floorBytePosition, ceilingBytePosition - 1);
+            long j7 = ((float) (j - j2)) * (((float) (j5 - j4)) / ((float) (j3 - j2)));
+            return Util.constrainValue(((j7 + j4) - j6) - (j7 / 20), j4, j5 - 1);
         }
 
-        protected SeekOperationParams(long seekTimeUs, long targetTimePosition, long floorTimePosition, long ceilingTimePosition, long floorBytePosition, long ceilingBytePosition, long approxBytesPerFrame) {
-            this.seekTimeUs = seekTimeUs;
-            this.targetTimePosition = targetTimePosition;
-            this.floorTimePosition = floorTimePosition;
-            this.ceilingTimePosition = ceilingTimePosition;
-            this.floorBytePosition = floorBytePosition;
-            this.ceilingBytePosition = ceilingBytePosition;
-            this.approxBytesPerFrame = approxBytesPerFrame;
-            this.nextSearchBytePosition = calculateNextSearchBytePosition(targetTimePosition, floorTimePosition, ceilingTimePosition, floorBytePosition, ceilingBytePosition, approxBytesPerFrame);
+        protected SeekOperationParams(long j, long j2, long j3, long j4, long j5, long j6, long j7) {
+            this.seekTimeUs = j;
+            this.targetTimePosition = j2;
+            this.floorTimePosition = j3;
+            this.ceilingTimePosition = j4;
+            this.floorBytePosition = j5;
+            this.ceilingBytePosition = j6;
+            this.approxBytesPerFrame = j7;
+            this.nextSearchBytePosition = calculateNextSearchBytePosition(j2, j3, j4, j5, j6, j7);
         }
 
         public long getFloorBytePosition() {
@@ -182,15 +172,15 @@ public abstract class BinarySearchSeeker {
             return this.seekTimeUs;
         }
 
-        public void updateSeekFloor(long floorTimePosition, long floorBytePosition) {
-            this.floorTimePosition = floorTimePosition;
-            this.floorBytePosition = floorBytePosition;
+        public void updateSeekFloor(long j, long j2) {
+            this.floorTimePosition = j;
+            this.floorBytePosition = j2;
             updateNextSearchBytePosition();
         }
 
-        public void updateSeekCeiling(long ceilingTimePosition, long ceilingBytePosition) {
-            this.ceilingTimePosition = ceilingTimePosition;
-            this.ceilingBytePosition = ceilingBytePosition;
+        public void updateSeekCeiling(long j, long j2) {
+            this.ceilingTimePosition = j;
+            this.ceilingBytePosition = j2;
             updateNextSearchBytePosition();
         }
 
@@ -203,43 +193,33 @@ public abstract class BinarySearchSeeker {
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class TimestampSearchResult {
-        public static final TimestampSearchResult NO_TIMESTAMP_IN_RANGE_RESULT = new TimestampSearchResult(-3, C.TIME_UNSET, -1);
-        public static final int TYPE_NO_TIMESTAMP = -3;
-        public static final int TYPE_POSITION_OVERESTIMATED = -1;
-        public static final int TYPE_POSITION_UNDERESTIMATED = -2;
-        public static final int TYPE_TARGET_TIMESTAMP_FOUND = 0;
+        public static final TimestampSearchResult NO_TIMESTAMP_IN_RANGE_RESULT = new TimestampSearchResult(-3, -9223372036854775807L, -1);
         private final long bytePositionToUpdate;
         private final long timestampToUpdate;
         private final int type;
 
-        @Documented
-        @Retention(RetentionPolicy.SOURCE)
-        /* loaded from: classes.dex */
-        @interface Type {
+        private TimestampSearchResult(int i, long j, long j2) {
+            this.type = i;
+            this.timestampToUpdate = j;
+            this.bytePositionToUpdate = j2;
         }
 
-        private TimestampSearchResult(int type, long timestampToUpdate, long bytePositionToUpdate) {
-            this.type = type;
-            this.timestampToUpdate = timestampToUpdate;
-            this.bytePositionToUpdate = bytePositionToUpdate;
+        public static TimestampSearchResult overestimatedResult(long j, long j2) {
+            return new TimestampSearchResult(-1, j, j2);
         }
 
-        public static TimestampSearchResult overestimatedResult(long newCeilingTimestamp, long newCeilingBytePosition) {
-            return new TimestampSearchResult(-1, newCeilingTimestamp, newCeilingBytePosition);
+        public static TimestampSearchResult underestimatedResult(long j, long j2) {
+            return new TimestampSearchResult(-2, j, j2);
         }
 
-        public static TimestampSearchResult underestimatedResult(long newFloorTimestamp, long newCeilingBytePosition) {
-            return new TimestampSearchResult(-2, newFloorTimestamp, newCeilingBytePosition);
-        }
-
-        public static TimestampSearchResult targetFoundResult(long resultBytePosition) {
-            return new TimestampSearchResult(0, C.TIME_UNSET, resultBytePosition);
+        public static TimestampSearchResult targetFoundResult(long j) {
+            return new TimestampSearchResult(0, -9223372036854775807L, j);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class BinarySearchSeekMap implements SeekMap {
         private final long approxBytesPerFrame;
         private final long ceilingBytePosition;
@@ -249,25 +229,24 @@ public abstract class BinarySearchSeeker {
         private final long floorTimePosition;
         private final SeekTimestampConverter seekTimestampConverter;
 
-        public BinarySearchSeekMap(SeekTimestampConverter seekTimestampConverter, long durationUs, long floorTimePosition, long ceilingTimePosition, long floorBytePosition, long ceilingBytePosition, long approxBytesPerFrame) {
-            this.seekTimestampConverter = seekTimestampConverter;
-            this.durationUs = durationUs;
-            this.floorTimePosition = floorTimePosition;
-            this.ceilingTimePosition = ceilingTimePosition;
-            this.floorBytePosition = floorBytePosition;
-            this.ceilingBytePosition = ceilingBytePosition;
-            this.approxBytesPerFrame = approxBytesPerFrame;
-        }
-
         @Override // com.google.android.exoplayer2.extractor.SeekMap
         public boolean isSeekable() {
             return true;
         }
 
+        public BinarySearchSeekMap(SeekTimestampConverter seekTimestampConverter, long j, long j2, long j3, long j4, long j5, long j6) {
+            this.seekTimestampConverter = seekTimestampConverter;
+            this.durationUs = j;
+            this.floorTimePosition = j2;
+            this.ceilingTimePosition = j3;
+            this.floorBytePosition = j4;
+            this.ceilingBytePosition = j5;
+            this.approxBytesPerFrame = j6;
+        }
+
         @Override // com.google.android.exoplayer2.extractor.SeekMap
-        public SeekMap.SeekPoints getSeekPoints(long timeUs) {
-            long nextSearchPosition = SeekOperationParams.calculateNextSearchBytePosition(this.seekTimestampConverter.timeUsToTargetTime(timeUs), this.floorTimePosition, this.ceilingTimePosition, this.floorBytePosition, this.ceilingBytePosition, this.approxBytesPerFrame);
-            return new SeekMap.SeekPoints(new SeekPoint(timeUs, nextSearchPosition));
+        public SeekMap.SeekPoints getSeekPoints(long j) {
+            return new SeekMap.SeekPoints(new SeekPoint(j, SeekOperationParams.calculateNextSearchBytePosition(this.seekTimestampConverter.timeUsToTargetTime(j), this.floorTimePosition, this.ceilingTimePosition, this.floorBytePosition, this.ceilingBytePosition, this.approxBytesPerFrame)));
         }
 
         @Override // com.google.android.exoplayer2.extractor.SeekMap
@@ -275,8 +254,8 @@ public abstract class BinarySearchSeeker {
             return this.durationUs;
         }
 
-        public long timeUsToTargetTime(long timeUs) {
-            return this.seekTimestampConverter.timeUsToTargetTime(timeUs);
+        public long timeUsToTargetTime(long j) {
+            return this.seekTimestampConverter.timeUsToTargetTime(j);
         }
     }
 }

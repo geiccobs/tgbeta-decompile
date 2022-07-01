@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.text.ssa;
 
+import android.graphics.PointF;
 import android.text.Layout;
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.SimpleSubtitleDecoder;
 import com.google.android.exoplayer2.text.Subtitle;
@@ -16,34 +16,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class SsaDecoder extends SimpleSubtitleDecoder {
-    private static final float DEFAULT_MARGIN = 0.05f;
-    private static final String DIALOGUE_LINE_PREFIX = "Dialogue:";
-    static final String FORMAT_LINE_PREFIX = "Format:";
     private static final Pattern SSA_TIMECODE_PATTERN = Pattern.compile("(?:(\\d+):)?(\\d+):(\\d+)[:.](\\d+)");
-    static final String STYLE_LINE_PREFIX = "Style:";
-    private static final String TAG = "SsaDecoder";
     private final SsaDialogueFormat dialogueFormatFromInitializationData;
     private final boolean haveInitializationData;
-    private float screenHeight;
-    private float screenWidth;
     private Map<String, SsaStyle> styles;
+    private float screenWidth = -3.4028235E38f;
+    private float screenHeight = -3.4028235E38f;
 
-    public SsaDecoder() {
-        this(null);
+    private static float computeDefaultLineOrPosition(int i) {
+        if (i != 0) {
+            if (i == 1) {
+                return 0.5f;
+            }
+            return i != 2 ? -3.4028235E38f : 0.95f;
+        }
+        return 0.05f;
     }
 
-    public SsaDecoder(List<byte[]> initializationData) {
-        super(TAG);
-        this.screenWidth = -3.4028235E38f;
-        this.screenHeight = -3.4028235E38f;
-        if (initializationData != null && !initializationData.isEmpty()) {
+    public SsaDecoder(List<byte[]> list) {
+        super("SsaDecoder");
+        if (list != null && !list.isEmpty()) {
             this.haveInitializationData = true;
-            String formatLine = Util.fromUtf8Bytes(initializationData.get(0));
-            Assertions.checkArgument(formatLine.startsWith(FORMAT_LINE_PREFIX));
-            this.dialogueFormatFromInitializationData = (SsaDialogueFormat) Assertions.checkNotNull(SsaDialogueFormat.fromFormatLine(formatLine));
-            parseHeader(new ParsableByteArray(initializationData.get(1)));
+            String fromUtf8Bytes = Util.fromUtf8Bytes(list.get(0));
+            Assertions.checkArgument(fromUtf8Bytes.startsWith("Format:"));
+            this.dialogueFormatFromInitializationData = (SsaDialogueFormat) Assertions.checkNotNull(SsaDialogueFormat.fromFormatLine(fromUtf8Bytes));
+            parseHeader(new ParsableByteArray(list.get(1)));
             return;
         }
         this.haveInitializationData = false;
@@ -51,28 +50,28 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
     }
 
     @Override // com.google.android.exoplayer2.text.SimpleSubtitleDecoder
-    protected Subtitle decode(byte[] bytes, int length, boolean reset) {
-        List<List<Cue>> cues = new ArrayList<>();
-        List<Long> cueTimesUs = new ArrayList<>();
-        ParsableByteArray data = new ParsableByteArray(bytes, length);
+    protected Subtitle decode(byte[] bArr, int i, boolean z) {
+        ArrayList arrayList = new ArrayList();
+        ArrayList arrayList2 = new ArrayList();
+        ParsableByteArray parsableByteArray = new ParsableByteArray(bArr, i);
         if (!this.haveInitializationData) {
-            parseHeader(data);
+            parseHeader(parsableByteArray);
         }
-        parseEventBody(data, cues, cueTimesUs);
-        return new SsaSubtitle(cues, cueTimesUs);
+        parseEventBody(parsableByteArray, arrayList, arrayList2);
+        return new SsaSubtitle(arrayList, arrayList2);
     }
 
-    private void parseHeader(ParsableByteArray data) {
+    private void parseHeader(ParsableByteArray parsableByteArray) {
         while (true) {
-            String currentLine = data.readLine();
-            if (currentLine != null) {
-                if ("[Script Info]".equalsIgnoreCase(currentLine)) {
-                    parseScriptInfo(data);
-                } else if ("[V4+ Styles]".equalsIgnoreCase(currentLine)) {
-                    this.styles = parseStyles(data);
-                } else if ("[V4 Styles]".equalsIgnoreCase(currentLine)) {
-                    Log.i(TAG, "[V4 Styles] are not supported");
-                } else if ("[Events]".equalsIgnoreCase(currentLine)) {
+            String readLine = parsableByteArray.readLine();
+            if (readLine != null) {
+                if ("[Script Info]".equalsIgnoreCase(readLine)) {
+                    parseScriptInfo(parsableByteArray);
+                } else if ("[V4+ Styles]".equalsIgnoreCase(readLine)) {
+                    this.styles = parseStyles(parsableByteArray);
+                } else if ("[V4 Styles]".equalsIgnoreCase(readLine)) {
+                    Log.i("SsaDecoder", "[V4 Styles] are not supported");
+                } else if ("[Events]".equalsIgnoreCase(readLine)) {
                     return;
                 }
             } else {
@@ -81,129 +80,24 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
         }
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    /* JADX WARN: Code restructure failed: missing block: B:16:0x0045, code lost:
-        if (r3.equals("playresx") != false) goto L18;
-     */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    private void parseScriptInfo(com.google.android.exoplayer2.util.ParsableByteArray r8) {
-        /*
-            r7 = this;
-        L0:
-            java.lang.String r0 = r8.readLine()
-            r1 = r0
-            if (r0 == 0) goto L6c
-            int r0 = r8.bytesLeft()
-            if (r0 == 0) goto L15
-            int r0 = r8.peekUnsignedByte()
-            r2 = 91
-            if (r0 == r2) goto L6c
-        L15:
-            java.lang.String r0 = ":"
-            java.lang.String[] r0 = r1.split(r0)
-            int r2 = r0.length
-            r3 = 2
-            if (r2 == r3) goto L20
-            goto L0
-        L20:
-            r2 = 0
-            r3 = r0[r2]
-            java.lang.String r3 = r3.trim()
-            java.lang.String r3 = com.google.android.exoplayer2.util.Util.toLowerInvariant(r3)
-            r4 = -1
-            int r5 = r3.hashCode()
-            r6 = 1
-            switch(r5) {
-                case 1879649548: goto L3f;
-                case 1879649549: goto L35;
-                default: goto L34;
-            }
-        L34:
-            goto L48
-        L35:
-            java.lang.String r2 = "playresy"
-            boolean r2 = r3.equals(r2)
-            if (r2 == 0) goto L34
-            r2 = 1
-            goto L49
-        L3f:
-            java.lang.String r5 = "playresx"
-            boolean r3 = r3.equals(r5)
-            if (r3 == 0) goto L34
-            goto L49
-        L48:
-            r2 = -1
-        L49:
-            switch(r2) {
-                case 0: goto L5c;
-                case 1: goto L4d;
-                default: goto L4c;
-            }
-        L4c:
-            goto L6b
-        L4d:
-            r2 = r0[r6]     // Catch: java.lang.NumberFormatException -> L5a
-            java.lang.String r2 = r2.trim()     // Catch: java.lang.NumberFormatException -> L5a
-            float r2 = java.lang.Float.parseFloat(r2)     // Catch: java.lang.NumberFormatException -> L5a
-            r7.screenHeight = r2     // Catch: java.lang.NumberFormatException -> L5a
-            goto L6b
-        L5a:
-            r2 = move-exception
-            goto L6b
-        L5c:
-            r2 = r0[r6]     // Catch: java.lang.NumberFormatException -> L69
-            java.lang.String r2 = r2.trim()     // Catch: java.lang.NumberFormatException -> L69
-            float r2 = java.lang.Float.parseFloat(r2)     // Catch: java.lang.NumberFormatException -> L69
-            r7.screenWidth = r2     // Catch: java.lang.NumberFormatException -> L69
-            goto L6b
-        L69:
-            r2 = move-exception
-        L6b:
-            goto L0
-        L6c:
-            return
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.google.android.exoplayer2.text.ssa.SsaDecoder.parseScriptInfo(com.google.android.exoplayer2.util.ParsableByteArray):void");
-    }
-
-    private static Map<String, SsaStyle> parseStyles(ParsableByteArray data) {
-        Map<String, SsaStyle> styles = new LinkedHashMap<>();
-        SsaStyle.Format formatInfo = null;
+    private void parseScriptInfo(ParsableByteArray parsableByteArray) {
         while (true) {
-            String currentLine = data.readLine();
-            if (currentLine == null || (data.bytesLeft() != 0 && data.peekUnsignedByte() == 91)) {
-                break;
-            } else if (currentLine.startsWith(FORMAT_LINE_PREFIX)) {
-                formatInfo = SsaStyle.Format.fromFormatLine(currentLine);
-            } else if (currentLine.startsWith(STYLE_LINE_PREFIX)) {
-                if (formatInfo == null) {
-                    Log.w(TAG, "Skipping 'Style:' line before 'Format:' line: " + currentLine);
-                } else {
-                    SsaStyle style = SsaStyle.fromStyleLine(currentLine, formatInfo);
-                    if (style != null) {
-                        styles.put(style.name, style);
-                    }
+            String readLine = parsableByteArray.readLine();
+            if (readLine != null) {
+                if (parsableByteArray.bytesLeft() != 0 && parsableByteArray.peekUnsignedByte() == 91) {
+                    return;
                 }
-            }
-        }
-        return styles;
-    }
-
-    private void parseEventBody(ParsableByteArray data, List<List<Cue>> cues, List<Long> cueTimesUs) {
-        SsaDialogueFormat format = this.haveInitializationData ? this.dialogueFormatFromInitializationData : null;
-        while (true) {
-            String currentLine = data.readLine();
-            if (currentLine != null) {
-                if (currentLine.startsWith(FORMAT_LINE_PREFIX)) {
-                    format = SsaDialogueFormat.fromFormatLine(currentLine);
-                } else if (currentLine.startsWith(DIALOGUE_LINE_PREFIX)) {
-                    if (format == null) {
-                        Log.w(TAG, "Skipping dialogue line before complete format: " + currentLine);
-                    } else {
-                        parseDialogueLine(currentLine, format, cues, cueTimesUs);
+                String[] split = readLine.split(":");
+                if (split.length == 2) {
+                    String lowerInvariant = Util.toLowerInvariant(split[0].trim());
+                    lowerInvariant.hashCode();
+                    if (lowerInvariant.equals("playresx")) {
+                        this.screenWidth = Float.parseFloat(split[1].trim());
+                    } else if (lowerInvariant.equals("playresy")) {
+                        try {
+                            this.screenHeight = Float.parseFloat(split[1].trim());
+                        } catch (NumberFormatException unused) {
+                        }
                     }
                 }
             } else {
@@ -212,82 +106,112 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
         }
     }
 
-    private void parseDialogueLine(String dialogueLine, SsaDialogueFormat format, List<List<Cue>> cues, List<Long> cueTimesUs) {
-        SsaStyle style;
-        Assertions.checkArgument(dialogueLine.startsWith(DIALOGUE_LINE_PREFIX));
-        String[] lineValues = dialogueLine.substring(DIALOGUE_LINE_PREFIX.length()).split(",", format.length);
-        if (lineValues.length != format.length) {
-            Log.w(TAG, "Skipping dialogue line with fewer columns than format: " + dialogueLine);
-            return;
+    private static Map<String, SsaStyle> parseStyles(ParsableByteArray parsableByteArray) {
+        LinkedHashMap linkedHashMap = new LinkedHashMap();
+        SsaStyle.Format format = null;
+        while (true) {
+            String readLine = parsableByteArray.readLine();
+            if (readLine == null || (parsableByteArray.bytesLeft() != 0 && parsableByteArray.peekUnsignedByte() == 91)) {
+                break;
+            } else if (readLine.startsWith("Format:")) {
+                format = SsaStyle.Format.fromFormatLine(readLine);
+            } else if (readLine.startsWith("Style:")) {
+                if (format == null) {
+                    Log.w("SsaDecoder", "Skipping 'Style:' line before 'Format:' line: " + readLine);
+                } else {
+                    SsaStyle fromStyleLine = SsaStyle.fromStyleLine(readLine, format);
+                    if (fromStyleLine != null) {
+                        linkedHashMap.put(fromStyleLine.name, fromStyleLine);
+                    }
+                }
+            }
         }
-        long startTimeUs = parseTimecodeUs(lineValues[format.startTimeIndex]);
-        if (startTimeUs == C.TIME_UNSET) {
-            Log.w(TAG, "Skipping invalid timing: " + dialogueLine);
-            return;
-        }
-        long endTimeUs = parseTimecodeUs(lineValues[format.endTimeIndex]);
-        if (endTimeUs == C.TIME_UNSET) {
-            Log.w(TAG, "Skipping invalid timing: " + dialogueLine);
-            return;
-        }
-        if (this.styles != null && format.styleIndex != -1) {
-            style = this.styles.get(lineValues[format.styleIndex].trim());
-        } else {
-            style = null;
-        }
-        String rawText = lineValues[format.textIndex];
-        SsaStyle.Overrides styleOverrides = SsaStyle.Overrides.parseFromDialogue(rawText);
-        String text = SsaStyle.Overrides.stripStyleOverrides(rawText).replaceAll("\\\\N", "\n").replaceAll("\\\\n", "\n");
-        Cue cue = createCue(text, style, styleOverrides, this.screenWidth, this.screenHeight);
-        int startTimeIndex = addCuePlacerholderByTime(startTimeUs, cueTimesUs, cues);
-        int i = startTimeIndex;
-        for (int endTimeIndex = addCuePlacerholderByTime(endTimeUs, cueTimesUs, cues); i < endTimeIndex; endTimeIndex = endTimeIndex) {
-            cues.get(i).add(cue);
-            i++;
+        return linkedHashMap;
+    }
+
+    private void parseEventBody(ParsableByteArray parsableByteArray, List<List<Cue>> list, List<Long> list2) {
+        SsaDialogueFormat ssaDialogueFormat = this.haveInitializationData ? this.dialogueFormatFromInitializationData : null;
+        while (true) {
+            String readLine = parsableByteArray.readLine();
+            if (readLine != null) {
+                if (readLine.startsWith("Format:")) {
+                    ssaDialogueFormat = SsaDialogueFormat.fromFormatLine(readLine);
+                } else if (readLine.startsWith("Dialogue:")) {
+                    if (ssaDialogueFormat == null) {
+                        Log.w("SsaDecoder", "Skipping dialogue line before complete format: " + readLine);
+                    } else {
+                        parseDialogueLine(readLine, ssaDialogueFormat, list, list2);
+                    }
+                }
+            } else {
+                return;
+            }
         }
     }
 
-    private static long parseTimecodeUs(String timeString) {
-        Matcher matcher = SSA_TIMECODE_PATTERN.matcher(timeString.trim());
+    private void parseDialogueLine(String str, SsaDialogueFormat ssaDialogueFormat, List<List<Cue>> list, List<Long> list2) {
+        int i;
+        Assertions.checkArgument(str.startsWith("Dialogue:"));
+        String[] split = str.substring(9).split(",", ssaDialogueFormat.length);
+        if (split.length != ssaDialogueFormat.length) {
+            Log.w("SsaDecoder", "Skipping dialogue line with fewer columns than format: " + str);
+            return;
+        }
+        long parseTimecodeUs = parseTimecodeUs(split[ssaDialogueFormat.startTimeIndex]);
+        if (parseTimecodeUs == -9223372036854775807L) {
+            Log.w("SsaDecoder", "Skipping invalid timing: " + str);
+            return;
+        }
+        long parseTimecodeUs2 = parseTimecodeUs(split[ssaDialogueFormat.endTimeIndex]);
+        if (parseTimecodeUs2 == -9223372036854775807L) {
+            Log.w("SsaDecoder", "Skipping invalid timing: " + str);
+            return;
+        }
+        Map<String, SsaStyle> map = this.styles;
+        SsaStyle ssaStyle = (map == null || (i = ssaDialogueFormat.styleIndex) == -1) ? null : map.get(split[i].trim());
+        String str2 = split[ssaDialogueFormat.textIndex];
+        Cue createCue = createCue(SsaStyle.Overrides.stripStyleOverrides(str2).replaceAll("\\\\N", "\n").replaceAll("\\\\n", "\n"), ssaStyle, SsaStyle.Overrides.parseFromDialogue(str2), this.screenWidth, this.screenHeight);
+        int addCuePlacerholderByTime = addCuePlacerholderByTime(parseTimecodeUs2, list2, list);
+        for (int addCuePlacerholderByTime2 = addCuePlacerholderByTime(parseTimecodeUs, list2, list); addCuePlacerholderByTime2 < addCuePlacerholderByTime; addCuePlacerholderByTime2++) {
+            list.get(addCuePlacerholderByTime2).add(createCue);
+        }
+    }
+
+    private static long parseTimecodeUs(String str) {
+        Matcher matcher = SSA_TIMECODE_PATTERN.matcher(str.trim());
         if (!matcher.matches()) {
-            return C.TIME_UNSET;
+            return -9223372036854775807L;
         }
-        long timestampUs = Long.parseLong((String) Util.castNonNull(matcher.group(1))) * 60 * 60 * 1000000;
-        return timestampUs + (Long.parseLong((String) Util.castNonNull(matcher.group(2))) * 60 * 1000000) + (Long.parseLong((String) Util.castNonNull(matcher.group(3))) * 1000000) + (Long.parseLong((String) Util.castNonNull(matcher.group(4))) * 10000);
+        return (Long.parseLong((String) Util.castNonNull(matcher.group(1))) * 60 * 60 * 1000000) + (Long.parseLong((String) Util.castNonNull(matcher.group(2))) * 60 * 1000000) + (Long.parseLong((String) Util.castNonNull(matcher.group(3))) * 1000000) + (Long.parseLong((String) Util.castNonNull(matcher.group(4))) * 10000);
     }
 
-    private static Cue createCue(String text, SsaStyle style, SsaStyle.Overrides styleOverrides, float screenWidth, float screenHeight) {
-        int alignment;
-        float line;
-        float position;
-        if (styleOverrides.alignment != -1) {
-            alignment = styleOverrides.alignment;
-        } else if (style != null) {
-            alignment = style.alignment;
-        } else {
-            alignment = -1;
+    private static Cue createCue(String str, SsaStyle ssaStyle, SsaStyle.Overrides overrides, float f, float f2) {
+        float f3;
+        float f4;
+        int i = overrides.alignment;
+        if (i == -1) {
+            i = ssaStyle != null ? ssaStyle.alignment : -1;
         }
-        int positionAnchor = toPositionAnchor(alignment);
-        int lineAnchor = toLineAnchor(alignment);
-        if (styleOverrides.position != null && screenHeight != -3.4028235E38f && screenWidth != -3.4028235E38f) {
-            float position2 = styleOverrides.position.x / screenWidth;
-            position = position2;
-            line = styleOverrides.position.y / screenHeight;
+        int positionAnchor = toPositionAnchor(i);
+        int lineAnchor = toLineAnchor(i);
+        PointF pointF = overrides.position;
+        if (pointF != null && f2 != -3.4028235E38f && f != -3.4028235E38f) {
+            f4 = pointF.y / f2;
+            f3 = pointF.x / f;
         } else {
-            float position3 = computeDefaultLineOrPosition(positionAnchor);
-            position = position3;
-            line = computeDefaultLineOrPosition(lineAnchor);
+            f3 = computeDefaultLineOrPosition(positionAnchor);
+            f4 = computeDefaultLineOrPosition(lineAnchor);
         }
-        return new Cue(text, toTextAlignment(alignment), line, 0, lineAnchor, position, positionAnchor, -3.4028235E38f);
+        return new Cue(str, toTextAlignment(i), f4, 0, lineAnchor, f3, positionAnchor, -3.4028235E38f);
     }
 
-    private static Layout.Alignment toTextAlignment(int alignment) {
-        switch (alignment) {
+    private static Layout.Alignment toTextAlignment(int i) {
+        switch (i) {
             case -1:
                 return null;
             case 0:
             default:
-                Log.w(TAG, "Unknown alignment: " + alignment);
+                Log.w("SsaDecoder", "Unknown alignment: " + i);
                 return null;
             case 1:
             case 4:
@@ -304,13 +228,13 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
         }
     }
 
-    private static int toLineAnchor(int alignment) {
-        switch (alignment) {
+    private static int toLineAnchor(int i) {
+        switch (i) {
             case -1:
                 return Integer.MIN_VALUE;
             case 0:
             default:
-                Log.w(TAG, "Unknown alignment: " + alignment);
+                Log.w("SsaDecoder", "Unknown alignment: " + i);
                 return Integer.MIN_VALUE;
             case 1:
             case 2:
@@ -327,13 +251,13 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
         }
     }
 
-    private static int toPositionAnchor(int alignment) {
-        switch (alignment) {
+    private static int toPositionAnchor(int i) {
+        switch (i) {
             case -1:
                 return Integer.MIN_VALUE;
             case 0:
             default:
-                Log.w(TAG, "Unknown alignment: " + alignment);
+                Log.w("SsaDecoder", "Unknown alignment: " + i);
                 return Integer.MIN_VALUE;
             case 1:
             case 4:
@@ -350,38 +274,25 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
         }
     }
 
-    private static float computeDefaultLineOrPosition(int anchor) {
-        switch (anchor) {
-            case 0:
-                return DEFAULT_MARGIN;
-            case 1:
-                return 0.5f;
-            case 2:
-                return 0.95f;
-            default:
-                return -3.4028235E38f;
-        }
-    }
-
-    private static int addCuePlacerholderByTime(long timeUs, List<Long> sortedCueTimesUs, List<List<Cue>> cues) {
-        int insertionIndex = 0;
-        int i = sortedCueTimesUs.size() - 1;
+    private static int addCuePlacerholderByTime(long j, List<Long> list, List<List<Cue>> list2) {
+        int i;
+        int size = list.size() - 1;
         while (true) {
-            if (i < 0) {
+            if (size < 0) {
+                i = 0;
                 break;
-            } else if (sortedCueTimesUs.get(i).longValue() == timeUs) {
-                return i;
+            } else if (list.get(size).longValue() == j) {
+                return size;
             } else {
-                if (sortedCueTimesUs.get(i).longValue() >= timeUs) {
-                    i--;
-                } else {
-                    insertionIndex = i + 1;
+                if (list.get(size).longValue() < j) {
+                    i = size + 1;
                     break;
                 }
+                size--;
             }
         }
-        sortedCueTimesUs.add(insertionIndex, Long.valueOf(timeUs));
-        cues.add(insertionIndex, insertionIndex == 0 ? new ArrayList() : new ArrayList(cues.get(insertionIndex - 1)));
-        return insertionIndex;
+        list.add(i, Long.valueOf(j));
+        list2.add(i, i == 0 ? new ArrayList() : new ArrayList(list2.get(i - 1)));
+        return i;
     }
 }

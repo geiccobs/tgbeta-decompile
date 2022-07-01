@@ -2,33 +2,21 @@ package com.android.billingclient.api;
 
 import com.android.billingclient.api.BillingResult;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzbb {
     static final BillingResult zza;
-    static final BillingResult zzb;
     static final BillingResult zzc;
     static final BillingResult zzd;
-    static final BillingResult zze;
-    static final BillingResult zzf;
     static final BillingResult zzg;
     static final BillingResult zzh;
-    static final BillingResult zzi;
     static final BillingResult zzj;
-    static final BillingResult zzk;
     static final BillingResult zzl;
     static final BillingResult zzm;
     static final BillingResult zzn;
     static final BillingResult zzo;
-    static final BillingResult zzp;
-    static final BillingResult zzq;
-    static final BillingResult zzr;
-    static final BillingResult zzs;
     static final BillingResult zzt;
     static final BillingResult zzu;
     static final BillingResult zzv;
-    static final BillingResult zzw;
-    static final BillingResult zzx;
-    static final BillingResult zzy;
 
     static {
         BillingResult.Builder newBuilder = BillingResult.newBuilder();
@@ -38,7 +26,7 @@ public final class zzbb {
         BillingResult.Builder newBuilder2 = BillingResult.newBuilder();
         newBuilder2.setResponseCode(3);
         newBuilder2.setDebugMessage("Google Play In-app Billing API version is less than 9");
-        zzb = newBuilder2.build();
+        newBuilder2.build();
         BillingResult.Builder newBuilder3 = BillingResult.newBuilder();
         newBuilder3.setResponseCode(3);
         newBuilder3.setDebugMessage("Billing service unavailable on device.");
@@ -50,11 +38,11 @@ public final class zzbb {
         BillingResult.Builder newBuilder5 = BillingResult.newBuilder();
         newBuilder5.setResponseCode(5);
         newBuilder5.setDebugMessage("The list of SKUs can't be empty.");
-        zze = newBuilder5.build();
+        newBuilder5.build();
         BillingResult.Builder newBuilder6 = BillingResult.newBuilder();
         newBuilder6.setResponseCode(5);
         newBuilder6.setDebugMessage("SKU type can't be empty.");
-        zzf = newBuilder6.build();
+        newBuilder6.build();
         BillingResult.Builder newBuilder7 = BillingResult.newBuilder();
         newBuilder7.setResponseCode(5);
         newBuilder7.setDebugMessage("Product type can't be empty.");
@@ -66,7 +54,7 @@ public final class zzbb {
         BillingResult.Builder newBuilder9 = BillingResult.newBuilder();
         newBuilder9.setResponseCode(5);
         newBuilder9.setDebugMessage("Invalid purchase token.");
-        zzi = newBuilder9.build();
+        newBuilder9.build();
         BillingResult.Builder newBuilder10 = BillingResult.newBuilder();
         newBuilder10.setResponseCode(6);
         newBuilder10.setDebugMessage("An internal error occurred.");
@@ -74,7 +62,7 @@ public final class zzbb {
         BillingResult.Builder newBuilder11 = BillingResult.newBuilder();
         newBuilder11.setResponseCode(5);
         newBuilder11.setDebugMessage("SKU can't be null.");
-        zzk = newBuilder11.build();
+        newBuilder11.build();
         BillingResult.Builder newBuilder12 = BillingResult.newBuilder();
         newBuilder12.setResponseCode(0);
         zzl = newBuilder12.build();
@@ -93,19 +81,19 @@ public final class zzbb {
         BillingResult.Builder newBuilder16 = BillingResult.newBuilder();
         newBuilder16.setResponseCode(-2);
         newBuilder16.setDebugMessage("Client does not support subscriptions update.");
-        zzp = newBuilder16.build();
+        newBuilder16.build();
         BillingResult.Builder newBuilder17 = BillingResult.newBuilder();
         newBuilder17.setResponseCode(-2);
         newBuilder17.setDebugMessage("Client does not support get purchase history.");
-        zzq = newBuilder17.build();
+        newBuilder17.build();
         BillingResult.Builder newBuilder18 = BillingResult.newBuilder();
         newBuilder18.setResponseCode(-2);
         newBuilder18.setDebugMessage("Client does not support price change confirmation.");
-        zzr = newBuilder18.build();
+        newBuilder18.build();
         BillingResult.Builder newBuilder19 = BillingResult.newBuilder();
         newBuilder19.setResponseCode(-2);
         newBuilder19.setDebugMessage("Play Store version installed does not support cross selling products.");
-        zzs = newBuilder19.build();
+        newBuilder19.build();
         BillingResult.Builder newBuilder20 = BillingResult.newBuilder();
         newBuilder20.setResponseCode(-2);
         newBuilder20.setDebugMessage("Client does not support multi-item purchases.");
@@ -121,14 +109,14 @@ public final class zzbb {
         BillingResult.Builder newBuilder23 = BillingResult.newBuilder();
         newBuilder23.setResponseCode(-2);
         newBuilder23.setDebugMessage("Client does not support in-app messages.");
-        zzw = newBuilder23.build();
+        newBuilder23.build();
         BillingResult.Builder newBuilder24 = BillingResult.newBuilder();
         newBuilder24.setResponseCode(-2);
         newBuilder24.setDebugMessage("Client does not support alternative billing.");
-        zzx = newBuilder24.build();
+        newBuilder24.build();
         BillingResult.Builder newBuilder25 = BillingResult.newBuilder();
         newBuilder25.setResponseCode(5);
         newBuilder25.setDebugMessage("Unknown feature");
-        zzy = newBuilder25.build();
+        newBuilder25.build();
     }
 }

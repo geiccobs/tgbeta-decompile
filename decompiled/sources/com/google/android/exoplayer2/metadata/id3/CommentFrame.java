@@ -3,62 +3,59 @@ package com.google.android.exoplayer2.metadata.id3;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class CommentFrame extends Id3Frame {
     public static final Parcelable.Creator<CommentFrame> CREATOR = new Parcelable.Creator<CommentFrame>() { // from class: com.google.android.exoplayer2.metadata.id3.CommentFrame.1
         @Override // android.os.Parcelable.Creator
-        public CommentFrame createFromParcel(Parcel in) {
-            return new CommentFrame(in);
+        public CommentFrame createFromParcel(Parcel parcel) {
+            return new CommentFrame(parcel);
         }
 
         @Override // android.os.Parcelable.Creator
-        public CommentFrame[] newArray(int size) {
-            return new CommentFrame[size];
+        public CommentFrame[] newArray(int i) {
+            return new CommentFrame[i];
         }
     };
-    public static final String ID = "COMM";
     public final String description;
     public final String language;
     public final String text;
 
-    public CommentFrame(String language, String description, String text) {
-        super(ID);
-        this.language = language;
-        this.description = description;
-        this.text = text;
+    public CommentFrame(String str, String str2, String str3) {
+        super("COMM");
+        this.language = str;
+        this.description = str2;
+        this.text = str3;
     }
 
-    CommentFrame(Parcel in) {
-        super(ID);
-        this.language = (String) Util.castNonNull(in.readString());
-        this.description = (String) Util.castNonNull(in.readString());
-        this.text = (String) Util.castNonNull(in.readString());
+    CommentFrame(Parcel parcel) {
+        super("COMM");
+        this.language = (String) Util.castNonNull(parcel.readString());
+        this.description = (String) Util.castNonNull(parcel.readString());
+        this.text = (String) Util.castNonNull(parcel.readString());
     }
 
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || CommentFrame.class != obj.getClass()) {
             return false;
         }
-        CommentFrame other = (CommentFrame) obj;
-        return Util.areEqual(this.description, other.description) && Util.areEqual(this.language, other.language) && Util.areEqual(this.text, other.text);
+        CommentFrame commentFrame = (CommentFrame) obj;
+        return Util.areEqual(this.description, commentFrame.description) && Util.areEqual(this.language, commentFrame.language) && Util.areEqual(this.text, commentFrame.text);
     }
 
     public int hashCode() {
-        int i = 17 * 31;
         String str = this.language;
-        int i2 = 0;
-        int result = i + (str != null ? str.hashCode() : 0);
-        int result2 = result * 31;
+        int i = 0;
+        int hashCode = (527 + (str != null ? str.hashCode() : 0)) * 31;
         String str2 = this.description;
-        int result3 = (result2 + (str2 != null ? str2.hashCode() : 0)) * 31;
+        int hashCode2 = (hashCode + (str2 != null ? str2.hashCode() : 0)) * 31;
         String str3 = this.text;
         if (str3 != null) {
-            i2 = str3.hashCode();
+            i = str3.hashCode();
         }
-        return result3 + i2;
+        return hashCode2 + i;
     }
 
     @Override // com.google.android.exoplayer2.metadata.id3.Id3Frame
@@ -67,9 +64,9 @@ public final class CommentFrame extends Id3Frame {
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.id);
-        dest.writeString(this.language);
-        dest.writeString(this.text);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(this.id);
+        parcel.writeString(this.language);
+        parcel.writeString(this.text);
     }
 }

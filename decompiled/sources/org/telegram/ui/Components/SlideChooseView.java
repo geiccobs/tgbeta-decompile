@@ -11,10 +11,9 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class SlideChooseView extends View {
     private final SeekBarAccessibilityDelegate accessibilityDelegate;
     private Callback callback;
@@ -37,9 +36,23 @@ public class SlideChooseView extends View {
     private boolean startMoving;
     private int startMovingPreset;
     private TextPaint textPaint;
-    private boolean touchWasClose;
     private float xTouchDown;
     private float yTouchDown;
+
+    /* loaded from: classes3.dex */
+    public interface Callback {
+
+        /* renamed from: org.telegram.ui.Components.SlideChooseView$Callback$-CC */
+        /* loaded from: classes3.dex */
+        public final /* synthetic */ class CC {
+            public static void $default$onTouchEnd(Callback callback) {
+            }
+        }
+
+        void onOptionSelected(int i);
+
+        void onTouchEnd();
+    }
 
     public SlideChooseView(Context context) {
         this(context, null);
@@ -48,9 +61,9 @@ public class SlideChooseView extends View {
     public SlideChooseView(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.dashedFrom = -1;
-        this.selectedIndexAnimatedHolder = new AnimatedFloat(this, 120L, CubicBezierInterpolator.DEFAULT);
-        this.movingAnimatedHolder = new AnimatedFloat(this, 150L, CubicBezierInterpolator.DEFAULT);
-        this.touchWasClose = false;
+        CubicBezierInterpolator cubicBezierInterpolator = CubicBezierInterpolator.DEFAULT;
+        this.selectedIndexAnimatedHolder = new AnimatedFloat(this, 120L, cubicBezierInterpolator);
+        this.movingAnimatedHolder = new AnimatedFloat(this, 150L, cubicBezierInterpolator);
         this.resourcesProvider = resourcesProvider;
         this.paint = new Paint(1);
         this.textPaint = new TextPaint(1);
@@ -66,8 +79,8 @@ public class SlideChooseView extends View {
             }
 
             @Override // org.telegram.ui.Components.IntSeekBarAccessibilityDelegate
-            protected void setProgress(int progress) {
-                SlideChooseView.this.setOption(progress);
+            protected void setProgress(int i) {
+                SlideChooseView.this.setOption(i);
             }
 
             @Override // org.telegram.ui.Components.IntSeekBarAccessibilityDelegate
@@ -76,7 +89,7 @@ public class SlideChooseView extends View {
             }
 
             @Override // org.telegram.ui.Components.SeekBarAccessibilityDelegate
-            protected CharSequence getContentDescription(View host) {
+            protected CharSequence getContentDescription(View view) {
                 if (SlideChooseView.this.selectedIndex < SlideChooseView.this.optionsStr.length) {
                     return SlideChooseView.this.optionsStr[SlideChooseView.this.selectedIndex];
                 }
@@ -89,16 +102,16 @@ public class SlideChooseView extends View {
         this.callback = callback;
     }
 
-    public void setOptions(int selected, String... options) {
-        this.optionsStr = options;
-        this.selectedIndex = selected;
-        this.optionsSizes = new int[options.length];
-        int i = 0;
+    public void setOptions(int i, String... strArr) {
+        this.optionsStr = strArr;
+        this.selectedIndex = i;
+        this.optionsSizes = new int[strArr.length];
+        int i2 = 0;
         while (true) {
-            String[] strArr = this.optionsStr;
-            if (i < strArr.length) {
-                this.optionsSizes[i] = (int) Math.ceil(this.textPaint.measureText(strArr[i]));
-                i++;
+            String[] strArr2 = this.optionsStr;
+            if (i2 < strArr2.length) {
+                this.optionsSizes[i2] = (int) Math.ceil(this.textPaint.measureText(strArr2[i2]));
+                i2++;
             } else {
                 requestLayout();
                 return;
@@ -106,28 +119,28 @@ public class SlideChooseView extends View {
         }
     }
 
-    public void setDashedFrom(int from) {
-        this.dashedFrom = from;
+    public void setDashedFrom(int i) {
+        this.dashedFrom = i;
     }
 
     @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent motionEvent) {
         int i;
-        float x = event.getX();
-        float y = event.getY();
-        float indexTouch = MathUtils.clamp(((x - this.sideSide) + (this.circleSize / 2.0f)) / ((this.lineSize + (this.gapSize * 2)) + i), 0.0f, this.optionsStr.length - 1);
-        boolean isClose = Math.abs(indexTouch - ((float) Math.round(indexTouch))) < 0.35f;
-        if (isClose) {
-            indexTouch = Math.round(indexTouch);
+        float x = motionEvent.getX();
+        float y = motionEvent.getY();
+        float clamp = MathUtils.clamp(((x - this.sideSide) + (this.circleSize / 2.0f)) / ((this.lineSize + (this.gapSize * 2)) + i), 0.0f, this.optionsStr.length - 1);
+        boolean z = Math.abs(clamp - ((float) Math.round(clamp))) < 0.35f;
+        if (z) {
+            clamp = Math.round(clamp);
         }
-        if (event.getAction() == 0) {
+        if (motionEvent.getAction() == 0) {
             this.xTouchDown = x;
             this.yTouchDown = y;
-            this.selectedIndexTouch = indexTouch;
+            this.selectedIndexTouch = clamp;
             this.startMovingPreset = this.selectedIndex;
             this.startMoving = true;
             invalidate();
-        } else if (event.getAction() == 2) {
+        } else if (motionEvent.getAction() == 2) {
             if (!this.moving && Math.abs(this.xTouchDown - x) > Math.abs(this.yTouchDown - y)) {
                 getParent().requestDisallowInterceptTouchEvent(true);
             }
@@ -136,17 +149,17 @@ public class SlideChooseView extends View {
                 this.startMoving = false;
             }
             if (this.moving) {
-                this.selectedIndexTouch = indexTouch;
+                this.selectedIndexTouch = clamp;
                 invalidate();
-                if (Math.round(this.selectedIndexTouch) != this.selectedIndex && isClose) {
+                if (Math.round(this.selectedIndexTouch) != this.selectedIndex && z) {
                     setOption(Math.round(this.selectedIndexTouch));
                 }
             }
             invalidate();
-        } else if (event.getAction() == 1 || event.getAction() == 3) {
+        } else if (motionEvent.getAction() == 1 || motionEvent.getAction() == 3) {
             if (!this.moving) {
-                this.selectedIndexTouch = indexTouch;
-                if (Math.round(indexTouch) != this.selectedIndex) {
+                this.selectedIndexTouch = clamp;
+                if (Math.round(clamp) != this.selectedIndex) {
                     setOption(Math.round(this.selectedIndexTouch));
                 }
             } else {
@@ -167,140 +180,134 @@ public class SlideChooseView extends View {
         return true;
     }
 
-    public void setOption(int index) {
-        if (this.selectedIndex != index) {
+    public void setOption(int i) {
+        if (this.selectedIndex != i) {
             try {
                 performHapticFeedback(9, 1);
-            } catch (Exception e) {
+            } catch (Exception unused) {
             }
         }
-        this.selectedIndex = index;
+        this.selectedIndex = i;
         Callback callback = this.callback;
         if (callback != null) {
-            callback.onOptionSelected(index);
+            callback.onOptionSelected(i);
         }
         invalidate();
     }
 
     @Override // android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(74.0f), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(74.0f), 1073741824));
         this.circleSize = AndroidUtilities.dp(6.0f);
         this.gapSize = AndroidUtilities.dp(2.0f);
         this.sideSide = AndroidUtilities.dp(22.0f);
         int measuredWidth = getMeasuredWidth();
-        int i = this.circleSize;
+        int i3 = this.circleSize;
         String[] strArr = this.optionsStr;
-        this.lineSize = (((measuredWidth - (i * strArr.length)) - ((this.gapSize * 2) * (strArr.length - 1))) - (this.sideSide * 2)) / (strArr.length - 1);
+        this.lineSize = (((measuredWidth - (i3 * strArr.length)) - ((this.gapSize * 2) * (strArr.length - 1))) - (this.sideSide * 2)) / (strArr.length - 1);
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        float t;
-        int x;
-        int width;
-        float selectedIndexAnimated = this.selectedIndexAnimatedHolder.set(this.selectedIndex);
-        float f = 0.0f;
-        float f2 = 1.0f;
-        float movingAnimated = this.movingAnimatedHolder.set(this.moving ? 1.0f : 0.0f);
-        int i = 2;
-        int cy = (getMeasuredHeight() / 2) + AndroidUtilities.dp(11.0f);
-        int a = 0;
-        while (a < this.optionsStr.length) {
-            int i2 = this.sideSide;
-            int i3 = this.lineSize + (this.gapSize * 2);
-            int i4 = this.circleSize;
-            int cx = i2 + ((i3 + i4) * a) + (i4 / i);
-            float t2 = Math.max(f, f2 - Math.abs(a - selectedIndexAnimated));
-            float ut = MathUtils.clamp((selectedIndexAnimated - a) + f2, f, f2);
-            int color = ColorUtils.blendARGB(getThemedColor(Theme.key_switchTrack), getThemedColor(Theme.key_switchTrackChecked), ut);
-            this.paint.setColor(color);
-            this.linePaint.setColor(color);
-            canvas.drawCircle(cx, cy, AndroidUtilities.lerp(this.circleSize / i, AndroidUtilities.dp(6.0f), t2), this.paint);
-            if (a != 0) {
-                int x2 = ((cx - (this.circleSize / i)) - this.gapSize) - this.lineSize;
-                int width2 = this.lineSize;
-                int i5 = this.dashedFrom;
-                if (i5 != -1 && a - 1 >= i5) {
-                    int x3 = AndroidUtilities.dp(3.0f) + x2;
-                    int dash = (width2 - AndroidUtilities.dp(3.0f)) / AndroidUtilities.dp(13.0f);
-                    if (this.lastDash != dash) {
-                        float gap = (width - (AndroidUtilities.dp(8.0f) * dash)) / (dash - 1);
-                        Paint paint = this.linePaint;
-                        float[] fArr = new float[i];
-                        fArr[0] = AndroidUtilities.dp(6.0f);
-                        fArr[1] = gap;
-                        paint.setPathEffect(new DashPathEffect(fArr, 0.0f));
-                        this.lastDash = dash;
+        int i;
+        float f;
+        int dp;
+        int dp2;
+        int i2;
+        float f2;
+        float f3 = this.selectedIndexAnimatedHolder.set(this.selectedIndex);
+        float f4 = 0.0f;
+        float f5 = 1.0f;
+        float f6 = this.movingAnimatedHolder.set(this.moving ? 1.0f : 0.0f);
+        int measuredHeight = (getMeasuredHeight() / 2) + AndroidUtilities.dp(11.0f);
+        int i3 = 0;
+        while (i3 < this.optionsStr.length) {
+            int i4 = this.sideSide;
+            int i5 = this.lineSize + (this.gapSize * 2);
+            int i6 = this.circleSize;
+            int i7 = i4 + ((i5 + i6) * i3) + (i6 / 2);
+            float f7 = i3;
+            float f8 = f7 - f3;
+            float max = Math.max(f4, f5 - Math.abs(f8));
+            int blendARGB = ColorUtils.blendARGB(getThemedColor("switchTrack"), getThemedColor("switchTrackChecked"), MathUtils.clamp((f3 - f7) + f5, f4, f5));
+            this.paint.setColor(blendARGB);
+            this.linePaint.setColor(blendARGB);
+            float f9 = measuredHeight;
+            canvas.drawCircle(i7, f9, AndroidUtilities.lerp(this.circleSize / 2, AndroidUtilities.dp(6.0f), max), this.paint);
+            if (i3 != 0) {
+                int i8 = (i7 - (this.circleSize / 2)) - this.gapSize;
+                int i9 = this.lineSize;
+                int i10 = i8 - i9;
+                int i11 = this.dashedFrom;
+                if (i11 != -1 && i3 - 1 >= i11) {
+                    int dp3 = i10 + AndroidUtilities.dp(3.0f);
+                    int dp4 = (i9 - AndroidUtilities.dp(3.0f)) / AndroidUtilities.dp(13.0f);
+                    if (this.lastDash != dp4) {
+                        f2 = max;
+                        i2 = i7;
+                        this.linePaint.setPathEffect(new DashPathEffect(new float[]{AndroidUtilities.dp(6.0f), (dp2 - (AndroidUtilities.dp(8.0f) * dp4)) / (dp4 - 1)}, 0.0f));
+                        this.lastDash = dp4;
+                    } else {
+                        f2 = max;
+                        i2 = i7;
                     }
-                    t = t2;
-                    canvas.drawLine(AndroidUtilities.dp(1.0f) + x3, cy, (x3 + width) - AndroidUtilities.dp(1.0f), cy, this.linePaint);
+                    f = f2;
+                    i = i2;
+                    canvas.drawLine(AndroidUtilities.dp(1.0f) + dp3, f9, (dp3 + dp2) - AndroidUtilities.dp(1.0f), f9, this.linePaint);
                 } else {
-                    t = t2;
-                    float nt = MathUtils.clamp(1.0f - Math.abs((a - selectedIndexAnimated) - 1.0f), 0.0f, 1.0f);
-                    float nct = MathUtils.clamp(1.0f - Math.min(Math.abs(a - selectedIndexAnimated), Math.abs((a - selectedIndexAnimated) - 1.0f)), 0.0f, 1.0f);
-                    int width3 = (int) (width2 - (AndroidUtilities.dp(3.0f) * nct));
-                    canvas.drawRect((int) (x2 + (AndroidUtilities.dp(3.0f) * nt)), cy - AndroidUtilities.dp(1.0f), x + width3, AndroidUtilities.dp(1.0f) + cy, this.paint);
+                    f = max;
+                    i = i7;
+                    float f10 = f8 - 1.0f;
+                    float clamp = MathUtils.clamp(1.0f - Math.abs(f10), 0.0f, 1.0f);
+                    float clamp2 = MathUtils.clamp(1.0f - Math.min(Math.abs(f8), Math.abs(f10)), 0.0f, 1.0f);
+                    canvas.drawRect((int) (i10 + (AndroidUtilities.dp(3.0f) * clamp)), measuredHeight - AndroidUtilities.dp(1.0f), dp + ((int) (i9 - (AndroidUtilities.dp(3.0f) * clamp2))), AndroidUtilities.dp(1.0f) + measuredHeight, this.paint);
                 }
             } else {
-                t = t2;
+                f = max;
+                i = i7;
             }
-            int size = this.optionsSizes[a];
-            String text = this.optionsStr[a];
-            this.textPaint.setColor(ColorUtils.blendARGB(getThemedColor(Theme.key_windowBackgroundWhiteGrayText), getThemedColor(Theme.key_windowBackgroundWhiteBlueText), t));
-            if (a == 0) {
-                canvas.drawText(text, AndroidUtilities.dp(22.0f), AndroidUtilities.dp(28.0f), this.textPaint);
-            } else if (a == this.optionsStr.length - 1) {
-                canvas.drawText(text, (getMeasuredWidth() - size) - AndroidUtilities.dp(22.0f), AndroidUtilities.dp(28.0f), this.textPaint);
+            int i12 = this.optionsSizes[i3];
+            String str = this.optionsStr[i3];
+            this.textPaint.setColor(ColorUtils.blendARGB(getThemedColor("windowBackgroundWhiteGrayText"), getThemedColor("windowBackgroundWhiteBlueText"), f));
+            if (i3 == 0) {
+                canvas.drawText(str, AndroidUtilities.dp(22.0f), AndroidUtilities.dp(28.0f), this.textPaint);
+            } else if (i3 == this.optionsStr.length - 1) {
+                canvas.drawText(str, (getMeasuredWidth() - i12) - AndroidUtilities.dp(22.0f), AndroidUtilities.dp(28.0f), this.textPaint);
             } else {
-                canvas.drawText(text, cx - (size / 2), AndroidUtilities.dp(28.0f), this.textPaint);
+                canvas.drawText(str, i - (i12 / 2), AndroidUtilities.dp(28.0f), this.textPaint);
             }
-            a++;
-            f = 0.0f;
-            f2 = 1.0f;
-            i = 2;
+            i3++;
+            f4 = 0.0f;
+            f5 = 1.0f;
         }
-        int i6 = this.lineSize + (this.gapSize * 2);
-        int i7 = this.circleSize;
-        float cx2 = this.sideSide + ((i6 + i7) * selectedIndexAnimated) + (i7 / 2);
-        this.paint.setColor(ColorUtils.setAlphaComponent(getThemedColor(Theme.key_switchTrackChecked), 80));
-        canvas.drawCircle(cx2, cy, AndroidUtilities.dp(12.0f * movingAnimated), this.paint);
-        this.paint.setColor(getThemedColor(Theme.key_switchTrackChecked));
-        canvas.drawCircle(cx2, cy, AndroidUtilities.dp(6.0f), this.paint);
+        int i13 = this.lineSize + (this.gapSize * 2);
+        int i14 = this.circleSize;
+        float f11 = this.sideSide + ((i13 + i14) * f3) + (i14 / 2);
+        this.paint.setColor(ColorUtils.setAlphaComponent(getThemedColor("switchTrackChecked"), 80));
+        float f12 = measuredHeight;
+        canvas.drawCircle(f11, f12, AndroidUtilities.dp(f6 * 12.0f), this.paint);
+        this.paint.setColor(getThemedColor("switchTrackChecked"));
+        canvas.drawCircle(f11, f12, AndroidUtilities.dp(6.0f), this.paint);
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        this.accessibilityDelegate.onInitializeAccessibilityNodeInfoInternal(this, info);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        this.accessibilityDelegate.onInitializeAccessibilityNodeInfoInternal(this, accessibilityNodeInfo);
     }
 
     @Override // android.view.View
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        return super.performAccessibilityAction(action, arguments) || this.accessibilityDelegate.performAccessibilityActionInternal(this, action, arguments);
+    public boolean performAccessibilityAction(int i, Bundle bundle) {
+        return super.performAccessibilityAction(i, bundle) || this.accessibilityDelegate.performAccessibilityActionInternal(this, i, bundle);
     }
 
     public int getSelectedIndex() {
         return this.selectedIndex;
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
-    }
-
-    /* loaded from: classes5.dex */
-    public interface Callback {
-        void onOptionSelected(int i);
-
-        void onTouchEnd();
-
-        /* renamed from: org.telegram.ui.Components.SlideChooseView$Callback$-CC */
-        /* loaded from: classes5.dex */
-        public final /* synthetic */ class CC {
-            public static void $default$onTouchEnd(Callback _this) {
-            }
-        }
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

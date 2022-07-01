@@ -5,18 +5,17 @@ import j$.util.concurrent.ConcurrentHashMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LazySet<T> implements Provider<Set<T>> {
     private volatile Set<T> actualSet = null;
     private volatile Set<Provider<T>> providers = Collections.newSetFromMap(new ConcurrentHashMap());
 
-    LazySet(Collection<Provider<T>> providers) {
-        this.providers.addAll(providers);
+    LazySet(Collection<Provider<T>> collection) {
+        this.providers.addAll(collection);
     }
 
-    public static LazySet<?> fromCollection(Collection<Provider<?>> providers) {
-        Collection<Provider<Object>> casted = (Set) providers;
-        return new LazySet<>(casted);
+    public static LazySet<?> fromCollection(Collection<Provider<?>> collection) {
+        return new LazySet<>((Set) collection);
     }
 
     @Override // com.google.firebase.inject.Provider
@@ -32,11 +31,11 @@ public class LazySet<T> implements Provider<Set<T>> {
         return Collections.unmodifiableSet(this.actualSet);
     }
 
-    public synchronized void add(Provider<T> newProvider) {
+    public synchronized void add(Provider<T> provider) {
         if (this.actualSet == null) {
-            this.providers.add(newProvider);
+            this.providers.add(provider);
         } else {
-            this.actualSet.add(newProvider.get());
+            this.actualSet.add(provider.get());
         }
     }
 

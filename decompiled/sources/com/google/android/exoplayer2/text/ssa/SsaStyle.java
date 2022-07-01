@@ -5,68 +5,15 @@ import android.text.TextUtils;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
-import com.microsoft.appcenter.ingestion.models.CommonProperties;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class SsaStyle {
-    public static final int SSA_ALIGNMENT_BOTTOM_CENTER = 2;
-    public static final int SSA_ALIGNMENT_BOTTOM_LEFT = 1;
-    public static final int SSA_ALIGNMENT_BOTTOM_RIGHT = 3;
-    public static final int SSA_ALIGNMENT_MIDDLE_CENTER = 5;
-    public static final int SSA_ALIGNMENT_MIDDLE_LEFT = 4;
-    public static final int SSA_ALIGNMENT_MIDDLE_RIGHT = 6;
-    public static final int SSA_ALIGNMENT_TOP_CENTER = 8;
-    public static final int SSA_ALIGNMENT_TOP_LEFT = 7;
-    public static final int SSA_ALIGNMENT_TOP_RIGHT = 9;
-    public static final int SSA_ALIGNMENT_UNKNOWN = -1;
-    private static final String TAG = "SsaStyle";
     public final int alignment;
     public final String name;
 
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    public @interface SsaAlignment {
-    }
-
-    private SsaStyle(String name, int alignment) {
-        this.name = name;
-        this.alignment = alignment;
-    }
-
-    public static SsaStyle fromStyleLine(String styleLine, Format format) {
-        Assertions.checkArgument(styleLine.startsWith("Style:"));
-        String[] styleValues = TextUtils.split(styleLine.substring("Style:".length()), ",");
-        if (styleValues.length != format.length) {
-            Log.w(TAG, Util.formatInvariant("Skipping malformed 'Style:' line (expected %s values, found %s): '%s'", Integer.valueOf(format.length), Integer.valueOf(styleValues.length), styleLine));
-            return null;
-        }
-        try {
-            return new SsaStyle(styleValues[format.nameIndex].trim(), parseAlignment(styleValues[format.alignmentIndex]));
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Skipping malformed 'Style:' line: '" + styleLine + "'", e);
-            return null;
-        }
-    }
-
-    public static int parseAlignment(String alignmentStr) {
-        try {
-            int alignment = Integer.parseInt(alignmentStr.trim());
-            if (isValidAlignment(alignment)) {
-                return alignment;
-            }
-        } catch (NumberFormatException e) {
-        }
-        Log.w(TAG, "Ignoring unknown alignment: " + alignmentStr);
-        return -1;
-    }
-
-    private static boolean isValidAlignment(int alignment) {
-        switch (alignment) {
+    private static boolean isValidAlignment(int i) {
+        switch (i) {
             case 1:
             case 2:
             case 3:
@@ -82,128 +29,139 @@ public final class SsaStyle {
         }
     }
 
+    private SsaStyle(String str, int i) {
+        this.name = str;
+        this.alignment = i;
+    }
+
+    public static SsaStyle fromStyleLine(String str, Format format) {
+        Assertions.checkArgument(str.startsWith("Style:"));
+        String[] split = TextUtils.split(str.substring(6), ",");
+        int length = split.length;
+        int i = format.length;
+        if (length != i) {
+            Log.w("SsaStyle", Util.formatInvariant("Skipping malformed 'Style:' line (expected %s values, found %s): '%s'", Integer.valueOf(i), Integer.valueOf(split.length), str));
+            return null;
+        }
+        try {
+            return new SsaStyle(split[format.nameIndex].trim(), parseAlignment(split[format.alignmentIndex]));
+        } catch (RuntimeException e) {
+            Log.w("SsaStyle", "Skipping malformed 'Style:' line: '" + str + "'", e);
+            return null;
+        }
+    }
+
+    public static int parseAlignment(String str) {
+        try {
+            int parseInt = Integer.parseInt(str.trim());
+            if (isValidAlignment(parseInt)) {
+                return parseInt;
+            }
+        } catch (NumberFormatException unused) {
+        }
+        Log.w("SsaStyle", "Ignoring unknown alignment: " + str);
+        return -1;
+    }
+
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Format {
         public final int alignmentIndex;
         public final int length;
         public final int nameIndex;
 
-        private Format(int nameIndex, int alignmentIndex, int length) {
-            this.nameIndex = nameIndex;
-            this.alignmentIndex = alignmentIndex;
-            this.length = length;
+        private Format(int i, int i2, int i3) {
+            this.nameIndex = i;
+            this.alignmentIndex = i2;
+            this.length = i3;
         }
 
-        public static Format fromFormatLine(String styleFormatLine) {
-            int nameIndex = -1;
-            int alignmentIndex = -1;
-            String[] keys = TextUtils.split(styleFormatLine.substring("Format:".length()), ",");
-            int i = 0;
-            while (true) {
-                char c = 65535;
-                if (i < keys.length) {
-                    String lowerInvariant = Util.toLowerInvariant(keys[i].trim());
-                    switch (lowerInvariant.hashCode()) {
-                        case 3373707:
-                            if (lowerInvariant.equals(CommonProperties.NAME)) {
-                                c = 0;
-                                break;
-                            }
-                            break;
-                        case 1767875043:
-                            if (lowerInvariant.equals("alignment")) {
-                                c = 1;
-                                break;
-                            }
-                            break;
-                    }
-                    switch (c) {
-                        case 0:
-                            nameIndex = i;
-                            break;
-                        case 1:
-                            alignmentIndex = i;
-                            break;
-                    }
-                    i++;
-                } else if (nameIndex == -1) {
-                    return null;
-                } else {
-                    return new Format(nameIndex, alignmentIndex, keys.length);
+        public static Format fromFormatLine(String str) {
+            String[] split = TextUtils.split(str.substring(7), ",");
+            int i = -1;
+            int i2 = -1;
+            for (int i3 = 0; i3 < split.length; i3++) {
+                String lowerInvariant = Util.toLowerInvariant(split[i3].trim());
+                lowerInvariant.hashCode();
+                if (lowerInvariant.equals("name")) {
+                    i = i3;
+                } else if (lowerInvariant.equals("alignment")) {
+                    i2 = i3;
                 }
             }
+            if (i != -1) {
+                return new Format(i, i2, split.length);
+            }
+            return null;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     static final class Overrides {
-        private static final String TAG = "SsaStyle.Overrides";
         public final int alignment;
         public final PointF position;
         private static final Pattern BRACES_PATTERN = Pattern.compile("\\{([^}]*)\\}");
-        private static final String PADDED_DECIMAL_PATTERN = "\\s*\\d+(?:\\.\\d+)?\\s*";
-        private static final Pattern POSITION_PATTERN = Pattern.compile(Util.formatInvariant("\\\\pos\\((%1$s),(%1$s)\\)", PADDED_DECIMAL_PATTERN));
-        private static final Pattern MOVE_PATTERN = Pattern.compile(Util.formatInvariant("\\\\move\\(%1$s,%1$s,(%1$s),(%1$s)(?:,%1$s,%1$s)?\\)", PADDED_DECIMAL_PATTERN));
+        private static final Pattern POSITION_PATTERN = Pattern.compile(Util.formatInvariant("\\\\pos\\((%1$s),(%1$s)\\)", "\\s*\\d+(?:\\.\\d+)?\\s*"));
+        private static final Pattern MOVE_PATTERN = Pattern.compile(Util.formatInvariant("\\\\move\\(%1$s,%1$s,(%1$s),(%1$s)(?:,%1$s,%1$s)?\\)", "\\s*\\d+(?:\\.\\d+)?\\s*"));
         private static final Pattern ALIGNMENT_OVERRIDE_PATTERN = Pattern.compile("\\\\an(\\d+)");
 
-        private Overrides(int alignment, PointF position) {
-            this.alignment = alignment;
-            this.position = position;
+        private Overrides(int i, PointF pointF) {
+            this.alignment = i;
+            this.position = pointF;
         }
 
-        public static Overrides parseFromDialogue(String text) {
-            int alignment = -1;
-            PointF position = null;
-            Matcher matcher = BRACES_PATTERN.matcher(text);
+        public static Overrides parseFromDialogue(String str) {
+            Matcher matcher = BRACES_PATTERN.matcher(str);
+            PointF pointF = null;
+            int i = -1;
             while (matcher.find()) {
-                String braceContents = matcher.group(1);
+                String group = matcher.group(1);
                 try {
-                    PointF parsedPosition = parsePosition(braceContents);
-                    if (parsedPosition != null) {
-                        position = parsedPosition;
+                    PointF parsePosition = parsePosition(group);
+                    if (parsePosition != null) {
+                        pointF = parsePosition;
                     }
-                } catch (RuntimeException e) {
+                } catch (RuntimeException unused) {
                 }
                 try {
-                    int parsedAlignment = parseAlignmentOverride(braceContents);
-                    if (parsedAlignment != -1) {
-                        alignment = parsedAlignment;
+                    int parseAlignmentOverride = parseAlignmentOverride(group);
+                    if (parseAlignmentOverride != -1) {
+                        i = parseAlignmentOverride;
                     }
-                } catch (RuntimeException e2) {
+                } catch (RuntimeException unused2) {
                 }
             }
-            return new Overrides(alignment, position);
+            return new Overrides(i, pointF);
         }
 
-        public static String stripStyleOverrides(String dialogueLine) {
-            return BRACES_PATTERN.matcher(dialogueLine).replaceAll("");
+        public static String stripStyleOverrides(String str) {
+            return BRACES_PATTERN.matcher(str).replaceAll("");
         }
 
-        private static PointF parsePosition(String styleOverride) {
-            String x;
-            String y;
-            Matcher positionMatcher = POSITION_PATTERN.matcher(styleOverride);
-            Matcher moveMatcher = MOVE_PATTERN.matcher(styleOverride);
-            boolean hasPosition = positionMatcher.find();
-            boolean hasMove = moveMatcher.find();
-            if (hasPosition) {
-                if (hasMove) {
-                    Log.i(TAG, "Override has both \\pos(x,y) and \\move(x1,y1,x2,y2); using \\pos values. override='" + styleOverride + "'");
+        private static PointF parsePosition(String str) {
+            String str2;
+            String str3;
+            Matcher matcher = POSITION_PATTERN.matcher(str);
+            Matcher matcher2 = MOVE_PATTERN.matcher(str);
+            boolean find = matcher.find();
+            boolean find2 = matcher2.find();
+            if (find) {
+                if (find2) {
+                    Log.i("SsaStyle.Overrides", "Override has both \\pos(x,y) and \\move(x1,y1,x2,y2); using \\pos values. override='" + str + "'");
                 }
-                x = positionMatcher.group(1);
-                y = positionMatcher.group(2);
-            } else if (hasMove) {
-                x = moveMatcher.group(1);
-                y = moveMatcher.group(2);
-            } else {
+                str2 = matcher.group(1);
+                str3 = matcher.group(2);
+            } else if (!find2) {
                 return null;
+            } else {
+                str2 = matcher2.group(1);
+                str3 = matcher2.group(2);
             }
-            return new PointF(Float.parseFloat(((String) Assertions.checkNotNull(x)).trim()), Float.parseFloat(((String) Assertions.checkNotNull(y)).trim()));
+            return new PointF(Float.parseFloat(((String) Assertions.checkNotNull(str2)).trim()), Float.parseFloat(((String) Assertions.checkNotNull(str3)).trim()));
         }
 
-        private static int parseAlignmentOverride(String braceContents) {
-            Matcher matcher = ALIGNMENT_OVERRIDE_PATTERN.matcher(braceContents);
+        private static int parseAlignmentOverride(String str) {
+            Matcher matcher = ALIGNMENT_OVERRIDE_PATTERN.matcher(str);
             if (matcher.find()) {
                 return SsaStyle.parseAlignment(matcher.group(1));
             }

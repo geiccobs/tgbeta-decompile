@@ -13,30 +13,8 @@ import android.text.TextPaint;
 import android.view.animation.DecelerateInterpolator;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class MediaActionDrawable extends Drawable {
-    private static final float CANCEL_TO_CHECK_STAGE1 = 0.5f;
-    private static final float CANCEL_TO_CHECK_STAGE2 = 0.5f;
-    private static final float DOWNLOAD_TO_CANCEL_STAGE1 = 0.5f;
-    private static final float DOWNLOAD_TO_CANCEL_STAGE2 = 0.2f;
-    private static final float DOWNLOAD_TO_CANCEL_STAGE3 = 0.3f;
-    private static final float EPS = 0.001f;
-    public static final int ICON_CANCEL = 3;
-    public static final int ICON_CANCEL_FILL = 14;
-    public static final int ICON_CANCEL_NOPROFRESS = 12;
-    public static final int ICON_CANCEL_PERCENT = 13;
-    public static final int ICON_CHECK = 6;
-    public static final int ICON_DOWNLOAD = 2;
-    public static final int ICON_EMPTY = 10;
-    public static final int ICON_EMPTY_NOPROGRESS = 11;
-    public static final int ICON_FILE = 5;
-    public static final int ICON_FIRE = 7;
-    public static final int ICON_GIF = 8;
-    public static final int ICON_NONE = 4;
-    public static final int ICON_PAUSE = 1;
-    public static final int ICON_PLAY = 0;
-    public static final int ICON_SECRETCHECK = 9;
-    public static final int ICON_UPDATE = 15;
     private float animatedDownloadProgress;
     private boolean animatingTransition;
     private ColorFilter colorFilter;
@@ -69,9 +47,25 @@ public class MediaActionDrawable extends Drawable {
     private float overrideAlpha = 1.0f;
     private float transitionProgress = 1.0f;
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface MediaActionDrawableDelegate {
         void invalidate();
+    }
+
+    public static float getCircleValue(float f) {
+        while (f > 360.0f) {
+            f -= 360.0f;
+        }
+        return f;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int i) {
     }
 
     public MediaActionDrawable() {
@@ -86,12 +80,8 @@ public class MediaActionDrawable extends Drawable {
         this.paint2.setColor(-1);
     }
 
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int alpha) {
-    }
-
-    public void setOverrideAlpha(float alpha) {
-        this.overrideAlpha = alpha;
+    public void setOverrideAlpha(float f) {
+        this.overrideAlpha = f;
     }
 
     @Override // android.graphics.drawable.Drawable
@@ -102,76 +92,68 @@ public class MediaActionDrawable extends Drawable {
         this.textPaint.setColorFilter(colorFilter);
     }
 
-    public void setColor(int value) {
-        this.paint.setColor(value | (-16777216));
-        this.paint2.setColor(value | (-16777216));
-        this.paint3.setColor(value | (-16777216));
-        this.textPaint.setColor((-16777216) | value);
-        this.colorFilter = new PorterDuffColorFilter(value, PorterDuff.Mode.MULTIPLY);
+    public void setColor(int i) {
+        int i2 = (-16777216) | i;
+        this.paint.setColor(i2);
+        this.paint2.setColor(i2);
+        this.paint3.setColor(i2);
+        this.textPaint.setColor(i2);
+        this.colorFilter = new PorterDuffColorFilter(i, PorterDuff.Mode.MULTIPLY);
     }
 
-    public void setBackColor(int value) {
-        this.backPaint.setColor((-16777216) | value);
+    public void setBackColor(int i) {
+        this.backPaint.setColor(i | (-16777216));
     }
 
-    public int getColor() {
-        return this.paint.getColor();
-    }
-
-    public void setMini(boolean value) {
-        this.isMini = value;
-        this.paint.setStrokeWidth(AndroidUtilities.dp(value ? 2.0f : 3.0f));
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
+    public void setMini(boolean z) {
+        this.isMini = z;
+        this.paint.setStrokeWidth(AndroidUtilities.dp(z ? 2.0f : 3.0f));
     }
 
     public void setDelegate(MediaActionDrawableDelegate mediaActionDrawableDelegate) {
         this.delegate = mediaActionDrawableDelegate;
     }
 
-    public boolean setIcon(int icon, boolean animated) {
-        int i;
+    public boolean setIcon(int i, boolean z) {
         int i2;
-        if (this.currentIcon == icon && (i2 = this.nextIcon) != icon) {
-            this.currentIcon = i2;
+        int i3;
+        if (this.currentIcon == i && (i3 = this.nextIcon) != i) {
+            this.currentIcon = i3;
             this.transitionProgress = 1.0f;
         }
-        if (animated) {
-            int i3 = this.currentIcon;
-            if (i3 == icon || (i = this.nextIcon) == icon) {
+        if (z) {
+            int i4 = this.currentIcon;
+            if (i4 == i || (i2 = this.nextIcon) == i) {
                 return false;
             }
-            if ((i3 == 0 && icon == 1) || (i3 == 1 && icon == 0)) {
+            if ((i4 == 0 && i == 1) || (i4 == 1 && i == 0)) {
                 this.transitionAnimationTime = 300.0f;
-            } else if (i3 == 2 && (icon == 3 || icon == 14)) {
+            } else if (i4 == 2 && (i == 3 || i == 14)) {
                 this.transitionAnimationTime = 400.0f;
-            } else if (i3 != 4 && icon == 6) {
+            } else if (i4 != 4 && i == 6) {
                 this.transitionAnimationTime = 360.0f;
-            } else if ((i3 == 4 && icon == 14) || (i3 == 14 && icon == 4)) {
+            } else if ((i4 == 4 && i == 14) || (i4 == 14 && i == 4)) {
                 this.transitionAnimationTime = 160.0f;
             } else {
                 this.transitionAnimationTime = 220.0f;
             }
             if (this.animatingTransition) {
-                this.currentIcon = i;
+                this.currentIcon = i2;
             }
             this.animatingTransition = true;
-            this.nextIcon = icon;
+            this.nextIcon = i;
             this.savedTransitionProgress = this.transitionProgress;
             this.transitionProgress = 0.0f;
-        } else if (this.currentIcon == icon) {
+        } else if (this.currentIcon == i) {
             return false;
         } else {
             this.animatingTransition = false;
-            this.nextIcon = icon;
-            this.currentIcon = icon;
+            this.nextIcon = i;
+            this.currentIcon = i;
             this.savedTransitionProgress = this.transitionProgress;
             this.transitionProgress = 1.0f;
         }
-        if (icon == 3 || icon == 14) {
+        if (i == 3 || i == 14) {
             this.downloadRadOffset = 112.0f;
             this.animatedDownloadProgress = 0.0f;
             this.downloadProgressAnimationStart = 0.0f;
@@ -189,34 +171,23 @@ public class MediaActionDrawable extends Drawable {
         return this.currentIcon;
     }
 
-    public void setProgress(float value, boolean animated) {
-        if (!animated) {
-            this.animatedDownloadProgress = value;
-            this.downloadProgressAnimationStart = value;
+    public void setProgress(float f, boolean z) {
+        if (!z) {
+            this.animatedDownloadProgress = f;
+            this.downloadProgressAnimationStart = f;
         } else {
-            if (this.animatedDownloadProgress > value) {
-                this.animatedDownloadProgress = value;
+            if (this.animatedDownloadProgress > f) {
+                this.animatedDownloadProgress = f;
             }
             this.downloadProgressAnimationStart = this.animatedDownloadProgress;
         }
-        this.downloadProgress = value;
+        this.downloadProgress = f;
         this.downloadProgressTime = 0.0f;
         invalidateSelf();
     }
 
     public float getProgress() {
         return this.downloadProgress;
-    }
-
-    public static float getCircleValue(float value) {
-        while (value > 360.0f) {
-            value -= 360.0f;
-        }
-        return value;
-    }
-
-    public float getProgressAlpha() {
-        return 1.0f - this.transitionProgress;
     }
 
     public float getTransitionProgress() {
@@ -226,23 +197,23 @@ public class MediaActionDrawable extends Drawable {
         return 1.0f;
     }
 
-    public void setBackgroundDrawable(Theme.MessageDrawable drawable) {
-        this.messageDrawable = drawable;
+    public void setBackgroundDrawable(Theme.MessageDrawable messageDrawable) {
+        this.messageDrawable = messageDrawable;
     }
 
-    public void setBackgroundGradientDrawable(LinearGradient drawable) {
-        this.gradientDrawable = drawable;
+    public void setBackgroundGradientDrawable(LinearGradient linearGradient) {
+        this.gradientDrawable = linearGradient;
         this.gradientMatrix = new Matrix();
     }
 
-    public void setHasOverlayImage(boolean value) {
-        this.hasOverlayImage = value;
+    public void setHasOverlayImage(boolean z) {
+        this.hasOverlayImage = z;
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setBounds(int left, int top, int right, int bottom) {
-        super.setBounds(left, top, right, bottom);
-        float intrinsicWidth = (right - left) / getIntrinsicWidth();
+    public void setBounds(int i, int i2, int i3, int i4) {
+        super.setBounds(i, i2, i3, i4);
+        float intrinsicWidth = (i3 - i) / getIntrinsicWidth();
         this.scale = intrinsicWidth;
         if (intrinsicWidth < 0.7f) {
             this.paint.setStrokeWidth(AndroidUtilities.dp(2.0f));
@@ -258,95 +229,75 @@ public class MediaActionDrawable extends Drawable {
         }
     }
 
-    private void applyShaderMatrix(boolean path) {
+    private void applyShaderMatrix(boolean z) {
         Theme.MessageDrawable messageDrawable = this.messageDrawable;
-        if (messageDrawable != null && messageDrawable.hasGradient() && !this.hasOverlayImage) {
-            android.graphics.Rect bounds = getBounds();
-            Shader shader = this.messageDrawable.getGradientShader();
-            Matrix matrix = this.messageDrawable.getMatrix();
-            matrix.reset();
-            this.messageDrawable.applyMatrixScale();
-            if (path) {
-                matrix.postTranslate(-bounds.centerX(), (-this.messageDrawable.getTopY()) + bounds.top);
-            } else {
-                matrix.postTranslate(0.0f, -this.messageDrawable.getTopY());
-            }
-            shader.setLocalMatrix(matrix);
+        if (messageDrawable == null || !messageDrawable.hasGradient() || this.hasOverlayImage) {
+            return;
         }
+        android.graphics.Rect bounds = getBounds();
+        Shader gradientShader = this.messageDrawable.getGradientShader();
+        Matrix matrix = this.messageDrawable.getMatrix();
+        matrix.reset();
+        this.messageDrawable.applyMatrixScale();
+        if (z) {
+            matrix.postTranslate(-bounds.centerX(), (-this.messageDrawable.getTopY()) + bounds.top);
+        } else {
+            matrix.postTranslate(0.0f, -this.messageDrawable.getTopY());
+        }
+        gradientShader.setLocalMatrix(matrix);
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:334:0x0957, code lost:
-        if (r44.nextIcon != 1) goto L336;
+    /* JADX WARN: Code restructure failed: missing block: B:341:0x0885, code lost:
+        if (r33.nextIcon == 1) goto L342;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:356:0x0989, code lost:
-        if (r2 == 1) goto L358;
+    /* JADX WARN: Code restructure failed: missing block: B:342:0x0887, code lost:
+        r4 = 1.0f;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:492:0x0cee, code lost:
-        if (r44.nextIcon == 14) goto L500;
+    /* JADX WARN: Code restructure failed: missing block: B:343:0x088a, code lost:
+        r4 = 0.0f;
      */
-    /* JADX WARN: Removed duplicated region for block: B:229:0x0710  */
-    /* JADX WARN: Removed duplicated region for block: B:230:0x0717  */
-    /* JADX WARN: Removed duplicated region for block: B:242:0x074c  */
-    /* JADX WARN: Removed duplicated region for block: B:243:0x074f  */
-    /* JADX WARN: Removed duplicated region for block: B:248:0x075c  */
-    /* JADX WARN: Removed duplicated region for block: B:249:0x0761  */
-    /* JADX WARN: Removed duplicated region for block: B:255:0x0772  */
-    /* JADX WARN: Removed duplicated region for block: B:256:0x0775  */
-    /* JADX WARN: Removed duplicated region for block: B:261:0x0782  */
-    /* JADX WARN: Removed duplicated region for block: B:262:0x0787  */
-    /* JADX WARN: Removed duplicated region for block: B:273:0x07ba  */
-    /* JADX WARN: Removed duplicated region for block: B:274:0x07bd  */
-    /* JADX WARN: Removed duplicated region for block: B:277:0x07d9  */
-    /* JADX WARN: Removed duplicated region for block: B:280:0x082b  */
-    /* JADX WARN: Removed duplicated region for block: B:287:0x0844  */
-    /* JADX WARN: Removed duplicated region for block: B:288:0x0848  */
-    /* JADX WARN: Removed duplicated region for block: B:294:0x085b  */
-    /* JADX WARN: Removed duplicated region for block: B:295:0x085e  */
-    /* JADX WARN: Removed duplicated region for block: B:298:0x0878  */
-    /* JADX WARN: Removed duplicated region for block: B:301:0x08b5  */
-    /* JADX WARN: Removed duplicated region for block: B:308:0x08cc  */
-    /* JADX WARN: Removed duplicated region for block: B:309:0x08cf  */
-    /* JADX WARN: Removed duplicated region for block: B:315:0x08f7  */
-    /* JADX WARN: Removed duplicated region for block: B:323:0x093d  */
-    /* JADX WARN: Removed duplicated region for block: B:333:0x0954  */
-    /* JADX WARN: Removed duplicated region for block: B:335:0x095a  */
-    /* JADX WARN: Removed duplicated region for block: B:351:0x0980  */
-    /* JADX WARN: Removed duplicated region for block: B:352:0x0983  */
-    /* JADX WARN: Removed duplicated region for block: B:355:0x0988  */
-    /* JADX WARN: Removed duplicated region for block: B:357:0x098c  */
-    /* JADX WARN: Removed duplicated region for block: B:359:0x098f A[ADDED_TO_REGION] */
-    /* JADX WARN: Removed duplicated region for block: B:371:0x09e7  */
-    /* JADX WARN: Removed duplicated region for block: B:372:0x09ea  */
-    /* JADX WARN: Removed duplicated region for block: B:374:0x09ed  */
-    /* JADX WARN: Removed duplicated region for block: B:386:0x0a2c  */
-    /* JADX WARN: Removed duplicated region for block: B:390:0x0a34  */
-    /* JADX WARN: Removed duplicated region for block: B:391:0x0a41  */
-    /* JADX WARN: Removed duplicated region for block: B:397:0x0a64  */
-    /* JADX WARN: Removed duplicated region for block: B:410:0x0a9b  */
-    /* JADX WARN: Removed duplicated region for block: B:419:0x0ac6  */
-    /* JADX WARN: Removed duplicated region for block: B:426:0x0af8  */
-    /* JADX WARN: Removed duplicated region for block: B:427:0x0b2b  */
-    /* JADX WARN: Removed duplicated region for block: B:430:0x0b34  */
-    /* JADX WARN: Removed duplicated region for block: B:432:0x0b52  */
-    /* JADX WARN: Removed duplicated region for block: B:439:0x0b95  */
-    /* JADX WARN: Removed duplicated region for block: B:441:0x0b99  */
-    /* JADX WARN: Removed duplicated region for block: B:447:0x0bd5  */
-    /* JADX WARN: Removed duplicated region for block: B:461:0x0c39  */
-    /* JADX WARN: Removed duplicated region for block: B:463:0x0c41  */
-    /* JADX WARN: Removed duplicated region for block: B:484:0x0cd8  */
-    /* JADX WARN: Removed duplicated region for block: B:502:0x0d1e  */
-    /* JADX WARN: Removed duplicated region for block: B:509:0x0d51  */
-    /* JADX WARN: Removed duplicated region for block: B:513:0x0d5a  */
-    /* JADX WARN: Removed duplicated region for block: B:521:0x0d7e  */
-    /* JADX WARN: Removed duplicated region for block: B:523:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Code restructure failed: missing block: B:345:0x088d, code lost:
+        if (r1 != 1) goto L343;
+     */
+    /* JADX WARN: Removed duplicated region for block: B:182:0x050f  */
+    /* JADX WARN: Removed duplicated region for block: B:185:0x051a  */
+    /* JADX WARN: Removed duplicated region for block: B:187:0x0524  */
+    /* JADX WARN: Removed duplicated region for block: B:193:0x05a2  */
+    /* JADX WARN: Removed duplicated region for block: B:196:0x05aa  */
+    /* JADX WARN: Removed duplicated region for block: B:199:0x05b3  */
+    /* JADX WARN: Removed duplicated region for block: B:202:0x05bb  */
+    /* JADX WARN: Removed duplicated region for block: B:212:0x05d8  */
+    /* JADX WARN: Removed duplicated region for block: B:213:0x05db  */
+    /* JADX WARN: Removed duplicated region for block: B:216:0x05fc  */
+    /* JADX WARN: Removed duplicated region for block: B:244:0x067f  */
+    /* JADX WARN: Removed duplicated region for block: B:245:0x0682  */
+    /* JADX WARN: Removed duplicated region for block: B:250:0x068e  */
+    /* JADX WARN: Removed duplicated region for block: B:251:0x0694  */
+    /* JADX WARN: Removed duplicated region for block: B:258:0x06a3  */
+    /* JADX WARN: Removed duplicated region for block: B:259:0x06a6  */
+    /* JADX WARN: Removed duplicated region for block: B:269:0x06d3  */
+    /* JADX WARN: Removed duplicated region for block: B:270:0x06d6  */
+    /* JADX WARN: Removed duplicated region for block: B:273:0x06f2  */
+    /* JADX WARN: Removed duplicated region for block: B:274:0x06ff  */
+    /* JADX WARN: Removed duplicated region for block: B:277:0x074c  */
+    /* JADX WARN: Removed duplicated region for block: B:284:0x0765  */
+    /* JADX WARN: Removed duplicated region for block: B:285:0x0768  */
+    /* JADX WARN: Removed duplicated region for block: B:291:0x077a  */
+    /* JADX WARN: Removed duplicated region for block: B:292:0x077d  */
+    /* JADX WARN: Removed duplicated region for block: B:295:0x0791  */
+    /* JADX WARN: Removed duplicated region for block: B:298:0x07c8  */
+    /* JADX WARN: Removed duplicated region for block: B:305:0x07df  */
+    /* JADX WARN: Removed duplicated region for block: B:306:0x07e2  */
+    /* JADX WARN: Removed duplicated region for block: B:311:0x0808  */
+    /* JADX WARN: Removed duplicated region for block: B:319:0x084e  */
     @Override // android.graphics.drawable.Drawable
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void draw(android.graphics.Canvas r45) {
+    public void draw(android.graphics.Canvas r34) {
         /*
-            Method dump skipped, instructions count: 3458
+            Method dump skipped, instructions count: 3152
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.MediaActionDrawable.draw(android.graphics.Canvas):void");

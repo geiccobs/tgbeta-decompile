@@ -12,20 +12,20 @@ import com.google.android.datatransport.Encoding;
 import com.google.android.datatransport.Event;
 import com.google.android.datatransport.Transport;
 import com.google.android.datatransport.TransportFactory;
-import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.analytics.connector.AnalyticsConnector;
 import com.google.firebase.installations.FirebaseInstallations;
-import com.google.firebase.messaging.Constants;
 import com.google.firebase.messaging.reporting.MessagingClientEvent;
 import com.google.firebase.messaging.reporting.MessagingClientEventExtension;
 import java.util.concurrent.ExecutionException;
+import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class MessagingAnalytics {
-    public static boolean deliveryMetricsExportToBigQueryEnabled() {
+    static boolean deliveryMetricsExportToBigQueryEnabled() {
         ApplicationInfo applicationInfo;
+        Bundle bundle;
         try {
             FirebaseApp.getInstance();
             Context applicationContext = FirebaseApp.getInstance().getApplicationContext();
@@ -35,14 +35,14 @@ public class MessagingAnalytics {
             }
             try {
                 PackageManager packageManager = applicationContext.getPackageManager();
-                if (packageManager != null && (applicationInfo = packageManager.getApplicationInfo(applicationContext.getPackageName(), 128)) != null && applicationInfo.metaData != null && applicationInfo.metaData.containsKey("delivery_metrics_exported_to_big_query_enabled")) {
+                if (packageManager != null && (applicationInfo = packageManager.getApplicationInfo(applicationContext.getPackageName(), ConnectionsManager.RequestFlagNeedQuickAck)) != null && (bundle = applicationInfo.metaData) != null && bundle.containsKey("delivery_metrics_exported_to_big_query_enabled")) {
                     return applicationInfo.metaData.getBoolean("delivery_metrics_exported_to_big_query_enabled", false);
                 }
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (PackageManager.NameNotFoundException unused) {
             }
             return false;
-        } catch (IllegalStateException e2) {
-            Log.i(Constants.TAG, "FirebaseApp has not being initialized. Device might be in direct boot mode. Skip exporting delivery metrics to Big Query");
+        } catch (IllegalStateException unused2) {
+            Log.i("FirebaseMessaging", "FirebaseApp has not being initialized. Device might be in direct boot mode. Skip exporting delivery metrics to Big Query");
             return false;
         }
     }
@@ -90,19 +90,19 @@ public class MessagingAnalytics {
     }
 
     static String getCollapseKey(Bundle bundle) {
-        return bundle.getString(Constants.MessagePayloadKeys.COLLAPSE_KEY);
+        return bundle.getString("collapse_key");
     }
 
     static String getComposerId(Bundle bundle) {
-        return bundle.getString(Constants.AnalyticsKeys.COMPOSER_ID);
+        return bundle.getString("google.c.a.c_id");
     }
 
     static String getComposerLabel(Bundle bundle) {
-        return bundle.getString(Constants.AnalyticsKeys.COMPOSER_LABEL);
+        return bundle.getString("google.c.a.c_l");
     }
 
     static String getInstanceId(Bundle bundle) {
-        String string = bundle.getString(Constants.MessagePayloadKeys.TO);
+        String string = bundle.getString("google.to");
         if (!TextUtils.isEmpty(string)) {
             return string;
         }
@@ -114,20 +114,20 @@ public class MessagingAnalytics {
     }
 
     static String getMessageChannel(Bundle bundle) {
-        return bundle.getString(Constants.AnalyticsKeys.MESSAGE_CHANNEL);
+        return bundle.getString("google.c.a.m_c");
     }
 
     static String getMessageId(Bundle bundle) {
-        String string = bundle.getString(Constants.MessagePayloadKeys.MSGID);
-        return string == null ? bundle.getString(Constants.MessagePayloadKeys.MSGID_SERVER) : string;
+        String string = bundle.getString("google.message_id");
+        return string == null ? bundle.getString("message_id") : string;
     }
 
     static String getMessageLabel(Bundle bundle) {
-        return bundle.getString(Constants.AnalyticsKeys.MESSAGE_LABEL);
+        return bundle.getString("google.c.a.m_l");
     }
 
     static String getMessageTime(Bundle bundle) {
-        return bundle.getString(Constants.AnalyticsKeys.MESSAGE_TIMESTAMP);
+        return bundle.getString("google.c.a.ts");
     }
 
     static MessagingClientEvent.MessageType getMessageTypeForFirelog(Bundle bundle) {
@@ -138,7 +138,7 @@ public class MessagingAnalytics {
     }
 
     static String getMessageTypeForScion(Bundle bundle) {
-        return true != NotificationParams.isNotification(bundle) ? "data" : Constants.ScionAnalytics.MessageType.DISPLAY_NOTIFICATION;
+        return true != NotificationParams.isNotification(bundle) ? "data" : "display";
     }
 
     static String getPackageName() {
@@ -146,11 +146,11 @@ public class MessagingAnalytics {
     }
 
     static long getProjectNumber(Bundle bundle) {
-        if (bundle.containsKey(Constants.MessagePayloadKeys.SENDER_ID)) {
+        if (bundle.containsKey("google.c.sender.id")) {
             try {
-                return Long.parseLong(bundle.getString(Constants.MessagePayloadKeys.SENDER_ID));
+                return Long.parseLong(bundle.getString("google.c.sender.id"));
             } catch (NumberFormatException e) {
-                Log.w(Constants.TAG, "error parsing project number", e);
+                Log.w("FirebaseMessaging", "error parsing project number", e);
             }
         }
         FirebaseApp firebaseApp = FirebaseApp.getInstance();
@@ -159,7 +159,7 @@ public class MessagingAnalytics {
             try {
                 return Long.parseLong(gcmSenderId);
             } catch (NumberFormatException e2) {
-                Log.w(Constants.TAG, "error parsing sender ID", e2);
+                Log.w("FirebaseMessaging", "error parsing sender ID", e2);
             }
         }
         String applicationId = firebaseApp.getOptions().getApplicationId();
@@ -167,10 +167,10 @@ public class MessagingAnalytics {
             try {
                 return Long.parseLong(applicationId);
             } catch (NumberFormatException e3) {
-                Log.w(Constants.TAG, "error parsing app ID", e3);
+                Log.w("FirebaseMessaging", "error parsing app ID", e3);
             }
         } else {
-            String[] split = applicationId.split(com.microsoft.appcenter.Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
+            String[] split = applicationId.split(":");
             if (split.length < 2) {
                 return 0L;
             }
@@ -181,14 +181,14 @@ public class MessagingAnalytics {
             try {
                 return Long.parseLong(str);
             } catch (NumberFormatException e4) {
-                Log.w(Constants.TAG, "error parsing app ID", e4);
+                Log.w("FirebaseMessaging", "error parsing app ID", e4);
             }
         }
         return 0L;
     }
 
     static String getTopic(Bundle bundle) {
-        String string = bundle.getString(Constants.MessagePayloadKeys.FROM);
+        String string = bundle.getString("from");
         if (string == null || !string.startsWith("/topics/")) {
             return null;
         }
@@ -196,28 +196,28 @@ public class MessagingAnalytics {
     }
 
     static int getTtl(Bundle bundle) {
-        Object obj = bundle.get(Constants.MessagePayloadKeys.TTL);
+        Object obj = bundle.get("google.ttl");
         if (obj instanceof Integer) {
             return ((Integer) obj).intValue();
         }
-        if (obj instanceof String) {
-            try {
-                return Integer.parseInt((String) obj);
-            } catch (NumberFormatException e) {
-                String valueOf = String.valueOf(obj);
-                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 13);
-                sb.append("Invalid TTL: ");
-                sb.append(valueOf);
-                Log.w(Constants.TAG, sb.toString());
-                return 0;
-            }
+        if (!(obj instanceof String)) {
+            return 0;
         }
-        return 0;
+        try {
+            return Integer.parseInt((String) obj);
+        } catch (NumberFormatException unused) {
+            String valueOf = String.valueOf(obj);
+            StringBuilder sb = new StringBuilder(valueOf.length() + 13);
+            sb.append("Invalid TTL: ");
+            sb.append(valueOf);
+            Log.w("FirebaseMessaging", sb.toString());
+            return 0;
+        }
     }
 
     static String getUseDeviceTime(Bundle bundle) {
-        if (bundle.containsKey(Constants.AnalyticsKeys.MESSAGE_USE_DEVICE_TIME)) {
-            return bundle.getString(Constants.AnalyticsKeys.MESSAGE_USE_DEVICE_TIME);
+        if (bundle.containsKey("google.c.a.udt")) {
+            return bundle.getString("google.c.a.udt");
         }
         return null;
     }
@@ -227,21 +227,21 @@ public class MessagingAnalytics {
     }
 
     public static void logNotificationDismiss(Intent intent) {
-        logToScion(Constants.ScionAnalytics.EVENT_NOTIFICATION_DISMISS, intent.getExtras());
+        logToScion("_nd", intent.getExtras());
     }
 
     public static void logNotificationForeground(Intent intent) {
-        logToScion(Constants.ScionAnalytics.EVENT_NOTIFICATION_FOREGROUND, intent.getExtras());
+        logToScion("_nf", intent.getExtras());
     }
 
-    public static void logNotificationOpen(Bundle extras) {
-        setUserPropertyIfRequired(extras);
-        logToScion(Constants.ScionAnalytics.EVENT_NOTIFICATION_OPEN, extras);
+    public static void logNotificationOpen(Bundle bundle) {
+        setUserPropertyIfRequired(bundle);
+        logToScion("_no", bundle);
     }
 
     public static void logNotificationReceived(Intent intent) {
         if (shouldUploadScionMetrics(intent)) {
-            logToScion(Constants.ScionAnalytics.EVENT_NOTIFICATION_RECEIVE, intent.getExtras());
+            logToScion("_nr", intent.getExtras());
         }
         if (shouldUploadFirelogAnalytics(intent)) {
             logToFirelog(MessagingClientEvent.Event.MESSAGE_DELIVERED, intent, FirebaseMessaging.getTransportFactory());
@@ -250,7 +250,7 @@ public class MessagingAnalytics {
 
     private static void logToFirelog(MessagingClientEvent.Event event, Intent intent, TransportFactory transportFactory) {
         if (transportFactory == null) {
-            Log.e(Constants.TAG, "TransportFactory is null. Skip exporting message delivery metrics to Big Query");
+            Log.e("FirebaseMessaging", "TransportFactory is null. Skip exporting message delivery metrics to Big Query");
             return;
         }
         MessagingClientEvent eventToProto = eventToProto(event, intent);
@@ -258,12 +258,12 @@ public class MessagingAnalytics {
             return;
         }
         try {
-            Transport transport = transportFactory.getTransport(Constants.FirelogAnalytics.FCM_LOG_SOURCE, MessagingClientEventExtension.class, Encoding.of("proto"), MessagingAnalytics$$Lambda$0.$instance);
+            Transport transport = transportFactory.getTransport("FCM_CLIENT_EVENT_LOGGING", MessagingClientEventExtension.class, Encoding.of("proto"), MessagingAnalytics$$Lambda$0.$instance);
             MessagingClientEventExtension.Builder newBuilder = MessagingClientEventExtension.newBuilder();
             newBuilder.setMessagingClientEvent(eventToProto);
             transport.send(Event.ofTelemetry(newBuilder.build()));
         } catch (RuntimeException e) {
-            Log.w(Constants.TAG, "Failed to send big query analytics payload.", e);
+            Log.w("FirebaseMessaging", "Failed to send big query analytics payload.", e);
         }
     }
 
@@ -278,84 +278,80 @@ public class MessagingAnalytics {
         }
         String composerLabel = getComposerLabel(bundle);
         if (composerLabel != null) {
-            bundle2.putString(Constants.ScionAnalytics.PARAM_MESSAGE_NAME, composerLabel);
+            bundle2.putString("_nmn", composerLabel);
         }
         String messageLabel = getMessageLabel(bundle);
         if (!TextUtils.isEmpty(messageLabel)) {
-            bundle2.putString(Constants.ScionAnalytics.PARAM_LABEL, messageLabel);
+            bundle2.putString("label", messageLabel);
         }
         String messageChannel = getMessageChannel(bundle);
         if (!TextUtils.isEmpty(messageChannel)) {
-            bundle2.putString(Constants.ScionAnalytics.PARAM_MESSAGE_CHANNEL, messageChannel);
+            bundle2.putString("message_channel", messageChannel);
         }
         String topic = getTopic(bundle);
         if (topic != null) {
-            bundle2.putString(Constants.ScionAnalytics.PARAM_TOPIC, topic);
+            bundle2.putString("_nt", topic);
         }
         String messageTime = getMessageTime(bundle);
         if (messageTime != null) {
             try {
-                bundle2.putInt(Constants.ScionAnalytics.PARAM_MESSAGE_TIME, Integer.parseInt(messageTime));
+                bundle2.putInt("_nmt", Integer.parseInt(messageTime));
             } catch (NumberFormatException e) {
-                Log.w(Constants.TAG, "Error while parsing timestamp in GCM event", e);
+                Log.w("FirebaseMessaging", "Error while parsing timestamp in GCM event", e);
             }
         }
         String useDeviceTime = getUseDeviceTime(bundle);
         if (useDeviceTime != null) {
             try {
-                bundle2.putInt(Constants.ScionAnalytics.PARAM_MESSAGE_DEVICE_TIME, Integer.parseInt(useDeviceTime));
+                bundle2.putInt("_ndt", Integer.parseInt(useDeviceTime));
             } catch (NumberFormatException e2) {
-                Log.w(Constants.TAG, "Error while parsing use_device_time in GCM event", e2);
+                Log.w("FirebaseMessaging", "Error while parsing use_device_time in GCM event", e2);
             }
         }
         String messageTypeForScion = getMessageTypeForScion(bundle);
-        if (Constants.ScionAnalytics.EVENT_NOTIFICATION_RECEIVE.equals(str) || Constants.ScionAnalytics.EVENT_NOTIFICATION_FOREGROUND.equals(str)) {
-            bundle2.putString(Constants.ScionAnalytics.PARAM_MESSAGE_TYPE, messageTypeForScion);
+        if ("_nr".equals(str) || "_nf".equals(str)) {
+            bundle2.putString("_nmc", messageTypeForScion);
         }
-        if (Log.isLoggable(Constants.TAG, 3)) {
+        if (Log.isLoggable("FirebaseMessaging", 3)) {
             String valueOf = String.valueOf(bundle2);
-            StringBuilder sb = new StringBuilder(str.length() + 37 + String.valueOf(valueOf).length());
+            StringBuilder sb = new StringBuilder(str.length() + 37 + valueOf.length());
             sb.append("Logging to scion event=");
             sb.append(str);
             sb.append(" scionPayload=");
             sb.append(valueOf);
-            Log.d(Constants.TAG, sb.toString());
+            Log.d("FirebaseMessaging", sb.toString());
         }
         AnalyticsConnector analyticsConnector = (AnalyticsConnector) FirebaseApp.getInstance().get(AnalyticsConnector.class);
         if (analyticsConnector != null) {
-            analyticsConnector.logEvent(Constants.ScionAnalytics.ORIGIN_FCM, str, bundle2);
+            analyticsConnector.logEvent("fcm", str, bundle2);
         } else {
-            Log.w(Constants.TAG, "Unable to log event: analytics library is missing");
+            Log.w("FirebaseMessaging", "Unable to log event: analytics library is missing");
         }
-    }
-
-    public static void setDeliveryMetricsExportToBigQuery(boolean z) {
-        FirebaseApp.getInstance().getApplicationContext().getSharedPreferences("com.google.firebase.messaging", 0).edit().putBoolean("export_to_big_query", z).apply();
     }
 
     private static void setUserPropertyIfRequired(Bundle bundle) {
         if (bundle == null) {
             return;
         }
-        if (IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE.equals(bundle.getString(Constants.AnalyticsKeys.TRACK_CONVERSIONS))) {
+        if ("1".equals(bundle.getString("google.c.a.tc"))) {
             AnalyticsConnector analyticsConnector = (AnalyticsConnector) FirebaseApp.getInstance().get(AnalyticsConnector.class);
-            if (Log.isLoggable(Constants.TAG, 3)) {
-                Log.d(Constants.TAG, "Received event with track-conversion=true. Setting user property and reengagement event");
+            if (Log.isLoggable("FirebaseMessaging", 3)) {
+                Log.d("FirebaseMessaging", "Received event with track-conversion=true. Setting user property and reengagement event");
             }
             if (analyticsConnector != null) {
-                String string = bundle.getString(Constants.AnalyticsKeys.COMPOSER_ID);
-                analyticsConnector.setUserProperty(Constants.ScionAnalytics.ORIGIN_FCM, Constants.ScionAnalytics.USER_PROPERTY_FIREBASE_LAST_NOTIFICATION, string);
+                String string = bundle.getString("google.c.a.c_id");
+                analyticsConnector.setUserProperty("fcm", "_ln", string);
                 Bundle bundle2 = new Bundle();
-                bundle2.putString(Constants.ScionAnalytics.PARAM_SOURCE, "Firebase");
-                bundle2.putString(Constants.ScionAnalytics.PARAM_MEDIUM, "notification");
-                bundle2.putString(Constants.ScionAnalytics.PARAM_CAMPAIGN, string);
-                analyticsConnector.logEvent(Constants.ScionAnalytics.ORIGIN_FCM, Constants.ScionAnalytics.EVENT_FIREBASE_CAMPAIGN, bundle2);
+                bundle2.putString("source", "Firebase");
+                bundle2.putString("medium", "notification");
+                bundle2.putString("campaign", string);
+                analyticsConnector.logEvent("fcm", "_cmp", bundle2);
                 return;
             }
-            Log.w(Constants.TAG, "Unable to set user property for conversion tracking:  analytics library is missing");
-        } else if (!Log.isLoggable(Constants.TAG, 3)) {
+            Log.w("FirebaseMessaging", "Unable to set user property for conversion tracking:  analytics library is missing");
+        } else if (!Log.isLoggable("FirebaseMessaging", 3)) {
         } else {
-            Log.d(Constants.TAG, "Received event with track-conversion=false. Do not set user property");
+            Log.d("FirebaseMessaging", "Received event with track-conversion=false. Do not set user property");
         }
     }
 
@@ -373,10 +369,10 @@ public class MessagingAnalytics {
         return shouldUploadScionMetrics(intent.getExtras());
     }
 
-    public static boolean shouldUploadScionMetrics(Bundle extras) {
-        if (extras == null) {
+    public static boolean shouldUploadScionMetrics(Bundle bundle) {
+        if (bundle == null) {
             return false;
         }
-        return IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE.equals(extras.getString(Constants.AnalyticsKeys.ENABLED));
+        return "1".equals(bundle.getString("google.c.a.e"));
     }
 }

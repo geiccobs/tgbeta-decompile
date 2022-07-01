@@ -1,15 +1,13 @@
 package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.internal.clearcut.zzcg;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzec implements zzdm {
-    private final String info;
     private final zzdo zzmn;
     private final zzed zzng;
 
     public zzec(zzdo zzdoVar, String str, Object[] objArr) {
         this.zzmn = zzdoVar;
-        this.info = str;
         this.zzng = new zzed(zzdoVar.getClass(), str, objArr);
     }
 

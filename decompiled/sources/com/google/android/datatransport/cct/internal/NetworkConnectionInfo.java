@@ -2,10 +2,13 @@ package com.google.android.datatransport.cct.internal;
 
 import android.util.SparseArray;
 import com.google.android.datatransport.cct.internal.AutoValue_NetworkConnectionInfo;
-/* loaded from: classes3.dex */
+import com.google.auto.value.AutoValue;
+@AutoValue
+/* loaded from: classes.dex */
 public abstract class NetworkConnectionInfo {
 
-    /* loaded from: classes3.dex */
+    @AutoValue.Builder
+    /* loaded from: classes.dex */
     public static abstract class Builder {
         public abstract NetworkConnectionInfo build();
 
@@ -18,7 +21,7 @@ public abstract class NetworkConnectionInfo {
 
     public abstract NetworkType getNetworkType();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum NetworkType {
         MOBILE(0),
         WIFI(1),
@@ -86,20 +89,20 @@ public abstract class NetworkConnectionInfo {
             sparseArray.put(-1, networkType19);
         }
 
-        NetworkType(int value) {
-            this.value = value;
+        NetworkType(int i) {
+            this.value = i;
         }
 
         public int getValue() {
             return this.value;
         }
 
-        public static NetworkType forNumber(int value) {
-            return valueMap.get(value);
+        public static NetworkType forNumber(int i) {
+            return valueMap.get(i);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum MobileSubtype {
         UNKNOWN_MOBILE_SUBTYPE(0),
         GPRS(1),
@@ -171,16 +174,16 @@ public abstract class NetworkConnectionInfo {
             sparseArray.put(19, mobileSubtype20);
         }
 
-        MobileSubtype(int value) {
-            this.value = value;
+        MobileSubtype(int i) {
+            this.value = i;
         }
 
         public int getValue() {
             return this.value;
         }
 
-        public static MobileSubtype forNumber(int value) {
-            return valueMap.get(value);
+        public static MobileSubtype forNumber(int i) {
+            return valueMap.get(i);
         }
     }
 

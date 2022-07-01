@@ -1,5 +1,5 @@
 package com.google.android.exoplayer2.util;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ConditionVariable {
     private final Clock clock;
     private boolean isOpen;
@@ -22,33 +22,16 @@ public final class ConditionVariable {
     }
 
     public synchronized boolean close() {
-        boolean wasOpen;
-        wasOpen = this.isOpen;
+        boolean z;
+        z = this.isOpen;
         this.isOpen = false;
-        return wasOpen;
+        return z;
     }
 
     public synchronized void block() throws InterruptedException {
         while (!this.isOpen) {
             wait();
         }
-    }
-
-    public synchronized boolean block(long timeoutMs) throws InterruptedException {
-        if (timeoutMs <= 0) {
-            return this.isOpen;
-        }
-        long nowMs = this.clock.elapsedRealtime();
-        long endMs = nowMs + timeoutMs;
-        if (endMs < nowMs) {
-            block();
-        } else {
-            while (!this.isOpen && nowMs < endMs) {
-                wait(endMs - nowMs);
-                nowMs = this.clock.elapsedRealtime();
-            }
-        }
-        return this.isOpen;
     }
 
     public synchronized boolean isOpen() {

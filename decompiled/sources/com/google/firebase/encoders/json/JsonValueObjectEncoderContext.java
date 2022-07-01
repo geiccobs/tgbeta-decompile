@@ -13,8 +13,8 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-/* loaded from: classes3.dex */
-public final class JsonValueObjectEncoderContext implements ObjectEncoderContext, ValueEncoderContext {
+/* loaded from: classes.dex */
+final class JsonValueObjectEncoderContext implements ObjectEncoderContext, ValueEncoderContext {
     private final ObjectEncoder<Object> fallbackEncoder;
     private final boolean ignoreNullValues;
     private final JsonWriter jsonWriter;
@@ -23,274 +23,190 @@ public final class JsonValueObjectEncoderContext implements ObjectEncoderContext
     private JsonValueObjectEncoderContext childContext = null;
     private boolean active = true;
 
-    public JsonValueObjectEncoderContext(Writer writer, Map<Class<?>, ObjectEncoder<?>> objectEncoders, Map<Class<?>, ValueEncoder<?>> valueEncoders, ObjectEncoder<Object> fallbackEncoder, boolean ignoreNullValues) {
+    public JsonValueObjectEncoderContext(Writer writer, Map<Class<?>, ObjectEncoder<?>> map, Map<Class<?>, ValueEncoder<?>> map2, ObjectEncoder<Object> objectEncoder, boolean z) {
         this.jsonWriter = new JsonWriter(writer);
-        this.objectEncoders = objectEncoders;
-        this.valueEncoders = valueEncoders;
-        this.fallbackEncoder = fallbackEncoder;
-        this.ignoreNullValues = ignoreNullValues;
+        this.objectEncoders = map;
+        this.valueEncoders = map2;
+        this.fallbackEncoder = objectEncoder;
+        this.ignoreNullValues = z;
     }
 
-    private JsonValueObjectEncoderContext(JsonValueObjectEncoderContext anotherContext) {
-        this.jsonWriter = anotherContext.jsonWriter;
-        this.objectEncoders = anotherContext.objectEncoders;
-        this.valueEncoders = anotherContext.valueEncoders;
-        this.fallbackEncoder = anotherContext.fallbackEncoder;
-        this.ignoreNullValues = anotherContext.ignoreNullValues;
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public JsonValueObjectEncoderContext add(String name, Object o) throws IOException {
+    public JsonValueObjectEncoderContext add(String str, Object obj) throws IOException {
         if (this.ignoreNullValues) {
-            return internalAddIgnoreNullValues(name, o);
+            return internalAddIgnoreNullValues(str, obj);
         }
-        return internalAdd(name, o);
+        return internalAdd(str, obj);
     }
 
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public JsonValueObjectEncoderContext add(String name, double value) throws IOException {
+    public JsonValueObjectEncoderContext add(String str, int i) throws IOException {
         maybeUnNest();
-        this.jsonWriter.name(name);
-        return add(value);
+        this.jsonWriter.name(str);
+        return add(i);
     }
 
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public JsonValueObjectEncoderContext add(String name, int value) throws IOException {
+    public JsonValueObjectEncoderContext add(String str, long j) throws IOException {
         maybeUnNest();
-        this.jsonWriter.name(name);
-        return add(value);
+        this.jsonWriter.name(str);
+        return add(j);
     }
 
     @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public JsonValueObjectEncoderContext add(String name, long value) throws IOException {
-        maybeUnNest();
-        this.jsonWriter.name(name);
-        return add(value);
+    public ObjectEncoderContext add(FieldDescriptor fieldDescriptor, Object obj) throws IOException {
+        return add(fieldDescriptor.getName(), obj);
     }
 
     @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public JsonValueObjectEncoderContext add(String name, boolean value) throws IOException {
-        maybeUnNest();
-        this.jsonWriter.name(name);
-        return add(value);
+    public ObjectEncoderContext add(FieldDescriptor fieldDescriptor, int i) throws IOException {
+        return add(fieldDescriptor.getName(), i);
     }
 
     @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext add(FieldDescriptor field, Object obj) throws IOException {
-        return add(field.getName(), obj);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext add(FieldDescriptor field, float value) throws IOException {
-        return add(field.getName(), value);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext add(FieldDescriptor field, double value) throws IOException {
-        return add(field.getName(), value);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext add(FieldDescriptor field, int value) throws IOException {
-        return add(field.getName(), value);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext add(FieldDescriptor field, long value) throws IOException {
-        return add(field.getName(), value);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext add(FieldDescriptor field, boolean value) throws IOException {
-        return add(field.getName(), value);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext inline(Object value) throws IOException {
-        return add(value, true);
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext nested(String name) throws IOException {
-        maybeUnNest();
-        this.childContext = new JsonValueObjectEncoderContext(this);
-        this.jsonWriter.name(name);
-        this.jsonWriter.beginObject();
-        return this.childContext;
-    }
-
-    @Override // com.google.firebase.encoders.ObjectEncoderContext
-    public ObjectEncoderContext nested(FieldDescriptor field) throws IOException {
-        return nested(field.getName());
+    public ObjectEncoderContext add(FieldDescriptor fieldDescriptor, long j) throws IOException {
+        return add(fieldDescriptor.getName(), j);
     }
 
     @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(String value) throws IOException {
+    public JsonValueObjectEncoderContext add(String str) throws IOException {
         maybeUnNest();
-        this.jsonWriter.value(value);
+        this.jsonWriter.value(str);
+        return this;
+    }
+
+    public JsonValueObjectEncoderContext add(int i) throws IOException {
+        maybeUnNest();
+        this.jsonWriter.value(i);
+        return this;
+    }
+
+    public JsonValueObjectEncoderContext add(long j) throws IOException {
+        maybeUnNest();
+        this.jsonWriter.value(j);
         return this;
     }
 
     @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(float value) throws IOException {
+    public JsonValueObjectEncoderContext add(boolean z) throws IOException {
         maybeUnNest();
-        this.jsonWriter.value(value);
+        this.jsonWriter.value(z);
         return this;
     }
 
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(double value) throws IOException {
+    public JsonValueObjectEncoderContext add(byte[] bArr) throws IOException {
         maybeUnNest();
-        this.jsonWriter.value(value);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(int value) throws IOException {
-        maybeUnNest();
-        this.jsonWriter.value(value);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(long value) throws IOException {
-        maybeUnNest();
-        this.jsonWriter.value(value);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(boolean value) throws IOException {
-        maybeUnNest();
-        this.jsonWriter.value(value);
-        return this;
-    }
-
-    @Override // com.google.firebase.encoders.ValueEncoderContext
-    public JsonValueObjectEncoderContext add(byte[] bytes) throws IOException {
-        maybeUnNest();
-        if (bytes == null) {
+        if (bArr == null) {
             this.jsonWriter.nullValue();
         } else {
-            this.jsonWriter.value(Base64.encodeToString(bytes, 2));
+            this.jsonWriter.value(Base64.encodeToString(bArr, 2));
         }
         return this;
     }
 
-    public JsonValueObjectEncoderContext add(Object o, boolean inline) throws IOException {
-        Object[] objArr;
-        Number[] numberArr;
+    public JsonValueObjectEncoderContext add(Object obj, boolean z) throws IOException {
+        int[] iArr;
         int i = 0;
-        if (inline && cannotBeInline(o)) {
-            Object[] objArr2 = new Object[1];
-            objArr2[0] = o == null ? null : o.getClass();
-            throw new EncodingException(String.format("%s cannot be encoded inline", objArr2));
-        } else if (o == null) {
+        if (z && cannotBeInline(obj)) {
+            Object[] objArr = new Object[1];
+            objArr[0] = obj == null ? null : obj.getClass();
+            throw new EncodingException(String.format("%s cannot be encoded inline", objArr));
+        } else if (obj == null) {
             this.jsonWriter.nullValue();
             return this;
-        } else if (o instanceof Number) {
-            this.jsonWriter.value((Number) o);
+        } else if (obj instanceof Number) {
+            this.jsonWriter.value((Number) obj);
             return this;
-        } else if (o.getClass().isArray()) {
-            if (o instanceof byte[]) {
-                return add((byte[]) o);
+        } else if (obj.getClass().isArray()) {
+            if (obj instanceof byte[]) {
+                return add((byte[]) obj);
             }
             this.jsonWriter.beginArray();
-            if (o instanceof int[]) {
-                int[] iArr = (int[]) o;
-                int length = iArr.length;
+            if (obj instanceof int[]) {
+                int length = ((int[]) obj).length;
                 while (i < length) {
-                    int item = iArr[i];
-                    this.jsonWriter.value(item);
+                    this.jsonWriter.value(iArr[i]);
                     i++;
                 }
-            } else if (o instanceof long[]) {
-                long[] jArr = (long[]) o;
+            } else if (obj instanceof long[]) {
+                long[] jArr = (long[]) obj;
                 int length2 = jArr.length;
                 while (i < length2) {
-                    long item2 = jArr[i];
-                    add(item2);
+                    add(jArr[i]);
                     i++;
                 }
-            } else if (o instanceof double[]) {
-                double[] dArr = (double[]) o;
+            } else if (obj instanceof double[]) {
+                double[] dArr = (double[]) obj;
                 int length3 = dArr.length;
                 while (i < length3) {
-                    double item3 = dArr[i];
-                    this.jsonWriter.value(item3);
+                    this.jsonWriter.value(dArr[i]);
                     i++;
                 }
-            } else if (o instanceof boolean[]) {
-                boolean[] zArr = (boolean[]) o;
+            } else if (obj instanceof boolean[]) {
+                boolean[] zArr = (boolean[]) obj;
                 int length4 = zArr.length;
                 while (i < length4) {
-                    boolean item4 = zArr[i];
-                    this.jsonWriter.value(item4);
+                    this.jsonWriter.value(zArr[i]);
                     i++;
                 }
-            } else if (o instanceof Number[]) {
-                for (Number item5 : (Number[]) o) {
-                    add((Object) item5, false);
+            } else if (obj instanceof Number[]) {
+                for (Number number : (Number[]) obj) {
+                    add((Object) number, false);
                 }
             } else {
-                for (Object item6 : (Object[]) o) {
-                    add(item6, false);
+                for (Object obj2 : (Object[]) obj) {
+                    add(obj2, false);
                 }
             }
             this.jsonWriter.endArray();
             return this;
-        } else if (o instanceof Collection) {
-            Collection collection = (Collection) o;
+        } else if (obj instanceof Collection) {
             this.jsonWriter.beginArray();
-            for (Object elem : collection) {
-                add(elem, false);
+            for (Object obj3 : (Collection) obj) {
+                add(obj3, false);
             }
             this.jsonWriter.endArray();
             return this;
-        } else if (o instanceof Map) {
-            Map<Object, Object> map = (Map) o;
+        } else if (obj instanceof Map) {
             this.jsonWriter.beginObject();
-            for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            for (Map.Entry entry : ((Map) obj).entrySet()) {
                 Object key = entry.getKey();
                 try {
                     add((String) key, entry.getValue());
-                } catch (ClassCastException ex) {
-                    throw new EncodingException(String.format("Only String keys are currently supported in maps, got %s of type %s instead.", key, key.getClass()), ex);
+                } catch (ClassCastException e) {
+                    throw new EncodingException(String.format("Only String keys are currently supported in maps, got %s of type %s instead.", key, key.getClass()), e);
                 }
             }
             this.jsonWriter.endObject();
             return this;
         } else {
-            ObjectEncoder<Object> objectEncoder = this.objectEncoders.get(o.getClass());
+            ObjectEncoder<?> objectEncoder = this.objectEncoders.get(obj.getClass());
             if (objectEncoder != null) {
-                return doEncode(objectEncoder, o, inline);
+                return doEncode(objectEncoder, obj, z);
             }
-            ValueEncoder<Object> valueEncoder = this.valueEncoders.get(o.getClass());
+            ValueEncoder<?> valueEncoder = this.valueEncoders.get(obj.getClass());
             if (valueEncoder != null) {
-                valueEncoder.encode(o, this);
+                valueEncoder.encode(obj, this);
                 return this;
-            } else if (o instanceof Enum) {
-                add(((Enum) o).name());
+            } else if (obj instanceof Enum) {
+                add(((Enum) obj).name());
                 return this;
             } else {
-                return doEncode(this.fallbackEncoder, o, inline);
+                return doEncode(this.fallbackEncoder, obj, z);
             }
         }
     }
 
-    JsonValueObjectEncoderContext doEncode(ObjectEncoder<Object> encoder, Object o, boolean inline) throws IOException {
-        if (!inline) {
+    JsonValueObjectEncoderContext doEncode(ObjectEncoder<Object> objectEncoder, Object obj, boolean z) throws IOException {
+        if (!z) {
             this.jsonWriter.beginObject();
         }
-        encoder.encode(o, this);
-        if (!inline) {
+        objectEncoder.encode(obj, this);
+        if (!z) {
             this.jsonWriter.endObject();
         }
         return this;
     }
 
-    private boolean cannotBeInline(Object value) {
-        return value == null || value.getClass().isArray() || (value instanceof Collection) || (value instanceof Date) || (value instanceof Enum) || (value instanceof Number);
+    private boolean cannotBeInline(Object obj) {
+        return obj == null || obj.getClass().isArray() || (obj instanceof Collection) || (obj instanceof Date) || (obj instanceof Enum) || (obj instanceof Number);
     }
 
     public void close() throws IOException {
@@ -303,30 +219,31 @@ public final class JsonValueObjectEncoderContext implements ObjectEncoderContext
             throw new IllegalStateException("Parent context used since this context was created. Cannot use this context anymore.");
         }
         JsonValueObjectEncoderContext jsonValueObjectEncoderContext = this.childContext;
-        if (jsonValueObjectEncoderContext != null) {
-            jsonValueObjectEncoderContext.maybeUnNest();
-            this.childContext.active = false;
-            this.childContext = null;
-            this.jsonWriter.endObject();
+        if (jsonValueObjectEncoderContext == null) {
+            return;
         }
+        jsonValueObjectEncoderContext.maybeUnNest();
+        this.childContext.active = false;
+        this.childContext = null;
+        this.jsonWriter.endObject();
     }
 
-    private JsonValueObjectEncoderContext internalAdd(String name, Object o) throws IOException, EncodingException {
+    private JsonValueObjectEncoderContext internalAdd(String str, Object obj) throws IOException, EncodingException {
         maybeUnNest();
-        this.jsonWriter.name(name);
-        if (o == null) {
+        this.jsonWriter.name(str);
+        if (obj == null) {
             this.jsonWriter.nullValue();
             return this;
         }
-        return add(o, false);
+        return add(obj, false);
     }
 
-    private JsonValueObjectEncoderContext internalAddIgnoreNullValues(String name, Object o) throws IOException, EncodingException {
-        if (o == null) {
+    private JsonValueObjectEncoderContext internalAddIgnoreNullValues(String str, Object obj) throws IOException, EncodingException {
+        if (obj == null) {
             return this;
         }
         maybeUnNest();
-        this.jsonWriter.name(name);
-        return add(o, false);
+        this.jsonWriter.name(str);
+        return add(obj, false);
     }
 }

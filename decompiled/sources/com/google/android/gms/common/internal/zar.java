@@ -5,8 +5,9 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.internal.PendingResultUtil;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import java.util.concurrent.TimeUnit;
+/* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zar implements PendingResult.StatusListener {
     private final /* synthetic */ PendingResult zaa;
     private final /* synthetic */ TaskCompletionSource zab;

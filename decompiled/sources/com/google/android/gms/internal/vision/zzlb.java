@@ -1,9 +1,10 @@
 package com.google.android.gms.internal.vision;
 
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.RandomAccess;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzlb<E> extends zzhj<E> implements RandomAccess {
     private static final zzlb<Object> zza;
     private E[] zzb;
@@ -11,10 +12,6 @@ final class zzlb<E> extends zzhj<E> implements RandomAccess {
 
     public static <E> zzlb<E> zzd() {
         return (zzlb<E>) zza;
-    }
-
-    zzlb() {
-        this(new Object[10], 0);
     }
 
     private zzlb(E[] eArr, int i) {
@@ -34,11 +31,11 @@ final class zzlb<E> extends zzhj<E> implements RandomAccess {
         int i2 = this.zzc;
         this.zzc = i2 + 1;
         eArr2[i2] = e;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return true;
     }
 
-    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final void add(int i, E e) {
         int i2;
         zzc();
@@ -56,7 +53,7 @@ final class zzlb<E> extends zzhj<E> implements RandomAccess {
         }
         this.zzb[i] = e;
         this.zzc++;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
     @Override // java.util.AbstractList, java.util.List
@@ -76,18 +73,18 @@ final class zzlb<E> extends zzhj<E> implements RandomAccess {
             System.arraycopy(eArr, i + 1, eArr, i, (i2 - i) - 1);
         }
         this.zzc--;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return e;
     }
 
-    @Override // com.google.android.gms.internal.vision.zzhj, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final E set(int i, E e) {
         zzc();
         zzb(i);
         E[] eArr = this.zzb;
         E e2 = eArr[i];
         eArr[i] = e;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return e2;
     }
 

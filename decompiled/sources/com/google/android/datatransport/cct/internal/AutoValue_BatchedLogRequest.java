@@ -1,21 +1,19 @@
 package com.google.android.datatransport.cct.internal;
 
-import com.google.firebase.encoders.annotations.Encodable;
 import java.util.List;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class AutoValue_BatchedLogRequest extends BatchedLogRequest {
     private final List<LogRequest> logRequests;
 
-    public AutoValue_BatchedLogRequest(List<LogRequest> logRequests) {
-        if (logRequests == null) {
+    public AutoValue_BatchedLogRequest(List<LogRequest> list) {
+        if (list == null) {
             throw new NullPointerException("Null logRequests");
         }
-        this.logRequests = logRequests;
+        this.logRequests = list;
     }
 
     @Override // com.google.android.datatransport.cct.internal.BatchedLogRequest
-    @Encodable.Field(name = "logRequest")
     public List<LogRequest> getLogRequests() {
         return this.logRequests;
     }
@@ -24,19 +22,17 @@ public final class AutoValue_BatchedLogRequest extends BatchedLogRequest {
         return "BatchedLogRequest{logRequests=" + this.logRequests + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (o instanceof BatchedLogRequest) {
-            BatchedLogRequest that = (BatchedLogRequest) o;
-            return this.logRequests.equals(that.getLogRequests());
+        if (!(obj instanceof BatchedLogRequest)) {
+            return false;
         }
-        return false;
+        return this.logRequests.equals(((BatchedLogRequest) obj).getLogRequests());
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
-        return h$ ^ this.logRequests.hashCode();
+        return this.logRequests.hashCode() ^ 1000003;
     }
 }

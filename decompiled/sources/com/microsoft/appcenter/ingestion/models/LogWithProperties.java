@@ -5,50 +5,47 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class LogWithProperties extends AbstractLog {
-    private static final String PROPERTIES = "properties";
     private Map<String, String> properties;
 
     public Map<String, String> getProperties() {
         return this.properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    public void setProperties(Map<String, String> map) {
+        this.properties = map;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) throws JSONException {
-        super.read(object);
-        setProperties(JSONUtils.readMap(object, PROPERTIES));
+    public void read(JSONObject jSONObject) throws JSONException {
+        super.read(jSONObject);
+        setProperties(JSONUtils.readMap(jSONObject, "properties"));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        super.write(writer);
-        JSONUtils.writeMap(writer, PROPERTIES, getProperties());
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        super.write(jSONStringer);
+        JSONUtils.writeMap(jSONStringer, "properties", getProperties());
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
+        if (obj == null || getClass() != obj.getClass() || !super.equals(obj)) {
             return false;
         }
-        LogWithProperties that = (LogWithProperties) o;
         Map<String, String> map = this.properties;
-        return map != null ? map.equals(that.properties) : that.properties == null;
+        Map<String, String> map2 = ((LogWithProperties) obj).properties;
+        return map != null ? map.equals(map2) : map2 == null;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
     public int hashCode() {
-        int result = super.hashCode();
-        int i = result * 31;
+        int hashCode = super.hashCode() * 31;
         Map<String, String> map = this.properties;
-        int result2 = i + (map != null ? map.hashCode() : 0);
-        return result2;
+        return hashCode + (map != null ? map.hashCode() : 0);
     }
 }

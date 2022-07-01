@@ -2,7 +2,7 @@ package com.google.android.gms.dynamic;
 
 import com.google.android.gms.dynamic.DeferredLifecycleHelper;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaf implements DeferredLifecycleHelper.zaa {
     private final /* synthetic */ DeferredLifecycleHelper zaa;
 

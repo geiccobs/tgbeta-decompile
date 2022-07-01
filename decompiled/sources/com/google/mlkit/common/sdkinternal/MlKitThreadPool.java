@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class MlKitThreadPool extends zzal {
     private static final ThreadLocal<Deque<Runnable>> zzd = new zzj();
     private final ExecutorService zza = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 60, TimeUnit.SECONDS, new LinkedBlockingQueue(), new ThreadFactory(this) { // from class: com.google.mlkit.common.sdkinternal.zzi
@@ -43,7 +43,7 @@ public class MlKitThreadPool extends zzal {
         return newThread;
     }
 
-    @Override // com.google.android.gms.internal.mlkit_common.zzal, java.util.concurrent.Executor
+    @Override // java.util.concurrent.Executor
     public void execute(Runnable runnable) {
         boolean containsKey;
         synchronized (this.zzc) {
@@ -81,8 +81,8 @@ public class MlKitThreadPool extends zzal {
         } while (runnable != null);
     }
 
-    @Override // com.google.android.gms.internal.mlkit_common.zzal, com.google.android.gms.internal.mlkit_common.zzz
+    @Override // com.google.android.gms.internal.mlkit_common.zzz
     protected final /* synthetic */ Object zza() {
-        return zza();
+        return zzb();
     }
 }

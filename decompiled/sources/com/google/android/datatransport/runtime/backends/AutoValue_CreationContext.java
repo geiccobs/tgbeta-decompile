@@ -2,30 +2,31 @@ package com.google.android.datatransport.runtime.backends;
 
 import android.content.Context;
 import com.google.android.datatransport.runtime.time.Clock;
-/* loaded from: classes3.dex */
+/* JADX INFO: Access modifiers changed from: package-private */
+/* loaded from: classes.dex */
 public final class AutoValue_CreationContext extends CreationContext {
     private final Context applicationContext;
     private final String backendName;
     private final Clock monotonicClock;
     private final Clock wallClock;
 
-    public AutoValue_CreationContext(Context applicationContext, Clock wallClock, Clock monotonicClock, String backendName) {
-        if (applicationContext == null) {
+    public AutoValue_CreationContext(Context context, Clock clock, Clock clock2, String str) {
+        if (context == null) {
             throw new NullPointerException("Null applicationContext");
         }
-        this.applicationContext = applicationContext;
-        if (wallClock == null) {
+        this.applicationContext = context;
+        if (clock == null) {
             throw new NullPointerException("Null wallClock");
         }
-        this.wallClock = wallClock;
-        if (monotonicClock == null) {
+        this.wallClock = clock;
+        if (clock2 == null) {
             throw new NullPointerException("Null monotonicClock");
         }
-        this.monotonicClock = monotonicClock;
-        if (backendName == null) {
+        this.monotonicClock = clock2;
+        if (str == null) {
             throw new NullPointerException("Null backendName");
         }
-        this.backendName = backendName;
+        this.backendName = str;
     }
 
     @Override // com.google.android.datatransport.runtime.backends.CreationContext
@@ -52,19 +53,18 @@ public final class AutoValue_CreationContext extends CreationContext {
         return "CreationContext{applicationContext=" + this.applicationContext + ", wallClock=" + this.wallClock + ", monotonicClock=" + this.monotonicClock + ", backendName=" + this.backendName + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof CreationContext)) {
+        if (!(obj instanceof CreationContext)) {
             return false;
         }
-        CreationContext that = (CreationContext) o;
-        return this.applicationContext.equals(that.getApplicationContext()) && this.wallClock.equals(that.getWallClock()) && this.monotonicClock.equals(that.getMonotonicClock()) && this.backendName.equals(that.getBackendName());
+        CreationContext creationContext = (CreationContext) obj;
+        return this.applicationContext.equals(creationContext.getApplicationContext()) && this.wallClock.equals(creationContext.getWallClock()) && this.monotonicClock.equals(creationContext.getMonotonicClock()) && this.backendName.equals(creationContext.getBackendName());
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
-        return ((((((h$ ^ this.applicationContext.hashCode()) * 1000003) ^ this.wallClock.hashCode()) * 1000003) ^ this.monotonicClock.hashCode()) * 1000003) ^ this.backendName.hashCode();
+        return ((((((this.applicationContext.hashCode() ^ 1000003) * 1000003) ^ this.wallClock.hashCode()) * 1000003) ^ this.monotonicClock.hashCode()) * 1000003) ^ this.backendName.hashCode();
     }
 }

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import com.google.android.gms.tasks.TaskCompletionSource;
 /* compiled from: com.google.android.gms:play-services-cloud-messaging@@16.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 abstract class zzq<T> {
     final int zza;
     final TaskCompletionSource<T> zzb = new TaskCompletionSource<>();
@@ -25,7 +25,7 @@ abstract class zzq<T> {
         if (Log.isLoggable("MessengerIpcClient", 3)) {
             String valueOf = String.valueOf(this);
             String valueOf2 = String.valueOf(t);
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 16 + String.valueOf(valueOf2).length());
+            StringBuilder sb = new StringBuilder(valueOf.length() + 16 + valueOf2.length());
             sb.append("Finishing ");
             sb.append(valueOf);
             sb.append(" with ");
@@ -39,7 +39,7 @@ abstract class zzq<T> {
         if (Log.isLoggable("MessengerIpcClient", 3)) {
             String valueOf = String.valueOf(this);
             String valueOf2 = String.valueOf(zzpVar);
-            StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 14 + String.valueOf(valueOf2).length());
+            StringBuilder sb = new StringBuilder(valueOf.length() + 14 + valueOf2.length());
             sb.append("Failing ");
             sb.append(valueOf);
             sb.append(" with ");

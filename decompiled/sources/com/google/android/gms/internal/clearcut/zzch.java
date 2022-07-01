@@ -1,18 +1,16 @@
 package com.google.android.gms.internal.clearcut;
 
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.RandomAccess;
-/* loaded from: classes3.dex */
-public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAccess {
-    private static final zzch zzkr;
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
+final class zzch extends zzav<Integer> implements zzcn<Integer> {
     private int size;
     private int[] zzks;
 
     static {
-        zzch zzchVar = new zzch();
-        zzkr = zzchVar;
-        zzchVar.zzv();
+        new zzch().zzv();
     }
 
     zzch() {
@@ -22,10 +20,6 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
     private zzch(int[] iArr, int i) {
         this.zzks = iArr;
         this.size = i;
-    }
-
-    public static zzch zzbk() {
-        return zzkr;
     }
 
     private final void zzg(int i) {
@@ -61,10 +55,10 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
         }
         this.zzks[i] = i2;
         this.size++;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
     }
 
-    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ void add(int i, Object obj) {
         zzo(i, ((Integer) obj).intValue());
     }
@@ -82,7 +76,7 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
             return false;
         }
         int i2 = this.size;
-        if (Integer.MAX_VALUE - i2 < i) {
+        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;
@@ -92,7 +86,7 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
         }
         System.arraycopy(zzchVar.zzks, 0, this.zzks, this.size, zzchVar.size);
         this.size = i3;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return true;
     }
 
@@ -136,7 +130,7 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
         return i;
     }
 
-    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object remove(int i) {
         zzw();
         zzg(i);
@@ -147,7 +141,7 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
             System.arraycopy(iArr, i + 1, iArr, i, i3 - i);
         }
         this.size--;
-        this.modCount++;
+        ((AbstractList) this).modCount++;
         return Integer.valueOf(i2);
     }
 
@@ -159,7 +153,7 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
                 int[] iArr = this.zzks;
                 System.arraycopy(iArr, i + 1, iArr, i, this.size - i);
                 this.size--;
-                this.modCount++;
+                ((AbstractList) this).modCount++;
                 return true;
             }
         }
@@ -173,13 +167,13 @@ public final class zzch extends zzav<Integer> implements zzcn<Integer>, RandomAc
             int[] iArr = this.zzks;
             System.arraycopy(iArr, i2, iArr, i, this.size - i2);
             this.size -= i2 - i;
-            this.modCount++;
+            ((AbstractList) this).modCount++;
             return;
         }
         throw new IndexOutOfBoundsException("toIndex < fromIndex");
     }
 
-    @Override // com.google.android.gms.internal.clearcut.zzav, java.util.AbstractList, java.util.List
+    @Override // java.util.AbstractList, java.util.List
     public final /* synthetic */ Object set(int i, Object obj) {
         int intValue = ((Integer) obj).intValue();
         zzw();

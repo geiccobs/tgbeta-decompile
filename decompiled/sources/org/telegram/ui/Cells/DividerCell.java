@@ -7,7 +7,7 @@ import android.view.View;
 import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class DividerCell extends View {
     private boolean forceDarkTheme;
     private Paint paint;
@@ -25,21 +25,21 @@ public class DividerCell extends View {
     }
 
     @Override // android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), getPaddingTop() + getPaddingBottom() + 1);
+    protected void onMeasure(int i, int i2) {
+        setMeasuredDimension(View.MeasureSpec.getSize(i), getPaddingTop() + getPaddingBottom() + 1);
     }
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
         if (this.forceDarkTheme) {
-            this.paint.setColor(ColorUtils.blendARGB(-16777216, Theme.getColor(Theme.key_voipgroup_dialogBackground, this.resourcesProvider), 0.2f));
+            this.paint.setColor(ColorUtils.blendARGB(-16777216, Theme.getColor("voipgroup_dialogBackground", this.resourcesProvider), 0.2f));
         } else {
-            this.paint.setColor(Theme.getColor(Theme.key_divider, this.resourcesProvider));
+            this.paint.setColor(Theme.getColor("divider", this.resourcesProvider));
         }
         canvas.drawLine(getPaddingLeft(), getPaddingTop(), getWidth() - getPaddingRight(), getPaddingTop(), this.paint);
     }
 
-    public void setForceDarkTheme(boolean forceDarkTheme) {
-        this.forceDarkTheme = forceDarkTheme;
+    public void setForceDarkTheme(boolean z) {
+        this.forceDarkTheme = z;
     }
 }

@@ -1,24 +1,24 @@
 package org.webrtc;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Size {
     public int height;
     public int width;
 
-    public Size(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public Size(int i, int i2) {
+        this.width = i;
+        this.height = i2;
     }
 
     public String toString() {
         return this.width + "x" + this.height;
     }
 
-    public boolean equals(Object other) {
-        if (!(other instanceof Size)) {
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Size)) {
             return false;
         }
-        Size otherSize = (Size) other;
-        return this.width == otherSize.width && this.height == otherSize.height;
+        Size size = (Size) obj;
+        return this.width == size.width && this.height == size.height;
     }
 
     public int hashCode() {

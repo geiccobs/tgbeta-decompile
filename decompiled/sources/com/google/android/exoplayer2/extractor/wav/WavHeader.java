@@ -1,7 +1,6 @@
 package com.google.android.exoplayer2.extractor.wav;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class WavHeader {
-    public final int averageBytesPerSecond;
     public final int bitsPerSample;
     public final int blockSize;
     public final byte[] extraData;
@@ -9,13 +8,12 @@ final class WavHeader {
     public final int frameRateHz;
     public final int numChannels;
 
-    public WavHeader(int formatType, int numChannels, int frameRateHz, int averageBytesPerSecond, int blockSize, int bitsPerSample, byte[] extraData) {
-        this.formatType = formatType;
-        this.numChannels = numChannels;
-        this.frameRateHz = frameRateHz;
-        this.averageBytesPerSecond = averageBytesPerSecond;
-        this.blockSize = blockSize;
-        this.bitsPerSample = bitsPerSample;
-        this.extraData = extraData;
+    public WavHeader(int i, int i2, int i3, int i4, int i5, int i6, byte[] bArr) {
+        this.formatType = i;
+        this.numChannels = i2;
+        this.frameRateHz = i3;
+        this.blockSize = i5;
+        this.bitsPerSample = i6;
+        this.extraData = bArr;
     }
 }

@@ -2,23 +2,23 @@ package org.telegram.ui.Components;
 
 import android.text.TextPaint;
 import android.text.style.MetricAffectingSpan;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class AnchorSpan extends MetricAffectingSpan {
     private String name;
 
-    public AnchorSpan(String n) {
-        this.name = n.toLowerCase();
+    @Override // android.text.style.CharacterStyle
+    public void updateDrawState(TextPaint textPaint) {
+    }
+
+    @Override // android.text.style.MetricAffectingSpan
+    public void updateMeasureState(TextPaint textPaint) {
+    }
+
+    public AnchorSpan(String str) {
+        this.name = str.toLowerCase();
     }
 
     public String getName() {
         return this.name;
-    }
-
-    @Override // android.text.style.MetricAffectingSpan
-    public void updateMeasureState(TextPaint p) {
-    }
-
-    @Override // android.text.style.CharacterStyle
-    public void updateDrawState(TextPaint tp) {
     }
 }

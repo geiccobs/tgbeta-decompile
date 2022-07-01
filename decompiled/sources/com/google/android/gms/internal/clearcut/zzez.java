@@ -1,7 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzez extends zzex<zzey, zzey> {
     private static void zza(Object obj, zzey zzeyVar) {
         ((zzcg) obj).zzjp = zzeyVar;

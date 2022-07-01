@@ -44,13 +44,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.widget.NestedScrollView;
-import com.google.android.exoplayer2.C;
-import com.google.firebase.messaging.Constants;
-import com.microsoft.appcenter.http.DefaultHttpClient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -65,16 +61,18 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.messenger.XiaomiUtilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$InputPeer;
+import org.telegram.tgnet.TLRPC$TL_error;
+import org.telegram.tgnet.TLRPC$TL_messages_translateText;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.TranslateAlert;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class TranslateAlert extends Dialog {
     private Spannable allTexts;
     private TextView allTextsView;
@@ -100,7 +98,6 @@ public class TranslateAlert extends Dialog {
     private boolean fromScrollRect;
     private float fromScrollViewY;
     private float fromScrollY;
-    private boolean fromTranslateMoreView;
     private float fromY;
     private FrameLayout header;
     private FrameLayout.LayoutParams headerLayout;
@@ -129,7 +126,6 @@ public class TranslateAlert extends Dialog {
     private FrameLayout.LayoutParams subtitleLayout;
     private TextView subtitleToView;
     private LinearLayout subtitleView;
-    private CharSequence text;
     private ArrayList<CharSequence> textBlocks;
     private android.graphics.Rect textRect;
     private FrameLayout textsContainerView;
@@ -137,123 +133,133 @@ public class TranslateAlert extends Dialog {
     private FrameLayout.LayoutParams titleLayout;
     private TextView titleView;
     private String toLanguage;
-    private android.graphics.Rect translateMoreRect;
     public static volatile DispatchQueue translateQueue = new DispatchQueue("translateQueue", false);
     private static final int MOST_SPEC = View.MeasureSpec.makeMeasureSpec(999999, Integer.MIN_VALUE);
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface OnLinkPress {
         boolean run(URLSpan uRLSpan);
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface OnTranslationFail {
         void run(boolean z);
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface OnTranslationSuccess {
         void run(String str, String str2);
     }
 
-    public void openAnimation(float t) {
-        float f = 1.0f;
-        float t2 = Math.min(Math.max(t, 0.0f), 1.0f);
-        if (this.containerOpenAnimationT == t2) {
+    public static /* synthetic */ void lambda$translateText$13(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
+    }
+
+    public void openAnimation(float f) {
+        float f2 = 1.0f;
+        float min = Math.min(Math.max(f, 0.0f), 1.0f);
+        if (this.containerOpenAnimationT == min) {
             return;
         }
-        this.containerOpenAnimationT = t2;
-        this.titleView.setScaleX(AndroidUtilities.lerp(1.0f, 0.9473f, t2));
-        this.titleView.setScaleY(AndroidUtilities.lerp(1.0f, 0.9473f, t2));
-        this.titleLayout.setMargins(AndroidUtilities.dp(AndroidUtilities.lerp(22, 72, t2)), AndroidUtilities.dp(AndroidUtilities.lerp(22, 8, t2)), this.titleLayout.rightMargin, this.titleLayout.bottomMargin);
+        this.containerOpenAnimationT = min;
+        this.titleView.setScaleX(AndroidUtilities.lerp(1.0f, 0.9473f, min));
+        this.titleView.setScaleY(AndroidUtilities.lerp(1.0f, 0.9473f, min));
+        FrameLayout.LayoutParams layoutParams = this.titleLayout;
+        int dp = AndroidUtilities.dp(AndroidUtilities.lerp(22, 72, min));
+        int dp2 = AndroidUtilities.dp(AndroidUtilities.lerp(22, 8, min));
+        FrameLayout.LayoutParams layoutParams2 = this.titleLayout;
+        layoutParams.setMargins(dp, dp2, layoutParams2.rightMargin, layoutParams2.bottomMargin);
         this.titleView.setLayoutParams(this.titleLayout);
-        this.subtitleLayout.setMargins(AndroidUtilities.dp(AndroidUtilities.lerp(22, 72, t2)) - LoadingTextView2.paddingHorizontal, AndroidUtilities.dp(AndroidUtilities.lerp(47, 30, t2)) - LoadingTextView2.paddingVertical, this.subtitleLayout.rightMargin, this.subtitleLayout.bottomMargin);
+        FrameLayout.LayoutParams layoutParams3 = this.subtitleLayout;
+        int dp3 = AndroidUtilities.dp(AndroidUtilities.lerp(22, 72, min)) - LoadingTextView2.paddingHorizontal;
+        int dp4 = AndroidUtilities.dp(AndroidUtilities.lerp(47, 30, min)) - LoadingTextView2.paddingVertical;
+        FrameLayout.LayoutParams layoutParams4 = this.subtitleLayout;
+        layoutParams3.setMargins(dp3, dp4, layoutParams4.rightMargin, layoutParams4.bottomMargin);
         this.subtitleView.setLayoutParams(this.subtitleLayout);
-        this.backButton.setAlpha(t2);
-        this.backButton.setScaleX((t2 * 0.25f) + 0.75f);
-        this.backButton.setScaleY((0.25f * t2) + 0.75f);
-        this.backButton.setClickable(t2 > 0.5f);
+        this.backButton.setAlpha(min);
+        float f3 = (0.25f * min) + 0.75f;
+        this.backButton.setScaleX(f3);
+        this.backButton.setScaleY(f3);
+        this.backButton.setClickable(min > 0.5f);
         FrameLayout frameLayout = this.headerShadowView;
         if (this.scrollView.getScrollY() <= 0) {
-            f = t2;
+            f2 = min;
         }
-        frameLayout.setAlpha(f);
-        this.headerLayout.height = AndroidUtilities.lerp(AndroidUtilities.dp(70.0f), AndroidUtilities.dp(56.0f), t2);
+        frameLayout.setAlpha(f2);
+        this.headerLayout.height = AndroidUtilities.lerp(AndroidUtilities.dp(70.0f), AndroidUtilities.dp(56.0f), min);
         this.header.setLayoutParams(this.headerLayout);
-        FrameLayout.LayoutParams layoutParams = this.scrollViewLayout;
-        layoutParams.setMargins(layoutParams.leftMargin, AndroidUtilities.lerp(AndroidUtilities.dp(70.0f), AndroidUtilities.dp(56.0f), t2), this.scrollViewLayout.rightMargin, this.scrollViewLayout.bottomMargin);
+        FrameLayout.LayoutParams layoutParams5 = this.scrollViewLayout;
+        int i = layoutParams5.leftMargin;
+        int lerp = AndroidUtilities.lerp(AndroidUtilities.dp(70.0f), AndroidUtilities.dp(56.0f), min);
+        FrameLayout.LayoutParams layoutParams6 = this.scrollViewLayout;
+        layoutParams5.setMargins(i, lerp, layoutParams6.rightMargin, layoutParams6.bottomMargin);
         this.scrollView.setLayoutParams(this.scrollViewLayout);
     }
 
-    public void openAnimationTo(float to, boolean priority) {
-        openAnimationTo(to, priority, null);
+    public void openAnimationTo(float f, boolean z) {
+        openAnimationTo(f, z, null);
     }
 
-    private void openAnimationTo(float to, boolean priority, final Runnable onAnimationEnd) {
-        if (this.openAnimationToAnimatorPriority && !priority) {
-            return;
-        }
-        this.openAnimationToAnimatorPriority = priority;
-        float to2 = Math.min(Math.max(to, 0.0f), 1.0f);
-        ValueAnimator valueAnimator = this.openAnimationToAnimator;
-        if (valueAnimator != null) {
-            valueAnimator.cancel();
-        }
-        ValueAnimator ofFloat = ValueAnimator.ofFloat(this.containerOpenAnimationT, to2);
-        this.openAnimationToAnimator = ofFloat;
-        ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda0
-            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-            public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                TranslateAlert.this.m3162xab02aaef(valueAnimator2);
+    private void openAnimationTo(float f, boolean z, final Runnable runnable) {
+        if (!this.openAnimationToAnimatorPriority || z) {
+            this.openAnimationToAnimatorPriority = z;
+            float min = Math.min(Math.max(f, 0.0f), 1.0f);
+            ValueAnimator valueAnimator = this.openAnimationToAnimator;
+            if (valueAnimator != null) {
+                valueAnimator.cancel();
             }
-        });
-        this.openAnimationToAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.TranslateAlert.1
-            {
-                TranslateAlert.this = this;
-            }
-
-            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                TranslateAlert.this.openAnimationToAnimatorPriority = false;
-                Runnable runnable = onAnimationEnd;
-                if (runnable != null) {
-                    runnable.run();
+            ValueAnimator ofFloat = ValueAnimator.ofFloat(this.containerOpenAnimationT, min);
+            this.openAnimationToAnimator = ofFloat;
+            ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda0
+                @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
+                    TranslateAlert.this.lambda$openAnimationTo$0(valueAnimator2);
                 }
-            }
+            });
+            this.openAnimationToAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.TranslateAlert.1
+                {
+                    TranslateAlert.this = this;
+                }
 
-            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationCancel(Animator animator) {
-                TranslateAlert.this.openAnimationToAnimatorPriority = false;
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationEnd(Animator animator) {
+                    TranslateAlert.this.openAnimationToAnimatorPriority = false;
+                    Runnable runnable2 = runnable;
+                    if (runnable2 != null) {
+                        runnable2.run();
+                    }
+                }
+
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationCancel(Animator animator) {
+                    TranslateAlert.this.openAnimationToAnimatorPriority = false;
+                }
+            });
+            this.openAnimationToAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT);
+            this.openAnimationToAnimator.setDuration(220L);
+            this.openAnimationToAnimator.start();
+            if (min < 0.5d || this.blockIndex > 1) {
+                return;
             }
-        });
-        this.openAnimationToAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT);
-        this.openAnimationToAnimator.setDuration(220L);
-        this.openAnimationToAnimator.start();
-        if (to2 >= 0.5d && this.blockIndex <= 1) {
             fetchNext();
         }
     }
 
-    /* renamed from: lambda$openAnimationTo$0$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3162xab02aaef(ValueAnimator a) {
-        openAnimation(((Float) a.getAnimatedValue()).floatValue());
+    public /* synthetic */ void lambda$openAnimationTo$0(ValueAnimator valueAnimator) {
+        openAnimation(((Float) valueAnimator.getAnimatedValue()).floatValue());
     }
 
     public int minHeight() {
         return minHeight(false);
     }
 
-    private int minHeight(boolean full) {
+    private int minHeight(boolean z) {
         TextBlocksLayout textBlocksLayout = this.textsView;
-        int textsViewHeight = textBlocksLayout == null ? 0 : textBlocksLayout.getMeasuredHeight();
-        int height = AndroidUtilities.dp(147.0f) + textsViewHeight;
-        if (this.firstMinHeight < 0 && textsViewHeight > 0) {
-            this.firstMinHeight = height;
+        int measuredHeight = textBlocksLayout == null ? 0 : textBlocksLayout.getMeasuredHeight();
+        int dp = AndroidUtilities.dp(147.0f) + measuredHeight;
+        if (this.firstMinHeight < 0 && measuredHeight > 0) {
+            this.firstMinHeight = dp;
         }
-        if (this.firstMinHeight > 0 && this.textBlocks.size() > 1 && !full) {
-            return this.firstMinHeight;
-        }
-        return height;
+        return (this.firstMinHeight <= 0 || this.textBlocks.size() <= 1 || z) ? dp : this.firstMinHeight;
     }
 
     public boolean canExpand() {
@@ -274,23 +280,25 @@ public class TranslateAlert extends Dialog {
         alpha.setDuration(Math.abs(alpha2 - f) * 220.0f).start();
     }
 
-    public TranslateAlert(BaseFragment fragment, Context context, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
-        this(fragment, context, -1, null, -1, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
+    public TranslateAlert(BaseFragment baseFragment, Context context, String str, String str2, CharSequence charSequence, boolean z, OnLinkPress onLinkPress, Runnable runnable) {
+        this(baseFragment, context, -1, null, -1, str, str2, charSequence, z, onLinkPress, runnable);
     }
 
-    public TranslateAlert(BaseFragment fragment, Context context, int currentAccount, TLRPC.InputPeer peer, int msgId, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
+    public TranslateAlert(BaseFragment baseFragment, Context context, int i, TLRPC$InputPeer tLRPC$InputPeer, int i2, String str, String str2, CharSequence charSequence, boolean z, OnLinkPress onLinkPress, Runnable runnable) {
         super(context, R.style.TransparentDialog);
+        int i3;
+        int i4;
         this.blockIndex = 0;
         this.containerOpenAnimationT = 0.0f;
         this.openAnimationToAnimatorPriority = false;
-        String str = null;
+        String str3 = null;
         this.openAnimationToAnimator = null;
         this.firstMinHeight = -1;
         this.allowScroll = true;
         this.fromScrollY = 0.0f;
         this.containerRect = new android.graphics.Rect();
         this.textRect = new android.graphics.Rect();
-        this.translateMoreRect = new android.graphics.Rect();
+        new android.graphics.Rect();
         this.buttonRect = new android.graphics.Rect();
         this.backRect = new android.graphics.Rect();
         this.scrollRect = new android.graphics.Rect();
@@ -299,7 +307,6 @@ public class TranslateAlert extends Dialog {
         this.maybeScrolling = false;
         this.scrolling = false;
         this.fromScrollRect = false;
-        this.fromTranslateMoreView = false;
         this.fromScrollViewY = 0.0f;
         this.allTexts = null;
         this.openingT = 0.0f;
@@ -309,8 +316,8 @@ public class TranslateAlert extends Dialog {
             }
 
             @Override // android.graphics.drawable.ColorDrawable, android.graphics.drawable.Drawable
-            public void setAlpha(int alpha) {
-                super.setAlpha(alpha);
+            public void setAlpha(int i5) {
+                super.setAlpha(i5);
                 TranslateAlert.this.container.invalidate();
             }
         };
@@ -320,23 +327,31 @@ public class TranslateAlert extends Dialog {
         this.openingAnimatorPriority = false;
         this.loading = false;
         this.loaded = false;
-        if (peer != null) {
-            translateText(currentAccount, peer, msgId, (fromLanguage == null || !fromLanguage.equals("und")) ? fromLanguage : str, toLanguage);
+        if (tLRPC$InputPeer != null) {
+            if (str == null || !str.equals("und")) {
+                i4 = i;
+                i3 = i2;
+                str3 = str;
+            } else {
+                i4 = i;
+                i3 = i2;
+            }
+            translateText(i4, tLRPC$InputPeer, i3, str3, str2);
         }
         this.onLinkPress = onLinkPress;
-        this.noforwards = noforwards;
-        this.fragment = fragment;
-        this.fromLanguage = (fromLanguage == null || !fromLanguage.equals("und")) ? fromLanguage : "auto";
-        this.toLanguage = toLanguage;
-        this.text = text;
-        this.textBlocks = cutInBlocks(text, 1024);
-        this.onDismiss = onDismiss;
-        if (Build.VERSION.SDK_INT >= 30) {
+        this.noforwards = z;
+        this.fragment = baseFragment;
+        this.fromLanguage = (str == null || !str.equals("und")) ? str : "auto";
+        this.toLanguage = str2;
+        this.textBlocks = cutInBlocks(charSequence, 1024);
+        this.onDismiss = runnable;
+        int i5 = Build.VERSION.SDK_INT;
+        if (i5 >= 30) {
             getWindow().addFlags(-2147483392);
-        } else if (Build.VERSION.SDK_INT >= 21) {
+        } else if (i5 >= 21) {
             getWindow().addFlags(-2147417856);
         }
-        if (noforwards) {
+        if (z) {
             getWindow().addFlags(8192);
         }
         FrameLayout frameLayout = new FrameLayout(context);
@@ -344,56 +359,57 @@ public class TranslateAlert extends Dialog {
         frameLayout.setBackground(this.backDrawable);
         this.contentView.setClipChildren(false);
         this.contentView.setClipToPadding(false);
-        if (Build.VERSION.SDK_INT >= 21) {
+        if (i5 >= 21) {
             this.contentView.setFitsSystemWindows(true);
-            if (Build.VERSION.SDK_INT >= 30) {
+            if (i5 >= 30) {
                 this.contentView.setSystemUiVisibility(1792);
             } else {
                 this.contentView.setSystemUiVisibility(1280);
             }
         }
-        final Paint containerPaint = new Paint();
-        containerPaint.setColor(Theme.getColor(Theme.key_dialogBackground));
-        containerPaint.setShadowLayer(AndroidUtilities.dp(2.0f), 0.0f, AndroidUtilities.dp(-0.66f), 503316480);
+        final Paint paint = new Paint();
+        paint.setColor(Theme.getColor("dialogBackground"));
+        paint.setShadowLayer(AndroidUtilities.dp(2.0f), 0.0f, AndroidUtilities.dp(-0.66f), 503316480);
         FrameLayout frameLayout2 = new FrameLayout(context) { // from class: org.telegram.ui.Components.TranslateAlert.2
-            private int contentHeight = Integer.MAX_VALUE;
-            private Path containerPath = new Path();
+            private int contentHeight = ConnectionsManager.DEFAULT_DATACENTER_ID;
             private RectF containerRect = new RectF();
-            private RectF rectF = new RectF();
 
             {
                 TranslateAlert.this = this;
+                new Path();
+                new RectF();
             }
 
             @Override // android.widget.FrameLayout, android.view.View
-            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                int fullWidth = View.MeasureSpec.getSize(widthMeasureSpec);
-                View.MeasureSpec.getSize(widthMeasureSpec);
-                int minHeight = (int) (AndroidUtilities.displayMetrics.heightPixels * TranslateAlert.this.heightMaxPercent);
+            protected void onMeasure(int i6, int i7) {
+                int size = View.MeasureSpec.getSize(i6);
+                View.MeasureSpec.getSize(i6);
+                int i8 = (int) (AndroidUtilities.displayMetrics.heightPixels * TranslateAlert.this.heightMaxPercent);
                 if (TranslateAlert.this.textsView != null && TranslateAlert.this.textsView.getMeasuredHeight() <= 0) {
-                    TranslateAlert.this.textsView.measure(View.MeasureSpec.makeMeasureSpec((((View.MeasureSpec.getSize(widthMeasureSpec) - TranslateAlert.this.textsView.getPaddingLeft()) - TranslateAlert.this.textsView.getPaddingRight()) - TranslateAlert.this.textsContainerView.getPaddingLeft()) - TranslateAlert.this.textsContainerView.getPaddingRight(), C.BUFFER_FLAG_ENCRYPTED), 0);
+                    TranslateAlert.this.textsView.measure(View.MeasureSpec.makeMeasureSpec((((View.MeasureSpec.getSize(i6) - TranslateAlert.this.textsView.getPaddingLeft()) - TranslateAlert.this.textsView.getPaddingRight()) - TranslateAlert.this.textsContainerView.getPaddingLeft()) - TranslateAlert.this.textsContainerView.getPaddingRight(), 1073741824), 0);
                 }
-                int fromHeight = Math.min(minHeight, TranslateAlert.this.minHeight());
-                int height = (int) (fromHeight + ((AndroidUtilities.displayMetrics.heightPixels - fromHeight) * TranslateAlert.this.containerOpenAnimationT));
+                int min = Math.min(i8, TranslateAlert.this.minHeight());
+                int i9 = (int) (min + ((AndroidUtilities.displayMetrics.heightPixels - min) * TranslateAlert.this.containerOpenAnimationT));
                 TranslateAlert.this.updateCanExpand();
-                super.onMeasure(View.MeasureSpec.makeMeasureSpec((int) Math.max(fullWidth * 0.8f, Math.min(AndroidUtilities.dp(480.0f), fullWidth)), View.MeasureSpec.getMode(widthMeasureSpec)), View.MeasureSpec.makeMeasureSpec(height, C.BUFFER_FLAG_ENCRYPTED));
+                super.onMeasure(View.MeasureSpec.makeMeasureSpec((int) Math.max(size * 0.8f, Math.min(AndroidUtilities.dp(480.0f), size)), View.MeasureSpec.getMode(i6)), View.MeasureSpec.makeMeasureSpec(i9, 1073741824));
             }
 
             @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-                super.onLayout(changed, left, top, right, bottom);
-                this.contentHeight = Math.min(this.contentHeight, bottom - top);
+            protected void onLayout(boolean z2, int i6, int i7, int i8, int i9) {
+                super.onLayout(z2, i6, i7, i8, i9);
+                this.contentHeight = Math.min(this.contentHeight, i9 - i7);
             }
 
             @Override // android.view.View
             protected void onDraw(Canvas canvas) {
-                int w = getWidth();
-                int h = getHeight();
-                int r = AndroidUtilities.dp((1.0f - TranslateAlert.this.containerOpenAnimationT) * 12.0f);
-                canvas.clipRect(0, 0, w, h);
-                this.containerRect.set(0.0f, 0.0f, w, h + r);
-                canvas.translate(0.0f, (1.0f - TranslateAlert.this.openingT) * h);
-                canvas.drawRoundRect(this.containerRect, r, r, containerPaint);
+                int width = getWidth();
+                int height = getHeight();
+                int dp = AndroidUtilities.dp((1.0f - TranslateAlert.this.containerOpenAnimationT) * 12.0f);
+                canvas.clipRect(0, 0, width, height);
+                this.containerRect.set(0.0f, 0.0f, width, height + dp);
+                canvas.translate(0.0f, (1.0f - TranslateAlert.this.openingT) * height);
+                float f = dp;
+                canvas.drawRoundRect(this.containerRect, f, f, paint);
                 super.onDraw(canvas);
             }
         };
@@ -402,48 +418,48 @@ public class TranslateAlert extends Dialog {
         this.header = new FrameLayout(context);
         TextView textView = new TextView(context);
         this.titleView = textView;
-        textView.setPivotX(LocaleController.isRTL ? this.titleView.getWidth() : 0.0f);
+        textView.setPivotX(LocaleController.isRTL ? textView.getWidth() : 0.0f);
         this.titleView.setPivotY(0.0f);
         this.titleView.setLines(1);
         this.titleView.setText(LocaleController.getString("AutomaticTranslation", R.string.AutomaticTranslation));
         this.titleView.setGravity(LocaleController.isRTL ? 5 : 3);
         this.titleView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        this.titleView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        this.titleView.setTextColor(Theme.getColor("dialogTextBlack"));
         this.titleView.setTextSize(0, AndroidUtilities.dp(19.0f));
         FrameLayout frameLayout3 = this.header;
         View view = this.titleView;
         FrameLayout.LayoutParams createFrame = LayoutHelper.createFrame(-1, -2.0f, 55, 22.0f, 22.0f, 22.0f, 0.0f);
         this.titleLayout = createFrame;
         frameLayout3.addView(view, createFrame);
-        this.titleView.post(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda14
+        this.titleView.post(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda8
             @Override // java.lang.Runnable
             public final void run() {
-                TranslateAlert.this.m3159lambda$new$1$orgtelegramuiComponentsTranslateAlert();
+                TranslateAlert.this.lambda$new$1();
             }
         });
         LinearLayout linearLayout = new LinearLayout(context);
         this.subtitleView = linearLayout;
         linearLayout.setOrientation(0);
-        if (Build.VERSION.SDK_INT >= 17) {
+        if (i5 >= 17) {
             this.subtitleView.setLayoutDirection(LocaleController.isRTL ? 1 : 0);
         }
         this.subtitleView.setGravity(LocaleController.isRTL ? 5 : 3);
-        String fromLanguageName = languageName(fromLanguage);
-        InlineLoadingTextView inlineLoadingTextView = new InlineLoadingTextView(context, fromLanguageName == null ? languageName(toLanguage) : fromLanguageName, AndroidUtilities.dp(14.0f), Theme.getColor(Theme.key_player_actionBarSubtitle)) { // from class: org.telegram.ui.Components.TranslateAlert.3
+        String languageName = languageName(str);
+        InlineLoadingTextView inlineLoadingTextView = new InlineLoadingTextView(context, languageName == null ? languageName(str2) : languageName, AndroidUtilities.dp(14.0f), Theme.getColor("player_actionBarSubtitle")) { // from class: org.telegram.ui.Components.TranslateAlert.3
             {
                 TranslateAlert.this = this;
             }
 
             @Override // org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView
-            protected void onLoadAnimation(float t) {
-                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) TranslateAlert.this.subtitleFromView.getLayoutParams();
-                if (lp != null) {
+            protected void onLoadAnimation(float f) {
+                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) TranslateAlert.this.subtitleFromView.getLayoutParams();
+                if (marginLayoutParams != null) {
                     if (LocaleController.isRTL) {
-                        lp.leftMargin = AndroidUtilities.dp(2.0f - (6.0f * t));
+                        marginLayoutParams.leftMargin = AndroidUtilities.dp(2.0f - (f * 6.0f));
                     } else {
-                        lp.rightMargin = AndroidUtilities.dp(2.0f - (6.0f * t));
+                        marginLayoutParams.rightMargin = AndroidUtilities.dp(2.0f - (f * 6.0f));
                     }
-                    TranslateAlert.this.subtitleFromView.setLayoutParams(lp);
+                    TranslateAlert.this.subtitleFromView.setLayoutParams(marginLayoutParams);
                 }
             }
         };
@@ -452,16 +468,16 @@ public class TranslateAlert extends Dialog {
         ImageView imageView = new ImageView(context);
         this.subtitleArrowView = imageView;
         imageView.setImageResource(R.drawable.search_arrow);
-        this.subtitleArrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_player_actionBarSubtitle), PorterDuff.Mode.MULTIPLY));
+        this.subtitleArrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor("player_actionBarSubtitle"), PorterDuff.Mode.MULTIPLY));
         if (LocaleController.isRTL) {
             this.subtitleArrowView.setScaleX(-1.0f);
         }
         TextView textView2 = new TextView(context);
         this.subtitleToView = textView2;
         textView2.setLines(1);
-        this.subtitleToView.setTextColor(Theme.getColor(Theme.key_player_actionBarSubtitle));
+        this.subtitleToView.setTextColor(Theme.getColor("player_actionBarSubtitle"));
         this.subtitleToView.setTextSize(0, AndroidUtilities.dp(14.0f));
-        this.subtitleToView.setText(languageName(toLanguage));
+        this.subtitleToView.setText(languageName(str2));
         if (LocaleController.isRTL) {
             this.subtitleView.setPadding(InlineLoadingTextView.paddingHorizontal, 0, 0, 0);
             this.subtitleView.addView(this.subtitleToView, LayoutHelper.createLinear(-2, -2, 16));
@@ -473,33 +489,36 @@ public class TranslateAlert extends Dialog {
             this.subtitleView.addView(this.subtitleArrowView, LayoutHelper.createLinear(-2, -2, 16, 0, 1, 3, 0));
             this.subtitleView.addView(this.subtitleToView, LayoutHelper.createLinear(-2, -2, 16));
         }
-        if (fromLanguageName != null) {
-            this.subtitleFromView.set(fromLanguageName);
+        if (languageName != null) {
+            this.subtitleFromView.set(languageName);
         }
         FrameLayout frameLayout4 = this.header;
         View view2 = this.subtitleView;
-        FrameLayout.LayoutParams createFrame2 = LayoutHelper.createFrame(-1, -2.0f, (LocaleController.isRTL ? 5 : 3) | 48, 22.0f - (LoadingTextView2.paddingHorizontal / AndroidUtilities.density), 47.0f - (LoadingTextView2.paddingVertical / AndroidUtilities.density), 22.0f - (LoadingTextView2.paddingHorizontal / AndroidUtilities.density), 0.0f);
+        int i6 = LocaleController.isRTL ? 5 : 3;
+        int i7 = LoadingTextView2.paddingHorizontal;
+        float f = AndroidUtilities.density;
+        FrameLayout.LayoutParams createFrame2 = LayoutHelper.createFrame(-1, -2.0f, i6 | 48, 22.0f - (i7 / AndroidUtilities.density), 47.0f - (LoadingTextView2.paddingVertical / f), 22.0f - (i7 / f), 0.0f);
         this.subtitleLayout = createFrame2;
         frameLayout4.addView(view2, createFrame2);
         ImageView imageView2 = new ImageView(context);
         this.backButton = imageView2;
         imageView2.setImageResource(R.drawable.ic_ab_back);
-        this.backButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_dialogTextBlack), PorterDuff.Mode.MULTIPLY));
+        this.backButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor("dialogTextBlack"), PorterDuff.Mode.MULTIPLY));
         this.backButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
         this.backButton.setPadding(AndroidUtilities.dp(16.0f), 0, AndroidUtilities.dp(16.0f), 0);
-        this.backButton.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_dialogButtonSelector)));
+        this.backButton.setBackground(Theme.createSelectorDrawable(Theme.getColor("dialogButtonSelector")));
         this.backButton.setClickable(false);
         this.backButton.setAlpha(0.0f);
-        this.backButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda7
+        this.backButton.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda2
             @Override // android.view.View.OnClickListener
             public final void onClick(View view3) {
-                TranslateAlert.this.m3160lambda$new$2$orgtelegramuiComponentsTranslateAlert(view3);
+                TranslateAlert.this.lambda$new$2(view3);
             }
         });
         this.header.addView(this.backButton, LayoutHelper.createFrame(56, 56, 3));
         FrameLayout frameLayout5 = new FrameLayout(context);
         this.headerShadowView = frameLayout5;
-        frameLayout5.setBackgroundColor(Theme.getColor(Theme.key_dialogShadowLine));
+        frameLayout5.setBackgroundColor(Theme.getColor("dialogShadowLine"));
         this.headerShadowView.setAlpha(0.0f);
         this.header.addView(this.headerShadowView, LayoutHelper.createFrame(-1, 1, 87));
         this.header.setClipChildren(false);
@@ -514,18 +533,18 @@ public class TranslateAlert extends Dialog {
             }
 
             @Override // androidx.core.widget.NestedScrollView, android.view.ViewGroup
-            public boolean onInterceptTouchEvent(MotionEvent ev) {
-                return TranslateAlert.this.allowScroll && TranslateAlert.this.containerOpenAnimationT >= 1.0f && TranslateAlert.this.canExpand() && super.onInterceptTouchEvent(ev);
+            public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+                return TranslateAlert.this.allowScroll && TranslateAlert.this.containerOpenAnimationT >= 1.0f && TranslateAlert.this.canExpand() && super.onInterceptTouchEvent(motionEvent);
             }
 
             @Override // androidx.core.widget.NestedScrollView, android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-            public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-                super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
+            public void onNestedScroll(View view4, int i8, int i9, int i10, int i11) {
+                super.onNestedScroll(view4, i8, i9, i10, i11);
             }
 
             @Override // androidx.core.widget.NestedScrollView, android.view.View
-            public void onScrollChanged(int l, int t, int oldl, int oldt) {
-                super.onScrollChanged(l, t, oldl, oldt);
+            public void onScrollChanged(int i8, int i9, int i10, int i11) {
+                super.onScrollChanged(i8, i9, i10, i11);
                 if (TranslateAlert.this.checkForNextLoading()) {
                     TranslateAlert.this.openAnimationTo(1.0f, true);
                 }
@@ -533,64 +552,69 @@ public class TranslateAlert extends Dialog {
         };
         this.scrollView = nestedScrollView;
         nestedScrollView.setClipChildren(true);
-        this.allTextsView = new TextView(context) { // from class: org.telegram.ui.Components.TranslateAlert.5
+        TextView textView3 = new TextView(context) { // from class: org.telegram.ui.Components.TranslateAlert.5
             {
                 TranslateAlert.this = this;
             }
 
             @Override // android.widget.TextView, android.view.View
-            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                super.onMeasure(widthMeasureSpec, TranslateAlert.MOST_SPEC);
+            protected void onMeasure(int i8, int i9) {
+                super.onMeasure(i8, TranslateAlert.MOST_SPEC);
             }
 
             @Override // android.widget.TextView, android.view.View
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
                 canvas.translate(getPaddingLeft(), getPaddingTop());
-                if (TranslateAlert.this.links != null && TranslateAlert.this.links.draw(canvas)) {
-                    invalidate();
+                if (TranslateAlert.this.links == null || !TranslateAlert.this.links.draw(canvas)) {
+                    return;
                 }
+                invalidate();
             }
 
             @Override // android.widget.TextView
-            public boolean onTextContextMenuItem(int id) {
-                if (id == 16908321 && isFocused()) {
-                    ClipboardManager clipboard = (ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard");
-                    ClipData clip = ClipData.newPlainText(Constants.ScionAnalytics.PARAM_LABEL, getText().subSequence(Math.max(0, Math.min(getSelectionStart(), getSelectionEnd())), Math.max(0, Math.max(getSelectionStart(), getSelectionEnd()))));
-                    clipboard.setPrimaryClip(clip);
+            public boolean onTextContextMenuItem(int i8) {
+                if (i8 == 16908321 && isFocused()) {
+                    ((ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("label", getText().subSequence(Math.max(0, Math.min(getSelectionStart(), getSelectionEnd())), Math.max(0, Math.max(getSelectionStart(), getSelectionEnd())))));
                     BulletinFactory.of(TranslateAlert.this.bulletinContainer, null).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
                     clearFocus();
                     return true;
                 }
-                return super.onTextContextMenuItem(id);
+                return super.onTextContextMenuItem(i8);
             }
         };
-        this.links = new LinkSpanDrawable.LinkCollector(this.allTextsView);
+        this.allTextsView = textView3;
+        this.links = new LinkSpanDrawable.LinkCollector(textView3);
         this.allTextsView.setTextColor(0);
         this.allTextsView.setTextSize(1, 16.0f);
-        this.allTextsView.setTextIsSelectable(!noforwards);
-        this.allTextsView.setHighlightColor(Theme.getColor(Theme.key_chat_inTextSelectionHighlight));
-        int handleColor = Theme.getColor(Theme.key_chat_TextSelectionCursor);
-        try {
-            if (Build.VERSION.SDK_INT >= 29 && !XiaomiUtilities.isMIUI()) {
-                Drawable left = this.allTextsView.getTextSelectHandleLeft();
-                left.setColorFilter(handleColor, PorterDuff.Mode.SRC_IN);
-                this.allTextsView.setTextSelectHandleLeft(left);
-                Drawable right = this.allTextsView.getTextSelectHandleRight();
-                right.setColorFilter(handleColor, PorterDuff.Mode.SRC_IN);
-                this.allTextsView.setTextSelectHandleRight(right);
+        this.allTextsView.setTextIsSelectable(!z);
+        this.allTextsView.setHighlightColor(Theme.getColor("chat_inTextSelectionHighlight"));
+        int color = Theme.getColor("chat_TextSelectionCursor");
+        if (i5 >= 29) {
+            try {
+                if (!XiaomiUtilities.isMIUI()) {
+                    Drawable textSelectHandleLeft = this.allTextsView.getTextSelectHandleLeft();
+                    textSelectHandleLeft.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                    this.allTextsView.setTextSelectHandleLeft(textSelectHandleLeft);
+                    Drawable textSelectHandleRight = this.allTextsView.getTextSelectHandleRight();
+                    textSelectHandleRight.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                    this.allTextsView.setTextSelectHandleRight(textSelectHandleRight);
+                }
+            } catch (Exception unused) {
             }
-        } catch (Exception e) {
         }
         this.allTextsView.setFocusable(true);
         this.allTextsView.setMovementMethod(new LinkMovementMethod());
-        TextBlocksLayout textBlocksLayout = new TextBlocksLayout(context, AndroidUtilities.dp(16.0f), Theme.getColor(Theme.key_dialogTextBlack), this.allTextsView);
+        TextBlocksLayout textBlocksLayout = new TextBlocksLayout(context, AndroidUtilities.dp(16.0f), Theme.getColor("dialogTextBlack"), this.allTextsView);
         this.textsView = textBlocksLayout;
-        textBlocksLayout.setPadding(AndroidUtilities.dp(22.0f) - LoadingTextView2.paddingHorizontal, AndroidUtilities.dp(12.0f) - LoadingTextView2.paddingVertical, AndroidUtilities.dp(22.0f) - LoadingTextView2.paddingHorizontal, AndroidUtilities.dp(12.0f) - LoadingTextView2.paddingVertical);
+        int dp = AndroidUtilities.dp(22.0f);
+        int i8 = LoadingTextView2.paddingHorizontal;
+        int dp2 = AndroidUtilities.dp(12.0f);
+        int i9 = LoadingTextView2.paddingVertical;
+        textBlocksLayout.setPadding(dp - i8, dp2 - i9, AndroidUtilities.dp(22.0f) - i8, AndroidUtilities.dp(12.0f) - i9);
         Iterator<CharSequence> it = this.textBlocks.iterator();
         while (it.hasNext()) {
-            CharSequence blockText = it.next();
-            this.textsView.addBlock(blockText);
+            this.textsView.addBlock(it.next());
         }
         FrameLayout frameLayout7 = new FrameLayout(context);
         this.textsContainerView = frameLayout7;
@@ -604,27 +628,27 @@ public class TranslateAlert extends Dialog {
         fetchNext();
         FrameLayout frameLayout9 = new FrameLayout(context);
         this.buttonShadowView = frameLayout9;
-        frameLayout9.setBackgroundColor(Theme.getColor(Theme.key_dialogShadowLine));
+        frameLayout9.setBackgroundColor(Theme.getColor("dialogShadowLine"));
         this.container.addView(this.buttonShadowView, LayoutHelper.createFrame(-1, 1.0f, 87, 0.0f, 0.0f, 0.0f, 80.0f));
-        TextView textView3 = new TextView(context);
-        this.buttonTextView = textView3;
-        textView3.setLines(1);
+        TextView textView4 = new TextView(context);
+        this.buttonTextView = textView4;
+        textView4.setLines(1);
         this.buttonTextView.setSingleLine(true);
         this.buttonTextView.setGravity(1);
         this.buttonTextView.setEllipsize(TextUtils.TruncateAt.END);
         this.buttonTextView.setGravity(17);
-        this.buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+        this.buttonTextView.setTextColor(Theme.getColor("featuredStickers_buttonText"));
         this.buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         this.buttonTextView.setTextSize(1, 14.0f);
         this.buttonTextView.setText(LocaleController.getString("CloseTranslation", R.string.CloseTranslation));
         FrameLayout frameLayout10 = new FrameLayout(context);
         this.buttonView = frameLayout10;
-        frameLayout10.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 4.0f));
+        frameLayout10.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor("featuredStickers_addButton"), 4.0f));
         this.buttonView.addView(this.buttonTextView);
-        this.buttonView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda8
+        this.buttonView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda3
             @Override // android.view.View.OnClickListener
             public final void onClick(View view5) {
-                TranslateAlert.this.m3161lambda$new$3$orgtelegramuiComponentsTranslateAlert(view5);
+                TranslateAlert.this.lambda$new$3(view5);
             }
         });
         this.container.addView(this.buttonView, LayoutHelper.createFrame(-1, 48.0f, 80, 16.0f, 16.0f, 16.0f, 16.0f));
@@ -634,53 +658,49 @@ public class TranslateAlert extends Dialog {
         this.contentView.addView(frameLayout11, LayoutHelper.createFrame(-1, -1.0f, 119, 0.0f, 0.0f, 0.0f, 81.0f));
     }
 
-    /* renamed from: lambda$new$1$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3159lambda$new$1$orgtelegramuiComponentsTranslateAlert() {
-        this.titleView.setPivotX(LocaleController.isRTL ? this.titleView.getWidth() : 0.0f);
+    public /* synthetic */ void lambda$new$1() {
+        TextView textView = this.titleView;
+        textView.setPivotX(LocaleController.isRTL ? textView.getWidth() : 0.0f);
     }
 
-    /* renamed from: lambda$new$2$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3160lambda$new$2$orgtelegramuiComponentsTranslateAlert(View e) {
+    public /* synthetic */ void lambda$new$2(View view) {
         dismiss();
     }
 
-    /* renamed from: lambda$new$3$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3161lambda$new$3$orgtelegramuiComponentsTranslateAlert(View e) {
+    public /* synthetic */ void lambda$new$3(View view) {
         dismiss();
     }
 
-    public void showDim(boolean enable) {
-        this.contentView.setBackground(enable ? this.backDrawable : null);
+    public void showDim(boolean z) {
+        this.contentView.setBackground(z ? this.backDrawable : null);
     }
 
     private boolean scrollAtBottom() {
         NestedScrollView nestedScrollView = this.scrollView;
-        View view = nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1);
-        int bottom = view.getBottom();
-        LoadingTextView2 lastUnloadedBlock = this.textsView.getFirstUnloadedBlock();
-        if (lastUnloadedBlock != null) {
-            bottom = lastUnloadedBlock.getTop();
+        int bottom = nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getBottom();
+        LoadingTextView2 firstUnloadedBlock = this.textsView.getFirstUnloadedBlock();
+        if (firstUnloadedBlock != null) {
+            bottom = firstUnloadedBlock.getTop();
         }
-        int diff = bottom - (this.scrollView.getHeight() + this.scrollView.getScrollY());
-        return diff <= this.textsContainerView.getPaddingBottom();
+        return bottom - (this.scrollView.getHeight() + this.scrollView.getScrollY()) <= this.textsContainerView.getPaddingBottom();
     }
 
-    private void setScrollY(float t) {
-        openAnimation(t);
-        float max = Math.max(Math.min(t + 1.0f, 1.0f), 0.0f);
+    private void setScrollY(float f) {
+        openAnimation(f);
+        float max = Math.max(Math.min(f + 1.0f, 1.0f), 0.0f);
         this.openingT = max;
         this.backDrawable.setAlpha((int) (max * 51.0f));
         this.container.invalidate();
         this.bulletinContainer.setTranslationY((1.0f - this.openingT) * Math.min(minHeight(), AndroidUtilities.displayMetrics.heightPixels * this.heightMaxPercent));
     }
 
-    private void scrollYTo(float t) {
-        scrollYTo(t, null);
+    private void scrollYTo(float f) {
+        scrollYTo(f, null);
     }
 
-    private void scrollYTo(float t, Runnable onAnimationEnd) {
-        openAnimationTo(t, false, onAnimationEnd);
-        openTo(1.0f + t, false);
+    private void scrollYTo(float f, Runnable runnable) {
+        openAnimationTo(f, false, runnable);
+        openTo(f + 1.0f, false);
     }
 
     private float getScrollY() {
@@ -692,19 +712,22 @@ public class TranslateAlert extends Dialog {
     }
 
     @Override // android.app.Dialog, android.view.Window.Callback
-    public boolean dispatchTouchEvent(MotionEvent event) {
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
         float f;
         float f2;
-        ClickableSpan[] linkSpans;
+        ClickableSpan[] clickableSpanArr;
         try {
-            float x = event.getX();
-            float y = event.getY();
+            float x = motionEvent.getX();
+            float y = motionEvent.getY();
             this.container.getGlobalVisibleRect(this.containerRect);
-            if (!this.containerRect.contains((int) x, (int) y)) {
-                if (event.getAction() == 0) {
+            int i = (int) x;
+            int i2 = (int) y;
+            boolean z = false;
+            if (!this.containerRect.contains(i, i2)) {
+                if (motionEvent.getAction() == 0) {
                     this.pressedOutside = true;
                     return true;
-                } else if (event.getAction() == 1 && this.pressedOutside) {
+                } else if (motionEvent.getAction() == 1 && this.pressedOutside) {
                     this.pressedOutside = false;
                     dismiss();
                     return true;
@@ -712,15 +735,15 @@ public class TranslateAlert extends Dialog {
             }
             try {
                 this.allTextsView.getGlobalVisibleRect(this.textRect);
-                if (this.textRect.contains((int) x, (int) y) && !this.maybeScrolling) {
-                    Layout allTextsLayout = this.allTextsView.getLayout();
-                    int tx = (int) ((x - this.allTextsView.getLeft()) - this.container.getLeft());
-                    int ty = (int) ((((y - this.allTextsView.getTop()) - this.container.getTop()) - this.scrollView.getTop()) + this.scrollView.getScrollY());
-                    int line = allTextsLayout.getLineForVertical(ty);
-                    int off = allTextsLayout.getOffsetForHorizontal(line, tx);
-                    float left = allTextsLayout.getLineLeft(line);
-                    if ((this.allTexts instanceof Spannable) && left <= tx && allTextsLayout.getLineWidth(line) + left >= tx && (linkSpans = (ClickableSpan[]) this.allTexts.getSpans(off, off, ClickableSpan.class)) != null && linkSpans.length >= 1) {
-                        if (event.getAction() == 1 && this.pressedLink.getSpan() == linkSpans[0]) {
+                if (this.textRect.contains(i, i2) && !this.maybeScrolling) {
+                    Layout layout = this.allTextsView.getLayout();
+                    int top = (int) ((((y - this.allTextsView.getTop()) - this.container.getTop()) - this.scrollView.getTop()) + this.scrollView.getScrollY());
+                    int lineForVertical = layout.getLineForVertical(top);
+                    float left = (int) ((x - this.allTextsView.getLeft()) - this.container.getLeft());
+                    int offsetForHorizontal = layout.getOffsetForHorizontal(lineForVertical, left);
+                    float lineLeft = layout.getLineLeft(lineForVertical);
+                    if ((this.allTexts instanceof Spannable) && lineLeft <= left && lineLeft + layout.getLineWidth(lineForVertical) >= left && (clickableSpanArr = (ClickableSpan[]) this.allTexts.getSpans(offsetForHorizontal, offsetForHorizontal, ClickableSpan.class)) != null && clickableSpanArr.length >= 1) {
+                        if (motionEvent.getAction() == 1 && this.pressedLink.getSpan() == clickableSpanArr[0]) {
                             ((ClickableSpan) this.pressedLink.getSpan()).onClick(this.allTextsView);
                             LinkSpanDrawable.LinkCollector linkCollector = this.links;
                             if (linkCollector != null) {
@@ -728,18 +751,18 @@ public class TranslateAlert extends Dialog {
                             }
                             this.pressedLink = null;
                             this.allTextsView.setTextIsSelectable(!this.noforwards);
-                        } else if (event.getAction() == 0) {
-                            LinkSpanDrawable linkSpanDrawable = new LinkSpanDrawable(linkSpans[0], this.fragment.getResourceProvider(), tx, ty, false);
+                        } else if (motionEvent.getAction() == 0) {
+                            LinkSpanDrawable linkSpanDrawable = new LinkSpanDrawable(clickableSpanArr[0], this.fragment.getResourceProvider(), left, top, false);
                             this.pressedLink = linkSpanDrawable;
                             LinkSpanDrawable.LinkCollector linkCollector2 = this.links;
                             if (linkCollector2 != null) {
                                 linkCollector2.addLink(linkSpanDrawable);
                             }
-                            LinkPath path = this.pressedLink.obtainNewPath();
-                            int start = this.allTexts.getSpanStart(this.pressedLink.getSpan());
-                            int end = this.allTexts.getSpanEnd(this.pressedLink.getSpan());
-                            path.setCurrentLayout(allTextsLayout, start, 0.0f);
-                            allTextsLayout.getSelectionPath(start, end, path);
+                            LinkPath obtainNewPath = this.pressedLink.obtainNewPath();
+                            int spanStart = this.allTexts.getSpanStart(this.pressedLink.getSpan());
+                            int spanEnd = this.allTexts.getSpanEnd(this.pressedLink.getSpan());
+                            obtainNewPath.setCurrentLayout(layout, spanStart, 0.0f);
+                            layout.getSelectionPath(spanStart, spanEnd, obtainNewPath);
                         }
                         this.allTextsView.invalidate();
                         return true;
@@ -752,65 +775,69 @@ public class TranslateAlert extends Dialog {
                     }
                     this.pressedLink = null;
                 }
-            } catch (Exception e2) {
-                e2.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             this.scrollView.getGlobalVisibleRect(this.scrollRect);
             this.backButton.getGlobalVisibleRect(this.backRect);
             this.buttonView.getGlobalVisibleRect(this.buttonRect);
             if (this.pressedLink == null && !hasSelection()) {
-                if (!this.backRect.contains((int) x, (int) y) && !this.buttonRect.contains((int) x, (int) y) && event.getAction() == 0) {
-                    this.fromScrollRect = this.scrollRect.contains((int) x, (int) y) && (this.containerOpenAnimationT > 0.0f || !canExpand());
+                if (!this.backRect.contains(i, i2) && !this.buttonRect.contains(i, i2) && motionEvent.getAction() == 0) {
+                    this.fromScrollRect = this.scrollRect.contains(i, i2) && (this.containerOpenAnimationT > 0.0f || !canExpand());
                     this.maybeScrolling = true;
-                    this.scrolling = this.scrollRect.contains((int) x, (int) y) && this.textsView.getBlocksCount() > 0 && !this.textsView.getBlockAt(0).loaded;
+                    if (this.scrollRect.contains(i, i2) && this.textsView.getBlocksCount() > 0 && !this.textsView.getBlockAt(0).loaded) {
+                        z = true;
+                    }
+                    this.scrolling = z;
                     this.fromY = y;
                     this.fromScrollY = getScrollY();
                     this.fromScrollViewY = this.scrollView.getScrollY();
-                    super.dispatchTouchEvent(event);
+                    super.dispatchTouchEvent(motionEvent);
                     return true;
-                } else if (this.maybeScrolling && (event.getAction() == 2 || event.getAction() == 1)) {
-                    float dy = this.fromY - y;
+                } else if (this.maybeScrolling && (motionEvent.getAction() == 2 || motionEvent.getAction() == 1)) {
+                    float f3 = this.fromY - y;
                     if (this.fromScrollRect) {
-                        dy = -Math.max(0.0f, (-(this.fromScrollViewY + AndroidUtilities.dp(48.0f))) - dy);
-                        if (dy < 0.0f) {
+                        f3 = -Math.max(0.0f, (-(this.fromScrollViewY + AndroidUtilities.dp(48.0f))) - f3);
+                        if (f3 < 0.0f) {
                             this.scrolling = true;
                             this.allTextsView.setTextIsSelectable(false);
                         }
-                    } else if (Math.abs(dy) > AndroidUtilities.dp(4.0f) && !this.fromScrollRect) {
+                    } else if (Math.abs(f3) > AndroidUtilities.dp(4.0f) && !this.fromScrollRect) {
                         this.scrolling = true;
                         this.allTextsView.setTextIsSelectable(false);
                         this.scrollView.stopNestedScroll();
                         this.allowScroll = false;
                     }
-                    float fullHeight = AndroidUtilities.displayMetrics.heightPixels;
-                    float minHeight = Math.min(minHeight(), this.heightMaxPercent * fullHeight);
-                    float f3 = -1.0f;
-                    float scrollYPx = ((1.0f - (-Math.min(Math.max(this.fromScrollY, -1.0f), 0.0f))) * minHeight) + ((fullHeight - minHeight) * Math.min(1.0f, Math.max(this.fromScrollY, 0.0f))) + dy;
-                    float scrollY = scrollYPx > minHeight ? (scrollYPx - minHeight) / (fullHeight - minHeight) : -(1.0f - (scrollYPx / minHeight));
+                    float f4 = AndroidUtilities.displayMetrics.heightPixels;
+                    float min = Math.min(minHeight(), this.heightMaxPercent * f4);
+                    float f5 = -1.0f;
+                    float f6 = f4 - min;
+                    float min2 = ((1.0f - (-Math.min(Math.max(this.fromScrollY, -1.0f), 0.0f))) * min) + (Math.min(1.0f, Math.max(this.fromScrollY, 0.0f)) * f6) + f3;
+                    float f7 = min2 > min ? (min2 - min) / f6 : -(1.0f - (min2 / min));
                     if (!canExpand()) {
-                        scrollY = Math.min(scrollY, 0.0f);
+                        f7 = Math.min(f7, 0.0f);
                     }
                     updateCanExpand();
                     if (this.scrolling) {
-                        setScrollY(scrollY);
-                        if (event.getAction() == 1) {
+                        setScrollY(f7);
+                        if (motionEvent.getAction() == 1) {
                             this.scrolling = false;
                             this.allTextsView.setTextIsSelectable(!this.noforwards);
                             this.maybeScrolling = false;
                             this.allowScroll = true;
-                            if (Math.abs(dy) > AndroidUtilities.dp(16.0f)) {
+                            if (Math.abs(f3) > AndroidUtilities.dp(16.0f)) {
                                 float round = Math.round(this.fromScrollY);
-                                if (scrollY > this.fromScrollY) {
-                                    f3 = 1.0f;
+                                if (f7 > this.fromScrollY) {
+                                    f5 = 1.0f;
                                 }
-                                f = round + (f3 * ((float) Math.ceil(Math.abs(f2 - scrollY))));
+                                f = round + (f5 * ((float) Math.ceil(Math.abs(f2 - f7))));
                             } else {
                                 f = Math.round(this.fromScrollY);
                             }
-                            scrollYTo(f, new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda12
+                            scrollYTo(f, new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda7
                                 @Override // java.lang.Runnable
                                 public final void run() {
-                                    TranslateAlert.this.m3154x59187c0d();
+                                    TranslateAlert.this.lambda$dispatchTouchEvent$4();
                                 }
                             });
                         }
@@ -825,41 +852,42 @@ public class TranslateAlert extends Dialog {
                 this.allowScroll = true;
                 scrollYTo(Math.round(this.fromScrollY));
             }
-            return super.dispatchTouchEvent(event);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return super.dispatchTouchEvent(event);
+            return super.dispatchTouchEvent(motionEvent);
+        } catch (Exception e2) {
+            e2.printStackTrace();
+            return super.dispatchTouchEvent(motionEvent);
         }
     }
 
-    /* renamed from: lambda$dispatchTouchEvent$4$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3154x59187c0d() {
-        this.contentView.post(new TranslateAlert$$ExternalSyntheticLambda1(this));
+    public /* synthetic */ void lambda$dispatchTouchEvent$4() {
+        this.contentView.post(new TranslateAlert$$ExternalSyntheticLambda10(this));
     }
 
     @Override // android.app.Dialog
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle bundle) {
+        int color;
+        super.onCreate(bundle);
         boolean z = false;
         this.contentView.setPadding(0, 0, 0, 0);
         setContentView(this.contentView, new ViewGroup.LayoutParams(-1, -1));
         Window window = getWindow();
         window.setWindowAnimations(R.style.DialogNoAnimation);
-        WindowManager.LayoutParams params = window.getAttributes();
-        params.width = -1;
-        params.gravity = 51;
-        params.dimAmount = 0.0f;
-        params.flags &= -3;
-        params.flags |= 131072;
+        WindowManager.LayoutParams attributes = window.getAttributes();
+        attributes.width = -1;
+        attributes.gravity = 51;
+        attributes.dimAmount = 0.0f;
+        int i = attributes.flags & (-3);
+        attributes.flags = i;
+        int i2 = i | 131072;
+        attributes.flags = i2;
         if (Build.VERSION.SDK_INT >= 21) {
-            params.flags |= -2147417856;
+            attributes.flags = i2 | (-2147417856);
         }
-        params.flags |= 256;
-        params.height = -1;
-        window.setAttributes(params);
-        int navigationbarColor = Theme.getColor(Theme.key_windowBackgroundWhite);
-        AndroidUtilities.setNavigationBarColor(window, navigationbarColor);
-        if (AndroidUtilities.computePerceivedBrightness(navigationbarColor) > 0.721d) {
+        attributes.flags |= 256;
+        attributes.height = -1;
+        window.setAttributes(attributes);
+        AndroidUtilities.setNavigationBarColor(window, Theme.getColor("windowBackgroundWhite"));
+        if (AndroidUtilities.computePerceivedBrightness(color) > 0.721d) {
             z = true;
         }
         AndroidUtilities.setLightNavigationBar(window, z);
@@ -882,63 +910,57 @@ public class TranslateAlert extends Dialog {
         openTo(0.0f, true);
     }
 
-    private void openTo(float t, boolean priority) {
-        openTo(t, priority, false);
+    private void openTo(float f, boolean z) {
+        openTo(f, z, false);
     }
 
-    private void openTo(float t) {
-        openTo(t, false);
-    }
-
-    private void openTo(float t, boolean priority, final boolean setAfter) {
+    private void openTo(float f, boolean z, final boolean z2) {
         Runnable runnable;
-        final float T = Math.min(Math.max(t, 0.0f), 1.0f);
-        if (this.openingAnimatorPriority && !priority) {
-            return;
-        }
-        this.openingAnimatorPriority = priority;
-        ValueAnimator valueAnimator = this.openingAnimator;
-        if (valueAnimator != null) {
-            valueAnimator.cancel();
-        }
-        this.openingAnimator = ValueAnimator.ofFloat(this.openingT, T);
-        this.backDrawable.setAlpha((int) (this.openingT * 51.0f));
-        this.openingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda6
-            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-            public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                TranslateAlert.this.m3163lambda$openTo$5$orgtelegramuiComponentsTranslateAlert(valueAnimator2);
+        final float min = Math.min(Math.max(f, 0.0f), 1.0f);
+        if (!this.openingAnimatorPriority || z) {
+            this.openingAnimatorPriority = z;
+            ValueAnimator valueAnimator = this.openingAnimator;
+            if (valueAnimator != null) {
+                valueAnimator.cancel();
             }
-        });
-        if (T <= 0.0f && (runnable = this.onDismiss) != null) {
-            runnable.run();
-        }
-        this.openingAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.TranslateAlert.7
-            {
-                TranslateAlert.this = this;
-            }
-
-            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                if (T <= 0.0f) {
-                    TranslateAlert.this.dismissInternal();
-                } else if (setAfter) {
-                    TranslateAlert.this.allTextsView.setTextIsSelectable(!TranslateAlert.this.noforwards);
-                    TranslateAlert.this.allTextsView.invalidate();
-                    TranslateAlert.this.scrollView.stopNestedScroll();
-                    TranslateAlert.this.openAnimation(T - 1.0f);
+            this.openingAnimator = ValueAnimator.ofFloat(this.openingT, min);
+            this.backDrawable.setAlpha((int) (this.openingT * 51.0f));
+            this.openingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda1
+                @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
+                    TranslateAlert.this.lambda$openTo$5(valueAnimator2);
                 }
-                TranslateAlert.this.openingAnimatorPriority = false;
+            });
+            if (min <= 0.0f && (runnable = this.onDismiss) != null) {
+                runnable.run();
             }
-        });
-        this.openingAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-        this.openingAnimator.setDuration(Math.abs(this.openingT - T) * (this.fastHide ? 200 : 380));
-        this.openingAnimator.setStartDelay(setAfter ? 60L : 0L);
-        this.openingAnimator.start();
+            this.openingAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.TranslateAlert.7
+                {
+                    TranslateAlert.this = this;
+                }
+
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationEnd(Animator animator) {
+                    if (min <= 0.0f) {
+                        TranslateAlert.this.dismissInternal();
+                    } else if (z2) {
+                        TranslateAlert.this.allTextsView.setTextIsSelectable(!TranslateAlert.this.noforwards);
+                        TranslateAlert.this.allTextsView.invalidate();
+                        TranslateAlert.this.scrollView.stopNestedScroll();
+                        TranslateAlert.this.openAnimation(min - 1.0f);
+                    }
+                    TranslateAlert.this.openingAnimatorPriority = false;
+                }
+            });
+            this.openingAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+            this.openingAnimator.setDuration(Math.abs(this.openingT - min) * (this.fastHide ? 200 : 380));
+            this.openingAnimator.setStartDelay(z2 ? 60L : 0L);
+            this.openingAnimator.start();
+        }
     }
 
-    /* renamed from: lambda$openTo$5$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3163lambda$openTo$5$orgtelegramuiComponentsTranslateAlert(ValueAnimator a) {
-        this.openingT = ((Float) a.getAnimatedValue()).floatValue();
+    public /* synthetic */ void lambda$openTo$5(ValueAnimator valueAnimator) {
+        this.openingT = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         this.container.invalidate();
         this.backDrawable.setAlpha((int) (this.openingT * 51.0f));
         this.bulletinContainer.setTranslationY((1.0f - this.openingT) * Math.min(minHeight(), AndroidUtilities.displayMetrics.heightPixels * this.heightMaxPercent));
@@ -952,60 +974,60 @@ public class TranslateAlert extends Dialog {
         }
     }
 
-    public String languageName(String locale) {
-        if (locale == null || locale.equals("und") || locale.equals("auto")) {
+    public String languageName(String str) {
+        if (str == null || str.equals("und") || str.equals("auto")) {
             return null;
         }
-        LocaleController.LocaleInfo thisLanguageInfo = LocaleController.getInstance().getBuiltinLanguageByPlural(locale);
-        LocaleController.LocaleInfo currentLanguageInfo = LocaleController.getInstance().getCurrentLocaleInfo();
-        if (thisLanguageInfo == null) {
+        LocaleController.LocaleInfo builtinLanguageByPlural = LocaleController.getInstance().getBuiltinLanguageByPlural(str);
+        LocaleController.LocaleInfo currentLocaleInfo = LocaleController.getInstance().getCurrentLocaleInfo();
+        if (builtinLanguageByPlural == null) {
             return null;
         }
-        boolean isCurrentLanguageEnglish = currentLanguageInfo != null && "en".equals(currentLanguageInfo.pluralLangCode);
-        if (isCurrentLanguageEnglish) {
-            return thisLanguageInfo.nameEnglish;
+        if (currentLocaleInfo != null && "en".equals(currentLocaleInfo.pluralLangCode)) {
+            return builtinLanguageByPlural.nameEnglish;
         }
-        return thisLanguageInfo.name;
+        return builtinLanguageByPlural.name;
     }
 
     public void updateSourceLanguage() {
         if (languageName(this.fromLanguage) != null) {
             this.subtitleView.setAlpha(1.0f);
-            if (!this.subtitleFromView.loaded) {
-                this.subtitleFromView.loaded(languageName(this.fromLanguage));
+            InlineLoadingTextView inlineLoadingTextView = this.subtitleFromView;
+            if (inlineLoadingTextView.loaded) {
+                return;
             }
-        } else if (this.loaded) {
+            inlineLoadingTextView.loaded(languageName(this.fromLanguage));
+        } else if (!this.loaded) {
+        } else {
             this.subtitleView.animate().alpha(0.0f).setDuration(150L).start();
         }
     }
 
-    private ArrayList<CharSequence> cutInBlocks(CharSequence full, int maxBlockSize) {
-        ArrayList<CharSequence> blocks = new ArrayList<>();
-        if (full == null) {
-            return blocks;
+    private ArrayList<CharSequence> cutInBlocks(CharSequence charSequence, int i) {
+        ArrayList<CharSequence> arrayList = new ArrayList<>();
+        if (charSequence == null) {
+            return arrayList;
         }
-        while (full.length() > maxBlockSize) {
-            String maxBlockStr = full.subSequence(0, maxBlockSize).toString();
-            int n = -1;
-            if (-1 == -1) {
-                n = maxBlockStr.lastIndexOf("\n\n");
+        while (charSequence.length() > i) {
+            String charSequence2 = charSequence.subSequence(0, i).toString();
+            int lastIndexOf = charSequence2.lastIndexOf("\n\n");
+            if (lastIndexOf == -1) {
+                lastIndexOf = charSequence2.lastIndexOf("\n");
             }
-            if (n == -1) {
-                n = maxBlockStr.lastIndexOf("\n");
+            if (lastIndexOf == -1) {
+                lastIndexOf = charSequence2.lastIndexOf(". ");
             }
-            if (n == -1) {
-                n = maxBlockStr.lastIndexOf(". ");
+            if (lastIndexOf == -1) {
+                lastIndexOf = Math.min(charSequence2.length(), i);
             }
-            if (n == -1) {
-                n = Math.min(maxBlockStr.length(), maxBlockSize);
-            }
-            blocks.add(full.subSequence(0, n + 1));
-            full = full.subSequence(n + 1, full.length());
+            int i2 = lastIndexOf + 1;
+            arrayList.add(charSequence.subSequence(0, i2));
+            charSequence = charSequence.subSequence(i2, charSequence.length());
         }
-        if (full.length() > 0) {
-            blocks.add(full);
+        if (charSequence.length() > 0) {
+            arrayList.add(charSequence);
         }
-        return blocks;
+        return arrayList;
     }
 
     private boolean fetchNext() {
@@ -1016,34 +1038,34 @@ public class TranslateAlert extends Dialog {
         if (this.blockIndex >= this.textBlocks.size()) {
             return false;
         }
-        fetchTranslation(this.textBlocks.get(this.blockIndex), Math.min((this.blockIndex + 1) * 1000, 3500), new OnTranslationSuccess() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda5
+        fetchTranslation(this.textBlocks.get(this.blockIndex), Math.min((this.blockIndex + 1) * 1000, 3500), new OnTranslationSuccess() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda14
             @Override // org.telegram.ui.Components.TranslateAlert.OnTranslationSuccess
             public final void run(String str, String str2) {
-                TranslateAlert.this.m3156lambda$fetchNext$7$orgtelegramuiComponentsTranslateAlert(str, str2);
+                TranslateAlert.this.lambda$fetchNext$7(str, str2);
             }
-        }, new OnTranslationFail() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda4
+        }, new OnTranslationFail() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda13
             @Override // org.telegram.ui.Components.TranslateAlert.OnTranslationFail
             public final void run(boolean z) {
-                TranslateAlert.this.m3157lambda$fetchNext$8$orgtelegramuiComponentsTranslateAlert(z);
+                TranslateAlert.this.lambda$fetchNext$8(z);
             }
         });
         return true;
     }
 
-    /* renamed from: lambda$fetchNext$7$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3156lambda$fetchNext$7$orgtelegramuiComponentsTranslateAlert(String translatedText, String sourceLanguage) {
+    public /* synthetic */ void lambda$fetchNext$7(String str, String str2) {
         TextView textView;
+        URLSpan[] uRLSpanArr;
+        URLSpan[] uRLSpanArr2;
         this.loaded = true;
-        Spannable spannable = new SpannableStringBuilder(translatedText);
+        Spannable spannableStringBuilder = new SpannableStringBuilder(str);
         try {
-            MessageObject.addUrlsByPattern(false, spannable, false, 0, 0, true);
-            URLSpan[] urlSpans = (URLSpan[]) spannable.getSpans(0, spannable.length(), URLSpan.class);
-            for (final URLSpan urlSpan : urlSpans) {
-                int start = spannable.getSpanStart(urlSpan);
-                int end = spannable.getSpanEnd(urlSpan);
-                if (start != -1 && end != -1) {
-                    spannable.removeSpan(urlSpan);
-                    spannable.setSpan(new ClickableSpan() { // from class: org.telegram.ui.Components.TranslateAlert.8
+            MessageObject.addUrlsByPattern(false, spannableStringBuilder, false, 0, 0, true);
+            for (final URLSpan uRLSpan : (URLSpan[]) spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), URLSpan.class)) {
+                int spanStart = spannableStringBuilder.getSpanStart(uRLSpan);
+                int spanEnd = spannableStringBuilder.getSpanEnd(uRLSpan);
+                if (spanStart != -1 && spanEnd != -1) {
+                    spannableStringBuilder.removeSpan(uRLSpan);
+                    spannableStringBuilder.setSpan(new ClickableSpan() { // from class: org.telegram.ui.Components.TranslateAlert.8
                         {
                             TranslateAlert.this = this;
                         }
@@ -1051,58 +1073,57 @@ public class TranslateAlert extends Dialog {
                         @Override // android.text.style.ClickableSpan
                         public void onClick(View view) {
                             if (TranslateAlert.this.onLinkPress != null) {
-                                if (TranslateAlert.this.onLinkPress.run(urlSpan)) {
-                                    TranslateAlert.this.fastHide = true;
-                                    TranslateAlert.this.dismiss();
+                                if (!TranslateAlert.this.onLinkPress.run(uRLSpan)) {
                                     return;
                                 }
+                                TranslateAlert.this.fastHide = true;
+                                TranslateAlert.this.dismiss();
                                 return;
                             }
-                            AlertsCreator.showOpenUrlAlert(TranslateAlert.this.fragment, urlSpan.getURL(), false, false);
+                            AlertsCreator.showOpenUrlAlert(TranslateAlert.this.fragment, uRLSpan.getURL(), false, false);
                         }
 
                         @Override // android.text.style.ClickableSpan, android.text.style.CharacterStyle
-                        public void updateDrawState(TextPaint ds) {
-                            int alpha = Math.min(ds.getAlpha(), (ds.getColor() >> 24) & 255);
-                            if (!(urlSpan instanceof URLSpanNoUnderline)) {
-                                ds.setUnderlineText(true);
+                        public void updateDrawState(TextPaint textPaint) {
+                            int min = Math.min(textPaint.getAlpha(), (textPaint.getColor() >> 24) & 255);
+                            if (!(uRLSpan instanceof URLSpanNoUnderline)) {
+                                textPaint.setUnderlineText(true);
                             }
-                            ds.setColor(Theme.getColor(Theme.key_dialogTextLink));
-                            ds.setAlpha(alpha);
+                            textPaint.setColor(Theme.getColor("dialogTextLink"));
+                            textPaint.setAlpha(min);
                         }
-                    }, start, end, 33);
+                    }, spanStart, spanEnd, 33);
                 }
             }
-            AndroidUtilities.addLinks(spannable, 1);
-            URLSpan[] urlSpans2 = (URLSpan[]) spannable.getSpans(0, spannable.length(), URLSpan.class);
-            for (final URLSpan urlSpan2 : urlSpans2) {
-                int start2 = spannable.getSpanStart(urlSpan2);
-                int end2 = spannable.getSpanEnd(urlSpan2);
-                if (start2 != -1 && end2 != -1) {
-                    spannable.removeSpan(urlSpan2);
-                    spannable.setSpan(new ClickableSpan() { // from class: org.telegram.ui.Components.TranslateAlert.9
+            AndroidUtilities.addLinks(spannableStringBuilder, 1);
+            for (final URLSpan uRLSpan2 : (URLSpan[]) spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), URLSpan.class)) {
+                int spanStart2 = spannableStringBuilder.getSpanStart(uRLSpan2);
+                int spanEnd2 = spannableStringBuilder.getSpanEnd(uRLSpan2);
+                if (spanStart2 != -1 && spanEnd2 != -1) {
+                    spannableStringBuilder.removeSpan(uRLSpan2);
+                    spannableStringBuilder.setSpan(new ClickableSpan() { // from class: org.telegram.ui.Components.TranslateAlert.9
                         {
                             TranslateAlert.this = this;
                         }
 
                         @Override // android.text.style.ClickableSpan
                         public void onClick(View view) {
-                            AlertsCreator.showOpenUrlAlert(TranslateAlert.this.fragment, urlSpan2.getURL(), false, false);
+                            AlertsCreator.showOpenUrlAlert(TranslateAlert.this.fragment, uRLSpan2.getURL(), false, false);
                         }
 
                         @Override // android.text.style.ClickableSpan, android.text.style.CharacterStyle
-                        public void updateDrawState(TextPaint ds) {
-                            int alpha = Math.min(ds.getAlpha(), (ds.getColor() >> 24) & 255);
-                            if (!(urlSpan2 instanceof URLSpanNoUnderline)) {
-                                ds.setUnderlineText(true);
+                        public void updateDrawState(TextPaint textPaint) {
+                            int min = Math.min(textPaint.getAlpha(), (textPaint.getColor() >> 24) & 255);
+                            if (!(uRLSpan2 instanceof URLSpanNoUnderline)) {
+                                textPaint.setUnderlineText(true);
                             }
-                            ds.setColor(Theme.getColor(Theme.key_dialogTextLink));
-                            ds.setAlpha(alpha);
+                            textPaint.setColor(Theme.getColor("dialogTextLink"));
+                            textPaint.setAlpha(min);
                         }
-                    }, start2, end2, 33);
+                    }, spanStart2, spanEnd2, 33);
                 }
             }
-            spannable = (Spannable) Emoji.replaceEmoji(spannable, this.allTextsView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14.0f), false);
+            spannableStringBuilder = (Spannable) Emoji.replaceEmoji(spannableStringBuilder, this.allTextsView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14.0f), false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1110,24 +1131,24 @@ public class TranslateAlert extends Dialog {
         if (charSequence == null) {
             charSequence = "";
         }
-        SpannableStringBuilder allTextsBuilder = new SpannableStringBuilder(charSequence);
+        SpannableStringBuilder spannableStringBuilder2 = new SpannableStringBuilder(charSequence);
         if (this.blockIndex != 0) {
-            allTextsBuilder.append((CharSequence) "\n");
+            spannableStringBuilder2.append((CharSequence) "\n");
         }
-        allTextsBuilder.append((CharSequence) spannable);
-        this.allTexts = allTextsBuilder;
-        this.textsView.setWholeText(allTextsBuilder);
-        LoadingTextView2 block = this.textsView.getBlockAt(this.blockIndex);
-        if (block != null) {
-            block.loaded(spannable, new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda13
+        spannableStringBuilder2.append((CharSequence) spannableStringBuilder);
+        this.allTexts = spannableStringBuilder2;
+        this.textsView.setWholeText(spannableStringBuilder2);
+        LoadingTextView2 blockAt = this.textsView.getBlockAt(this.blockIndex);
+        if (blockAt != null) {
+            blockAt.loaded(spannableStringBuilder, new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda9
                 @Override // java.lang.Runnable
                 public final void run() {
-                    TranslateAlert.this.m3155lambda$fetchNext$6$orgtelegramuiComponentsTranslateAlert();
+                    TranslateAlert.this.lambda$fetchNext$6();
                 }
             });
         }
-        if (sourceLanguage != null) {
-            this.fromLanguage = sourceLanguage;
+        if (str2 != null) {
+            this.fromLanguage = str2;
             updateSourceLanguage();
         }
         if (this.blockIndex == 0 && AndroidUtilities.isAccessibilityScreenReaderEnabled() && (textView = this.allTextsView) != null) {
@@ -1137,14 +1158,12 @@ public class TranslateAlert extends Dialog {
         this.loading = false;
     }
 
-    /* renamed from: lambda$fetchNext$6$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3155lambda$fetchNext$6$orgtelegramuiComponentsTranslateAlert() {
-        this.contentView.post(new TranslateAlert$$ExternalSyntheticLambda1(this));
+    public /* synthetic */ void lambda$fetchNext$6() {
+        this.contentView.post(new TranslateAlert$$ExternalSyntheticLambda10(this));
     }
 
-    /* renamed from: lambda$fetchNext$8$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3157lambda$fetchNext$8$orgtelegramuiComponentsTranslateAlert(boolean rateLimit) {
-        if (rateLimit) {
+    public /* synthetic */ void lambda$fetchNext$8(boolean z) {
+        if (z) {
             Toast.makeText(getContext(), LocaleController.getString("TranslationFailedAlert1", R.string.TranslationFailedAlert1), 0).show();
         } else {
             Toast.makeText(getContext(), LocaleController.getString("TranslationFailedAlert2", R.string.TranslationFailedAlert2), 0).show();
@@ -1162,259 +1181,200 @@ public class TranslateAlert extends Dialog {
         return false;
     }
 
-    private void fetchTranslation(final CharSequence text, final long minDuration, final OnTranslationSuccess onSuccess, final OnTranslationFail onFail) {
+    private void fetchTranslation(final CharSequence charSequence, final long j, final OnTranslationSuccess onTranslationSuccess, final OnTranslationFail onTranslationFail) {
         if (!translateQueue.isAlive()) {
             translateQueue.start();
         }
-        translateQueue.postRunnable(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda2
+        translateQueue.postRunnable(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda11
             @Override // java.lang.Runnable
             public final void run() {
-                TranslateAlert.this.m3158x8a9f447c(text, onSuccess, minDuration, onFail);
+                TranslateAlert.this.lambda$fetchTranslation$12(charSequence, onTranslationSuccess, j, onTranslationFail);
             }
         });
     }
 
-    /* JADX WARN: Not initialized variable reg: 19, insn: 0x0185: MOVE  (r4 I:??[OBJECT, ARRAY]) = (r19 I:??[OBJECT, ARRAY] A[D('uri' java.lang.String)]), block:B:55:0x0184 */
-    /* JADX WARN: Not initialized variable reg: 7, insn: 0x0184: MOVE  (r5 I:??[OBJECT, ARRAY]) = (r7 I:??[OBJECT, ARRAY] A[D('connection' java.net.HttpURLConnection)]), block:B:55:0x0184 */
-    /* renamed from: lambda$fetchTranslation$12$org-telegram-ui-Components-TranslateAlert */
-    public /* synthetic */ void m3158x8a9f447c(CharSequence text, final OnTranslationSuccess onSuccess, long minDuration, final OnTranslationFail onFail) {
-        Exception e;
-        boolean z;
-        Throwable th;
-        HttpURLConnection connection;
-        HttpURLConnection connection2 = null;
-        long start = SystemClock.elapsedRealtime();
-        int i = 0;
+    public /* synthetic */ void lambda$fetchTranslation$12(CharSequence charSequence, final OnTranslationSuccess onTranslationSuccess, long j, final OnTranslationFail onTranslationFail) {
+        HttpURLConnection httpURLConnection;
+        Exception exc;
+        final String str;
+        long elapsedRealtime = SystemClock.elapsedRealtime();
+        String str2 = null;
+        final boolean z = false;
         try {
-            String uri = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + Uri.encode(this.fromLanguage);
+            httpURLConnection = (HttpURLConnection) new URI((((("https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + Uri.encode(this.fromLanguage)) + "&tl=") + Uri.encode(this.toLanguage)) + "&dt=t&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&kc=7&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&q=") + Uri.encode(charSequence.toString())).toURL().openConnection();
             try {
-                connection2 = (HttpURLConnection) new URI((((uri + "&tl=") + Uri.encode(this.toLanguage)) + "&dt=t&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&kc=7&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&q=") + Uri.encode(text.toString())).toURL().openConnection();
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
+                httpURLConnection.setRequestProperty("Content-Type", "application/json");
+                StringBuilder sb = new StringBuilder();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), Charset.forName("UTF-8")));
+                while (true) {
+                    int read = bufferedReader.read();
+                    if (read == -1) {
+                        break;
+                    }
+                    sb.append((char) read);
+                }
+                bufferedReader.close();
+                JSONArray jSONArray = new JSONArray(new JSONTokener(sb.toString()));
+                JSONArray jSONArray2 = jSONArray.getJSONArray(0);
                 try {
-                    connection2.setRequestMethod(DefaultHttpClient.METHOD_GET);
-                    connection2.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
-                    connection2.setRequestProperty(DefaultHttpClient.CONTENT_TYPE_KEY, "application/json");
-                    StringBuilder textBuilder = new StringBuilder();
-                    Reader reader = new BufferedReader(new InputStreamReader(connection2.getInputStream(), Charset.forName("UTF-8")));
-                    while (true) {
-                        try {
-                            try {
-                                int c = reader.read();
-                                if (c == -1) {
-                                    break;
-                                }
-                                try {
-                                    textBuilder.append((char) c);
-                                } catch (Throwable th2) {
-                                    th = th2;
-                                    try {
-                                        reader.close();
-                                    } catch (Throwable th3) {
-                                    }
-                                    throw th;
-                                }
-                            } catch (Throwable th4) {
-                                th = th4;
-                            }
-                        } catch (Exception e2) {
-                            e = e2;
-                            connection2 = connection;
-                        }
+                    str = jSONArray.getString(2);
+                } catch (Exception unused) {
+                    str = null;
+                }
+                if (str != null && str.contains("-")) {
+                    str = str.substring(0, str.indexOf("-"));
+                }
+                StringBuilder sb2 = new StringBuilder();
+                for (int i = 0; i < jSONArray2.length(); i++) {
+                    String string = jSONArray2.getJSONArray(i).getString(0);
+                    if (string != null && !string.equals("null")) {
+                        sb2.append(string);
                     }
-                    reader.close();
-                    String jsonString = textBuilder.toString();
-                    JSONTokener tokener = new JSONTokener(jsonString);
-                    JSONArray array = new JSONArray(tokener);
-                    JSONArray array1 = array.getJSONArray(0);
-                    String sourceLanguage = null;
+                }
+                if (charSequence.length() > 0 && charSequence.charAt(0) == '\n') {
+                    sb2.insert(0, "\n");
+                }
+                final String sb3 = sb2.toString();
+                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda6
+                    @Override // java.lang.Runnable
+                    public final void run() {
+                        TranslateAlert.lambda$fetchTranslation$9(TranslateAlert.OnTranslationSuccess.this, sb3, str);
+                    }
+                }, Math.max(0L, j - (SystemClock.elapsedRealtime() - elapsedRealtime)));
+            } catch (Exception e) {
+                exc = e;
+                try {
+                    StringBuilder sb4 = new StringBuilder();
+                    sb4.append("failed to translate a text ");
+                    sb4.append(httpURLConnection != null ? Integer.valueOf(httpURLConnection.getResponseCode()) : null);
+                    sb4.append(" ");
+                    if (httpURLConnection != null) {
+                        str2 = httpURLConnection.getResponseMessage();
+                    }
+                    sb4.append(str2);
+                    Log.e("translate", sb4.toString());
+                } catch (IOException e2) {
+                    e2.printStackTrace();
+                }
+                exc.printStackTrace();
+                if (onTranslationFail == null || this.dismissed) {
+                    return;
+                }
+                if (httpURLConnection != null) {
                     try {
-                        sourceLanguage = array.getString(2);
-                    } catch (Exception e3) {
-                    }
-                    if (sourceLanguage != null) {
-                        try {
-                            if (sourceLanguage.contains("-")) {
-                                sourceLanguage = sourceLanguage.substring(0, sourceLanguage.indexOf("-"));
-                            }
-                        } catch (Exception e4) {
-                            e = e4;
-                            Exception e5 = e;
-                            try {
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("failed to translate a text ");
-                                String str = null;
-                                sb.append(connection2 != null ? Integer.valueOf(connection2.getResponseCode()) : null);
-                                sb.append(" ");
-                                if (connection2 != null) {
-                                    str = connection2.getResponseMessage();
-                                }
-                                sb.append(str);
-                                Log.e("translate", sb.toString());
-                            } catch (IOException ioException) {
-                                ioException.printStackTrace();
-                            }
-                            e5.printStackTrace();
-                            if (onFail != null && !this.dismissed) {
-                                if (connection2 != null) {
-                                    try {
-                                        if (connection2.getResponseCode() == 429) {
-                                            z = true;
-                                            final boolean rateLimit = z;
-                                            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda10
-                                                @Override // java.lang.Runnable
-                                                public final void run() {
-                                                    TranslateAlert.OnTranslationFail.this.run(rateLimit);
-                                                }
-                                            });
-                                            return;
-                                        }
-                                    } catch (Exception e6) {
-                                        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda9
-                                            @Override // java.lang.Runnable
-                                            public final void run() {
-                                                TranslateAlert.OnTranslationFail.this.run(false);
-                                            }
-                                        });
-                                        return;
-                                    }
-                                }
-                                z = false;
-                                final boolean rateLimit2 = z;
-                                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda10
-                                    @Override // java.lang.Runnable
-                                    public final void run() {
-                                        TranslateAlert.OnTranslationFail.this.run(rateLimit2);
-                                    }
-                                });
-                                return;
-                            }
-                            return;
+                        if (httpURLConnection.getResponseCode() == 429) {
+                            z = true;
                         }
-                    }
-                    StringBuilder result = new StringBuilder();
-                    int i2 = 0;
-                    while (i2 < array1.length()) {
-                        String blockText = array1.getJSONArray(i2).getString(i);
-                        if (blockText != null && !blockText.equals("null")) {
-                            result.append(blockText);
-                        }
-                        i2++;
-                        i = 0;
-                    }
-                    int i3 = text.length();
-                    if (i3 > 0 && text.charAt(0) == '\n') {
-                        result.insert(0, "\n");
-                        final String finalResult = result.toString();
-                        final String finalSourceLanguage = sourceLanguage;
-                        long elapsed = SystemClock.elapsedRealtime() - start;
-                        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda11
+                    } catch (Exception unused2) {
+                        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda4
                             @Override // java.lang.Runnable
                             public final void run() {
-                                TranslateAlert.lambda$fetchTranslation$9(TranslateAlert.OnTranslationSuccess.this, finalResult, finalSourceLanguage);
+                                TranslateAlert.OnTranslationFail.this.run(false);
                             }
-                        }, Math.max(0L, minDuration - elapsed));
+                        });
+                        return;
                     }
-                    final String finalResult2 = result.toString();
-                    final String finalSourceLanguage2 = sourceLanguage;
-                    long elapsed2 = SystemClock.elapsedRealtime() - start;
-                    AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda11
-                        @Override // java.lang.Runnable
-                        public final void run() {
-                            TranslateAlert.lambda$fetchTranslation$9(TranslateAlert.OnTranslationSuccess.this, finalResult2, finalSourceLanguage2);
-                        }
-                    }, Math.max(0L, minDuration - elapsed2));
-                } catch (Exception e7) {
-                    e = e7;
                 }
-            } catch (Exception e8) {
-                e = e8;
+                AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.TranslateAlert$$ExternalSyntheticLambda5
+                    @Override // java.lang.Runnable
+                    public final void run() {
+                        TranslateAlert.OnTranslationFail.this.run(z);
+                    }
+                });
             }
-        } catch (Exception e9) {
-            e = e9;
+        } catch (Exception e3) {
+            exc = e3;
+            httpURLConnection = null;
         }
     }
 
-    public static /* synthetic */ void lambda$fetchTranslation$9(OnTranslationSuccess onSuccess, String finalResult, String finalSourceLanguage) {
-        if (onSuccess != null) {
-            onSuccess.run(finalResult, finalSourceLanguage);
+    public static /* synthetic */ void lambda$fetchTranslation$9(OnTranslationSuccess onTranslationSuccess, String str, String str2) {
+        if (onTranslationSuccess != null) {
+            onTranslationSuccess.run(str, str2);
         }
     }
 
-    private static void translateText(int currentAccount, TLRPC.InputPeer peer, int msg_id, String from_lang, String to_lang) {
-        TLRPC.TL_messages_translateText req = new TLRPC.TL_messages_translateText();
-        req.peer = peer;
-        req.msg_id = msg_id;
-        req.flags |= 1;
-        if (from_lang != null) {
-            req.from_lang = from_lang;
-            req.flags |= 4;
+    private static void translateText(int i, TLRPC$InputPeer tLRPC$InputPeer, int i2, String str, String str2) {
+        TLRPC$TL_messages_translateText tLRPC$TL_messages_translateText = new TLRPC$TL_messages_translateText();
+        tLRPC$TL_messages_translateText.peer = tLRPC$InputPeer;
+        tLRPC$TL_messages_translateText.msg_id = i2;
+        int i3 = tLRPC$TL_messages_translateText.flags | 1;
+        tLRPC$TL_messages_translateText.flags = i3;
+        if (str != null) {
+            tLRPC$TL_messages_translateText.from_lang = str;
+            tLRPC$TL_messages_translateText.flags = i3 | 4;
         }
-        req.to_lang = to_lang;
+        tLRPC$TL_messages_translateText.to_lang = str2;
         try {
-            ConnectionsManager.getInstance(currentAccount).sendRequest(req, TranslateAlert$$ExternalSyntheticLambda3.INSTANCE);
+            ConnectionsManager.getInstance(i).sendRequest(tLRPC$TL_messages_translateText, TranslateAlert$$ExternalSyntheticLambda12.INSTANCE);
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
-    public static /* synthetic */ void lambda$translateText$13(TLObject error, TLRPC.TL_error res) {
-    }
-
-    public static TranslateAlert showAlert(Context context, BaseFragment fragment, int currentAccount, TLRPC.InputPeer peer, int msgId, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
-        TranslateAlert alert = new TranslateAlert(fragment, context, currentAccount, peer, msgId, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
-        if (fragment != null) {
-            if (fragment.getParentActivity() != null) {
-                fragment.showDialog(alert);
+    public static TranslateAlert showAlert(Context context, BaseFragment baseFragment, int i, TLRPC$InputPeer tLRPC$InputPeer, int i2, String str, String str2, CharSequence charSequence, boolean z, OnLinkPress onLinkPress, Runnable runnable) {
+        TranslateAlert translateAlert = new TranslateAlert(baseFragment, context, i, tLRPC$InputPeer, i2, str, str2, charSequence, z, onLinkPress, runnable);
+        if (baseFragment != null) {
+            if (baseFragment.getParentActivity() != null) {
+                baseFragment.showDialog(translateAlert);
             }
         } else {
-            alert.show();
+            translateAlert.show();
         }
-        return alert;
+        return translateAlert;
     }
 
-    public static TranslateAlert showAlert(Context context, BaseFragment fragment, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
-        TranslateAlert alert = new TranslateAlert(fragment, context, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
-        if (fragment != null) {
-            if (fragment.getParentActivity() != null) {
-                fragment.showDialog(alert);
+    public static TranslateAlert showAlert(Context context, BaseFragment baseFragment, String str, String str2, CharSequence charSequence, boolean z, OnLinkPress onLinkPress, Runnable runnable) {
+        TranslateAlert translateAlert = new TranslateAlert(baseFragment, context, str, str2, charSequence, z, onLinkPress, runnable);
+        if (baseFragment != null) {
+            if (baseFragment.getParentActivity() != null) {
+                baseFragment.showDialog(translateAlert);
             }
         } else {
-            alert.show();
+            translateAlert.show();
         }
-        return alert;
+        return translateAlert;
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class TextBlocksLayout extends ViewGroup {
         private static final int gap = ((-LoadingTextView2.paddingVertical) * 4) + AndroidUtilities.dp(0.48f);
         private final int fontSize;
         private final int textColor;
         private TextView wholeTextView;
 
-        public TextBlocksLayout(Context context, int fontSize, int textColor, TextView wholeTextView) {
+        protected void onHeightUpdated(int i) {
+        }
+
+        public TextBlocksLayout(Context context, int i, int i2, TextView textView) {
             super(context);
-            this.fontSize = fontSize;
-            this.textColor = textColor;
-            if (wholeTextView != null) {
-                wholeTextView.setPadding(LoadingTextView2.paddingHorizontal, LoadingTextView2.paddingVertical, LoadingTextView2.paddingHorizontal, LoadingTextView2.paddingVertical);
-                this.wholeTextView = wholeTextView;
-                addView(wholeTextView);
+            this.fontSize = i;
+            this.textColor = i2;
+            if (textView != null) {
+                int i3 = LoadingTextView2.paddingHorizontal;
+                int i4 = LoadingTextView2.paddingVertical;
+                textView.setPadding(i3, i4, i3, i4);
+                this.wholeTextView = textView;
+                addView(textView);
             }
         }
 
-        public void setWholeText(CharSequence wholeText) {
+        public void setWholeText(CharSequence charSequence) {
             this.wholeTextView.clearFocus();
-            this.wholeTextView.setText(wholeText);
+            this.wholeTextView.setText(charSequence);
         }
 
-        public LoadingTextView2 addBlock(CharSequence fromText) {
-            LoadingTextView2 textView = new LoadingTextView2(getContext(), fromText, getBlocksCount() > 0, this.fontSize, this.textColor);
-            textView.setFocusable(false);
-            addView(textView);
-            TextView textView2 = this.wholeTextView;
-            if (textView2 != null) {
-                textView2.bringToFront();
+        public LoadingTextView2 addBlock(CharSequence charSequence) {
+            LoadingTextView2 loadingTextView2 = new LoadingTextView2(getContext(), charSequence, getBlocksCount() > 0, this.fontSize, this.textColor);
+            loadingTextView2.setFocusable(false);
+            addView(loadingTextView2);
+            TextView textView = this.wholeTextView;
+            if (textView != null) {
+                textView.bringToFront();
             }
-            return textView;
+            return loadingTextView2;
         }
 
         public int getBlocksCount() {
@@ -1422,91 +1382,86 @@ public class TranslateAlert extends Dialog {
         }
 
         public LoadingTextView2 getBlockAt(int i) {
-            View child = getChildAt(i);
-            if (child instanceof LoadingTextView2) {
-                return (LoadingTextView2) child;
+            View childAt = getChildAt(i);
+            if (childAt instanceof LoadingTextView2) {
+                return (LoadingTextView2) childAt;
             }
             return null;
         }
 
         public LoadingTextView2 getFirstUnloadedBlock() {
-            int count = getBlocksCount();
-            for (int i = 0; i < count; i++) {
-                LoadingTextView2 block = getBlockAt(i);
-                if (block != null && !block.loaded) {
-                    return block;
+            int blocksCount = getBlocksCount();
+            for (int i = 0; i < blocksCount; i++) {
+                LoadingTextView2 blockAt = getBlockAt(i);
+                if (blockAt != null && !blockAt.loaded) {
+                    return blockAt;
                 }
             }
             return null;
         }
 
         public int height() {
-            int height = 0;
-            int count = getBlocksCount();
-            for (int i = 0; i < count; i++) {
-                height += getBlockAt(i).height();
+            int blocksCount = getBlocksCount();
+            int i = 0;
+            for (int i2 = 0; i2 < blocksCount; i2++) {
+                i += getBlockAt(i2).height();
             }
-            int i2 = getPaddingTop();
-            return i2 + height + getPaddingBottom();
-        }
-
-        protected void onHeightUpdated(int height) {
+            return getPaddingTop() + i + getPaddingBottom();
         }
 
         public void updateHeight() {
-            boolean updated;
-            int newHeight = height();
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-            if (lp == null) {
-                lp = new FrameLayout.LayoutParams(-1, newHeight);
-                updated = true;
+            int height = height();
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
+            boolean z = true;
+            if (layoutParams == null) {
+                layoutParams = new FrameLayout.LayoutParams(-1, height);
             } else {
-                updated = lp.height != newHeight;
-                lp.height = newHeight;
+                if (layoutParams.height == height) {
+                    z = false;
+                }
+                layoutParams.height = height;
             }
-            if (updated) {
-                setLayoutParams(lp);
-                onHeightUpdated(newHeight);
+            if (z) {
+                setLayoutParams(layoutParams);
+                onHeightUpdated(height);
             }
         }
 
         @Override // android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int count = getBlocksCount();
-            int innerWidthMeasureSpec = View.MeasureSpec.makeMeasureSpec((View.MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft()) - getPaddingRight(), View.MeasureSpec.getMode(widthMeasureSpec));
-            for (int i = 0; i < count; i++) {
-                LoadingTextView2 block = getBlockAt(i);
-                block.measure(innerWidthMeasureSpec, TranslateAlert.MOST_SPEC);
+        protected void onMeasure(int i, int i2) {
+            int blocksCount = getBlocksCount();
+            int makeMeasureSpec = View.MeasureSpec.makeMeasureSpec((View.MeasureSpec.getSize(i) - getPaddingLeft()) - getPaddingRight(), View.MeasureSpec.getMode(i));
+            for (int i3 = 0; i3 < blocksCount; i3++) {
+                getBlockAt(i3).measure(makeMeasureSpec, TranslateAlert.MOST_SPEC);
             }
-            int i2 = height();
-            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(i2, C.BUFFER_FLAG_ENCRYPTED));
+            super.onMeasure(i, View.MeasureSpec.makeMeasureSpec(height(), 1073741824));
         }
 
         @Override // android.view.ViewGroup, android.view.View
-        protected void onLayout(boolean changed, int l, int t, int r, int b) {
-            int y = 0;
-            int count = getBlocksCount();
-            int i = 0;
-            while (i < count) {
-                LoadingTextView2 block = getBlockAt(i);
-                int blockHeight = block.height();
-                int translationY = i > 0 ? gap : 0;
-                block.layout(getPaddingLeft(), getPaddingTop() + y + translationY, (r - l) - getPaddingRight(), getPaddingTop() + y + blockHeight + translationY);
-                y += blockHeight;
-                if (i > 0 && i < count - 1) {
-                    y += gap;
+        protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+            int blocksCount = getBlocksCount();
+            int i5 = 0;
+            int i6 = 0;
+            while (i5 < blocksCount) {
+                LoadingTextView2 blockAt = getBlockAt(i5);
+                int height = blockAt.height();
+                int i7 = i5 > 0 ? gap : 0;
+                blockAt.layout(getPaddingLeft(), getPaddingTop() + i6 + i7, (i3 - i) - getPaddingRight(), getPaddingTop() + i6 + height + i7);
+                i6 += height;
+                if (i5 > 0 && i5 < blocksCount - 1) {
+                    i6 += gap;
                 }
-                i++;
+                i5++;
             }
-            this.wholeTextView.measure(View.MeasureSpec.makeMeasureSpec(((r - l) - getPaddingLeft()) - getPaddingRight(), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(((b - t) - getPaddingTop()) - getPaddingBottom(), C.BUFFER_FLAG_ENCRYPTED));
-            this.wholeTextView.layout(getPaddingLeft(), getPaddingTop(), (r - l) - getPaddingRight(), getPaddingTop() + this.wholeTextView.getMeasuredHeight());
+            int i8 = i3 - i;
+            this.wholeTextView.measure(View.MeasureSpec.makeMeasureSpec((i8 - getPaddingLeft()) - getPaddingRight(), 1073741824), View.MeasureSpec.makeMeasureSpec(((i4 - i2) - getPaddingTop()) - getPaddingBottom(), 1073741824));
+            this.wholeTextView.layout(getPaddingLeft(), getPaddingTop(), i8 - getPaddingRight(), getPaddingTop() + this.wholeTextView.getMeasuredHeight());
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class InlineLoadingTextView extends ViewGroup {
         public static final int paddingHorizontal = AndroidUtilities.dp(6.0f);
-        public static final int paddingVertical = 0;
         private final TextView fromTextView;
         private final float gradientWidth;
         private final ValueAnimator loadingAnimator;
@@ -1523,30 +1478,35 @@ public class TranslateAlert extends Dialog {
         private final Path loadingPath = new Path();
         private final Path shadePath = new Path();
 
-        public InlineLoadingTextView(Context context, CharSequence fromText, int fontSize, int textColor) {
+        @Override // android.view.ViewGroup
+        protected boolean drawChild(Canvas canvas, View view, long j) {
+            return false;
+        }
+
+        protected void onLoadAnimation(float f) {
+        }
+
+        public InlineLoadingTextView(Context context, CharSequence charSequence, int i, int i2) {
             super(context);
             Paint paint = new Paint();
             this.loadingPaint = paint;
             float dp = AndroidUtilities.dp(350.0f);
             this.gradientWidth = dp;
-            int i = paddingHorizontal;
-            setPadding(i, 0, i, 0);
+            int i3 = paddingHorizontal;
+            setPadding(i3, 0, i3, 0);
             setClipChildren(false);
             setWillNotDraw(false);
-            TextView textView = new TextView(context) { // from class: org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView.1
-                {
-                    InlineLoadingTextView.this = this;
-                }
-
+            TextView textView = new TextView(this, context) { // from class: org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView.1
                 @Override // android.widget.TextView, android.view.View
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                protected void onMeasure(int i4, int i5) {
                     super.onMeasure(TranslateAlert.MOST_SPEC, TranslateAlert.MOST_SPEC);
                 }
             };
             this.fromTextView = textView;
-            textView.setTextSize(0, fontSize);
-            textView.setTextColor(textColor);
-            textView.setText(fromText);
+            float f = i;
+            textView.setTextSize(0, f);
+            textView.setTextColor(i2);
+            textView.setText(charSequence);
             textView.setLines(1);
             textView.setMaxLines(1);
             textView.setSingleLine(true);
@@ -1554,134 +1514,116 @@ public class TranslateAlert extends Dialog {
             textView.setFocusable(false);
             textView.setImportantForAccessibility(2);
             addView(textView);
-            TextView textView2 = new TextView(context) { // from class: org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView.2
-                {
-                    InlineLoadingTextView.this = this;
-                }
-
+            TextView textView2 = new TextView(this, context) { // from class: org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView.2
                 @Override // android.widget.TextView, android.view.View
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                protected void onMeasure(int i4, int i5) {
                     super.onMeasure(TranslateAlert.MOST_SPEC, TranslateAlert.MOST_SPEC);
                 }
             };
             this.toTextView = textView2;
-            textView2.setTextSize(0, fontSize);
-            textView2.setTextColor(textColor);
+            textView2.setTextSize(0, f);
+            textView2.setTextColor(i2);
             textView2.setLines(1);
             textView2.setMaxLines(1);
             textView2.setSingleLine(true);
             textView2.setEllipsize(null);
             textView2.setFocusable(true);
             addView(textView2);
-            int c1 = Theme.getColor(Theme.key_dialogBackground);
-            int c2 = Theme.getColor(Theme.key_dialogBackgroundGray);
-            LinearGradient gradient = new LinearGradient(0.0f, 0.0f, dp, 0.0f, new int[]{c1, c2, c1}, new float[]{0.0f, 0.67f, 1.0f}, Shader.TileMode.REPEAT);
-            paint.setShader(gradient);
+            int color = Theme.getColor("dialogBackground");
+            paint.setShader(new LinearGradient(0.0f, 0.0f, dp, 0.0f, new int[]{color, Theme.getColor("dialogBackgroundGray"), color}, new float[]{0.0f, 0.67f, 1.0f}, Shader.TileMode.REPEAT));
             ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
             this.loadingAnimator = ofFloat;
-            ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$InlineLoadingTextView$$ExternalSyntheticLambda1
+            ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$InlineLoadingTextView$$ExternalSyntheticLambda0
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    TranslateAlert.InlineLoadingTextView.this.m3165x9271a5cb(valueAnimator);
+                    TranslateAlert.InlineLoadingTextView.this.lambda$new$0(valueAnimator);
                 }
             });
             ofFloat.setDuration(Long.MAX_VALUE);
             ofFloat.start();
         }
 
-        /* renamed from: lambda$new$0$org-telegram-ui-Components-TranslateAlert$InlineLoadingTextView */
-        public /* synthetic */ void m3165x9271a5cb(ValueAnimator a) {
+        public /* synthetic */ void lambda$new$0(ValueAnimator valueAnimator) {
             invalidate();
         }
 
         @Override // android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        protected void onMeasure(int i, int i2) {
             this.fromTextView.measure(0, 0);
             this.toTextView.measure(0, 0);
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.lerp(this.fromTextView.getMeasuredWidth(), this.toTextView.getMeasuredWidth(), this.loadingT) + getPaddingLeft() + getPaddingRight(), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(Math.max(this.fromTextView.getMeasuredHeight(), this.toTextView.getMeasuredHeight()), C.BUFFER_FLAG_ENCRYPTED));
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.lerp(this.fromTextView.getMeasuredWidth(), this.toTextView.getMeasuredWidth(), this.loadingT) + getPaddingLeft() + getPaddingRight(), 1073741824), View.MeasureSpec.makeMeasureSpec(Math.max(this.fromTextView.getMeasuredHeight(), this.toTextView.getMeasuredHeight()), 1073741824));
         }
 
         @Override // android.view.ViewGroup, android.view.View
-        protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
             this.fromTextView.layout(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + this.fromTextView.getMeasuredWidth(), getPaddingTop() + this.fromTextView.getMeasuredHeight());
             this.toTextView.layout(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + this.toTextView.getMeasuredWidth(), getPaddingTop() + this.toTextView.getMeasuredHeight());
             updateWidth();
         }
 
         private void updateWidth() {
-            boolean updated;
-            int newWidth = AndroidUtilities.lerp(this.fromTextView.getMeasuredWidth(), this.toTextView.getMeasuredWidth(), this.loadingT) + getPaddingLeft() + getPaddingRight();
-            int newHeight = Math.max(this.fromTextView.getMeasuredHeight(), this.toTextView.getMeasuredHeight());
-            ViewGroup.LayoutParams lp = getLayoutParams();
-            if (lp == null) {
-                lp = new LinearLayout.LayoutParams(newWidth, newHeight);
-                updated = true;
+            int lerp = AndroidUtilities.lerp(this.fromTextView.getMeasuredWidth(), this.toTextView.getMeasuredWidth(), this.loadingT) + getPaddingLeft() + getPaddingRight();
+            int max = Math.max(this.fromTextView.getMeasuredHeight(), this.toTextView.getMeasuredHeight());
+            ViewGroup.LayoutParams layoutParams = getLayoutParams();
+            boolean z = true;
+            if (layoutParams == null) {
+                layoutParams = new LinearLayout.LayoutParams(lerp, max);
             } else {
-                updated = (lp.width == newWidth && lp.height == newHeight) ? false : true;
-                lp.width = newWidth;
-                lp.height = newHeight;
+                if (layoutParams.width == lerp && layoutParams.height == max) {
+                    z = false;
+                }
+                layoutParams.width = lerp;
+                layoutParams.height = max;
             }
-            if (updated) {
-                setLayoutParams(lp);
+            if (z) {
+                setLayoutParams(layoutParams);
             }
         }
 
-        protected void onLoadAnimation(float t) {
+        public void loaded(CharSequence charSequence) {
+            loaded(charSequence, 350L, null);
         }
 
-        public void loaded(CharSequence loadedText) {
-            loaded(loadedText, 350L, null);
-        }
-
-        public void loaded(CharSequence loadedText, Runnable onLoadEnd) {
-            loaded(loadedText, 350L, onLoadEnd);
-        }
-
-        public void loaded(CharSequence loadedText, long duration, final Runnable onLoadEnd) {
+        public void loaded(CharSequence charSequence, long j, final Runnable runnable) {
             this.loaded = true;
-            this.toTextView.setText(loadedText);
+            this.toTextView.setText(charSequence);
             if (this.loadingAnimator.isRunning()) {
                 this.loadingAnimator.cancel();
             }
             if (this.loadedAnimator == null) {
                 ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.loadedAnimator = ofFloat;
-                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$InlineLoadingTextView$$ExternalSyntheticLambda0
+                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$InlineLoadingTextView$$ExternalSyntheticLambda1
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        TranslateAlert.InlineLoadingTextView.this.m3164x9a76264b(valueAnimator);
+                        TranslateAlert.InlineLoadingTextView.this.lambda$loaded$1(valueAnimator);
                     }
                 });
-                this.loadedAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView.3
-                    {
-                        InlineLoadingTextView.this = this;
-                    }
-
+                this.loadedAnimator.addListener(new AnimatorListenerAdapter(this) { // from class: org.telegram.ui.Components.TranslateAlert.InlineLoadingTextView.3
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
-                        Runnable runnable = onLoadEnd;
-                        if (runnable != null) {
-                            runnable.run();
+                    public void onAnimationEnd(Animator animator) {
+                        Runnable runnable2 = runnable;
+                        if (runnable2 != null) {
+                            runnable2.run();
                         }
                     }
                 });
-                this.loadedAnimator.setDuration(duration);
+                this.loadedAnimator.setDuration(j);
                 this.loadedAnimator.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
                 this.loadedAnimator.start();
             }
         }
 
-        /* renamed from: lambda$loaded$1$org-telegram-ui-Components-TranslateAlert$InlineLoadingTextView */
-        public /* synthetic */ void m3164x9a76264b(ValueAnimator a) {
-            this.loadingT = ((Float) a.getAnimatedValue()).floatValue();
+        public /* synthetic */ void lambda$loaded$1(ValueAnimator valueAnimator) {
+            this.loadingT = ((Float) valueAnimator.getAnimatedValue()).floatValue();
             updateWidth();
             invalidate();
             onLoadAnimation(this.loadingT);
         }
 
-        public void set(CharSequence loadedText) {
+        public void set(CharSequence charSequence) {
             this.loaded = true;
-            this.toTextView.setText(loadedText);
+            this.toTextView.setText(charSequence);
             if (this.loadingAnimator.isRunning()) {
                 this.loadingAnimator.cancel();
             }
@@ -1699,34 +1641,39 @@ public class TranslateAlert extends Dialog {
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
-            float w = getWidth();
-            float h = getHeight();
-            float cx = LocaleController.isRTL ? Math.max(w / 2.0f, w - 8.0f) : Math.min(w / 2.0f, 8.0f);
-            float cy = Math.min(h / 2.0f, 8.0f);
-            float R = (float) Math.sqrt(Math.max(Math.max((cx * cx) + (cy * cy), ((w - cx) * (w - cx)) + (cy * cy)), Math.max((cx * cx) + ((h - cy) * (h - cy)), ((w - cx) * (w - cx)) + ((h - cy) * (h - cy)))));
-            float r = this.loadingT * R;
+            float width = getWidth();
+            float height = getHeight();
+            float max = LocaleController.isRTL ? Math.max(width / 2.0f, width - 8.0f) : Math.min(width / 2.0f, 8.0f);
+            float min = Math.min(height / 2.0f, 8.0f);
+            float f = max * max;
+            float f2 = min * min;
+            float f3 = width - max;
+            float f4 = f3 * f3;
+            float f5 = height - min;
+            float f6 = f5 * f5;
+            float sqrt = this.loadingT * ((float) Math.sqrt(Math.max(Math.max(f + f2, f2 + f4), Math.max(f + f6, f4 + f6))));
             this.inPath.reset();
-            this.inPath.addCircle(cx, cy, r, Path.Direction.CW);
+            this.inPath.addCircle(max, min, sqrt, Path.Direction.CW);
             canvas.save();
             canvas.clipPath(this.inPath, Region.Op.DIFFERENCE);
             this.loadingPaint.setAlpha((int) ((1.0f - this.loadingT) * 255.0f));
-            float f = this.gradientWidth;
-            float f2 = this.gradientWidth;
-            float dx = f - (((((float) (SystemClock.elapsedRealtime() - this.start)) / 1000.0f) * f2) % f2);
+            float f7 = this.gradientWidth;
+            float f8 = this.gradientWidth;
+            float elapsedRealtime = f7 - (((((float) (SystemClock.elapsedRealtime() - this.start)) / 1000.0f) * f8) % f8);
             this.shadePath.reset();
-            this.shadePath.addRect(0.0f, 0.0f, w, h, Path.Direction.CW);
+            this.shadePath.addRect(0.0f, 0.0f, width, height, Path.Direction.CW);
             this.loadingPath.reset();
-            this.rect.set(0.0f, 0.0f, w, h);
+            this.rect.set(0.0f, 0.0f, width, height);
             this.loadingPath.addRoundRect(this.rect, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), Path.Direction.CW);
             canvas.clipPath(this.loadingPath);
-            canvas.translate(-dx, 0.0f);
-            this.shadePath.offset(dx, 0.0f, this.tempPath);
+            canvas.translate(-elapsedRealtime, 0.0f);
+            this.shadePath.offset(elapsedRealtime, 0.0f, this.tempPath);
             canvas.drawPath(this.tempPath, this.loadingPaint);
-            canvas.translate(dx, 0.0f);
+            canvas.translate(elapsedRealtime, 0.0f);
             canvas.restore();
             if (this.showLoadingText && this.fromTextView != null) {
                 canvas.save();
-                this.rect.set(0.0f, 0.0f, w, h);
+                this.rect.set(0.0f, 0.0f, width, height);
                 canvas.clipPath(this.inPath, Region.Op.DIFFERENCE);
                 canvas.translate(paddingHorizontal, 0.0f);
                 canvas.saveLayerAlpha(this.rect, 20, 31);
@@ -1746,14 +1693,9 @@ public class TranslateAlert extends Dialog {
                 canvas.restore();
             }
         }
-
-        @Override // android.view.ViewGroup
-        protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-            return false;
-        }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class LoadingTextView2 extends ViewGroup {
         public static final int paddingHorizontal = AndroidUtilities.dp(6.0f);
         public static final int paddingVertical = AndroidUtilities.dp(1.5f);
@@ -1761,7 +1703,6 @@ public class TranslateAlert extends Dialog {
         private final float gradientWidth;
         private final ValueAnimator loadingAnimator;
         private final Paint loadingPaint;
-        private final boolean scaleFromZero;
         private float scaleT;
         private final TextView toTextView;
         public boolean showLoadingText = true;
@@ -1777,33 +1718,35 @@ public class TranslateAlert extends Dialog {
         private final Path loadingPath = new Path();
         private final Path shadePath = new Path();
 
-        public LoadingTextView2(Context context, CharSequence fromText, final boolean scaleFromZero, int fontSize, int textColor) {
+        @Override // android.view.ViewGroup
+        protected boolean drawChild(Canvas canvas, View view, long j) {
+            return false;
+        }
+
+        public LoadingTextView2(Context context, CharSequence charSequence, final boolean z, int i, int i2) {
             super(context);
             this.scaleT = 1.0f;
             Paint paint = new Paint();
             this.loadingPaint = paint;
             float dp = AndroidUtilities.dp(350.0f);
             this.gradientWidth = dp;
-            int i = paddingHorizontal;
-            int i2 = paddingVertical;
-            setPadding(i, i2, i, i2);
+            int i3 = paddingHorizontal;
+            int i4 = paddingVertical;
+            setPadding(i3, i4, i3, i4);
             setClipChildren(false);
             setWillNotDraw(false);
             setFocusable(false);
-            TextView textView = new TextView(context) { // from class: org.telegram.ui.Components.TranslateAlert.LoadingTextView2.1
-                {
-                    LoadingTextView2.this = this;
-                }
-
+            TextView textView = new TextView(this, context) { // from class: org.telegram.ui.Components.TranslateAlert.LoadingTextView2.1
                 @Override // android.widget.TextView, android.view.View
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    super.onMeasure(widthMeasureSpec, TranslateAlert.MOST_SPEC);
+                protected void onMeasure(int i5, int i6) {
+                    super.onMeasure(i5, TranslateAlert.MOST_SPEC);
                 }
             };
             this.fromTextView = textView;
-            textView.setTextSize(0, fontSize);
-            textView.setTextColor(textColor);
-            textView.setText(fromText);
+            float f = i;
+            textView.setTextSize(0, f);
+            textView.setTextColor(i2);
+            textView.setText(charSequence);
             textView.setLines(0);
             textView.setMaxLines(0);
             textView.setSingleLine(false);
@@ -1811,19 +1754,15 @@ public class TranslateAlert extends Dialog {
             textView.setFocusable(false);
             textView.setImportantForAccessibility(2);
             addView(textView);
-            TextView textView2 = new TextView(context) { // from class: org.telegram.ui.Components.TranslateAlert.LoadingTextView2.2
-                {
-                    LoadingTextView2.this = this;
-                }
-
+            TextView textView2 = new TextView(this, context) { // from class: org.telegram.ui.Components.TranslateAlert.LoadingTextView2.2
                 @Override // android.widget.TextView, android.view.View
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    super.onMeasure(widthMeasureSpec, TranslateAlert.MOST_SPEC);
+                protected void onMeasure(int i5, int i6) {
+                    super.onMeasure(i5, TranslateAlert.MOST_SPEC);
                 }
             };
             this.toTextView = textView2;
-            textView2.setTextSize(0, fontSize);
-            textView2.setTextColor(textColor);
+            textView2.setTextSize(0, f);
+            textView2.setTextColor(i2);
             textView2.setLines(0);
             textView2.setMaxLines(0);
             textView2.setSingleLine(false);
@@ -1831,35 +1770,32 @@ public class TranslateAlert extends Dialog {
             textView2.setFocusable(false);
             textView2.setImportantForAccessibility(2);
             addView(textView2);
-            int c1 = Theme.getColor(Theme.key_dialogBackground);
-            int c2 = Theme.getColor(Theme.key_dialogBackgroundGray);
-            LinearGradient gradient = new LinearGradient(0.0f, 0.0f, dp, 0.0f, new int[]{c1, c2, c1}, new float[]{0.0f, 0.67f, 1.0f}, Shader.TileMode.REPEAT);
-            paint.setShader(gradient);
-            this.scaleFromZero = scaleFromZero;
+            int color = Theme.getColor("dialogBackground");
+            paint.setShader(new LinearGradient(0.0f, 0.0f, dp, 0.0f, new int[]{color, Theme.getColor("dialogBackgroundGray"), color}, new float[]{0.0f, 0.67f, 1.0f}, Shader.TileMode.REPEAT));
             ValueAnimator ofFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
             this.loadingAnimator = ofFloat;
-            if (scaleFromZero) {
+            if (z) {
                 this.scaleT = 0.0f;
             }
             ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$LoadingTextView2$$ExternalSyntheticLambda1
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    TranslateAlert.LoadingTextView2.this.m3167xfb13368e(scaleFromZero, valueAnimator);
+                    TranslateAlert.LoadingTextView2.this.lambda$new$0(z, valueAnimator);
                 }
             });
             ofFloat.setDuration(Long.MAX_VALUE);
             ofFloat.start();
         }
 
-        /* renamed from: lambda$new$0$org-telegram-ui-Components-TranslateAlert$LoadingTextView2 */
-        public /* synthetic */ void m3167xfb13368e(boolean scaleFromZero, ValueAnimator a) {
+        public /* synthetic */ void lambda$new$0(boolean z, ValueAnimator valueAnimator) {
             invalidate();
-            if (scaleFromZero) {
-                boolean scaleTWasNoFull = this.scaleT < 1.0f;
+            if (z) {
+                boolean z2 = this.scaleT < 1.0f;
                 this.scaleT = Math.min(1.0f, ((float) (SystemClock.elapsedRealtime() - this.start)) / 400.0f);
-                if (scaleTWasNoFull) {
-                    updateHeight();
+                if (!z2) {
+                    return;
                 }
+                updateHeight();
             }
         }
 
@@ -1878,9 +1814,9 @@ public class TranslateAlert extends Dialog {
             }
         }
 
-        public void loaded(CharSequence loadedText, final Runnable onLoadEnd) {
+        public void loaded(CharSequence charSequence, final Runnable runnable) {
             this.loaded = true;
-            this.toTextView.setText(loadedText);
+            this.toTextView.setText(charSequence);
             layout();
             if (this.loadingAnimator.isRunning()) {
                 this.loadingAnimator.cancel();
@@ -1891,19 +1827,15 @@ public class TranslateAlert extends Dialog {
                 ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.TranslateAlert$LoadingTextView2$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        TranslateAlert.LoadingTextView2.this.m3166xe960660e(valueAnimator);
+                        TranslateAlert.LoadingTextView2.this.lambda$loaded$1(valueAnimator);
                     }
                 });
-                this.loadedAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.TranslateAlert.LoadingTextView2.3
-                    {
-                        LoadingTextView2.this = this;
-                    }
-
+                this.loadedAnimator.addListener(new AnimatorListenerAdapter(this) { // from class: org.telegram.ui.Components.TranslateAlert.LoadingTextView2.3
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
-                        Runnable runnable = onLoadEnd;
-                        if (runnable != null) {
-                            runnable.run();
+                    public void onAnimationEnd(Animator animator) {
+                        Runnable runnable2 = runnable;
+                        if (runnable2 != null) {
+                            runnable2.run();
                         }
                     }
                 });
@@ -1913,46 +1845,45 @@ public class TranslateAlert extends Dialog {
             }
         }
 
-        /* renamed from: lambda$loaded$1$org-telegram-ui-Components-TranslateAlert$LoadingTextView2 */
-        public /* synthetic */ void m3166xe960660e(ValueAnimator a) {
-            this.loadingT = ((Float) a.getAnimatedValue()).floatValue();
+        public /* synthetic */ void lambda$loaded$1(ValueAnimator valueAnimator) {
+            this.loadingT = ((Float) valueAnimator.getAnimatedValue()).floatValue();
             updateHeight();
             invalidate();
         }
 
         @Override // android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int width = View.MeasureSpec.getSize(widthMeasureSpec);
-            int innerWidth = (width - getPaddingLeft()) - getPaddingRight();
-            if (this.fromTextView.getMeasuredWidth() <= 0 || this.lastWidth != innerWidth) {
-                measureChild(this.fromTextView, innerWidth);
+        protected void onMeasure(int i, int i2) {
+            int size = View.MeasureSpec.getSize(i);
+            int paddingLeft = (size - getPaddingLeft()) - getPaddingRight();
+            if (this.fromTextView.getMeasuredWidth() <= 0 || this.lastWidth != paddingLeft) {
+                measureChild(this.fromTextView, paddingLeft);
                 updateLoadingPath();
             }
-            if (this.toTextView.getMeasuredWidth() <= 0 || this.lastWidth != innerWidth) {
-                measureChild(this.toTextView, innerWidth);
+            if (this.toTextView.getMeasuredWidth() <= 0 || this.lastWidth != paddingLeft) {
+                measureChild(this.toTextView, paddingLeft);
             }
-            this.lastWidth = innerWidth;
-            super.onMeasure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(height(), C.BUFFER_FLAG_ENCRYPTED));
+            this.lastWidth = paddingLeft;
+            super.onMeasure(View.MeasureSpec.makeMeasureSpec(size, 1073741824), View.MeasureSpec.makeMeasureSpec(height(), 1073741824));
         }
 
         @Override // android.view.ViewGroup, android.view.View
-        protected void onLayout(boolean changed, int l, int t, int r, int b) {
-            layout(((r - l) - getPaddingLeft()) - getPaddingRight(), true);
+        protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+            layout(((i3 - i) - getPaddingLeft()) - getPaddingRight(), true);
         }
 
-        private void layout(int width, boolean force) {
-            if (this.lastWidth != width || force) {
-                this.lastWidth = width;
-                layout(width);
+        private void layout(int i, boolean z) {
+            if (this.lastWidth != i || z) {
+                this.lastWidth = i;
+                layout(i);
             }
         }
 
-        private void layout(int width) {
-            measureChild(this.fromTextView, width);
-            layoutChild(this.fromTextView, width);
+        private void layout(int i) {
+            measureChild(this.fromTextView, i);
+            layoutChild(this.fromTextView, i);
             updateLoadingPath();
-            measureChild(this.toTextView, width);
-            layoutChild(this.toTextView, width);
+            measureChild(this.toTextView, i);
+            layoutChild(this.toTextView, i);
             updateHeight();
         }
 
@@ -1960,95 +1891,93 @@ public class TranslateAlert extends Dialog {
             layout(this.lastWidth);
         }
 
-        private void measureChild(View view, int width) {
-            view.measure(View.MeasureSpec.makeMeasureSpec(width, C.BUFFER_FLAG_ENCRYPTED), TranslateAlert.MOST_SPEC);
+        private void measureChild(View view, int i) {
+            view.measure(View.MeasureSpec.makeMeasureSpec(i, 1073741824), TranslateAlert.MOST_SPEC);
         }
 
-        private void layoutChild(View view, int width) {
-            view.layout(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + width, getPaddingTop() + view.getMeasuredHeight());
+        private void layoutChild(View view, int i) {
+            view.layout(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + i, getPaddingTop() + view.getMeasuredHeight());
         }
 
         private void updateLoadingPath() {
-            Layout loadingLayout;
+            boolean z;
             TextView textView = this.fromTextView;
-            if (textView != null && textView.getMeasuredWidth() > 0) {
-                this.loadingPath.reset();
-                Layout loadingLayout2 = this.fromTextView.getLayout();
-                if (loadingLayout2 != null) {
-                    CharSequence text = loadingLayout2.getText();
-                    int lineCount = loadingLayout2.getLineCount();
-                    int i = 0;
-                    while (i < lineCount) {
-                        float s = loadingLayout2.getLineLeft(i);
-                        float e = loadingLayout2.getLineRight(i);
-                        float l = Math.min(s, e);
-                        float r = Math.max(s, e);
-                        int start = loadingLayout2.getLineStart(i);
-                        int end = loadingLayout2.getLineEnd(i);
-                        boolean hasNonEmptyChar = false;
-                        int j = start;
-                        while (true) {
-                            if (j < end) {
-                                char c = text.charAt(j);
-                                if (c == '\n' || c == '\t' || c == ' ') {
-                                    j++;
-                                } else {
-                                    hasNonEmptyChar = true;
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                        if (!hasNonEmptyChar) {
-                            loadingLayout = loadingLayout2;
-                        } else {
-                            RectF rectF = this.fetchedPathRect;
-                            int i2 = paddingHorizontal;
-                            int lineTop = loadingLayout2.getLineTop(i);
-                            int i3 = paddingVertical;
-                            loadingLayout = loadingLayout2;
-                            rectF.set(l - i2, lineTop - i3, i2 + r, loadingLayout2.getLineBottom(i) + i3);
-                            this.loadingPath.addRoundRect(this.fetchedPathRect, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), Path.Direction.CW);
-                        }
-                        i++;
-                        loadingLayout2 = loadingLayout;
+            if (textView == null || textView.getMeasuredWidth() <= 0) {
+                return;
+            }
+            this.loadingPath.reset();
+            Layout layout = this.fromTextView.getLayout();
+            if (layout == null) {
+                return;
+            }
+            CharSequence text = layout.getText();
+            int lineCount = layout.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                float lineLeft = layout.getLineLeft(i);
+                float lineRight = layout.getLineRight(i);
+                float min = Math.min(lineLeft, lineRight);
+                float max = Math.max(lineLeft, lineRight);
+                int lineStart = layout.getLineStart(i);
+                int lineEnd = layout.getLineEnd(i);
+                while (true) {
+                    if (lineStart >= lineEnd) {
+                        z = false;
+                        break;
                     }
+                    char charAt = text.charAt(lineStart);
+                    if (charAt != '\n' && charAt != '\t' && charAt != ' ') {
+                        z = true;
+                        break;
+                    }
+                    lineStart++;
+                }
+                if (z) {
+                    RectF rectF = this.fetchedPathRect;
+                    int i2 = paddingHorizontal;
+                    int lineTop = layout.getLineTop(i);
+                    int i3 = paddingVertical;
+                    rectF.set(min - i2, lineTop - i3, max + i2, layout.getLineBottom(i) + i3);
+                    this.loadingPath.addRoundRect(this.fetchedPathRect, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), Path.Direction.CW);
                 }
             }
         }
 
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
-            float w = getWidth();
-            float h = getHeight();
-            float cx = LocaleController.isRTL ? Math.max(w / 2.0f, w - 8.0f) : Math.min(w / 2.0f, 8.0f);
-            float cy = Math.min(h / 2.0f, 8.0f);
-            float R = (float) Math.sqrt(Math.max(Math.max((cx * cx) + (cy * cy), ((w - cx) * (w - cx)) + (cy * cy)), Math.max((cx * cx) + ((h - cy) * (h - cy)), ((w - cx) * (w - cx)) + ((h - cy) * (h - cy)))));
-            float r = this.loadingT * R;
+            float width = getWidth();
+            float height = getHeight();
+            float max = LocaleController.isRTL ? Math.max(width / 2.0f, width - 8.0f) : Math.min(width / 2.0f, 8.0f);
+            float min = Math.min(height / 2.0f, 8.0f);
+            float f = max * max;
+            float f2 = min * min;
+            float f3 = width - max;
+            float f4 = f3 * f3;
+            float f5 = height - min;
+            float f6 = f5 * f5;
+            float sqrt = this.loadingT * ((float) Math.sqrt(Math.max(Math.max(f + f2, f2 + f4), Math.max(f + f6, f4 + f6))));
             this.inPath.reset();
-            this.inPath.addCircle(cx, cy, r, Path.Direction.CW);
+            this.inPath.addCircle(max, min, sqrt, Path.Direction.CW);
             canvas.save();
             canvas.clipPath(this.inPath, Region.Op.DIFFERENCE);
             this.loadingPaint.setAlpha((int) ((1.0f - this.loadingT) * 255.0f));
-            float f = this.gradientWidth;
-            float f2 = this.gradientWidth;
-            float dx = f - (((((float) (SystemClock.elapsedRealtime() - this.start)) / 1000.0f) * f2) % f2);
+            float f7 = this.gradientWidth;
+            float f8 = this.gradientWidth;
+            float elapsedRealtime = f7 - (((((float) (SystemClock.elapsedRealtime() - this.start)) / 1000.0f) * f8) % f8);
             this.shadePath.reset();
-            this.shadePath.addRect(0.0f, 0.0f, w, h, Path.Direction.CW);
+            this.shadePath.addRect(0.0f, 0.0f, width, height, Path.Direction.CW);
             int i = paddingHorizontal;
             int i2 = paddingVertical;
             canvas.translate(i, i2);
             canvas.clipPath(this.loadingPath);
             canvas.translate(-i, -i2);
-            canvas.translate(-dx, 0.0f);
-            this.shadePath.offset(dx, 0.0f, this.tempPath);
+            canvas.translate(-elapsedRealtime, 0.0f);
+            this.shadePath.offset(elapsedRealtime, 0.0f, this.tempPath);
             canvas.drawPath(this.tempPath, this.loadingPaint);
-            canvas.translate(dx, 0.0f);
+            canvas.translate(elapsedRealtime, 0.0f);
             canvas.restore();
             if (this.showLoadingText && this.fromTextView != null) {
                 canvas.save();
-                this.rect.set(0.0f, 0.0f, w, h);
+                this.rect.set(0.0f, 0.0f, width, height);
                 canvas.clipPath(this.inPath, Region.Op.DIFFERENCE);
                 canvas.translate(i, i2);
                 canvas.saveLayerAlpha(this.rect, 20, 31);
@@ -2067,11 +1996,6 @@ public class TranslateAlert extends Dialog {
                 }
                 canvas.restore();
             }
-        }
-
-        @Override // android.view.ViewGroup
-        protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-            return false;
         }
     }
 }

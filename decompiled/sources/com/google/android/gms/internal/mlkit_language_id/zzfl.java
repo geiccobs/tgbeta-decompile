@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzfl extends zzfj {
     private static final Class<?> zza = Collections.unmodifiableList(Collections.emptyList()).getClass();
 
@@ -24,10 +24,10 @@ final class zzfl extends zzfj {
         } else {
             if ((list instanceof zzgi) && (list instanceof zzew)) {
                 zzew zzewVar = (zzew) list;
-                if (zzewVar.zza()) {
-                    zzewVar.b_();
+                if (!zzewVar.zza()) {
                     return;
                 }
+                zzewVar.b_();
                 return;
             }
             obj2 = Collections.unmodifiableList(list);
@@ -37,6 +37,7 @@ final class zzfl extends zzfj {
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzfj
     public final <E> void zza(Object obj, Object obj2, long j) {
+        ArrayList arrayList;
         List zzb = zzb(obj2, j);
         int size = zzb.size();
         List zzb2 = zzb(obj, j);
@@ -49,22 +50,25 @@ final class zzfl extends zzfj {
                 zzb2 = new ArrayList(size);
             }
             zzhn.zza(obj, j, zzb2);
-        } else if (zza.isAssignableFrom(zzb2.getClass())) {
-            ArrayList arrayList = new ArrayList(zzb2.size() + size);
-            arrayList.addAll(zzb2);
-            zzhn.zza(obj, j, arrayList);
-            zzb2 = arrayList;
-        } else if (zzb2 instanceof zzhi) {
-            List zzfhVar = new zzfh(zzb2.size() + size);
-            zzfhVar.addAll((zzhi) zzb2);
-            zzhn.zza(obj, j, zzfhVar);
-            zzb2 = zzfhVar;
-        } else if ((zzb2 instanceof zzgi) && (zzb2 instanceof zzew)) {
-            zzew zzewVar = (zzew) zzb2;
-            if (!zzewVar.zza()) {
-                zzb2 = zzewVar.zzb(zzb2.size() + size);
-                zzhn.zza(obj, j, zzb2);
+        } else {
+            if (zza.isAssignableFrom(zzb2.getClass())) {
+                ArrayList arrayList2 = new ArrayList(zzb2.size() + size);
+                arrayList2.addAll(zzb2);
+                zzhn.zza(obj, j, arrayList2);
+                arrayList = arrayList2;
+            } else if (zzb2 instanceof zzhi) {
+                List zzfhVar = new zzfh(zzb2.size() + size);
+                zzfhVar.addAll((zzhi) zzb2);
+                zzhn.zza(obj, j, zzfhVar);
+                arrayList = zzfhVar;
+            } else if ((zzb2 instanceof zzgi) && (zzb2 instanceof zzew)) {
+                zzew zzewVar = (zzew) zzb2;
+                if (!zzewVar.zza()) {
+                    zzb2 = zzewVar.zzb(zzb2.size() + size);
+                    zzhn.zza(obj, j, zzb2);
+                }
             }
+            zzb2 = arrayList;
         }
         int size2 = zzb2.size();
         int size3 = zzb.size();

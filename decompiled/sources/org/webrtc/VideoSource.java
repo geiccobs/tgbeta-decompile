@@ -2,7 +2,7 @@ package org.webrtc;
 
 import org.webrtc.VideoProcessor;
 import org.webrtc.VideoSink;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class VideoSource extends MediaSource {
     private boolean isCapturerRunning;
     private final NativeAndroidVideoTrackSource nativeAndroidVideoTrackSource;
@@ -10,12 +10,12 @@ public class VideoSource extends MediaSource {
     private final Object videoProcessorLock = new Object();
     private final CapturerObserver capturerObserver = new CapturerObserver() { // from class: org.webrtc.VideoSource.1
         @Override // org.webrtc.CapturerObserver
-        public void onCapturerStarted(boolean success) {
-            VideoSource.this.nativeAndroidVideoTrackSource.setState(success);
+        public void onCapturerStarted(boolean z) {
+            VideoSource.this.nativeAndroidVideoTrackSource.setState(z);
             synchronized (VideoSource.this.videoProcessorLock) {
-                VideoSource.this.isCapturerRunning = success;
+                VideoSource.this.isCapturerRunning = z;
                 if (VideoSource.this.videoProcessor != null) {
-                    VideoSource.this.videoProcessor.onCapturerStarted(success);
+                    VideoSource.this.videoProcessor.onCapturerStarted(z);
                 }
             }
         }
@@ -32,72 +32,73 @@ public class VideoSource extends MediaSource {
         }
 
         @Override // org.webrtc.CapturerObserver
-        public void onFrameCaptured(VideoFrame frame) {
-            VideoProcessor.FrameAdaptationParameters parameters = VideoSource.this.nativeAndroidVideoTrackSource.adaptFrame(frame);
+        public void onFrameCaptured(VideoFrame videoFrame) {
+            VideoProcessor.FrameAdaptationParameters adaptFrame = VideoSource.this.nativeAndroidVideoTrackSource.adaptFrame(videoFrame);
             synchronized (VideoSource.this.videoProcessorLock) {
                 if (VideoSource.this.videoProcessor != null) {
-                    VideoSource.this.videoProcessor.onFrameCaptured(frame, parameters);
+                    VideoSource.this.videoProcessor.onFrameCaptured(videoFrame, adaptFrame);
                     return;
                 }
-                VideoFrame adaptedFrame = VideoProcessor.CC.applyFrameAdaptationParameters(frame, parameters);
-                if (adaptedFrame != null) {
-                    VideoSource.this.nativeAndroidVideoTrackSource.onFrameCaptured(adaptedFrame);
-                    adaptedFrame.release();
+                VideoFrame applyFrameAdaptationParameters = VideoProcessor.CC.applyFrameAdaptationParameters(videoFrame, adaptFrame);
+                if (applyFrameAdaptationParameters == null) {
+                    return;
                 }
+                VideoSource.this.nativeAndroidVideoTrackSource.onFrameCaptured(applyFrameAdaptationParameters);
+                applyFrameAdaptationParameters.release();
             }
         }
     };
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class AspectRatio {
         public static final AspectRatio UNDEFINED = new AspectRatio(0, 0);
         public final int height;
         public final int width;
 
-        public AspectRatio(int width, int height) {
-            this.width = width;
-            this.height = height;
+        public AspectRatio(int i, int i2) {
+            this.width = i;
+            this.height = i2;
         }
     }
 
-    public VideoSource(long nativeSource) {
-        super(nativeSource);
-        this.nativeAndroidVideoTrackSource = new NativeAndroidVideoTrackSource(nativeSource);
+    public VideoSource(long j) {
+        super(j);
+        this.nativeAndroidVideoTrackSource = new NativeAndroidVideoTrackSource(j);
     }
 
-    public void adaptOutputFormat(int width, int height, int fps) {
-        int maxSide = Math.max(width, height);
-        int minSide = Math.min(width, height);
-        adaptOutputFormat(maxSide, minSide, minSide, maxSide, fps);
+    public void adaptOutputFormat(int i, int i2, int i3) {
+        int max = Math.max(i, i2);
+        int min = Math.min(i, i2);
+        adaptOutputFormat(max, min, min, max, i3);
     }
 
-    public void adaptOutputFormat(int landscapeWidth, int landscapeHeight, int portraitWidth, int portraitHeight, int fps) {
-        adaptOutputFormat(new AspectRatio(landscapeWidth, landscapeHeight), Integer.valueOf(landscapeWidth * landscapeHeight), new AspectRatio(portraitWidth, portraitHeight), Integer.valueOf(portraitWidth * portraitHeight), Integer.valueOf(fps));
+    public void adaptOutputFormat(int i, int i2, int i3, int i4, int i5) {
+        adaptOutputFormat(new AspectRatio(i, i2), Integer.valueOf(i * i2), new AspectRatio(i3, i4), Integer.valueOf(i3 * i4), Integer.valueOf(i5));
     }
 
-    public void adaptOutputFormat(AspectRatio targetLandscapeAspectRatio, Integer maxLandscapePixelCount, AspectRatio targetPortraitAspectRatio, Integer maxPortraitPixelCount, Integer maxFps) {
-        this.nativeAndroidVideoTrackSource.adaptOutputFormat(targetLandscapeAspectRatio, maxLandscapePixelCount, targetPortraitAspectRatio, maxPortraitPixelCount, maxFps);
+    public void adaptOutputFormat(AspectRatio aspectRatio, Integer num, AspectRatio aspectRatio2, Integer num2, Integer num3) {
+        this.nativeAndroidVideoTrackSource.adaptOutputFormat(aspectRatio, num, aspectRatio2, num2, num3);
     }
 
-    public void setIsScreencast(boolean isScreencast) {
-        this.nativeAndroidVideoTrackSource.setIsScreencast(isScreencast);
+    public void setIsScreencast(boolean z) {
+        this.nativeAndroidVideoTrackSource.setIsScreencast(z);
     }
 
-    public void setVideoProcessor(VideoProcessor newVideoProcessor) {
+    public void setVideoProcessor(VideoProcessor videoProcessor) {
         synchronized (this.videoProcessorLock) {
-            VideoProcessor videoProcessor = this.videoProcessor;
-            if (videoProcessor != null) {
-                videoProcessor.setSink(null);
+            VideoProcessor videoProcessor2 = this.videoProcessor;
+            if (videoProcessor2 != null) {
+                videoProcessor2.setSink(null);
                 if (this.isCapturerRunning) {
                     this.videoProcessor.onCapturerStopped();
                 }
             }
-            this.videoProcessor = newVideoProcessor;
-            if (newVideoProcessor != null) {
-                newVideoProcessor.setSink(new VideoSink() { // from class: org.webrtc.VideoSource$$ExternalSyntheticLambda1
+            this.videoProcessor = videoProcessor;
+            if (videoProcessor != null) {
+                videoProcessor.setSink(new VideoSink() { // from class: org.webrtc.VideoSource$$ExternalSyntheticLambda1
                     @Override // org.webrtc.VideoSink
                     public final void onFrame(VideoFrame videoFrame) {
-                        VideoSource.this.m4861lambda$setVideoProcessor$1$orgwebrtcVideoSource(videoFrame);
+                        VideoSource.this.lambda$setVideoProcessor$1(videoFrame);
                     }
 
                     @Override // org.webrtc.VideoSink
@@ -106,23 +107,21 @@ public class VideoSource extends MediaSource {
                     }
                 });
                 if (this.isCapturerRunning) {
-                    newVideoProcessor.onCapturerStarted(true);
+                    videoProcessor.onCapturerStarted(true);
                 }
             }
         }
     }
 
-    /* renamed from: lambda$setVideoProcessor$0$org-webrtc-VideoSource */
-    public /* synthetic */ void m4860lambda$setVideoProcessor$0$orgwebrtcVideoSource(VideoFrame frame) {
-        this.nativeAndroidVideoTrackSource.onFrameCaptured(frame);
+    public /* synthetic */ void lambda$setVideoProcessor$0(VideoFrame videoFrame) {
+        this.nativeAndroidVideoTrackSource.onFrameCaptured(videoFrame);
     }
 
-    /* renamed from: lambda$setVideoProcessor$1$org-webrtc-VideoSource */
-    public /* synthetic */ void m4861lambda$setVideoProcessor$1$orgwebrtcVideoSource(final VideoFrame frame) {
+    public /* synthetic */ void lambda$setVideoProcessor$1(final VideoFrame videoFrame) {
         runWithReference(new Runnable() { // from class: org.webrtc.VideoSource$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                VideoSource.this.m4860lambda$setVideoProcessor$0$orgwebrtcVideoSource(frame);
+                VideoSource.this.lambda$setVideoProcessor$0(videoFrame);
             }
         });
     }

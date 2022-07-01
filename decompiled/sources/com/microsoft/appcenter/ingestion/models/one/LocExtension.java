@@ -5,39 +5,38 @@ import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class LocExtension implements Model {
-    private static final String TZ = "tz";
     private String tz;
 
     public String getTz() {
         return this.tz;
     }
 
-    public void setTz(String tz) {
-        this.tz = tz;
+    public void setTz(String str) {
+        this.tz = str;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) {
-        setTz(object.optString(TZ, null));
+    public void read(JSONObject jSONObject) {
+        setTz(jSONObject.optString("tz", null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        JSONUtils.write(writer, TZ, getTz());
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        JSONUtils.write(jSONStringer, "tz", getTz());
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || LocExtension.class != obj.getClass()) {
             return false;
         }
-        LocExtension that = (LocExtension) o;
         String str = this.tz;
-        return str != null ? str.equals(that.tz) : that.tz == null;
+        String str2 = ((LocExtension) obj).tz;
+        return str != null ? str.equals(str2) : str2 == null;
     }
 
     public int hashCode() {

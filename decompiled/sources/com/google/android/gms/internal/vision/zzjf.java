@@ -1,29 +1,31 @@
 package com.google.android.gms.internal.vision;
 
-import com.google.android.exoplayer2.C;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzjf {
-    public static final byte[] zzb;
-    private static final ByteBuffer zzd;
-    private static final zzif zze;
     static final Charset zza = Charset.forName("UTF-8");
-    private static final Charset zzc = Charset.forName(C.ISO88591_NAME);
+    public static final byte[] zzb;
+
+    public static int zza(long j) {
+        return (int) (j ^ (j >>> 32));
+    }
+
+    public static int zza(boolean z) {
+        return z ? 1231 : 1237;
+    }
 
     public static <T> T zza(T t) {
-        if (t == null) {
-            throw new NullPointerException();
-        }
+        t.getClass();
         return t;
     }
 
     public static <T> T zza(T t, String str) {
-        if (t == null) {
-            throw new NullPointerException(str);
+        if (t != null) {
+            return t;
         }
-        return t;
+        throw new NullPointerException(str);
     }
 
     public static boolean zza(byte[] bArr) {
@@ -32,14 +34,6 @@ public final class zzjf {
 
     public static String zzb(byte[] bArr) {
         return new String(bArr, zza);
-    }
-
-    public static int zza(long j) {
-        return (int) (j ^ (j >>> 32));
-    }
-
-    public static int zza(boolean z) {
-        return z ? 1231 : 1237;
     }
 
     public static int zzc(byte[] bArr) {
@@ -71,9 +65,10 @@ public final class zzjf {
     }
 
     static {
+        Charset.forName("ISO-8859-1");
         byte[] bArr = new byte[0];
         zzb = bArr;
-        zzd = ByteBuffer.wrap(bArr);
-        zze = zzif.zza(bArr, 0, bArr.length, false);
+        ByteBuffer.wrap(bArr);
+        zzif.zza(bArr, 0, bArr.length, false);
     }
 }

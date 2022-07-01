@@ -1,5 +1,5 @@
 package org.telegram.ui.Components;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class Size {
     public float height;
     public float width;
@@ -7,8 +7,8 @@ public class Size {
     public Size() {
     }
 
-    public Size(float width, float height) {
-        this.width = width;
-        this.height = height;
+    public Size(float f, float f2) {
+        this.width = f;
+        this.height = f2;
     }
 }

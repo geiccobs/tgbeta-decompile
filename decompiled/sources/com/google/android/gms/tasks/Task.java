@@ -5,13 +5,9 @@ import java.util.concurrent.Executor;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
 /* loaded from: classes.dex */
 public abstract class Task<TResult> {
-    public abstract Task<TResult> addOnFailureListener(Activity activity, OnFailureListener onFailureListener);
-
     public abstract Task<TResult> addOnFailureListener(OnFailureListener onFailureListener);
 
     public abstract Task<TResult> addOnFailureListener(Executor executor, OnFailureListener onFailureListener);
-
-    public abstract Task<TResult> addOnSuccessListener(Activity activity, OnSuccessListener<? super TResult> onSuccessListener);
 
     public abstract Task<TResult> addOnSuccessListener(OnSuccessListener<? super TResult> onSuccessListener);
 
@@ -41,20 +37,8 @@ public abstract class Task<TResult> {
         throw new UnsupportedOperationException("addOnCompleteListener is not implemented");
     }
 
-    public Task<TResult> addOnCanceledListener(OnCanceledListener onCanceledListener) {
-        throw new UnsupportedOperationException("addOnCanceledListener is not implemented.");
-    }
-
     public Task<TResult> addOnCanceledListener(Executor executor, OnCanceledListener onCanceledListener) {
         throw new UnsupportedOperationException("addOnCanceledListener is not implemented");
-    }
-
-    public Task<TResult> addOnCanceledListener(Activity activity, OnCanceledListener onCanceledListener) {
-        throw new UnsupportedOperationException("addOnCanceledListener is not implemented.");
-    }
-
-    public <TContinuationResult> Task<TContinuationResult> continueWith(Continuation<TResult, TContinuationResult> continuation) {
-        throw new UnsupportedOperationException("continueWith is not implemented");
     }
 
     public <TContinuationResult> Task<TContinuationResult> continueWith(Executor executor, Continuation<TResult, TContinuationResult> continuation) {

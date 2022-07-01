@@ -1,26 +1,18 @@
 package com.google.zxing;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ChecksumException extends ReaderException {
     private static final ChecksumException INSTANCE;
 
     static {
         ChecksumException checksumException = new ChecksumException();
         INSTANCE = checksumException;
-        checksumException.setStackTrace(NO_TRACE);
+        checksumException.setStackTrace(ReaderException.NO_TRACE);
     }
 
     private ChecksumException() {
     }
 
-    private ChecksumException(Throwable cause) {
-        super(cause);
-    }
-
     public static ChecksumException getChecksumInstance() {
-        return isStackTrace ? new ChecksumException() : INSTANCE;
-    }
-
-    public static ChecksumException getChecksumInstance(Throwable cause) {
-        return isStackTrace ? new ChecksumException(cause) : INSTANCE;
+        return ReaderException.isStackTrace ? new ChecksumException() : INSTANCE;
     }
 }

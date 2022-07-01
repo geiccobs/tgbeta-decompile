@@ -1,13 +1,11 @@
 package com.google.android.gms.identity.intents.model;
 
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.ReflectedParcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import com.google.android.gms.identity.intents.AddressConstants;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class UserAddress extends AbstractSafeParcelable implements ReflectedParcelable {
     public static final Parcelable.Creator<UserAddress> CREATOR = new zzb();
     private String name;
@@ -45,73 +43,6 @@ public final class UserAddress extends AbstractSafeParcelable implements Reflect
         this.zzv = z;
         this.zzw = str13;
         this.zzx = str14;
-    }
-
-    public static UserAddress fromIntent(Intent intent) {
-        if (intent == null || !intent.hasExtra(AddressConstants.Extras.EXTRA_ADDRESS)) {
-            return null;
-        }
-        return (UserAddress) intent.getParcelableExtra(AddressConstants.Extras.EXTRA_ADDRESS);
-    }
-
-    public final String getAddress1() {
-        return this.zzl;
-    }
-
-    public final String getAddress2() {
-        return this.zzm;
-    }
-
-    public final String getAddress3() {
-        return this.zzn;
-    }
-
-    public final String getAddress4() {
-        return this.zzo;
-    }
-
-    public final String getAddress5() {
-        return this.zzp;
-    }
-
-    public final String getAdministrativeArea() {
-        return this.zzq;
-    }
-
-    public final String getCompanyName() {
-        return this.zzw;
-    }
-
-    public final String getCountryCode() {
-        return this.zzk;
-    }
-
-    public final String getEmailAddress() {
-        return this.zzx;
-    }
-
-    public final String getLocality() {
-        return this.zzr;
-    }
-
-    public final String getName() {
-        return this.name;
-    }
-
-    public final String getPhoneNumber() {
-        return this.zzu;
-    }
-
-    public final String getPostalCode() {
-        return this.zzs;
-    }
-
-    public final String getSortingCode() {
-        return this.zzt;
-    }
-
-    public final boolean isPostBox() {
-        return this.zzv;
     }
 
     @Override // android.os.Parcelable

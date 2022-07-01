@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import androidx.collection.ArrayMap;
-import androidx.exifinterface.media.ExifInterface;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
@@ -18,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class TopicsSubscriber {
     private static final long MAX_DELAY_SEC = TimeUnit.HOURS.toSeconds(8);
     private final Context context;
@@ -39,21 +38,6 @@ public class TopicsSubscriber {
         this.rpc = gmsRpc;
         this.context = context;
         this.syncExecutor = scheduledExecutorService;
-    }
-
-    private void addToPendingOperations(TopicOperation topicOperation, TaskCompletionSource<Void> taskCompletionSource) {
-        ArrayDeque<TaskCompletionSource<Void>> arrayDeque;
-        synchronized (this.pendingOperations) {
-            String serialize = topicOperation.serialize();
-            if (this.pendingOperations.containsKey(serialize)) {
-                arrayDeque = this.pendingOperations.get(serialize);
-            } else {
-                ArrayDeque<TaskCompletionSource<Void>> arrayDeque2 = new ArrayDeque<>();
-                this.pendingOperations.put(serialize, arrayDeque2);
-                arrayDeque = arrayDeque2;
-            }
-            arrayDeque.add(taskCompletionSource);
-        }
     }
 
     private static <T> T awaitTask(Task<T> task) throws IOException {
@@ -113,7 +97,7 @@ public class TopicsSubscriber {
     }
 
     static boolean isDebugLogEnabled() {
-        return Log.isLoggable(Constants.TAG, 3) || (Build.VERSION.SDK_INT == 23 && Log.isLoggable(Constants.TAG, 3));
+        return Log.isLoggable("FirebaseMessaging", 3) || (Build.VERSION.SDK_INT == 23 && Log.isLoggable("FirebaseMessaging", 3));
     }
 
     public static final /* synthetic */ TopicsSubscriber lambda$createInstance$0$TopicsSubscriber(Context context, ScheduledExecutorService scheduledExecutorService, FirebaseMessaging firebaseMessaging, FirebaseInstallationsApi firebaseInstallationsApi, Metadata metadata, GmsRpc gmsRpc) throws Exception {
@@ -151,96 +135,22 @@ public class TopicsSubscriber {
         return this.syncScheduledOrRunning;
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    boolean performTopicOperation(TopicOperation topicOperation) throws IOException {
-        char c;
-        try {
-            String operation = topicOperation.getOperation();
-            switch (operation.hashCode()) {
-                case 83:
-                    if (operation.equals(ExifInterface.LATITUDE_SOUTH)) {
-                        c = 0;
-                        break;
-                    }
-                    c = 65535;
-                    break;
-                case 84:
-                default:
-                    c = 65535;
-                    break;
-                case 85:
-                    if (operation.equals("U")) {
-                        c = 1;
-                        break;
-                    }
-                    c = 65535;
-                    break;
-            }
-            switch (c) {
-                case 0:
-                    blockingSubscribeToTopic(topicOperation.getTopic());
-                    if (isDebugLogEnabled()) {
-                        String topic = topicOperation.getTopic();
-                        StringBuilder sb = new StringBuilder(String.valueOf(topic).length() + 31);
-                        sb.append("Subscribe to topic: ");
-                        sb.append(topic);
-                        sb.append(" succeeded.");
-                        Log.d(Constants.TAG, sb.toString());
-                        break;
-                    }
-                    break;
-                case 1:
-                    blockingUnsubscribeFromTopic(topicOperation.getTopic());
-                    if (isDebugLogEnabled()) {
-                        String topic2 = topicOperation.getTopic();
-                        StringBuilder sb2 = new StringBuilder(String.valueOf(topic2).length() + 35);
-                        sb2.append("Unsubscribe from topic: ");
-                        sb2.append(topic2);
-                        sb2.append(" succeeded.");
-                        Log.d(Constants.TAG, sb2.toString());
-                        break;
-                    }
-                    break;
-                default:
-                    if (isDebugLogEnabled()) {
-                        String valueOf = String.valueOf(topicOperation);
-                        StringBuilder sb3 = new StringBuilder(String.valueOf(valueOf).length() + 24);
-                        sb3.append("Unknown topic operation");
-                        sb3.append(valueOf);
-                        sb3.append(".");
-                        Log.d(Constants.TAG, sb3.toString());
-                        break;
-                    }
-                    break;
-            }
-            return true;
-        } catch (IOException e) {
-            if ("SERVICE_NOT_AVAILABLE".equals(e.getMessage()) || "INTERNAL_SERVER_ERROR".equals(e.getMessage())) {
-                String message = e.getMessage();
-                StringBuilder sb4 = new StringBuilder(String.valueOf(message).length() + 53);
-                sb4.append("Topic operation failed: ");
-                sb4.append(message);
-                sb4.append(". Will retry Topic operation.");
-                Log.e(Constants.TAG, sb4.toString());
-                return false;
-            } else if (e.getMessage() == null) {
-                Log.e(Constants.TAG, "Topic operation failed without exception message. Will retry Topic operation.");
-                return false;
-            } else {
-                throw e;
-            }
-        }
+    /* JADX WARN: Removed duplicated region for block: B:17:0x002e  */
+    /* JADX WARN: Removed duplicated region for block: B:24:0x008d A[Catch: IOException -> 0x00c0, TryCatch #0 {IOException -> 0x00c0, blocks: (B:3:0x0003, B:18:0x0030, B:20:0x0036, B:21:0x005a, B:23:0x0067, B:24:0x008d, B:26:0x009a), top: B:40:0x0003 }] */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    boolean performTopicOperation(com.google.firebase.messaging.TopicOperation r7) throws java.io.IOException {
+        /*
+            Method dump skipped, instructions count: 271
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.google.firebase.messaging.TopicsSubscriber.performTopicOperation(com.google.firebase.messaging.TopicOperation):boolean");
     }
 
     public void scheduleSyncTaskWithDelaySeconds(Runnable runnable, long j) {
         this.syncExecutor.schedule(runnable, j, TimeUnit.SECONDS);
-    }
-
-    Task<Void> scheduleTopicOperation(TopicOperation topicOperation) {
-        this.store.addTopicOperation(topicOperation);
-        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
-        addToPendingOperations(topicOperation, taskCompletionSource);
-        return taskCompletionSource.getTask();
     }
 
     public synchronized void setSyncScheduledOrRunning(boolean z) {
@@ -253,17 +163,11 @@ public class TopicsSubscriber {
         }
     }
 
-    public Task<Void> subscribeToTopic(String str) {
-        Task<Void> scheduleTopicOperation = scheduleTopicOperation(TopicOperation.subscribe(str));
-        startTopicsSyncIfNecessary();
-        return scheduleTopicOperation;
-    }
-
     /* JADX WARN: Code restructure failed: missing block: B:6:0x000d, code lost:
         if (isDebugLogEnabled() == false) goto L8;
      */
     /* JADX WARN: Code restructure failed: missing block: B:7:0x000f, code lost:
-        android.util.Log.d(com.google.firebase.messaging.Constants.TAG, "topic sync succeeded");
+        android.util.Log.d("FirebaseMessaging", "topic sync succeeded");
      */
     /* JADX WARN: Code restructure failed: missing block: B:9:0x0017, code lost:
         return true;
@@ -315,11 +219,5 @@ public class TopicsSubscriber {
     public void syncWithDelaySecondsInternal(long j) {
         scheduleSyncTaskWithDelaySeconds(new TopicsSyncTask(this, this.context, this.metadata, Math.min(Math.max(30L, j + j), MAX_DELAY_SEC)), j);
         setSyncScheduledOrRunning(true);
-    }
-
-    public Task<Void> unsubscribeFromTopic(String str) {
-        Task<Void> scheduleTopicOperation = scheduleTopicOperation(TopicOperation.unsubscribe(str));
-        startTopicsSyncIfNecessary();
-        return scheduleTopicOperation;
     }
 }

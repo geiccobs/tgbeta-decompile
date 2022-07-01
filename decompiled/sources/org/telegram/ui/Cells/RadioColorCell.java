@@ -5,13 +5,12 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RadioButton;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class RadioColorCell extends FrameLayout {
     private RadioButton radioButton;
     private final Theme.ResourcesProvider resourcesProvider;
@@ -27,49 +26,53 @@ public class RadioColorCell extends FrameLayout {
         RadioButton radioButton = new RadioButton(context);
         this.radioButton = radioButton;
         radioButton.setSize(AndroidUtilities.dp(20.0f));
-        this.radioButton.setColor(getThemedColor(Theme.key_dialogRadioBackground), getThemedColor(Theme.key_dialogRadioBackgroundChecked));
+        this.radioButton.setColor(getThemedColor("dialogRadioBackground"), getThemedColor("dialogRadioBackgroundChecked"));
+        RadioButton radioButton2 = this.radioButton;
+        boolean z = LocaleController.isRTL;
         int i = 5;
-        addView(this.radioButton, LayoutHelper.createFrame(22, 22.0f, (LocaleController.isRTL ? 5 : 3) | 48, LocaleController.isRTL ? 0 : 18, 14.0f, LocaleController.isRTL ? 18 : 0, 0.0f));
+        addView(radioButton2, LayoutHelper.createFrame(22, 22.0f, (z ? 5 : 3) | 48, z ? 0 : 18, 14.0f, z ? 18 : 0, 0.0f));
         TextView textView = new TextView(context);
         this.textView = textView;
-        textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
+        textView.setTextColor(getThemedColor("dialogTextBlack"));
         this.textView.setTextSize(1, 16.0f);
         this.textView.setLines(1);
         this.textView.setMaxLines(1);
         this.textView.setSingleLine(true);
         this.textView.setGravity((LocaleController.isRTL ? 5 : 3) | 16);
-        addView(this.textView, LayoutHelper.createFrame(-2, -2.0f, (!LocaleController.isRTL ? 3 : i) | 48, LocaleController.isRTL ? 21 : 51, 13.0f, LocaleController.isRTL ? 51 : 21, 0.0f));
+        TextView textView2 = this.textView;
+        boolean z2 = LocaleController.isRTL;
+        addView(textView2, LayoutHelper.createFrame(-2, -2.0f, (!z2 ? 3 : i) | 48, z2 ? 21 : 51, 13.0f, z2 ? 51 : 21, 0.0f));
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50.0f), 1073741824));
     }
 
-    public void setCheckColor(int color1, int color2) {
-        this.radioButton.setColor(color1, color2);
+    public void setCheckColor(int i, int i2) {
+        this.radioButton.setColor(i, i2);
     }
 
-    public void setTextAndValue(String text, boolean checked) {
-        this.textView.setText(text);
-        this.radioButton.setChecked(checked, false);
+    public void setTextAndValue(String str, boolean z) {
+        this.textView.setText(str);
+        this.radioButton.setChecked(z, false);
     }
 
-    public void setChecked(boolean checked, boolean animated) {
-        this.radioButton.setChecked(checked, animated);
+    public void setChecked(boolean z, boolean z2) {
+        this.radioButton.setChecked(z, z2);
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName("android.widget.RadioButton");
-        info.setCheckable(true);
-        info.setChecked(this.radioButton.isChecked());
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.setClassName("android.widget.RadioButton");
+        accessibilityNodeInfo.setCheckable(true);
+        accessibilityNodeInfo.setChecked(this.radioButton.isChecked());
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

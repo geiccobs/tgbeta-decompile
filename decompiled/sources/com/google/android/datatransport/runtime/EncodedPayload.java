@@ -2,20 +2,21 @@ package com.google.android.datatransport.runtime;
 
 import com.google.android.datatransport.Encoding;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class EncodedPayload {
     private final byte[] bytes;
     private final Encoding encoding;
 
-    public EncodedPayload(Encoding encoding, byte[] bytes) {
-        if (encoding == null) {
-            throw new NullPointerException("encoding is null");
+    public EncodedPayload(Encoding encoding, byte[] bArr) {
+        if (encoding != null) {
+            if (bArr == null) {
+                throw new NullPointerException("bytes is null");
+            }
+            this.encoding = encoding;
+            this.bytes = bArr;
+            return;
         }
-        if (bytes == null) {
-            throw new NullPointerException("bytes is null");
-        }
-        this.encoding = encoding;
-        this.bytes = bytes;
+        throw new NullPointerException("encoding is null");
     }
 
     public Encoding getEncoding() {
@@ -26,23 +27,22 @@ public final class EncodedPayload {
         return this.bytes;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof EncodedPayload)) {
+        if (!(obj instanceof EncodedPayload)) {
             return false;
         }
-        EncodedPayload that = (EncodedPayload) o;
-        if (this.encoding.equals(that.encoding)) {
-            return Arrays.equals(this.bytes, that.bytes);
+        EncodedPayload encodedPayload = (EncodedPayload) obj;
+        if (this.encoding.equals(encodedPayload.encoding)) {
+            return Arrays.equals(this.bytes, encodedPayload.bytes);
         }
         return false;
     }
 
     public int hashCode() {
-        int h = 1000003 ^ this.encoding.hashCode();
-        return (h * 1000003) ^ Arrays.hashCode(this.bytes);
+        return ((this.encoding.hashCode() ^ 1000003) * 1000003) ^ Arrays.hashCode(this.bytes);
     }
 
     public String toString() {

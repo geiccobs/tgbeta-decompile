@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import org.telegram.messenger.AndroidUtilities;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class PlayPauseDrawable extends Drawable {
     private int alpha = 255;
     float duration = 300.0f;
@@ -17,8 +17,13 @@ public class PlayPauseDrawable extends Drawable {
     private float progress;
     private final int size;
 
-    public PlayPauseDrawable(int size) {
-        this.size = AndroidUtilities.dp(size);
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    public PlayPauseDrawable(int i) {
+        this.size = AndroidUtilities.dp(i);
         Paint paint = new Paint(1);
         this.paint = paint;
         paint.setColor(-1);
@@ -26,30 +31,30 @@ public class PlayPauseDrawable extends Drawable {
 
     /* JADX WARN: Removed duplicated region for block: B:28:0x0062  */
     /* JADX WARN: Removed duplicated region for block: B:29:0x0066  */
-    /* JADX WARN: Removed duplicated region for block: B:32:0x00a1  */
-    /* JADX WARN: Removed duplicated region for block: B:33:0x00ac  */
+    /* JADX WARN: Removed duplicated region for block: B:32:0x009f  */
+    /* JADX WARN: Removed duplicated region for block: B:33:0x00aa  */
     @Override // android.graphics.drawable.Drawable
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void draw(android.graphics.Canvas r15) {
+    public void draw(android.graphics.Canvas r10) {
         /*
-            Method dump skipped, instructions count: 255
+            Method dump skipped, instructions count: 253
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.PlayPauseDrawable.draw(android.graphics.Canvas):void");
     }
 
-    public void setPause(boolean pause) {
-        setPause(pause, true);
+    public void setPause(boolean z) {
+        setPause(z, true);
     }
 
-    public void setPause(boolean pause, boolean animated) {
-        if (this.pause != pause) {
-            this.pause = pause;
-            if (!animated) {
-                this.progress = pause ? 1.0f : 0.0f;
+    public void setPause(boolean z, boolean z2) {
+        if (this.pause != z) {
+            this.pause = z;
+            if (!z2) {
+                this.progress = z ? 1.0f : 0.0f;
             }
             this.lastUpdateTime = AnimationUtils.currentAnimationTimeMillis();
             invalidateSelf();
@@ -67,11 +72,6 @@ public class PlayPauseDrawable extends Drawable {
     }
 
     @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
     public int getIntrinsicWidth() {
         return this.size;
     }
@@ -81,11 +81,11 @@ public class PlayPauseDrawable extends Drawable {
         return this.size;
     }
 
-    public void setParent(View parent) {
-        this.parent = parent;
+    public void setParent(View view) {
+        this.parent = view;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setDuration(int i) {
+        this.duration = i;
     }
 }

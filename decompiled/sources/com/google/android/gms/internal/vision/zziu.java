@@ -1,13 +1,13 @@
 package com.google.android.gms.internal.vision;
 
 import com.google.android.gms.internal.vision.zziw;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zziu<T extends zziw<T>> {
     private static final zziu zzd = new zziu(true);
     final zzlh<T, Object> zza;
@@ -48,10 +48,10 @@ public final class zziu<T extends zziw<T>> {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof zziu)) {
-            return false;
+        if (obj instanceof zziu) {
+            return this.zza.equals(((zziu) obj).zza);
         }
-        return this.zza.equals(((zziu) obj).zza);
+        return false;
     }
 
     public final int hashCode() {
@@ -88,11 +88,10 @@ public final class zziu<T extends zziw<T>> {
             }
             ArrayList arrayList = new ArrayList();
             arrayList.addAll((List) obj);
-            ArrayList arrayList2 = arrayList;
-            int size = arrayList2.size();
+            int size = arrayList.size();
             int i = 0;
             while (i < size) {
-                Object obj2 = arrayList2.get(i);
+                Object obj2 = arrayList.get(i);
                 i++;
                 zzd(t, obj2);
             }
@@ -122,61 +121,109 @@ public final class zziu<T extends zziw<T>> {
         list.add(obj);
     }
 
-    private static void zzd(T t, Object obj) {
-        boolean z;
-        zzml zzb = t.zzb();
-        zzjf.zza(obj);
-        switch (zzit.zza[zzb.zza().ordinal()]) {
-            case 1:
-                z = obj instanceof Integer;
-                break;
-            case 2:
-                z = obj instanceof Long;
-                break;
-            case 3:
-                z = obj instanceof Float;
-                break;
-            case 4:
-                z = obj instanceof Double;
-                break;
-            case 5:
-                z = obj instanceof Boolean;
-                break;
-            case 6:
-                z = obj instanceof String;
-                break;
-            case 7:
-                if (!(obj instanceof zzht) && !(obj instanceof byte[])) {
-                    z = false;
-                    break;
-                } else {
-                    z = true;
-                    break;
-                }
-                break;
-            case 8:
-                if (!(obj instanceof Integer) && !(obj instanceof zzje)) {
-                    z = false;
-                    break;
-                } else {
-                    z = true;
-                    break;
-                }
-            case 9:
-                if (!(obj instanceof zzkk) && !(obj instanceof zzjp)) {
-                    z = false;
-                    break;
-                } else {
-                    z = true;
-                    break;
-                }
-            default:
-                z = false;
-                break;
-        }
-        if (!z) {
-            throw new IllegalArgumentException(String.format("Wrong object type used with protocol message reflection.\nField number: %d, field java type: %s, value type: %s\n", Integer.valueOf(t.zza()), t.zzb().zza(), obj.getClass().getName()));
-        }
+    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
+    /* JADX WARN: Code restructure failed: missing block: B:12:0x0029, code lost:
+        if ((r6 instanceof com.google.android.gms.internal.vision.zzje) == false) goto L4;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:16:0x0032, code lost:
+        if ((r6 instanceof byte[]) == false) goto L4;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:8:0x0020, code lost:
+        if ((r6 instanceof com.google.android.gms.internal.vision.zzjp) == false) goto L4;
+     */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private static void zzd(T r5, java.lang.Object r6) {
+        /*
+            com.google.android.gms.internal.vision.zzml r0 = r5.zzb()
+            com.google.android.gms.internal.vision.zzjf.zza(r6)
+            int[] r1 = com.google.android.gms.internal.vision.zzit.zza
+            com.google.android.gms.internal.vision.zzmo r0 = r0.zza()
+            int r0 = r0.ordinal()
+            r0 = r1[r0]
+            r1 = 1
+            r2 = 0
+            switch(r0) {
+                case 1: goto L45;
+                case 2: goto L42;
+                case 3: goto L3f;
+                case 4: goto L3c;
+                case 5: goto L39;
+                case 6: goto L36;
+                case 7: goto L2c;
+                case 8: goto L23;
+                case 9: goto L1a;
+                default: goto L18;
+            }
+        L18:
+            r0 = 0
+            goto L47
+        L1a:
+            boolean r0 = r6 instanceof com.google.android.gms.internal.vision.zzkk
+            if (r0 != 0) goto L34
+            boolean r0 = r6 instanceof com.google.android.gms.internal.vision.zzjp
+            if (r0 == 0) goto L18
+            goto L34
+        L23:
+            boolean r0 = r6 instanceof java.lang.Integer
+            if (r0 != 0) goto L34
+            boolean r0 = r6 instanceof com.google.android.gms.internal.vision.zzje
+            if (r0 == 0) goto L18
+            goto L34
+        L2c:
+            boolean r0 = r6 instanceof com.google.android.gms.internal.vision.zzht
+            if (r0 != 0) goto L34
+            boolean r0 = r6 instanceof byte[]
+            if (r0 == 0) goto L18
+        L34:
+            r0 = 1
+            goto L47
+        L36:
+            boolean r0 = r6 instanceof java.lang.String
+            goto L47
+        L39:
+            boolean r0 = r6 instanceof java.lang.Boolean
+            goto L47
+        L3c:
+            boolean r0 = r6 instanceof java.lang.Double
+            goto L47
+        L3f:
+            boolean r0 = r6 instanceof java.lang.Float
+            goto L47
+        L42:
+            boolean r0 = r6 instanceof java.lang.Long
+            goto L47
+        L45:
+            boolean r0 = r6 instanceof java.lang.Integer
+        L47:
+            if (r0 == 0) goto L4a
+            return
+        L4a:
+            java.lang.IllegalArgumentException r0 = new java.lang.IllegalArgumentException
+            r3 = 3
+            java.lang.Object[] r3 = new java.lang.Object[r3]
+            int r4 = r5.zza()
+            java.lang.Integer r4 = java.lang.Integer.valueOf(r4)
+            r3[r2] = r4
+            com.google.android.gms.internal.vision.zzml r5 = r5.zzb()
+            com.google.android.gms.internal.vision.zzmo r5 = r5.zza()
+            r3[r1] = r5
+            r5 = 2
+            java.lang.Class r6 = r6.getClass()
+            java.lang.String r6 = r6.getName()
+            r3[r5] = r6
+            java.lang.String r5 = "Wrong object type used with protocol message reflection.\nField number: %d, field java type: %s, value type: %s\n"
+            java.lang.String r5 = java.lang.String.format(r5, r3)
+            r0.<init>(r5)
+            goto L79
+        L78:
+            throw r0
+        L79:
+            goto L78
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.google.android.gms.internal.vision.zziu.zzd(com.google.android.gms.internal.vision.zziw, java.lang.Object):void");
     }
 
     public final boolean zzf() {
@@ -231,13 +278,13 @@ public final class zziu<T extends zziw<T>> {
         if (obj instanceof zzkt) {
             return ((zzkt) obj).zza();
         }
-        if (obj instanceof byte[]) {
-            byte[] bArr = (byte[]) obj;
-            byte[] bArr2 = new byte[bArr.length];
-            System.arraycopy(bArr, 0, bArr2, 0, bArr.length);
-            return bArr2;
+        if (!(obj instanceof byte[])) {
+            return obj;
         }
-        return obj;
+        byte[] bArr = (byte[]) obj;
+        byte[] bArr2 = new byte[bArr.length];
+        System.arraycopy(bArr, 0, bArr2, 0, bArr.length);
+        return bArr2;
     }
 
     private final void zzb(Map.Entry<T, Object> entry) {
@@ -274,91 +321,6 @@ public final class zziu<T extends zziw<T>> {
         }
     }
 
-    public static void zza(zzii zziiVar, zzml zzmlVar, int i, Object obj) throws IOException {
-        if (zzmlVar == zzml.GROUP) {
-            zzkk zzkkVar = (zzkk) obj;
-            zzjf.zza(zzkkVar);
-            zziiVar.zza(i, 3);
-            zzkkVar.zza(zziiVar);
-            zziiVar.zza(i, 4);
-            return;
-        }
-        zziiVar.zza(i, zzmlVar.zzb());
-        switch (zzit.zzb[zzmlVar.ordinal()]) {
-            case 1:
-                zziiVar.zza(((Double) obj).doubleValue());
-                return;
-            case 2:
-                zziiVar.zza(((Float) obj).floatValue());
-                return;
-            case 3:
-                zziiVar.zza(((Long) obj).longValue());
-                return;
-            case 4:
-                zziiVar.zza(((Long) obj).longValue());
-                return;
-            case 5:
-                zziiVar.zza(((Integer) obj).intValue());
-                return;
-            case 6:
-                zziiVar.zzc(((Long) obj).longValue());
-                return;
-            case 7:
-                zziiVar.zzd(((Integer) obj).intValue());
-                return;
-            case 8:
-                zziiVar.zza(((Boolean) obj).booleanValue());
-                return;
-            case 9:
-                ((zzkk) obj).zza(zziiVar);
-                return;
-            case 10:
-                zziiVar.zza((zzkk) obj);
-                return;
-            case 11:
-                if (obj instanceof zzht) {
-                    zziiVar.zza((zzht) obj);
-                    return;
-                } else {
-                    zziiVar.zza((String) obj);
-                    return;
-                }
-            case 12:
-                if (obj instanceof zzht) {
-                    zziiVar.zza((zzht) obj);
-                    return;
-                }
-                byte[] bArr = (byte[]) obj;
-                zziiVar.zzb(bArr, 0, bArr.length);
-                return;
-            case 13:
-                zziiVar.zzb(((Integer) obj).intValue());
-                return;
-            case 14:
-                zziiVar.zzd(((Integer) obj).intValue());
-                return;
-            case 15:
-                zziiVar.zzc(((Long) obj).longValue());
-                return;
-            case 16:
-                zziiVar.zzc(((Integer) obj).intValue());
-                return;
-            case 17:
-                zziiVar.zzb(((Long) obj).longValue());
-                return;
-            case 18:
-                if (obj instanceof zzje) {
-                    zziiVar.zza(((zzje) obj).zza());
-                    return;
-                } else {
-                    zziiVar.zza(((Integer) obj).intValue());
-                    return;
-                }
-            default:
-                return;
-        }
-    }
-
     public final int zzg() {
         int i = 0;
         for (int i2 = 0; i2 < this.zza.zzc(); i2++) {
@@ -382,7 +344,7 @@ public final class zziu<T extends zziw<T>> {
         return zzc(key, value);
     }
 
-    public static int zza(zzml zzmlVar, int i, Object obj) {
+    static int zza(zzml zzmlVar, int i, Object obj) {
         int zze = zzii.zze(i);
         if (zzmlVar == zzml.GROUP) {
             zzjf.zza((zzkk) obj);
@@ -436,7 +398,7 @@ public final class zziu<T extends zziw<T>> {
                 return zzii.zzh(((Integer) obj).intValue());
             case 17:
                 return zzii.zzf(((Long) obj).longValue());
-            case 18:
+            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
                 if (obj instanceof zzje) {
                     return zzii.zzk(((zzje) obj).zza());
                 }

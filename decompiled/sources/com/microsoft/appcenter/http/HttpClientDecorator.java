@@ -1,12 +1,12 @@
 package com.microsoft.appcenter.http;
 
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class HttpClientDecorator implements HttpClient {
     final HttpClient mDecoratedApi;
 
-    public HttpClientDecorator(HttpClient decoratedApi) {
-        this.mDecoratedApi = decoratedApi;
+    public HttpClientDecorator(HttpClient httpClient) {
+        this.mDecoratedApi = httpClient;
     }
 
     @Override // java.io.Closeable, java.lang.AutoCloseable
@@ -17,9 +17,5 @@ public abstract class HttpClientDecorator implements HttpClient {
     @Override // com.microsoft.appcenter.http.HttpClient
     public void reopen() {
         this.mDecoratedApi.reopen();
-    }
-
-    HttpClient getDecoratedApi() {
-        return this.mDecoratedApi;
     }
 }

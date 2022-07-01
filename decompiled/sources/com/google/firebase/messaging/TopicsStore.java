@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class TopicsStore {
     private static WeakReference<TopicsStore> topicsStoreWeakReference;
     private final SharedPreferences sharedPreferences;
@@ -18,29 +18,21 @@ public final class TopicsStore {
     }
 
     public static synchronized TopicsStore getInstance(Context context, Executor executor) {
-        TopicsStore topicsStore;
         synchronized (TopicsStore.class) {
             WeakReference<TopicsStore> weakReference = topicsStoreWeakReference;
-            if (weakReference != null) {
-                topicsStore = weakReference.get();
-            } else {
-                topicsStore = null;
-            }
+            TopicsStore topicsStore = weakReference != null ? weakReference.get() : null;
             if (topicsStore == null) {
-                topicsStore = new TopicsStore(context.getSharedPreferences("com.google.android.gms.appid", 0), executor);
-                topicsStore.initStore();
-                topicsStoreWeakReference = new WeakReference<>(topicsStore);
+                TopicsStore topicsStore2 = new TopicsStore(context.getSharedPreferences("com.google.android.gms.appid", 0), executor);
+                topicsStore2.initStore();
+                topicsStoreWeakReference = new WeakReference<>(topicsStore2);
+                return topicsStore2;
             }
+            return topicsStore;
         }
-        return topicsStore;
     }
 
     private synchronized void initStore() {
         this.topicOperationsQueue = SharedPreferencesQueue.createInstance(this.sharedPreferences, "topic_operation_queue", ",", this.syncExecutor);
-    }
-
-    public synchronized boolean addTopicOperation(TopicOperation topicOperation) {
-        return this.topicOperationsQueue.add(topicOperation.serialize());
     }
 
     public synchronized TopicOperation getNextTopicOperation() {

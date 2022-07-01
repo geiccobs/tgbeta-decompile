@@ -5,14 +5,14 @@ import com.google.firebase.components.ComponentContainer;
 import com.google.firebase.components.Dependency;
 import java.util.Iterator;
 import java.util.Set;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class DefaultUserAgentPublisher implements UserAgentPublisher {
     private final GlobalLibraryVersionRegistrar gamesSDKRegistrar;
     private final String javaSDKVersionUserAgent;
 
-    DefaultUserAgentPublisher(Set<LibraryVersion> libraryVersions, GlobalLibraryVersionRegistrar gamesSDKRegistrar) {
-        this.javaSDKVersionUserAgent = toUserAgent(libraryVersions);
-        this.gamesSDKRegistrar = gamesSDKRegistrar;
+    DefaultUserAgentPublisher(Set<LibraryVersion> set, GlobalLibraryVersionRegistrar globalLibraryVersionRegistrar) {
+        this.javaSDKVersionUserAgent = toUserAgent(set);
+        this.gamesSDKRegistrar = globalLibraryVersionRegistrar;
     }
 
     @Override // com.google.firebase.platforminfo.UserAgentPublisher
@@ -23,15 +23,15 @@ public class DefaultUserAgentPublisher implements UserAgentPublisher {
         return this.javaSDKVersionUserAgent + ' ' + toUserAgent(this.gamesSDKRegistrar.getRegisteredVersions());
     }
 
-    private static String toUserAgent(Set<LibraryVersion> tokens) {
+    private static String toUserAgent(Set<LibraryVersion> set) {
         StringBuilder sb = new StringBuilder();
-        Iterator<LibraryVersion> iterator = tokens.iterator();
-        while (iterator.hasNext()) {
-            LibraryVersion token = iterator.next();
-            sb.append(token.getLibraryName());
+        Iterator<LibraryVersion> it = set.iterator();
+        while (it.hasNext()) {
+            LibraryVersion next = it.next();
+            sb.append(next.getLibraryName());
             sb.append('/');
-            sb.append(token.getVersion());
-            if (iterator.hasNext()) {
+            sb.append(next.getVersion());
+            if (it.hasNext()) {
                 sb.append(' ');
             }
         }
@@ -42,7 +42,7 @@ public class DefaultUserAgentPublisher implements UserAgentPublisher {
         return Component.builder(UserAgentPublisher.class).add(Dependency.setOf(LibraryVersion.class)).factory(DefaultUserAgentPublisher$$ExternalSyntheticLambda0.INSTANCE).build();
     }
 
-    public static /* synthetic */ UserAgentPublisher lambda$component$0(ComponentContainer c) {
-        return new DefaultUserAgentPublisher(c.setOf(LibraryVersion.class), GlobalLibraryVersionRegistrar.getInstance());
+    public static /* synthetic */ UserAgentPublisher lambda$component$0(ComponentContainer componentContainer) {
+        return new DefaultUserAgentPublisher(componentContainer.setOf(LibraryVersion.class), GlobalLibraryVersionRegistrar.getInstance());
     }
 }

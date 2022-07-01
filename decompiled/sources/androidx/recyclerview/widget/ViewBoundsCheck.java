@@ -1,35 +1,13 @@
 package androidx.recyclerview.widget;
 
 import android.view.View;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class ViewBoundsCheck {
-    static final int CVE_PVE_POS = 12;
-    static final int CVE_PVS_POS = 8;
-    static final int CVS_PVE_POS = 4;
-    static final int CVS_PVS_POS = 0;
-    static final int EQ = 2;
-    static final int FLAG_CVE_EQ_PVE = 8192;
-    static final int FLAG_CVE_EQ_PVS = 512;
-    static final int FLAG_CVE_GT_PVE = 4096;
-    static final int FLAG_CVE_GT_PVS = 256;
-    static final int FLAG_CVE_LT_PVE = 16384;
-    static final int FLAG_CVE_LT_PVS = 1024;
-    static final int FLAG_CVS_EQ_PVE = 32;
-    static final int FLAG_CVS_EQ_PVS = 2;
-    static final int FLAG_CVS_GT_PVE = 16;
-    static final int FLAG_CVS_GT_PVS = 1;
-    static final int FLAG_CVS_LT_PVE = 64;
-    static final int FLAG_CVS_LT_PVS = 4;
-    static final int GT = 1;
-    static final int LT = 4;
-    static final int MASK = 7;
     BoundFlags mBoundFlags = new BoundFlags();
     final Callback mCallback;
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Callback {
         View getChildAt(int i);
 
@@ -42,17 +20,12 @@ class ViewBoundsCheck {
         int getParentStart();
     }
 
-    @Retention(RetentionPolicy.SOURCE)
-    /* loaded from: classes.dex */
-    public @interface ViewBounds {
-    }
-
     public ViewBoundsCheck(Callback callback) {
         this.mCallback = callback;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class BoundFlags {
         int mBoundFlags = 0;
         int mChildEnd;
@@ -60,32 +33,29 @@ class ViewBoundsCheck {
         int mRvEnd;
         int mRvStart;
 
+        int compare(int i, int i2) {
+            if (i > i2) {
+                return 1;
+            }
+            return i == i2 ? 2 : 4;
+        }
+
         BoundFlags() {
         }
 
-        void setBounds(int rvStart, int rvEnd, int childStart, int childEnd) {
-            this.mRvStart = rvStart;
-            this.mRvEnd = rvEnd;
-            this.mChildStart = childStart;
-            this.mChildEnd = childEnd;
+        void setBounds(int i, int i2, int i3, int i4) {
+            this.mRvStart = i;
+            this.mRvEnd = i2;
+            this.mChildStart = i3;
+            this.mChildEnd = i4;
         }
 
-        void addFlags(int flags) {
-            this.mBoundFlags |= flags;
+        void addFlags(int i) {
+            this.mBoundFlags = i | this.mBoundFlags;
         }
 
         void resetFlags() {
             this.mBoundFlags = 0;
-        }
-
-        int compare(int x, int y) {
-            if (x > y) {
-                return 1;
-            }
-            if (x == y) {
-                return 2;
-            }
-            return 4;
         }
 
         boolean boundsMatch() {
@@ -106,39 +76,38 @@ class ViewBoundsCheck {
         }
     }
 
-    public View findOneViewWithinBoundFlags(int fromIndex, int toIndex, int preferredBoundFlags, int acceptableBoundFlags) {
-        int start = this.mCallback.getParentStart();
-        int end = this.mCallback.getParentEnd();
-        int next = toIndex > fromIndex ? 1 : -1;
-        View acceptableMatch = null;
-        for (int i = fromIndex; i != toIndex; i += next) {
-            View child = this.mCallback.getChildAt(i);
-            int childStart = this.mCallback.getChildStart(child);
-            int childEnd = this.mCallback.getChildEnd(child);
-            this.mBoundFlags.setBounds(start, end, childStart, childEnd);
-            if (preferredBoundFlags != 0) {
+    public View findOneViewWithinBoundFlags(int i, int i2, int i3, int i4) {
+        int parentStart = this.mCallback.getParentStart();
+        int parentEnd = this.mCallback.getParentEnd();
+        int i5 = i2 > i ? 1 : -1;
+        View view = null;
+        while (i != i2) {
+            View childAt = this.mCallback.getChildAt(i);
+            this.mBoundFlags.setBounds(parentStart, parentEnd, this.mCallback.getChildStart(childAt), this.mCallback.getChildEnd(childAt));
+            if (i3 != 0) {
                 this.mBoundFlags.resetFlags();
-                this.mBoundFlags.addFlags(preferredBoundFlags);
+                this.mBoundFlags.addFlags(i3);
                 if (this.mBoundFlags.boundsMatch()) {
-                    return child;
+                    return childAt;
                 }
             }
-            if (acceptableBoundFlags != 0) {
+            if (i4 != 0) {
                 this.mBoundFlags.resetFlags();
-                this.mBoundFlags.addFlags(acceptableBoundFlags);
+                this.mBoundFlags.addFlags(i4);
                 if (this.mBoundFlags.boundsMatch()) {
-                    acceptableMatch = child;
+                    view = childAt;
                 }
             }
+            i += i5;
         }
-        return acceptableMatch;
+        return view;
     }
 
-    public boolean isViewWithinBoundFlags(View child, int boundsFlags) {
-        this.mBoundFlags.setBounds(this.mCallback.getParentStart(), this.mCallback.getParentEnd(), this.mCallback.getChildStart(child), this.mCallback.getChildEnd(child));
-        if (boundsFlags != 0) {
+    public boolean isViewWithinBoundFlags(View view, int i) {
+        this.mBoundFlags.setBounds(this.mCallback.getParentStart(), this.mCallback.getParentEnd(), this.mCallback.getChildStart(view), this.mCallback.getChildEnd(view));
+        if (i != 0) {
             this.mBoundFlags.resetFlags();
-            this.mBoundFlags.addFlags(boundsFlags);
+            this.mBoundFlags.addFlags(i);
             return this.mBoundFlags.boundsMatch();
         }
         return false;

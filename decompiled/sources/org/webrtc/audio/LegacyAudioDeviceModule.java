@@ -1,6 +1,6 @@
 package org.webrtc.audio;
 @Deprecated
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class LegacyAudioDeviceModule implements AudioDeviceModule {
     @Override // org.webrtc.audio.AudioDeviceModule
     public long getNativeAudioDeviceModulePointer() {
@@ -12,12 +12,12 @@ public class LegacyAudioDeviceModule implements AudioDeviceModule {
     }
 
     @Override // org.webrtc.audio.AudioDeviceModule
-    public void setSpeakerMute(boolean mute) {
-        org.webrtc.voiceengine.WebRtcAudioTrack.setSpeakerMute(mute);
+    public void setSpeakerMute(boolean z) {
+        org.webrtc.voiceengine.WebRtcAudioTrack.setSpeakerMute(z);
     }
 
     @Override // org.webrtc.audio.AudioDeviceModule
-    public void setMicrophoneMute(boolean mute) {
-        org.webrtc.voiceengine.WebRtcAudioRecord.setMicrophoneMute(mute);
+    public void setMicrophoneMute(boolean z) {
+        org.webrtc.voiceengine.WebRtcAudioRecord.setMicrophoneMute(z);
     }
 }

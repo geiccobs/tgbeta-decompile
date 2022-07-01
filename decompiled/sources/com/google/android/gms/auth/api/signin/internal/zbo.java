@@ -3,7 +3,7 @@ package com.google.android.gms.auth.api.signin.internal;
 import android.os.Parcel;
 import android.os.RemoteException;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zbo extends com.google.android.gms.internal.p001authapi.zbb implements zbp {
     public zbo() {
         super("com.google.android.gms.auth.api.signin.internal.IRevocationService");
@@ -11,15 +11,13 @@ public abstract class zbo extends com.google.android.gms.internal.p001authapi.zb
 
     @Override // com.google.android.gms.internal.p001authapi.zbb
     protected final boolean zba(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-        switch (i) {
-            case 1:
-                zbc();
-                return true;
-            case 2:
-                zbb();
-                return true;
-            default:
-                return false;
+        if (i == 1) {
+            zbc();
+        } else if (i != 2) {
+            return false;
+        } else {
+            zbb();
         }
+        return true;
     }
 }

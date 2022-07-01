@@ -11,17 +11,37 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 /* loaded from: classes.dex */
 public class ForegroundDetector implements Application.ActivityLifecycleCallbacks {
-    private static ForegroundDetector Instance = null;
+    private static ForegroundDetector Instance;
     private int refs;
     private boolean wasInBackground = true;
     private long enterBackgroundTime = 0;
     private CopyOnWriteArrayList<Listener> listeners = new CopyOnWriteArrayList<>();
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface Listener {
         void onBecameBackground();
 
         void onBecameForeground();
+    }
+
+    @Override // android.app.Application.ActivityLifecycleCallbacks
+    public void onActivityCreated(Activity activity, Bundle bundle) {
+    }
+
+    @Override // android.app.Application.ActivityLifecycleCallbacks
+    public void onActivityDestroyed(Activity activity) {
+    }
+
+    @Override // android.app.Application.ActivityLifecycleCallbacks
+    public void onActivityPaused(Activity activity) {
+    }
+
+    @Override // android.app.Application.ActivityLifecycleCallbacks
+    public void onActivityResumed(Activity activity) {
+    }
+
+    @Override // android.app.Application.ActivityLifecycleCallbacks
+    public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
     }
 
     public static ForegroundDetector getInstance() {
@@ -62,9 +82,8 @@ public class ForegroundDetector implements Application.ActivityLifecycleCallback
             }
             Iterator<Listener> it = this.listeners.iterator();
             while (it.hasNext()) {
-                Listener listener = it.next();
                 try {
-                    listener.onBecameForeground();
+                    it.next().onBecameForeground();
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
@@ -72,8 +91,8 @@ public class ForegroundDetector implements Application.ActivityLifecycleCallback
         }
     }
 
-    public boolean isWasInBackground(boolean reset) {
-        if (reset && Build.VERSION.SDK_INT >= 21 && SystemClock.elapsedRealtime() - this.enterBackgroundTime < 200) {
+    public boolean isWasInBackground(boolean z) {
+        if (z && Build.VERSION.SDK_INT >= 21 && SystemClock.elapsedRealtime() - this.enterBackgroundTime < 200) {
             this.wasInBackground = false;
         }
         return this.wasInBackground;
@@ -95,33 +114,12 @@ public class ForegroundDetector implements Application.ActivityLifecycleCallback
             }
             Iterator<Listener> it = this.listeners.iterator();
             while (it.hasNext()) {
-                Listener listener = it.next();
                 try {
-                    listener.onBecameBackground();
+                    it.next().onBecameBackground();
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
             }
         }
-    }
-
-    @Override // android.app.Application.ActivityLifecycleCallbacks
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-    }
-
-    @Override // android.app.Application.ActivityLifecycleCallbacks
-    public void onActivityResumed(Activity activity) {
-    }
-
-    @Override // android.app.Application.ActivityLifecycleCallbacks
-    public void onActivityPaused(Activity activity) {
-    }
-
-    @Override // android.app.Application.ActivityLifecycleCallbacks
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-    }
-
-    @Override // android.app.Application.ActivityLifecycleCallbacks
-    public void onActivityDestroyed(Activity activity) {
     }
 }

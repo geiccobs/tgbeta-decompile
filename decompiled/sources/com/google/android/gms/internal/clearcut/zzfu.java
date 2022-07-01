@@ -2,7 +2,7 @@ package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.internal.clearcut.zzfu;
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzfu<M extends zzfu<M>> extends zzfz {
     protected zzfw zzrj;
 

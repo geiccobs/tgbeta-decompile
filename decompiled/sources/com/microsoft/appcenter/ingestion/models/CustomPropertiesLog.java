@@ -9,136 +9,121 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class CustomPropertiesLog extends AbstractLog {
-    private static final String PROPERTIES = "properties";
-    private static final String PROPERTY_NAME = "name";
-    private static final String PROPERTY_TYPE = "type";
-    private static final String PROPERTY_TYPE_BOOLEAN = "boolean";
-    private static final String PROPERTY_TYPE_CLEAR = "clear";
-    private static final String PROPERTY_TYPE_DATETIME = "dateTime";
-    private static final String PROPERTY_TYPE_NUMBER = "number";
-    private static final String PROPERTY_TYPE_STRING = "string";
-    private static final String PROPERTY_VALUE = "value";
-    public static final String TYPE = "customProperties";
     private Map<String, Object> properties;
 
-    private static Map<String, Object> readProperties(JSONObject object) throws JSONException {
-        JSONArray jArray = object.getJSONArray(PROPERTIES);
-        Map<String, Object> properties = new HashMap<>();
-        for (int i = 0; i < jArray.length(); i++) {
-            JSONObject jProperty = jArray.getJSONObject(i);
-            String key = jProperty.getString("name");
-            Object value = readPropertyValue(jProperty);
-            properties.put(key, value);
-        }
-        return properties;
+    @Override // com.microsoft.appcenter.ingestion.models.Log
+    public String getType() {
+        return "customProperties";
     }
 
-    private static Object readPropertyValue(JSONObject object) throws JSONException {
-        String type = object.getString("type");
-        if (type.equals(PROPERTY_TYPE_CLEAR)) {
+    private static Map<String, Object> readProperties(JSONObject jSONObject) throws JSONException {
+        JSONArray jSONArray = jSONObject.getJSONArray("properties");
+        HashMap hashMap = new HashMap();
+        for (int i = 0; i < jSONArray.length(); i++) {
+            JSONObject jSONObject2 = jSONArray.getJSONObject(i);
+            hashMap.put(jSONObject2.getString("name"), readPropertyValue(jSONObject2));
+        }
+        return hashMap;
+    }
+
+    private static Object readPropertyValue(JSONObject jSONObject) throws JSONException {
+        String string = jSONObject.getString("type");
+        if (string.equals("clear")) {
             return null;
         }
-        if (type.equals("boolean")) {
-            Object value = Boolean.valueOf(object.getBoolean("value"));
-            return value;
-        } else if (type.equals(PROPERTY_TYPE_NUMBER)) {
-            Object value2 = object.get("value");
-            if (!(value2 instanceof Number)) {
+        if (string.equals("boolean")) {
+            return Boolean.valueOf(jSONObject.getBoolean("value"));
+        }
+        if (string.equals("number")) {
+            Object obj = jSONObject.get("value");
+            if (!(obj instanceof Number)) {
                 throw new JSONException("Invalid value type");
             }
-            return value2;
-        } else if (type.equals("dateTime")) {
-            Object value3 = JSONDateUtils.toDate(object.getString("value"));
-            return value3;
-        } else if (type.equals("string")) {
-            Object value4 = object.getString("value");
-            return value4;
+            return obj;
+        } else if (string.equals("dateTime")) {
+            return JSONDateUtils.toDate(jSONObject.getString("value"));
         } else {
+            if (string.equals("string")) {
+                return jSONObject.getString("value");
+            }
             throw new JSONException("Invalid value type");
         }
     }
 
-    private static void writeProperties(JSONStringer writer, Map<String, Object> properties) throws JSONException {
-        if (properties != null) {
-            writer.key(PROPERTIES).array();
-            for (Map.Entry<String, Object> property : properties.entrySet()) {
-                writer.object();
-                JSONUtils.write(writer, "name", property.getKey());
-                writePropertyValue(writer, property.getValue());
-                writer.endObject();
+    private static void writeProperties(JSONStringer jSONStringer, Map<String, Object> map) throws JSONException {
+        if (map != null) {
+            jSONStringer.key("properties").array();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                jSONStringer.object();
+                JSONUtils.write(jSONStringer, "name", entry.getKey());
+                writePropertyValue(jSONStringer, entry.getValue());
+                jSONStringer.endObject();
             }
-            writer.endArray();
+            jSONStringer.endArray();
             return;
         }
         throw new JSONException("Properties cannot be null");
     }
 
-    private static void writePropertyValue(JSONStringer writer, Object value) throws JSONException {
-        if (value == null) {
-            JSONUtils.write(writer, "type", PROPERTY_TYPE_CLEAR);
-        } else if (value instanceof Boolean) {
-            JSONUtils.write(writer, "type", "boolean");
-            JSONUtils.write(writer, "value", value);
-        } else if (value instanceof Number) {
-            JSONUtils.write(writer, "type", PROPERTY_TYPE_NUMBER);
-            JSONUtils.write(writer, "value", value);
-        } else if (value instanceof Date) {
-            JSONUtils.write(writer, "type", "dateTime");
-            JSONUtils.write(writer, "value", JSONDateUtils.toString((Date) value));
-        } else if (value instanceof String) {
-            JSONUtils.write(writer, "type", "string");
-            JSONUtils.write(writer, "value", value);
+    private static void writePropertyValue(JSONStringer jSONStringer, Object obj) throws JSONException {
+        if (obj == null) {
+            JSONUtils.write(jSONStringer, "type", "clear");
+        } else if (obj instanceof Boolean) {
+            JSONUtils.write(jSONStringer, "type", "boolean");
+            JSONUtils.write(jSONStringer, "value", obj);
+        } else if (obj instanceof Number) {
+            JSONUtils.write(jSONStringer, "type", "number");
+            JSONUtils.write(jSONStringer, "value", obj);
+        } else if (obj instanceof Date) {
+            JSONUtils.write(jSONStringer, "type", "dateTime");
+            JSONUtils.write(jSONStringer, "value", JSONDateUtils.toString((Date) obj));
+        } else if (obj instanceof String) {
+            JSONUtils.write(jSONStringer, "type", "string");
+            JSONUtils.write(jSONStringer, "value", obj);
         } else {
             throw new JSONException("Invalid value type");
         }
-    }
-
-    @Override // com.microsoft.appcenter.ingestion.models.Log
-    public String getType() {
-        return TYPE;
     }
 
     public Map<String, Object> getProperties() {
         return this.properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
-        this.properties = properties;
+    public void setProperties(Map<String, Object> map) {
+        this.properties = map;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) throws JSONException {
-        super.read(object);
-        setProperties(readProperties(object));
+    public void read(JSONObject jSONObject) throws JSONException {
+        super.read(jSONObject);
+        setProperties(readProperties(jSONObject));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog, com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        super.write(writer);
-        writeProperties(writer, getProperties());
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        super.write(jSONStringer);
+        writeProperties(jSONStringer, getProperties());
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
+        if (obj == null || CustomPropertiesLog.class != obj.getClass() || !super.equals(obj)) {
             return false;
         }
-        CustomPropertiesLog that = (CustomPropertiesLog) o;
         Map<String, Object> map = this.properties;
-        return map != null ? map.equals(that.properties) : that.properties == null;
+        Map<String, Object> map2 = ((CustomPropertiesLog) obj).properties;
+        return map != null ? map.equals(map2) : map2 == null;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog
     public int hashCode() {
-        int result = super.hashCode();
-        int i = result * 31;
+        int hashCode = super.hashCode() * 31;
         Map<String, Object> map = this.properties;
-        int result2 = i + (map != null ? map.hashCode() : 0);
-        return result2;
+        return hashCode + (map != null ? map.hashCode() : 0);
     }
 }

@@ -2,23 +2,23 @@ package com.google.android.exoplayer2.decoder;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class SimpleOutputBuffer extends OutputBuffer {
     public ByteBuffer data;
     private final SimpleDecoder<?, SimpleOutputBuffer, ?> owner;
 
-    public SimpleOutputBuffer(SimpleDecoder<?, SimpleOutputBuffer, ?> owner) {
-        this.owner = owner;
+    public SimpleOutputBuffer(SimpleDecoder<?, SimpleOutputBuffer, ?> simpleDecoder) {
+        this.owner = simpleDecoder;
     }
 
-    public ByteBuffer init(long timeUs, int size) {
-        this.timeUs = timeUs;
+    public ByteBuffer init(long j, int i) {
+        this.timeUs = j;
         ByteBuffer byteBuffer = this.data;
-        if (byteBuffer == null || byteBuffer.capacity() < size) {
-            this.data = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+        if (byteBuffer == null || byteBuffer.capacity() < i) {
+            this.data = ByteBuffer.allocateDirect(i).order(ByteOrder.nativeOrder());
         }
         this.data.position(0);
-        this.data.limit(size);
+        this.data.limit(i);
         return this.data;
     }
 

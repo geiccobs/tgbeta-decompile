@@ -4,14 +4,8 @@ import android.app.Person;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import androidx.core.graphics.drawable.IconCompat;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Person {
-    private static final String ICON_KEY = "icon";
-    private static final String IS_BOT_KEY = "isBot";
-    private static final String IS_IMPORTANT_KEY = "isImportant";
-    private static final String KEY_KEY = "key";
-    private static final String NAME_KEY = "name";
-    private static final String URI_KEY = "uri";
     IconCompat mIcon;
     boolean mIsBot;
     boolean mIsImportant;
@@ -19,24 +13,8 @@ public class Person {
     CharSequence mName;
     String mUri;
 
-    public static Person fromBundle(Bundle bundle) {
-        Bundle iconBundle = bundle.getBundle(ICON_KEY);
-        return new Builder().setName(bundle.getCharSequence("name")).setIcon(iconBundle != null ? IconCompat.createFromBundle(iconBundle) : null).setUri(bundle.getString(URI_KEY)).setKey(bundle.getString(KEY_KEY)).setBot(bundle.getBoolean(IS_BOT_KEY)).setImportant(bundle.getBoolean(IS_IMPORTANT_KEY)).build();
-    }
-
     public static Person fromPersistableBundle(PersistableBundle bundle) {
-        return new Builder().setName(bundle.getString("name")).setUri(bundle.getString(URI_KEY)).setKey(bundle.getString(KEY_KEY)).setBot(bundle.getBoolean(IS_BOT_KEY)).setImportant(bundle.getBoolean(IS_IMPORTANT_KEY)).build();
-    }
-
-    public static Person fromAndroidPerson(android.app.Person person) {
-        IconCompat iconCompat;
-        Builder name = new Builder().setName(person.getName());
-        if (person.getIcon() != null) {
-            iconCompat = IconCompat.createFromIcon(person.getIcon());
-        } else {
-            iconCompat = null;
-        }
-        return name.setIcon(iconCompat).setUri(person.getUri()).setKey(person.getKey()).setBot(person.isBot()).setImportant(person.isImportant()).build();
+        return new Builder().setName(bundle.getString("name")).setUri(bundle.getString("uri")).setKey(bundle.getString("key")).setBot(bundle.getBoolean("isBot")).setImportant(bundle.getBoolean("isImportant")).build();
     }
 
     Person(Builder builder) {
@@ -49,30 +27,26 @@ public class Person {
     }
 
     public Bundle toBundle() {
-        Bundle result = new Bundle();
-        result.putCharSequence("name", this.mName);
+        Bundle bundle = new Bundle();
+        bundle.putCharSequence("name", this.mName);
         IconCompat iconCompat = this.mIcon;
-        result.putBundle(ICON_KEY, iconCompat != null ? iconCompat.toBundle() : null);
-        result.putString(URI_KEY, this.mUri);
-        result.putString(KEY_KEY, this.mKey);
-        result.putBoolean(IS_BOT_KEY, this.mIsBot);
-        result.putBoolean(IS_IMPORTANT_KEY, this.mIsImportant);
-        return result;
+        bundle.putBundle("icon", iconCompat != null ? iconCompat.toBundle() : null);
+        bundle.putString("uri", this.mUri);
+        bundle.putString("key", this.mKey);
+        bundle.putBoolean("isBot", this.mIsBot);
+        bundle.putBoolean("isImportant", this.mIsImportant);
+        return bundle;
     }
 
     public PersistableBundle toPersistableBundle() {
-        PersistableBundle result = new PersistableBundle();
+        PersistableBundle persistableBundle = new PersistableBundle();
         CharSequence charSequence = this.mName;
-        result.putString("name", charSequence != null ? charSequence.toString() : null);
-        result.putString(URI_KEY, this.mUri);
-        result.putString(KEY_KEY, this.mKey);
-        result.putBoolean(IS_BOT_KEY, this.mIsBot);
-        result.putBoolean(IS_IMPORTANT_KEY, this.mIsImportant);
-        return result;
-    }
-
-    public Builder toBuilder() {
-        return new Builder(this);
+        persistableBundle.putString("name", charSequence != null ? charSequence.toString() : null);
+        persistableBundle.putString("uri", this.mUri);
+        persistableBundle.putString("key", this.mKey);
+        persistableBundle.putBoolean("isBot", this.mIsBot);
+        persistableBundle.putBoolean("isImportant", this.mIsImportant);
+        return persistableBundle;
     }
 
     public android.app.Person toAndroidPerson() {
@@ -108,13 +82,13 @@ public class Person {
         if (str != null) {
             return str;
         }
-        if (this.mName != null) {
-            return "name:" + ((Object) this.mName);
+        if (this.mName == null) {
+            return "";
         }
-        return "";
+        return "name:" + ((Object) this.mName);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class Builder {
         IconCompat mIcon;
         boolean mIsBot;
@@ -122,18 +96,6 @@ public class Person {
         String mKey;
         CharSequence mName;
         String mUri;
-
-        public Builder() {
-        }
-
-        Builder(Person person) {
-            this.mName = person.mName;
-            this.mIcon = person.mIcon;
-            this.mUri = person.mUri;
-            this.mKey = person.mKey;
-            this.mIsBot = person.mIsBot;
-            this.mIsImportant = person.mIsImportant;
-        }
 
         public Builder setName(CharSequence name) {
             this.mName = name;

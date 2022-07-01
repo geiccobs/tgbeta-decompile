@@ -8,7 +8,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.api.internal.GoogleApiManager;
 import com.google.android.gms.tasks.TaskCompletionSource;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zah<ResultT> extends zad {
     private final TaskApiCall<Api.AnyClient, ResultT> zab;
     private final TaskCompletionSource<ResultT> zac;
@@ -19,9 +19,10 @@ public final class zah<ResultT> extends zad {
         this.zac = taskCompletionSource;
         this.zab = taskApiCall;
         this.zad = statusExceptionMapper;
-        if (i == 2 && taskApiCall.shouldAutoResolveMissingFeatures()) {
-            throw new IllegalArgumentException("Best-effort write calls cannot pass methods that should auto-resolve missing features.");
+        if (i != 2 || !taskApiCall.shouldAutoResolveMissingFeatures()) {
+            return;
         }
+        throw new IllegalArgumentException("Best-effort write calls cannot pass methods that should auto-resolve missing features.");
     }
 
     @Override // com.google.android.gms.common.api.internal.zab

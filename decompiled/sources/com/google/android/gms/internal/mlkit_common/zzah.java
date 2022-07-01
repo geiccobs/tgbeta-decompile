@@ -1,6 +1,7 @@
 package com.google.android.gms.internal.mlkit_common;
+/* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzah<E> extends zzad<E> {
     static final zzad<Object> zza = new zzah(new Object[0], 0);
     private final transient Object[] zzb;
@@ -11,6 +12,11 @@ public final class zzah<E> extends zzad<E> {
         this.zzc = i;
     }
 
+    @Override // com.google.android.gms.internal.mlkit_common.zzac
+    public final int zzc() {
+        return 0;
+    }
+
     @Override // java.util.AbstractCollection, java.util.Collection, java.util.List
     public final int size() {
         return this.zzc;
@@ -19,11 +25,6 @@ public final class zzah<E> extends zzad<E> {
     @Override // com.google.android.gms.internal.mlkit_common.zzac
     public final Object[] zzb() {
         return this.zzb;
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_common.zzac
-    public final int zzc() {
-        return 0;
     }
 
     @Override // com.google.android.gms.internal.mlkit_common.zzac

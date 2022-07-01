@@ -1,5 +1,6 @@
 package org.telegram.ui.Components;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -11,129 +12,117 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Document;
+import org.telegram.tgnet.TLRPC$PhotoSize;
+import org.telegram.tgnet.TLRPC$StickerSet;
+import org.telegram.tgnet.TLRPC$StickerSetCovered;
+import org.telegram.tgnet.TLRPC$TL_messages_stickerSet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
-/* loaded from: classes5.dex */
+@SuppressLint({"ViewConstructor"})
+/* loaded from: classes3.dex */
 public class StickerSetBulletinLayout extends Bulletin.TwoLineLayout {
-    public static final int TYPE_ADDED = 2;
-    public static final int TYPE_ADDED_TO_FAVORITES = 5;
-    public static final int TYPE_ARCHIVED = 1;
-    public static final int TYPE_EMPTY = -1;
-    public static final int TYPE_REMOVED = 0;
-    public static final int TYPE_REMOVED_FROM_FAVORITES = 4;
-    public static final int TYPE_REMOVED_FROM_RECENT = 3;
-    public static final int TYPE_REPLACED_TO_FAVORITES = 6;
-    public static final int TYPE_REPLACED_TO_FAVORITES_GIFS = 7;
-
-    /* loaded from: classes5.dex */
-    public @interface Type {
+    public StickerSetBulletinLayout(Context context, TLObject tLObject, int i) {
+        this(context, tLObject, i, null, null);
     }
 
-    public StickerSetBulletinLayout(Context context, TLObject setObject, int type) {
-        this(context, setObject, type, null, null);
-    }
-
-    public StickerSetBulletinLayout(final Context context, TLObject setObject, int type, TLRPC.Document sticker, Theme.ResourcesProvider resourcesProvider) {
+    public StickerSetBulletinLayout(final Context context, TLObject tLObject, int i, TLRPC$Document tLRPC$Document, Theme.ResourcesProvider resourcesProvider) {
         super(context, resourcesProvider);
-        TLRPC.StickerSet stickerSet;
-        TLRPC.Document sticker2;
-        TLObject object;
-        ImageLocation imageLocation;
-        TLRPC.Document sticker3;
-        TLRPC.Document sticker4;
-        if (setObject instanceof TLRPC.TL_messages_stickerSet) {
-            TLRPC.TL_messages_stickerSet obj = (TLRPC.TL_messages_stickerSet) setObject;
-            TLRPC.StickerSet stickerSet2 = obj.set;
-            ArrayList<TLRPC.Document> documents = obj.documents;
-            if (documents != null && !documents.isEmpty()) {
-                sticker4 = documents.get(0);
-            } else {
-                sticker4 = null;
+        TLRPC$StickerSet tLRPC$StickerSet;
+        TLRPC$Document tLRPC$Document2;
+        int i2;
+        ImageLocation forSticker;
+        TLRPC$StickerSet tLRPC$StickerSet2;
+        boolean z = tLObject instanceof TLRPC$TL_messages_stickerSet;
+        TLRPC$PhotoSize tLRPC$PhotoSize = null;
+        if (z) {
+            TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet = (TLRPC$TL_messages_stickerSet) tLObject;
+            tLRPC$StickerSet2 = tLRPC$TL_messages_stickerSet.set;
+            ArrayList<TLRPC$Document> arrayList = tLRPC$TL_messages_stickerSet.documents;
+            if (arrayList != null && !arrayList.isEmpty()) {
+                tLRPC$Document2 = arrayList.get(0);
+                tLRPC$StickerSet = tLRPC$StickerSet2;
             }
-            stickerSet = stickerSet2;
-            sticker2 = sticker4;
-        } else if (setObject instanceof TLRPC.StickerSetCovered) {
-            TLRPC.StickerSetCovered obj2 = (TLRPC.StickerSetCovered) setObject;
-            TLRPC.StickerSet stickerSet3 = obj2.set;
-            if (obj2.cover != null) {
-                sticker3 = obj2.cover;
-            } else if (!obj2.covers.isEmpty()) {
-                sticker3 = obj2.covers.get(0);
+            tLRPC$Document2 = null;
+            tLRPC$StickerSet = tLRPC$StickerSet2;
+        } else if (tLObject instanceof TLRPC$StickerSetCovered) {
+            TLRPC$StickerSetCovered tLRPC$StickerSetCovered = (TLRPC$StickerSetCovered) tLObject;
+            tLRPC$StickerSet2 = tLRPC$StickerSetCovered.set;
+            TLRPC$Document tLRPC$Document3 = tLRPC$StickerSetCovered.cover;
+            if (tLRPC$Document3 != null) {
+                tLRPC$Document2 = tLRPC$Document3;
             } else {
-                sticker3 = null;
-            }
-            stickerSet = stickerSet3;
-            sticker2 = sticker3;
-        } else if (sticker == null && setObject != null && BuildVars.DEBUG_VERSION) {
-            throw new IllegalArgumentException("Invalid type of the given setObject: " + setObject.getClass());
-        } else {
-            sticker2 = sticker;
-            stickerSet = null;
-        }
-        if (sticker2 != null) {
-            TLObject object2 = stickerSet == null ? null : FileLoader.getClosestPhotoSizeWithSize(stickerSet.thumbs, 90);
-            if (object2 != null) {
-                object = object2;
-            } else {
-                object = sticker2;
-            }
-            if (object instanceof TLRPC.Document) {
-                TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(sticker2.thumbs, 90);
-                imageLocation = ImageLocation.getForDocument(thumb, sticker2);
-            } else {
-                TLRPC.PhotoSize thumb2 = (TLRPC.PhotoSize) object;
-                int thumbVersion = 0;
-                if (setObject instanceof TLRPC.StickerSetCovered) {
-                    thumbVersion = ((TLRPC.StickerSetCovered) setObject).set.thumb_version;
-                } else if (setObject instanceof TLRPC.TL_messages_stickerSet) {
-                    thumbVersion = ((TLRPC.TL_messages_stickerSet) setObject).set.thumb_version;
+                if (!tLRPC$StickerSetCovered.covers.isEmpty()) {
+                    tLRPC$Document2 = tLRPC$StickerSetCovered.covers.get(0);
                 }
-                imageLocation = ImageLocation.getForSticker(thumb2, sticker2, thumbVersion);
+                tLRPC$Document2 = null;
             }
-            if (((object instanceof TLRPC.Document) && MessageObject.isAnimatedStickerDocument(sticker2, true)) || MessageObject.isVideoSticker(sticker2) || MessageObject.isGifDocument(sticker2)) {
-                this.imageView.setImage(ImageLocation.getForDocument(sticker2), "50_50", imageLocation, (String) null, 0, setObject);
-            } else if (imageLocation != null && imageLocation.imageType == 1) {
-                this.imageView.setImage(imageLocation, "50_50", "tgs", (Drawable) null, setObject);
+            tLRPC$StickerSet = tLRPC$StickerSet2;
+        } else if (tLRPC$Document == null && tLObject != null && BuildVars.DEBUG_VERSION) {
+            throw new IllegalArgumentException("Invalid type of the given setObject: " + tLObject.getClass());
+        } else {
+            tLRPC$Document2 = tLRPC$Document;
+            tLRPC$StickerSet = null;
+        }
+        if (tLRPC$Document2 != null) {
+            tLRPC$PhotoSize = tLRPC$StickerSet != null ? FileLoader.getClosestPhotoSizeWithSize(tLRPC$StickerSet.thumbs, 90) : tLRPC$PhotoSize;
+            tLRPC$PhotoSize = tLRPC$PhotoSize == null ? tLRPC$Document2 : tLRPC$PhotoSize;
+            boolean z2 = tLRPC$PhotoSize instanceof TLRPC$Document;
+            if (z2) {
+                forSticker = ImageLocation.getForDocument(FileLoader.getClosestPhotoSizeWithSize(tLRPC$Document2.thumbs, 90), tLRPC$Document2);
             } else {
-                this.imageView.setImage(imageLocation, "50_50", "webp", (Drawable) null, setObject);
+                TLRPC$PhotoSize tLRPC$PhotoSize2 = tLRPC$PhotoSize;
+                if (tLObject instanceof TLRPC$StickerSetCovered) {
+                    i2 = ((TLRPC$StickerSetCovered) tLObject).set.thumb_version;
+                } else {
+                    i2 = z ? ((TLRPC$TL_messages_stickerSet) tLObject).set.thumb_version : 0;
+                }
+                forSticker = ImageLocation.getForSticker(tLRPC$PhotoSize2, tLRPC$Document2, i2);
+            }
+            ImageLocation imageLocation = forSticker;
+            if ((z2 && MessageObject.isAnimatedStickerDocument(tLRPC$Document2, true)) || MessageObject.isVideoSticker(tLRPC$Document2) || MessageObject.isGifDocument(tLRPC$Document2)) {
+                this.imageView.setImage(ImageLocation.getForDocument(tLRPC$Document2), "50_50", imageLocation, (String) null, 0, tLObject);
+            } else if (imageLocation != null && imageLocation.imageType == 1) {
+                this.imageView.setImage(imageLocation, "50_50", "tgs", (Drawable) null, tLObject);
+            } else {
+                this.imageView.setImage(imageLocation, "50_50", "webp", (Drawable) null, tLObject);
             }
         } else {
-            this.imageView.setImage((ImageLocation) null, (String) null, "webp", (Drawable) null, setObject);
+            this.imageView.setImage((ImageLocation) null, (String) null, "webp", (Drawable) null, tLObject);
         }
-        switch (type) {
+        switch (i) {
             case 0:
-                if (stickerSet.masks) {
+                if (tLRPC$StickerSet.masks) {
                     this.titleTextView.setText(LocaleController.getString("MasksRemoved", R.string.MasksRemoved));
-                    this.subtitleTextView.setText(LocaleController.formatString("MasksRemovedInfo", R.string.MasksRemovedInfo, stickerSet.title));
+                    this.subtitleTextView.setText(LocaleController.formatString("MasksRemovedInfo", R.string.MasksRemovedInfo, tLRPC$StickerSet.title));
                     return;
                 }
                 this.titleTextView.setText(LocaleController.getString("StickersRemoved", R.string.StickersRemoved));
-                this.subtitleTextView.setText(LocaleController.formatString("StickersRemovedInfo", R.string.StickersRemovedInfo, stickerSet.title));
+                this.subtitleTextView.setText(LocaleController.formatString("StickersRemovedInfo", R.string.StickersRemovedInfo, tLRPC$StickerSet.title));
                 return;
             case 1:
-                if (stickerSet.masks) {
+                if (tLRPC$StickerSet.masks) {
                     this.titleTextView.setText(LocaleController.getString("MasksArchived", R.string.MasksArchived));
-                    this.subtitleTextView.setText(LocaleController.formatString("MasksArchivedInfo", R.string.MasksArchivedInfo, stickerSet.title));
+                    this.subtitleTextView.setText(LocaleController.formatString("MasksArchivedInfo", R.string.MasksArchivedInfo, tLRPC$StickerSet.title));
                     return;
                 }
                 this.titleTextView.setText(LocaleController.getString("StickersArchived", R.string.StickersArchived));
-                this.subtitleTextView.setText(LocaleController.formatString("StickersArchivedInfo", R.string.StickersArchivedInfo, stickerSet.title));
+                this.subtitleTextView.setText(LocaleController.formatString("StickersArchivedInfo", R.string.StickersArchivedInfo, tLRPC$StickerSet.title));
                 return;
             case 2:
-                if (stickerSet.masks) {
+                if (tLRPC$StickerSet.masks) {
                     this.titleTextView.setText(LocaleController.getString("AddMasksInstalled", R.string.AddMasksInstalled));
-                    this.subtitleTextView.setText(LocaleController.formatString("AddMasksInstalledInfo", R.string.AddMasksInstalledInfo, stickerSet.title));
+                    this.subtitleTextView.setText(LocaleController.formatString("AddMasksInstalledInfo", R.string.AddMasksInstalledInfo, tLRPC$StickerSet.title));
                     return;
                 }
                 this.titleTextView.setText(LocaleController.getString("AddStickersInstalled", R.string.AddStickersInstalled));
-                this.subtitleTextView.setText(LocaleController.formatString("AddStickersInstalledInfo", R.string.AddStickersInstalledInfo, stickerSet.title));
+                this.subtitleTextView.setText(LocaleController.formatString("AddStickersInstalledInfo", R.string.AddStickersInstalledInfo, tLRPC$StickerSet.title));
                 return;
             case 3:
                 this.titleTextView.setText(LocaleController.getString("RemovedFromRecent", R.string.RemovedFromRecent));
@@ -150,13 +139,12 @@ public class StickerSetBulletinLayout extends Bulletin.TwoLineLayout {
             case 6:
                 if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium() && !MessagesController.getInstance(UserConfig.selectedAccount).premiumLocked) {
                     this.titleTextView.setText(LocaleController.formatString("LimitReachedFavoriteStickers", R.string.LimitReachedFavoriteStickers, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).stickersFavedLimitDefault)));
-                    CharSequence str = AndroidUtilities.replaceSingleTag(LocaleController.formatString("LimitReachedFavoriteStickersSubtitle", R.string.LimitReachedFavoriteStickersSubtitle, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).stickersFavedLimitPremium)), new Runnable() { // from class: org.telegram.ui.Components.StickerSetBulletinLayout$$ExternalSyntheticLambda0
+                    this.subtitleTextView.setText(AndroidUtilities.replaceSingleTag(LocaleController.formatString("LimitReachedFavoriteStickersSubtitle", R.string.LimitReachedFavoriteStickersSubtitle, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).stickersFavedLimitPremium)), new Runnable() { // from class: org.telegram.ui.Components.StickerSetBulletinLayout$$ExternalSyntheticLambda0
                         @Override // java.lang.Runnable
                         public final void run() {
                             StickerSetBulletinLayout.lambda$new$0(context);
                         }
-                    });
-                    this.subtitleTextView.setText(str);
+                    }));
                     return;
                 }
                 this.titleTextView.setText(LocaleController.formatString("LimitReachedFavoriteStickers", R.string.LimitReachedFavoriteStickers, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).stickersFavedLimitPremium)));
@@ -165,13 +153,12 @@ public class StickerSetBulletinLayout extends Bulletin.TwoLineLayout {
             case 7:
                 if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium() && !MessagesController.getInstance(UserConfig.selectedAccount).premiumLocked) {
                     this.titleTextView.setText(LocaleController.formatString("LimitReachedFavoriteGifs", R.string.LimitReachedFavoriteGifs, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).savedGifsLimitDefault)));
-                    CharSequence str2 = AndroidUtilities.replaceSingleTag(LocaleController.formatString("LimitReachedFavoriteGifsSubtitle", R.string.LimitReachedFavoriteGifsSubtitle, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).savedGifsLimitPremium)), new Runnable() { // from class: org.telegram.ui.Components.StickerSetBulletinLayout$$ExternalSyntheticLambda1
+                    this.subtitleTextView.setText(AndroidUtilities.replaceSingleTag(LocaleController.formatString("LimitReachedFavoriteGifsSubtitle", R.string.LimitReachedFavoriteGifsSubtitle, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).savedGifsLimitPremium)), new Runnable() { // from class: org.telegram.ui.Components.StickerSetBulletinLayout$$ExternalSyntheticLambda1
                         @Override // java.lang.Runnable
                         public final void run() {
                             StickerSetBulletinLayout.lambda$new$1(context);
                         }
-                    });
-                    this.subtitleTextView.setText(str2);
+                    }));
                     return;
                 }
                 this.titleTextView.setText(LocaleController.formatString("LimitReachedFavoriteGifs", R.string.LimitReachedFavoriteGifs, Integer.valueOf(MessagesController.getInstance(UserConfig.selectedAccount).savedGifsLimitPremium)));
@@ -183,16 +170,16 @@ public class StickerSetBulletinLayout extends Bulletin.TwoLineLayout {
     }
 
     public static /* synthetic */ void lambda$new$0(Context context) {
-        Activity activity = AndroidUtilities.findActivity(context);
-        if (activity instanceof LaunchActivity) {
-            ((LaunchActivity) activity).m3653lambda$runLinkRequest$59$orgtelegramuiLaunchActivity(new PremiumPreviewFragment(LimitReachedBottomSheet.limitTypeToServerString(10)));
+        Activity findActivity = AndroidUtilities.findActivity(context);
+        if (findActivity instanceof LaunchActivity) {
+            ((LaunchActivity) findActivity).lambda$runLinkRequest$59(new PremiumPreviewFragment(LimitReachedBottomSheet.limitTypeToServerString(10)));
         }
     }
 
     public static /* synthetic */ void lambda$new$1(Context context) {
-        Activity activity = AndroidUtilities.findActivity(context);
-        if (activity instanceof LaunchActivity) {
-            ((LaunchActivity) activity).m3653lambda$runLinkRequest$59$orgtelegramuiLaunchActivity(new PremiumPreviewFragment(LimitReachedBottomSheet.limitTypeToServerString(9)));
+        Activity findActivity = AndroidUtilities.findActivity(context);
+        if (findActivity instanceof LaunchActivity) {
+            ((LaunchActivity) findActivity).lambda$runLinkRequest$59(new PremiumPreviewFragment(LimitReachedBottomSheet.limitTypeToServerString(9)));
         }
     }
 }

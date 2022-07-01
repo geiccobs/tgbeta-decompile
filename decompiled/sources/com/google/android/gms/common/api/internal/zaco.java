@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaco {
     public static final Status zaa = new Status(8, "The connection to Google Play services was lost");
     final Set<BasePendingResult<?>> zab = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap()));

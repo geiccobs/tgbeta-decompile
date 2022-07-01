@@ -1,7 +1,7 @@
 package com.google.firebase.components;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class MissingDependencyException extends DependencyException {
-    public MissingDependencyException(String msg) {
-        super(msg);
+    public MissingDependencyException(String str) {
+        super(str);
     }
 }

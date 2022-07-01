@@ -21,8 +21,7 @@ public abstract class zzy extends zzr implements Set {
                         return true;
                     }
                 }
-            } catch (ClassCastException e) {
-            } catch (NullPointerException e2) {
+            } catch (ClassCastException | NullPointerException unused) {
             }
         }
         return false;
@@ -43,10 +42,6 @@ public abstract class zzy extends zzr implements Set {
         }
         return zzuVar;
     }
-
-    @Override // com.google.android.gms.internal.play_billing.zzr
-    /* renamed from: zze */
-    public abstract zzah iterator();
 
     zzu zzh() {
         return zzu.zzi(toArray());

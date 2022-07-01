@@ -30,7 +30,7 @@ import com.google.android.datatransport.runtime.time.TimeModule_EventClockFactor
 import com.google.android.datatransport.runtime.time.TimeModule_UptimeClockFactory;
 import java.util.concurrent.Executor;
 import javax.inject.Provider;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class DaggerTransportRuntimeComponent extends TransportRuntimeComponent {
     private Provider<SchedulerConfig> configProvider;
     private Provider creationContextFactoryProvider;
@@ -46,17 +46,17 @@ public final class DaggerTransportRuntimeComponent extends TransportRuntimeCompo
     private Provider<WorkInitializer> workInitializerProvider;
     private Provider<WorkScheduler> workSchedulerProvider;
 
-    private DaggerTransportRuntimeComponent(Context setApplicationContextParam) {
-        initialize(setApplicationContextParam);
+    private DaggerTransportRuntimeComponent(Context context) {
+        initialize(context);
     }
 
     public static TransportRuntimeComponent.Builder builder() {
         return new Builder();
     }
 
-    private void initialize(Context setApplicationContextParam) {
+    private void initialize(Context context) {
         this.executorProvider = DoubleCheck.provider(ExecutionModule_ExecutorFactory.create());
-        Factory create = InstanceFactory.create(setApplicationContextParam);
+        Factory create = InstanceFactory.create(context);
         this.setApplicationContextProvider = create;
         CreationContextFactory_Factory create2 = CreationContextFactory_Factory.create(create, TimeModule_EventClockFactory.create(), TimeModule_UptimeClockFactory.create());
         this.creationContextFactoryProvider = create2;
@@ -93,7 +93,7 @@ public final class DaggerTransportRuntimeComponent extends TransportRuntimeCompo
         return this.sQLiteEventStoreProvider.get();
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder implements TransportRuntimeComponent.Builder {
         private Context setApplicationContext;
 
@@ -101,8 +101,8 @@ public final class DaggerTransportRuntimeComponent extends TransportRuntimeCompo
         }
 
         @Override // com.google.android.datatransport.runtime.TransportRuntimeComponent.Builder
-        public Builder setApplicationContext(Context applicationContext) {
-            this.setApplicationContext = (Context) Preconditions.checkNotNull(applicationContext);
+        public Builder setApplicationContext(Context context) {
+            this.setApplicationContext = (Context) Preconditions.checkNotNull(context);
             return this;
         }
 

@@ -1,5 +1,5 @@
 package com.microsoft.appcenter.http;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface ServiceCallback {
     void onCallFailed(Exception exc);
 

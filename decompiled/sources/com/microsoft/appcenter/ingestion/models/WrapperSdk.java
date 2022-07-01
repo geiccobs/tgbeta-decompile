@@ -4,14 +4,8 @@ import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class WrapperSdk implements Model {
-    private static final String LIVE_UPDATE_DEPLOYMENT_KEY = "liveUpdateDeploymentKey";
-    private static final String LIVE_UPDATE_PACKAGE_HASH = "liveUpdatePackageHash";
-    private static final String LIVE_UPDATE_RELEASE_LABEL = "liveUpdateReleaseLabel";
-    private static final String WRAPPER_RUNTIME_VERSION = "wrapperRuntimeVersion";
-    private static final String WRAPPER_SDK_NAME = "wrapperSdkName";
-    private static final String WRAPPER_SDK_VERSION = "wrapperSdkVersion";
     private String liveUpdateDeploymentKey;
     private String liveUpdatePackageHash;
     private String liveUpdateReleaseLabel;
@@ -23,120 +17,119 @@ public class WrapperSdk implements Model {
         return this.wrapperSdkVersion;
     }
 
-    public void setWrapperSdkVersion(String wrapperSdkVersion) {
-        this.wrapperSdkVersion = wrapperSdkVersion;
+    public void setWrapperSdkVersion(String str) {
+        this.wrapperSdkVersion = str;
     }
 
     public String getWrapperSdkName() {
         return this.wrapperSdkName;
     }
 
-    public void setWrapperSdkName(String wrapperSdkName) {
-        this.wrapperSdkName = wrapperSdkName;
+    public void setWrapperSdkName(String str) {
+        this.wrapperSdkName = str;
     }
 
     public String getWrapperRuntimeVersion() {
         return this.wrapperRuntimeVersion;
     }
 
-    public void setWrapperRuntimeVersion(String wrapperRuntimeVersion) {
-        this.wrapperRuntimeVersion = wrapperRuntimeVersion;
+    public void setWrapperRuntimeVersion(String str) {
+        this.wrapperRuntimeVersion = str;
     }
 
     public String getLiveUpdateReleaseLabel() {
         return this.liveUpdateReleaseLabel;
     }
 
-    public void setLiveUpdateReleaseLabel(String liveUpdateReleaseLabel) {
-        this.liveUpdateReleaseLabel = liveUpdateReleaseLabel;
+    public void setLiveUpdateReleaseLabel(String str) {
+        this.liveUpdateReleaseLabel = str;
     }
 
     public String getLiveUpdateDeploymentKey() {
         return this.liveUpdateDeploymentKey;
     }
 
-    public void setLiveUpdateDeploymentKey(String liveUpdateDeploymentKey) {
-        this.liveUpdateDeploymentKey = liveUpdateDeploymentKey;
+    public void setLiveUpdateDeploymentKey(String str) {
+        this.liveUpdateDeploymentKey = str;
     }
 
     public String getLiveUpdatePackageHash() {
         return this.liveUpdatePackageHash;
     }
 
-    public void setLiveUpdatePackageHash(String liveUpdatePackageHash) {
-        this.liveUpdatePackageHash = liveUpdatePackageHash;
+    public void setLiveUpdatePackageHash(String str) {
+        this.liveUpdatePackageHash = str;
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void read(JSONObject object) throws JSONException {
-        setWrapperSdkVersion(object.optString(WRAPPER_SDK_VERSION, null));
-        setWrapperSdkName(object.optString(WRAPPER_SDK_NAME, null));
-        setWrapperRuntimeVersion(object.optString(WRAPPER_RUNTIME_VERSION, null));
-        setLiveUpdateReleaseLabel(object.optString(LIVE_UPDATE_RELEASE_LABEL, null));
-        setLiveUpdateDeploymentKey(object.optString(LIVE_UPDATE_DEPLOYMENT_KEY, null));
-        setLiveUpdatePackageHash(object.optString(LIVE_UPDATE_PACKAGE_HASH, null));
+    public void read(JSONObject jSONObject) throws JSONException {
+        setWrapperSdkVersion(jSONObject.optString("wrapperSdkVersion", null));
+        setWrapperSdkName(jSONObject.optString("wrapperSdkName", null));
+        setWrapperRuntimeVersion(jSONObject.optString("wrapperRuntimeVersion", null));
+        setLiveUpdateReleaseLabel(jSONObject.optString("liveUpdateReleaseLabel", null));
+        setLiveUpdateDeploymentKey(jSONObject.optString("liveUpdateDeploymentKey", null));
+        setLiveUpdatePackageHash(jSONObject.optString("liveUpdatePackageHash", null));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.Model
-    public void write(JSONStringer writer) throws JSONException {
-        JSONUtils.write(writer, WRAPPER_SDK_VERSION, getWrapperSdkVersion());
-        JSONUtils.write(writer, WRAPPER_SDK_NAME, getWrapperSdkName());
-        JSONUtils.write(writer, WRAPPER_RUNTIME_VERSION, getWrapperRuntimeVersion());
-        JSONUtils.write(writer, LIVE_UPDATE_RELEASE_LABEL, getLiveUpdateReleaseLabel());
-        JSONUtils.write(writer, LIVE_UPDATE_DEPLOYMENT_KEY, getLiveUpdateDeploymentKey());
-        JSONUtils.write(writer, LIVE_UPDATE_PACKAGE_HASH, getLiveUpdatePackageHash());
+    public void write(JSONStringer jSONStringer) throws JSONException {
+        JSONUtils.write(jSONStringer, "wrapperSdkVersion", getWrapperSdkVersion());
+        JSONUtils.write(jSONStringer, "wrapperSdkName", getWrapperSdkName());
+        JSONUtils.write(jSONStringer, "wrapperRuntimeVersion", getWrapperRuntimeVersion());
+        JSONUtils.write(jSONStringer, "liveUpdateReleaseLabel", getLiveUpdateReleaseLabel());
+        JSONUtils.write(jSONStringer, "liveUpdateDeploymentKey", getLiveUpdateDeploymentKey());
+        JSONUtils.write(jSONStringer, "liveUpdatePackageHash", getLiveUpdatePackageHash());
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        WrapperSdk that = (WrapperSdk) o;
+        WrapperSdk wrapperSdk = (WrapperSdk) obj;
         String str = this.wrapperSdkVersion;
-        if (str == null ? that.wrapperSdkVersion != null : !str.equals(that.wrapperSdkVersion)) {
+        if (str == null ? wrapperSdk.wrapperSdkVersion != null : !str.equals(wrapperSdk.wrapperSdkVersion)) {
             return false;
         }
         String str2 = this.wrapperSdkName;
-        if (str2 == null ? that.wrapperSdkName != null : !str2.equals(that.wrapperSdkName)) {
+        if (str2 == null ? wrapperSdk.wrapperSdkName != null : !str2.equals(wrapperSdk.wrapperSdkName)) {
             return false;
         }
         String str3 = this.wrapperRuntimeVersion;
-        if (str3 == null ? that.wrapperRuntimeVersion != null : !str3.equals(that.wrapperRuntimeVersion)) {
+        if (str3 == null ? wrapperSdk.wrapperRuntimeVersion != null : !str3.equals(wrapperSdk.wrapperRuntimeVersion)) {
             return false;
         }
         String str4 = this.liveUpdateReleaseLabel;
-        if (str4 == null ? that.liveUpdateReleaseLabel != null : !str4.equals(that.liveUpdateReleaseLabel)) {
+        if (str4 == null ? wrapperSdk.liveUpdateReleaseLabel != null : !str4.equals(wrapperSdk.liveUpdateReleaseLabel)) {
             return false;
         }
         String str5 = this.liveUpdateDeploymentKey;
-        if (str5 == null ? that.liveUpdateDeploymentKey != null : !str5.equals(that.liveUpdateDeploymentKey)) {
+        if (str5 == null ? wrapperSdk.liveUpdateDeploymentKey != null : !str5.equals(wrapperSdk.liveUpdateDeploymentKey)) {
             return false;
         }
         String str6 = this.liveUpdatePackageHash;
-        return str6 != null ? str6.equals(that.liveUpdatePackageHash) : that.liveUpdatePackageHash == null;
+        String str7 = wrapperSdk.liveUpdatePackageHash;
+        return str6 != null ? str6.equals(str7) : str7 == null;
     }
 
     public int hashCode() {
         String str = this.wrapperSdkVersion;
         int i = 0;
-        int result = str != null ? str.hashCode() : 0;
-        int i2 = result * 31;
+        int hashCode = (str != null ? str.hashCode() : 0) * 31;
         String str2 = this.wrapperSdkName;
-        int result2 = i2 + (str2 != null ? str2.hashCode() : 0);
-        int result3 = result2 * 31;
+        int hashCode2 = (hashCode + (str2 != null ? str2.hashCode() : 0)) * 31;
         String str3 = this.wrapperRuntimeVersion;
-        int result4 = (result3 + (str3 != null ? str3.hashCode() : 0)) * 31;
+        int hashCode3 = (hashCode2 + (str3 != null ? str3.hashCode() : 0)) * 31;
         String str4 = this.liveUpdateReleaseLabel;
-        int result5 = (result4 + (str4 != null ? str4.hashCode() : 0)) * 31;
+        int hashCode4 = (hashCode3 + (str4 != null ? str4.hashCode() : 0)) * 31;
         String str5 = this.liveUpdateDeploymentKey;
-        int result6 = (result5 + (str5 != null ? str5.hashCode() : 0)) * 31;
+        int hashCode5 = (hashCode4 + (str5 != null ? str5.hashCode() : 0)) * 31;
         String str6 = this.liveUpdatePackageHash;
         if (str6 != null) {
             i = str6.hashCode();
         }
-        return result6 + i;
+        return hashCode5 + i;
     }
 }

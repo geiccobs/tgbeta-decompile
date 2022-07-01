@@ -11,10 +11,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.SystemClock;
-import android.view.MotionEvent;
+import android.util.Property;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
@@ -26,14 +25,13 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.messenger.voip.VoIPService;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$TL_groupCallParticipant;
 import org.telegram.ui.Components.GroupCallPip;
 import org.telegram.ui.Components.voip.RTMPStreamPipOverlay;
 import org.telegram.ui.GroupCallActivity;
-import org.telegram.ui.LaunchActivity;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class GroupCallPip implements NotificationCenter.NotificationCenterDelegate {
     private static boolean forceRemoved = true;
     private static GroupCallPip instance;
@@ -75,31 +73,34 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
     private ValueAnimator.AnimatorUpdateListener updateXlistener = new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.GroupCallPip.1
         @Override // android.animation.ValueAnimator.AnimatorUpdateListener
         public void onAnimationUpdate(ValueAnimator valueAnimator) {
-            float x = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-            GroupCallPip.this.windowLayoutParams.x = (int) x;
-            GroupCallPip.this.updateAvatarsPosition();
+            float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+            GroupCallPip groupCallPip = GroupCallPip.this;
+            groupCallPip.windowLayoutParams.x = (int) floatValue;
+            groupCallPip.updateAvatarsPosition();
             if (GroupCallPip.this.windowView.getParent() != null) {
-                GroupCallPip.this.windowManager.updateViewLayout(GroupCallPip.this.windowView, GroupCallPip.this.windowLayoutParams);
+                GroupCallPip groupCallPip2 = GroupCallPip.this;
+                groupCallPip2.windowManager.updateViewLayout(groupCallPip2.windowView, groupCallPip2.windowLayoutParams);
             }
         }
     };
     private ValueAnimator.AnimatorUpdateListener updateYlistener = new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.GroupCallPip.2
         @Override // android.animation.ValueAnimator.AnimatorUpdateListener
         public void onAnimationUpdate(ValueAnimator valueAnimator) {
-            float y = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-            GroupCallPip.this.windowLayoutParams.y = (int) y;
-            if (GroupCallPip.this.windowView.getParent() != null) {
-                GroupCallPip.this.windowManager.updateViewLayout(GroupCallPip.this.windowView, GroupCallPip.this.windowLayoutParams);
+            float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+            GroupCallPip groupCallPip = GroupCallPip.this;
+            groupCallPip.windowLayoutParams.y = (int) floatValue;
+            if (groupCallPip.windowView.getParent() != null) {
+                GroupCallPip groupCallPip2 = GroupCallPip.this;
+                groupCallPip2.windowManager.updateViewLayout(groupCallPip2.windowView, groupCallPip2.windowLayoutParams);
             }
         }
     };
     boolean animateToPinnedToCenter = false;
     float pinnedProgress = 0.0f;
 
-    public GroupCallPip(Context context, int account) {
-        this.currentAccount = account;
-        float touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        AnonymousClass3 anonymousClass3 = new AnonymousClass3(context, touchSlop);
+    public GroupCallPip(Context context, int i) {
+        this.currentAccount = i;
+        AnonymousClass3 anonymousClass3 = new AnonymousClass3(context, ViewConfiguration.get(context).getScaledTouchSlop());
         this.windowView = anonymousClass3;
         anonymousClass3.setAlpha(0.7f);
         GroupCallPipButton groupCallPipButton = new GroupCallPipButton(context, this.currentAccount, false);
@@ -113,26 +114,27 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         this.avatarsImageView.setDelegate(new Runnable() { // from class: org.telegram.ui.Components.GroupCallPip$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                GroupCallPip.this.m2655lambda$new$0$orgtelegramuiComponentsGroupCallPip();
+                GroupCallPip.this.lambda$new$0();
             }
         });
         updateAvatars(false);
         this.windowView.addView(this.avatarsImageView, LayoutHelper.createFrame(108, 36, 49));
         this.windowRemoveTooltipView = new FrameLayout(context) { // from class: org.telegram.ui.Components.GroupCallPip.4
             @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-                super.onLayout(changed, left, top, right, bottom);
-                GroupCallPip.this.windowRemoveTooltipView.getLocationOnScreen(GroupCallPip.this.location);
+            protected void onLayout(boolean z, int i2, int i3, int i4, int i5) {
+                super.onLayout(z, i2, i3, i4, i5);
                 GroupCallPip groupCallPip = GroupCallPip.this;
-                groupCallPip.windowLeft = groupCallPip.location[0];
+                groupCallPip.windowRemoveTooltipView.getLocationOnScreen(groupCallPip.location);
                 GroupCallPip groupCallPip2 = GroupCallPip.this;
-                groupCallPip2.windowTop = groupCallPip2.location[1] - AndroidUtilities.dp(25.0f);
+                int[] iArr = groupCallPip2.location;
+                groupCallPip2.windowLeft = iArr[0];
+                groupCallPip2.windowTop = iArr[1] - AndroidUtilities.dp(25.0f);
             }
 
             @Override // android.view.View
-            public void setVisibility(int visibility) {
-                super.setVisibility(visibility);
-                GroupCallPip.this.windowRemoveTooltipOverlayView.setVisibility(visibility);
+            public void setVisibility(int i2) {
+                super.setVisibility(i2);
+                GroupCallPip.this.windowRemoveTooltipOverlayView.setVisibility(i2);
             }
         };
         View view = new View(context) { // from class: org.telegram.ui.Components.GroupCallPip.5
@@ -140,46 +142,58 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
 
             @Override // android.view.View
             protected void onDraw(Canvas canvas) {
-                if (GroupCallPip.this.animateToPrepareRemove && GroupCallPip.this.prepareToRemoveProgress != 1.0f) {
-                    GroupCallPip.this.prepareToRemoveProgress += 0.064f;
-                    if (GroupCallPip.this.prepareToRemoveProgress > 1.0f) {
-                        GroupCallPip.this.prepareToRemoveProgress = 1.0f;
+                GroupCallPip groupCallPip = GroupCallPip.this;
+                boolean z = groupCallPip.animateToPrepareRemove;
+                if (z) {
+                    float f = groupCallPip.prepareToRemoveProgress;
+                    if (f != 1.0f) {
+                        float f2 = f + 0.064f;
+                        groupCallPip.prepareToRemoveProgress = f2;
+                        if (f2 > 1.0f) {
+                            groupCallPip.prepareToRemoveProgress = 1.0f;
+                        }
+                        invalidate();
+                        this.paint.setColor(ColorUtils.blendARGB(1711607061, 1714752530, GroupCallPip.this.prepareToRemoveProgress));
+                        canvas.drawCircle(getMeasuredWidth() / 2.0f, (getMeasuredHeight() / 2.0f) - AndroidUtilities.dp(25.0f), AndroidUtilities.dp(35.0f) + (AndroidUtilities.dp(5.0f) * GroupCallPip.this.prepareToRemoveProgress), this.paint);
                     }
-                    invalidate();
-                } else if (!GroupCallPip.this.animateToPrepareRemove && GroupCallPip.this.prepareToRemoveProgress != 0.0f) {
-                    GroupCallPip.this.prepareToRemoveProgress -= 0.064f;
-                    if (GroupCallPip.this.prepareToRemoveProgress < 0.0f) {
-                        GroupCallPip.this.prepareToRemoveProgress = 0.0f;
+                }
+                if (!z) {
+                    float f3 = groupCallPip.prepareToRemoveProgress;
+                    if (f3 != 0.0f) {
+                        float f4 = f3 - 0.064f;
+                        groupCallPip.prepareToRemoveProgress = f4;
+                        if (f4 < 0.0f) {
+                            groupCallPip.prepareToRemoveProgress = 0.0f;
+                        }
+                        invalidate();
                     }
-                    invalidate();
                 }
                 this.paint.setColor(ColorUtils.blendARGB(1711607061, 1714752530, GroupCallPip.this.prepareToRemoveProgress));
-                float r = AndroidUtilities.dp(35.0f) + (AndroidUtilities.dp(5.0f) * GroupCallPip.this.prepareToRemoveProgress);
-                canvas.drawCircle(getMeasuredWidth() / 2.0f, (getMeasuredHeight() / 2.0f) - AndroidUtilities.dp(25.0f), r, this.paint);
+                canvas.drawCircle(getMeasuredWidth() / 2.0f, (getMeasuredHeight() / 2.0f) - AndroidUtilities.dp(25.0f), AndroidUtilities.dp(35.0f) + (AndroidUtilities.dp(5.0f) * GroupCallPip.this.prepareToRemoveProgress), this.paint);
             }
 
             @Override // android.view.View
-            public void setAlpha(float alpha) {
-                super.setAlpha(alpha);
-                GroupCallPip.this.windowRemoveTooltipOverlayView.setAlpha(alpha);
+            public void setAlpha(float f) {
+                super.setAlpha(f);
+                GroupCallPip.this.windowRemoveTooltipOverlayView.setAlpha(f);
             }
 
             @Override // android.view.View
-            public void setScaleX(float scaleX) {
-                super.setScaleX(scaleX);
-                GroupCallPip.this.windowRemoveTooltipOverlayView.setScaleX(scaleX);
+            public void setScaleX(float f) {
+                super.setScaleX(f);
+                GroupCallPip.this.windowRemoveTooltipOverlayView.setScaleX(f);
             }
 
             @Override // android.view.View
-            public void setScaleY(float scaleY) {
-                super.setScaleY(scaleY);
-                GroupCallPip.this.windowRemoveTooltipOverlayView.setScaleY(scaleY);
+            public void setScaleY(float f) {
+                super.setScaleY(f);
+                GroupCallPip.this.windowRemoveTooltipOverlayView.setScaleY(f);
             }
 
             @Override // android.view.View
-            public void setTranslationY(float translationY) {
-                super.setTranslationY(translationY);
-                GroupCallPip.this.windowRemoveTooltipOverlayView.setTranslationY(translationY);
+            public void setTranslationY(float f) {
+                super.setTranslationY(f);
+                GroupCallPip.this.windowRemoveTooltipOverlayView.setTranslationY(f);
             }
         };
         this.removeTooltipView = view;
@@ -198,22 +212,24 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
             int lastSize = -1;
 
             @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
-            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-                super.onLayout(changed, left, top, right, bottom);
-                int size = AndroidUtilities.displaySize.x + AndroidUtilities.displaySize.y;
-                int i = this.lastSize;
-                if (i > 0 && i != size) {
+            protected void onLayout(boolean z, int i2, int i3, int i4, int i5) {
+                super.onLayout(z, i2, i3, i4, i5);
+                android.graphics.Point point = AndroidUtilities.displaySize;
+                int i6 = point.x + point.y;
+                int i7 = this.lastSize;
+                if (i7 > 0 && i7 != i6) {
                     setVisibility(8);
-                    GroupCallPip.this.showAlert = false;
-                    GroupCallPip.this.checkButtonAlpha();
+                    GroupCallPip groupCallPip = GroupCallPip.this;
+                    groupCallPip.showAlert = false;
+                    groupCallPip.checkButtonAlpha();
                 }
-                this.lastSize = size;
+                this.lastSize = i6;
             }
 
             @Override // android.view.View
-            public void setVisibility(int visibility) {
-                super.setVisibility(visibility);
-                if (visibility == 8) {
+            public void setVisibility(int i2) {
+                super.setVisibility(i2);
+                if (i2 == 8) {
                     this.lastSize = -1;
                 }
             }
@@ -222,7 +238,7 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         frameLayout.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.GroupCallPip$$ExternalSyntheticLambda1
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                GroupCallPip.this.m2656lambda$new$1$orgtelegramuiComponentsGroupCallPip(view2);
+                GroupCallPip.this.lambda$new$1(view2);
             }
         });
         this.alertContainer.setClipChildren(false);
@@ -234,225 +250,84 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
 
     /* JADX INFO: Access modifiers changed from: package-private */
     /* renamed from: org.telegram.ui.Components.GroupCallPip$3 */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass3 extends FrameLayout {
         AnimatorSet moveToBoundsAnimator;
         boolean pressed;
-        long startTime;
         float startX;
         float startY;
         final /* synthetic */ float val$touchSlop;
         Runnable pressedRunnable = new Runnable() { // from class: org.telegram.ui.Components.GroupCallPip.3.1
             @Override // java.lang.Runnable
             public void run() {
-                VoIPService voIPService = VoIPService.getSharedInstance();
-                if (voIPService != null && voIPService.isMicMute()) {
-                    ChatObject.Call call = voIPService.groupCall;
-                    TLRPC.TL_groupCallParticipant participant = call.participants.get(voIPService.getSelfId());
-                    if (participant != null && !participant.can_self_unmute && participant.muted && !ChatObject.canManageCalls(voIPService.getChat())) {
-                        return;
-                    }
-                    AndroidUtilities.runOnUIThread(AnonymousClass3.this.micRunnable, 90L);
-                    AnonymousClass3.this.performHapticFeedback(3, 2);
-                    AnonymousClass3.this.pressed = true;
+                VoIPService sharedInstance = VoIPService.getSharedInstance();
+                if (sharedInstance == null || !sharedInstance.isMicMute()) {
+                    return;
                 }
+                TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant = sharedInstance.groupCall.participants.get(sharedInstance.getSelfId());
+                if (tLRPC$TL_groupCallParticipant != null && !tLRPC$TL_groupCallParticipant.can_self_unmute && tLRPC$TL_groupCallParticipant.muted && !ChatObject.canManageCalls(sharedInstance.getChat())) {
+                    return;
+                }
+                AndroidUtilities.runOnUIThread(AnonymousClass3.this.micRunnable, 90L);
+                AnonymousClass3.this.performHapticFeedback(3, 2);
+                AnonymousClass3.this.pressed = true;
             }
         };
         Runnable micRunnable = GroupCallPip$3$$ExternalSyntheticLambda0.INSTANCE;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        AnonymousClass3(Context arg0, float f) {
-            super(arg0);
-            GroupCallPip.this = this$0;
+        AnonymousClass3(Context context, float f) {
+            super(context);
+            GroupCallPip.this = r1;
             this.val$touchSlop = f;
         }
 
         public static /* synthetic */ void lambda$$0() {
-            if (VoIPService.getSharedInstance() != null && VoIPService.getSharedInstance().isMicMute()) {
-                VoIPService.getSharedInstance().setMicMute(false, true, false);
+            if (VoIPService.getSharedInstance() == null || !VoIPService.getSharedInstance().isMicMute()) {
+                return;
             }
+            VoIPService.getSharedInstance().setMicMute(false, true, false);
         }
 
         @Override // android.widget.FrameLayout, android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            if (AndroidUtilities.displaySize.x != GroupCallPip.this.lastScreenX || GroupCallPip.this.lastScreenY != AndroidUtilities.displaySize.y) {
-                GroupCallPip.this.lastScreenX = AndroidUtilities.displaySize.x;
-                GroupCallPip.this.lastScreenY = AndroidUtilities.displaySize.y;
-                if (GroupCallPip.this.xRelative < 0.0f) {
-                    SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("groupcallpipconfig", 0);
-                    GroupCallPip.this.xRelative = preferences.getFloat("relativeX", 1.0f);
-                    GroupCallPip.this.yRelative = preferences.getFloat("relativeY", 0.4f);
-                }
-                if (GroupCallPip.instance != null) {
-                    GroupCallPip.instance.setPosition(GroupCallPip.this.xRelative, GroupCallPip.this.yRelative);
-                }
+        protected void onMeasure(int i, int i2) {
+            super.onMeasure(i, i2);
+            android.graphics.Point point = AndroidUtilities.displaySize;
+            int i3 = point.x;
+            GroupCallPip groupCallPip = GroupCallPip.this;
+            if (i3 == groupCallPip.lastScreenX && groupCallPip.lastScreenY == point.y) {
+                return;
             }
+            groupCallPip.lastScreenX = i3;
+            groupCallPip.lastScreenY = point.y;
+            if (groupCallPip.xRelative < 0.0f) {
+                SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("groupcallpipconfig", 0);
+                GroupCallPip.this.xRelative = sharedPreferences.getFloat("relativeX", 1.0f);
+                GroupCallPip.this.yRelative = sharedPreferences.getFloat("relativeY", 0.4f);
+            }
+            if (GroupCallPip.instance == null) {
+                return;
+            }
+            GroupCallPip groupCallPip2 = GroupCallPip.instance;
+            GroupCallPip groupCallPip3 = GroupCallPip.this;
+            groupCallPip2.setPosition(groupCallPip3.xRelative, groupCallPip3.yRelative);
         }
 
+        /* JADX WARN: Code restructure failed: missing block: B:10:0x0022, code lost:
+            if (r4 != 3) goto L80;
+         */
+        /* JADX WARN: Removed duplicated region for block: B:21:0x0064  */
         @Override // android.view.View
-        public boolean onTouchEvent(MotionEvent event) {
-            GroupCallPip groupCallPip;
-            GroupCallPip groupCallPip2;
-            GroupCallPip groupCallPip3;
-            GroupCallPip groupCallPip4;
-            double angle;
-            if (GroupCallPip.instance == null) {
-                return false;
-            }
-            float x = event.getRawX();
-            float y = event.getRawY();
-            ViewParent parent = getParent();
-            switch (event.getAction()) {
-                case 0:
-                    getLocationOnScreen(GroupCallPip.this.location);
-                    GroupCallPip.this.windowOffsetLeft = groupCallPip.location[0] - GroupCallPip.this.windowLayoutParams.x;
-                    GroupCallPip.this.windowOffsetTop = groupCallPip2.location[1] - GroupCallPip.this.windowLayoutParams.y;
-                    this.startX = x;
-                    this.startY = y;
-                    this.startTime = System.currentTimeMillis();
-                    AndroidUtilities.runOnUIThread(this.pressedRunnable, 300L);
-                    GroupCallPip.this.windowX = groupCallPip3.windowLayoutParams.x;
-                    GroupCallPip.this.windowY = groupCallPip4.windowLayoutParams.y;
-                    GroupCallPip.this.pressedState = true;
-                    GroupCallPip.this.checkButtonAlpha();
-                    return true;
-                case 1:
-                case 3:
-                    AndroidUtilities.cancelRunOnUIThread(this.micRunnable);
-                    AndroidUtilities.cancelRunOnUIThread(this.pressedRunnable);
-                    if (GroupCallPip.this.animateToPrepareRemove) {
-                        if (this.pressed && VoIPService.getSharedInstance() != null) {
-                            VoIPService.getSharedInstance().setMicMute(true, false, false);
-                        }
-                        this.pressed = false;
-                        GroupCallPip.this.remove();
-                        return false;
-                    }
-                    GroupCallPip.this.pressedState = false;
-                    GroupCallPip.this.checkButtonAlpha();
-                    if (this.pressed) {
-                        if (VoIPService.getSharedInstance() != null) {
-                            VoIPService.getSharedInstance().setMicMute(true, false, false);
-                            performHapticFeedback(3, 2);
-                        }
-                        this.pressed = false;
-                    } else if (event.getAction() == 1 && !GroupCallPip.this.moving) {
-                        onTap();
-                        return false;
-                    }
-                    if (parent != null && GroupCallPip.this.moving) {
-                        parent.requestDisallowInterceptTouchEvent(false);
-                        int parentWidth = AndroidUtilities.displaySize.x;
-                        int parentHeight = AndroidUtilities.displaySize.y;
-                        float left = GroupCallPip.this.windowLayoutParams.x;
-                        float right = getMeasuredWidth() + left;
-                        float top = GroupCallPip.this.windowLayoutParams.y;
-                        float bottom = getMeasuredHeight() + top;
-                        this.moveToBoundsAnimator = new AnimatorSet();
-                        float finallyX = left;
-                        float finallyY = top;
-                        float paddingHorizontal = -AndroidUtilities.dp(36.0f);
-                        if (left < paddingHorizontal) {
-                            finallyX = paddingHorizontal;
-                            ValueAnimator animator = ValueAnimator.ofFloat(GroupCallPip.this.windowLayoutParams.x, paddingHorizontal);
-                            animator.addUpdateListener(GroupCallPip.this.updateXlistener);
-                            this.moveToBoundsAnimator.playTogether(animator);
-                        } else if (right > parentWidth - paddingHorizontal) {
-                            float measuredWidth = (parentWidth - getMeasuredWidth()) - paddingHorizontal;
-                            finallyX = measuredWidth;
-                            ValueAnimator animator2 = ValueAnimator.ofFloat(GroupCallPip.this.windowLayoutParams.x, measuredWidth);
-                            animator2.addUpdateListener(GroupCallPip.this.updateXlistener);
-                            this.moveToBoundsAnimator.playTogether(animator2);
-                        }
-                        int maxBottom = AndroidUtilities.dp(36.0f) + parentHeight;
-                        if (top < AndroidUtilities.statusBarHeight - AndroidUtilities.dp(36.0f)) {
-                            float dp = AndroidUtilities.statusBarHeight - AndroidUtilities.dp(36.0f);
-                            finallyY = dp;
-                            ValueAnimator animator3 = ValueAnimator.ofFloat(GroupCallPip.this.windowLayoutParams.y, dp);
-                            animator3.addUpdateListener(GroupCallPip.this.updateYlistener);
-                            this.moveToBoundsAnimator.playTogether(animator3);
-                        } else if (bottom > maxBottom) {
-                            float measuredHeight = maxBottom - getMeasuredHeight();
-                            finallyY = measuredHeight;
-                            ValueAnimator animator4 = ValueAnimator.ofFloat(GroupCallPip.this.windowLayoutParams.y, measuredHeight);
-                            animator4.addUpdateListener(GroupCallPip.this.updateYlistener);
-                            this.moveToBoundsAnimator.playTogether(animator4);
-                        }
-                        this.moveToBoundsAnimator.setDuration(150L).setInterpolator(CubicBezierInterpolator.DEFAULT);
-                        this.moveToBoundsAnimator.start();
-                        if (GroupCallPip.this.xRelative >= 0.0f) {
-                            GroupCallPip groupCallPip5 = GroupCallPip.this;
-                            groupCallPip5.getRelativePosition(finallyX, finallyY, groupCallPip5.point);
-                            SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("groupcallpipconfig", 0);
-                            SharedPreferences.Editor edit = preferences.edit();
-                            GroupCallPip groupCallPip6 = GroupCallPip.this;
-                            float f = groupCallPip6.point[0];
-                            groupCallPip6.xRelative = f;
-                            SharedPreferences.Editor putFloat = edit.putFloat("relativeX", f);
-                            GroupCallPip groupCallPip7 = GroupCallPip.this;
-                            float f2 = groupCallPip7.point[1];
-                            groupCallPip7.yRelative = f2;
-                            putFloat.putFloat("relativeY", f2).apply();
-                        }
-                    }
-                    GroupCallPip.this.moving = false;
-                    GroupCallPip.this.showRemoveTooltip(false);
-                    return true;
-                case 2:
-                    float dx = x - this.startX;
-                    float dy = y - this.startY;
-                    if (!GroupCallPip.this.moving) {
-                        float f3 = (dx * dx) + (dy * dy);
-                        float f4 = this.val$touchSlop;
-                        if (f3 > f4 * f4) {
-                            if (parent != null) {
-                                parent.requestDisallowInterceptTouchEvent(true);
-                            }
-                            AndroidUtilities.cancelRunOnUIThread(this.pressedRunnable);
-                            GroupCallPip.this.moving = true;
-                            GroupCallPip.this.showRemoveTooltip(true);
-                            GroupCallPip.this.showAlert(false);
-                            this.startX = x;
-                            this.startY = y;
-                            dx = 0.0f;
-                            dy = 0.0f;
-                        }
-                    }
-                    if (!GroupCallPip.this.moving) {
-                        return true;
-                    }
-                    GroupCallPip.this.windowX += dx;
-                    GroupCallPip.this.windowY += dy;
-                    this.startX = x;
-                    this.startY = y;
-                    GroupCallPip.this.updateButtonPosition();
-                    float cx = GroupCallPip.this.windowX + (getMeasuredWidth() / 2.0f);
-                    float cy = GroupCallPip.this.windowY + (getMeasuredHeight() / 2.0f);
-                    float cxRemove = (GroupCallPip.this.windowLeft - GroupCallPip.this.windowOffsetLeft) + (GroupCallPip.this.windowRemoveTooltipView.getMeasuredWidth() / 2.0f);
-                    float cyRemove = (GroupCallPip.this.windowTop - GroupCallPip.this.windowOffsetTop) + (GroupCallPip.this.windowRemoveTooltipView.getMeasuredHeight() / 2.0f);
-                    float distanceToRemove = ((cx - cxRemove) * (cx - cxRemove)) + ((cy - cyRemove) * (cy - cyRemove));
-                    boolean prepareToRemove = false;
-                    boolean pinnedToCenter = false;
-                    if (distanceToRemove < AndroidUtilities.dp(80.0f) * AndroidUtilities.dp(80.0f)) {
-                        prepareToRemove = true;
-                        double angle2 = Math.toDegrees(Math.atan((cx - cxRemove) / (cy - cyRemove)));
-                        if ((cx > cxRemove && cy < cyRemove) || (cx < cxRemove && cy < cyRemove)) {
-                            angle = 270.0d - angle2;
-                        } else {
-                            angle = 90.0d - angle2;
-                        }
-                        GroupCallPip.this.button.setRemoveAngle(angle);
-                        if (distanceToRemove < AndroidUtilities.dp(50.0f) * AndroidUtilities.dp(50.0f)) {
-                            pinnedToCenter = true;
-                        }
-                    }
-                    GroupCallPip.this.pinnedToCenter(pinnedToCenter);
-                    GroupCallPip.this.prepareToRemove(prepareToRemove);
-                    return true;
-                default:
-                    return true;
-            }
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        public boolean onTouchEvent(android.view.MotionEvent r13) {
+            /*
+                Method dump skipped, instructions count: 768
+                To view this dump add '--comments-level debug' option
+            */
+            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.GroupCallPip.AnonymousClass3.onTouchEvent(android.view.MotionEvent):boolean");
         }
 
         private void onTap() {
@@ -463,13 +338,11 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         }
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Components-GroupCallPip */
-    public /* synthetic */ void m2655lambda$new$0$orgtelegramuiComponentsGroupCallPip() {
+    public /* synthetic */ void lambda$new$0() {
         updateAvatars(true);
     }
 
-    /* renamed from: lambda$new$1$org-telegram-ui-Components-GroupCallPip */
-    public /* synthetic */ void m2656lambda$new$1$orgtelegramuiComponentsGroupCallPip(View view) {
+    public /* synthetic */ void lambda$new$1(View view) {
         showAlert(false);
     }
 
@@ -478,12 +351,8 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
             if (!checkInlinePermissions()) {
                 return false;
             }
-            VoIPService service = VoIPService.getSharedInstance();
-            boolean groupCall = false;
-            if (service != null && service.groupCall != null && !service.isHangingUp()) {
-                groupCall = true;
-            }
-            return groupCall && !forceRemoved && (ApplicationLoader.mainInterfaceStopped || !GroupCallActivity.groupCallUiVisible);
+            VoIPService sharedInstance = VoIPService.getSharedInstance();
+            return (sharedInstance != null && sharedInstance.groupCall != null && !sharedInstance.isHangingUp()) && !forceRemoved && (ApplicationLoader.mainInterfaceStopped || !GroupCallActivity.groupCallUiVisible);
         }
         return true;
     }
@@ -497,9 +366,9 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         return true;
     }
 
-    public void showAlert(boolean b) {
-        if (b != this.showAlert) {
-            this.showAlert = b;
+    public void showAlert(boolean z) {
+        if (z != this.showAlert) {
+            this.showAlert = z;
             this.alertContainer.animate().setListener(null).cancel();
             if (this.showAlert) {
                 if (this.alertContainer.getVisibility() != 0) {
@@ -512,37 +381,43 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
                     @Override // android.view.ViewTreeObserver.OnPreDrawListener
                     public boolean onPreDraw() {
                         GroupCallPip.this.alertContainer.getViewTreeObserver().removeOnPreDrawListener(this);
-                        GroupCallPip.this.alertContainer.getLocationOnScreen(GroupCallPip.this.location);
-                        float cx = ((GroupCallPip.this.windowLayoutParams.x + GroupCallPip.this.windowOffsetLeft) + (GroupCallPip.this.button.getMeasuredWidth() / 2.0f)) - GroupCallPip.this.location[0];
-                        float cy = ((GroupCallPip.this.windowLayoutParams.y + GroupCallPip.this.windowOffsetTop) + (GroupCallPip.this.button.getMeasuredWidth() / 2.0f)) - GroupCallPip.this.location[1];
-                        boolean canHorizontal = cy - ((float) AndroidUtilities.dp(61.0f)) > 0.0f && ((float) AndroidUtilities.dp(61.0f)) + cy < ((float) GroupCallPip.this.alertContainer.getMeasuredHeight());
-                        if (AndroidUtilities.dp(61.0f) + cx + GroupCallPip.this.pipAlertView.getMeasuredWidth() >= GroupCallPip.this.alertContainer.getMeasuredWidth() - AndroidUtilities.dp(16.0f) || !canHorizontal) {
-                            if ((cx - AndroidUtilities.dp(61.0f)) - GroupCallPip.this.pipAlertView.getMeasuredWidth() > AndroidUtilities.dp(16.0f) && canHorizontal) {
-                                float yOffset = cy / GroupCallPip.this.alertContainer.getMeasuredHeight();
-                                float maxOffset = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredHeight();
-                                float yOffset2 = Math.max(maxOffset, Math.min(yOffset, 1.0f - maxOffset));
-                                GroupCallPip.this.pipAlertView.setTranslationX((int) ((cx - AndroidUtilities.dp(61.0f)) - GroupCallPip.this.pipAlertView.getMeasuredWidth()));
-                                GroupCallPip.this.pipAlertView.setTranslationY((int) (cy - (GroupCallPip.this.pipAlertView.getMeasuredHeight() * yOffset2)));
-                                GroupCallPip.this.pipAlertView.setPosition(1, cx, cy);
-                            } else if (cy > GroupCallPip.this.alertContainer.getMeasuredHeight() * 0.3f) {
-                                float xOffset = cx / GroupCallPip.this.alertContainer.getMeasuredWidth();
-                                float maxOffset2 = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredWidth();
-                                GroupCallPip.this.pipAlertView.setTranslationX((int) (cx - (GroupCallPip.this.pipAlertView.getMeasuredWidth() * Math.max(maxOffset2, Math.min(xOffset, 1.0f - maxOffset2)))));
-                                GroupCallPip.this.pipAlertView.setTranslationY((int) ((cy - GroupCallPip.this.pipAlertView.getMeasuredHeight()) - AndroidUtilities.dp(61.0f)));
-                                GroupCallPip.this.pipAlertView.setPosition(3, cx, cy);
-                            } else {
-                                float xOffset2 = cx / GroupCallPip.this.alertContainer.getMeasuredWidth();
-                                float maxOffset3 = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredWidth();
-                                GroupCallPip.this.pipAlertView.setTranslationX((int) (cx - (GroupCallPip.this.pipAlertView.getMeasuredWidth() * Math.max(maxOffset3, Math.min(xOffset2, 1.0f - maxOffset3)))));
-                                GroupCallPip.this.pipAlertView.setTranslationY((int) (AndroidUtilities.dp(61.0f) + cy));
-                                GroupCallPip.this.pipAlertView.setPosition(2, cx, cy);
-                            }
+                        GroupCallPip groupCallPip = GroupCallPip.this;
+                        groupCallPip.alertContainer.getLocationOnScreen(groupCallPip.location);
+                        GroupCallPip groupCallPip2 = GroupCallPip.this;
+                        float measuredWidth = groupCallPip2.windowLayoutParams.x + groupCallPip2.windowOffsetLeft + (groupCallPip2.button.getMeasuredWidth() / 2.0f);
+                        GroupCallPip groupCallPip3 = GroupCallPip.this;
+                        float f = measuredWidth - groupCallPip3.location[0];
+                        float measuredWidth2 = ((groupCallPip3.windowLayoutParams.y + groupCallPip3.windowOffsetTop) + (groupCallPip3.button.getMeasuredWidth() / 2.0f)) - GroupCallPip.this.location[1];
+                        boolean z2 = measuredWidth2 - ((float) AndroidUtilities.dp(61.0f)) > 0.0f && ((float) AndroidUtilities.dp(61.0f)) + measuredWidth2 < ((float) GroupCallPip.this.alertContainer.getMeasuredHeight());
+                        if (AndroidUtilities.dp(61.0f) + f + GroupCallPip.this.pipAlertView.getMeasuredWidth() < GroupCallPip.this.alertContainer.getMeasuredWidth() - AndroidUtilities.dp(16.0f) && z2) {
+                            GroupCallPip.this.pipAlertView.setTranslationX(AndroidUtilities.dp(61.0f) + f);
+                            float dp = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredHeight();
+                            float max = Math.max(dp, Math.min(measuredWidth2 / GroupCallPip.this.alertContainer.getMeasuredHeight(), 1.0f - dp));
+                            GroupCallPipAlertView groupCallPipAlertView = GroupCallPip.this.pipAlertView;
+                            groupCallPipAlertView.setTranslationY((int) (measuredWidth2 - (groupCallPipAlertView.getMeasuredHeight() * max)));
+                            GroupCallPip.this.pipAlertView.setPosition(0, f, measuredWidth2);
+                        } else if ((f - AndroidUtilities.dp(61.0f)) - GroupCallPip.this.pipAlertView.getMeasuredWidth() > AndroidUtilities.dp(16.0f) && z2) {
+                            float dp2 = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredHeight();
+                            float max2 = Math.max(dp2, Math.min(measuredWidth2 / GroupCallPip.this.alertContainer.getMeasuredHeight(), 1.0f - dp2));
+                            GroupCallPip.this.pipAlertView.setTranslationX((int) ((f - AndroidUtilities.dp(61.0f)) - GroupCallPip.this.pipAlertView.getMeasuredWidth()));
+                            GroupCallPipAlertView groupCallPipAlertView2 = GroupCallPip.this.pipAlertView;
+                            groupCallPipAlertView2.setTranslationY((int) (measuredWidth2 - (groupCallPipAlertView2.getMeasuredHeight() * max2)));
+                            GroupCallPip.this.pipAlertView.setPosition(1, f, measuredWidth2);
+                        } else if (measuredWidth2 > GroupCallPip.this.alertContainer.getMeasuredHeight() * 0.3f) {
+                            float dp3 = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredWidth();
+                            float max3 = Math.max(dp3, Math.min(f / GroupCallPip.this.alertContainer.getMeasuredWidth(), 1.0f - dp3));
+                            GroupCallPipAlertView groupCallPipAlertView3 = GroupCallPip.this.pipAlertView;
+                            groupCallPipAlertView3.setTranslationX((int) (f - (groupCallPipAlertView3.getMeasuredWidth() * max3)));
+                            GroupCallPipAlertView groupCallPipAlertView4 = GroupCallPip.this.pipAlertView;
+                            groupCallPipAlertView4.setTranslationY((int) ((measuredWidth2 - groupCallPipAlertView4.getMeasuredHeight()) - AndroidUtilities.dp(61.0f)));
+                            GroupCallPip.this.pipAlertView.setPosition(3, f, measuredWidth2);
                         } else {
-                            GroupCallPip.this.pipAlertView.setTranslationX(AndroidUtilities.dp(61.0f) + cx);
-                            float yOffset3 = cy / GroupCallPip.this.alertContainer.getMeasuredHeight();
-                            float maxOffset4 = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredHeight();
-                            GroupCallPip.this.pipAlertView.setTranslationY((int) (cy - (GroupCallPip.this.pipAlertView.getMeasuredHeight() * Math.max(maxOffset4, Math.min(yOffset3, 1.0f - maxOffset4)))));
-                            GroupCallPip.this.pipAlertView.setPosition(0, cx, cy);
+                            float dp4 = AndroidUtilities.dp(40.0f) / GroupCallPip.this.pipAlertView.getMeasuredWidth();
+                            float max4 = Math.max(dp4, Math.min(f / GroupCallPip.this.alertContainer.getMeasuredWidth(), 1.0f - dp4));
+                            GroupCallPipAlertView groupCallPipAlertView5 = GroupCallPip.this.pipAlertView;
+                            groupCallPipAlertView5.setTranslationX((int) (f - (groupCallPipAlertView5.getMeasuredWidth() * max4)));
+                            GroupCallPip.this.pipAlertView.setTranslationY((int) (AndroidUtilities.dp(61.0f) + measuredWidth2));
+                            GroupCallPip.this.pipAlertView.setPosition(2, f, measuredWidth2);
                         }
                         return false;
                     }
@@ -553,7 +428,7 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
                 this.pipAlertView.animate().scaleX(0.7f).scaleY(0.7f).setDuration(150L).start();
                 this.alertContainer.animate().alpha(0.0f).setDuration(150L).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.GroupCallPip.8
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
+                    public void onAnimationEnd(Animator animator) {
                         GroupCallPip.this.alertContainer.setVisibility(8);
                     }
                 }).start();
@@ -563,15 +438,15 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
     }
 
     public void checkButtonAlpha() {
-        boolean alpha = this.pressedState || this.showAlert;
-        if (this.buttonInAlpha != alpha) {
-            this.buttonInAlpha = alpha;
-            if (alpha) {
+        boolean z = this.pressedState || this.showAlert;
+        if (this.buttonInAlpha != z) {
+            this.buttonInAlpha = z;
+            if (z) {
                 this.windowView.animate().alpha(1.0f).start();
             } else {
                 this.windowView.animate().alpha(0.7f).start();
             }
-            this.button.setPressedState(alpha);
+            this.button.setPressedState(z);
         }
     }
 
@@ -580,88 +455,93 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
     }
 
     public void remove() {
-        View alert;
-        if (instance != null) {
-            this.removed = true;
-            forceRemoved = true;
-            this.button.removed = true;
-            instance.showAlert(false);
-            float cx = this.windowLayoutParams.x + (this.windowView.getMeasuredWidth() / 2.0f);
-            float cy = this.windowLayoutParams.y + (this.windowView.getMeasuredHeight() / 2.0f);
-            float cxRemove = (this.windowLeft - this.windowOffsetLeft) + (this.windowRemoveTooltipView.getMeasuredWidth() / 2.0f);
-            float cyRemove = (this.windowTop - this.windowOffsetTop) + (this.windowRemoveTooltipView.getMeasuredHeight() / 2.0f);
-            float dx = cxRemove - cx;
-            float dy = cyRemove - cy;
-            GroupCallPip groupCallPip = instance;
-            WindowManager windowManager = groupCallPip.windowManager;
-            View windowView = groupCallPip.windowView;
-            View windowRemoveTooltipView = groupCallPip.windowRemoveTooltipView;
-            View windowRemoveTooltipOverlayView = groupCallPip.windowRemoveTooltipOverlayView;
-            View alert2 = groupCallPip.alertContainer;
-            onDestroy();
-            instance = null;
-            AnimatorSet animatorSet = new AnimatorSet();
-            long additionalDuration = 0;
-            if (this.deleteIcon.getCurrentFrame() < 33) {
-                alert = alert2;
-                additionalDuration = ((1.0f - (this.deleteIcon.getCurrentFrame() / 33.0f)) * ((float) this.deleteIcon.getDuration())) / 2.0f;
-            } else {
-                alert = alert2;
-            }
-            ValueAnimator animator = ValueAnimator.ofFloat(this.windowLayoutParams.x, this.windowLayoutParams.x + dx);
-            animator.addUpdateListener(this.updateXlistener);
-            animator.setDuration(250L).setInterpolator(CubicBezierInterpolator.DEFAULT);
-            animatorSet.playTogether(animator);
-            ValueAnimator animator2 = ValueAnimator.ofFloat(this.windowLayoutParams.y, (this.windowLayoutParams.y + dy) - AndroidUtilities.dp(30.0f), this.windowLayoutParams.y + dy);
-            animator2.addUpdateListener(this.updateYlistener);
-            animator2.setDuration(250L).setInterpolator(CubicBezierInterpolator.DEFAULT);
-            animatorSet.playTogether(animator2);
-            animatorSet.playTogether(ObjectAnimator.ofFloat(windowView, View.SCALE_X, windowView.getScaleX(), 0.1f).setDuration(180L));
-            animatorSet.playTogether(ObjectAnimator.ofFloat(windowView, View.SCALE_Y, windowView.getScaleY(), 0.1f).setDuration(180L));
-            ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(windowView, View.ALPHA, 1.0f, 0.0f);
-            alphaAnimator.setStartDelay(((float) 350) * 0.7f);
-            alphaAnimator.setDuration(((float) 350) * 0.3f);
-            animatorSet.playTogether(alphaAnimator);
-            AndroidUtilities.runOnUIThread(GroupCallPip$$ExternalSyntheticLambda3.INSTANCE, 20 + 350);
-            long moveDuration = 350 + additionalDuration + 180;
-            ObjectAnimator o = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_X, 1.0f, 1.05f);
-            o.setDuration(moveDuration);
-            o.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
-            animatorSet.playTogether(o);
-            ObjectAnimator o2 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_Y, 1.0f, 1.05f);
-            o2.setDuration(moveDuration);
-            o2.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
-            animatorSet.playTogether(o2);
-            ObjectAnimator o3 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_X, 1.0f, 0.3f);
-            o3.setStartDelay(moveDuration);
-            o3.setDuration(350L);
-            o3.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-            animatorSet.playTogether(o3);
-            ObjectAnimator o4 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_Y, 1.0f, 0.3f);
-            o4.setStartDelay(moveDuration);
-            o4.setDuration(350L);
-            o4.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-            animatorSet.playTogether(o4);
-            ObjectAnimator o5 = ObjectAnimator.ofFloat(this.removeTooltipView, View.TRANSLATION_Y, 0.0f, AndroidUtilities.dp(60.0f));
-            o5.setStartDelay(moveDuration);
-            o5.setDuration(350L);
-            o5.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-            animatorSet.playTogether(o5);
-            ObjectAnimator o6 = ObjectAnimator.ofFloat(this.removeTooltipView, View.ALPHA, 1.0f, 0.0f);
-            o6.setStartDelay(moveDuration);
-            o6.setDuration(350L);
-            o6.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-            animatorSet.playTogether(o6);
-            animatorSet.addListener(new AnonymousClass9(windowView, windowRemoveTooltipView, windowManager, windowRemoveTooltipOverlayView, alert));
-            animatorSet.start();
-            this.deleteIcon.setCustomEndFrame(66);
-            this.iconView.stopAnimation();
-            this.iconView.playAnimation();
+        GroupCallPip groupCallPip = instance;
+        if (groupCallPip == null) {
+            return;
         }
+        this.removed = true;
+        forceRemoved = true;
+        this.button.removed = true;
+        groupCallPip.showAlert(false);
+        float measuredWidth = ((this.windowLeft - this.windowOffsetLeft) + (this.windowRemoveTooltipView.getMeasuredWidth() / 2.0f)) - (this.windowLayoutParams.x + (this.windowView.getMeasuredWidth() / 2.0f));
+        float measuredHeight = ((this.windowTop - this.windowOffsetTop) + (this.windowRemoveTooltipView.getMeasuredHeight() / 2.0f)) - (this.windowLayoutParams.y + (this.windowView.getMeasuredHeight() / 2.0f));
+        GroupCallPip groupCallPip2 = instance;
+        WindowManager windowManager = groupCallPip2.windowManager;
+        FrameLayout frameLayout = groupCallPip2.windowView;
+        FrameLayout frameLayout2 = groupCallPip2.windowRemoveTooltipView;
+        FrameLayout frameLayout3 = groupCallPip2.windowRemoveTooltipOverlayView;
+        FrameLayout frameLayout4 = groupCallPip2.alertContainer;
+        onDestroy();
+        instance = null;
+        AnimatorSet animatorSet = new AnimatorSet();
+        long j = 0;
+        if (this.deleteIcon.getCurrentFrame() < 33) {
+            j = ((1.0f - (this.deleteIcon.getCurrentFrame() / 33.0f)) * ((float) this.deleteIcon.getDuration())) / 2.0f;
+        }
+        int i = this.windowLayoutParams.x;
+        ValueAnimator ofFloat = ValueAnimator.ofFloat(i, i + measuredWidth);
+        ofFloat.addUpdateListener(this.updateXlistener);
+        ValueAnimator duration = ofFloat.setDuration(250L);
+        CubicBezierInterpolator cubicBezierInterpolator = CubicBezierInterpolator.DEFAULT;
+        duration.setInterpolator(cubicBezierInterpolator);
+        animatorSet.playTogether(ofFloat);
+        int i2 = this.windowLayoutParams.y;
+        ValueAnimator ofFloat2 = ValueAnimator.ofFloat(i2, (i2 + measuredHeight) - AndroidUtilities.dp(30.0f), this.windowLayoutParams.y + measuredHeight);
+        ofFloat2.addUpdateListener(this.updateYlistener);
+        ofFloat2.setDuration(250L).setInterpolator(cubicBezierInterpolator);
+        animatorSet.playTogether(ofFloat2);
+        animatorSet.playTogether(ObjectAnimator.ofFloat(frameLayout, View.SCALE_X, frameLayout.getScaleX(), 0.1f).setDuration(180L));
+        animatorSet.playTogether(ObjectAnimator.ofFloat(frameLayout, View.SCALE_Y, frameLayout.getScaleY(), 0.1f).setDuration(180L));
+        ObjectAnimator ofFloat3 = ObjectAnimator.ofFloat(frameLayout, View.ALPHA, 1.0f, 0.0f);
+        float f = (float) 350;
+        ofFloat3.setStartDelay(0.7f * f);
+        ofFloat3.setDuration(f * 0.3f);
+        animatorSet.playTogether(ofFloat3);
+        AndroidUtilities.runOnUIThread(GroupCallPip$$ExternalSyntheticLambda3.INSTANCE, 370L);
+        long j2 = 350 + j + 180;
+        ObjectAnimator ofFloat4 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_X, 1.0f, 1.05f);
+        ofFloat4.setDuration(j2);
+        CubicBezierInterpolator cubicBezierInterpolator2 = CubicBezierInterpolator.EASE_BOTH;
+        ofFloat4.setInterpolator(cubicBezierInterpolator2);
+        animatorSet.playTogether(ofFloat4);
+        ObjectAnimator ofFloat5 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_Y, 1.0f, 1.05f);
+        ofFloat5.setDuration(j2);
+        ofFloat5.setInterpolator(cubicBezierInterpolator2);
+        animatorSet.playTogether(ofFloat5);
+        ObjectAnimator ofFloat6 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_X, 1.0f, 0.3f);
+        ofFloat6.setStartDelay(j2);
+        ofFloat6.setDuration(350L);
+        CubicBezierInterpolator cubicBezierInterpolator3 = CubicBezierInterpolator.EASE_OUT_QUINT;
+        ofFloat6.setInterpolator(cubicBezierInterpolator3);
+        animatorSet.playTogether(ofFloat6);
+        ObjectAnimator ofFloat7 = ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_Y, 1.0f, 0.3f);
+        ofFloat7.setStartDelay(j2);
+        ofFloat7.setDuration(350L);
+        ofFloat7.setInterpolator(cubicBezierInterpolator3);
+        animatorSet.playTogether(ofFloat7);
+        ObjectAnimator ofFloat8 = ObjectAnimator.ofFloat(this.removeTooltipView, View.TRANSLATION_Y, 0.0f, AndroidUtilities.dp(60.0f));
+        ofFloat8.setStartDelay(j2);
+        ofFloat8.setDuration(350L);
+        ofFloat8.setInterpolator(cubicBezierInterpolator3);
+        animatorSet.playTogether(ofFloat8);
+        ObjectAnimator ofFloat9 = ObjectAnimator.ofFloat(this.removeTooltipView, View.ALPHA, 1.0f, 0.0f);
+        ofFloat9.setStartDelay(j2);
+        ofFloat9.setDuration(350L);
+        ofFloat9.setInterpolator(cubicBezierInterpolator3);
+        animatorSet.playTogether(ofFloat9);
+        animatorSet.addListener(new AnonymousClass9(frameLayout, frameLayout2, windowManager, frameLayout3, frameLayout4));
+        animatorSet.start();
+        this.deleteIcon.setCustomEndFrame(66);
+        this.iconView.stopAnimation();
+        this.iconView.playAnimation();
+    }
+
+    public static /* synthetic */ void lambda$remove$2() {
+        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.groupCallVisibilityChanged, new Object[0]);
     }
 
     /* renamed from: org.telegram.ui.Components.GroupCallPip$9 */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass9 extends AnimatorListenerAdapter {
         final /* synthetic */ View val$alert;
         final /* synthetic */ WindowManager val$windowManager;
@@ -670,7 +550,7 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         final /* synthetic */ View val$windowView;
 
         AnonymousClass9(View view, View view2, WindowManager windowManager, View view3, View view4) {
-            GroupCallPip.this = this$0;
+            GroupCallPip.this = r1;
             this.val$windowView = view;
             this.val$windowRemoveTooltipView = view2;
             this.val$windowManager = windowManager;
@@ -679,7 +559,7 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         }
 
         @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-        public void onAnimationEnd(Animator animation) {
+        public void onAnimationEnd(Animator animator) {
             NotificationCenter notificationCenter = NotificationCenter.getInstance(GroupCallPip.this.currentAccount);
             final View view = this.val$windowView;
             final View view2 = this.val$windowRemoveTooltipView;
@@ -694,84 +574,81 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
             });
         }
 
-        public static /* synthetic */ void lambda$onAnimationEnd$0(View windowView, View windowRemoveTooltipView, WindowManager windowManager, View windowRemoveTooltipOverlayView, View alert) {
-            windowView.setVisibility(8);
-            windowRemoveTooltipView.setVisibility(8);
-            windowManager.removeView(windowView);
-            windowManager.removeView(windowRemoveTooltipView);
-            windowManager.removeView(windowRemoveTooltipOverlayView);
-            windowManager.removeView(alert);
+        public static /* synthetic */ void lambda$onAnimationEnd$0(View view, View view2, WindowManager windowManager, View view3, View view4) {
+            view.setVisibility(8);
+            view2.setVisibility(8);
+            windowManager.removeView(view);
+            windowManager.removeView(view2);
+            windowManager.removeView(view3);
+            windowManager.removeView(view4);
         }
     }
 
-    private void updateAvatars(boolean animated) {
-        ChatObject.Call call;
-        if (this.avatarsImageView.avatarsDarawable.transitionProgressAnimator == null) {
-            VoIPService voIPService = VoIPService.getSharedInstance();
-            if (voIPService != null) {
-                call = voIPService.groupCall;
-            } else {
-                call = null;
-            }
+    private void updateAvatars(boolean z) {
+        AvatarsImageView avatarsImageView = this.avatarsImageView;
+        if (avatarsImageView.avatarsDarawable.transitionProgressAnimator == null) {
+            VoIPService sharedInstance = VoIPService.getSharedInstance();
+            ChatObject.Call call = sharedInstance != null ? sharedInstance.groupCall : null;
+            int i = 0;
             if (call != null) {
-                long selfId = voIPService.getSelfId();
-                int a = 0;
-                int N = call.sortedParticipants.size();
-                int k = 0;
-                while (k < 2) {
-                    if (a >= N) {
-                        this.avatarsImageView.setObject(k, this.currentAccount, null);
-                        k++;
-                    } else {
-                        TLRPC.TL_groupCallParticipant participant = call.sortedParticipants.get(a);
-                        if (MessageObject.getPeerId(participant.peer) != selfId && SystemClock.uptimeMillis() - participant.lastSpeakTime <= 500) {
-                            this.avatarsImageView.setObject(k, this.currentAccount, participant);
-                            k++;
+                long selfId = sharedInstance.getSelfId();
+                int size = call.sortedParticipants.size();
+                int i2 = 0;
+                while (i < 2) {
+                    if (i2 < size) {
+                        TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant = call.sortedParticipants.get(i2);
+                        if (MessageObject.getPeerId(tLRPC$TL_groupCallParticipant.peer) != selfId && SystemClock.uptimeMillis() - tLRPC$TL_groupCallParticipant.lastSpeakTime <= 500) {
+                            this.avatarsImageView.setObject(i, this.currentAccount, tLRPC$TL_groupCallParticipant);
                         }
+                        i2++;
+                    } else {
+                        this.avatarsImageView.setObject(i, this.currentAccount, null);
                     }
-                    a++;
+                    i++;
+                    i2++;
                 }
                 this.avatarsImageView.setObject(2, this.currentAccount, null);
-                this.avatarsImageView.commitTransition(animated);
+                this.avatarsImageView.commitTransition(z);
                 return;
             }
-            for (int a2 = 0; a2 < 3; a2++) {
-                this.avatarsImageView.setObject(a2, this.currentAccount, null);
+            while (i < 3) {
+                this.avatarsImageView.setObject(i, this.currentAccount, null);
+                i++;
             }
-            this.avatarsImageView.commitTransition(animated);
+            this.avatarsImageView.commitTransition(z);
             return;
         }
-        this.avatarsImageView.updateAfterTransitionEnd();
+        avatarsImageView.updateAfterTransitionEnd();
     }
 
-    public static void show(Context context, int account) {
+    public static void show(Context context, int i) {
         if (instance != null) {
             return;
         }
-        instance = new GroupCallPip(context, account);
-        WindowManager wm = (WindowManager) ApplicationLoader.applicationContext.getSystemService("window");
-        instance.windowManager = wm;
-        WindowManager.LayoutParams windowLayoutParams = createWindowLayoutParams(context);
-        windowLayoutParams.width = -1;
-        windowLayoutParams.height = -1;
-        windowLayoutParams.dimAmount = 0.25f;
-        windowLayoutParams.flags = 522;
-        wm.addView(instance.alertContainer, windowLayoutParams);
+        instance = new GroupCallPip(context, i);
+        WindowManager windowManager = (WindowManager) ApplicationLoader.applicationContext.getSystemService("window");
+        instance.windowManager = windowManager;
+        WindowManager.LayoutParams createWindowLayoutParams = createWindowLayoutParams(context);
+        createWindowLayoutParams.width = -1;
+        createWindowLayoutParams.height = -1;
+        createWindowLayoutParams.dimAmount = 0.25f;
+        createWindowLayoutParams.flags = 522;
+        windowManager.addView(instance.alertContainer, createWindowLayoutParams);
         instance.alertContainer.setVisibility(8);
-        WindowManager.LayoutParams windowLayoutParams2 = createWindowLayoutParams(context);
-        windowLayoutParams2.gravity = 81;
-        windowLayoutParams2.width = AndroidUtilities.dp(100.0f);
-        windowLayoutParams2.height = AndroidUtilities.dp(150.0f);
-        wm.addView(instance.windowRemoveTooltipView, windowLayoutParams2);
-        WindowManager.LayoutParams windowLayoutParams3 = createWindowLayoutParams(context);
+        WindowManager.LayoutParams createWindowLayoutParams2 = createWindowLayoutParams(context);
+        createWindowLayoutParams2.gravity = 81;
+        createWindowLayoutParams2.width = AndroidUtilities.dp(100.0f);
+        createWindowLayoutParams2.height = AndroidUtilities.dp(150.0f);
+        windowManager.addView(instance.windowRemoveTooltipView, createWindowLayoutParams2);
+        WindowManager.LayoutParams createWindowLayoutParams3 = createWindowLayoutParams(context);
         GroupCallPip groupCallPip = instance;
-        groupCallPip.windowLayoutParams = windowLayoutParams3;
-        wm.addView(groupCallPip.windowView, windowLayoutParams3);
-        WindowManager.LayoutParams windowLayoutParams4 = createWindowLayoutParams(context);
-        windowLayoutParams4.gravity = 81;
-        windowLayoutParams4.width = AndroidUtilities.dp(100.0f);
-        windowLayoutParams4.height = AndroidUtilities.dp(150.0f);
-        wm.addView(instance.windowRemoveTooltipOverlayView, windowLayoutParams4);
+        groupCallPip.windowLayoutParams = createWindowLayoutParams3;
+        windowManager.addView(groupCallPip.windowView, createWindowLayoutParams3);
+        WindowManager.LayoutParams createWindowLayoutParams4 = createWindowLayoutParams(context);
+        createWindowLayoutParams4.gravity = 81;
+        createWindowLayoutParams4.width = AndroidUtilities.dp(100.0f);
+        createWindowLayoutParams4.height = AndroidUtilities.dp(150.0f);
+        windowManager.addView(instance.windowRemoveTooltipOverlayView, createWindowLayoutParams4);
         instance.windowRemoveTooltipView.setVisibility(8);
         instance.windowView.setScaleX(0.5f);
         instance.windowView.setScaleY(0.5f);
@@ -789,11 +666,10 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.didEndCall);
     }
 
-    public void setPosition(float xRelative, float yRelative) {
-        float paddingHorizontal = -AndroidUtilities.dp(36.0f);
-        float w = AndroidUtilities.displaySize.x - (2.0f * paddingHorizontal);
-        this.windowLayoutParams.x = (int) (((w - AndroidUtilities.dp(105.0f)) * xRelative) + paddingHorizontal);
-        this.windowLayoutParams.y = (int) ((AndroidUtilities.displaySize.y - AndroidUtilities.dp(105.0f)) * yRelative);
+    public void setPosition(float f, float f2) {
+        float f3 = -AndroidUtilities.dp(36.0f);
+        this.windowLayoutParams.x = (int) (f3 + (((AndroidUtilities.displaySize.x - (2.0f * f3)) - AndroidUtilities.dp(105.0f)) * f));
+        this.windowLayoutParams.y = (int) ((AndroidUtilities.displaySize.y - AndroidUtilities.dp(105.0f)) * f2);
         updateAvatarsPosition();
         if (this.windowView.getParent() != null) {
             this.windowManager.updateViewLayout(this.windowView, this.windowLayoutParams);
@@ -806,21 +682,21 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
             groupCallPip.showAlert(false);
             GroupCallPip groupCallPip2 = instance;
             final WindowManager windowManager = groupCallPip2.windowManager;
-            final View windowView = groupCallPip2.windowView;
-            final View windowRemoveTooltipView = groupCallPip2.windowRemoveTooltipView;
-            final View windowRemoveTooltipOverlayView = groupCallPip2.windowRemoveTooltipOverlayView;
-            final View alert = groupCallPip2.alertContainer;
-            groupCallPip2.windowView.animate().scaleX(0.5f).scaleY(0.5f).alpha(0.0f).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.GroupCallPip.10
+            final FrameLayout frameLayout = groupCallPip2.windowView;
+            final FrameLayout frameLayout2 = groupCallPip2.windowRemoveTooltipView;
+            final FrameLayout frameLayout3 = groupCallPip2.windowRemoveTooltipOverlayView;
+            final FrameLayout frameLayout4 = groupCallPip2.alertContainer;
+            frameLayout.animate().scaleX(0.5f).scaleY(0.5f).alpha(0.0f).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.GroupCallPip.10
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animation) {
-                    if (windowView.getParent() != null) {
-                        windowView.setVisibility(8);
-                        windowRemoveTooltipView.setVisibility(8);
-                        windowRemoveTooltipOverlayView.setVisibility(8);
-                        windowManager.removeView(windowView);
-                        windowManager.removeView(windowRemoveTooltipView);
-                        windowManager.removeView(windowRemoveTooltipOverlayView);
-                        windowManager.removeView(alert);
+                public void onAnimationEnd(Animator animator) {
+                    if (frameLayout.getParent() != null) {
+                        frameLayout.setVisibility(8);
+                        frameLayout2.setVisibility(8);
+                        frameLayout3.setVisibility(8);
+                        windowManager.removeView(frameLayout);
+                        windowManager.removeView(frameLayout2);
+                        windowManager.removeView(frameLayout3);
+                        windowManager.removeView(frameLayout4);
                     }
                 }
             }).start();
@@ -831,33 +707,33 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
     }
 
     private static WindowManager.LayoutParams createWindowLayoutParams(Context context) {
-        WindowManager.LayoutParams windowLayoutParams = new WindowManager.LayoutParams();
-        windowLayoutParams.height = AndroidUtilities.dp(105.0f);
-        windowLayoutParams.width = AndroidUtilities.dp(105.0f);
-        windowLayoutParams.gravity = 51;
-        windowLayoutParams.format = -3;
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.height = AndroidUtilities.dp(105.0f);
+        layoutParams.width = AndroidUtilities.dp(105.0f);
+        layoutParams.gravity = 51;
+        layoutParams.format = -3;
         if (AndroidUtilities.checkInlinePermissions(context)) {
             if (Build.VERSION.SDK_INT >= 26) {
-                windowLayoutParams.type = 2038;
+                layoutParams.type = 2038;
             } else {
-                windowLayoutParams.type = 2003;
+                layoutParams.type = 2003;
             }
         } else {
-            windowLayoutParams.type = 99;
+            layoutParams.type = 99;
         }
-        windowLayoutParams.flags = LaunchActivity.SCREEN_CAPTURE_REQUEST_CODE;
-        return windowLayoutParams;
+        layoutParams.flags = 520;
+        return layoutParams;
     }
 
-    void showRemoveTooltip(boolean show) {
-        if (this.animateToShowRemoveTooltip != show) {
-            this.animateToShowRemoveTooltip = show;
+    void showRemoveTooltip(boolean z) {
+        if (this.animateToShowRemoveTooltip != z) {
+            this.animateToShowRemoveTooltip = z;
             AnimatorSet animatorSet = this.showRemoveAnimator;
             if (animatorSet != null) {
                 animatorSet.removeAllListeners();
                 this.showRemoveAnimator.cancel();
             }
-            if (show) {
+            if (z) {
                 if (this.windowRemoveTooltipView.getVisibility() != 0) {
                     this.windowRemoveTooltipView.setVisibility(0);
                     this.removeTooltipView.setAlpha(0.0f);
@@ -867,19 +743,34 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
                 }
                 AnimatorSet animatorSet2 = new AnimatorSet();
                 this.showRemoveAnimator = animatorSet2;
-                animatorSet2.playTogether(ObjectAnimator.ofFloat(this.removeTooltipView, View.ALPHA, this.removeTooltipView.getAlpha(), 1.0f), ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_X, this.removeTooltipView.getScaleX(), 1.0f), ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_Y, this.removeTooltipView.getScaleY(), 1.0f));
+                View view = this.removeTooltipView;
+                Property property = View.ALPHA;
+                float[] fArr = {view.getAlpha(), 1.0f};
+                View view2 = this.removeTooltipView;
+                Property property2 = View.SCALE_X;
+                float[] fArr2 = {view2.getScaleX(), 1.0f};
+                View view3 = this.removeTooltipView;
+                animatorSet2.playTogether(ObjectAnimator.ofFloat(view, property, fArr), ObjectAnimator.ofFloat(view2, property2, fArr2), ObjectAnimator.ofFloat(view3, View.SCALE_Y, view3.getScaleY(), 1.0f));
                 this.showRemoveAnimator.setDuration(150L).start();
                 return;
             }
             AnimatorSet animatorSet3 = new AnimatorSet();
             this.showRemoveAnimator = animatorSet3;
-            animatorSet3.playTogether(ObjectAnimator.ofFloat(this.removeTooltipView, View.ALPHA, this.removeTooltipView.getAlpha(), 0.0f), ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_X, this.removeTooltipView.getScaleX(), 0.5f), ObjectAnimator.ofFloat(this.removeTooltipView, View.SCALE_Y, this.removeTooltipView.getScaleY(), 0.5f));
+            View view4 = this.removeTooltipView;
+            Property property3 = View.ALPHA;
+            float[] fArr3 = {view4.getAlpha(), 0.0f};
+            View view5 = this.removeTooltipView;
+            Property property4 = View.SCALE_X;
+            float[] fArr4 = {view5.getScaleX(), 0.5f};
+            View view6 = this.removeTooltipView;
+            animatorSet3.playTogether(ObjectAnimator.ofFloat(view4, property3, fArr3), ObjectAnimator.ofFloat(view5, property4, fArr4), ObjectAnimator.ofFloat(view6, View.SCALE_Y, view6.getScaleY(), 0.5f));
             this.showRemoveAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.GroupCallPip.11
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animation) {
+                public void onAnimationEnd(Animator animator) {
                     GroupCallPip.this.windowRemoveTooltipView.setVisibility(8);
-                    GroupCallPip.this.animateToPrepareRemove = false;
-                    GroupCallPip.this.prepareToRemoveProgress = 0.0f;
+                    GroupCallPip groupCallPip = GroupCallPip.this;
+                    groupCallPip.animateToPrepareRemove = false;
+                    groupCallPip.prepareToRemoveProgress = 0.0f;
                 }
             });
             this.showRemoveAnimator.setDuration(150L);
@@ -887,24 +778,24 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         }
     }
 
-    void prepareToRemove(boolean prepare) {
-        if (this.animateToPrepareRemove != prepare) {
-            this.animateToPrepareRemove = prepare;
+    void prepareToRemove(boolean z) {
+        if (this.animateToPrepareRemove != z) {
+            this.animateToPrepareRemove = z;
             this.removeTooltipView.invalidate();
             if (!this.removed) {
-                this.deleteIcon.setCustomEndFrame(prepare ? 33 : 0);
+                this.deleteIcon.setCustomEndFrame(z ? 33 : 0);
                 this.iconView.playAnimation();
             }
-            if (prepare) {
+            if (z) {
                 this.button.performHapticFeedback(3, 2);
             }
         }
-        this.button.prepareToRemove(prepare);
+        this.button.prepareToRemove(z);
     }
 
-    void pinnedToCenter(final boolean pinned) {
-        if (!this.removed && this.animateToPinnedToCenter != pinned) {
-            this.animateToPinnedToCenter = pinned;
+    void pinnedToCenter(final boolean z) {
+        if (!this.removed && this.animateToPinnedToCenter != z) {
+            this.animateToPinnedToCenter = z;
             ValueAnimator valueAnimator = this.pinAnimator;
             if (valueAnimator != null) {
                 valueAnimator.removeAllListeners();
@@ -912,28 +803,33 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
             }
             float[] fArr = new float[2];
             fArr[0] = this.pinnedProgress;
-            fArr[1] = pinned ? 1.0f : 0.0f;
+            fArr[1] = z ? 1.0f : 0.0f;
             ValueAnimator ofFloat = ValueAnimator.ofFloat(fArr);
             this.pinAnimator = ofFloat;
             ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.GroupCallPip$$ExternalSyntheticLambda0
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                    GroupCallPip.this.m2657lambda$pinnedToCenter$3$orgtelegramuiComponentsGroupCallPip(valueAnimator2);
+                    GroupCallPip.this.lambda$pinnedToCenter$3(valueAnimator2);
                 }
             });
             this.pinAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.GroupCallPip.12
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animation) {
-                    if (GroupCallPip.this.removed) {
+                public void onAnimationEnd(Animator animator) {
+                    GroupCallPip groupCallPip = GroupCallPip.this;
+                    if (groupCallPip.removed) {
                         return;
                     }
-                    GroupCallPip.this.pinnedProgress = pinned ? 1.0f : 0.0f;
-                    GroupCallPip.this.button.setPinnedProgress(GroupCallPip.this.pinnedProgress);
-                    GroupCallPip.this.windowView.setScaleX(1.0f - (GroupCallPip.this.pinnedProgress * 0.6f));
-                    GroupCallPip.this.windowView.setScaleY(1.0f - (GroupCallPip.this.pinnedProgress * 0.6f));
-                    if (GroupCallPip.this.moving) {
-                        GroupCallPip.this.updateButtonPosition();
+                    groupCallPip.pinnedProgress = z ? 1.0f : 0.0f;
+                    groupCallPip.button.setPinnedProgress(GroupCallPip.this.pinnedProgress);
+                    GroupCallPip groupCallPip2 = GroupCallPip.this;
+                    groupCallPip2.windowView.setScaleX(1.0f - (groupCallPip2.pinnedProgress * 0.6f));
+                    GroupCallPip groupCallPip3 = GroupCallPip.this;
+                    groupCallPip3.windowView.setScaleY(1.0f - (groupCallPip3.pinnedProgress * 0.6f));
+                    GroupCallPip groupCallPip4 = GroupCallPip.this;
+                    if (!groupCallPip4.moving) {
+                        return;
                     }
+                    groupCallPip4.updateButtonPosition();
                 }
             });
             this.pinAnimator.setDuration(250L);
@@ -942,8 +838,7 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         }
     }
 
-    /* renamed from: lambda$pinnedToCenter$3$org-telegram-ui-Components-GroupCallPip */
-    public /* synthetic */ void m2657lambda$pinnedToCenter$3$orgtelegramuiComponentsGroupCallPip(ValueAnimator valueAnimator) {
+    public /* synthetic */ void lambda$pinnedToCenter$3(ValueAnimator valueAnimator) {
         if (this.removed) {
             return;
         }
@@ -952,22 +847,20 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         this.button.setPinnedProgress(floatValue);
         this.windowView.setScaleX(1.0f - (this.pinnedProgress * 0.6f));
         this.windowView.setScaleY(1.0f - (this.pinnedProgress * 0.6f));
-        if (this.moving) {
-            updateButtonPosition();
+        if (!this.moving) {
+            return;
         }
+        updateButtonPosition();
     }
 
     public void updateButtonPosition() {
-        float cxRemove = ((this.windowLeft - this.windowOffsetLeft) + (this.windowRemoveTooltipView.getMeasuredWidth() / 2.0f)) - (this.windowView.getMeasuredWidth() / 2.0f);
-        float cyRemove = (((this.windowTop - this.windowOffsetTop) + (this.windowRemoveTooltipView.getMeasuredHeight() / 2.0f)) - (this.windowView.getMeasuredHeight() / 2.0f)) - AndroidUtilities.dp(25.0f);
+        float measuredWidth = ((this.windowLeft - this.windowOffsetLeft) + (this.windowRemoveTooltipView.getMeasuredWidth() / 2.0f)) - (this.windowView.getMeasuredWidth() / 2.0f);
+        float measuredHeight = (((this.windowTop - this.windowOffsetTop) + (this.windowRemoveTooltipView.getMeasuredHeight() / 2.0f)) - (this.windowView.getMeasuredHeight() / 2.0f)) - AndroidUtilities.dp(25.0f);
         WindowManager.LayoutParams layoutParams = this.windowLayoutParams;
         float f = this.windowX;
         float f2 = this.pinnedProgress;
-        layoutParams.x = (int) ((f * (1.0f - f2)) + (f2 * cxRemove));
-        WindowManager.LayoutParams layoutParams2 = this.windowLayoutParams;
-        float f3 = this.windowY;
-        float f4 = this.pinnedProgress;
-        layoutParams2.y = (int) ((f3 * (1.0f - f4)) + (f4 * cyRemove));
+        layoutParams.x = (int) ((f * (1.0f - f2)) + (measuredWidth * f2));
+        layoutParams.y = (int) ((this.windowY * (1.0f - f2)) + (measuredHeight * f2));
         updateAvatarsPosition();
         if (this.windowView.getParent() != null) {
             this.windowManager.updateViewLayout(this.windowView, this.windowLayoutParams);
@@ -975,62 +868,56 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
     }
 
     public void updateAvatarsPosition() {
-        int parentWidth = AndroidUtilities.displaySize.x;
-        float x = Math.min(Math.max(this.windowLayoutParams.x, -AndroidUtilities.dp(36.0f)), (parentWidth - this.windowView.getMeasuredWidth()) + AndroidUtilities.dp(36.0f));
-        if (x < 0.0f) {
-            this.avatarsImageView.setTranslationX(Math.abs(x) / 3.0f);
-        } else if (x > parentWidth - this.windowView.getMeasuredWidth()) {
-            this.avatarsImageView.setTranslationX((-Math.abs(x - (parentWidth - this.windowView.getMeasuredWidth()))) / 3.0f);
+        int i = AndroidUtilities.displaySize.x;
+        float min = Math.min(Math.max(this.windowLayoutParams.x, -AndroidUtilities.dp(36.0f)), (i - this.windowView.getMeasuredWidth()) + AndroidUtilities.dp(36.0f));
+        if (min < 0.0f) {
+            this.avatarsImageView.setTranslationX(Math.abs(min) / 3.0f);
+        } else if (min > i - this.windowView.getMeasuredWidth()) {
+            this.avatarsImageView.setTranslationX((-Math.abs(min - (i - this.windowView.getMeasuredWidth()))) / 3.0f);
         } else {
             this.avatarsImageView.setTranslationX(0.0f);
         }
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.groupCallUpdated || id == NotificationCenter.webRtcSpeakerAmplitudeEvent) {
+    public void didReceivedNotification(int i, int i2, Object... objArr) {
+        if (i == NotificationCenter.groupCallUpdated || i == NotificationCenter.webRtcSpeakerAmplitudeEvent) {
             updateAvatars(true);
-        } else if (id == NotificationCenter.didEndCall) {
+        } else if (i != NotificationCenter.didEndCall) {
+        } else {
             updateVisibility(ApplicationLoader.applicationContext);
         }
     }
 
-    public void getRelativePosition(float x, float y, float[] point) {
-        float width = AndroidUtilities.displaySize.x;
-        float height = AndroidUtilities.displaySize.y;
-        float paddingHorizontal = -AndroidUtilities.dp(36.0f);
-        point[0] = (x - paddingHorizontal) / ((width - (2.0f * paddingHorizontal)) - AndroidUtilities.dp(105.0f));
-        point[1] = y / (height - AndroidUtilities.dp(105.0f));
-        point[0] = Math.min(1.0f, Math.max(0.0f, point[0]));
-        point[1] = Math.min(1.0f, Math.max(0.0f, point[1]));
+    public void getRelativePosition(float f, float f2, float[] fArr) {
+        android.graphics.Point point = AndroidUtilities.displaySize;
+        float f3 = -AndroidUtilities.dp(36.0f);
+        fArr[0] = (f - f3) / ((point.x - (f3 * 2.0f)) - AndroidUtilities.dp(105.0f));
+        fArr[1] = f2 / (point.y - AndroidUtilities.dp(105.0f));
+        fArr[0] = Math.min(1.0f, Math.max(0.0f, fArr[0]));
+        fArr[1] = Math.min(1.0f, Math.max(0.0f, fArr[1]));
     }
 
     public static void updateVisibility(Context context) {
-        boolean visible;
-        VoIPService service = VoIPService.getSharedInstance();
-        boolean groupCall = false;
-        if (service != null && service.groupCall != null && !service.isHangingUp()) {
-            groupCall = true;
+        VoIPService sharedInstance = VoIPService.getSharedInstance();
+        boolean z = false;
+        boolean z2 = (sharedInstance == null || sharedInstance.groupCall == null || sharedInstance.isHangingUp()) ? false : true;
+        if (AndroidUtilities.checkInlinePermissions(ApplicationLoader.applicationContext) && z2 && !forceRemoved && (ApplicationLoader.mainInterfaceStopped || !GroupCallActivity.groupCallUiVisible)) {
+            z = true;
         }
-        if (!AndroidUtilities.checkInlinePermissions(ApplicationLoader.applicationContext)) {
-            visible = false;
-        } else {
-            visible = groupCall && !forceRemoved && (ApplicationLoader.mainInterfaceStopped || !GroupCallActivity.groupCallUiVisible);
-        }
-        if (visible) {
-            show(context, service.getAccount());
+        if (z) {
+            show(context, sharedInstance.getAccount());
             instance.showAvatars(true);
             return;
         }
         finish();
     }
 
-    private void showAvatars(boolean show) {
-        boolean isShowing = this.avatarsImageView.getTag() != null;
-        if (show != isShowing) {
+    private void showAvatars(boolean z) {
+        if (z != (this.avatarsImageView.getTag() != null)) {
             Integer num = null;
             this.avatarsImageView.animate().setListener(null).cancel();
-            if (show) {
+            if (z) {
                 if (this.avatarsImageView.getVisibility() != 0) {
                     this.avatarsImageView.setVisibility(0);
                     this.avatarsImageView.setAlpha(0.0f);
@@ -1041,13 +928,13 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
             } else {
                 this.avatarsImageView.animate().alpha(0.0f).scaleX(0.5f).scaleY(0.5f).setDuration(150L).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.GroupCallPip.13
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
+                    public void onAnimationEnd(Animator animator) {
                         GroupCallPip.this.avatarsImageView.setVisibility(8);
                     }
                 }).start();
             }
             AvatarsImageView avatarsImageView = this.avatarsImageView;
-            if (show) {
+            if (z) {
                 num = 1;
             }
             avatarsImageView.setTag(num);
@@ -1059,9 +946,6 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
     }
 
     public static boolean checkInlinePermissions() {
-        if (Build.VERSION.SDK_INT < 23 || ApplicationLoader.canDrawOverlays) {
-            return true;
-        }
-        return false;
+        return Build.VERSION.SDK_INT < 23 || ApplicationLoader.canDrawOverlays;
     }
 }

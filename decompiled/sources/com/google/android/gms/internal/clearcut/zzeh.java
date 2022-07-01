@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.RandomAccess;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzeh {
     private static final Class<?> zzoh = zzdp();
     private static final zzex<?, ?> zzoi = zzd(false);
@@ -293,7 +293,7 @@ final class zzeh {
                 return (zzex) zzdq.getConstructor(Boolean.TYPE).newInstance(Boolean.valueOf(z));
             }
             return null;
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }
@@ -327,7 +327,7 @@ final class zzeh {
     private static Class<?> zzdp() {
         try {
             return Class.forName("com.google.protobuf.GeneratedMessage");
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }
@@ -335,7 +335,7 @@ final class zzeh {
     private static Class<?> zzdq() {
         try {
             return Class.forName("com.google.protobuf.UnknownFieldSetSchema");
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }

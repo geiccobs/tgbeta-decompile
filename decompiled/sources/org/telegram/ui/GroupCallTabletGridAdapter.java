@@ -9,12 +9,12 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.MessageObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$TL_groupCallParticipant;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.voip.GroupCallGridCell;
 import org.telegram.ui.Components.voip.GroupCallMiniTextureView;
 import org.telegram.ui.Components.voip.GroupCallRenderersContainer;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapter {
     private final GroupCallActivity activity;
     private ArrayList<GroupCallMiniTextureView> attachedRenderers;
@@ -24,35 +24,36 @@ public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapte
     private final ArrayList<ChatObject.VideoParticipant> videoParticipants = new ArrayList<>();
     private boolean visible = false;
 
-    public GroupCallTabletGridAdapter(ChatObject.Call groupCall, int currentAccount, GroupCallActivity activity) {
-        this.groupCall = groupCall;
-        this.currentAccount = currentAccount;
-        this.activity = activity;
-    }
-
-    public void setRenderersPool(ArrayList<GroupCallMiniTextureView> attachedRenderers, GroupCallRenderersContainer renderersContainer) {
-        this.attachedRenderers = attachedRenderers;
-        this.renderersContainer = renderersContainer;
-    }
-
-    public void setGroupCall(ChatObject.Call groupCall) {
-        this.groupCall = groupCall;
-    }
-
     @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-    public boolean isEnabled(RecyclerView.ViewHolder holder) {
+    public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
         return false;
     }
 
+    public GroupCallTabletGridAdapter(ChatObject.Call call, int i, GroupCallActivity groupCallActivity) {
+        this.groupCall = call;
+        this.currentAccount = i;
+        this.activity = groupCallActivity;
+    }
+
+    public void setRenderersPool(ArrayList<GroupCallMiniTextureView> arrayList, GroupCallRenderersContainer groupCallRenderersContainer) {
+        this.attachedRenderers = arrayList;
+        this.renderersContainer = groupCallRenderersContainer;
+    }
+
+    public void setGroupCall(ChatObject.Call call) {
+        this.groupCall = call;
+    }
+
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new RecyclerListView.Holder(new GroupCallGridCell(parent.getContext(), true) { // from class: org.telegram.ui.GroupCallTabletGridAdapter.1
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        return new RecyclerListView.Holder(new GroupCallGridCell(viewGroup.getContext(), true) { // from class: org.telegram.ui.GroupCallTabletGridAdapter.1
             @Override // org.telegram.ui.Components.voip.GroupCallGridCell, android.view.ViewGroup, android.view.View
             public void onAttachedToWindow() {
                 super.onAttachedToWindow();
-                if (GroupCallTabletGridAdapter.this.visible && getParticipant() != null) {
-                    GroupCallTabletGridAdapter.this.attachRenderer(this, true);
+                if (!GroupCallTabletGridAdapter.this.visible || getParticipant() == null) {
+                    return;
                 }
+                GroupCallTabletGridAdapter.this.attachRenderer(this, true);
             }
 
             @Override // org.telegram.ui.Components.voip.GroupCallGridCell, android.view.ViewGroup, android.view.View
@@ -63,35 +64,37 @@ public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapte
         });
     }
 
-    public void attachRenderer(GroupCallGridCell cell, boolean attach) {
-        if (attach && cell.getRenderer() == null) {
-            cell.setRenderer(GroupCallMiniTextureView.getOrCreate(this.attachedRenderers, this.renderersContainer, null, null, cell, cell.getParticipant(), this.groupCall, this.activity));
-        } else if (!attach && cell.getRenderer() != null) {
-            cell.getRenderer().setTabletGridView(null);
-            cell.setRenderer(null);
+    public void attachRenderer(GroupCallGridCell groupCallGridCell, boolean z) {
+        if (z && groupCallGridCell.getRenderer() == null) {
+            groupCallGridCell.setRenderer(GroupCallMiniTextureView.getOrCreate(this.attachedRenderers, this.renderersContainer, null, null, groupCallGridCell, groupCallGridCell.getParticipant(), this.groupCall, this.activity));
+        } else if (z || groupCallGridCell.getRenderer() == null) {
+        } else {
+            groupCallGridCell.getRenderer().setTabletGridView(null);
+            groupCallGridCell.setRenderer(null);
         }
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        GroupCallGridCell cell = (GroupCallGridCell) holder.itemView;
-        ChatObject.VideoParticipant oldVideoParticipant = cell.getParticipant();
-        ChatObject.VideoParticipant videoParticipant = this.videoParticipants.get(position);
-        TLRPC.TL_groupCallParticipant tL_groupCallParticipant = this.videoParticipants.get(position).participant;
-        cell.spanCount = getSpanCount(position);
-        cell.position = position;
-        cell.gridAdapter = this;
-        if (cell.getMeasuredHeight() != getItemHeight(position)) {
-            cell.requestLayout();
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+        GroupCallGridCell groupCallGridCell = (GroupCallGridCell) viewHolder.itemView;
+        ChatObject.VideoParticipant participant = groupCallGridCell.getParticipant();
+        ChatObject.VideoParticipant videoParticipant = this.videoParticipants.get(i);
+        TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant = this.videoParticipants.get(i).participant;
+        groupCallGridCell.spanCount = getSpanCount(i);
+        groupCallGridCell.position = i;
+        groupCallGridCell.gridAdapter = this;
+        if (groupCallGridCell.getMeasuredHeight() != getItemHeight(i)) {
+            groupCallGridCell.requestLayout();
         }
         AccountInstance accountInstance = AccountInstance.getInstance(this.currentAccount);
         ChatObject.Call call = this.groupCall;
-        cell.setData(accountInstance, videoParticipant, call, MessageObject.getPeerId(call.selfPeer));
-        if (oldVideoParticipant != null && !oldVideoParticipant.equals(videoParticipant) && cell.attached && cell.getRenderer() != null) {
-            attachRenderer(cell, false);
-            attachRenderer(cell, true);
-        } else if (cell.getRenderer() != null) {
-            cell.getRenderer().updateAttachState(true);
+        groupCallGridCell.setData(accountInstance, videoParticipant, call, MessageObject.getPeerId(call.selfPeer));
+        if (participant != null && !participant.equals(videoParticipant) && groupCallGridCell.attached && groupCallGridCell.getRenderer() != null) {
+            attachRenderer(groupCallGridCell, false);
+            attachRenderer(groupCallGridCell, true);
+        } else if (groupCallGridCell.getRenderer() == null) {
+        } else {
+            groupCallGridCell.getRenderer().updateAttachState(true);
         }
     }
 
@@ -100,37 +103,39 @@ public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapte
         return this.videoParticipants.size();
     }
 
-    public void setVisibility(RecyclerListView listView, boolean visibility, boolean updateAttach) {
-        this.visible = visibility;
-        if (updateAttach) {
-            for (int i = 0; i < listView.getChildCount(); i++) {
-                View view = listView.getChildAt(i);
-                if (view instanceof GroupCallGridCell) {
-                    GroupCallGridCell cell = (GroupCallGridCell) view;
-                    if (cell.getParticipant() != null) {
-                        attachRenderer(cell, visibility);
+    public void setVisibility(RecyclerListView recyclerListView, boolean z, boolean z2) {
+        this.visible = z;
+        if (z2) {
+            for (int i = 0; i < recyclerListView.getChildCount(); i++) {
+                View childAt = recyclerListView.getChildAt(i);
+                if (childAt instanceof GroupCallGridCell) {
+                    GroupCallGridCell groupCallGridCell = (GroupCallGridCell) childAt;
+                    if (groupCallGridCell.getParticipant() != null) {
+                        attachRenderer(groupCallGridCell, z);
                     }
                 }
             }
         }
     }
 
-    public void scrollToPeerId(long peerId, RecyclerListView fullscreenUsersListView) {
-    }
-
-    public void update(boolean animated, RecyclerListView listView) {
+    public void update(boolean z, RecyclerListView recyclerListView) {
         if (this.groupCall == null) {
             return;
         }
-        if (animated) {
-            final ArrayList<ChatObject.VideoParticipant> oldVideoParticipants = new ArrayList<>();
-            oldVideoParticipants.addAll(this.videoParticipants);
+        if (z) {
+            final ArrayList arrayList = new ArrayList();
+            arrayList.addAll(this.videoParticipants);
             this.videoParticipants.clear();
             this.videoParticipants.addAll(this.groupCall.visibleVideoParticipants);
             DiffUtil.calculateDiff(new DiffUtil.Callback() { // from class: org.telegram.ui.GroupCallTabletGridAdapter.2
                 @Override // androidx.recyclerview.widget.DiffUtil.Callback
+                public boolean areContentsTheSame(int i, int i2) {
+                    return true;
+                }
+
+                @Override // androidx.recyclerview.widget.DiffUtil.Callback
                 public int getOldListSize() {
-                    return oldVideoParticipants.size();
+                    return arrayList.size();
                 }
 
                 @Override // androidx.recyclerview.widget.DiffUtil.Callback
@@ -139,19 +144,14 @@ public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapte
                 }
 
                 @Override // androidx.recyclerview.widget.DiffUtil.Callback
-                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    if (oldItemPosition < oldVideoParticipants.size() && newItemPosition < GroupCallTabletGridAdapter.this.videoParticipants.size()) {
-                        return ((ChatObject.VideoParticipant) oldVideoParticipants.get(oldItemPosition)).equals(GroupCallTabletGridAdapter.this.videoParticipants.get(newItemPosition));
+                public boolean areItemsTheSame(int i, int i2) {
+                    if (i >= arrayList.size() || i2 >= GroupCallTabletGridAdapter.this.videoParticipants.size()) {
+                        return false;
                     }
-                    return false;
-                }
-
-                @Override // androidx.recyclerview.widget.DiffUtil.Callback
-                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    return true;
+                    return ((ChatObject.VideoParticipant) arrayList.get(i)).equals(GroupCallTabletGridAdapter.this.videoParticipants.get(i2));
                 }
             }).dispatchUpdatesTo(this);
-            AndroidUtilities.updateVisibleRows(listView);
+            AndroidUtilities.updateVisibleRows(recyclerListView);
             return;
         }
         this.videoParticipants.clear();
@@ -159,23 +159,23 @@ public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapte
         notifyDataSetChanged();
     }
 
-    public int getSpanCount(int position) {
-        int itemsCount = getItemCount();
-        if (itemsCount > 1 && itemsCount != 2) {
-            return (itemsCount != 3 || position == 0 || position == 1) ? 3 : 6;
+    public int getSpanCount(int i) {
+        int itemCount = getItemCount();
+        if (itemCount > 1 && itemCount != 2) {
+            return (itemCount != 3 || i == 0 || i == 1) ? 3 : 6;
         }
         return 6;
     }
 
-    public int getItemHeight(int position) {
-        View parentView = this.activity.tabletVideoGridView;
-        int itemsCount = getItemCount();
-        if (itemsCount <= 1) {
-            return parentView.getMeasuredHeight();
+    public int getItemHeight(int i) {
+        RecyclerListView recyclerListView = this.activity.tabletVideoGridView;
+        int itemCount = getItemCount();
+        if (itemCount <= 1) {
+            return recyclerListView.getMeasuredHeight();
         }
-        if (itemsCount <= 4) {
-            return parentView.getMeasuredHeight() / 2;
+        if (itemCount <= 4) {
+            return recyclerListView.getMeasuredHeight() / 2;
         }
-        return (int) (parentView.getMeasuredHeight() / 2.5f);
+        return (int) (recyclerListView.getMeasuredHeight() / 2.5f);
     }
 }

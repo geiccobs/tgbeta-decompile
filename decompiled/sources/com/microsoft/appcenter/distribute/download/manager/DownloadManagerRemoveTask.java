@@ -1,21 +1,22 @@
 package com.microsoft.appcenter.distribute.download.manager;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.os.AsyncTask;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 class DownloadManagerRemoveTask extends AsyncTask<Void, Void, Void> {
+    @SuppressLint({"StaticFieldLeak"})
     private final Context mContext;
     private final long mDownloadId;
 
-    public DownloadManagerRemoveTask(Context context, long downloadId) {
+    public DownloadManagerRemoveTask(Context context, long j) {
         this.mContext = context;
-        this.mDownloadId = downloadId;
+        this.mDownloadId = j;
     }
 
-    public Void doInBackground(Void... params) {
-        DownloadManager downloadManager = (DownloadManager) this.mContext.getSystemService("download");
-        downloadManager.remove(this.mDownloadId);
+    public Void doInBackground(Void... voidArr) {
+        ((DownloadManager) this.mContext.getSystemService("download")).remove(this.mDownloadId);
         return null;
     }
 }

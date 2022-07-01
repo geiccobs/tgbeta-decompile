@@ -1,13 +1,13 @@
 package com.google.android.datatransport.cct.internal;
 
 import com.google.android.datatransport.cct.internal.AutoValue_LogRequest;
-import com.google.firebase.encoders.annotations.Encodable;
+import com.google.auto.value.AutoValue;
 import java.util.List;
-/* loaded from: classes3.dex */
+@AutoValue
+/* loaded from: classes.dex */
 public abstract class LogRequest {
     public abstract ClientInfo getClientInfo();
 
-    @Encodable.Field(name = "logEvent")
     public abstract List<LogEvent> getLogEvents();
 
     public abstract Integer getLogSource();
@@ -24,7 +24,8 @@ public abstract class LogRequest {
         return new AutoValue_LogRequest.Builder();
     }
 
-    /* loaded from: classes3.dex */
+    @AutoValue.Builder
+    /* loaded from: classes.dex */
     public static abstract class Builder {
         public abstract LogRequest build();
 
@@ -42,12 +43,12 @@ public abstract class LogRequest {
 
         public abstract Builder setRequestUptimeMs(long j);
 
-        public Builder setSource(int value) {
-            return setLogSource(Integer.valueOf(value));
+        public Builder setSource(int i) {
+            return setLogSource(Integer.valueOf(i));
         }
 
-        public Builder setSource(String value) {
-            return setLogSourceName(value);
+        public Builder setSource(String str) {
+            return setLogSourceName(str);
         }
     }
 }

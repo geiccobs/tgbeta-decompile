@@ -1,7 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzft extends IOException {
     /* JADX WARN: Illegal instructions before constructor call */
     /*

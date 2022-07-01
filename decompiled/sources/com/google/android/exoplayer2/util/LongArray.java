@@ -1,9 +1,8 @@
 package com.google.android.exoplayer2.util;
 
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class LongArray {
-    private static final int DEFAULT_INITIAL_CAPACITY = 32;
     private int size;
     private long[] values;
 
@@ -11,11 +10,11 @@ public final class LongArray {
         this(32);
     }
 
-    public LongArray(int initialCapacity) {
-        this.values = new long[initialCapacity];
+    public LongArray(int i) {
+        this.values = new long[i];
     }
 
-    public void add(long value) {
+    public void add(long j) {
         int i = this.size;
         long[] jArr = this.values;
         if (i == jArr.length) {
@@ -24,14 +23,14 @@ public final class LongArray {
         long[] jArr2 = this.values;
         int i2 = this.size;
         this.size = i2 + 1;
-        jArr2[i2] = value;
+        jArr2[i2] = j;
     }
 
-    public long get(int index) {
-        if (index < 0 || index >= this.size) {
-            throw new IndexOutOfBoundsException("Invalid index " + index + ", size is " + this.size);
+    public long get(int i) {
+        if (i < 0 || i >= this.size) {
+            throw new IndexOutOfBoundsException("Invalid index " + i + ", size is " + this.size);
         }
-        return this.values[index];
+        return this.values[i];
     }
 
     public int size() {

@@ -5,12 +5,12 @@ import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.IOException;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class OggPacket {
     private boolean populated;
     private int segmentCount;
     private final OggPageHeader pageHeader = new OggPageHeader();
-    private final ParsableByteArray packetArray = new ParsableByteArray(new byte[OggPageHeader.MAX_PAGE_PAYLOAD], 0);
+    private final ParsableByteArray packetArray = new ParsableByteArray(new byte[65025], 0);
     private int currentSegmentIndex = -1;
 
     public void reset() {
@@ -20,39 +20,46 @@ final class OggPacket {
         this.populated = false;
     }
 
-    public boolean populate(ExtractorInput input) throws IOException, InterruptedException {
-        Assertions.checkState(input != null);
+    public boolean populate(ExtractorInput extractorInput) throws IOException, InterruptedException {
+        int i;
+        Assertions.checkState(extractorInput != null);
         if (this.populated) {
             this.populated = false;
             this.packetArray.reset();
         }
         while (!this.populated) {
             if (this.currentSegmentIndex < 0) {
-                if (!this.pageHeader.populate(input, true)) {
+                if (!this.pageHeader.populate(extractorInput, true)) {
                     return false;
                 }
-                int segmentIndex = 0;
-                int bytesToSkip = this.pageHeader.headerSize;
-                if ((this.pageHeader.type & 1) == 1 && this.packetArray.limit() == 0) {
-                    bytesToSkip += calculatePacketSize(0);
-                    segmentIndex = 0 + this.segmentCount;
+                OggPageHeader oggPageHeader = this.pageHeader;
+                int i2 = oggPageHeader.headerSize;
+                if ((oggPageHeader.type & 1) == 1 && this.packetArray.limit() == 0) {
+                    i2 += calculatePacketSize(0);
+                    i = this.segmentCount + 0;
+                } else {
+                    i = 0;
                 }
-                input.skipFully(bytesToSkip);
-                this.currentSegmentIndex = segmentIndex;
+                extractorInput.skipFully(i2);
+                this.currentSegmentIndex = i;
             }
-            int size = calculatePacketSize(this.currentSegmentIndex);
-            int segmentIndex2 = this.currentSegmentIndex + this.segmentCount;
-            if (size > 0) {
-                if (this.packetArray.capacity() < this.packetArray.limit() + size) {
+            int calculatePacketSize = calculatePacketSize(this.currentSegmentIndex);
+            int i3 = this.currentSegmentIndex + this.segmentCount;
+            if (calculatePacketSize > 0) {
+                if (this.packetArray.capacity() < this.packetArray.limit() + calculatePacketSize) {
                     ParsableByteArray parsableByteArray = this.packetArray;
-                    parsableByteArray.data = Arrays.copyOf(parsableByteArray.data, this.packetArray.limit() + size);
+                    parsableByteArray.data = Arrays.copyOf(parsableByteArray.data, parsableByteArray.limit() + calculatePacketSize);
                 }
-                input.readFully(this.packetArray.data, this.packetArray.limit(), size);
                 ParsableByteArray parsableByteArray2 = this.packetArray;
-                parsableByteArray2.setLimit(parsableByteArray2.limit() + size);
-                this.populated = this.pageHeader.laces[segmentIndex2 + (-1)] != 255;
+                extractorInput.readFully(parsableByteArray2.data, parsableByteArray2.limit(), calculatePacketSize);
+                ParsableByteArray parsableByteArray3 = this.packetArray;
+                parsableByteArray3.setLimit(parsableByteArray3.limit() + calculatePacketSize);
+                this.populated = this.pageHeader.laces[i3 + (-1)] != 255;
             }
-            this.currentSegmentIndex = segmentIndex2 == this.pageHeader.pageSegmentCount ? -1 : segmentIndex2;
+            if (i3 == this.pageHeader.pageSegmentCount) {
+                i3 = -1;
+            }
+            this.currentSegmentIndex = i3;
         }
         return true;
     }
@@ -66,26 +73,30 @@ final class OggPacket {
     }
 
     public void trimPayload() {
-        if (this.packetArray.data.length == 65025) {
+        ParsableByteArray parsableByteArray = this.packetArray;
+        byte[] bArr = parsableByteArray.data;
+        if (bArr.length == 65025) {
             return;
         }
-        ParsableByteArray parsableByteArray = this.packetArray;
-        parsableByteArray.data = Arrays.copyOf(parsableByteArray.data, Math.max((int) OggPageHeader.MAX_PAGE_PAYLOAD, this.packetArray.limit()));
+        parsableByteArray.data = Arrays.copyOf(bArr, Math.max(65025, parsableByteArray.limit()));
     }
 
-    private int calculatePacketSize(int startSegmentIndex) {
+    private int calculatePacketSize(int i) {
+        int i2;
+        int i3 = 0;
         this.segmentCount = 0;
-        int size = 0;
-        while (this.segmentCount + startSegmentIndex < this.pageHeader.pageSegmentCount) {
-            int[] iArr = this.pageHeader.laces;
-            int i = this.segmentCount;
-            this.segmentCount = i + 1;
-            int segmentLength = iArr[i + startSegmentIndex];
-            size += segmentLength;
-            if (segmentLength != 255) {
+        do {
+            int i4 = this.segmentCount;
+            int i5 = i + i4;
+            OggPageHeader oggPageHeader = this.pageHeader;
+            if (i5 >= oggPageHeader.pageSegmentCount) {
                 break;
             }
-        }
-        return size;
+            int[] iArr = oggPageHeader.laces;
+            this.segmentCount = i4 + 1;
+            i2 = iArr[i4 + i];
+            i3 += i2;
+        } while (i2 == 255);
+        return i3;
     }
 }

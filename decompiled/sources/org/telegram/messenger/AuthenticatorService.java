@@ -9,54 +9,54 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class AuthenticatorService extends Service {
-    private static Authenticator authenticator = null;
+    private static Authenticator authenticator;
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes.dex */
     public static class Authenticator extends AbstractAccountAuthenticator {
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public Bundle addAccount(AccountAuthenticatorResponse accountAuthenticatorResponse, String str, String str2, String[] strArr, Bundle bundle) throws NetworkErrorException {
+            return null;
+        }
+
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public Bundle confirmCredentials(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, Bundle bundle) throws NetworkErrorException {
+            return null;
+        }
+
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public Bundle editProperties(AccountAuthenticatorResponse accountAuthenticatorResponse, String str) {
+            return null;
+        }
+
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public Bundle getAuthToken(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String str, Bundle bundle) throws NetworkErrorException {
+            return null;
+        }
+
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public String getAuthTokenLabel(String str) {
+            return null;
+        }
+
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public Bundle hasFeatures(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String[] strArr) throws NetworkErrorException {
+            return null;
+        }
+
+        @Override // android.accounts.AbstractAccountAuthenticator
+        public Bundle updateCredentials(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String str, Bundle bundle) throws NetworkErrorException {
+            return null;
+        }
+
         public Authenticator(Context context) {
             super(context);
         }
 
         @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-            return null;
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response, Account account) throws NetworkErrorException {
-            return super.getAccountRemovalAllowed(response, account);
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account, Bundle options) throws NetworkErrorException {
-            return null;
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
-            return null;
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-            return null;
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public String getAuthTokenLabel(String authTokenType) {
-            return null;
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features) throws NetworkErrorException {
-            return null;
-        }
-
-        @Override // android.accounts.AbstractAccountAuthenticator
-        public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-            return null;
+        public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account) throws NetworkErrorException {
+            return super.getAccountRemovalAllowed(accountAuthenticatorResponse, account);
         }
     }
 

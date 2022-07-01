@@ -1,5 +1,5 @@
 package com.google.zxing.qrcode.decoder;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public enum Mode {
     TERMINATOR(new int[]{0, 0, 0}, 0),
     NUMERIC(new int[]{10, 12, 14}, 1),
@@ -15,53 +15,48 @@ public enum Mode {
     private final int bits;
     private final int[] characterCountBitsForVersions;
 
-    Mode(int[] characterCountBitsForVersions, int bits) {
-        this.characterCountBitsForVersions = characterCountBitsForVersions;
-        this.bits = bits;
+    Mode(int[] iArr, int i) {
+        this.characterCountBitsForVersions = iArr;
+        this.bits = i;
     }
 
-    public static Mode forBits(int bits) {
-        switch (bits) {
-            case 0:
-                return TERMINATOR;
-            case 1:
+    public static Mode forBits(int i) {
+        if (i != 0) {
+            if (i == 1) {
                 return NUMERIC;
-            case 2:
+            }
+            if (i == 2) {
                 return ALPHANUMERIC;
-            case 3:
+            }
+            if (i == 3) {
                 return STRUCTURED_APPEND;
-            case 4:
+            }
+            if (i == 4) {
                 return BYTE;
-            case 5:
+            }
+            if (i == 5) {
                 return FNC1_FIRST_POSITION;
-            case 6:
-            case 10:
-            case 11:
-            case 12:
-            default:
-                throw new IllegalArgumentException();
-            case 7:
+            }
+            if (i == 7) {
                 return ECI;
-            case 8:
+            }
+            if (i == 8) {
                 return KANJI;
-            case 9:
+            }
+            if (i == 9) {
                 return FNC1_SECOND_POSITION;
-            case 13:
+            }
+            if (i == 13) {
                 return HANZI;
+            }
+            throw new IllegalArgumentException();
         }
+        return TERMINATOR;
     }
 
     public int getCharacterCountBits(Version version) {
-        int offset;
-        int number = version.getVersionNumber();
-        if (number <= 9) {
-            offset = 0;
-        } else if (number <= 26) {
-            offset = 1;
-        } else {
-            offset = 2;
-        }
-        return this.characterCountBitsForVersions[offset];
+        int versionNumber = version.getVersionNumber();
+        return this.characterCountBitsForVersions[versionNumber <= 9 ? (char) 0 : versionNumber <= 26 ? (char) 1 : (char) 2];
     }
 
     public int getBits() {

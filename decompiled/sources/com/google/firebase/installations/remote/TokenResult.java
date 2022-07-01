@@ -1,10 +1,13 @@
 package com.google.firebase.installations.remote;
 
+import com.google.auto.value.AutoValue;
 import com.google.firebase.installations.remote.AutoValue_TokenResult;
-/* loaded from: classes3.dex */
+@AutoValue
+/* loaded from: classes.dex */
 public abstract class TokenResult {
 
-    /* loaded from: classes3.dex */
+    @AutoValue.Builder
+    /* loaded from: classes.dex */
     public static abstract class Builder {
         public abstract TokenResult build();
 
@@ -15,7 +18,7 @@ public abstract class TokenResult {
         public abstract Builder setTokenExpirationTimestamp(long j);
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public enum ResponseCode {
         OK,
         BAD_CONFIG,
@@ -27,8 +30,6 @@ public abstract class TokenResult {
     public abstract String getToken();
 
     public abstract long getTokenExpirationTimestamp();
-
-    public abstract Builder toBuilder();
 
     public static Builder builder() {
         return new AutoValue_TokenResult.Builder().setTokenExpirationTimestamp(0L);

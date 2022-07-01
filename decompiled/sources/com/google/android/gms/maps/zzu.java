@@ -2,7 +2,7 @@ package com.google.android.gms.maps;
 
 import com.google.android.gms.maps.GoogleMap;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzu extends com.google.android.gms.maps.internal.zzu {
     final /* synthetic */ GoogleMap.OnCameraMoveStartedListener zza;
 

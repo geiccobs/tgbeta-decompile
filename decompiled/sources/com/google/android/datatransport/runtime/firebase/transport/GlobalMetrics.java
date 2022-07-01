@@ -1,35 +1,28 @@
 package com.google.android.datatransport.runtime.firebase.transport;
 
-import com.google.firebase.encoders.annotations.Encodable;
-/* loaded from: classes3.dex */
+import com.google.firebase.encoders.proto.Protobuf;
+/* loaded from: classes.dex */
 public final class GlobalMetrics {
-    private static final GlobalMetrics DEFAULT_INSTANCE = new Builder().build();
     private final StorageMetrics storage_metrics_;
 
-    GlobalMetrics(StorageMetrics storage_metrics_) {
-        this.storage_metrics_ = storage_metrics_;
+    static {
+        new Builder().build();
+    }
+
+    GlobalMetrics(StorageMetrics storageMetrics) {
+        this.storage_metrics_ = storageMetrics;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    @Encodable.Ignore
-    public StorageMetrics getStorageMetrics() {
-        StorageMetrics storageMetrics = this.storage_metrics_;
-        return storageMetrics == null ? StorageMetrics.getDefaultInstance() : storageMetrics;
-    }
-
-    @Encodable.Field(name = "storageMetrics")
+    @Protobuf(tag = 1)
     public StorageMetrics getStorageMetricsInternal() {
         return this.storage_metrics_;
     }
 
-    public static GlobalMetrics getDefaultInstance() {
-        return DEFAULT_INSTANCE;
-    }
-
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder {
         private StorageMetrics storage_metrics_ = null;
 
@@ -40,8 +33,8 @@ public final class GlobalMetrics {
             return new GlobalMetrics(this.storage_metrics_);
         }
 
-        public Builder setStorageMetrics(StorageMetrics storage_metrics_) {
-            this.storage_metrics_ = storage_metrics_;
+        public Builder setStorageMetrics(StorageMetrics storageMetrics) {
+            this.storage_metrics_ = storageMetrics;
             return this;
         }
     }

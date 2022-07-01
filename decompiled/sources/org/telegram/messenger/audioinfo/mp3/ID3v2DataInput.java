@@ -3,50 +3,48 @@ package org.telegram.messenger.audioinfo.mp3;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class ID3v2DataInput {
     private final InputStream input;
 
-    public ID3v2DataInput(InputStream in) {
-        this.input = in;
+    public ID3v2DataInput(InputStream inputStream) {
+        this.input = inputStream;
     }
 
-    public final void readFully(byte[] b, int off, int len) throws IOException {
-        int total = 0;
-        while (total < len) {
-            int current = this.input.read(b, off + total, len - total);
-            if (current > 0) {
-                total += current;
-            } else {
+    public final void readFully(byte[] bArr, int i, int i2) throws IOException {
+        int i3 = 0;
+        while (i3 < i2) {
+            int read = this.input.read(bArr, i + i3, i2 - i3);
+            if (read <= 0) {
                 throw new EOFException();
             }
+            i3 += read;
         }
     }
 
-    public byte[] readFully(int len) throws IOException {
-        byte[] bytes = new byte[len];
-        readFully(bytes, 0, len);
-        return bytes;
+    public byte[] readFully(int i) throws IOException {
+        byte[] bArr = new byte[i];
+        readFully(bArr, 0, i);
+        return bArr;
     }
 
-    public void skipFully(long len) throws IOException {
-        long total = 0;
-        while (total < len) {
-            long current = this.input.skip(len - total);
-            if (current > 0) {
-                total += current;
-            } else {
+    public void skipFully(long j) throws IOException {
+        long j2 = 0;
+        while (j2 < j) {
+            long skip = this.input.skip(j - j2);
+            if (skip <= 0) {
                 throw new EOFException();
             }
+            j2 += skip;
         }
     }
 
     public byte readByte() throws IOException {
-        int b = this.input.read();
-        if (b < 0) {
-            throw new EOFException();
+        int read = this.input.read();
+        if (read >= 0) {
+            return (byte) read;
         }
-        return (byte) b;
+        throw new EOFException();
     }
 
     public int readInt() throws IOException {

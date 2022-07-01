@@ -1,7 +1,7 @@
 package org.telegram.ui;
 
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class CodeNumberField$$ExternalSyntheticLambda9 implements SimpleFloatPropertyCompat.Setter {
     public static final /* synthetic */ CodeNumberField$$ExternalSyntheticLambda9 INSTANCE = new CodeNumberField$$ExternalSyntheticLambda9();
 
@@ -10,6 +10,6 @@ public final /* synthetic */ class CodeNumberField$$ExternalSyntheticLambda9 imp
 
     @Override // org.telegram.ui.Components.SimpleFloatPropertyCompat.Setter
     public final void set(Object obj, float f) {
-        CodeNumberField.lambda$static$7((CodeNumberField) obj, f);
+        CodeNumberField.lambda$static$3((CodeNumberField) obj, f);
     }
 }

@@ -6,13 +6,31 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import java.util.ArrayList;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class AccessibilityNodeProviderCompat {
-    public static final int HOST_VIEW_ID = -1;
     private final Object mProvider;
 
+    public void addExtraDataToAccessibilityNodeInfo(int virtualViewId, AccessibilityNodeInfoCompat info, String extraDataKey, Bundle arguments) {
+    }
+
+    public AccessibilityNodeInfoCompat createAccessibilityNodeInfo(int virtualViewId) {
+        return null;
+    }
+
+    public List<AccessibilityNodeInfoCompat> findAccessibilityNodeInfosByText(String text, int virtualViewId) {
+        return null;
+    }
+
+    public AccessibilityNodeInfoCompat findFocus(int focus) {
+        return null;
+    }
+
+    public boolean performAction(int virtualViewId, int action, Bundle arguments) {
+        return false;
+    }
+
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class AccessibilityNodeProviderApi16 extends AccessibilityNodeProvider {
         final AccessibilityNodeProviderCompat mCompat;
 
@@ -22,26 +40,25 @@ public class AccessibilityNodeProviderCompat {
 
         @Override // android.view.accessibility.AccessibilityNodeProvider
         public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
-            AccessibilityNodeInfoCompat compatInfo = this.mCompat.createAccessibilityNodeInfo(virtualViewId);
-            if (compatInfo == null) {
+            AccessibilityNodeInfoCompat createAccessibilityNodeInfo = this.mCompat.createAccessibilityNodeInfo(virtualViewId);
+            if (createAccessibilityNodeInfo == null) {
                 return null;
             }
-            return compatInfo.unwrap();
+            return createAccessibilityNodeInfo.unwrap();
         }
 
         @Override // android.view.accessibility.AccessibilityNodeProvider
         public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text, int virtualViewId) {
-            List<AccessibilityNodeInfoCompat> compatInfos = this.mCompat.findAccessibilityNodeInfosByText(text, virtualViewId);
-            if (compatInfos == null) {
+            List<AccessibilityNodeInfoCompat> findAccessibilityNodeInfosByText = this.mCompat.findAccessibilityNodeInfosByText(text, virtualViewId);
+            if (findAccessibilityNodeInfosByText == null) {
                 return null;
             }
-            List<AccessibilityNodeInfo> infoList = new ArrayList<>();
-            int infoCount = compatInfos.size();
-            for (int i = 0; i < infoCount; i++) {
-                AccessibilityNodeInfoCompat infoCompat = compatInfos.get(i);
-                infoList.add(infoCompat.unwrap());
+            ArrayList arrayList = new ArrayList();
+            int size = findAccessibilityNodeInfosByText.size();
+            for (int i = 0; i < size; i++) {
+                arrayList.add(findAccessibilityNodeInfosByText.get(i).unwrap());
             }
-            return infoList;
+            return arrayList;
         }
 
         @Override // android.view.accessibility.AccessibilityNodeProvider
@@ -51,7 +68,7 @@ public class AccessibilityNodeProviderCompat {
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class AccessibilityNodeProviderApi19 extends AccessibilityNodeProviderApi16 {
         AccessibilityNodeProviderApi19(AccessibilityNodeProviderCompat compat) {
             super(compat);
@@ -59,16 +76,16 @@ public class AccessibilityNodeProviderCompat {
 
         @Override // android.view.accessibility.AccessibilityNodeProvider
         public AccessibilityNodeInfo findFocus(int focus) {
-            AccessibilityNodeInfoCompat compatInfo = this.mCompat.findFocus(focus);
-            if (compatInfo == null) {
+            AccessibilityNodeInfoCompat findFocus = this.mCompat.findFocus(focus);
+            if (findFocus == null) {
                 return null;
             }
-            return compatInfo.unwrap();
+            return findFocus.unwrap();
         }
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class AccessibilityNodeProviderApi26 extends AccessibilityNodeProviderApi19 {
         AccessibilityNodeProviderApi26(AccessibilityNodeProviderCompat compat) {
             super(compat);
@@ -81,11 +98,12 @@ public class AccessibilityNodeProviderCompat {
     }
 
     public AccessibilityNodeProviderCompat() {
-        if (Build.VERSION.SDK_INT >= 26) {
+        int i = Build.VERSION.SDK_INT;
+        if (i >= 26) {
             this.mProvider = new AccessibilityNodeProviderApi26(this);
-        } else if (Build.VERSION.SDK_INT >= 19) {
+        } else if (i >= 19) {
             this.mProvider = new AccessibilityNodeProviderApi19(this);
-        } else if (Build.VERSION.SDK_INT >= 16) {
+        } else if (i >= 16) {
             this.mProvider = new AccessibilityNodeProviderApi16(this);
         } else {
             this.mProvider = null;
@@ -98,24 +116,5 @@ public class AccessibilityNodeProviderCompat {
 
     public Object getProvider() {
         return this.mProvider;
-    }
-
-    public AccessibilityNodeInfoCompat createAccessibilityNodeInfo(int virtualViewId) {
-        return null;
-    }
-
-    public boolean performAction(int virtualViewId, int action, Bundle arguments) {
-        return false;
-    }
-
-    public List<AccessibilityNodeInfoCompat> findAccessibilityNodeInfosByText(String text, int virtualViewId) {
-        return null;
-    }
-
-    public AccessibilityNodeInfoCompat findFocus(int focus) {
-        return null;
-    }
-
-    public void addExtraDataToAccessibilityNodeInfo(int virtualViewId, AccessibilityNodeInfoCompat info, String extraDataKey, Bundle arguments) {
     }
 }

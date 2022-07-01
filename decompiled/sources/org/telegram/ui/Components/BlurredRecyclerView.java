@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.SharedConfig;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class BlurredRecyclerView extends RecyclerListView {
     public int additionalClipBottom;
     public int blurTopPadding;
@@ -18,12 +18,12 @@ public class BlurredRecyclerView extends RecyclerListView {
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.View
-    public void onMeasure(int widthSpec, int heightSpec) {
+    public void onMeasure(int i, int i2) {
         this.globalIgnoreLayout = true;
         updateTopPadding();
         super.setPadding(getPaddingLeft(), this.topPadding + this.blurTopPadding, getPaddingRight(), getPaddingBottom());
         this.globalIgnoreLayout = false;
-        super.onMeasure(widthSpec, heightSpec);
+        super.onMeasure(i, i2);
     }
 
     @Override // org.telegram.ui.Components.RecyclerListView, androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup, android.view.View
@@ -65,16 +65,16 @@ public class BlurredRecyclerView extends RecyclerListView {
     }
 
     @Override // androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
-    public boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (child.getY() + child.getMeasuredHeight() < this.blurTopPadding) {
+    public boolean drawChild(Canvas canvas, View view, long j) {
+        if (view.getY() + view.getMeasuredHeight() < this.blurTopPadding) {
             return true;
         }
-        return super.drawChild(canvas, child, drawingTime);
+        return super.drawChild(canvas, view, j);
     }
 
     @Override // android.view.View
-    public void setPadding(int left, int top, int right, int bottom) {
-        this.topPadding = top;
-        super.setPadding(left, this.blurTopPadding + top, right, bottom);
+    public void setPadding(int i, int i2, int i3, int i4) {
+        this.topPadding = i2;
+        super.setPadding(i, i2 + this.blurTopPadding, i3, i4);
     }
 }

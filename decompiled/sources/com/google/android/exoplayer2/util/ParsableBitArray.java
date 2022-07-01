@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.util;
 
-import androidx.core.view.MotionEventCompat;
-/* loaded from: classes3.dex */
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
 public final class ParsableBitArray {
     private int bitOffset;
     private int byteLimit;
@@ -12,17 +12,17 @@ public final class ParsableBitArray {
         this.data = Util.EMPTY_BYTE_ARRAY;
     }
 
-    public ParsableBitArray(byte[] data) {
-        this(data, data.length);
+    public ParsableBitArray(byte[] bArr) {
+        this(bArr, bArr.length);
     }
 
-    public ParsableBitArray(byte[] data, int limit) {
-        this.data = data;
-        this.byteLimit = limit;
+    public ParsableBitArray(byte[] bArr, int i) {
+        this.data = bArr;
+        this.byteLimit = i;
     }
 
-    public void reset(byte[] data) {
-        reset(data, data.length);
+    public void reset(byte[] bArr) {
+        reset(bArr, bArr.length);
     }
 
     public void reset(ParsableByteArray parsableByteArray) {
@@ -30,11 +30,11 @@ public final class ParsableBitArray {
         setPosition(parsableByteArray.getPosition() * 8);
     }
 
-    public void reset(byte[] data, int limit) {
-        this.data = data;
+    public void reset(byte[] bArr, int i) {
+        this.data = bArr;
         this.byteOffset = 0;
         this.bitOffset = 0;
-        this.byteLimit = limit;
+        this.byteLimit = i;
     }
 
     public int bitsLeft() {
@@ -50,10 +50,10 @@ public final class ParsableBitArray {
         return this.byteOffset;
     }
 
-    public void setPosition(int position) {
-        int i = position / 8;
-        this.byteOffset = i;
-        this.bitOffset = position - (i * 8);
+    public void setPosition(int i) {
+        int i2 = i / 8;
+        this.byteOffset = i2;
+        this.bitOffset = i - (i2 * 8);
         assertValidOffset();
     }
 
@@ -67,97 +67,97 @@ public final class ParsableBitArray {
         assertValidOffset();
     }
 
-    public void skipBits(int numBits) {
-        int numBytes = numBits / 8;
-        int i = this.byteOffset + numBytes;
-        this.byteOffset = i;
-        int i2 = this.bitOffset + (numBits - (numBytes * 8));
-        this.bitOffset = i2;
-        if (i2 > 7) {
-            this.byteOffset = i + 1;
-            this.bitOffset = i2 - 8;
+    public void skipBits(int i) {
+        int i2 = i / 8;
+        int i3 = this.byteOffset + i2;
+        this.byteOffset = i3;
+        int i4 = this.bitOffset + (i - (i2 * 8));
+        this.bitOffset = i4;
+        if (i4 > 7) {
+            this.byteOffset = i3 + 1;
+            this.bitOffset = i4 - 8;
         }
         assertValidOffset();
     }
 
     public boolean readBit() {
-        boolean returnValue = (this.data[this.byteOffset] & (128 >> this.bitOffset)) != 0;
+        boolean z = (this.data[this.byteOffset] & (ConnectionsManager.RequestFlagNeedQuickAck >> this.bitOffset)) != 0;
         skipBit();
-        return returnValue;
+        return z;
     }
 
-    public int readBits(int numBits) {
-        int i;
-        if (numBits == 0) {
+    public int readBits(int i) {
+        int i2;
+        if (i == 0) {
             return 0;
         }
-        int returnValue = 0;
-        this.bitOffset += numBits;
+        this.bitOffset += i;
+        int i3 = 0;
         while (true) {
-            i = this.bitOffset;
-            if (i <= 8) {
+            i2 = this.bitOffset;
+            if (i2 <= 8) {
                 break;
             }
-            int i2 = i - 8;
-            this.bitOffset = i2;
+            int i4 = i2 - 8;
+            this.bitOffset = i4;
             byte[] bArr = this.data;
-            int i3 = this.byteOffset;
-            this.byteOffset = i3 + 1;
-            returnValue |= (bArr[i3] & 255) << i2;
+            int i5 = this.byteOffset;
+            this.byteOffset = i5 + 1;
+            i3 |= (bArr[i5] & 255) << i4;
         }
         byte[] bArr2 = this.data;
-        int i4 = this.byteOffset;
-        int returnValue2 = (returnValue | ((bArr2[i4] & 255) >> (8 - i))) & ((-1) >>> (32 - numBits));
-        if (i == 8) {
+        int i6 = this.byteOffset;
+        int i7 = ((-1) >>> (32 - i)) & (i3 | ((bArr2[i6] & 255) >> (8 - i2)));
+        if (i2 == 8) {
             this.bitOffset = 0;
-            this.byteOffset = i4 + 1;
+            this.byteOffset = i6 + 1;
         }
         assertValidOffset();
-        return returnValue2;
+        return i7;
     }
 
-    public long readBitsToLong(int numBits) {
-        if (numBits > 32) {
-            return Util.toLong(readBits(numBits - 32), readBits(32));
+    public long readBitsToLong(int i) {
+        if (i <= 32) {
+            return Util.toUnsignedLong(readBits(i));
         }
-        return Util.toUnsignedLong(readBits(numBits));
+        return Util.toLong(readBits(i - 32), readBits(32));
     }
 
-    public void readBits(byte[] buffer, int offset, int numBits) {
-        int to = (numBits >> 3) + offset;
-        for (int i = offset; i < to; i++) {
-            byte[] bArr = this.data;
-            int i2 = this.byteOffset;
-            int i3 = i2 + 1;
-            this.byteOffset = i3;
-            byte b = bArr[i2];
-            int i4 = this.bitOffset;
-            buffer[i] = (byte) (b << i4);
-            buffer[i] = (byte) (((255 & bArr[i3]) >> (8 - i4)) | buffer[i]);
+    public void readBits(byte[] bArr, int i, int i2) {
+        int i3 = (i2 >> 3) + i;
+        while (i < i3) {
+            byte[] bArr2 = this.data;
+            int i4 = this.byteOffset;
+            int i5 = i4 + 1;
+            this.byteOffset = i5;
+            byte b = bArr2[i4];
+            int i6 = this.bitOffset;
+            bArr[i] = (byte) (b << i6);
+            bArr[i] = (byte) (((255 & bArr2[i5]) >> (8 - i6)) | bArr[i]);
+            i++;
         }
-        int i5 = numBits & 7;
-        if (i5 == 0) {
+        int i7 = i2 & 7;
+        if (i7 == 0) {
             return;
         }
-        buffer[to] = (byte) (buffer[to] & (255 >> i5));
-        int i6 = this.bitOffset;
-        if (i6 + i5 > 8) {
-            int i7 = buffer[to];
-            byte[] bArr2 = this.data;
-            int i8 = this.byteOffset;
-            this.byteOffset = i8 + 1;
-            buffer[to] = (byte) (i7 | ((bArr2[i8] & 255) << i6));
-            this.bitOffset = i6 - 8;
-        }
-        int i9 = this.bitOffset + i5;
-        this.bitOffset = i9;
-        byte[] bArr3 = this.data;
-        int i10 = this.byteOffset;
-        int lastDataByteTrailingBits = (255 & bArr3[i10]) >> (8 - i9);
-        buffer[to] = (byte) (buffer[to] | ((byte) (lastDataByteTrailingBits << (8 - i5))));
-        if (i9 == 8) {
-            this.bitOffset = 0;
+        bArr[i3] = (byte) (bArr[i3] & (255 >> i7));
+        int i8 = this.bitOffset;
+        if (i8 + i7 > 8) {
+            int i9 = bArr[i3];
+            byte[] bArr3 = this.data;
+            int i10 = this.byteOffset;
             this.byteOffset = i10 + 1;
+            bArr[i3] = (byte) (i9 | ((bArr3[i10] & 255) << i8));
+            this.bitOffset = i8 - 8;
+        }
+        int i11 = this.bitOffset + i7;
+        this.bitOffset = i11;
+        byte[] bArr4 = this.data;
+        int i12 = this.byteOffset;
+        bArr[i3] = (byte) (((byte) (((255 & bArr4[i12]) >> (8 - i11)) << (8 - i7))) | bArr[i3]);
+        if (i11 == 8) {
+            this.bitOffset = 0;
+            this.byteOffset = i12 + 1;
         }
         assertValidOffset();
     }
@@ -171,45 +171,42 @@ public final class ParsableBitArray {
         assertValidOffset();
     }
 
-    public void readBytes(byte[] buffer, int offset, int length) {
+    public void readBytes(byte[] bArr, int i, int i2) {
         Assertions.checkState(this.bitOffset == 0);
-        System.arraycopy(this.data, this.byteOffset, buffer, offset, length);
-        this.byteOffset += length;
+        System.arraycopy(this.data, this.byteOffset, bArr, i, i2);
+        this.byteOffset += i2;
         assertValidOffset();
     }
 
-    public void skipBytes(int length) {
+    public void skipBytes(int i) {
         Assertions.checkState(this.bitOffset == 0);
-        this.byteOffset += length;
+        this.byteOffset += i;
         assertValidOffset();
     }
 
-    public void putInt(int value, int numBits) {
-        if (numBits < 32) {
-            value &= (1 << numBits) - 1;
+    public void putInt(int i, int i2) {
+        if (i2 < 32) {
+            i &= (1 << i2) - 1;
         }
-        int firstByteReadSize = Math.min(8 - this.bitOffset, numBits);
-        int i = this.bitOffset;
-        int firstByteRightPaddingSize = (8 - i) - firstByteReadSize;
-        int firstByteBitmask = (MotionEventCompat.ACTION_POINTER_INDEX_MASK >> i) | ((1 << firstByteRightPaddingSize) - 1);
+        int min = Math.min(8 - this.bitOffset, i2);
+        int i3 = this.bitOffset;
+        int i4 = (8 - i3) - min;
         byte[] bArr = this.data;
-        int i2 = this.byteOffset;
-        bArr[i2] = (byte) (bArr[i2] & firstByteBitmask);
-        int firstByteInputBits = value >>> (numBits - firstByteReadSize);
-        bArr[i2] = (byte) (bArr[i2] | (firstByteInputBits << firstByteRightPaddingSize));
-        int remainingBitsToRead = numBits - firstByteReadSize;
-        int currentByteIndex = i2 + 1;
-        while (remainingBitsToRead > 8) {
-            this.data[currentByteIndex] = (byte) (value >>> (remainingBitsToRead - 8));
-            remainingBitsToRead -= 8;
-            currentByteIndex++;
+        int i5 = this.byteOffset;
+        bArr[i5] = (byte) (((65280 >> i3) | ((1 << i4) - 1)) & bArr[i5]);
+        int i6 = i2 - min;
+        bArr[i5] = (byte) (((i >>> i6) << i4) | bArr[i5]);
+        int i7 = i5 + 1;
+        while (i6 > 8) {
+            this.data[i7] = (byte) (i >>> (i6 - 8));
+            i6 -= 8;
+            i7++;
         }
-        int lastByteRightPaddingSize = 8 - remainingBitsToRead;
+        int i8 = 8 - i6;
         byte[] bArr2 = this.data;
-        bArr2[currentByteIndex] = (byte) (bArr2[currentByteIndex] & ((1 << lastByteRightPaddingSize) - 1));
-        int lastByteInput = value & ((1 << remainingBitsToRead) - 1);
-        bArr2[currentByteIndex] = (byte) (bArr2[currentByteIndex] | (lastByteInput << lastByteRightPaddingSize));
-        skipBits(numBits);
+        bArr2[i7] = (byte) (bArr2[i7] & ((1 << i8) - 1));
+        bArr2[i7] = (byte) (((i & ((1 << i6) - 1)) << i8) | bArr2[i7]);
+        skipBits(i2);
         assertValidOffset();
     }
 

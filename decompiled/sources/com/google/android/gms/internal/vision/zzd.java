@@ -4,26 +4,9 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzd {
-    private static final ClassLoader zza = zzd.class.getClassLoader();
-
     private zzd() {
-    }
-
-    public static boolean zza(Parcel parcel) {
-        return parcel.readInt() != 0;
-    }
-
-    public static void zza(Parcel parcel, boolean z) {
-        parcel.writeInt(z ? 1 : 0);
-    }
-
-    public static <T extends Parcelable> T zza(Parcel parcel, Parcelable.Creator<T> creator) {
-        if (parcel.readInt() == 0) {
-            return null;
-        }
-        return creator.createFromParcel(parcel);
     }
 
     public static void zza(Parcel parcel, Parcelable parcelable) {
@@ -41,5 +24,9 @@ public class zzd {
         } else {
             parcel.writeStrongBinder(iInterface.asBinder());
         }
+    }
+
+    static {
+        zzd.class.getClassLoader();
     }
 }

@@ -1,5 +1,5 @@
 package com.google.zxing;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class ReaderException extends Exception {
     protected static final StackTraceElement[] NO_TRACE;
     protected static final boolean isStackTrace;
@@ -7,13 +7,6 @@ public abstract class ReaderException extends Exception {
     static {
         isStackTrace = System.getProperty("surefire.test.class.path") != null;
         NO_TRACE = new StackTraceElement[0];
-    }
-
-    public ReaderException() {
-    }
-
-    public ReaderException(Throwable cause) {
-        super(cause);
     }
 
     @Override // java.lang.Throwable

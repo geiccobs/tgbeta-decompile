@@ -1,31 +1,29 @@
 package androidx.interpolator.view.animation;
 
 import android.view.animation.Interpolator;
-/* loaded from: classes3.dex */
-abstract class LookupTableInterpolator implements Interpolator {
+/* loaded from: classes.dex */
+public abstract class LookupTableInterpolator implements Interpolator {
     private final float mStepSize;
     private final float[] mValues;
 
-    public LookupTableInterpolator(float[] values) {
-        this.mValues = values;
-        this.mStepSize = 1.0f / (values.length - 1);
+    public LookupTableInterpolator(float[] fArr) {
+        this.mValues = fArr;
+        this.mStepSize = 1.0f / (fArr.length - 1);
     }
 
     @Override // android.animation.TimeInterpolator
-    public float getInterpolation(float input) {
-        if (input >= 1.0f) {
+    public float getInterpolation(float f) {
+        if (f >= 1.0f) {
             return 1.0f;
         }
-        if (input <= 0.0f) {
+        if (f <= 0.0f) {
             return 0.0f;
         }
         float[] fArr = this.mValues;
-        int position = Math.min((int) ((fArr.length - 1) * input), fArr.length - 2);
-        float f = this.mStepSize;
-        float quantized = position * f;
-        float diff = input - quantized;
-        float weight = diff / f;
+        int min = Math.min((int) ((fArr.length - 1) * f), fArr.length - 2);
+        float f2 = this.mStepSize;
+        float f3 = (f - (min * f2)) / f2;
         float[] fArr2 = this.mValues;
-        return fArr2[position] + ((fArr2[position + 1] - fArr2[position]) * weight);
+        return fArr2[min] + (f3 * (fArr2[min + 1] - fArr2[min]));
     }
 }

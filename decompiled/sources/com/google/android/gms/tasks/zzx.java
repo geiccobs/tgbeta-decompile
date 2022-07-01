@@ -2,7 +2,7 @@ package com.google.android.gms.tasks;
 
 import java.util.concurrent.Executor;
 /* compiled from: com.google.android.gms:play-services-tasks@@17.2.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final /* synthetic */ class zzx implements zzw {
     static final zzw zza = new zzx();
 

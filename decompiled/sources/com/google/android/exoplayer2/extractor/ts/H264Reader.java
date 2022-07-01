@@ -11,12 +11,10 @@ import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.ParsableNalUnitBitArray;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-/* loaded from: classes3.dex */
+import org.telegram.messenger.MediaController;
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
 public final class H264Reader implements ElementaryStreamReader {
-    private static final int NAL_UNIT_TYPE_PPS = 8;
-    private static final int NAL_UNIT_TYPE_SEI = 6;
-    private static final int NAL_UNIT_TYPE_SPS = 7;
     private final boolean allowNonIdrKeyframes;
     private final boolean detectAccessUnits;
     private String formatId;
@@ -28,15 +26,19 @@ public final class H264Reader implements ElementaryStreamReader {
     private final SeiReader seiReader;
     private long totalBytesWritten;
     private final boolean[] prefixFlags = new boolean[3];
-    private final NalUnitTargetBuffer sps = new NalUnitTargetBuffer(7, 128);
-    private final NalUnitTargetBuffer pps = new NalUnitTargetBuffer(8, 128);
-    private final NalUnitTargetBuffer sei = new NalUnitTargetBuffer(6, 128);
+    private final NalUnitTargetBuffer sps = new NalUnitTargetBuffer(7, ConnectionsManager.RequestFlagNeedQuickAck);
+    private final NalUnitTargetBuffer pps = new NalUnitTargetBuffer(8, ConnectionsManager.RequestFlagNeedQuickAck);
+    private final NalUnitTargetBuffer sei = new NalUnitTargetBuffer(6, ConnectionsManager.RequestFlagNeedQuickAck);
     private final ParsableByteArray seiWrapper = new ParsableByteArray();
 
-    public H264Reader(SeiReader seiReader, boolean allowNonIdrKeyframes, boolean detectAccessUnits) {
+    @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
+    public void packetFinished() {
+    }
+
+    public H264Reader(SeiReader seiReader, boolean z, boolean z2) {
         this.seiReader = seiReader;
-        this.allowNonIdrKeyframes = allowNonIdrKeyframes;
-        this.detectAccessUnits = detectAccessUnits;
+        this.allowNonIdrKeyframes = z;
+        this.detectAccessUnits = z2;
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
@@ -51,116 +53,113 @@ public final class H264Reader implements ElementaryStreamReader {
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void createTracks(ExtractorOutput extractorOutput, TsPayloadReader.TrackIdGenerator idGenerator) {
-        idGenerator.generateNewId();
-        this.formatId = idGenerator.getFormatId();
-        this.output = extractorOutput.track(idGenerator.getTrackId(), 2);
-        this.sampleReader = new SampleReader(this.output, this.allowNonIdrKeyframes, this.detectAccessUnits);
-        this.seiReader.createTracks(extractorOutput, idGenerator);
+    public void createTracks(ExtractorOutput extractorOutput, TsPayloadReader.TrackIdGenerator trackIdGenerator) {
+        trackIdGenerator.generateNewId();
+        this.formatId = trackIdGenerator.getFormatId();
+        TrackOutput track = extractorOutput.track(trackIdGenerator.getTrackId(), 2);
+        this.output = track;
+        this.sampleReader = new SampleReader(track, this.allowNonIdrKeyframes, this.detectAccessUnits);
+        this.seiReader.createTracks(extractorOutput, trackIdGenerator);
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void packetStarted(long pesTimeUs, int flags) {
-        this.pesTimeUs = pesTimeUs;
-        this.randomAccessIndicator |= (flags & 2) != 0;
+    public void packetStarted(long j, int i) {
+        this.pesTimeUs = j;
+        this.randomAccessIndicator |= (i & 2) != 0;
     }
 
     @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void consume(ParsableByteArray data) {
-        int offset = data.getPosition();
-        int limit = data.limit();
-        byte[] dataArray = data.data;
-        this.totalBytesWritten += data.bytesLeft();
-        this.output.sampleData(data, data.bytesLeft());
-        int offset2 = offset;
+    public void consume(ParsableByteArray parsableByteArray) {
+        int position = parsableByteArray.getPosition();
+        int limit = parsableByteArray.limit();
+        byte[] bArr = parsableByteArray.data;
+        this.totalBytesWritten += parsableByteArray.bytesLeft();
+        this.output.sampleData(parsableByteArray, parsableByteArray.bytesLeft());
         while (true) {
-            int nalUnitOffset = NalUnitUtil.findNalUnit(dataArray, offset2, limit, this.prefixFlags);
-            if (nalUnitOffset == limit) {
-                nalUnitData(dataArray, offset2, limit);
+            int findNalUnit = NalUnitUtil.findNalUnit(bArr, position, limit, this.prefixFlags);
+            if (findNalUnit == limit) {
+                nalUnitData(bArr, position, limit);
                 return;
             }
-            int nalUnitType = NalUnitUtil.getNalUnitType(dataArray, nalUnitOffset);
-            int lengthToNalUnit = nalUnitOffset - offset2;
-            if (lengthToNalUnit > 0) {
-                nalUnitData(dataArray, offset2, nalUnitOffset);
+            int nalUnitType = NalUnitUtil.getNalUnitType(bArr, findNalUnit);
+            int i = findNalUnit - position;
+            if (i > 0) {
+                nalUnitData(bArr, position, findNalUnit);
             }
-            int bytesWrittenPastPosition = limit - nalUnitOffset;
-            long absolutePosition = this.totalBytesWritten - bytesWrittenPastPosition;
-            endNalUnit(absolutePosition, bytesWrittenPastPosition, lengthToNalUnit < 0 ? -lengthToNalUnit : 0, this.pesTimeUs);
-            startNalUnit(absolutePosition, nalUnitType, this.pesTimeUs);
-            offset2 = nalUnitOffset + 3;
+            int i2 = limit - findNalUnit;
+            long j = this.totalBytesWritten - i2;
+            endNalUnit(j, i2, i < 0 ? -i : 0, this.pesTimeUs);
+            startNalUnit(j, nalUnitType, this.pesTimeUs);
+            position = findNalUnit + 3;
         }
     }
 
-    @Override // com.google.android.exoplayer2.extractor.ts.ElementaryStreamReader
-    public void packetFinished() {
-    }
-
-    private void startNalUnit(long position, int nalUnitType, long pesTimeUs) {
+    private void startNalUnit(long j, int i, long j2) {
         if (!this.hasOutputFormat || this.sampleReader.needsSpsPps()) {
-            this.sps.startNalUnit(nalUnitType);
-            this.pps.startNalUnit(nalUnitType);
+            this.sps.startNalUnit(i);
+            this.pps.startNalUnit(i);
         }
-        this.sei.startNalUnit(nalUnitType);
-        this.sampleReader.startNalUnit(position, nalUnitType, pesTimeUs);
+        this.sei.startNalUnit(i);
+        this.sampleReader.startNalUnit(j, i, j2);
     }
 
-    private void nalUnitData(byte[] dataArray, int offset, int limit) {
+    private void nalUnitData(byte[] bArr, int i, int i2) {
         if (!this.hasOutputFormat || this.sampleReader.needsSpsPps()) {
-            this.sps.appendToNalUnit(dataArray, offset, limit);
-            this.pps.appendToNalUnit(dataArray, offset, limit);
+            this.sps.appendToNalUnit(bArr, i, i2);
+            this.pps.appendToNalUnit(bArr, i, i2);
         }
-        this.sei.appendToNalUnit(dataArray, offset, limit);
-        this.sampleReader.appendToNalUnit(dataArray, offset, limit);
+        this.sei.appendToNalUnit(bArr, i, i2);
+        this.sampleReader.appendToNalUnit(bArr, i, i2);
     }
 
-    private void endNalUnit(long position, int offset, int discardPadding, long pesTimeUs) {
+    private void endNalUnit(long j, int i, int i2, long j2) {
         if (!this.hasOutputFormat || this.sampleReader.needsSpsPps()) {
-            this.sps.endNalUnit(discardPadding);
-            this.pps.endNalUnit(discardPadding);
+            this.sps.endNalUnit(i2);
+            this.pps.endNalUnit(i2);
             if (!this.hasOutputFormat) {
                 if (this.sps.isCompleted() && this.pps.isCompleted()) {
-                    List<byte[]> initializationData = new ArrayList<>();
-                    initializationData.add(Arrays.copyOf(this.sps.nalData, this.sps.nalLength));
-                    initializationData.add(Arrays.copyOf(this.pps.nalData, this.pps.nalLength));
-                    NalUnitUtil.SpsData spsData = NalUnitUtil.parseSpsNalUnit(this.sps.nalData, 3, this.sps.nalLength);
-                    NalUnitUtil.PpsData ppsData = NalUnitUtil.parsePpsNalUnit(this.pps.nalData, 3, this.pps.nalLength);
-                    this.output.format(Format.createVideoSampleFormat(this.formatId, "video/avc", CodecSpecificDataUtil.buildAvcCodecString(spsData.profileIdc, spsData.constraintsFlagsAndReservedZero2Bits, spsData.levelIdc), -1, -1, spsData.width, spsData.height, -1.0f, initializationData, -1, spsData.pixelWidthAspectRatio, null));
+                    ArrayList arrayList = new ArrayList();
+                    NalUnitTargetBuffer nalUnitTargetBuffer = this.sps;
+                    arrayList.add(Arrays.copyOf(nalUnitTargetBuffer.nalData, nalUnitTargetBuffer.nalLength));
+                    NalUnitTargetBuffer nalUnitTargetBuffer2 = this.pps;
+                    arrayList.add(Arrays.copyOf(nalUnitTargetBuffer2.nalData, nalUnitTargetBuffer2.nalLength));
+                    NalUnitTargetBuffer nalUnitTargetBuffer3 = this.sps;
+                    NalUnitUtil.SpsData parseSpsNalUnit = NalUnitUtil.parseSpsNalUnit(nalUnitTargetBuffer3.nalData, 3, nalUnitTargetBuffer3.nalLength);
+                    NalUnitTargetBuffer nalUnitTargetBuffer4 = this.pps;
+                    NalUnitUtil.PpsData parsePpsNalUnit = NalUnitUtil.parsePpsNalUnit(nalUnitTargetBuffer4.nalData, 3, nalUnitTargetBuffer4.nalLength);
+                    this.output.format(Format.createVideoSampleFormat(this.formatId, MediaController.VIDEO_MIME_TYPE, CodecSpecificDataUtil.buildAvcCodecString(parseSpsNalUnit.profileIdc, parseSpsNalUnit.constraintsFlagsAndReservedZero2Bits, parseSpsNalUnit.levelIdc), -1, -1, parseSpsNalUnit.width, parseSpsNalUnit.height, -1.0f, arrayList, -1, parseSpsNalUnit.pixelWidthAspectRatio, null));
                     this.hasOutputFormat = true;
-                    this.sampleReader.putSps(spsData);
-                    this.sampleReader.putPps(ppsData);
+                    this.sampleReader.putSps(parseSpsNalUnit);
+                    this.sampleReader.putPps(parsePpsNalUnit);
                     this.sps.reset();
                     this.pps.reset();
                 }
             } else if (this.sps.isCompleted()) {
-                this.sampleReader.putSps(NalUnitUtil.parseSpsNalUnit(this.sps.nalData, 3, this.sps.nalLength));
+                NalUnitTargetBuffer nalUnitTargetBuffer5 = this.sps;
+                this.sampleReader.putSps(NalUnitUtil.parseSpsNalUnit(nalUnitTargetBuffer5.nalData, 3, nalUnitTargetBuffer5.nalLength));
                 this.sps.reset();
             } else if (this.pps.isCompleted()) {
-                NalUnitUtil.PpsData ppsData2 = NalUnitUtil.parsePpsNalUnit(this.pps.nalData, 3, this.pps.nalLength);
-                this.sampleReader.putPps(ppsData2);
+                NalUnitTargetBuffer nalUnitTargetBuffer6 = this.pps;
+                this.sampleReader.putPps(NalUnitUtil.parsePpsNalUnit(nalUnitTargetBuffer6.nalData, 3, nalUnitTargetBuffer6.nalLength));
                 this.pps.reset();
             }
         }
-        if (this.sei.endNalUnit(discardPadding)) {
-            int unescapedLength = NalUnitUtil.unescapeStream(this.sei.nalData, this.sei.nalLength);
-            this.seiWrapper.reset(this.sei.nalData, unescapedLength);
+        if (this.sei.endNalUnit(i2)) {
+            NalUnitTargetBuffer nalUnitTargetBuffer7 = this.sei;
+            this.seiWrapper.reset(this.sei.nalData, NalUnitUtil.unescapeStream(nalUnitTargetBuffer7.nalData, nalUnitTargetBuffer7.nalLength));
             this.seiWrapper.setPosition(4);
-            this.seiReader.consume(pesTimeUs, this.seiWrapper);
+            this.seiReader.consume(j2, this.seiWrapper);
         }
-        boolean sampleIsKeyFrame = this.sampleReader.endNalUnit(position, offset, this.hasOutputFormat, this.randomAccessIndicator);
-        if (sampleIsKeyFrame) {
+        if (this.sampleReader.endNalUnit(j, i, this.hasOutputFormat, this.randomAccessIndicator)) {
             this.randomAccessIndicator = false;
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class SampleReader {
-        private static final int DEFAULT_BUFFER_SIZE = 128;
-        private static final int NAL_UNIT_TYPE_AUD = 9;
-        private static final int NAL_UNIT_TYPE_IDR = 5;
-        private static final int NAL_UNIT_TYPE_NON_IDR = 1;
-        private static final int NAL_UNIT_TYPE_PARTITION_A = 2;
         private final boolean allowNonIdrKeyframes;
+        private final ParsableNalUnitBitArray bitArray;
+        private byte[] buffer;
         private int bufferLength;
         private final boolean detectAccessUnits;
         private boolean isFilling;
@@ -176,13 +175,14 @@ public final class H264Reader implements ElementaryStreamReader {
         private final SparseArray<NalUnitUtil.PpsData> pps = new SparseArray<>();
         private SliceHeaderData previousSliceHeader = new SliceHeaderData();
         private SliceHeaderData sliceHeader = new SliceHeaderData();
-        private byte[] buffer = new byte[128];
-        private final ParsableNalUnitBitArray bitArray = new ParsableNalUnitBitArray(this.buffer, 0, 0);
 
-        public SampleReader(TrackOutput output, boolean allowNonIdrKeyframes, boolean detectAccessUnits) {
-            this.output = output;
-            this.allowNonIdrKeyframes = allowNonIdrKeyframes;
-            this.detectAccessUnits = detectAccessUnits;
+        public SampleReader(TrackOutput trackOutput, boolean z, boolean z2) {
+            this.output = trackOutput;
+            this.allowNonIdrKeyframes = z;
+            this.detectAccessUnits = z2;
+            byte[] bArr = new byte[ConnectionsManager.RequestFlagNeedQuickAck];
+            this.buffer = bArr;
+            this.bitArray = new ParsableNalUnitBitArray(bArr, 0, 0);
             reset();
         }
 
@@ -204,201 +204,75 @@ public final class H264Reader implements ElementaryStreamReader {
             this.sliceHeader.clear();
         }
 
-        public void startNalUnit(long position, int type, long pesTimeUs) {
-            this.nalUnitType = type;
-            this.nalUnitTimeUs = pesTimeUs;
-            this.nalUnitStartPosition = position;
-            if (!this.allowNonIdrKeyframes || type != 1) {
+        public void startNalUnit(long j, int i, long j2) {
+            this.nalUnitType = i;
+            this.nalUnitTimeUs = j2;
+            this.nalUnitStartPosition = j;
+            if (!this.allowNonIdrKeyframes || i != 1) {
                 if (!this.detectAccessUnits) {
                     return;
                 }
-                if (type != 5 && type != 1 && type != 2) {
+                if (i != 5 && i != 1 && i != 2) {
                     return;
                 }
             }
-            SliceHeaderData newSliceHeader = this.previousSliceHeader;
+            SliceHeaderData sliceHeaderData = this.previousSliceHeader;
             this.previousSliceHeader = this.sliceHeader;
-            this.sliceHeader = newSliceHeader;
-            newSliceHeader.clear();
+            this.sliceHeader = sliceHeaderData;
+            sliceHeaderData.clear();
             this.bufferLength = 0;
             this.isFilling = true;
         }
 
-        public void appendToNalUnit(byte[] data, int offset, int limit) {
-            boolean bottomFieldFlag;
-            boolean bottomFieldFlagPresent;
-            int idrPicId;
-            int deltaPicOrderCnt1;
-            int deltaPicOrderCnt0;
-            int deltaPicOrderCntBottom;
-            int picOrderCntLsb;
-            if (!this.isFilling) {
-                return;
-            }
-            int readLength = limit - offset;
-            byte[] bArr = this.buffer;
-            int length = bArr.length;
-            int i = this.bufferLength;
-            if (length < i + readLength) {
-                this.buffer = Arrays.copyOf(bArr, (i + readLength) * 2);
-            }
-            System.arraycopy(data, offset, this.buffer, this.bufferLength, readLength);
-            int i2 = this.bufferLength + readLength;
-            this.bufferLength = i2;
-            this.bitArray.reset(this.buffer, 0, i2);
-            if (!this.bitArray.canReadBits(8)) {
-                return;
-            }
-            this.bitArray.skipBit();
-            int nalRefIdc = this.bitArray.readBits(2);
-            this.bitArray.skipBits(5);
-            if (!this.bitArray.canReadExpGolombCodedNum()) {
-                return;
-            }
-            this.bitArray.readUnsignedExpGolombCodedInt();
-            if (!this.bitArray.canReadExpGolombCodedNum()) {
-                return;
-            }
-            int sliceType = this.bitArray.readUnsignedExpGolombCodedInt();
-            if (!this.detectAccessUnits) {
-                this.isFilling = false;
-                this.sliceHeader.setSliceType(sliceType);
-            } else if (!this.bitArray.canReadExpGolombCodedNum()) {
-            } else {
-                int picParameterSetId = this.bitArray.readUnsignedExpGolombCodedInt();
-                if (this.pps.indexOfKey(picParameterSetId) < 0) {
-                    this.isFilling = false;
-                    return;
-                }
-                NalUnitUtil.PpsData ppsData = this.pps.get(picParameterSetId);
-                NalUnitUtil.SpsData spsData = this.sps.get(ppsData.seqParameterSetId);
-                if (spsData.separateColorPlaneFlag) {
-                    if (!this.bitArray.canReadBits(2)) {
-                        return;
-                    }
-                    this.bitArray.skipBits(2);
-                }
-                if (!this.bitArray.canReadBits(spsData.frameNumLength)) {
-                    return;
-                }
-                boolean fieldPicFlag = false;
-                int frameNum = this.bitArray.readBits(spsData.frameNumLength);
-                if (spsData.frameMbsOnlyFlag) {
-                    bottomFieldFlagPresent = false;
-                    bottomFieldFlag = false;
-                } else if (!this.bitArray.canReadBits(1)) {
-                    return;
-                } else {
-                    fieldPicFlag = this.bitArray.readBit();
-                    if (!fieldPicFlag) {
-                        bottomFieldFlagPresent = false;
-                        bottomFieldFlag = false;
-                    } else if (!this.bitArray.canReadBits(1)) {
-                        return;
-                    } else {
-                        boolean bottomFieldFlag2 = this.bitArray.readBit();
-                        bottomFieldFlagPresent = true;
-                        bottomFieldFlag = bottomFieldFlag2;
-                    }
-                }
-                boolean idrPicFlag = this.nalUnitType == 5;
-                if (!idrPicFlag) {
-                    idrPicId = 0;
-                } else if (!this.bitArray.canReadExpGolombCodedNum()) {
-                    return;
-                } else {
-                    int idrPicId2 = this.bitArray.readUnsignedExpGolombCodedInt();
-                    idrPicId = idrPicId2;
-                }
-                int picOrderCntLsb2 = 0;
-                int deltaPicOrderCnt02 = 0;
-                if (spsData.picOrderCountType == 0) {
-                    if (!this.bitArray.canReadBits(spsData.picOrderCntLsbLength)) {
-                        return;
-                    }
-                    picOrderCntLsb2 = this.bitArray.readBits(spsData.picOrderCntLsbLength);
-                    if (ppsData.bottomFieldPicOrderInFramePresentFlag && !fieldPicFlag) {
-                        if (!this.bitArray.canReadExpGolombCodedNum()) {
-                            return;
-                        }
-                        int deltaPicOrderCntBottom2 = this.bitArray.readSignedExpGolombCodedInt();
-                        picOrderCntLsb = picOrderCntLsb2;
-                        deltaPicOrderCntBottom = deltaPicOrderCntBottom2;
-                        deltaPicOrderCnt0 = 0;
-                        deltaPicOrderCnt1 = 0;
-                        this.sliceHeader.setAll(spsData, nalRefIdc, sliceType, frameNum, picParameterSetId, fieldPicFlag, bottomFieldFlagPresent, bottomFieldFlag, idrPicFlag, idrPicId, picOrderCntLsb, deltaPicOrderCntBottom, deltaPicOrderCnt0, deltaPicOrderCnt1);
-                        this.isFilling = false;
-                    }
-                    picOrderCntLsb = picOrderCntLsb2;
-                    deltaPicOrderCntBottom = 0;
-                    deltaPicOrderCnt0 = deltaPicOrderCnt02;
-                    deltaPicOrderCnt1 = 0;
-                    this.sliceHeader.setAll(spsData, nalRefIdc, sliceType, frameNum, picParameterSetId, fieldPicFlag, bottomFieldFlagPresent, bottomFieldFlag, idrPicFlag, idrPicId, picOrderCntLsb, deltaPicOrderCntBottom, deltaPicOrderCnt0, deltaPicOrderCnt1);
-                    this.isFilling = false;
-                }
-                if (spsData.picOrderCountType == 1 && !spsData.deltaPicOrderAlwaysZeroFlag) {
-                    if (!this.bitArray.canReadExpGolombCodedNum()) {
-                        return;
-                    }
-                    deltaPicOrderCnt02 = this.bitArray.readSignedExpGolombCodedInt();
-                    if (ppsData.bottomFieldPicOrderInFramePresentFlag && !fieldPicFlag) {
-                        if (!this.bitArray.canReadExpGolombCodedNum()) {
-                            return;
-                        }
-                        int deltaPicOrderCnt12 = this.bitArray.readSignedExpGolombCodedInt();
-                        picOrderCntLsb = 0;
-                        deltaPicOrderCntBottom = 0;
-                        deltaPicOrderCnt0 = deltaPicOrderCnt02;
-                        deltaPicOrderCnt1 = deltaPicOrderCnt12;
-                        this.sliceHeader.setAll(spsData, nalRefIdc, sliceType, frameNum, picParameterSetId, fieldPicFlag, bottomFieldFlagPresent, bottomFieldFlag, idrPicFlag, idrPicId, picOrderCntLsb, deltaPicOrderCntBottom, deltaPicOrderCnt0, deltaPicOrderCnt1);
-                        this.isFilling = false;
-                    }
-                }
-                picOrderCntLsb = picOrderCntLsb2;
-                deltaPicOrderCntBottom = 0;
-                deltaPicOrderCnt0 = deltaPicOrderCnt02;
-                deltaPicOrderCnt1 = 0;
-                this.sliceHeader.setAll(spsData, nalRefIdc, sliceType, frameNum, picParameterSetId, fieldPicFlag, bottomFieldFlagPresent, bottomFieldFlag, idrPicFlag, idrPicId, picOrderCntLsb, deltaPicOrderCntBottom, deltaPicOrderCnt0, deltaPicOrderCnt1);
-                this.isFilling = false;
-            }
+        /* JADX WARN: Removed duplicated region for block: B:53:0x00ff  */
+        /* JADX WARN: Removed duplicated region for block: B:54:0x0102  */
+        /* JADX WARN: Removed duplicated region for block: B:56:0x0106  */
+        /* JADX WARN: Removed duplicated region for block: B:60:0x0118  */
+        /* JADX WARN: Removed duplicated region for block: B:63:0x011e  */
+        /* JADX WARN: Removed duplicated region for block: B:74:0x014e  */
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        public void appendToNalUnit(byte[] r24, int r25, int r26) {
+            /*
+                Method dump skipped, instructions count: 408
+                To view this dump add '--comments-level debug' option
+            */
+            throw new UnsupportedOperationException("Method not decompiled: com.google.android.exoplayer2.extractor.ts.H264Reader.SampleReader.appendToNalUnit(byte[], int, int):void");
         }
 
-        public boolean endNalUnit(long position, int offset, boolean hasOutputFormat, boolean randomAccessIndicator) {
-            boolean z = false;
+        public boolean endNalUnit(long j, int i, boolean z, boolean z2) {
+            boolean z3 = false;
             if (this.nalUnitType == 9 || (this.detectAccessUnits && this.sliceHeader.isFirstVclNalUnitOfPicture(this.previousSliceHeader))) {
-                if (hasOutputFormat && this.readingSample) {
-                    int nalUnitLength = (int) (position - this.nalUnitStartPosition);
-                    outputSample(offset + nalUnitLength);
+                if (z && this.readingSample) {
+                    outputSample(i + ((int) (j - this.nalUnitStartPosition)));
                 }
                 this.samplePosition = this.nalUnitStartPosition;
                 this.sampleTimeUs = this.nalUnitTimeUs;
                 this.sampleIsKeyframe = false;
                 this.readingSample = true;
             }
-            boolean treatIFrameAsKeyframe = this.allowNonIdrKeyframes ? this.sliceHeader.isISlice() : randomAccessIndicator;
-            boolean z2 = this.sampleIsKeyframe;
-            int i = this.nalUnitType;
-            if (i == 5 || (treatIFrameAsKeyframe && i == 1)) {
-                z = true;
+            if (this.allowNonIdrKeyframes) {
+                z2 = this.sliceHeader.isISlice();
             }
-            boolean z3 = z | z2;
-            this.sampleIsKeyframe = z3;
-            return z3;
+            boolean z4 = this.sampleIsKeyframe;
+            int i2 = this.nalUnitType;
+            if (i2 == 5 || (z2 && i2 == 1)) {
+                z3 = true;
+            }
+            boolean z5 = z4 | z3;
+            this.sampleIsKeyframe = z5;
+            return z5;
         }
 
-        private void outputSample(int offset) {
+        private void outputSample(int i) {
             boolean z = this.sampleIsKeyframe;
-            int size = (int) (this.nalUnitStartPosition - this.samplePosition);
-            TrackOutput trackOutput = this.output;
-            long j = this.sampleTimeUs;
-            int flags = z ? 1 : 0;
-            trackOutput.sampleMetadata(j, flags, size, offset, null);
+            this.output.sampleMetadata(this.sampleTimeUs, z ? 1 : 0, (int) (this.nalUnitStartPosition - this.samplePosition), i, null);
         }
 
-        /* loaded from: classes3.dex */
+        /* loaded from: classes.dex */
         public static final class SliceHeaderData {
-            private static final int SLICE_TYPE_ALL_I = 7;
-            private static final int SLICE_TYPE_I = 2;
             private boolean bottomFieldFlag;
             private boolean bottomFieldFlagPresent;
             private int deltaPicOrderCnt0;
@@ -424,26 +298,26 @@ public final class H264Reader implements ElementaryStreamReader {
                 this.isComplete = false;
             }
 
-            public void setSliceType(int sliceType) {
-                this.sliceType = sliceType;
+            public void setSliceType(int i) {
+                this.sliceType = i;
                 this.hasSliceType = true;
             }
 
-            public void setAll(NalUnitUtil.SpsData spsData, int nalRefIdc, int sliceType, int frameNum, int picParameterSetId, boolean fieldPicFlag, boolean bottomFieldFlagPresent, boolean bottomFieldFlag, boolean idrPicFlag, int idrPicId, int picOrderCntLsb, int deltaPicOrderCntBottom, int deltaPicOrderCnt0, int deltaPicOrderCnt1) {
+            public void setAll(NalUnitUtil.SpsData spsData, int i, int i2, int i3, int i4, boolean z, boolean z2, boolean z3, boolean z4, int i5, int i6, int i7, int i8, int i9) {
                 this.spsData = spsData;
-                this.nalRefIdc = nalRefIdc;
-                this.sliceType = sliceType;
-                this.frameNum = frameNum;
-                this.picParameterSetId = picParameterSetId;
-                this.fieldPicFlag = fieldPicFlag;
-                this.bottomFieldFlagPresent = bottomFieldFlagPresent;
-                this.bottomFieldFlag = bottomFieldFlag;
-                this.idrPicFlag = idrPicFlag;
-                this.idrPicId = idrPicId;
-                this.picOrderCntLsb = picOrderCntLsb;
-                this.deltaPicOrderCntBottom = deltaPicOrderCntBottom;
-                this.deltaPicOrderCnt0 = deltaPicOrderCnt0;
-                this.deltaPicOrderCnt1 = deltaPicOrderCnt1;
+                this.nalRefIdc = i;
+                this.sliceType = i2;
+                this.frameNum = i3;
+                this.picParameterSetId = i4;
+                this.fieldPicFlag = z;
+                this.bottomFieldFlagPresent = z2;
+                this.bottomFieldFlag = z3;
+                this.idrPicFlag = z4;
+                this.idrPicId = i5;
+                this.picOrderCntLsb = i6;
+                this.deltaPicOrderCntBottom = i7;
+                this.deltaPicOrderCnt0 = i8;
+                this.deltaPicOrderCnt1 = i9;
                 this.isComplete = true;
                 this.hasSliceType = true;
             }
@@ -453,28 +327,29 @@ public final class H264Reader implements ElementaryStreamReader {
                 return this.hasSliceType && ((i = this.sliceType) == 7 || i == 2);
             }
 
-            public boolean isFirstVclNalUnitOfPicture(SliceHeaderData other) {
+            public boolean isFirstVclNalUnitOfPicture(SliceHeaderData sliceHeaderData) {
                 boolean z;
                 boolean z2;
                 if (this.isComplete) {
-                    if (!other.isComplete || this.frameNum != other.frameNum || this.picParameterSetId != other.picParameterSetId || this.fieldPicFlag != other.fieldPicFlag) {
+                    if (!sliceHeaderData.isComplete || this.frameNum != sliceHeaderData.frameNum || this.picParameterSetId != sliceHeaderData.picParameterSetId || this.fieldPicFlag != sliceHeaderData.fieldPicFlag) {
                         return true;
                     }
-                    if (this.bottomFieldFlagPresent && other.bottomFieldFlagPresent && this.bottomFieldFlag != other.bottomFieldFlag) {
+                    if (this.bottomFieldFlagPresent && sliceHeaderData.bottomFieldFlagPresent && this.bottomFieldFlag != sliceHeaderData.bottomFieldFlag) {
                         return true;
                     }
                     int i = this.nalRefIdc;
-                    int i2 = other.nalRefIdc;
+                    int i2 = sliceHeaderData.nalRefIdc;
                     if (i != i2 && (i == 0 || i2 == 0)) {
                         return true;
                     }
-                    if (this.spsData.picOrderCountType == 0 && other.spsData.picOrderCountType == 0 && (this.picOrderCntLsb != other.picOrderCntLsb || this.deltaPicOrderCntBottom != other.deltaPicOrderCntBottom)) {
+                    int i3 = this.spsData.picOrderCountType;
+                    if (i3 == 0 && sliceHeaderData.spsData.picOrderCountType == 0 && (this.picOrderCntLsb != sliceHeaderData.picOrderCntLsb || this.deltaPicOrderCntBottom != sliceHeaderData.deltaPicOrderCntBottom)) {
                         return true;
                     }
-                    if ((this.spsData.picOrderCountType == 1 && other.spsData.picOrderCountType == 1 && (this.deltaPicOrderCnt0 != other.deltaPicOrderCnt0 || this.deltaPicOrderCnt1 != other.deltaPicOrderCnt1)) || (z = this.idrPicFlag) != (z2 = other.idrPicFlag)) {
+                    if ((i3 == 1 && sliceHeaderData.spsData.picOrderCountType == 1 && (this.deltaPicOrderCnt0 != sliceHeaderData.deltaPicOrderCnt0 || this.deltaPicOrderCnt1 != sliceHeaderData.deltaPicOrderCnt1)) || (z = this.idrPicFlag) != (z2 = sliceHeaderData.idrPicFlag)) {
                         return true;
                     }
-                    if (z && z2 && this.idrPicId != other.idrPicId) {
+                    if (z && z2 && this.idrPicId != sliceHeaderData.idrPicId) {
                         return true;
                     }
                 }

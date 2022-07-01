@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.firebase_messaging;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzi {
     private static final zzf zza;
     private static volatile zzf zzb;

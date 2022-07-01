@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import com.google.android.gms.location.LocationSettingsResult;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public abstract class zzan extends zzb implements zzao {
     public zzan() {
         super("com.google.android.gms.location.internal.ISettingsCallbacks");

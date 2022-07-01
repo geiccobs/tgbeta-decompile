@@ -3,7 +3,7 @@ package com.google.android.gms.internal.icing;
 import java.util.ArrayList;
 import java.util.List;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzr {
     private final String zza;
     private String zzb;
@@ -23,16 +23,6 @@ public final class zzr {
 
     public final zzr zzb(boolean z) {
         this.zzc = true;
-        return this;
-    }
-
-    public final zzr zzc(boolean z) {
-        this.zzd = true;
-        return this;
-    }
-
-    public final zzr zzd(String str) {
-        this.zzf = str;
         return this;
     }
 

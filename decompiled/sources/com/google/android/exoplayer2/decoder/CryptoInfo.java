@@ -1,11 +1,10 @@
 package com.google.android.exoplayer2.decoder;
 
+import android.annotation.TargetApi;
 import android.media.MediaCodec;
 import com.google.android.exoplayer2.util.Util;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class CryptoInfo {
-    public int clearBlocks;
-    public int encryptedBlocks;
     private final MediaCodec.CryptoInfo frameworkCryptoInfo;
     public byte[] iv;
     public byte[] key;
@@ -21,49 +20,43 @@ public final class CryptoInfo {
         this.patternHolder = Util.SDK_INT >= 24 ? new PatternHolderV24(cryptoInfo) : null;
     }
 
-    public void set(int numSubSamples, int[] numBytesOfClearData, int[] numBytesOfEncryptedData, byte[] key, byte[] iv, int mode, int encryptedBlocks, int clearBlocks) {
-        this.numSubSamples = numSubSamples;
-        this.numBytesOfClearData = numBytesOfClearData;
-        this.numBytesOfEncryptedData = numBytesOfEncryptedData;
-        this.key = key;
-        this.iv = iv;
-        this.mode = mode;
-        this.encryptedBlocks = encryptedBlocks;
-        this.clearBlocks = clearBlocks;
-        this.frameworkCryptoInfo.numSubSamples = numSubSamples;
-        this.frameworkCryptoInfo.numBytesOfClearData = numBytesOfClearData;
-        this.frameworkCryptoInfo.numBytesOfEncryptedData = numBytesOfEncryptedData;
-        this.frameworkCryptoInfo.key = key;
-        this.frameworkCryptoInfo.iv = iv;
-        this.frameworkCryptoInfo.mode = mode;
-        if (Util.SDK_INT < 24) {
-            return;
+    public void set(int i, int[] iArr, int[] iArr2, byte[] bArr, byte[] bArr2, int i2, int i3, int i4) {
+        this.numSubSamples = i;
+        this.numBytesOfClearData = iArr;
+        this.numBytesOfEncryptedData = iArr2;
+        this.key = bArr;
+        this.iv = bArr2;
+        this.mode = i2;
+        MediaCodec.CryptoInfo cryptoInfo = this.frameworkCryptoInfo;
+        cryptoInfo.numSubSamples = i;
+        cryptoInfo.numBytesOfClearData = iArr;
+        cryptoInfo.numBytesOfEncryptedData = iArr2;
+        cryptoInfo.key = bArr;
+        cryptoInfo.iv = bArr2;
+        cryptoInfo.mode = i2;
+        if (Util.SDK_INT >= 24) {
+            this.patternHolder.set(i3, i4);
         }
-        this.patternHolder.set(encryptedBlocks, clearBlocks);
     }
 
     public MediaCodec.CryptoInfo getFrameworkCryptoInfo() {
         return this.frameworkCryptoInfo;
     }
 
-    @Deprecated
-    public MediaCodec.CryptoInfo getFrameworkCryptoInfoV16() {
-        return getFrameworkCryptoInfo();
-    }
-
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    @TargetApi(24)
+    /* loaded from: classes.dex */
     public static final class PatternHolderV24 {
         private final MediaCodec.CryptoInfo frameworkCryptoInfo;
         private final MediaCodec.CryptoInfo.Pattern pattern;
 
-        private PatternHolderV24(MediaCodec.CryptoInfo frameworkCryptoInfo) {
-            this.frameworkCryptoInfo = frameworkCryptoInfo;
+        private PatternHolderV24(MediaCodec.CryptoInfo cryptoInfo) {
+            this.frameworkCryptoInfo = cryptoInfo;
             this.pattern = new MediaCodec.CryptoInfo.Pattern(0, 0);
         }
 
-        public void set(int encryptedBlocks, int clearBlocks) {
-            this.pattern.set(encryptedBlocks, clearBlocks);
+        public void set(int i, int i2) {
+            this.pattern.set(i, i2);
             this.frameworkCryptoInfo.setPattern(this.pattern);
         }
     }

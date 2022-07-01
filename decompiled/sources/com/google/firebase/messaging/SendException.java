@@ -2,18 +2,11 @@ package com.google.firebase.messaging;
 
 import java.util.Locale;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class SendException extends Exception {
-    public static final int ERROR_INVALID_PARAMETERS = 1;
-    public static final int ERROR_SIZE = 2;
-    public static final int ERROR_TOO_MANY_MESSAGES = 4;
-    public static final int ERROR_TTL_EXCEEDED = 3;
-    public static final int ERROR_UNKNOWN = 0;
-    private final int errorCode;
-
     public SendException(String str) {
         super(str);
-        this.errorCode = parseErrorCode(str);
+        parseErrorCode(str);
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
@@ -63,22 +56,15 @@ public final class SendException extends Exception {
                 c = 65535;
                 break;
         }
-        switch (c) {
-            case 0:
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 3;
-            case 4:
-                return 4;
-            default:
-                return 0;
+        if (c == 0 || c == 1) {
+            return 1;
         }
-    }
-
-    public int getErrorCode() {
-        return this.errorCode;
+        if (c == 2) {
+            return 2;
+        }
+        if (c == 3) {
+            return 3;
+        }
+        return c != 4 ? 0 : 4;
     }
 }

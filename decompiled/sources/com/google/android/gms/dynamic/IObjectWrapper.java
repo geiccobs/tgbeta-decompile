@@ -2,17 +2,18 @@ package com.google.android.gms.dynamic;
 
 import android.os.IBinder;
 import android.os.IInterface;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.internal.common.zzb;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface IObjectWrapper extends IInterface {
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static abstract class Stub extends com.google.android.gms.internal.common.zza implements IObjectWrapper {
 
         /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-        /* loaded from: classes3.dex */
+        /* loaded from: classes.dex */
         public static class zza extends zzb implements IObjectWrapper {
             zza(IBinder iBinder) {
                 super(iBinder, "com.google.android.gms.dynamic.IObjectWrapper");
@@ -23,7 +24,8 @@ public interface IObjectWrapper extends IInterface {
             super("com.google.android.gms.dynamic.IObjectWrapper");
         }
 
-        public static IObjectWrapper asInterface(IBinder iBinder) {
+        @RecentlyNonNull
+        public static IObjectWrapper asInterface(@RecentlyNonNull IBinder iBinder) {
             if (iBinder == null) {
                 return null;
             }

@@ -4,28 +4,28 @@ import android.os.Handler;
 import com.google.android.exoplayer2.util.EventDispatcher;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class EventDispatcher<T> {
     private final CopyOnWriteArrayList<HandlerAndListener<T>> listeners = new CopyOnWriteArrayList<>();
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Event<T> {
         void sendTo(T t);
     }
 
-    public void addListener(Handler handler, T eventListener) {
-        Assertions.checkArgument((handler == null || eventListener == null) ? false : true);
-        removeListener(eventListener);
-        this.listeners.add(new HandlerAndListener<>(handler, eventListener));
+    public void addListener(Handler handler, T t) {
+        Assertions.checkArgument((handler == null || t == null) ? false : true);
+        removeListener(t);
+        this.listeners.add(new HandlerAndListener<>(handler, t));
     }
 
-    public void removeListener(T eventListener) {
+    public void removeListener(T t) {
         Iterator<HandlerAndListener<T>> it = this.listeners.iterator();
         while (it.hasNext()) {
-            HandlerAndListener<T> handlerAndListener = it.next();
-            if (((HandlerAndListener) handlerAndListener).listener == eventListener) {
-                handlerAndListener.release();
-                this.listeners.remove(handlerAndListener);
+            HandlerAndListener<T> next = it.next();
+            if (((HandlerAndListener) next).listener == t) {
+                next.release();
+                this.listeners.remove(next);
             }
         }
     }
@@ -33,20 +33,19 @@ public final class EventDispatcher<T> {
     public void dispatch(Event<T> event) {
         Iterator<HandlerAndListener<T>> it = this.listeners.iterator();
         while (it.hasNext()) {
-            HandlerAndListener<T> handlerAndListener = it.next();
-            handlerAndListener.dispatch(event);
+            it.next().dispatch(event);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class HandlerAndListener<T> {
         private final Handler handler;
         private final T listener;
         private boolean released;
 
-        public HandlerAndListener(Handler handler, T eventListener) {
+        public HandlerAndListener(Handler handler, T t) {
             this.handler = handler;
-            this.listener = eventListener;
+            this.listener = t;
         }
 
         public void release() {
@@ -57,13 +56,12 @@ public final class EventDispatcher<T> {
             this.handler.post(new Runnable() { // from class: com.google.android.exoplayer2.util.EventDispatcher$HandlerAndListener$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    EventDispatcher.HandlerAndListener.this.m78xc52e451c(event);
+                    EventDispatcher.HandlerAndListener.this.lambda$dispatch$0(event);
                 }
             });
         }
 
-        /* renamed from: lambda$dispatch$0$com-google-android-exoplayer2-util-EventDispatcher$HandlerAndListener */
-        public /* synthetic */ void m78xc52e451c(Event event) {
+        public /* synthetic */ void lambda$dispatch$0(Event event) {
             if (!this.released) {
                 event.sendTo(this.listener);
             }

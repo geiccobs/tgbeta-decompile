@@ -2,31 +2,33 @@ package com.google.android.gms.common;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import com.microsoft.appcenter.ingestion.models.CommonProperties;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class Feature extends AbstractSafeParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<Feature> CREATOR = new zzb();
     private final String zza;
     @Deprecated
     private final int zzb;
     private final long zzc;
 
-    public Feature(String str, long j) {
+    public Feature(@RecentlyNonNull String str, long j) {
         this.zza = str;
         this.zzc = j;
         this.zzb = -1;
     }
 
-    public Feature(String str, int i, long j) {
+    public Feature(@RecentlyNonNull String str, int i, long j) {
         this.zza = str;
         this.zzb = i;
         this.zzc = j;
     }
 
+    @RecentlyNonNull
     public String getName() {
         return this.zza;
     }
@@ -37,7 +39,7 @@ public class Feature extends AbstractSafeParcelable {
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeString(parcel, 1, getName(), false);
         SafeParcelWriter.writeInt(parcel, 2, this.zzb);
@@ -48,7 +50,9 @@ public class Feature extends AbstractSafeParcelable {
     public boolean equals(Object obj) {
         if (obj instanceof Feature) {
             Feature feature = (Feature) obj;
-            return ((getName() != null && getName().equals(feature.getName())) || (getName() == null && feature.getName() == null)) && getVersion() == feature.getVersion();
+            if (((getName() != null && getName().equals(feature.getName())) || (getName() == null && feature.getName() == null)) && getVersion() == feature.getVersion()) {
+                return true;
+            }
         }
         return false;
     }
@@ -57,7 +61,8 @@ public class Feature extends AbstractSafeParcelable {
         return Objects.hashCode(getName(), Long.valueOf(getVersion()));
     }
 
+    @RecentlyNonNull
     public String toString() {
-        return Objects.toStringHelper(this).add(CommonProperties.NAME, getName()).add("version", Long.valueOf(getVersion())).toString();
+        return Objects.toStringHelper(this).add("name", getName()).add("version", Long.valueOf(getVersion())).toString();
     }
 }

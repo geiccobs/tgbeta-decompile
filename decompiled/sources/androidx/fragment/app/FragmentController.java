@@ -8,52 +8,33 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import androidx.collection.SimpleArrayMap;
-import androidx.loader.app.LoaderManager;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class FragmentController {
     private final FragmentHostCallback<?> mHost;
 
-    public static FragmentController createController(FragmentHostCallback<?> callbacks) {
-        return new FragmentController(callbacks);
+    public static FragmentController createController(FragmentHostCallback<?> fragmentHostCallback) {
+        return new FragmentController(fragmentHostCallback);
     }
 
-    private FragmentController(FragmentHostCallback<?> callbacks) {
-        this.mHost = callbacks;
+    private FragmentController(FragmentHostCallback<?> fragmentHostCallback) {
+        this.mHost = fragmentHostCallback;
     }
 
     public FragmentManager getSupportFragmentManager() {
         return this.mHost.getFragmentManagerImpl();
     }
 
-    @Deprecated
-    public LoaderManager getSupportLoaderManager() {
-        throw new UnsupportedOperationException("Loaders are managed separately from FragmentController, use LoaderManager.getInstance() to obtain a LoaderManager.");
+    public Fragment findFragmentByWho(String str) {
+        return this.mHost.mFragmentManager.findFragmentByWho(str);
     }
 
-    public Fragment findFragmentByWho(String who) {
-        return this.mHost.mFragmentManager.findFragmentByWho(who);
-    }
-
-    public int getActiveFragmentsCount() {
-        return this.mHost.mFragmentManager.getActiveFragmentCount();
-    }
-
-    public List<Fragment> getActiveFragments(List<Fragment> actives) {
-        return this.mHost.mFragmentManager.getActiveFragments();
-    }
-
-    public void attachHost(Fragment parent) {
-        FragmentManagerImpl fragmentManagerImpl = this.mHost.mFragmentManager;
+    public void attachHost(Fragment fragment) {
         FragmentHostCallback<?> fragmentHostCallback = this.mHost;
-        fragmentManagerImpl.attachController(fragmentHostCallback, fragmentHostCallback, parent);
+        fragmentHostCallback.mFragmentManager.attachController(fragmentHostCallback, fragmentHostCallback, fragment);
     }
 
-    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
-        return this.mHost.mFragmentManager.onCreateView(parent, name, context, attrs);
+    public View onCreateView(View view, String str, Context context, AttributeSet attributeSet) {
+        return this.mHost.mFragmentManager.onCreateView(view, str, context, attributeSet);
     }
 
     public void noteStateNotSaved() {
@@ -64,22 +45,8 @@ public class FragmentController {
         return this.mHost.mFragmentManager.saveAllState();
     }
 
-    @Deprecated
-    public void restoreAllState(Parcelable state, List<Fragment> nonConfigList) {
-        this.mHost.mFragmentManager.restoreAllState(state, new FragmentManagerNonConfig(nonConfigList, null, null));
-    }
-
-    public void restoreAllState(Parcelable state, FragmentManagerNonConfig nonConfig) {
-        this.mHost.mFragmentManager.restoreAllState(state, nonConfig);
-    }
-
-    @Deprecated
-    public List<Fragment> retainNonConfig() {
-        FragmentManagerNonConfig nonconf = this.mHost.mFragmentManager.retainNonConfig();
-        if (nonconf != null) {
-            return nonconf.getFragments();
-        }
-        return null;
+    public void restoreAllState(Parcelable parcelable, FragmentManagerNonConfig fragmentManagerNonConfig) {
+        this.mHost.mFragmentManager.restoreAllState(parcelable, fragmentManagerNonConfig);
     }
 
     public FragmentManagerNonConfig retainNestedNonConfig() {
@@ -110,48 +77,40 @@ public class FragmentController {
         this.mHost.mFragmentManager.dispatchStop();
     }
 
-    @Deprecated
-    public void dispatchReallyStop() {
-    }
-
-    public void dispatchDestroyView() {
-        this.mHost.mFragmentManager.dispatchDestroyView();
-    }
-
     public void dispatchDestroy() {
         this.mHost.mFragmentManager.dispatchDestroy();
     }
 
-    public void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
-        this.mHost.mFragmentManager.dispatchMultiWindowModeChanged(isInMultiWindowMode);
+    public void dispatchMultiWindowModeChanged(boolean z) {
+        this.mHost.mFragmentManager.dispatchMultiWindowModeChanged(z);
     }
 
-    public void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
-        this.mHost.mFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
+    public void dispatchPictureInPictureModeChanged(boolean z) {
+        this.mHost.mFragmentManager.dispatchPictureInPictureModeChanged(z);
     }
 
-    public void dispatchConfigurationChanged(Configuration newConfig) {
-        this.mHost.mFragmentManager.dispatchConfigurationChanged(newConfig);
+    public void dispatchConfigurationChanged(Configuration configuration) {
+        this.mHost.mFragmentManager.dispatchConfigurationChanged(configuration);
     }
 
     public void dispatchLowMemory() {
         this.mHost.mFragmentManager.dispatchLowMemory();
     }
 
-    public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        return this.mHost.mFragmentManager.dispatchCreateOptionsMenu(menu, inflater);
+    public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        return this.mHost.mFragmentManager.dispatchCreateOptionsMenu(menu, menuInflater);
     }
 
     public boolean dispatchPrepareOptionsMenu(Menu menu) {
         return this.mHost.mFragmentManager.dispatchPrepareOptionsMenu(menu);
     }
 
-    public boolean dispatchOptionsItemSelected(MenuItem item) {
-        return this.mHost.mFragmentManager.dispatchOptionsItemSelected(item);
+    public boolean dispatchOptionsItemSelected(MenuItem menuItem) {
+        return this.mHost.mFragmentManager.dispatchOptionsItemSelected(menuItem);
     }
 
-    public boolean dispatchContextItemSelected(MenuItem item) {
-        return this.mHost.mFragmentManager.dispatchContextItemSelected(item);
+    public boolean dispatchContextItemSelected(MenuItem menuItem) {
+        return this.mHost.mFragmentManager.dispatchContextItemSelected(menuItem);
     }
 
     public void dispatchOptionsMenuClosed(Menu menu) {
@@ -160,38 +119,5 @@ public class FragmentController {
 
     public boolean execPendingActions() {
         return this.mHost.mFragmentManager.execPendingActions();
-    }
-
-    @Deprecated
-    public void doLoaderStart() {
-    }
-
-    @Deprecated
-    public void doLoaderStop(boolean retain) {
-    }
-
-    @Deprecated
-    public void doLoaderRetain() {
-    }
-
-    @Deprecated
-    public void doLoaderDestroy() {
-    }
-
-    @Deprecated
-    public void reportLoaderStart() {
-    }
-
-    @Deprecated
-    public SimpleArrayMap<String, LoaderManager> retainLoaderNonConfig() {
-        return null;
-    }
-
-    @Deprecated
-    public void restoreLoaderNonConfig(SimpleArrayMap<String, LoaderManager> loaderManagers) {
-    }
-
-    @Deprecated
-    public void dumpLoaders(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
     }
 }

@@ -2,52 +2,43 @@ package androidx.recyclerview.widget;
 
 import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ScrollbarHelper {
-    public static int computeScrollOffset(RecyclerView.State state, OrientationHelper orientation, View startChild, View endChild, RecyclerView.LayoutManager lm, boolean smoothScrollbarEnabled, boolean reverseLayout) {
-        int itemsBefore;
-        if (lm.getChildCount() == 0 || state.getItemCount() == 0 || startChild == null || endChild == null) {
+    public static int computeScrollOffset(RecyclerView.State state, OrientationHelper orientationHelper, View view, View view2, RecyclerView.LayoutManager layoutManager, boolean z, boolean z2) {
+        int i;
+        if (layoutManager.getChildCount() == 0 || state.getItemCount() == 0 || view == null || view2 == null) {
             return 0;
         }
-        int minPosition = Math.min(lm.getPosition(startChild), lm.getPosition(endChild));
-        int maxPosition = Math.max(lm.getPosition(startChild), lm.getPosition(endChild));
-        if (reverseLayout) {
-            itemsBefore = Math.max(0, (state.getItemCount() - maxPosition) - 1);
+        int min = Math.min(layoutManager.getPosition(view), layoutManager.getPosition(view2));
+        int max = Math.max(layoutManager.getPosition(view), layoutManager.getPosition(view2));
+        if (z2) {
+            i = Math.max(0, (state.getItemCount() - max) - 1);
         } else {
-            itemsBefore = Math.max(0, minPosition);
+            i = Math.max(0, min);
         }
-        if (!smoothScrollbarEnabled) {
-            return itemsBefore;
+        if (!z) {
+            return i;
         }
-        int laidOutArea = Math.abs(orientation.getDecoratedEnd(endChild) - orientation.getDecoratedStart(startChild));
-        int itemRange = Math.abs(lm.getPosition(startChild) - lm.getPosition(endChild)) + 1;
-        float avgSizePerRow = laidOutArea / itemRange;
-        return Math.round((itemsBefore * avgSizePerRow) + (orientation.getStartAfterPadding() - orientation.getDecoratedStart(startChild)));
+        return Math.round((i * (Math.abs(orientationHelper.getDecoratedEnd(view2) - orientationHelper.getDecoratedStart(view)) / (Math.abs(layoutManager.getPosition(view) - layoutManager.getPosition(view2)) + 1))) + (orientationHelper.getStartAfterPadding() - orientationHelper.getDecoratedStart(view)));
     }
 
-    public static int computeScrollExtent(RecyclerView.State state, OrientationHelper orientation, View startChild, View endChild, RecyclerView.LayoutManager lm, boolean smoothScrollbarEnabled) {
-        if (lm.getChildCount() == 0 || state.getItemCount() == 0 || startChild == null || endChild == null) {
+    public static int computeScrollExtent(RecyclerView.State state, OrientationHelper orientationHelper, View view, View view2, RecyclerView.LayoutManager layoutManager, boolean z) {
+        if (layoutManager.getChildCount() == 0 || state.getItemCount() == 0 || view == null || view2 == null) {
             return 0;
         }
-        if (!smoothScrollbarEnabled) {
-            return Math.abs(lm.getPosition(startChild) - lm.getPosition(endChild)) + 1;
+        if (!z) {
+            return Math.abs(layoutManager.getPosition(view) - layoutManager.getPosition(view2)) + 1;
         }
-        int extend = orientation.getDecoratedEnd(endChild) - orientation.getDecoratedStart(startChild);
-        return Math.min(orientation.getTotalSpace(), extend);
+        return Math.min(orientationHelper.getTotalSpace(), orientationHelper.getDecoratedEnd(view2) - orientationHelper.getDecoratedStart(view));
     }
 
-    public static int computeScrollRange(RecyclerView.State state, OrientationHelper orientation, View startChild, View endChild, RecyclerView.LayoutManager lm, boolean smoothScrollbarEnabled) {
-        if (lm.getChildCount() == 0 || state.getItemCount() == 0 || startChild == null || endChild == null) {
+    public static int computeScrollRange(RecyclerView.State state, OrientationHelper orientationHelper, View view, View view2, RecyclerView.LayoutManager layoutManager, boolean z) {
+        if (layoutManager.getChildCount() == 0 || state.getItemCount() == 0 || view == null || view2 == null) {
             return 0;
         }
-        if (!smoothScrollbarEnabled) {
+        if (!z) {
             return state.getItemCount();
         }
-        int laidOutArea = orientation.getDecoratedEnd(endChild) - orientation.getDecoratedStart(startChild);
-        int laidOutRange = Math.abs(lm.getPosition(startChild) - lm.getPosition(endChild)) + 1;
-        return (int) ((laidOutArea / laidOutRange) * state.getItemCount());
-    }
-
-    private ScrollbarHelper() {
+        return (int) (((orientationHelper.getDecoratedEnd(view2) - orientationHelper.getDecoratedStart(view)) / (Math.abs(layoutManager.getPosition(view) - layoutManager.getPosition(view2)) + 1)) * state.getItemCount());
     }
 }

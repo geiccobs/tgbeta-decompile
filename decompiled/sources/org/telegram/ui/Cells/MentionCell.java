@@ -6,17 +6,19 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.UserObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Chat;
+import org.telegram.tgnet.TLRPC$ChatPhoto;
+import org.telegram.tgnet.TLRPC$User;
+import org.telegram.tgnet.TLRPC$UserProfilePhoto;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class MentionCell extends LinearLayout {
     private AvatarDrawable avatarDrawable;
     private BackupImageView imageView;
@@ -37,7 +39,7 @@ public class MentionCell extends LinearLayout {
         addView(this.imageView, LayoutHelper.createLinear(28, 28, 12.0f, 4.0f, 0.0f, 0.0f));
         TextView textView = new TextView(context);
         this.nameTextView = textView;
-        textView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
+        textView.setTextColor(getThemedColor("windowBackgroundWhiteBlackText"));
         this.nameTextView.setTextSize(1, 15.0f);
         this.nameTextView.setSingleLine(true);
         this.nameTextView.setGravity(3);
@@ -45,7 +47,7 @@ public class MentionCell extends LinearLayout {
         addView(this.nameTextView, LayoutHelper.createLinear(-2, -2, 16, 12, 0, 0, 0));
         TextView textView2 = new TextView(context);
         this.usernameTextView = textView2;
-        textView2.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
+        textView2.setTextColor(getThemedColor("windowBackgroundWhiteGrayText3"));
         this.usernameTextView.setTextSize(1, 15.0f);
         this.usernameTextView.setSingleLine(true);
         this.usernameTextView.setGravity(3);
@@ -54,38 +56,39 @@ public class MentionCell extends LinearLayout {
     }
 
     @Override // android.widget.LinearLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(36.0f), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(36.0f), 1073741824));
     }
 
-    public void setUser(TLRPC.User user) {
-        if (user == null) {
+    public void setUser(TLRPC$User tLRPC$User) {
+        if (tLRPC$User == null) {
             this.nameTextView.setText("");
             this.usernameTextView.setText("");
             this.imageView.setImageDrawable(null);
             return;
         }
-        this.avatarDrawable.setInfo(user);
-        if (user.photo != null && user.photo.photo_small != null) {
-            this.imageView.setForUserOrChat(user, this.avatarDrawable);
+        this.avatarDrawable.setInfo(tLRPC$User);
+        TLRPC$UserProfilePhoto tLRPC$UserProfilePhoto = tLRPC$User.photo;
+        if (tLRPC$UserProfilePhoto != null && tLRPC$UserProfilePhoto.photo_small != null) {
+            this.imageView.setForUserOrChat(tLRPC$User, this.avatarDrawable);
         } else {
             this.imageView.setImageDrawable(this.avatarDrawable);
         }
-        this.nameTextView.setText(UserObject.getUserName(user));
-        if (user.username == null) {
-            this.usernameTextView.setText("");
-        } else {
+        this.nameTextView.setText(UserObject.getUserName(tLRPC$User));
+        if (tLRPC$User.username != null) {
             TextView textView = this.usernameTextView;
-            textView.setText("@" + user.username);
+            textView.setText("@" + tLRPC$User.username);
+        } else {
+            this.usernameTextView.setText("");
         }
         this.imageView.setVisibility(0);
         this.usernameTextView.setVisibility(0);
     }
 
-    public void setDivider(boolean enabled) {
-        if (enabled != this.needsDivider) {
-            this.needsDivider = enabled;
-            setWillNotDraw(!enabled);
+    public void setDivider(boolean z) {
+        if (z != this.needsDivider) {
+            this.needsDivider = z;
+            setWillNotDraw(!z);
             invalidate();
         }
     }
@@ -98,34 +101,35 @@ public class MentionCell extends LinearLayout {
         }
     }
 
-    public void setChat(TLRPC.Chat chat) {
-        if (chat == null) {
+    public void setChat(TLRPC$Chat tLRPC$Chat) {
+        if (tLRPC$Chat == null) {
             this.nameTextView.setText("");
             this.usernameTextView.setText("");
             this.imageView.setImageDrawable(null);
             return;
         }
-        this.avatarDrawable.setInfo(chat);
-        if (chat.photo != null && chat.photo.photo_small != null) {
-            this.imageView.setForUserOrChat(chat, this.avatarDrawable);
+        this.avatarDrawable.setInfo(tLRPC$Chat);
+        TLRPC$ChatPhoto tLRPC$ChatPhoto = tLRPC$Chat.photo;
+        if (tLRPC$ChatPhoto != null && tLRPC$ChatPhoto.photo_small != null) {
+            this.imageView.setForUserOrChat(tLRPC$Chat, this.avatarDrawable);
         } else {
             this.imageView.setImageDrawable(this.avatarDrawable);
         }
-        this.nameTextView.setText(chat.title);
-        if (chat.username == null) {
-            this.usernameTextView.setText("");
-        } else {
+        this.nameTextView.setText(tLRPC$Chat.title);
+        if (tLRPC$Chat.username != null) {
             TextView textView = this.usernameTextView;
-            textView.setText("@" + chat.username);
+            textView.setText("@" + tLRPC$Chat.username);
+        } else {
+            this.usernameTextView.setText("");
         }
         this.imageView.setVisibility(0);
         this.usernameTextView.setVisibility(0);
     }
 
-    public void setText(String text) {
+    public void setText(String str) {
         this.imageView.setVisibility(4);
         this.usernameTextView.setVisibility(4);
-        this.nameTextView.setText(text);
+        this.nameTextView.setText(str);
     }
 
     @Override // android.view.View
@@ -134,23 +138,24 @@ public class MentionCell extends LinearLayout {
         this.nameTextView.invalidate();
     }
 
-    public void setEmojiSuggestion(MediaDataController.KeywordResult suggestion) {
+    public void setEmojiSuggestion(MediaDataController.KeywordResult keywordResult) {
         this.imageView.setVisibility(4);
         this.usernameTextView.setVisibility(4);
-        StringBuilder stringBuilder = new StringBuilder(suggestion.emoji.length() + suggestion.keyword.length() + 4);
-        stringBuilder.append(suggestion.emoji);
-        stringBuilder.append("   :");
-        stringBuilder.append(suggestion.keyword);
+        StringBuilder sb = new StringBuilder(keywordResult.emoji.length() + keywordResult.keyword.length() + 4);
+        sb.append(keywordResult.emoji);
+        sb.append("   :");
+        sb.append(keywordResult.keyword);
         TextView textView = this.nameTextView;
-        textView.setText(Emoji.replaceEmoji(stringBuilder, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false));
+        textView.setText(Emoji.replaceEmoji(sb, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false));
     }
 
-    public void setBotCommand(String command, String help, TLRPC.User user) {
-        if (user != null) {
+    public void setBotCommand(String str, String str2, TLRPC$User tLRPC$User) {
+        if (tLRPC$User != null) {
             this.imageView.setVisibility(0);
-            this.avatarDrawable.setInfo(user);
-            if (user.photo != null && user.photo.photo_small != null) {
-                this.imageView.setForUserOrChat(user, this.avatarDrawable);
+            this.avatarDrawable.setInfo(tLRPC$User);
+            TLRPC$UserProfilePhoto tLRPC$UserProfilePhoto = tLRPC$User.photo;
+            if (tLRPC$UserProfilePhoto != null && tLRPC$UserProfilePhoto.photo_small != null) {
+                this.imageView.setForUserOrChat(tLRPC$User, this.avatarDrawable);
             } else {
                 this.imageView.setImageDrawable(this.avatarDrawable);
             }
@@ -158,24 +163,24 @@ public class MentionCell extends LinearLayout {
             this.imageView.setVisibility(4);
         }
         this.usernameTextView.setVisibility(0);
-        this.nameTextView.setText(command);
+        this.nameTextView.setText(str);
         TextView textView = this.usernameTextView;
-        textView.setText(Emoji.replaceEmoji(help, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false));
+        textView.setText(Emoji.replaceEmoji(str2, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false));
     }
 
-    public void setIsDarkTheme(boolean isDarkTheme) {
-        if (isDarkTheme) {
+    public void setIsDarkTheme(boolean z) {
+        if (z) {
             this.nameTextView.setTextColor(-1);
             this.usernameTextView.setTextColor(-4473925);
             return;
         }
-        this.nameTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        this.usernameTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
+        this.nameTextView.setTextColor(getThemedColor("windowBackgroundWhiteBlackText"));
+        this.usernameTextView.setTextColor(getThemedColor("windowBackgroundWhiteGrayText3"));
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

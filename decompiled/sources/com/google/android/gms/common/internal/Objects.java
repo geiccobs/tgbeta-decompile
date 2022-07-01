@@ -1,12 +1,11 @@
 package com.google.android.gms.common.internal;
 
-import android.os.Bundle;
+import androidx.annotation.RecentlyNonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Objects {
     public static boolean equal(Object obj, Object obj2) {
         if (obj != obj2) {
@@ -15,16 +14,17 @@ public final class Objects {
         return true;
     }
 
-    public static int hashCode(Object... objArr) {
+    public static int hashCode(@RecentlyNonNull Object... objArr) {
         return Arrays.hashCode(objArr);
     }
 
-    public static ToStringHelper toStringHelper(Object obj) {
+    @RecentlyNonNull
+    public static ToStringHelper toStringHelper(@RecentlyNonNull Object obj) {
         return new ToStringHelper(obj);
     }
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class ToStringHelper {
         private final List<String> zza;
         private final Object zzb;
@@ -34,11 +34,12 @@ public final class Objects {
             this.zza = new ArrayList();
         }
 
-        public final ToStringHelper add(String str, Object obj) {
+        @RecentlyNonNull
+        public final ToStringHelper add(@RecentlyNonNull String str, Object obj) {
             List<String> list = this.zza;
             String str2 = (String) Preconditions.checkNotNull(str);
             String valueOf = String.valueOf(obj);
-            StringBuilder sb = new StringBuilder(String.valueOf(str2).length() + 1 + String.valueOf(valueOf).length());
+            StringBuilder sb = new StringBuilder(String.valueOf(str2).length() + 1 + valueOf.length());
             sb.append(str2);
             sb.append("=");
             sb.append(valueOf);
@@ -46,6 +47,7 @@ public final class Objects {
             return this;
         }
 
+        @RecentlyNonNull
         public final String toString() {
             StringBuilder sb = new StringBuilder(100);
             sb.append(this.zzb.getClass().getSimpleName());
@@ -60,28 +62,5 @@ public final class Objects {
             sb.append('}');
             return sb.toString();
         }
-    }
-
-    public static boolean checkBundlesEquality(Bundle bundle, Bundle bundle2) {
-        if (bundle == null || bundle2 == null) {
-            return bundle == bundle2;
-        } else if (bundle.size() != bundle2.size()) {
-            return false;
-        } else {
-            Set<String> keySet = bundle.keySet();
-            if (!keySet.containsAll(bundle2.keySet())) {
-                return false;
-            }
-            for (String str : keySet) {
-                if (!equal(bundle.get(str), bundle2.get(str))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    private Objects() {
-        throw new AssertionError("Uninstantiable");
     }
 }

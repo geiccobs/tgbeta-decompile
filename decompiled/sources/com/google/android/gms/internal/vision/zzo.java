@@ -6,7 +6,7 @@ import android.os.RemoteException;
 import com.google.android.gms.dynamic.IObjectWrapper;
 import com.google.android.gms.vision.barcode.Barcode;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzo extends zzb implements zzl {
     public zzo(IBinder iBinder) {
         super(iBinder, "com.google.android.gms.vision.barcode.internal.client.INativeBarcodeDetector");

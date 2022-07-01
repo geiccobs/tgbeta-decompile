@@ -1,5 +1,5 @@
 package com.google.android.exoplayer2.decoder;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class DecoderCounters {
     public int decoderInitCount;
     public int decoderReleaseCount;
@@ -12,17 +12,5 @@ public final class DecoderCounters {
     public int skippedOutputBufferCount;
 
     public synchronized void ensureUpdated() {
-    }
-
-    public void merge(DecoderCounters other) {
-        this.decoderInitCount += other.decoderInitCount;
-        this.decoderReleaseCount += other.decoderReleaseCount;
-        this.inputBufferCount += other.inputBufferCount;
-        this.skippedInputBufferCount += other.skippedInputBufferCount;
-        this.renderedOutputBufferCount += other.renderedOutputBufferCount;
-        this.skippedOutputBufferCount += other.skippedOutputBufferCount;
-        this.droppedBufferCount += other.droppedBufferCount;
-        this.maxConsecutiveDroppedBufferCount = Math.max(this.maxConsecutiveDroppedBufferCount, other.maxConsecutiveDroppedBufferCount);
-        this.droppedToKeyframeCount += other.droppedToKeyframeCount;
     }
 }

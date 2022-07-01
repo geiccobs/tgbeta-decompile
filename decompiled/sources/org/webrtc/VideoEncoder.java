@@ -1,57 +1,67 @@
 package org.webrtc;
 
 import org.webrtc.EncodedImage;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public interface VideoEncoder {
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface Callback {
         void onEncodedFrame(EncodedImage encodedImage, CodecSpecificInfo codecSpecificInfo);
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class CodecSpecificInfo {
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class CodecSpecificInfoAV1 extends CodecSpecificInfo {
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class CodecSpecificInfoH264 extends CodecSpecificInfo {
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class CodecSpecificInfoVP8 extends CodecSpecificInfo {
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class CodecSpecificInfoVP9 extends CodecSpecificInfo {
     }
 
+    @CalledByNative
     long createNativeVideoEncoder();
 
+    @CalledByNative
     VideoCodecStatus encode(VideoFrame videoFrame, EncodeInfo encodeInfo);
 
+    @CalledByNative
     EncoderInfo getEncoderInfo();
 
+    @CalledByNative
     String getImplementationName();
 
+    @CalledByNative
     ResolutionBitrateLimits[] getResolutionBitrateLimits();
 
+    @CalledByNative
     ScalingSettings getScalingSettings();
 
+    @CalledByNative
     VideoCodecStatus initEncode(Settings settings, Callback callback);
 
+    @CalledByNative
     boolean isHardwareEncoder();
 
+    @CalledByNative
     VideoCodecStatus release();
 
     VideoCodecStatus setRateAllocation(BitrateAllocation bitrateAllocation, int i);
 
+    @CalledByNative
     VideoCodecStatus setRates(RateControlParameters rateControlParameters);
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class Settings {
         public final boolean automaticResizeOn;
         public final Capabilities capabilities;
@@ -63,71 +73,75 @@ public interface VideoEncoder {
         public final int width;
 
         @Deprecated
-        public Settings(int numberOfCores, int width, int height, int startBitrate, int maxFramerate, int numberOfSimulcastStreams, boolean automaticResizeOn) {
-            this(numberOfCores, width, height, startBitrate, maxFramerate, numberOfSimulcastStreams, automaticResizeOn, new Capabilities(false));
+        public Settings(int i, int i2, int i3, int i4, int i5, int i6, boolean z) {
+            this(i, i2, i3, i4, i5, i6, z, new Capabilities(false));
         }
 
-        public Settings(int numberOfCores, int width, int height, int startBitrate, int maxFramerate, int numberOfSimulcastStreams, boolean automaticResizeOn, Capabilities capabilities) {
-            this.numberOfCores = numberOfCores;
-            this.width = width;
-            this.height = height;
-            this.startBitrate = startBitrate;
-            this.maxFramerate = maxFramerate;
-            this.numberOfSimulcastStreams = numberOfSimulcastStreams;
-            this.automaticResizeOn = automaticResizeOn;
+        @CalledByNative("Settings")
+        public Settings(int i, int i2, int i3, int i4, int i5, int i6, boolean z, Capabilities capabilities) {
+            this.numberOfCores = i;
+            this.width = i2;
+            this.height = i3;
+            this.startBitrate = i4;
+            this.maxFramerate = i5;
+            this.numberOfSimulcastStreams = i6;
+            this.automaticResizeOn = z;
             this.capabilities = capabilities;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class Capabilities {
         public final boolean lossNotification;
 
-        public Capabilities(boolean lossNotification) {
-            this.lossNotification = lossNotification;
+        @CalledByNative("Capabilities")
+        public Capabilities(boolean z) {
+            this.lossNotification = z;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class EncodeInfo {
         public final EncodedImage.FrameType[] frameTypes;
 
-        public EncodeInfo(EncodedImage.FrameType[] frameTypes) {
-            this.frameTypes = frameTypes;
+        @CalledByNative("EncodeInfo")
+        public EncodeInfo(EncodedImage.FrameType[] frameTypeArr) {
+            this.frameTypes = frameTypeArr;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class BitrateAllocation {
         public final int[][] bitratesBbs;
 
-        public BitrateAllocation(int[][] bitratesBbs) {
-            this.bitratesBbs = bitratesBbs;
+        @CalledByNative("BitrateAllocation")
+        public BitrateAllocation(int[][] iArr) {
+            this.bitratesBbs = iArr;
         }
 
         public int getSum() {
             int[][] iArr;
-            int sum = 0;
-            for (int[] spatialLayer : this.bitratesBbs) {
-                for (int bitrate : spatialLayer) {
-                    sum += bitrate;
+            int i = 0;
+            for (int[] iArr2 : this.bitratesBbs) {
+                for (int i2 : iArr2) {
+                    i += i2;
                 }
             }
-            return sum;
+            return i;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class ScalingSettings {
         public static final ScalingSettings OFF = new ScalingSettings();
         public final Integer high;
         public final Integer low;
         public final boolean on;
 
-        public ScalingSettings(int low, int high) {
+        public ScalingSettings(int i, int i2) {
             this.on = true;
-            this.low = Integer.valueOf(low);
-            this.high = Integer.valueOf(high);
+            this.low = Integer.valueOf(i);
+            this.high = Integer.valueOf(i2);
         }
 
         private ScalingSettings() {
@@ -137,17 +151,17 @@ public interface VideoEncoder {
         }
 
         @Deprecated
-        public ScalingSettings(boolean on) {
-            this.on = on;
+        public ScalingSettings(boolean z) {
+            this.on = z;
             this.low = null;
             this.high = null;
         }
 
         @Deprecated
-        public ScalingSettings(boolean on, int low, int high) {
-            this.on = on;
-            this.low = Integer.valueOf(low);
-            this.high = Integer.valueOf(high);
+        public ScalingSettings(boolean z, int i, int i2) {
+            this.on = z;
+            this.low = Integer.valueOf(i);
+            this.high = Integer.valueOf(i2);
         }
 
         public String toString() {
@@ -158,88 +172,93 @@ public interface VideoEncoder {
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class ResolutionBitrateLimits {
         public final int frameSizePixels;
         public final int maxBitrateBps;
         public final int minBitrateBps;
         public final int minStartBitrateBps;
 
-        public ResolutionBitrateLimits(int frameSizePixels, int minStartBitrateBps, int minBitrateBps, int maxBitrateBps) {
-            this.frameSizePixels = frameSizePixels;
-            this.minStartBitrateBps = minStartBitrateBps;
-            this.minBitrateBps = minBitrateBps;
-            this.maxBitrateBps = maxBitrateBps;
+        public ResolutionBitrateLimits(int i, int i2, int i3, int i4) {
+            this.frameSizePixels = i;
+            this.minStartBitrateBps = i2;
+            this.minBitrateBps = i3;
+            this.maxBitrateBps = i4;
         }
 
+        @CalledByNative("ResolutionBitrateLimits")
         public int getFrameSizePixels() {
             return this.frameSizePixels;
         }
 
+        @CalledByNative("ResolutionBitrateLimits")
         public int getMinStartBitrateBps() {
             return this.minStartBitrateBps;
         }
 
+        @CalledByNative("ResolutionBitrateLimits")
         public int getMinBitrateBps() {
             return this.minBitrateBps;
         }
 
+        @CalledByNative("ResolutionBitrateLimits")
         public int getMaxBitrateBps() {
             return this.maxBitrateBps;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class RateControlParameters {
         public final BitrateAllocation bitrate;
         public final double framerateFps;
 
-        public RateControlParameters(BitrateAllocation bitrate, double framerateFps) {
-            this.bitrate = bitrate;
-            this.framerateFps = framerateFps;
+        @CalledByNative("RateControlParameters")
+        public RateControlParameters(BitrateAllocation bitrateAllocation, double d) {
+            this.bitrate = bitrateAllocation;
+            this.framerateFps = d;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class EncoderInfo {
         public final boolean applyAlignmentToAllSimulcastLayers;
         public final int requestedResolutionAlignment;
 
-        public EncoderInfo(int requestedResolutionAlignment, boolean applyAlignmentToAllSimulcastLayers) {
-            this.requestedResolutionAlignment = requestedResolutionAlignment;
-            this.applyAlignmentToAllSimulcastLayers = applyAlignmentToAllSimulcastLayers;
+        public EncoderInfo(int i, boolean z) {
+            this.requestedResolutionAlignment = i;
+            this.applyAlignmentToAllSimulcastLayers = z;
         }
 
+        @CalledByNative("EncoderInfo")
         public int getRequestedResolutionAlignment() {
             return this.requestedResolutionAlignment;
         }
 
+        @CalledByNative("EncoderInfo")
         public boolean getApplyAlignmentToAllSimulcastLayers() {
             return this.applyAlignmentToAllSimulcastLayers;
         }
     }
 
     /* renamed from: org.webrtc.VideoEncoder$-CC */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public final /* synthetic */ class CC {
-        public static long $default$createNativeVideoEncoder(VideoEncoder _this) {
+        @CalledByNative
+        public static long $default$createNativeVideoEncoder(VideoEncoder videoEncoder) {
             return 0L;
         }
 
-        public static boolean $default$isHardwareEncoder(VideoEncoder _this) {
+        @CalledByNative
+        public static ResolutionBitrateLimits[] $default$getResolutionBitrateLimits(VideoEncoder videoEncoder) {
+            return new ResolutionBitrateLimits[0];
+        }
+
+        @CalledByNative
+        public static boolean $default$isHardwareEncoder(VideoEncoder videoEncoder) {
             return true;
         }
 
-        public static VideoCodecStatus $default$setRates(VideoEncoder _this, RateControlParameters rcParameters) {
-            int framerateFps = (int) Math.ceil(rcParameters.framerateFps);
-            return _this.setRateAllocation(rcParameters.bitrate, framerateFps);
-        }
-
-        public static ResolutionBitrateLimits[] $default$getResolutionBitrateLimits(VideoEncoder _this) {
-            ResolutionBitrateLimits[] bitrate_limits = new ResolutionBitrateLimits[0];
-            return bitrate_limits;
-        }
-
+        @CalledByNative
         public static EncoderInfo $default$getEncoderInfo(VideoEncoder _this) {
             return new EncoderInfo(1, false);
         }

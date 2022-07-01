@@ -4,11 +4,12 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
+import com.google.android.gms.common.GooglePlayServicesUtilLight;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
 /* renamed from: com.google.android.gms.internal.auth-api-phone.zzi */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzi extends GmsClient<zze> {
     public zzi(Context context, Looper looper, ClientSettings clientSettings, GoogleApiClient.ConnectionCallbacks connectionCallbacks, GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         super(context, looper, 126, clientSettings, connectionCallbacks, onConnectionFailedListener);
@@ -25,7 +26,7 @@ public final class zzi extends GmsClient<zze> {
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient, com.google.android.gms.common.api.Api.Client
     public final int getMinApkVersion() {
-        return 12451000;
+        return GooglePlayServicesUtilLight.GOOGLE_PLAY_SERVICES_VERSION_CODE;
     }
 
     @Override // com.google.android.gms.common.internal.BaseGmsClient

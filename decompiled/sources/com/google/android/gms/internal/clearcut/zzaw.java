@@ -1,5 +1,5 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzaw {
     private static final Class<?> zzfb = zze("libcore.io.Memory");
     private static final boolean zzfc;
@@ -11,7 +11,7 @@ final class zzaw {
     private static <T> Class<T> zze(String str) {
         try {
             return (Class<T>) Class.forName(str);
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }

@@ -1,10 +1,10 @@
 package org.webrtc;
 
 import java.util.List;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public interface NetworkChangeDetector {
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public enum ConnectionType {
         CONNECTION_UNKNOWN,
         CONNECTION_ETHERNET,
@@ -19,7 +19,7 @@ public interface NetworkChangeDetector {
         CONNECTION_NONE
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface Observer {
         void onConnectionTypeChanged(ConnectionType connectionType);
 
@@ -38,20 +38,21 @@ public interface NetworkChangeDetector {
 
     boolean supportNetworkCallback();
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class IPAddress {
         public final byte[] address;
 
-        public IPAddress(byte[] address) {
-            this.address = address;
+        public IPAddress(byte[] bArr) {
+            this.address = bArr;
         }
 
+        @CalledByNative("IPAddress")
         private byte[] getAddress() {
             return this.address;
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static class NetworkInformation {
         public final long handle;
         public final IPAddress[] ipAddresses;
@@ -59,30 +60,35 @@ public interface NetworkChangeDetector {
         public final ConnectionType type;
         public final ConnectionType underlyingTypeForVpn;
 
-        public NetworkInformation(String name, ConnectionType type, ConnectionType underlyingTypeForVpn, long handle, IPAddress[] addresses) {
-            this.name = name;
-            this.type = type;
-            this.underlyingTypeForVpn = underlyingTypeForVpn;
-            this.handle = handle;
-            this.ipAddresses = addresses;
+        public NetworkInformation(String str, ConnectionType connectionType, ConnectionType connectionType2, long j, IPAddress[] iPAddressArr) {
+            this.name = str;
+            this.type = connectionType;
+            this.underlyingTypeForVpn = connectionType2;
+            this.handle = j;
+            this.ipAddresses = iPAddressArr;
         }
 
+        @CalledByNative("NetworkInformation")
         private IPAddress[] getIpAddresses() {
             return this.ipAddresses;
         }
 
+        @CalledByNative("NetworkInformation")
         private ConnectionType getConnectionType() {
             return this.type;
         }
 
+        @CalledByNative("NetworkInformation")
         private ConnectionType getUnderlyingConnectionTypeForVpn() {
             return this.underlyingTypeForVpn;
         }
 
+        @CalledByNative("NetworkInformation")
         private long getHandle() {
             return this.handle;
         }
 
+        @CalledByNative("NetworkInformation")
         private String getName() {
             return this.name;
         }

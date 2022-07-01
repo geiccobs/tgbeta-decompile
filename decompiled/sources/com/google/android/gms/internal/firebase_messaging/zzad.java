@@ -6,7 +6,7 @@ import com.google.firebase.encoders.config.EncoderConfig;
 import java.util.HashMap;
 import java.util.Map;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzad implements EncoderConfig<zzad> {
     public static final /* synthetic */ int zza = 0;
     private static final ObjectEncoder<Object> zzb = zzac.zza;
@@ -23,12 +23,5 @@ public final class zzad implements EncoderConfig<zzad> {
 
     public final zzae zza() {
         return new zzae(new HashMap(this.zzc), new HashMap(this.zzd), this.zze);
-    }
-
-    @Override // com.google.firebase.encoders.config.EncoderConfig
-    public final /* bridge */ /* synthetic */ zzad registerEncoder(Class cls, ValueEncoder valueEncoder) {
-        this.zzd.put(cls, valueEncoder);
-        this.zzc.remove(cls);
-        return this;
     }
 }

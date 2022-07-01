@@ -6,7 +6,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
 /* renamed from: com.google.android.gms.internal.auth-api.zba */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zba implements IInterface {
     private final IBinder zba;
     private final String zbb;

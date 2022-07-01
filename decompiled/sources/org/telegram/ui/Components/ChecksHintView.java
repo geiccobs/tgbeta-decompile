@@ -11,14 +11,13 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.ChecksHintView;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class ChecksHintView extends FrameLayout {
     private AnimatorSet animatorSet;
     private ImageView arrowImageView;
@@ -29,43 +28,42 @@ public class ChecksHintView extends FrameLayout {
     private float translationY;
     private TextView[] textView = new TextView[2];
     private RLottieImageView[] imageView = new RLottieImageView[2];
-    private long showingDuration = AdaptiveTrackSelection.DEFAULT_MIN_TIME_BETWEEN_BUFFER_REEVALUTATION_MS;
 
     public ChecksHintView(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
-        FrameLayout backgroundView = new FrameLayout(context);
-        backgroundView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(6.0f), getThemedColor(Theme.key_chat_gifSaveHintBackground)));
-        backgroundView.setPadding(AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), 0, AndroidUtilities.dp(8.0f));
-        addView(backgroundView, LayoutHelper.createFrame(-2, -2.0f, 51, 0.0f, 0.0f, 0.0f, 6.0f));
-        int a = 0;
-        while (a < 2) {
-            this.imageView[a] = new RLottieImageView(context);
-            this.imageView[a].setScaleType(ImageView.ScaleType.CENTER);
-            backgroundView.addView(this.imageView[a], LayoutHelper.createFrame(24, 24.0f, 51, 0.0f, a == 0 ? 0.0f : 24.0f, 0.0f, 0.0f));
-            this.textView[a] = new TextView(context);
-            this.textView[a].setTextColor(getThemedColor(Theme.key_chat_gifSaveHintText));
-            this.textView[a].setTextSize(1, 14.0f);
-            this.textView[a].setMaxLines(1);
-            this.textView[a].setSingleLine(true);
-            this.textView[a].setMaxWidth(AndroidUtilities.dp(250.0f));
-            this.textView[a].setGravity(51);
-            this.textView[a].setPivotX(0.0f);
-            backgroundView.addView(this.textView[a], LayoutHelper.createFrame(-2, -2.0f, 51, 32.0f, a == 0 ? 2.0f : 26.0f, 10.0f, 0.0f));
-            if (a == 0) {
-                this.imageView[a].setAnimation(R.raw.ticks_single, 24, 24);
-                this.textView[a].setText(LocaleController.getString("HintSent", R.string.HintSent));
+        FrameLayout frameLayout = new FrameLayout(context);
+        frameLayout.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(6.0f), getThemedColor("chat_gifSaveHintBackground")));
+        int i = 0;
+        frameLayout.setPadding(AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), 0, AndroidUtilities.dp(8.0f));
+        addView(frameLayout, LayoutHelper.createFrame(-2, -2.0f, 51, 0.0f, 0.0f, 0.0f, 6.0f));
+        while (i < 2) {
+            this.imageView[i] = new RLottieImageView(context);
+            this.imageView[i].setScaleType(ImageView.ScaleType.CENTER);
+            frameLayout.addView(this.imageView[i], LayoutHelper.createFrame(24, 24.0f, 51, 0.0f, i == 0 ? 0.0f : 24.0f, 0.0f, 0.0f));
+            this.textView[i] = new TextView(context);
+            this.textView[i].setTextColor(getThemedColor("chat_gifSaveHintText"));
+            this.textView[i].setTextSize(1, 14.0f);
+            this.textView[i].setMaxLines(1);
+            this.textView[i].setSingleLine(true);
+            this.textView[i].setMaxWidth(AndroidUtilities.dp(250.0f));
+            this.textView[i].setGravity(51);
+            this.textView[i].setPivotX(0.0f);
+            frameLayout.addView(this.textView[i], LayoutHelper.createFrame(-2, -2.0f, 51, 32.0f, i == 0 ? 2.0f : 26.0f, 10.0f, 0.0f));
+            if (i == 0) {
+                this.imageView[i].setAnimation(R.raw.ticks_single, 24, 24);
+                this.textView[i].setText(LocaleController.getString("HintSent", R.string.HintSent));
             } else {
-                this.imageView[a].setAnimation(R.raw.ticks_double, 24, 24);
-                this.textView[a].setText(LocaleController.getString("HintRead", R.string.HintRead));
+                this.imageView[i].setAnimation(R.raw.ticks_double, 24, 24);
+                this.textView[i].setText(LocaleController.getString("HintRead", R.string.HintRead));
             }
-            this.imageView[a].playAnimation();
-            a++;
+            this.imageView[i].playAnimation();
+            i++;
         }
         ImageView imageView = new ImageView(context);
         this.arrowImageView = imageView;
         imageView.setImageResource(R.drawable.tooltip_arrow);
-        this.arrowImageView.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_gifSaveHintBackground), PorterDuff.Mode.MULTIPLY));
+        this.arrowImageView.setColorFilter(new PorterDuffColorFilter(getThemedColor("chat_gifSaveHintBackground"), PorterDuff.Mode.MULTIPLY));
         addView(this.arrowImageView, LayoutHelper.createFrame(14, 6.0f, 83, 0.0f, 0.0f, 0.0f, 0.0f));
     }
 
@@ -73,58 +71,57 @@ public class ChecksHintView extends FrameLayout {
         return this.translationY;
     }
 
-    public boolean showForMessageCell(ChatMessageCell cell, boolean animated) {
+    public boolean showForMessageCell(ChatMessageCell chatMessageCell, boolean z) {
         Runnable runnable = this.hideRunnable;
         if (runnable != null) {
             AndroidUtilities.cancelRunOnUIThread(runnable);
             this.hideRunnable = null;
         }
-        int[] position = new int[2];
-        cell.getLocationInWindow(position);
-        int top = position[1];
-        View p = (View) getParent();
-        p.getLocationInWindow(position);
-        int top2 = top - position[1];
-        View parentView = (View) cell.getParent();
+        int[] iArr = new int[2];
+        chatMessageCell.getLocationInWindow(iArr);
+        int i = iArr[1];
+        ((View) getParent()).getLocationInWindow(iArr);
+        int i2 = i - iArr[1];
+        View view = (View) chatMessageCell.getParent();
         measure(View.MeasureSpec.makeMeasureSpec(1000, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(1000, Integer.MIN_VALUE));
-        if (top2 <= getMeasuredHeight() + AndroidUtilities.dp(10.0f)) {
+        final int i3 = 0;
+        if (i2 <= getMeasuredHeight() + AndroidUtilities.dp(10.0f)) {
             return false;
         }
-        int top3 = top2 + cell.getChecksY() + AndroidUtilities.dp(6.0f);
-        int centerX = cell.getChecksX() + AndroidUtilities.dp(5.0f);
-        int parentWidth = parentView.getMeasuredWidth();
-        float measuredHeight = top3 - getMeasuredHeight();
+        int checksY = i2 + chatMessageCell.getChecksY() + AndroidUtilities.dp(6.0f);
+        int checksX = chatMessageCell.getChecksX() + AndroidUtilities.dp(5.0f);
+        int measuredWidth = view.getMeasuredWidth();
+        float measuredHeight = checksY - getMeasuredHeight();
         this.translationY = measuredHeight;
         setTranslationY(measuredHeight);
-        int iconX = cell.getLeft() + centerX;
-        int left = AndroidUtilities.dp(15.0f);
-        if (iconX <= parentView.getMeasuredWidth() / 2) {
-            setTranslationX(0.0f);
+        int left = chatMessageCell.getLeft() + checksX;
+        int dp = AndroidUtilities.dp(15.0f);
+        if (left > view.getMeasuredWidth() / 2) {
+            int measuredWidth2 = (measuredWidth - getMeasuredWidth()) - AndroidUtilities.dp(20.0f);
+            setTranslationX(measuredWidth2);
+            dp += measuredWidth2;
         } else {
-            int offset = (parentWidth - getMeasuredWidth()) - AndroidUtilities.dp(20.0f);
-            setTranslationX(offset);
-            left += offset;
+            setTranslationX(0.0f);
         }
-        float arrowX = ((cell.getLeft() + centerX) - left) - (this.arrowImageView.getMeasuredWidth() / 2);
-        this.arrowImageView.setTranslationX(arrowX);
-        if (iconX > parentView.getMeasuredWidth() / 2) {
-            if (arrowX < AndroidUtilities.dp(10.0f)) {
-                float diff = arrowX - AndroidUtilities.dp(10.0f);
-                setTranslationX(getTranslationX() + diff);
-                this.arrowImageView.setTranslationX(arrowX - diff);
+        float left2 = ((chatMessageCell.getLeft() + checksX) - dp) - (this.arrowImageView.getMeasuredWidth() / 2);
+        this.arrowImageView.setTranslationX(left2);
+        if (left > view.getMeasuredWidth() / 2) {
+            if (left2 < AndroidUtilities.dp(10.0f)) {
+                float dp2 = left2 - AndroidUtilities.dp(10.0f);
+                setTranslationX(getTranslationX() + dp2);
+                this.arrowImageView.setTranslationX(left2 - dp2);
             }
-        } else if (arrowX > getMeasuredWidth() - AndroidUtilities.dp(24.0f)) {
-            float diff2 = (arrowX - getMeasuredWidth()) + AndroidUtilities.dp(24.0f);
-            setTranslationX(diff2);
-            this.arrowImageView.setTranslationX(arrowX - diff2);
-        } else if (arrowX < AndroidUtilities.dp(10.0f)) {
-            float diff3 = arrowX - AndroidUtilities.dp(10.0f);
-            setTranslationX(getTranslationX() + diff3);
-            this.arrowImageView.setTranslationX(arrowX - diff3);
+        } else if (left2 > getMeasuredWidth() - AndroidUtilities.dp(24.0f)) {
+            float measuredWidth3 = (left2 - getMeasuredWidth()) + AndroidUtilities.dp(24.0f);
+            setTranslationX(measuredWidth3);
+            this.arrowImageView.setTranslationX(left2 - measuredWidth3);
+        } else if (left2 < AndroidUtilities.dp(10.0f)) {
+            float dp3 = left2 - AndroidUtilities.dp(10.0f);
+            setTranslationX(getTranslationX() + dp3);
+            this.arrowImageView.setTranslationX(left2 - dp3);
         }
-        setPivotX(arrowX);
+        setPivotX(left2);
         setPivotY(getMeasuredHeight());
-        this.messageCell = cell;
         AnimatorSet animatorSet = this.animatorSet;
         if (animatorSet != null) {
             animatorSet.cancel();
@@ -132,52 +129,47 @@ public class ChecksHintView extends FrameLayout {
         }
         setTag(1);
         setVisibility(0);
-        if (!animated) {
+        if (z) {
+            AnimatorSet animatorSet2 = new AnimatorSet();
+            this.animatorSet = animatorSet2;
+            animatorSet2.playTogether(ObjectAnimator.ofFloat(this, View.ALPHA, 0.0f, 1.0f), ObjectAnimator.ofFloat(this, View.SCALE_X, 0.0f, 1.0f), ObjectAnimator.ofFloat(this, View.SCALE_Y, 0.0f, 1.0f));
+            this.animatorSet.addListener(new AnonymousClass1());
+            this.animatorSet.setDuration(180L);
+            this.animatorSet.start();
+            while (i3 < 2) {
+                this.textView[i3].animate().scaleX(1.04f).scaleY(1.04f).setInterpolator(CubicBezierInterpolator.EASE_IN).setStartDelay((i3 == 0 ? 132 : 500) + 140).setDuration(100L).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChecksHintView.2
+                    @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                    public void onAnimationEnd(Animator animator) {
+                        ChecksHintView.this.textView[i3].animate().scaleX(1.0f).scaleY(1.0f).setInterpolator(CubicBezierInterpolator.EASE_OUT).setStartDelay(0L).setDuration(100L).start();
+                    }
+                }).start();
+                i3++;
+            }
+        } else {
             setAlpha(1.0f);
-            return true;
-        }
-        AnimatorSet animatorSet2 = new AnimatorSet();
-        this.animatorSet = animatorSet2;
-        animatorSet2.playTogether(ObjectAnimator.ofFloat(this, View.ALPHA, 0.0f, 1.0f), ObjectAnimator.ofFloat(this, View.SCALE_X, 0.0f, 1.0f), ObjectAnimator.ofFloat(this, View.SCALE_Y, 0.0f, 1.0f));
-        this.animatorSet.addListener(new AnonymousClass1());
-        int[] position2 = position;
-        this.animatorSet.setDuration(180L);
-        this.animatorSet.start();
-        int a = 0;
-        while (a < 2) {
-            final int num = a;
-            this.textView[a].animate().scaleX(1.04f).scaleY(1.04f).setInterpolator(CubicBezierInterpolator.EASE_IN).setStartDelay((a == 0 ? 132 : 500) + 140).setDuration(100L).setListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChecksHintView.2
-                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animation) {
-                    ChecksHintView.this.textView[num].animate().scaleX(1.0f).scaleY(1.0f).setInterpolator(CubicBezierInterpolator.EASE_OUT).setStartDelay(0L).setDuration(100L).start();
-                }
-            }).start();
-            a++;
-            position2 = position2;
         }
         return true;
     }
 
     /* renamed from: org.telegram.ui.Components.ChecksHintView$1 */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass1 extends AnimatorListenerAdapter {
         AnonymousClass1() {
-            ChecksHintView.this = this$0;
+            ChecksHintView.this = r1;
         }
 
         @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-        public void onAnimationEnd(Animator animation) {
+        public void onAnimationEnd(Animator animator) {
             ChecksHintView.this.animatorSet = null;
             AndroidUtilities.runOnUIThread(ChecksHintView.this.hideRunnable = new Runnable() { // from class: org.telegram.ui.Components.ChecksHintView$1$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ChecksHintView.AnonymousClass1.this.m2534x9d80fc00();
+                    ChecksHintView.AnonymousClass1.this.lambda$onAnimationEnd$0();
                 }
             }, 3000L);
         }
 
-        /* renamed from: lambda$onAnimationEnd$0$org-telegram-ui-Components-ChecksHintView$1 */
-        public /* synthetic */ void m2534x9d80fc00() {
+        public /* synthetic */ void lambda$onAnimationEnd$0() {
             ChecksHintView.this.hide();
         }
     }
@@ -202,7 +194,7 @@ public class ChecksHintView extends FrameLayout {
         animatorSet2.playTogether(ObjectAnimator.ofFloat(this, View.ALPHA, 0.0f), ObjectAnimator.ofFloat(this, View.SCALE_X, 0.0f), ObjectAnimator.ofFloat(this, View.SCALE_Y, 0.0f));
         this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChecksHintView.3
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animator) {
                 ChecksHintView.this.setVisibility(4);
                 ChecksHintView.this.currentView = null;
                 ChecksHintView.this.messageCell = null;
@@ -213,9 +205,9 @@ public class ChecksHintView extends FrameLayout {
         this.animatorSet.start();
     }
 
-    private int getThemedColor(String key) {
+    private int getThemedColor(String str) {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color.intValue() : Theme.getColor(key);
+        Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
+        return color != null ? color.intValue() : Theme.getColor(str);
     }
 }

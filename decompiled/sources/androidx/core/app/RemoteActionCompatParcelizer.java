@@ -3,17 +3,17 @@ package androidx.core.app;
 import android.app.PendingIntent;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.versionedparcelable.VersionedParcel;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class RemoteActionCompatParcelizer {
     public static RemoteActionCompat read(VersionedParcel parcel) {
-        RemoteActionCompat obj = new RemoteActionCompat();
-        obj.mIcon = (IconCompat) parcel.readVersionedParcelable(obj.mIcon, 1);
-        obj.mTitle = parcel.readCharSequence(obj.mTitle, 2);
-        obj.mContentDescription = parcel.readCharSequence(obj.mContentDescription, 3);
-        obj.mActionIntent = (PendingIntent) parcel.readParcelable(obj.mActionIntent, 4);
-        obj.mEnabled = parcel.readBoolean(obj.mEnabled, 5);
-        obj.mShouldShowIcon = parcel.readBoolean(obj.mShouldShowIcon, 6);
-        return obj;
+        RemoteActionCompat remoteActionCompat = new RemoteActionCompat();
+        remoteActionCompat.mIcon = (IconCompat) parcel.readVersionedParcelable(remoteActionCompat.mIcon, 1);
+        remoteActionCompat.mTitle = parcel.readCharSequence(remoteActionCompat.mTitle, 2);
+        remoteActionCompat.mContentDescription = parcel.readCharSequence(remoteActionCompat.mContentDescription, 3);
+        remoteActionCompat.mActionIntent = (PendingIntent) parcel.readParcelable(remoteActionCompat.mActionIntent, 4);
+        remoteActionCompat.mEnabled = parcel.readBoolean(remoteActionCompat.mEnabled, 5);
+        remoteActionCompat.mShouldShowIcon = parcel.readBoolean(remoteActionCompat.mShouldShowIcon, 6);
+        return remoteActionCompat;
     }
 
     public static void write(RemoteActionCompat obj, VersionedParcel parcel) {

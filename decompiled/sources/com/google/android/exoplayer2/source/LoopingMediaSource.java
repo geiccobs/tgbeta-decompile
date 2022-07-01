@@ -8,76 +8,68 @@ import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.HashMap;
 import java.util.Map;
-/* loaded from: classes3.dex */
+import org.telegram.tgnet.ConnectionsManager;
+/* loaded from: classes.dex */
 public final class LoopingMediaSource extends CompositeMediaSource<Void> {
     private final Map<MediaSource.MediaPeriodId, MediaSource.MediaPeriodId> childMediaPeriodIdToMediaPeriodId;
     private final MediaSource childSource;
     private final int loopCount;
     private final Map<MediaPeriod, MediaSource.MediaPeriodId> mediaPeriodToChildMediaPeriodId;
 
-    public LoopingMediaSource(MediaSource childSource) {
-        this(childSource, Integer.MAX_VALUE);
+    public LoopingMediaSource(MediaSource mediaSource) {
+        this(mediaSource, ConnectionsManager.DEFAULT_DATACENTER_ID);
     }
 
-    public LoopingMediaSource(MediaSource childSource, int loopCount) {
-        Assertions.checkArgument(loopCount > 0);
-        this.childSource = childSource;
-        this.loopCount = loopCount;
+    public LoopingMediaSource(MediaSource mediaSource, int i) {
+        Assertions.checkArgument(i > 0);
+        this.childSource = mediaSource;
+        this.loopCount = i;
         this.childMediaPeriodIdToMediaPeriodId = new HashMap();
         this.mediaPeriodToChildMediaPeriodId = new HashMap();
     }
 
-    @Override // com.google.android.exoplayer2.source.BaseMediaSource, com.google.android.exoplayer2.source.MediaSource
-    public Object getTag() {
-        return this.childSource.getTag();
-    }
-
     @Override // com.google.android.exoplayer2.source.CompositeMediaSource, com.google.android.exoplayer2.source.BaseMediaSource
-    public void prepareSourceInternal(TransferListener mediaTransferListener) {
-        super.prepareSourceInternal(mediaTransferListener);
+    public void prepareSourceInternal(TransferListener transferListener) {
+        super.prepareSourceInternal(transferListener);
         prepareChildSource(null, this.childSource);
     }
 
     @Override // com.google.android.exoplayer2.source.MediaSource
-    public MediaPeriod createPeriod(MediaSource.MediaPeriodId id, Allocator allocator, long startPositionUs) {
+    public MediaPeriod createPeriod(MediaSource.MediaPeriodId mediaPeriodId, Allocator allocator, long j) {
         if (this.loopCount == Integer.MAX_VALUE) {
-            return this.childSource.createPeriod(id, allocator, startPositionUs);
+            return this.childSource.createPeriod(mediaPeriodId, allocator, j);
         }
-        Object childPeriodUid = LoopingTimeline.getChildPeriodUidFromConcatenatedUid(id.periodUid);
-        MediaSource.MediaPeriodId childMediaPeriodId = id.copyWithPeriodUid(childPeriodUid);
-        this.childMediaPeriodIdToMediaPeriodId.put(childMediaPeriodId, id);
-        MediaPeriod mediaPeriod = this.childSource.createPeriod(childMediaPeriodId, allocator, startPositionUs);
-        this.mediaPeriodToChildMediaPeriodId.put(mediaPeriod, childMediaPeriodId);
-        return mediaPeriod;
+        MediaSource.MediaPeriodId copyWithPeriodUid = mediaPeriodId.copyWithPeriodUid(AbstractConcatenatedTimeline.getChildPeriodUidFromConcatenatedUid(mediaPeriodId.periodUid));
+        this.childMediaPeriodIdToMediaPeriodId.put(copyWithPeriodUid, mediaPeriodId);
+        MediaPeriod createPeriod = this.childSource.createPeriod(copyWithPeriodUid, allocator, j);
+        this.mediaPeriodToChildMediaPeriodId.put(createPeriod, copyWithPeriodUid);
+        return createPeriod;
     }
 
     @Override // com.google.android.exoplayer2.source.MediaSource
     public void releasePeriod(MediaPeriod mediaPeriod) {
         this.childSource.releasePeriod(mediaPeriod);
-        MediaSource.MediaPeriodId childMediaPeriodId = this.mediaPeriodToChildMediaPeriodId.remove(mediaPeriod);
-        if (childMediaPeriodId != null) {
-            this.childMediaPeriodIdToMediaPeriodId.remove(childMediaPeriodId);
+        MediaSource.MediaPeriodId remove = this.mediaPeriodToChildMediaPeriodId.remove(mediaPeriod);
+        if (remove != null) {
+            this.childMediaPeriodIdToMediaPeriodId.remove(remove);
         }
     }
 
-    public void onChildSourceInfoRefreshed(Void id, MediaSource mediaSource, Timeline timeline) {
-        Timeline loopingTimeline;
+    public void onChildSourceInfoRefreshed(Void r1, MediaSource mediaSource, Timeline timeline) {
+        Timeline timeline2;
         if (this.loopCount != Integer.MAX_VALUE) {
-            loopingTimeline = new LoopingTimeline(timeline, this.loopCount);
+            timeline2 = new LoopingTimeline(timeline, this.loopCount);
         } else {
-            loopingTimeline = new InfinitelyLoopingTimeline(timeline);
+            timeline2 = new InfinitelyLoopingTimeline(timeline);
         }
-        refreshSourceInfo(loopingTimeline);
+        refreshSourceInfo(timeline2);
     }
 
-    public MediaSource.MediaPeriodId getMediaPeriodIdForChildMediaPeriodId(Void id, MediaSource.MediaPeriodId mediaPeriodId) {
-        if (this.loopCount != Integer.MAX_VALUE) {
-            return this.childMediaPeriodIdToMediaPeriodId.get(mediaPeriodId);
-        }
-        return mediaPeriodId;
+    public MediaSource.MediaPeriodId getMediaPeriodIdForChildMediaPeriodId(Void r2, MediaSource.MediaPeriodId mediaPeriodId) {
+        return this.loopCount != Integer.MAX_VALUE ? this.childMediaPeriodIdToMediaPeriodId.get(mediaPeriodId) : mediaPeriodId;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class LoopingTimeline extends AbstractConcatenatedTimeline {
         private final int childPeriodCount;
         private final Timeline childTimeline;
@@ -85,16 +77,16 @@ public final class LoopingMediaSource extends CompositeMediaSource<Void> {
         private final int loopCount;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        public LoopingTimeline(Timeline childTimeline, int loopCount) {
-            super(false, new ShuffleOrder.UnshuffledShuffleOrder(loopCount));
+        public LoopingTimeline(Timeline timeline, int i) {
+            super(false, new ShuffleOrder.UnshuffledShuffleOrder(i));
             boolean z = false;
-            this.childTimeline = childTimeline;
-            int periodCount = childTimeline.getPeriodCount();
+            this.childTimeline = timeline;
+            int periodCount = timeline.getPeriodCount();
             this.childPeriodCount = periodCount;
-            this.childWindowCount = childTimeline.getWindowCount();
-            this.loopCount = loopCount;
+            this.childWindowCount = timeline.getWindowCount();
+            this.loopCount = i;
             if (periodCount > 0) {
-                Assertions.checkState(loopCount <= Integer.MAX_VALUE / periodCount ? true : z, "LoopingMediaSource contains too many periods");
+                Assertions.checkState(i <= ConnectionsManager.DEFAULT_DATACENTER_ID / periodCount ? true : z, "LoopingMediaSource contains too many periods");
             }
         }
 
@@ -109,60 +101,54 @@ public final class LoopingMediaSource extends CompositeMediaSource<Void> {
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected int getChildIndexByPeriodIndex(int periodIndex) {
-            return periodIndex / this.childPeriodCount;
+        protected int getChildIndexByPeriodIndex(int i) {
+            return i / this.childPeriodCount;
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected int getChildIndexByWindowIndex(int windowIndex) {
-            return windowIndex / this.childWindowCount;
+        protected int getChildIndexByWindowIndex(int i) {
+            return i / this.childWindowCount;
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected int getChildIndexByChildUid(Object childUid) {
-            if (!(childUid instanceof Integer)) {
+        protected int getChildIndexByChildUid(Object obj) {
+            if (!(obj instanceof Integer)) {
                 return -1;
             }
-            return ((Integer) childUid).intValue();
+            return ((Integer) obj).intValue();
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected Timeline getTimelineByChildIndex(int childIndex) {
+        protected Timeline getTimelineByChildIndex(int i) {
             return this.childTimeline;
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected int getFirstPeriodIndexByChildIndex(int childIndex) {
-            return this.childPeriodCount * childIndex;
+        protected int getFirstPeriodIndexByChildIndex(int i) {
+            return i * this.childPeriodCount;
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected int getFirstWindowIndexByChildIndex(int childIndex) {
-            return this.childWindowCount * childIndex;
+        protected int getFirstWindowIndexByChildIndex(int i) {
+            return i * this.childWindowCount;
         }
 
         @Override // com.google.android.exoplayer2.source.AbstractConcatenatedTimeline
-        protected Object getChildUidByChildIndex(int childIndex) {
-            return Integer.valueOf(childIndex);
+        protected Object getChildUidByChildIndex(int i) {
+            return Integer.valueOf(i);
         }
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class InfinitelyLoopingTimeline extends ForwardingTimeline {
         public InfinitelyLoopingTimeline(Timeline timeline) {
             super(timeline);
         }
 
-        @Override // com.google.android.exoplayer2.source.ForwardingTimeline, com.google.android.exoplayer2.Timeline
-        public int getNextWindowIndex(int windowIndex, int repeatMode, boolean shuffleModeEnabled) {
-            int childNextWindowIndex = this.timeline.getNextWindowIndex(windowIndex, repeatMode, shuffleModeEnabled);
-            return childNextWindowIndex == -1 ? getFirstWindowIndex(shuffleModeEnabled) : childNextWindowIndex;
-        }
-
-        @Override // com.google.android.exoplayer2.source.ForwardingTimeline, com.google.android.exoplayer2.Timeline
-        public int getPreviousWindowIndex(int windowIndex, int repeatMode, boolean shuffleModeEnabled) {
-            int childPreviousWindowIndex = this.timeline.getPreviousWindowIndex(windowIndex, repeatMode, shuffleModeEnabled);
-            return childPreviousWindowIndex == -1 ? getLastWindowIndex(shuffleModeEnabled) : childPreviousWindowIndex;
+        @Override // com.google.android.exoplayer2.Timeline
+        public int getNextWindowIndex(int i, int i2, boolean z) {
+            int nextWindowIndex = this.timeline.getNextWindowIndex(i, i2, z);
+            return nextWindowIndex == -1 ? getFirstWindowIndex(z) : nextWindowIndex;
         }
     }
 }

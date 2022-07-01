@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -31,8 +32,6 @@ import androidx.collection.LongSparseArray;
 import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.exoplayer2.C;
-import com.google.firebase.messaging.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.telegram.messenger.AndroidUtilities;
@@ -43,14 +42,22 @@ import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC$Chat;
+import org.telegram.tgnet.TLRPC$ChatFull;
+import org.telegram.tgnet.TLRPC$Dialog;
+import org.telegram.tgnet.TLRPC$TL_chatInviteExported;
+import org.telegram.tgnet.TLRPC$TL_contact;
+import org.telegram.tgnet.TLRPC$TL_error;
+import org.telegram.tgnet.TLRPC$TL_messages_exportChatInvite;
+import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.SearchAdapterHelper;
 import org.telegram.ui.Cells.GroupCreateSectionCell;
@@ -62,7 +69,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UsersAlertBase;
 import org.telegram.ui.GroupCreateActivity;
 import org.telegram.ui.LaunchActivity;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class InviteMembersBottomSheet extends UsersAlertBase implements NotificationCenter.NotificationCenterDelegate {
     private int additionalHeight;
     private long chatId;
@@ -74,12 +81,12 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
     private AnimatorSet currentDoneButtonAnimation;
     private GroupCreateActivity.ContactsAddActivityDelegate delegate;
     private InviteMembersBottomSheetDelegate dialogsDelegate;
-    private ArrayList<TLRPC.Dialog> dialogsServerOnly;
+    private ArrayList<TLRPC$Dialog> dialogsServerOnly;
     private int emptyRow;
     boolean enterEventSent;
     private final ImageView floatingButton;
     private LongSparseArray<TLObject> ignoreUsers;
-    TLRPC.TL_chatInviteExported invite;
+    TLRPC$TL_chatInviteExported invite;
     private int lastRow;
     boolean linkGenerating;
     private int maxSize;
@@ -100,12 +107,12 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
     private float spansEnterProgress = 0.0f;
     private View.OnClickListener spanClickListener = new View.OnClickListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.1
         @Override // android.view.View.OnClickListener
-        public void onClick(View v) {
-            GroupCreateSpan span = (GroupCreateSpan) v;
-            if (span.isDeleting()) {
+        public void onClick(View view) {
+            GroupCreateSpan groupCreateSpan = (GroupCreateSpan) view;
+            if (groupCreateSpan.isDeleting()) {
                 InviteMembersBottomSheet.this.currentDeletingSpan = null;
-                InviteMembersBottomSheet.this.selectedContacts.remove(span.getUid());
-                InviteMembersBottomSheet.this.spansContainer.removeSpan(span);
+                InviteMembersBottomSheet.this.selectedContacts.remove(groupCreateSpan.getUid());
+                InviteMembersBottomSheet.this.spansContainer.removeSpan(groupCreateSpan);
                 InviteMembersBottomSheet.this.spansCountChanged(true);
                 AndroidUtilities.updateVisibleRows(InviteMembersBottomSheet.this.listView);
                 return;
@@ -113,26 +120,25 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             if (InviteMembersBottomSheet.this.currentDeletingSpan != null) {
                 InviteMembersBottomSheet.this.currentDeletingSpan.cancelDeleteAnimation();
             }
-            InviteMembersBottomSheet.this.currentDeletingSpan = span;
-            span.startDeleteAnimation();
+            InviteMembersBottomSheet.this.currentDeletingSpan = groupCreateSpan;
+            groupCreateSpan.startDeleteAnimation();
         }
     };
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface InviteMembersBottomSheetDelegate {
         void didSelectDialogs(ArrayList<Long> arrayList);
     }
 
-    public InviteMembersBottomSheet(final Context context, int account, final LongSparseArray<TLObject> ignoreUsers, final long chatId, final BaseFragment parentFragment, Theme.ResourcesProvider resourcesProvider) {
-        super(context, false, account, resourcesProvider);
-        this.ignoreUsers = ignoreUsers;
+    public InviteMembersBottomSheet(final Context context, int i, final LongSparseArray<TLObject> longSparseArray, final long j, final BaseFragment baseFragment, Theme.ResourcesProvider resourcesProvider) {
+        super(context, false, i, resourcesProvider);
+        this.ignoreUsers = longSparseArray;
         this.needSnapToTop = false;
-        this.parentFragment = parentFragment;
-        this.chatId = chatId;
+        this.parentFragment = baseFragment;
+        this.chatId = j;
         fixNavigationBar();
         this.searchView.searchEditText.setHint(LocaleController.getString("SearchForChats", R.string.SearchForChats));
-        ViewConfiguration configuration = ViewConfiguration.get(context);
-        this.touchSlop = configuration.getScaledTouchSlop();
+        this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         SearchAdapter searchAdapter = new SearchAdapter();
         this.searchAdapter = searchAdapter;
         this.searchListViewAdapter = searchAdapter;
@@ -140,9 +146,9 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         ListAdapter listAdapter = new ListAdapter();
         this.listViewAdapter = listAdapter;
         recyclerListView.setAdapter(listAdapter);
-        ArrayList<TLRPC.TL_contact> arrayList = ContactsController.getInstance(account).contacts;
-        for (int a = 0; a < arrayList.size(); a++) {
-            TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(arrayList.get(a).user_id));
+        ArrayList<TLRPC$TL_contact> arrayList = ContactsController.getInstance(i).contacts;
+        for (int i2 = 0; i2 < arrayList.size(); i2++) {
+            TLRPC$User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(arrayList.get(i2).user_id));
             if (user != null && !user.self && !user.deleted) {
                 this.contacts.add(user);
             }
@@ -151,23 +157,23 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         this.spansContainer = spansContainer;
         this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda8
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
-            public final void onItemClick(View view, int i) {
-                InviteMembersBottomSheet.this.m2709lambda$new$0$orgtelegramuiComponentsInviteMembersBottomSheet(chatId, parentFragment, ignoreUsers, context, view, i);
+            public final void onItemClick(View view, int i3) {
+                InviteMembersBottomSheet.this.lambda$new$0(j, baseFragment, longSparseArray, context, view, i3);
             }
         });
-        this.listView.setItemAnimator(new ItemAnimator());
+        this.listView.setItemAnimator(new ItemAnimator(this));
         updateRows();
         ScrollView scrollView = new ScrollView(context) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.2
             @Override // android.widget.ScrollView, android.widget.FrameLayout, android.view.View
-            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                int width = View.MeasureSpec.getSize(widthMeasureSpec);
-                int height = View.MeasureSpec.getSize(heightMeasureSpec);
-                if (AndroidUtilities.isTablet() || height > width) {
+            protected void onMeasure(int i3, int i4) {
+                int size = View.MeasureSpec.getSize(i3);
+                int size2 = View.MeasureSpec.getSize(i4);
+                if (AndroidUtilities.isTablet() || size2 > size) {
                     InviteMembersBottomSheet.this.maxSize = AndroidUtilities.dp(144.0f);
                 } else {
                     InviteMembersBottomSheet.this.maxSize = AndroidUtilities.dp(56.0f);
                 }
-                super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(InviteMembersBottomSheet.this.maxSize, Integer.MIN_VALUE));
+                super.onMeasure(i3, View.MeasureSpec.makeMeasureSpec(InviteMembersBottomSheet.this.maxSize, Integer.MIN_VALUE));
             }
         };
         this.spansScrollView = scrollView;
@@ -178,24 +184,26 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         ImageView imageView = new ImageView(context);
         this.floatingButton = imageView;
         imageView.setScaleType(ImageView.ScaleType.CENTER);
-        Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56.0f), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
-        if (Build.VERSION.SDK_INT < 21) {
-            Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow).mutate();
-            shadowDrawable.setColorFilter(new PorterDuffColorFilter(-16777216, PorterDuff.Mode.MULTIPLY));
-            CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
+        Drawable createSimpleSelectorCircleDrawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56.0f), Theme.getColor("chats_actionBackground"), Theme.getColor("chats_actionPressedBackground"));
+        int i3 = Build.VERSION.SDK_INT;
+        if (i3 < 21) {
+            Drawable mutate = context.getResources().getDrawable(R.drawable.floating_shadow).mutate();
+            mutate.setColorFilter(new PorterDuffColorFilter(-16777216, PorterDuff.Mode.MULTIPLY));
+            CombinedDrawable combinedDrawable = new CombinedDrawable(mutate, createSimpleSelectorCircleDrawable, 0, 0);
             combinedDrawable.setIconSize(AndroidUtilities.dp(56.0f), AndroidUtilities.dp(56.0f));
-            drawable = combinedDrawable;
+            createSimpleSelectorCircleDrawable = combinedDrawable;
         }
-        imageView.setBackgroundDrawable(drawable);
-        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_actionIcon), PorterDuff.Mode.MULTIPLY));
+        imageView.setBackgroundDrawable(createSimpleSelectorCircleDrawable);
+        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor("chats_actionIcon"), PorterDuff.Mode.MULTIPLY));
         imageView.setImageResource(R.drawable.floating_check);
-        if (Build.VERSION.SDK_INT >= 21) {
-            StateListAnimator animator = new StateListAnimator();
-            animator.addState(new int[]{16842919}, ObjectAnimator.ofFloat(imageView, "translationZ", AndroidUtilities.dp(2.0f), AndroidUtilities.dp(4.0f)).setDuration(200L));
-            animator.addState(new int[0], ObjectAnimator.ofFloat(imageView, "translationZ", AndroidUtilities.dp(4.0f), AndroidUtilities.dp(2.0f)).setDuration(200L));
-            imageView.setStateListAnimator(animator);
-            imageView.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.3
+        if (i3 >= 21) {
+            StateListAnimator stateListAnimator = new StateListAnimator();
+            stateListAnimator.addState(new int[]{16842919}, ObjectAnimator.ofFloat(imageView, "translationZ", AndroidUtilities.dp(2.0f), AndroidUtilities.dp(4.0f)).setDuration(200L));
+            stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(imageView, "translationZ", AndroidUtilities.dp(4.0f), AndroidUtilities.dp(2.0f)).setDuration(200L));
+            imageView.setStateListAnimator(stateListAnimator);
+            imageView.setOutlineProvider(new ViewOutlineProvider(this) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.3
                 @Override // android.view.ViewOutlineProvider
+                @SuppressLint({"NewApi"})
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, AndroidUtilities.dp(56.0f), AndroidUtilities.dp(56.0f));
                 }
@@ -204,7 +212,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         imageView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda2
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                InviteMembersBottomSheet.this.m2711lambda$new$2$orgtelegramuiComponentsInviteMembersBottomSheet(context, chatId, view);
+                InviteMembersBottomSheet.this.lambda$new$2(context, j, view);
             }
         });
         imageView.setVisibility(4);
@@ -212,80 +220,73 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         imageView.setScaleY(0.0f);
         imageView.setAlpha(0.0f);
         imageView.setContentDescription(LocaleController.getString("Next", R.string.Next));
-        this.containerView.addView(imageView, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT < 21 ? 60 : 56, 85, 14.0f, 14.0f, 14.0f, 14.0f));
+        this.containerView.addView(imageView, LayoutHelper.createFrame(i3 >= 21 ? 56 : 60, i3 < 21 ? 60 : 56, 85, 14.0f, 14.0f, 14.0f, 14.0f));
         ((ViewGroup.MarginLayoutParams) this.emptyView.getLayoutParams()).topMargin = AndroidUtilities.dp(20.0f);
         ((ViewGroup.MarginLayoutParams) this.emptyView.getLayoutParams()).leftMargin = AndroidUtilities.dp(4.0f);
         ((ViewGroup.MarginLayoutParams) this.emptyView.getLayoutParams()).rightMargin = AndroidUtilities.dp(4.0f);
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2709lambda$new$0$orgtelegramuiComponentsInviteMembersBottomSheet(long chatId, BaseFragment parentFragment, LongSparseArray ignoreUsers, Context context, View view, int position) {
-        long id;
-        TLObject object = null;
+    public /* synthetic */ void lambda$new$0(long j, BaseFragment baseFragment, LongSparseArray longSparseArray, Context context, View view, int i) {
+        long j2;
+        String str;
+        TLRPC$TL_chatInviteExported tLRPC$TL_chatInviteExported;
         RecyclerView.Adapter adapter = this.listView.getAdapter();
         SearchAdapter searchAdapter = this.searchAdapter;
+        TLObject tLObject = null;
         if (adapter != searchAdapter) {
-            if (position == this.copyLinkRow) {
-                TLRPC.Chat chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(chatId));
-                TLRPC.ChatFull chatInfo = MessagesController.getInstance(this.currentAccount).getChatFull(chatId);
-                String link = null;
+            if (i == this.copyLinkRow) {
+                TLRPC$Chat chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(j));
+                TLRPC$ChatFull chatFull = MessagesController.getInstance(this.currentAccount).getChatFull(j);
                 if (chat != null && !TextUtils.isEmpty(chat.username)) {
-                    link = "https://t.me/" + chat.username;
-                } else if (chatInfo != null && chatInfo.exported_invite != null) {
-                    link = chatInfo.exported_invite.link;
+                    str = "https://t.me/" + chat.username;
+                } else if (chatFull != null && (tLRPC$TL_chatInviteExported = chatFull.exported_invite) != null) {
+                    str = tLRPC$TL_chatInviteExported.link;
                 } else {
                     generateLink();
+                    str = null;
                 }
-                if (link == null) {
+                if (str == null) {
                     return;
                 }
-                ClipboardManager clipboard = (ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard");
-                ClipData clip = ClipData.newPlainText(Constants.ScionAnalytics.PARAM_LABEL, link);
-                clipboard.setPrimaryClip(clip);
+                ((ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("label", str));
                 dismiss();
-                BulletinFactory.createCopyLinkBulletin(parentFragment).show();
-            } else if (position >= this.contactsStartRow && position < this.contactsEndRow) {
-                object = ((ListAdapter) this.listViewAdapter).getObject(position);
+                BulletinFactory.createCopyLinkBulletin(baseFragment).show();
+            } else if (i >= this.contactsStartRow && i < this.contactsEndRow) {
+                tLObject = ((ListAdapter) this.listViewAdapter).getObject(i);
             }
         } else {
-            int localCount = searchAdapter.searchResult.size();
-            int globalCount = this.searchAdapter.searchAdapterHelper.getGlobalSearch().size();
-            int localServerCount = this.searchAdapter.searchAdapterHelper.getLocalServerSearch().size();
-            int position2 = position - 1;
-            if (position2 < 0 || position2 >= localCount) {
-                if (position2 < localCount || position2 >= localServerCount + localCount) {
-                    if (position2 > localCount + localServerCount && position2 <= globalCount + localCount + localServerCount) {
-                        object = this.searchAdapter.searchAdapterHelper.getGlobalSearch().get(((position2 - localCount) - localServerCount) - 1);
-                    }
-                } else {
-                    object = this.searchAdapter.searchAdapterHelper.getLocalServerSearch().get(position2 - localCount);
-                }
-            } else {
-                object = (TLObject) this.searchAdapter.searchResult.get(position2);
+            int size = searchAdapter.searchResult.size();
+            int size2 = this.searchAdapter.searchAdapterHelper.getGlobalSearch().size();
+            int size3 = this.searchAdapter.searchAdapterHelper.getLocalServerSearch().size();
+            int i2 = i - 1;
+            if (i2 >= 0 && i2 < size) {
+                tLObject = (TLObject) this.searchAdapter.searchResult.get(i2);
+            } else if (i2 >= size && i2 < size3 + size) {
+                tLObject = this.searchAdapter.searchAdapterHelper.getLocalServerSearch().get(i2 - size);
+            } else if (i2 > size + size3 && i2 <= size2 + size + size3) {
+                tLObject = this.searchAdapter.searchAdapterHelper.getGlobalSearch().get(((i2 - size) - size3) - 1);
             }
             if (this.dialogsDelegate != null) {
                 this.searchView.closeSearch();
             }
         }
-        if (object != null) {
-            if (object instanceof TLRPC.User) {
-                id = ((TLRPC.User) object).id;
-            } else if (object instanceof TLRPC.Chat) {
-                id = -((TLRPC.Chat) object).id;
+        if (tLObject != null) {
+            if (tLObject instanceof TLRPC$User) {
+                j2 = ((TLRPC$User) tLObject).id;
             } else {
-                id = 0;
+                j2 = tLObject instanceof TLRPC$Chat ? -((TLRPC$Chat) tLObject).id : 0L;
             }
-            if (ignoreUsers != null && ignoreUsers.indexOfKey(id) >= 0) {
+            if (longSparseArray != null && longSparseArray.indexOfKey(j2) >= 0) {
                 return;
             }
-            if (id != 0) {
-                if (this.selectedContacts.indexOfKey(id) >= 0) {
-                    this.selectedContacts.remove(id);
-                    this.spansContainer.removeSpan(this.selectedContacts.get(id));
+            if (j2 != 0) {
+                if (this.selectedContacts.indexOfKey(j2) >= 0) {
+                    this.selectedContacts.remove(j2);
+                    this.spansContainer.removeSpan(this.selectedContacts.get(j2));
                 } else {
-                    GroupCreateSpan groupCreateSpan = new GroupCreateSpan(context, object);
+                    GroupCreateSpan groupCreateSpan = new GroupCreateSpan(context, tLObject);
                     groupCreateSpan.setOnClickListener(this.spanClickListener);
-                    this.selectedContacts.put(id, groupCreateSpan);
+                    this.selectedContacts.put(j2, groupCreateSpan);
                     this.spansContainer.addSpan(groupCreateSpan, true);
                 }
             }
@@ -294,58 +295,54 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         }
     }
 
-    /* renamed from: lambda$new$2$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2711lambda$new$2$orgtelegramuiComponentsInviteMembersBottomSheet(Context context, long chatId, View v) {
-        Activity activity;
-        if ((this.dialogsDelegate == null && this.selectedContacts.size() == 0) || (activity = AndroidUtilities.findActivity(context)) == null) {
+    public /* synthetic */ void lambda$new$2(Context context, long j, View view) {
+        Activity findActivity;
+        if ((this.dialogsDelegate == null && this.selectedContacts.size() == 0) || (findActivity = AndroidUtilities.findActivity(context)) == null) {
             return;
         }
         if (this.dialogsDelegate != null) {
-            ArrayList<Long> dialogs = new ArrayList<>();
-            for (int a = 0; a < this.selectedContacts.size(); a++) {
-                long uid = this.selectedContacts.keyAt(a);
-                dialogs.add(Long.valueOf(uid));
+            ArrayList<Long> arrayList = new ArrayList<>();
+            for (int i = 0; i < this.selectedContacts.size(); i++) {
+                arrayList.add(Long.valueOf(this.selectedContacts.keyAt(i)));
             }
-            this.dialogsDelegate.didSelectDialogs(dialogs);
+            this.dialogsDelegate.didSelectDialogs(arrayList);
             dismiss();
             return;
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(findActivity);
         if (this.selectedContacts.size() == 1) {
             builder.setTitle(LocaleController.getString("AddOneMemberAlertTitle", R.string.AddOneMemberAlertTitle));
         } else {
             builder.setTitle(LocaleController.formatString("AddMembersAlertTitle", R.string.AddMembersAlertTitle, LocaleController.formatPluralString("Members", this.selectedContacts.size(), new Object[0])));
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int a2 = 0; a2 < this.selectedContacts.size(); a2++) {
-            long uid2 = this.selectedContacts.keyAt(a2);
-            TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(uid2));
+        StringBuilder sb = new StringBuilder();
+        for (int i2 = 0; i2 < this.selectedContacts.size(); i2++) {
+            TLRPC$User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.selectedContacts.keyAt(i2)));
             if (user != null) {
-                if (stringBuilder.length() > 0) {
-                    stringBuilder.append(", ");
+                if (sb.length() > 0) {
+                    sb.append(", ");
                 }
-                stringBuilder.append("**");
-                stringBuilder.append(ContactsController.formatName(user.first_name, user.last_name));
-                stringBuilder.append("**");
+                sb.append("**");
+                sb.append(ContactsController.formatName(user.first_name, user.last_name));
+                sb.append("**");
             }
         }
-        int a3 = this.currentAccount;
-        TLRPC.Chat chat = MessagesController.getInstance(a3).getChat(Long.valueOf(chatId));
+        TLRPC$Chat chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(j));
         if (this.selectedContacts.size() > 5) {
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(AndroidUtilities.replaceTags(LocaleController.formatString("AddMembersAlertNamesText", R.string.AddMembersAlertNamesText, LocaleController.formatPluralString("Members", this.selectedContacts.size(), new Object[0]), chat.title)));
-            String countString = String.format("%d", Integer.valueOf(this.selectedContacts.size()));
-            int index = TextUtils.indexOf(spannableStringBuilder, countString);
-            if (index >= 0) {
-                spannableStringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM)), index, countString.length() + index, 33);
+            String format = String.format("%d", Integer.valueOf(this.selectedContacts.size()));
+            int indexOf = TextUtils.indexOf(spannableStringBuilder, format);
+            if (indexOf >= 0) {
+                spannableStringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM)), indexOf, format.length() + indexOf, 33);
             }
             builder.setMessage(spannableStringBuilder);
         } else {
-            builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("AddMembersAlertNamesText", R.string.AddMembersAlertNamesText, stringBuilder, chat.title)));
+            builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("AddMembersAlertNamesText", R.string.AddMembersAlertNamesText, sb, chat.title)));
         }
         builder.setPositiveButton(LocaleController.getString("Add", R.string.Add), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda1
             @Override // android.content.DialogInterface.OnClickListener
-            public final void onClick(DialogInterface dialogInterface, int i) {
-                InviteMembersBottomSheet.this.m2710lambda$new$1$orgtelegramuiComponentsInviteMembersBottomSheet(dialogInterface, i);
+            public final void onClick(DialogInterface dialogInterface, int i3) {
+                InviteMembersBottomSheet.this.lambda$new$1(dialogInterface, i3);
             }
         });
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
@@ -353,20 +350,18 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         builder.show();
     }
 
-    /* renamed from: lambda$new$1$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2710lambda$new$1$orgtelegramuiComponentsInviteMembersBottomSheet(DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void lambda$new$1(DialogInterface dialogInterface, int i) {
         onAddToGroupDone(0);
     }
 
     private void onAddToGroupDone(int i) {
-        ArrayList<TLRPC.User> result = new ArrayList<>();
-        for (int a = 0; a < this.selectedContacts.size(); a++) {
-            TLRPC.User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.selectedContacts.keyAt(a)));
-            result.add(user);
+        ArrayList<TLRPC$User> arrayList = new ArrayList<>();
+        for (int i2 = 0; i2 < this.selectedContacts.size(); i2++) {
+            arrayList.add(MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.selectedContacts.keyAt(i2))));
         }
         GroupCreateActivity.ContactsAddActivityDelegate contactsAddActivityDelegate = this.delegate;
         if (contactsAddActivityDelegate != null) {
-            contactsAddActivityDelegate.didSelectUsers(result, i);
+            contactsAddActivityDelegate.didSelectUsers(arrayList, i);
         }
         dismiss();
     }
@@ -377,105 +372,52 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         NotificationCenter.getInstance(this.currentAccount).removeObserver(this, NotificationCenter.dialogsNeedReload);
     }
 
-    public void setSelectedContacts(ArrayList<Long> dialogs) {
-        int i;
-        int width;
-        int newAdditionalH;
-        TLObject object;
-        int a = 0;
-        int N = dialogs.size();
-        while (true) {
-            i = 0;
-            if (a >= N) {
-                break;
-            }
-            long dialogId = dialogs.get(a).longValue();
-            if (DialogObject.isChatDialog(dialogId)) {
-                object = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(-dialogId));
-            } else {
-                object = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(dialogId));
-            }
-            GroupCreateSpan span = new GroupCreateSpan(this.spansContainer.getContext(), object);
-            this.spansContainer.addSpan(span, false);
-            span.setOnClickListener(this.spanClickListener);
-            a++;
-        }
-        spansCountChanged(false);
-        int count = this.spansContainer.getChildCount();
-        boolean isPortrait = AndroidUtilities.displaySize.x < AndroidUtilities.displaySize.y;
-        if (AndroidUtilities.isTablet() || isPortrait) {
-            this.maxSize = AndroidUtilities.dp(144.0f);
-        } else {
-            this.maxSize = AndroidUtilities.dp(56.0f);
-        }
-        if (AndroidUtilities.isTablet()) {
-            width = (int) (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) * 0.8f);
-        } else {
-            width = AndroidUtilities.displaySize.x;
-            if (!isPortrait) {
-                width = (int) Math.max(width * 0.8f, Math.min(AndroidUtilities.dp(480.0f), AndroidUtilities.displaySize.x));
-            }
-        }
-        int maxWidth = width - AndroidUtilities.dp(26.0f);
-        int currentLineWidth = 0;
-        int y = AndroidUtilities.dp(10.0f);
-        for (int a2 = 0; a2 < count; a2++) {
-            View child = this.spansContainer.getChildAt(a2);
-            if (child instanceof GroupCreateSpan) {
-                child.measure(View.MeasureSpec.makeMeasureSpec(width, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32.0f), C.BUFFER_FLAG_ENCRYPTED));
-                if (child.getMeasuredWidth() + currentLineWidth > maxWidth) {
-                    y += child.getMeasuredHeight() + AndroidUtilities.dp(8.0f);
-                    currentLineWidth = 0;
-                }
-                currentLineWidth += child.getMeasuredWidth() + AndroidUtilities.dp(9.0f);
-            }
-        }
-        int animateToH = AndroidUtilities.dp(42.0f) + y;
-        if (this.dialogsDelegate != null) {
-            newAdditionalH = this.spanEnter ? Math.min(this.maxSize, animateToH) : 0;
-        } else {
-            newAdditionalH = Math.max(0, Math.min(this.maxSize, animateToH) - AndroidUtilities.dp(52.0f));
-        }
-        int oldSearchAdditionalH = this.searchAdditionalHeight;
-        if (this.selectedContacts.size() > 0) {
-            i = AndroidUtilities.dp(56.0f);
-        }
-        this.searchAdditionalHeight = i;
-        if (newAdditionalH != this.additionalHeight || oldSearchAdditionalH != i) {
-            this.additionalHeight = newAdditionalH;
-        }
+    /* JADX WARN: Removed duplicated region for block: B:27:0x00c8  */
+    /* JADX WARN: Removed duplicated region for block: B:36:0x0116  */
+    /* JADX WARN: Removed duplicated region for block: B:40:0x0123  */
+    /* JADX WARN: Removed duplicated region for block: B:43:0x013e  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public void setSelectedContacts(java.util.ArrayList<java.lang.Long> r12) {
+        /*
+            Method dump skipped, instructions count: 333
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.InviteMembersBottomSheet.setSelectedContacts(java.util.ArrayList):void");
     }
 
-    public void spansCountChanged(boolean animated) {
-        final boolean enter = this.selectedContacts.size() > 0;
-        if (this.spanEnter != enter) {
+    public void spansCountChanged(boolean z) {
+        final boolean z2 = this.selectedContacts.size() > 0;
+        if (this.spanEnter != z2) {
             ValueAnimator valueAnimator = this.spansEnterAnimator;
             if (valueAnimator != null) {
                 valueAnimator.removeAllListeners();
                 this.spansEnterAnimator.cancel();
             }
-            this.spanEnter = enter;
-            if (enter) {
+            this.spanEnter = z2;
+            if (z2) {
                 this.spansScrollView.setVisibility(0);
             }
-            if (animated) {
+            if (z) {
                 float[] fArr = new float[2];
                 fArr[0] = this.spansEnterProgress;
-                fArr[1] = enter ? 1.0f : 0.0f;
+                fArr[1] = z2 ? 1.0f : 0.0f;
                 ValueAnimator ofFloat = ValueAnimator.ofFloat(fArr);
                 this.spansEnterAnimator = ofFloat;
                 ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                        InviteMembersBottomSheet.this.m2713x2ee01541(valueAnimator2);
+                        InviteMembersBottomSheet.this.lambda$spansCountChanged$3(valueAnimator2);
                     }
                 });
                 this.spansEnterAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.4
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
-                        InviteMembersBottomSheet.this.spansEnterProgress = enter ? 1.0f : 0.0f;
-                        InviteMembersBottomSheet.this.containerView.invalidate();
-                        if (!enter) {
+                    public void onAnimationEnd(Animator animator) {
+                        InviteMembersBottomSheet.this.spansEnterProgress = z2 ? 1.0f : 0.0f;
+                        ((BottomSheet) InviteMembersBottomSheet.this).containerView.invalidate();
+                        if (!z2) {
                             InviteMembersBottomSheet.this.spansScrollView.setVisibility(8);
                         }
                     }
@@ -492,7 +434,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
                     animatorSet2.playTogether(ObjectAnimator.ofFloat(this.floatingButton, View.SCALE_X, 0.0f), ObjectAnimator.ofFloat(this.floatingButton, View.SCALE_Y, 0.0f), ObjectAnimator.ofFloat(this.floatingButton, View.ALPHA, 0.0f));
                     this.currentDoneButtonAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.5
                         @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                        public void onAnimationEnd(Animator animation) {
+                        public void onAnimationEnd(Animator animator) {
                             InviteMembersBottomSheet.this.floatingButton.setVisibility(4);
                         }
                     });
@@ -511,32 +453,31 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
                 this.currentDoneButtonAnimation.start();
                 return;
             }
-            this.spansEnterProgress = enter ? 1.0f : 0.0f;
+            this.spansEnterProgress = z2 ? 1.0f : 0.0f;
             this.containerView.invalidate();
-            if (!enter) {
+            if (!z2) {
                 this.spansScrollView.setVisibility(8);
             }
             AnimatorSet animatorSet4 = this.currentDoneButtonAnimation;
             if (animatorSet4 != null) {
                 animatorSet4.cancel();
             }
-            if (this.spanEnter || this.dialogsDelegate != null) {
-                this.floatingButton.setScaleY(1.0f);
-                this.floatingButton.setScaleX(1.0f);
-                this.floatingButton.setAlpha(1.0f);
-                this.floatingButton.setVisibility(0);
+            if (!this.spanEnter && this.dialogsDelegate == null) {
+                this.floatingButton.setScaleY(0.0f);
+                this.floatingButton.setScaleX(0.0f);
+                this.floatingButton.setAlpha(0.0f);
+                this.floatingButton.setVisibility(4);
                 return;
             }
-            this.floatingButton.setScaleY(0.0f);
-            this.floatingButton.setScaleX(0.0f);
-            this.floatingButton.setAlpha(0.0f);
-            this.floatingButton.setVisibility(4);
+            this.floatingButton.setScaleY(1.0f);
+            this.floatingButton.setScaleX(1.0f);
+            this.floatingButton.setAlpha(1.0f);
+            this.floatingButton.setVisibility(0);
         }
     }
 
-    /* renamed from: lambda$spansCountChanged$3$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2713x2ee01541(ValueAnimator valueAnimator1) {
-        this.spansEnterProgress = ((Float) valueAnimator1.getAnimatedValue()).floatValue();
+    public /* synthetic */ void lambda$spansCountChanged$3(ValueAnimator valueAnimator) {
+        this.spansEnterProgress = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         this.containerView.invalidate();
     }
 
@@ -582,146 +523,130 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.dialogsNeedReload && this.dialogsDelegate != null && this.dialogsServerOnly.isEmpty()) {
-            this.dialogsServerOnly = new ArrayList<>(MessagesController.getInstance(this.currentAccount).dialogsServerOnly);
-            this.listViewAdapter.notifyDataSetChanged();
+    public void didReceivedNotification(int i, int i2, Object... objArr) {
+        if (i != NotificationCenter.dialogsNeedReload || this.dialogsDelegate == null || !this.dialogsServerOnly.isEmpty()) {
+            return;
         }
+        this.dialogsServerOnly = new ArrayList<>(MessagesController.getInstance(this.currentAccount).dialogsServerOnly);
+        this.listViewAdapter.notifyDataSetChanged();
     }
 
-    /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class ListAdapter extends RecyclerListView.SelectionAdapter {
         private ListAdapter() {
             InviteMembersBottomSheet.this = r1;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view;
-            Context context = parent.getContext();
-            switch (viewType) {
-                case 2:
-                    view = new View(context) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.ListAdapter.1
-                        @Override // android.view.View
-                        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48.0f) + InviteMembersBottomSheet.this.additionalHeight, C.BUFFER_FLAG_ENCRYPTED));
-                        }
-                    };
-                    break;
-                case 3:
-                    view = new GroupCreateUserCell(context, 1, 0, InviteMembersBottomSheet.this.dialogsDelegate != null);
-                    break;
-                case 4:
-                    view = new View(context);
-                    break;
-                case 5:
-                    StickerEmptyView stickerEmptyView = new StickerEmptyView(context, null, 0) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.ListAdapter.2
-                        @Override // org.telegram.ui.Components.StickerEmptyView, android.view.ViewGroup, android.view.View
-                        public void onAttachedToWindow() {
-                            super.onAttachedToWindow();
-                            this.stickerView.getImageReceiver().startAnimation();
-                        }
-                    };
-                    stickerEmptyView.setLayoutParams(new RecyclerView.LayoutParams(-1, -1));
-                    stickerEmptyView.subtitle.setVisibility(8);
-                    if (InviteMembersBottomSheet.this.dialogsDelegate != null) {
-                        stickerEmptyView.title.setText(LocaleController.getString("FilterNoChats", R.string.FilterNoChats));
-                    } else {
-                        stickerEmptyView.title.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+            ManageChatTextCell manageChatTextCell;
+            Context context = viewGroup.getContext();
+            if (i == 2) {
+                manageChatTextCell = new View(context) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.ListAdapter.1
+                    @Override // android.view.View
+                    protected void onMeasure(int i2, int i3) {
+                        super.onMeasure(i2, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48.0f) + InviteMembersBottomSheet.this.additionalHeight, 1073741824));
                     }
-                    stickerEmptyView.setAnimateLayoutChange(true);
-                    view = stickerEmptyView;
-                    break;
-                default:
-                    ManageChatTextCell manageChatTextCell = new ManageChatTextCell(context);
-                    manageChatTextCell.setText(LocaleController.getString("VoipGroupCopyInviteLink", R.string.VoipGroupCopyInviteLink), null, R.drawable.msg_link, 7, true);
-                    manageChatTextCell.setColors(Theme.key_dialogTextBlue2, Theme.key_dialogTextBlue2);
-                    view = manageChatTextCell;
-                    break;
-            }
-            return new RecyclerListView.Holder(view);
-        }
-
-        public TLObject getObject(int position) {
-            if (InviteMembersBottomSheet.this.dialogsDelegate != null) {
-                TLRPC.Dialog dialog = (TLRPC.Dialog) InviteMembersBottomSheet.this.dialogsServerOnly.get(position - InviteMembersBottomSheet.this.contactsStartRow);
-                return DialogObject.isUserDialog(dialog.id) ? MessagesController.getInstance(InviteMembersBottomSheet.this.currentAccount).getUser(Long.valueOf(dialog.id)) : MessagesController.getInstance(InviteMembersBottomSheet.this.currentAccount).getChat(Long.valueOf(-dialog.id));
-            }
-            return (TLObject) InviteMembersBottomSheet.this.contacts.get(position - InviteMembersBottomSheet.this.contactsStartRow);
-        }
-
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            long oldId;
-            long id;
-            switch (holder.getItemViewType()) {
-                case 2:
-                    holder.itemView.requestLayout();
-                    return;
-                case 3:
-                    GroupCreateUserCell cell = (GroupCreateUserCell) holder.itemView;
-                    TLObject object = getObject(position);
-                    Object oldObject = cell.getObject();
-                    if (oldObject instanceof TLRPC.User) {
-                        oldId = ((TLRPC.User) oldObject).id;
-                    } else if (oldObject instanceof TLRPC.Chat) {
-                        oldId = -((TLRPC.Chat) oldObject).id;
-                    } else {
-                        oldId = 0;
+                };
+            } else if (i == 3) {
+                manageChatTextCell = new GroupCreateUserCell(context, 1, 0, InviteMembersBottomSheet.this.dialogsDelegate != null);
+            } else if (i == 4) {
+                manageChatTextCell = new View(context);
+            } else if (i != 5) {
+                ManageChatTextCell manageChatTextCell2 = new ManageChatTextCell(context);
+                manageChatTextCell2.setText(LocaleController.getString("VoipGroupCopyInviteLink", R.string.VoipGroupCopyInviteLink), null, R.drawable.msg_link, 7, true);
+                manageChatTextCell2.setColors("dialogTextBlue2", "dialogTextBlue2");
+                manageChatTextCell = manageChatTextCell2;
+            } else {
+                StickerEmptyView stickerEmptyView = new StickerEmptyView(this, context, null, 0) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.ListAdapter.2
+                    @Override // org.telegram.ui.Components.StickerEmptyView, android.view.ViewGroup, android.view.View
+                    public void onAttachedToWindow() {
+                        super.onAttachedToWindow();
+                        this.stickerView.getImageReceiver().startAnimation();
                     }
-                    boolean z = false;
-                    cell.setObject(object, null, null, position != InviteMembersBottomSheet.this.contactsEndRow);
-                    if (object instanceof TLRPC.User) {
-                        id = ((TLRPC.User) object).id;
-                    } else if (object instanceof TLRPC.Chat) {
-                        id = -((TLRPC.Chat) object).id;
-                    } else {
-                        id = 0;
-                    }
-                    if (id != 0) {
-                        if (InviteMembersBottomSheet.this.ignoreUsers == null || InviteMembersBottomSheet.this.ignoreUsers.indexOfKey(id) < 0) {
-                            boolean z2 = InviteMembersBottomSheet.this.selectedContacts.indexOfKey(id) >= 0;
-                            if (oldId == id) {
-                                z = true;
-                            }
-                            cell.setChecked(z2, z);
-                            cell.setCheckBoxEnabled(true);
-                            return;
-                        }
-                        cell.setChecked(true, false);
-                        cell.setCheckBoxEnabled(false);
-                        return;
-                    }
-                    return;
-                default:
-                    return;
-            }
-        }
-
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int position) {
-            if (position != InviteMembersBottomSheet.this.copyLinkRow) {
-                if (position != InviteMembersBottomSheet.this.emptyRow) {
-                    if (position < InviteMembersBottomSheet.this.contactsStartRow || position >= InviteMembersBottomSheet.this.contactsEndRow) {
-                        if (position != InviteMembersBottomSheet.this.lastRow) {
-                            if (position == InviteMembersBottomSheet.this.noContactsStubRow) {
-                                return 5;
-                            }
-                            return 0;
-                        }
-                        return 4;
-                    }
-                    return 3;
+                };
+                stickerEmptyView.setLayoutParams(new RecyclerView.LayoutParams(-1, -1));
+                stickerEmptyView.subtitle.setVisibility(8);
+                if (InviteMembersBottomSheet.this.dialogsDelegate != null) {
+                    stickerEmptyView.title.setText(LocaleController.getString("FilterNoChats", R.string.FilterNoChats));
+                } else {
+                    stickerEmptyView.title.setText(LocaleController.getString("NoContacts", R.string.NoContacts));
                 }
+                stickerEmptyView.setAnimateLayoutChange(true);
+                manageChatTextCell = stickerEmptyView;
+            }
+            return new RecyclerListView.Holder(manageChatTextCell);
+        }
+
+        public TLObject getObject(int i) {
+            if (InviteMembersBottomSheet.this.dialogsDelegate != null) {
+                TLRPC$Dialog tLRPC$Dialog = (TLRPC$Dialog) InviteMembersBottomSheet.this.dialogsServerOnly.get(i - InviteMembersBottomSheet.this.contactsStartRow);
+                return DialogObject.isUserDialog(tLRPC$Dialog.id) ? MessagesController.getInstance(((BottomSheet) InviteMembersBottomSheet.this).currentAccount).getUser(Long.valueOf(tLRPC$Dialog.id)) : MessagesController.getInstance(((BottomSheet) InviteMembersBottomSheet.this).currentAccount).getChat(Long.valueOf(-tLRPC$Dialog.id));
+            }
+            return (TLObject) InviteMembersBottomSheet.this.contacts.get(i - InviteMembersBottomSheet.this.contactsStartRow);
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+            long j;
+            long j2;
+            int itemViewType = viewHolder.getItemViewType();
+            if (itemViewType == 2) {
+                viewHolder.itemView.requestLayout();
+            } else if (itemViewType != 3) {
+            } else {
+                GroupCreateUserCell groupCreateUserCell = (GroupCreateUserCell) viewHolder.itemView;
+                TLObject object = getObject(i);
+                Object object2 = groupCreateUserCell.getObject();
+                if (object2 instanceof TLRPC$User) {
+                    j = ((TLRPC$User) object2).id;
+                } else {
+                    j = object2 instanceof TLRPC$Chat ? -((TLRPC$Chat) object2).id : 0L;
+                }
+                boolean z = false;
+                groupCreateUserCell.setObject(object, null, null, i != InviteMembersBottomSheet.this.contactsEndRow);
+                if (object instanceof TLRPC$User) {
+                    j2 = ((TLRPC$User) object).id;
+                } else {
+                    j2 = object instanceof TLRPC$Chat ? -((TLRPC$Chat) object).id : 0L;
+                }
+                if (j2 == 0) {
+                    return;
+                }
+                if (InviteMembersBottomSheet.this.ignoreUsers == null || InviteMembersBottomSheet.this.ignoreUsers.indexOfKey(j2) < 0) {
+                    boolean z2 = InviteMembersBottomSheet.this.selectedContacts.indexOfKey(j2) >= 0;
+                    if (j == j2) {
+                        z = true;
+                    }
+                    groupCreateUserCell.setChecked(z2, z);
+                    groupCreateUserCell.setCheckBoxEnabled(true);
+                    return;
+                }
+                groupCreateUserCell.setChecked(true, false);
+                groupCreateUserCell.setCheckBoxEnabled(false);
+            }
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemViewType(int i) {
+            if (i == InviteMembersBottomSheet.this.copyLinkRow) {
+                return 1;
+            }
+            if (i == InviteMembersBottomSheet.this.emptyRow) {
                 return 2;
             }
-            return 1;
+            if (i >= InviteMembersBottomSheet.this.contactsStartRow && i < InviteMembersBottomSheet.this.contactsEndRow) {
+                return 3;
+            }
+            if (i == InviteMembersBottomSheet.this.lastRow) {
+                return 4;
+            }
+            return i == InviteMembersBottomSheet.this.noContactsStubRow ? 5 : 0;
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            return holder.getItemViewType() == 3 || holder.getItemViewType() == 1;
+        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
+            return viewHolder.getItemViewType() == 3 || viewHolder.getItemViewType() == 1;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -730,7 +655,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         }
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class SearchAdapter extends RecyclerListView.SelectionAdapter {
         private int currentItemsCount;
         private final SearchAdapterHelper searchAdapterHelper;
@@ -760,7 +685,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
 
                 @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
                 public final void onDataSetChanged(int i) {
-                    InviteMembersBottomSheet.SearchAdapter.this.m2714xef2d3d33(i);
+                    InviteMembersBottomSheet.SearchAdapter.this.lambda$new$0(i);
                 }
 
                 @Override // org.telegram.ui.Adapters.SearchAdapterHelper.SearchAdapterHelperDelegate
@@ -770,8 +695,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             });
         }
 
-        /* renamed from: lambda$new$0$org-telegram-ui-Components-InviteMembersBottomSheet$SearchAdapter */
-        public /* synthetic */ void m2714xef2d3d33(int searchId) {
+        public /* synthetic */ void lambda$new$0(int i) {
             InviteMembersBottomSheet.this.showItemsAnimated(this.currentItemsCount - 1);
             if (this.searchRunnable == null && !this.searchAdapterHelper.isSearchInProgress() && getItemCount() <= 2) {
                 InviteMembersBottomSheet.this.emptyView.showProgress(false, true);
@@ -780,105 +704,101 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
-        public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            return holder.getItemViewType() == 1;
+        public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
+            return viewHolder.getItemViewType() == 1;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View view;
-            Context context = parent.getContext();
-            switch (viewType) {
-                case 1:
-                    view = new GroupCreateUserCell(context, 1, 0, false);
-                    break;
-                case 2:
-                    view = new View(context) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.SearchAdapter.1
-                        @Override // android.view.View
-                        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                            super.onMeasure(widthMeasureSpec, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48.0f) + InviteMembersBottomSheet.this.additionalHeight + InviteMembersBottomSheet.this.searchAdditionalHeight, C.BUFFER_FLAG_ENCRYPTED));
-                        }
-                    };
-                    break;
-                case 3:
-                default:
-                    view = new GroupCreateSectionCell(context);
-                    break;
-                case 4:
-                    view = new View(context);
-                    break;
+            Context context = viewGroup.getContext();
+            if (i == 1) {
+                view = new GroupCreateUserCell(context, 1, 0, false);
+            } else if (i == 2) {
+                view = new View(context) { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.SearchAdapter.1
+                    @Override // android.view.View
+                    protected void onMeasure(int i2, int i3) {
+                        super.onMeasure(i2, View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48.0f) + InviteMembersBottomSheet.this.additionalHeight + InviteMembersBottomSheet.this.searchAdditionalHeight, 1073741824));
+                    }
+                };
+            } else if (i != 4) {
+                view = new GroupCreateSectionCell(context);
+            } else {
+                view = new View(context);
             }
             return new RecyclerListView.Holder(view);
         }
 
-        /* JADX WARN: Multi-variable type inference failed */
-        /* JADX WARN: Removed duplicated region for block: B:59:0x0125  */
-        /* JADX WARN: Removed duplicated region for block: B:60:0x012b  */
-        /* JADX WARN: Removed duplicated region for block: B:66:0x013f  */
-        /* JADX WARN: Removed duplicated region for block: B:67:0x0145  */
-        /* JADX WARN: Removed duplicated region for block: B:73:0x0158  */
-        /* JADX WARN: Removed duplicated region for block: B:90:0x019e  */
+        /* JADX WARN: Code restructure failed: missing block: B:35:0x00ae, code lost:
+            if (r13.toString().startsWith("@" + r3) != false) goto L53;
+         */
+        /* JADX WARN: Removed duplicated region for block: B:55:0x0109  */
+        /* JADX WARN: Removed duplicated region for block: B:56:0x010e  */
+        /* JADX WARN: Removed duplicated region for block: B:62:0x0120  */
+        /* JADX WARN: Removed duplicated region for block: B:63:0x0125  */
+        /* JADX WARN: Removed duplicated region for block: B:69:0x0134  */
+        /* JADX WARN: Removed duplicated region for block: B:91:? A[RETURN, SYNTHETIC] */
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r19, int r20) {
+        public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r12, int r13) {
             /*
-                Method dump skipped, instructions count: 450
+                Method dump skipped, instructions count: 387
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.InviteMembersBottomSheet.SearchAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public int getItemViewType(int position) {
-            if (position == 0) {
+        public int getItemViewType(int i) {
+            if (i == 0) {
                 return 2;
             }
-            if (position == this.currentItemsCount - 1) {
+            if (i == this.currentItemsCount - 1) {
                 return 4;
             }
-            return position + (-1) == this.searchResult.size() + this.searchAdapterHelper.getLocalServerSearch().size() ? 0 : 1;
+            return i + (-1) == this.searchResult.size() + this.searchAdapterHelper.getLocalServerSearch().size() ? 0 : 1;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public int getItemCount() {
-            int count = this.searchResult.size();
-            int localServerCount = this.searchAdapterHelper.getLocalServerSearch().size();
-            int globalCount = this.searchAdapterHelper.getGlobalSearch().size();
-            int count2 = count + localServerCount;
-            if (globalCount != 0) {
-                count2 += globalCount + 1;
+            int size = this.searchResult.size();
+            int size2 = this.searchAdapterHelper.getLocalServerSearch().size();
+            int size3 = this.searchAdapterHelper.getGlobalSearch().size();
+            int i = size + size2;
+            if (size3 != 0) {
+                i += size3 + 1;
             }
-            int count3 = count2 + 2;
-            this.currentItemsCount = count3;
-            return count3;
+            int i2 = i + 2;
+            this.currentItemsCount = i2;
+            return i2;
         }
 
-        private void updateSearchResults(final ArrayList<Object> users, final ArrayList<CharSequence> names) {
+        private void updateSearchResults(final ArrayList<Object> arrayList, final ArrayList<CharSequence> arrayList2) {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SearchAdapter$$ExternalSyntheticLambda3
                 @Override // java.lang.Runnable
                 public final void run() {
-                    InviteMembersBottomSheet.SearchAdapter.this.m2718x989c1db9(users, names);
+                    InviteMembersBottomSheet.SearchAdapter.this.lambda$updateSearchResults$1(arrayList, arrayList2);
                 }
             });
         }
 
-        /* renamed from: lambda$updateSearchResults$1$org-telegram-ui-Components-InviteMembersBottomSheet$SearchAdapter */
-        public /* synthetic */ void m2718x989c1db9(ArrayList users, ArrayList names) {
+        public /* synthetic */ void lambda$updateSearchResults$1(ArrayList arrayList, ArrayList arrayList2) {
             this.searchRunnable = null;
-            this.searchResult = users;
-            this.searchResultNames = names;
-            this.searchAdapterHelper.mergeResults(users);
+            this.searchResult = arrayList;
+            this.searchResultNames = arrayList2;
+            this.searchAdapterHelper.mergeResults(arrayList);
             InviteMembersBottomSheet.this.showItemsAnimated(this.currentItemsCount - 1);
             notifyDataSetChanged();
-            if (!this.searchAdapterHelper.isSearchInProgress() && getItemCount() <= 2) {
-                InviteMembersBottomSheet.this.emptyView.showProgress(false, true);
+            if (this.searchAdapterHelper.isSearchInProgress() || getItemCount() > 2) {
+                return;
             }
+            InviteMembersBottomSheet.this.emptyView.showProgress(false, true);
         }
 
-        public void searchDialogs(final String query) {
+        public void searchDialogs(final String str) {
             if (this.searchRunnable != null) {
                 Utilities.searchQueue.cancelRunnable(this.searchRunnable);
                 this.searchRunnable = null;
@@ -888,93 +808,100 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             this.searchAdapterHelper.mergeResults(null);
             this.searchAdapterHelper.queryServerSearch(null, true, false, false, false, false, 0L, false, 0, 0);
             notifyDataSetChanged();
-            if (!TextUtils.isEmpty(query)) {
-                if (InviteMembersBottomSheet.this.listView.getAdapter() != InviteMembersBottomSheet.this.searchListViewAdapter) {
-                    InviteMembersBottomSheet.this.listView.setAdapter(InviteMembersBottomSheet.this.searchListViewAdapter);
+            if (!TextUtils.isEmpty(str)) {
+                RecyclerView.Adapter adapter = InviteMembersBottomSheet.this.listView.getAdapter();
+                InviteMembersBottomSheet inviteMembersBottomSheet = InviteMembersBottomSheet.this;
+                RecyclerView.Adapter adapter2 = inviteMembersBottomSheet.searchListViewAdapter;
+                if (adapter != adapter2) {
+                    inviteMembersBottomSheet.listView.setAdapter(adapter2);
                 }
                 InviteMembersBottomSheet.this.emptyView.showProgress(true, false);
                 DispatchQueue dispatchQueue = Utilities.searchQueue;
                 Runnable runnable = new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SearchAdapter$$ExternalSyntheticLambda2
                     @Override // java.lang.Runnable
                     public final void run() {
-                        InviteMembersBottomSheet.SearchAdapter.this.m2717x84772ba(query);
+                        InviteMembersBottomSheet.SearchAdapter.this.lambda$searchDialogs$4(str);
                     }
                 };
                 this.searchRunnable = runnable;
                 dispatchQueue.postRunnable(runnable, 300L);
-            } else if (InviteMembersBottomSheet.this.listView.getAdapter() != InviteMembersBottomSheet.this.listViewAdapter) {
-                InviteMembersBottomSheet.this.listView.setAdapter(InviteMembersBottomSheet.this.listViewAdapter);
+                return;
             }
+            RecyclerView.Adapter adapter3 = InviteMembersBottomSheet.this.listView.getAdapter();
+            InviteMembersBottomSheet inviteMembersBottomSheet2 = InviteMembersBottomSheet.this;
+            RecyclerView.Adapter adapter4 = inviteMembersBottomSheet2.listViewAdapter;
+            if (adapter3 == adapter4) {
+                return;
+            }
+            inviteMembersBottomSheet2.listView.setAdapter(adapter4);
         }
 
-        /* renamed from: lambda$searchDialogs$4$org-telegram-ui-Components-InviteMembersBottomSheet$SearchAdapter */
-        public /* synthetic */ void m2717x84772ba(final String query) {
+        public /* synthetic */ void lambda$searchDialogs$4(final String str) {
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SearchAdapter$$ExternalSyntheticLambda1
                 @Override // java.lang.Runnable
                 public final void run() {
-                    InviteMembersBottomSheet.SearchAdapter.this.m2716x2c85f6f9(query);
+                    InviteMembersBottomSheet.SearchAdapter.this.lambda$searchDialogs$3(str);
                 }
             });
         }
 
-        /* renamed from: lambda$searchDialogs$3$org-telegram-ui-Components-InviteMembersBottomSheet$SearchAdapter */
-        public /* synthetic */ void m2716x2c85f6f9(final String query) {
-            this.searchAdapterHelper.queryServerSearch(query, true, InviteMembersBottomSheet.this.dialogsDelegate != null, true, InviteMembersBottomSheet.this.dialogsDelegate != null, false, 0L, false, 0, 0);
+        public /* synthetic */ void lambda$searchDialogs$3(final String str) {
+            this.searchAdapterHelper.queryServerSearch(str, true, InviteMembersBottomSheet.this.dialogsDelegate != null, true, InviteMembersBottomSheet.this.dialogsDelegate != null, false, 0L, false, 0, 0);
             DispatchQueue dispatchQueue = Utilities.searchQueue;
             Runnable runnable = new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SearchAdapter$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    InviteMembersBottomSheet.SearchAdapter.this.m2715x50c47b38(query);
+                    InviteMembersBottomSheet.SearchAdapter.this.lambda$searchDialogs$2(str);
                 }
             };
             this.searchRunnable = runnable;
             dispatchQueue.postRunnable(runnable);
         }
 
-        /* JADX WARN: Code restructure failed: missing block: B:38:0x00d4, code lost:
-            if (r12.contains(" " + r3) != false) goto L44;
+        /* JADX WARN: Code restructure failed: missing block: B:38:0x00d0, code lost:
+            if (r13.contains(" " + r3) != false) goto L43;
          */
-        /* JADX WARN: Removed duplicated region for block: B:54:0x0137 A[LOOP:1: B:29:0x0096->B:54:0x0137, LOOP_END] */
-        /* JADX WARN: Removed duplicated region for block: B:62:0x00e8 A[SYNTHETIC] */
-        /* renamed from: lambda$searchDialogs$2$org-telegram-ui-Components-InviteMembersBottomSheet$SearchAdapter */
+        /* JADX WARN: Removed duplicated region for block: B:53:0x0130 A[LOOP:1: B:29:0x0094->B:53:0x0130, LOOP_END] */
+        /* JADX WARN: Removed duplicated region for block: B:62:0x00e0 A[SYNTHETIC] */
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public /* synthetic */ void m2715x50c47b38(java.lang.String r19) {
+        public /* synthetic */ void lambda$searchDialogs$2(java.lang.String r18) {
             /*
-                Method dump skipped, instructions count: 333
+                Method dump skipped, instructions count: 324
                 To view this dump add '--comments-level debug' option
             */
-            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.InviteMembersBottomSheet.SearchAdapter.m2715x50c47b38(java.lang.String):void");
+            throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.InviteMembersBottomSheet.SearchAdapter.lambda$searchDialogs$2(java.lang.String):void");
         }
     }
 
     @Override // org.telegram.ui.Components.UsersAlertBase
-    protected void onSearchViewTouched(MotionEvent ev, final EditTextBoldCursor searchEditText) {
-        if (ev.getAction() == 0) {
+    protected void onSearchViewTouched(MotionEvent motionEvent, final EditTextBoldCursor editTextBoldCursor) {
+        if (motionEvent.getAction() == 0) {
             this.y = this.scrollOffsetY;
-        } else if (ev.getAction() == 1 && Math.abs(this.scrollOffsetY - this.y) < this.touchSlop && !this.enterEventSent) {
-            Activity activity = AndroidUtilities.findActivity(getContext());
-            BaseFragment fragment = null;
-            if (activity instanceof LaunchActivity) {
-                BaseFragment fragment2 = ((LaunchActivity) activity).getActionBarLayout().fragmentsStack.get(((LaunchActivity) activity).getActionBarLayout().fragmentsStack.size() - 1);
-                fragment = fragment2;
+        } else if (motionEvent.getAction() != 1 || Math.abs(this.scrollOffsetY - this.y) >= this.touchSlop || this.enterEventSent) {
+        } else {
+            Activity findActivity = AndroidUtilities.findActivity(getContext());
+            BaseFragment baseFragment = null;
+            if (findActivity instanceof LaunchActivity) {
+                LaunchActivity launchActivity = (LaunchActivity) findActivity;
+                baseFragment = launchActivity.getActionBarLayout().fragmentsStack.get(launchActivity.getActionBarLayout().fragmentsStack.size() - 1);
             }
-            if (fragment instanceof ChatActivity) {
-                boolean keyboardVisible = ((ChatActivity) fragment).needEnterText();
+            if (baseFragment instanceof ChatActivity) {
+                boolean needEnterText = ((ChatActivity) baseFragment).needEnterText();
                 this.enterEventSent = true;
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda6
                     @Override // java.lang.Runnable
                     public final void run() {
-                        InviteMembersBottomSheet.this.m2712xf72b33a7(searchEditText);
+                        InviteMembersBottomSheet.this.lambda$onSearchViewTouched$5(editTextBoldCursor);
                     }
-                }, keyboardVisible ? 200L : 0L);
+                }, needEnterText ? 200L : 0L);
                 return;
             }
             this.enterEventSent = true;
             setFocusable(true);
-            searchEditText.requestFocus();
+            editTextBoldCursor.requestFocus();
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda4
                 @Override // java.lang.Runnable
                 public final void run() {
@@ -984,10 +911,9 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         }
     }
 
-    /* renamed from: lambda$onSearchViewTouched$5$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2712xf72b33a7(final EditTextBoldCursor searchEditText) {
+    public /* synthetic */ void lambda$onSearchViewTouched$5(final EditTextBoldCursor editTextBoldCursor) {
         setFocusable(true);
-        searchEditText.requestFocus();
+        editTextBoldCursor.requestFocus();
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
@@ -996,13 +922,12 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         });
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class SpansContainer extends ViewGroup {
         boolean addAnimation;
         private boolean animationStarted;
-        private View removingSpan;
         private ArrayList<Animator> animators = new ArrayList<>();
-        private int animationIndex = -1;
+        private View removingSpan;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public SpansContainer(Context context) {
@@ -1011,87 +936,89 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         }
 
         @Override // android.view.View
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            RecyclerView.ViewHolder holder;
-            int count = getChildCount();
-            int width = View.MeasureSpec.getSize(widthMeasureSpec);
-            int maxWidth = width - AndroidUtilities.dp(26.0f);
-            int currentLineWidth = 0;
-            int y = AndroidUtilities.dp(10.0f);
-            int allCurrentLineWidth = 0;
-            int allY = AndroidUtilities.dp(10.0f);
-            for (int a = 0; a < count; a++) {
-                View child = getChildAt(a);
-                if (child instanceof GroupCreateSpan) {
-                    child.measure(View.MeasureSpec.makeMeasureSpec(width, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32.0f), C.BUFFER_FLAG_ENCRYPTED));
-                    if (child != this.removingSpan && child.getMeasuredWidth() + currentLineWidth > maxWidth) {
-                        y += child.getMeasuredHeight() + AndroidUtilities.dp(8.0f);
-                        currentLineWidth = 0;
+        protected void onMeasure(int i, int i2) {
+            RecyclerView.ViewHolder findViewHolderForAdapterPosition;
+            int childCount = getChildCount();
+            int size = View.MeasureSpec.getSize(i);
+            int dp = size - AndroidUtilities.dp(26.0f);
+            int dp2 = AndroidUtilities.dp(10.0f);
+            int dp3 = AndroidUtilities.dp(10.0f);
+            int i3 = 0;
+            int i4 = 0;
+            for (int i5 = 0; i5 < childCount; i5++) {
+                View childAt = getChildAt(i5);
+                if (childAt instanceof GroupCreateSpan) {
+                    childAt.measure(View.MeasureSpec.makeMeasureSpec(size, Integer.MIN_VALUE), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32.0f), 1073741824));
+                    if (childAt != this.removingSpan && childAt.getMeasuredWidth() + i3 > dp) {
+                        dp2 += childAt.getMeasuredHeight() + AndroidUtilities.dp(8.0f);
+                        i3 = 0;
                     }
-                    if (child.getMeasuredWidth() + allCurrentLineWidth > maxWidth) {
-                        allY += child.getMeasuredHeight() + AndroidUtilities.dp(8.0f);
-                        allCurrentLineWidth = 0;
+                    if (childAt.getMeasuredWidth() + i4 > dp) {
+                        dp3 += childAt.getMeasuredHeight() + AndroidUtilities.dp(8.0f);
+                        i4 = 0;
                     }
-                    int x = AndroidUtilities.dp(13.0f) + currentLineWidth;
+                    int dp4 = AndroidUtilities.dp(13.0f) + i3;
                     if (!this.animationStarted) {
                         View view = this.removingSpan;
-                        if (child == view) {
-                            child.setTranslationX(AndroidUtilities.dp(13.0f) + allCurrentLineWidth);
-                            child.setTranslationY(allY);
+                        if (childAt == view) {
+                            childAt.setTranslationX(AndroidUtilities.dp(13.0f) + i4);
+                            childAt.setTranslationY(dp3);
                         } else if (view != null) {
-                            if (child.getTranslationX() != x) {
-                                this.animators.add(ObjectAnimator.ofFloat(child, View.TRANSLATION_X, x));
+                            float f = dp4;
+                            if (childAt.getTranslationX() != f) {
+                                this.animators.add(ObjectAnimator.ofFloat(childAt, View.TRANSLATION_X, f));
                             }
-                            if (child.getTranslationY() != y) {
-                                this.animators.add(ObjectAnimator.ofFloat(child, View.TRANSLATION_Y, y));
+                            float f2 = dp2;
+                            if (childAt.getTranslationY() != f2) {
+                                this.animators.add(ObjectAnimator.ofFloat(childAt, View.TRANSLATION_Y, f2));
                             }
                         } else {
-                            child.setTranslationX(x);
-                            child.setTranslationY(y);
+                            childAt.setTranslationX(dp4);
+                            childAt.setTranslationY(dp2);
                         }
                     }
-                    if (child != this.removingSpan) {
-                        currentLineWidth += child.getMeasuredWidth() + AndroidUtilities.dp(9.0f);
+                    if (childAt != this.removingSpan) {
+                        i3 += childAt.getMeasuredWidth() + AndroidUtilities.dp(9.0f);
                     }
-                    allCurrentLineWidth += child.getMeasuredWidth() + AndroidUtilities.dp(9.0f);
+                    i4 += childAt.getMeasuredWidth() + AndroidUtilities.dp(9.0f);
                 }
             }
-            int h = AndroidUtilities.dp(42.0f) + allY;
-            final int animateToH = AndroidUtilities.dp(42.0f) + y;
-            int newAdditionalH = InviteMembersBottomSheet.this.dialogsDelegate != null ? InviteMembersBottomSheet.this.spanEnter ? Math.min(InviteMembersBottomSheet.this.maxSize, animateToH) : 0 : Math.max(0, Math.min(InviteMembersBottomSheet.this.maxSize, animateToH) - AndroidUtilities.dp(52.0f));
-            int oldSearchAdditionalH = InviteMembersBottomSheet.this.searchAdditionalHeight;
+            int dp5 = dp3 + AndroidUtilities.dp(42.0f);
+            final int dp6 = dp2 + AndroidUtilities.dp(42.0f);
+            int min = InviteMembersBottomSheet.this.dialogsDelegate != null ? InviteMembersBottomSheet.this.spanEnter ? Math.min(InviteMembersBottomSheet.this.maxSize, dp6) : 0 : Math.max(0, Math.min(InviteMembersBottomSheet.this.maxSize, dp6) - AndroidUtilities.dp(52.0f));
+            int i6 = InviteMembersBottomSheet.this.searchAdditionalHeight;
             InviteMembersBottomSheet inviteMembersBottomSheet = InviteMembersBottomSheet.this;
             inviteMembersBottomSheet.searchAdditionalHeight = (inviteMembersBottomSheet.dialogsDelegate != null || InviteMembersBottomSheet.this.selectedContacts.size() <= 0) ? 0 : AndroidUtilities.dp(56.0f);
-            if (newAdditionalH != InviteMembersBottomSheet.this.additionalHeight || oldSearchAdditionalH != InviteMembersBottomSheet.this.searchAdditionalHeight) {
-                InviteMembersBottomSheet.this.additionalHeight = newAdditionalH;
-                if (InviteMembersBottomSheet.this.listView.getAdapter() != null && InviteMembersBottomSheet.this.listView.getAdapter().getItemCount() > 0 && (holder = InviteMembersBottomSheet.this.listView.findViewHolderForAdapterPosition(0)) != null) {
+            if (min != InviteMembersBottomSheet.this.additionalHeight || i6 != InviteMembersBottomSheet.this.searchAdditionalHeight) {
+                InviteMembersBottomSheet.this.additionalHeight = min;
+                if (InviteMembersBottomSheet.this.listView.getAdapter() != null && InviteMembersBottomSheet.this.listView.getAdapter().getItemCount() > 0 && (findViewHolderForAdapterPosition = InviteMembersBottomSheet.this.listView.findViewHolderForAdapterPosition(0)) != null) {
                     InviteMembersBottomSheet.this.listView.getAdapter().notifyItemChanged(0);
-                    InviteMembersBottomSheet.this.layoutManager.scrollToPositionWithOffset(0, holder.itemView.getTop() - InviteMembersBottomSheet.this.listView.getPaddingTop());
+                    InviteMembersBottomSheet.this.layoutManager.scrollToPositionWithOffset(0, findViewHolderForAdapterPosition.itemView.getTop() - InviteMembersBottomSheet.this.listView.getPaddingTop());
                 }
             }
-            int newSize = Math.min(InviteMembersBottomSheet.this.maxSize, animateToH);
-            if (InviteMembersBottomSheet.this.scrollViewH != newSize) {
-                ValueAnimator valueAnimator = ValueAnimator.ofInt(InviteMembersBottomSheet.this.scrollViewH, newSize);
-                valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SpansContainer$$ExternalSyntheticLambda0
+            int min2 = Math.min(InviteMembersBottomSheet.this.maxSize, dp6);
+            if (InviteMembersBottomSheet.this.scrollViewH != min2) {
+                ValueAnimator ofInt = ValueAnimator.ofInt(InviteMembersBottomSheet.this.scrollViewH, min2);
+                ofInt.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SpansContainer$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                    public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                        InviteMembersBottomSheet.SpansContainer.this.m2719x155bedad(valueAnimator2);
+                    public final void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        InviteMembersBottomSheet.SpansContainer.this.lambda$onMeasure$0(valueAnimator);
                     }
                 });
-                this.animators.add(valueAnimator);
+                this.animators.add(ofInt);
             }
-            if (this.addAnimation && animateToH > InviteMembersBottomSheet.this.maxSize) {
+            if (this.addAnimation && dp6 > InviteMembersBottomSheet.this.maxSize) {
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SpansContainer$$ExternalSyntheticLambda1
                     @Override // java.lang.Runnable
                     public final void run() {
-                        InviteMembersBottomSheet.SpansContainer.this.m2720xb1c9ea0c(animateToH);
+                        InviteMembersBottomSheet.SpansContainer.this.lambda$onMeasure$1(dp6);
                     }
                 });
-            } else if (!this.addAnimation && InviteMembersBottomSheet.this.spansScrollView.getScrollY() + InviteMembersBottomSheet.this.spansScrollView.getMeasuredHeight() > animateToH) {
+            } else if (!this.addAnimation && InviteMembersBottomSheet.this.spansScrollView.getScrollY() + InviteMembersBottomSheet.this.spansScrollView.getMeasuredHeight() > dp6) {
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$SpansContainer$$ExternalSyntheticLambda2
                     @Override // java.lang.Runnable
                     public final void run() {
-                        InviteMembersBottomSheet.SpansContainer.this.m2721x4e37e66b(animateToH);
+                        InviteMembersBottomSheet.SpansContainer.this.lambda$onMeasure$2(dp6);
                     }
                 });
             }
@@ -1099,7 +1026,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
                 InviteMembersBottomSheet.this.currentAnimation.playTogether(this.animators);
                 InviteMembersBottomSheet.this.currentAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.SpansContainer.1
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                    public void onAnimationEnd(Animator animation) {
+                    public void onAnimationEnd(Animator animator) {
                         InviteMembersBottomSheet.this.currentAnimation = null;
                         SpansContainer.this.requestLayout();
                     }
@@ -1108,47 +1035,44 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
                 this.animationStarted = true;
             }
             if (InviteMembersBottomSheet.this.currentAnimation == null) {
-                InviteMembersBottomSheet.this.scrollViewH = newSize;
-                InviteMembersBottomSheet.this.containerView.invalidate();
+                InviteMembersBottomSheet.this.scrollViewH = min2;
+                ((BottomSheet) InviteMembersBottomSheet.this).containerView.invalidate();
             }
-            setMeasuredDimension(width, Math.max(animateToH, h));
+            setMeasuredDimension(size, Math.max(dp6, dp5));
             InviteMembersBottomSheet.this.listView.setTranslationY(0.0f);
         }
 
-        /* renamed from: lambda$onMeasure$0$org-telegram-ui-Components-InviteMembersBottomSheet$SpansContainer */
-        public /* synthetic */ void m2719x155bedad(ValueAnimator valueAnimator1) {
-            InviteMembersBottomSheet.this.scrollViewH = ((Integer) valueAnimator1.getAnimatedValue()).intValue();
-            InviteMembersBottomSheet.this.containerView.invalidate();
+        public /* synthetic */ void lambda$onMeasure$0(ValueAnimator valueAnimator) {
+            InviteMembersBottomSheet.this.scrollViewH = ((Integer) valueAnimator.getAnimatedValue()).intValue();
+            ((BottomSheet) InviteMembersBottomSheet.this).containerView.invalidate();
         }
 
-        /* renamed from: lambda$onMeasure$1$org-telegram-ui-Components-InviteMembersBottomSheet$SpansContainer */
-        public /* synthetic */ void m2720xb1c9ea0c(int animateToH) {
-            InviteMembersBottomSheet.this.spansScrollView.smoothScrollTo(0, animateToH - InviteMembersBottomSheet.this.maxSize);
+        public /* synthetic */ void lambda$onMeasure$1(int i) {
+            InviteMembersBottomSheet.this.spansScrollView.smoothScrollTo(0, i - InviteMembersBottomSheet.this.maxSize);
         }
 
-        /* renamed from: lambda$onMeasure$2$org-telegram-ui-Components-InviteMembersBottomSheet$SpansContainer */
-        public /* synthetic */ void m2721x4e37e66b(int animateToH) {
-            InviteMembersBottomSheet.this.spansScrollView.smoothScrollTo(0, animateToH - InviteMembersBottomSheet.this.maxSize);
+        public /* synthetic */ void lambda$onMeasure$2(int i) {
+            InviteMembersBottomSheet.this.spansScrollView.smoothScrollTo(0, i - InviteMembersBottomSheet.this.maxSize);
         }
 
         @Override // android.view.ViewGroup, android.view.View
-        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            int count = getChildCount();
-            for (int a = 0; a < count; a++) {
-                View child = getChildAt(a);
-                child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+            int childCount = getChildCount();
+            for (int i5 = 0; i5 < childCount; i5++) {
+                View childAt = getChildAt(i5);
+                childAt.layout(0, 0, childAt.getMeasuredWidth(), childAt.getMeasuredHeight());
             }
         }
 
-        public void addSpan(GroupCreateSpan span, boolean animated) {
+        public void addSpan(GroupCreateSpan groupCreateSpan, boolean z) {
             this.addAnimation = true;
-            InviteMembersBottomSheet.this.selectedContacts.put(span.getUid(), span);
+            InviteMembersBottomSheet.this.selectedContacts.put(groupCreateSpan.getUid(), groupCreateSpan);
             if (InviteMembersBottomSheet.this.currentAnimation != null) {
                 InviteMembersBottomSheet.this.currentAnimation.setupEndValues();
                 InviteMembersBottomSheet.this.currentAnimation.cancel();
             }
             this.animationStarted = false;
-            if (animated) {
+            if (z) {
                 InviteMembersBottomSheet.this.currentAnimation = new AnimatorSet();
                 InviteMembersBottomSheet.this.currentAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.SpansContainer.2
                     @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
@@ -1160,17 +1084,17 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
                 InviteMembersBottomSheet.this.currentAnimation.setDuration(150L);
                 InviteMembersBottomSheet.this.currentAnimation.setInterpolator(CubicBezierInterpolator.DEFAULT);
                 this.animators.clear();
-                this.animators.add(ObjectAnimator.ofFloat(span, View.SCALE_X, 0.01f, 1.0f));
-                this.animators.add(ObjectAnimator.ofFloat(span, View.SCALE_Y, 0.01f, 1.0f));
-                this.animators.add(ObjectAnimator.ofFloat(span, View.ALPHA, 0.0f, 1.0f));
+                this.animators.add(ObjectAnimator.ofFloat(groupCreateSpan, View.SCALE_X, 0.01f, 1.0f));
+                this.animators.add(ObjectAnimator.ofFloat(groupCreateSpan, View.SCALE_Y, 0.01f, 1.0f));
+                this.animators.add(ObjectAnimator.ofFloat(groupCreateSpan, View.ALPHA, 0.0f, 1.0f));
             }
-            addView(span);
+            addView(groupCreateSpan);
         }
 
-        public void removeSpan(final GroupCreateSpan span) {
+        public void removeSpan(final GroupCreateSpan groupCreateSpan) {
             this.addAnimation = false;
-            InviteMembersBottomSheet.this.selectedContacts.remove(span.getUid());
-            span.setOnClickListener(null);
+            InviteMembersBottomSheet.this.selectedContacts.remove(groupCreateSpan.getUid());
+            groupCreateSpan.setOnClickListener(null);
             if (InviteMembersBottomSheet.this.currentAnimation != null) {
                 InviteMembersBottomSheet.this.currentAnimation.setupEndValues();
                 InviteMembersBottomSheet.this.currentAnimation.cancel();
@@ -1180,14 +1104,14 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             InviteMembersBottomSheet.this.currentAnimation.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet.SpansContainer.3
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
                 public void onAnimationEnd(Animator animator) {
-                    SpansContainer.this.removeView(span);
+                    SpansContainer.this.removeView(groupCreateSpan);
                     SpansContainer.this.removingSpan = null;
                     InviteMembersBottomSheet.this.currentAnimation = null;
                     SpansContainer.this.animationStarted = false;
                 }
             });
             InviteMembersBottomSheet.this.currentAnimation.setDuration(150L);
-            this.removingSpan = span;
+            this.removingSpan = groupCreateSpan;
             this.animators.clear();
             this.animators.add(ObjectAnimator.ofFloat(this.removingSpan, View.SCALE_X, 1.0f, 0.01f));
             this.animators.add(ObjectAnimator.ofFloat(this.removingSpan, View.SCALE_Y, 1.0f, 0.01f));
@@ -1206,9 +1130,9 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             private VerticalPositionAutoAnimator verticalPositionAutoAnimator;
 
             @Override // android.view.ViewGroup
-            public void onViewAdded(View child) {
-                if (child == InviteMembersBottomSheet.this.floatingButton && this.verticalPositionAutoAnimator == null) {
-                    this.verticalPositionAutoAnimator = VerticalPositionAutoAnimator.attach(child);
+            public void onViewAdded(View view) {
+                if (view == InviteMembersBottomSheet.this.floatingButton && this.verticalPositionAutoAnimator == null) {
+                    this.verticalPositionAutoAnimator = VerticalPositionAutoAnimator.attach(view);
                 }
             }
 
@@ -1224,63 +1148,63 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             /* JADX INFO: Access modifiers changed from: protected */
             @Override // org.telegram.ui.Components.UsersAlertBase.ContainerView, android.view.ViewGroup, android.view.View
             public void dispatchDraw(Canvas canvas) {
-                int y = (InviteMembersBottomSheet.this.scrollOffsetY - InviteMembersBottomSheet.this.backgroundPaddingTop) + AndroidUtilities.dp(6.0f);
-                InviteMembersBottomSheet.this.spansScrollView.setTranslationY(AndroidUtilities.dp(64.0f) + y);
-                float newEmptyViewOffset = InviteMembersBottomSheet.this.additionalHeight + InviteMembersBottomSheet.this.searchAdditionalHeight;
+                InviteMembersBottomSheet inviteMembersBottomSheet;
+                InviteMembersBottomSheet inviteMembersBottomSheet2 = InviteMembersBottomSheet.this;
+                InviteMembersBottomSheet.this.spansScrollView.setTranslationY((inviteMembersBottomSheet2.scrollOffsetY - ((BottomSheet) inviteMembersBottomSheet2).backgroundPaddingTop) + AndroidUtilities.dp(6.0f) + AndroidUtilities.dp(64.0f));
+                float f = InviteMembersBottomSheet.this.additionalHeight + InviteMembersBottomSheet.this.searchAdditionalHeight;
                 if (InviteMembersBottomSheet.this.emptyView.getVisibility() != 0) {
-                    this.emptyViewOffset = newEmptyViewOffset;
-                    this.animateToEmptyViewOffset = newEmptyViewOffset;
-                } else if (this.animateToEmptyViewOffset != newEmptyViewOffset) {
-                    this.animateToEmptyViewOffset = newEmptyViewOffset;
-                    this.deltaOffset = (newEmptyViewOffset - this.emptyViewOffset) * 0.10666667f;
+                    this.emptyViewOffset = f;
+                    this.animateToEmptyViewOffset = f;
+                } else if (this.animateToEmptyViewOffset != f) {
+                    this.animateToEmptyViewOffset = f;
+                    this.deltaOffset = (f - this.emptyViewOffset) * 0.10666667f;
                 }
-                float f = this.emptyViewOffset;
-                float f2 = this.animateToEmptyViewOffset;
-                if (f != f2) {
-                    float f3 = this.deltaOffset;
-                    float f4 = f + f3;
-                    this.emptyViewOffset = f4;
-                    if (f3 > 0.0f && f4 > f2) {
-                        this.emptyViewOffset = f2;
-                    } else if (f3 < 0.0f && f4 < f2) {
-                        this.emptyViewOffset = f2;
+                float f2 = this.emptyViewOffset;
+                float f3 = this.animateToEmptyViewOffset;
+                if (f2 != f3) {
+                    float f4 = this.deltaOffset;
+                    float f5 = f2 + f4;
+                    this.emptyViewOffset = f5;
+                    if (f4 > 0.0f && f5 > f3) {
+                        this.emptyViewOffset = f3;
+                    } else if (f4 < 0.0f && f5 < f3) {
+                        this.emptyViewOffset = f3;
                     } else {
                         invalidate();
                     }
                 }
-                InviteMembersBottomSheet.this.emptyView.setTranslationY(InviteMembersBottomSheet.this.scrollOffsetY + this.emptyViewOffset);
+                InviteMembersBottomSheet.this.emptyView.setTranslationY(inviteMembersBottomSheet.scrollOffsetY + this.emptyViewOffset);
                 super.dispatchDraw(canvas);
             }
 
             @Override // android.view.ViewGroup
-            protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-                if (child == InviteMembersBottomSheet.this.spansScrollView) {
+            protected boolean drawChild(Canvas canvas, View view, long j) {
+                if (view == InviteMembersBottomSheet.this.spansScrollView) {
                     canvas.save();
-                    canvas.clipRect(0.0f, child.getY() - AndroidUtilities.dp(4.0f), getMeasuredWidth(), child.getY() + InviteMembersBottomSheet.this.scrollViewH + 1.0f);
-                    canvas.drawColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), (int) (InviteMembersBottomSheet.this.spansEnterProgress * 255.0f)));
-                    this.paint.setColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_divider), (int) (InviteMembersBottomSheet.this.spansEnterProgress * 255.0f)));
-                    canvas.drawRect(0.0f, child.getY() + InviteMembersBottomSheet.this.scrollViewH, getMeasuredWidth(), child.getY() + InviteMembersBottomSheet.this.scrollViewH + 1.0f, this.paint);
-                    boolean rez = super.drawChild(canvas, child, drawingTime);
+                    canvas.clipRect(0.0f, view.getY() - AndroidUtilities.dp(4.0f), getMeasuredWidth(), view.getY() + InviteMembersBottomSheet.this.scrollViewH + 1.0f);
+                    canvas.drawColor(ColorUtils.setAlphaComponent(Theme.getColor("windowBackgroundWhite"), (int) (InviteMembersBottomSheet.this.spansEnterProgress * 255.0f)));
+                    this.paint.setColor(ColorUtils.setAlphaComponent(Theme.getColor("divider"), (int) (InviteMembersBottomSheet.this.spansEnterProgress * 255.0f)));
+                    canvas.drawRect(0.0f, view.getY() + InviteMembersBottomSheet.this.scrollViewH, getMeasuredWidth(), view.getY() + InviteMembersBottomSheet.this.scrollViewH + 1.0f, this.paint);
+                    boolean drawChild = super.drawChild(canvas, view, j);
                     canvas.restore();
-                    return rez;
+                    return drawChild;
                 }
-                boolean rez2 = super.drawChild(canvas, child, drawingTime);
-                return rez2;
+                return super.drawChild(canvas, view, j);
             }
         };
     }
 
     /* JADX INFO: Access modifiers changed from: protected */
     @Override // org.telegram.ui.Components.UsersAlertBase
-    public void search(String text) {
-        this.searchAdapter.searchDialogs(text);
+    public void search(String str) {
+        this.searchAdapter.searchDialogs(str);
     }
 
     public void setDelegate(GroupCreateActivity.ContactsAddActivityDelegate contactsAddActivityDelegate) {
         this.delegate = contactsAddActivityDelegate;
     }
 
-    public void setDelegate(InviteMembersBottomSheetDelegate inviteMembersBottomSheetDelegate, ArrayList<Long> selectedDialogs) {
+    public void setDelegate(InviteMembersBottomSheetDelegate inviteMembersBottomSheetDelegate, ArrayList<Long> arrayList) {
         this.dialogsDelegate = inviteMembersBottomSheetDelegate;
         NotificationCenter.getInstance(this.currentAccount).addObserver(this, NotificationCenter.dialogsNeedReload);
         this.dialogsServerOnly = new ArrayList<>(MessagesController.getInstance(this.currentAccount).dialogsServerOnly);
@@ -1288,15 +1212,14 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class ItemAnimator extends DefaultItemAnimator {
-        public ItemAnimator() {
-            InviteMembersBottomSheet.this = r3;
+        public ItemAnimator(InviteMembersBottomSheet inviteMembersBottomSheet) {
             this.translationInterpolator = CubicBezierInterpolator.DEFAULT;
             setMoveDuration(150L);
             setAddDuration(150L);
             setRemoveDuration(150L);
-            r3.setShowWithoutAnimation(false);
+            inviteMembersBottomSheet.setShowWithoutAnimation(false);
         }
     }
 
@@ -1304,13 +1227,16 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
     public void dismissInternal() {
         super.dismissInternal();
         if (this.enterEventSent) {
-            Activity activity = AndroidUtilities.findActivity(getContext());
-            if (activity instanceof LaunchActivity) {
-                BaseFragment fragment = ((LaunchActivity) activity).getActionBarLayout().fragmentsStack.get(((LaunchActivity) activity).getActionBarLayout().fragmentsStack.size() - 1);
-                if (fragment instanceof ChatActivity) {
-                    ((ChatActivity) fragment).onEditTextDialogClose(true, true);
-                }
+            Activity findActivity = AndroidUtilities.findActivity(getContext());
+            if (!(findActivity instanceof LaunchActivity)) {
+                return;
             }
+            LaunchActivity launchActivity = (LaunchActivity) findActivity;
+            BaseFragment baseFragment = launchActivity.getActionBarLayout().fragmentsStack.get(launchActivity.getActionBarLayout().fragmentsStack.size() - 1);
+            if (!(baseFragment instanceof ChatActivity)) {
+                return;
+            }
+            ((ChatActivity) baseFragment).onEditTextDialogClose(true, true);
         }
     }
 
@@ -1319,41 +1245,37 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
             return;
         }
         this.linkGenerating = true;
-        TLRPC.TL_messages_exportChatInvite req = new TLRPC.TL_messages_exportChatInvite();
-        req.legacy_revoke_permanent = true;
-        req.peer = MessagesController.getInstance(this.currentAccount).getInputPeer(-this.chatId);
-        ConnectionsManager.getInstance(this.currentAccount).sendRequest(req, new RequestDelegate() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda7
+        TLRPC$TL_messages_exportChatInvite tLRPC$TL_messages_exportChatInvite = new TLRPC$TL_messages_exportChatInvite();
+        tLRPC$TL_messages_exportChatInvite.legacy_revoke_permanent = true;
+        tLRPC$TL_messages_exportChatInvite.peer = MessagesController.getInstance(this.currentAccount).getInputPeer(-this.chatId);
+        ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_messages_exportChatInvite, new RequestDelegate() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda7
             @Override // org.telegram.tgnet.RequestDelegate
-            public final void run(TLObject tLObject, TLRPC.TL_error tL_error) {
-                InviteMembersBottomSheet.this.m2708xedf00341(tLObject, tL_error);
+            public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
+                InviteMembersBottomSheet.this.lambda$generateLink$8(tLObject, tLRPC$TL_error);
             }
         });
     }
 
-    /* renamed from: lambda$generateLink$8$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2708xedf00341(final TLObject response, final TLRPC.TL_error error) {
+    public /* synthetic */ void lambda$generateLink$8(final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.InviteMembersBottomSheet$$ExternalSyntheticLambda5
             @Override // java.lang.Runnable
             public final void run() {
-                InviteMembersBottomSheet.this.m2707x60b551c0(error, response);
+                InviteMembersBottomSheet.this.lambda$generateLink$7(tLRPC$TL_error, tLObject);
             }
         });
     }
 
-    /* renamed from: lambda$generateLink$7$org-telegram-ui-Components-InviteMembersBottomSheet */
-    public /* synthetic */ void m2707x60b551c0(TLRPC.TL_error error, TLObject response) {
-        if (error == null) {
-            this.invite = (TLRPC.TL_chatInviteExported) response;
-            TLRPC.ChatFull chatInfo = MessagesController.getInstance(this.currentAccount).getChatFull(this.chatId);
-            if (chatInfo != null) {
-                chatInfo.exported_invite = this.invite;
+    public /* synthetic */ void lambda$generateLink$7(TLRPC$TL_error tLRPC$TL_error, TLObject tLObject) {
+        if (tLRPC$TL_error == null) {
+            this.invite = (TLRPC$TL_chatInviteExported) tLObject;
+            TLRPC$ChatFull chatFull = MessagesController.getInstance(this.currentAccount).getChatFull(this.chatId);
+            if (chatFull != null) {
+                chatFull.exported_invite = this.invite;
             }
             if (this.invite.link == null) {
                 return;
             }
-            ClipboardManager clipboard = (ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard");
-            ClipData clip = ClipData.newPlainText(Constants.ScionAnalytics.PARAM_LABEL, this.invite.link);
-            clipboard.setPrimaryClip(clip);
+            ((ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("label", this.invite.link));
             BulletinFactory.createCopyLinkBulletin(this.parentFragment).show();
             dismiss();
         }

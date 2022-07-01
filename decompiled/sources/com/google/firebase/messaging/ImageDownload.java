@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class ImageDownload implements Closeable {
     private volatile InputStream connectionInputStream;
     private Task<Bitmap> task;
@@ -42,14 +42,14 @@ public class ImageDownload implements Closeable {
             if (inputStream != null) {
                 inputStream.close();
             }
-            if (Log.isLoggable(Constants.TAG, 2)) {
+            if (Log.isLoggable("FirebaseMessaging", 2)) {
                 String valueOf = String.valueOf(this.url);
-                StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 34);
+                StringBuilder sb = new StringBuilder(valueOf.length() + 34);
                 sb.append("Downloaded ");
                 sb.append(zza.length);
                 sb.append(" bytes from ");
                 sb.append(valueOf);
-                Log.v(Constants.TAG, sb.toString());
+                Log.v("FirebaseMessaging", sb.toString());
             }
             if (zza.length > 1048576) {
                 throw new IOException("Image exceeds max size of 1048576");
@@ -73,34 +73,34 @@ public class ImageDownload implements Closeable {
         }
         try {
             return new ImageDownload(new URL(str));
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException unused) {
             String valueOf = String.valueOf(str);
-            Log.w(Constants.TAG, valueOf.length() != 0 ? "Not downloading image, bad URL: ".concat(valueOf) : new String("Not downloading image, bad URL: "));
+            Log.w("FirebaseMessaging", valueOf.length() != 0 ? "Not downloading image, bad URL: ".concat(valueOf) : new String("Not downloading image, bad URL: "));
             return null;
         }
     }
 
     public Bitmap blockingDownload() throws IOException {
         String valueOf = String.valueOf(this.url);
-        StringBuilder sb = new StringBuilder(String.valueOf(valueOf).length() + 22);
+        StringBuilder sb = new StringBuilder(valueOf.length() + 22);
         sb.append("Starting download of: ");
         sb.append(valueOf);
-        Log.i(Constants.TAG, sb.toString());
+        Log.i("FirebaseMessaging", sb.toString());
         byte[] blockingDownloadBytes = blockingDownloadBytes();
         Bitmap decodeByteArray = BitmapFactory.decodeByteArray(blockingDownloadBytes, 0, blockingDownloadBytes.length);
         if (decodeByteArray == null) {
             String valueOf2 = String.valueOf(this.url);
-            StringBuilder sb2 = new StringBuilder(String.valueOf(valueOf2).length() + 24);
+            StringBuilder sb2 = new StringBuilder(valueOf2.length() + 24);
             sb2.append("Failed to decode image: ");
             sb2.append(valueOf2);
             throw new IOException(sb2.toString());
         }
-        if (Log.isLoggable(Constants.TAG, 3)) {
+        if (Log.isLoggable("FirebaseMessaging", 3)) {
             String valueOf3 = String.valueOf(this.url);
-            StringBuilder sb3 = new StringBuilder(String.valueOf(valueOf3).length() + 31);
+            StringBuilder sb3 = new StringBuilder(valueOf3.length() + 31);
             sb3.append("Successfully downloaded image: ");
             sb3.append(valueOf3);
-            Log.d(Constants.TAG, sb3.toString());
+            Log.d("FirebaseMessaging", sb3.toString());
         }
         return decodeByteArray;
     }
@@ -110,7 +110,7 @@ public class ImageDownload implements Closeable {
         try {
             zzm.zza(this.connectionInputStream);
         } catch (NullPointerException e) {
-            Log.e(Constants.TAG, "Failed to close the image download stream.", e);
+            Log.e("FirebaseMessaging", "Failed to close the image download stream.", e);
         }
     }
 

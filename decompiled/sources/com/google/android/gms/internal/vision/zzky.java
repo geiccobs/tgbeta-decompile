@@ -3,7 +3,7 @@ package com.google.android.gms.internal.vision;
 import j$.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzky {
     private static final zzky zza = new zzky();
     private final ConcurrentMap<Class<?>, zzlc<?>> zzc = new ConcurrentHashMap();
@@ -21,10 +21,7 @@ public final class zzky {
             zzjf.zza(cls, "messageType");
             zzjf.zza(zza2, "schema");
             zzlc<T> zzlcVar2 = (zzlc<T>) this.zzc.putIfAbsent(cls, zza2);
-            if (zzlcVar2 != null) {
-                return zzlcVar2;
-            }
-            return zza2;
+            return zzlcVar2 != null ? zzlcVar2 : zza2;
         }
         return zzlcVar;
     }

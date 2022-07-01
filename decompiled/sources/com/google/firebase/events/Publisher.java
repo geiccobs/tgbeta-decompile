@@ -1,5 +1,4 @@
 package com.google.firebase.events;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface Publisher {
-    void publish(Event<?> event);
 }

@@ -1,11 +1,12 @@
 package com.google.android.gms.dynamic;
 
 import android.os.IBinder;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.dynamic.IObjectWrapper;
 import java.lang.reflect.Field;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ObjectWrapper<T> extends IObjectWrapper.Stub {
     private final T zza;
 
@@ -13,11 +14,13 @@ public final class ObjectWrapper<T> extends IObjectWrapper.Stub {
         this.zza = t;
     }
 
-    public static <T> IObjectWrapper wrap(T t) {
+    @RecentlyNonNull
+    public static <T> IObjectWrapper wrap(@RecentlyNonNull T t) {
         return new ObjectWrapper(t);
     }
 
-    public static <T> T unwrap(IObjectWrapper iObjectWrapper) {
+    @RecentlyNonNull
+    public static <T> T unwrap(@RecentlyNonNull IObjectWrapper iObjectWrapper) {
         if (iObjectWrapper instanceof ObjectWrapper) {
             return ((ObjectWrapper) iObjectWrapper).zza;
         }

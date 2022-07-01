@@ -1,5 +1,5 @@
 package androidx.lifecycle;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface ViewModelStoreOwner {
     ViewModelStore getViewModelStore();
 }

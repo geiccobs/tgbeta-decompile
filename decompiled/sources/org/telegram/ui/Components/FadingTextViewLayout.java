@@ -11,8 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.core.view.ViewCompat;
 import java.util.ArrayList;
-import java.util.List;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class FadingTextViewLayout extends FrameLayout {
     private final ValueAnimator animator;
     private TextView currentView;
@@ -20,13 +19,17 @@ public class FadingTextViewLayout extends FrameLayout {
     private TextView nextView;
     private CharSequence text;
 
+    protected int getStaticCharsCount() {
+        return 0;
+    }
+
     public FadingTextViewLayout(Context context) {
         this(context, false);
     }
 
-    public FadingTextViewLayout(Context context, boolean hasStaticChars) {
+    public FadingTextViewLayout(Context context, boolean z) {
         super(context);
-        for (int i = 0; i < (hasStaticChars ? 1 : 0) + 2; i++) {
+        for (int i = 0; i < (z ? 1 : 0) + 2; i++) {
             TextView textView = new TextView(context);
             onTextViewCreated(textView);
             addView(textView);
@@ -49,12 +52,12 @@ public class FadingTextViewLayout extends FrameLayout {
         ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.FadingTextViewLayout$$ExternalSyntheticLambda0
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                FadingTextViewLayout.this.m2608lambda$new$0$orgtelegramuiComponentsFadingTextViewLayout(valueAnimator);
+                FadingTextViewLayout.this.lambda$new$0(valueAnimator);
             }
         });
         ofFloat.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.FadingTextViewLayout.1
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animator) {
                 FadingTextViewLayout.this.currentView.setLayerType(0, null);
                 FadingTextViewLayout.this.nextView.setLayerType(0, null);
                 FadingTextViewLayout.this.nextView.setVisibility(8);
@@ -65,7 +68,7 @@ public class FadingTextViewLayout extends FrameLayout {
             }
 
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationStart(Animator animation) {
+            public void onAnimationStart(Animator animator) {
                 FadingTextViewLayout.this.currentView.setLayerType(2, null);
                 FadingTextViewLayout.this.nextView.setLayerType(2, null);
                 if (ViewCompat.isAttachedToWindow(FadingTextViewLayout.this.currentView)) {
@@ -78,92 +81,82 @@ public class FadingTextViewLayout extends FrameLayout {
         });
     }
 
-    /* renamed from: lambda$new$0$org-telegram-ui-Components-FadingTextViewLayout */
-    public /* synthetic */ void m2608lambda$new$0$orgtelegramuiComponentsFadingTextViewLayout(ValueAnimator a) {
-        float fraction = a.getAnimatedFraction();
-        this.currentView.setAlpha(CubicBezierInterpolator.DEFAULT.getInterpolation(fraction));
-        this.nextView.setAlpha(CubicBezierInterpolator.DEFAULT.getInterpolation(1.0f - fraction));
+    public /* synthetic */ void lambda$new$0(ValueAnimator valueAnimator) {
+        float animatedFraction = valueAnimator.getAnimatedFraction();
+        TextView textView = this.currentView;
+        CubicBezierInterpolator cubicBezierInterpolator = CubicBezierInterpolator.DEFAULT;
+        textView.setAlpha(cubicBezierInterpolator.getInterpolation(animatedFraction));
+        this.nextView.setAlpha(cubicBezierInterpolator.getInterpolation(1.0f - animatedFraction));
     }
 
-    public void setText(CharSequence text) {
-        setText(text, true, true);
+    public void setText(CharSequence charSequence) {
+        setText(charSequence, true, true);
     }
 
-    public void setText(CharSequence text, boolean animated) {
-        setText(text, animated, true);
+    public void setText(CharSequence charSequence, boolean z) {
+        setText(charSequence, z, true);
     }
 
-    public void setText(CharSequence text, boolean animated, boolean dontAnimateUnchangedStaticChars) {
+    public void setText(CharSequence charSequence, boolean z, boolean z2) {
         int staticCharsCount;
-        CharSequence currentText;
-        CharSequence text2 = text;
-        if (!TextUtils.equals(text2, this.currentView.getText())) {
+        if (!TextUtils.equals(charSequence, this.currentView.getText())) {
             ValueAnimator valueAnimator = this.animator;
             if (valueAnimator != null) {
                 valueAnimator.end();
             }
-            this.text = text2;
-            if (animated) {
-                if (dontAnimateUnchangedStaticChars && this.foregroundView != null && (staticCharsCount = getStaticCharsCount()) > 0) {
-                    CharSequence currentText2 = this.currentView.getText();
-                    int length = Math.min(staticCharsCount, Math.min(text.length(), currentText2.length()));
-                    List<android.graphics.Point> points = new ArrayList<>();
-                    int startIndex = -1;
-                    for (int i = 0; i < length; i++) {
-                        char c = currentText2.charAt(i);
-                        if (text2.charAt(i) == c) {
-                            if (startIndex >= 0) {
-                                points.add(new android.graphics.Point(startIndex, i));
-                                startIndex = -1;
+            this.text = charSequence;
+            if (z) {
+                if (z2 && this.foregroundView != null && (staticCharsCount = getStaticCharsCount()) > 0) {
+                    CharSequence text = this.currentView.getText();
+                    int min = Math.min(staticCharsCount, Math.min(charSequence.length(), text.length()));
+                    ArrayList arrayList = new ArrayList();
+                    int i = -1;
+                    for (int i2 = 0; i2 < min; i2++) {
+                        if (charSequence.charAt(i2) == text.charAt(i2)) {
+                            if (i >= 0) {
+                                arrayList.add(new android.graphics.Point(i, i2));
+                                i = -1;
                             }
-                        } else if (startIndex == -1) {
-                            startIndex = i;
+                        } else if (i == -1) {
+                            i = i2;
                         }
                     }
-                    if (startIndex != 0) {
-                        if (startIndex > 0) {
-                            points.add(new android.graphics.Point(startIndex, length));
+                    if (i != 0) {
+                        if (i > 0) {
+                            arrayList.add(new android.graphics.Point(i, min));
                         } else {
-                            points.add(new android.graphics.Point(length, 0));
+                            arrayList.add(new android.graphics.Point(min, 0));
                         }
                     }
-                    if (!points.isEmpty()) {
-                        SpannableString foregroundText = new SpannableString(text2.subSequence(0, length));
-                        SpannableString currentSpannableText = new SpannableString(currentText2);
-                        SpannableString spannableText = new SpannableString(text2);
-                        int lastIndex = 0;
-                        int i2 = 0;
-                        int N = points.size();
-                        while (i2 < N) {
-                            android.graphics.Point point = points.get(i2);
-                            int staticCharsCount2 = staticCharsCount;
-                            if (point.y <= point.x) {
-                                currentText = currentText2;
-                            } else {
-                                currentText = currentText2;
-                                foregroundText.setSpan(new ForegroundColorSpan(0), point.x, point.y, 17);
+                    if (!arrayList.isEmpty()) {
+                        SpannableString spannableString = new SpannableString(charSequence.subSequence(0, min));
+                        SpannableString spannableString2 = new SpannableString(text);
+                        SpannableString spannableString3 = new SpannableString(charSequence);
+                        int size = arrayList.size();
+                        int i3 = 0;
+                        for (int i4 = 0; i4 < size; i4++) {
+                            android.graphics.Point point = (android.graphics.Point) arrayList.get(i4);
+                            if (point.y > point.x) {
+                                spannableString.setSpan(new ForegroundColorSpan(0), point.x, point.y, 17);
                             }
-                            if (point.x > lastIndex) {
-                                currentSpannableText.setSpan(new ForegroundColorSpan(0), lastIndex, point.x, 17);
-                                spannableText.setSpan(new ForegroundColorSpan(0), lastIndex, point.x, 17);
+                            if (point.x > i3) {
+                                spannableString2.setSpan(new ForegroundColorSpan(0), i3, point.x, 17);
+                                spannableString3.setSpan(new ForegroundColorSpan(0), i3, point.x, 17);
                             }
-                            lastIndex = point.y;
-                            i2++;
-                            staticCharsCount = staticCharsCount2;
-                            currentText2 = currentText;
+                            i3 = point.y;
                         }
                         this.foregroundView.setVisibility(0);
-                        this.foregroundView.setText(foregroundText);
-                        this.currentView.setText(currentSpannableText);
-                        text2 = spannableText;
+                        this.foregroundView.setText(spannableString);
+                        this.currentView.setText(spannableString2);
+                        charSequence = spannableString3;
                     }
                 }
                 this.nextView.setVisibility(0);
-                this.nextView.setText(text2);
+                this.nextView.setText(charSequence);
                 showNext();
                 return;
             }
-            this.currentView.setText(text2);
+            this.currentView.setText(charSequence);
         }
     }
 
@@ -180,18 +173,14 @@ public class FadingTextViewLayout extends FrameLayout {
     }
 
     private void showNext() {
-        TextView prevView = this.currentView;
+        TextView textView = this.currentView;
         this.currentView = this.nextView;
-        this.nextView = prevView;
+        this.nextView = textView;
         this.animator.start();
     }
 
     public void onTextViewCreated(TextView textView) {
         textView.setSingleLine(true);
         textView.setMaxLines(1);
-    }
-
-    protected int getStaticCharsCount() {
-        return 0;
     }
 }

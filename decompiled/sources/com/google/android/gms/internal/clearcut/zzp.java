@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import com.google.android.gms.clearcut.ClearcutLogger;
 import com.google.android.gms.common.wrappers.Wrappers;
-import com.google.android.gms.internal.clearcut.zzgw;
+import com.google.android.gms.internal.clearcut.zzgw$zza;
 import com.google.android.gms.phenotype.Phenotype;
 import j$.util.concurrent.ConcurrentHashMap;
 import java.nio.ByteBuffer;
@@ -12,14 +12,14 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzp implements ClearcutLogger.zza {
     private static final zzao zzaq;
     private static final zzae<Boolean> zzaw;
     private final Context zzh;
     private static final Charset UTF_8 = Charset.forName("UTF-8");
     private static final zzao zzar = new zzao(Phenotype.getContentProviderUri("com.google.android.gms.clearcut.public")).zzc("gms:playlog:service:sampling_").zzd("LogSampling__");
-    private static final ConcurrentHashMap<String, zzae<zzgw.zza>> zzas = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, zzae<zzgw$zza>> zzas = new ConcurrentHashMap<>();
     private static final HashMap<String, zzae<String>> zzat = new HashMap<>();
     private static Boolean zzau = null;
     private static Long zzav = null;
@@ -48,7 +48,7 @@ public final class zzp implements ClearcutLogger.zza {
         return zzk.zza(allocate.array());
     }
 
-    private static zzgw.zza.zzb zza(String str) {
+    private static zzgw$zza.zzb zza(String str) {
         String str2;
         if (str == null) {
             return null;
@@ -63,15 +63,14 @@ public final class zzp implements ClearcutLogger.zza {
         }
         int indexOf2 = str.indexOf(47, i);
         if (indexOf2 <= 0) {
-            String valueOf = String.valueOf(str);
-            Log.e("LogSamplerImpl", valueOf.length() != 0 ? "Failed to parse the rule: ".concat(valueOf) : new String("Failed to parse the rule: "));
+            Log.e("LogSamplerImpl", str.length() != 0 ? "Failed to parse the rule: ".concat(str) : new String("Failed to parse the rule: "));
             return null;
         }
         try {
             long parseLong = Long.parseLong(str.substring(i, indexOf2));
             long parseLong2 = Long.parseLong(str.substring(indexOf2 + 1));
             if (parseLong >= 0 && parseLong2 >= 0) {
-                return zzgw.zza.zzb.zzfz().zzn(str2).zzr(parseLong).zzs(parseLong2).zzbh();
+                return zzgw$zza.zzb.zzfz().zzn(str2).zzr(parseLong).zzs(parseLong2).zzbh();
             }
             StringBuilder sb = new StringBuilder(72);
             sb.append("negative values not supported: ");
@@ -81,8 +80,7 @@ public final class zzp implements ClearcutLogger.zza {
             Log.e("LogSamplerImpl", sb.toString());
             return null;
         } catch (NumberFormatException e) {
-            String valueOf2 = String.valueOf(str);
-            Log.e("LogSamplerImpl", valueOf2.length() != 0 ? "parseLong() failed while parsing: ".concat(valueOf2) : new String("parseLong() failed while parsing: "), e);
+            Log.e("LogSamplerImpl", str.length() != 0 ? "parseLong() failed while parsing: ".concat(str) : new String("parseLong() failed while parsing: "), e);
             return null;
         }
     }
@@ -117,11 +115,13 @@ public final class zzp implements ClearcutLogger.zza {
 
     @Override // com.google.android.gms.clearcut.ClearcutLogger.zza
     public final boolean zza(com.google.android.gms.clearcut.zze zzeVar) {
-        List<zzgw.zza.zzb> list;
-        zzae<zzgw.zza> putIfAbsent;
-        String str = zzeVar.zzag.zzj;
-        int i = zzeVar.zzag.zzk;
-        int i2 = zzeVar.zzaa != null ? zzeVar.zzaa.zzbji : 0;
+        List<zzgw$zza.zzb> list;
+        zzae<zzgw$zza> putIfAbsent;
+        zzr zzrVar = zzeVar.zzag;
+        String str = zzrVar.zzj;
+        int i = zzrVar.zzk;
+        zzha zzhaVar = zzeVar.zzaa;
+        int i2 = zzhaVar != null ? zzhaVar.zzbji : 0;
         String str2 = null;
         if (!zzaw.get().booleanValue()) {
             if (str == null || str.isEmpty()) {
@@ -140,7 +140,7 @@ public final class zzp implements ClearcutLogger.zza {
                 }
                 str2 = zzaeVar.get();
             }
-            zzgw.zza.zzb zza = zza(str2);
+            zzgw$zza.zzb zza = zza(str2);
             if (zza == null) {
                 return true;
             }
@@ -155,14 +155,14 @@ public final class zzp implements ClearcutLogger.zza {
         if (this.zzh == null) {
             list = Collections.emptyList();
         } else {
-            ConcurrentHashMap<String, zzae<zzgw.zza>> concurrentHashMap = zzas;
-            zzae<zzgw.zza> zzaeVar2 = concurrentHashMap.get(str);
-            if (zzaeVar2 == null && (putIfAbsent = concurrentHashMap.putIfAbsent(str, (zzaeVar2 = zzaq.zza(str, zzgw.zza.zzft(), zzq.zzax)))) != null) {
+            ConcurrentHashMap<String, zzae<zzgw$zza>> concurrentHashMap = zzas;
+            zzae<zzgw$zza> zzaeVar2 = concurrentHashMap.get(str);
+            if (zzaeVar2 == null && (putIfAbsent = concurrentHashMap.putIfAbsent(str, (zzaeVar2 = zzaq.zza(str, zzgw$zza.zzft(), zzq.zzax)))) != null) {
                 zzaeVar2 = putIfAbsent;
             }
             list = zzaeVar2.get().zzfs();
         }
-        for (zzgw.zza.zzb zzbVar : list) {
+        for (zzgw$zza.zzb zzbVar : list) {
             if (!zzbVar.zzfv() || zzbVar.getEventCode() == 0 || zzbVar.getEventCode() == i2) {
                 if (!zzb(zza(zzbVar.zzfw(), zzd(this.zzh)), zzbVar.zzfx(), zzbVar.zzfy())) {
                     return false;

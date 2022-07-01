@@ -9,7 +9,7 @@ import java.util.List;
 import org.webrtc.CameraSession;
 import org.webrtc.CameraVideoCapturer;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public abstract class CameraCapturer implements CameraVideoCapturer {
     private static final int MAX_OPEN_CAMERA_ATTEMPTS = 3;
     private static final int OPEN_CAMERA_DELAY_MS = 500;
@@ -35,24 +35,25 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
     private int width;
     private final CameraSession.CreateSessionCallback createSessionCallback = new CameraSession.CreateSessionCallback() { // from class: org.webrtc.CameraCapturer.1
         @Override // org.webrtc.CameraSession.CreateSessionCallback
-        public void onDone(CameraSession session) {
+        public void onDone(CameraSession cameraSession) {
             CameraCapturer.this.checkIsOnCameraThread();
             Logging.d(CameraCapturer.TAG, "Create session done. Switch state: " + CameraCapturer.this.switchState);
             CameraCapturer.this.uiThreadHandler.removeCallbacks(CameraCapturer.this.openCameraTimeoutRunnable);
             synchronized (CameraCapturer.this.stateLock) {
                 CameraCapturer.this.capturerObserver.onCapturerStarted(true);
                 CameraCapturer.this.sessionOpening = false;
-                CameraCapturer.this.currentSession = session;
-                CameraCapturer.this.cameraStatistics = new CameraVideoCapturer.CameraStatistics(CameraCapturer.this.surfaceHelper, CameraCapturer.this.eventsHandler);
+                CameraCapturer.this.currentSession = cameraSession;
+                CameraCapturer cameraCapturer = CameraCapturer.this;
+                cameraCapturer.cameraStatistics = new CameraVideoCapturer.CameraStatistics(cameraCapturer.surfaceHelper, CameraCapturer.this.eventsHandler);
                 CameraCapturer.this.firstFrameObserved = false;
                 CameraCapturer.this.stateLock.notifyAll();
                 if (CameraCapturer.this.switchState != SwitchState.IN_PROGRESS) {
                     if (CameraCapturer.this.switchState == SwitchState.PENDING) {
-                        String selectedCameraName = CameraCapturer.this.pendingCameraName;
+                        String str = CameraCapturer.this.pendingCameraName;
                         CameraCapturer.this.pendingCameraName = null;
                         CameraCapturer.this.switchState = SwitchState.IDLE;
-                        CameraCapturer cameraCapturer = CameraCapturer.this;
-                        cameraCapturer.switchCameraInternal(cameraCapturer.switchEventsHandler, selectedCameraName);
+                        CameraCapturer cameraCapturer2 = CameraCapturer.this;
+                        cameraCapturer2.switchCameraInternal(cameraCapturer2.switchEventsHandler, str);
                     }
                 } else {
                     CameraCapturer.this.switchState = SwitchState.IDLE;
@@ -65,31 +66,33 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
         }
 
         @Override // org.webrtc.CameraSession.CreateSessionCallback
-        public void onFailure(CameraSession.FailureType failureType, String error) {
+        public void onFailure(CameraSession.FailureType failureType, String str) {
             CameraCapturer.this.checkIsOnCameraThread();
             CameraCapturer.this.uiThreadHandler.removeCallbacks(CameraCapturer.this.openCameraTimeoutRunnable);
             synchronized (CameraCapturer.this.stateLock) {
                 CameraCapturer.this.capturerObserver.onCapturerStarted(false);
                 CameraCapturer.access$1710(CameraCapturer.this);
                 if (CameraCapturer.this.openAttemptsRemaining <= 0) {
-                    Logging.w(CameraCapturer.TAG, "Opening camera failed, passing: " + error);
+                    Logging.w(CameraCapturer.TAG, "Opening camera failed, passing: " + str);
                     CameraCapturer.this.sessionOpening = false;
                     CameraCapturer.this.stateLock.notifyAll();
-                    if (CameraCapturer.this.switchState != SwitchState.IDLE) {
+                    SwitchState switchState = CameraCapturer.this.switchState;
+                    SwitchState switchState2 = SwitchState.IDLE;
+                    if (switchState != switchState2) {
                         if (CameraCapturer.this.switchEventsHandler != null) {
-                            CameraCapturer.this.switchEventsHandler.onCameraSwitchError(error);
+                            CameraCapturer.this.switchEventsHandler.onCameraSwitchError(str);
                             CameraCapturer.this.switchEventsHandler = null;
                         }
-                        CameraCapturer.this.switchState = SwitchState.IDLE;
+                        CameraCapturer.this.switchState = switchState2;
                     }
                     if (failureType == CameraSession.FailureType.DISCONNECTED) {
                         CameraCapturer.this.eventsHandler.onCameraDisconnected();
                     } else {
-                        CameraCapturer.this.eventsHandler.onCameraError(error);
+                        CameraCapturer.this.eventsHandler.onCameraError(str);
                     }
                 } else {
-                    Logging.w(CameraCapturer.TAG, "Opening camera failed, retry: " + error);
-                    CameraCapturer.this.createSessionInternal(500);
+                    Logging.w(CameraCapturer.TAG, "Opening camera failed, retry: " + str);
+                    CameraCapturer.this.createSessionInternal(CameraCapturer.OPEN_CAMERA_DELAY_MS);
                 }
             }
         }
@@ -108,23 +111,23 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
         }
 
         @Override // org.webrtc.CameraSession.Events
-        public void onCameraError(CameraSession session, String error) {
+        public void onCameraError(CameraSession cameraSession, String str) {
             CameraCapturer.this.checkIsOnCameraThread();
             synchronized (CameraCapturer.this.stateLock) {
-                if (session == CameraCapturer.this.currentSession) {
-                    CameraCapturer.this.eventsHandler.onCameraError(error);
+                if (cameraSession == CameraCapturer.this.currentSession) {
+                    CameraCapturer.this.eventsHandler.onCameraError(str);
                     CameraCapturer.this.stopCapture();
                     return;
                 }
-                Logging.w(CameraCapturer.TAG, "onCameraError from another session: " + error);
+                Logging.w(CameraCapturer.TAG, "onCameraError from another session: " + str);
             }
         }
 
         @Override // org.webrtc.CameraSession.Events
-        public void onCameraDisconnected(CameraSession session) {
+        public void onCameraDisconnected(CameraSession cameraSession) {
             CameraCapturer.this.checkIsOnCameraThread();
             synchronized (CameraCapturer.this.stateLock) {
-                if (session == CameraCapturer.this.currentSession) {
+                if (cameraSession == CameraCapturer.this.currentSession) {
                     CameraCapturer.this.eventsHandler.onCameraDisconnected();
                     CameraCapturer.this.stopCapture();
                     return;
@@ -134,10 +137,10 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
         }
 
         @Override // org.webrtc.CameraSession.Events
-        public void onCameraClosed(CameraSession session) {
+        public void onCameraClosed(CameraSession cameraSession) {
             CameraCapturer.this.checkIsOnCameraThread();
             synchronized (CameraCapturer.this.stateLock) {
-                if (session == CameraCapturer.this.currentSession || CameraCapturer.this.currentSession == null) {
+                if (cameraSession == CameraCapturer.this.currentSession || CameraCapturer.this.currentSession == null) {
                     CameraCapturer.this.eventsHandler.onCameraClosed();
                 } else {
                     Logging.d(CameraCapturer.TAG, "onCameraClosed from another session.");
@@ -146,16 +149,16 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
         }
 
         @Override // org.webrtc.CameraSession.Events
-        public void onFrameCaptured(CameraSession session, VideoFrame frame) {
+        public void onFrameCaptured(CameraSession cameraSession, VideoFrame videoFrame) {
             CameraCapturer.this.checkIsOnCameraThread();
             synchronized (CameraCapturer.this.stateLock) {
-                if (session == CameraCapturer.this.currentSession) {
+                if (cameraSession == CameraCapturer.this.currentSession) {
                     if (!CameraCapturer.this.firstFrameObserved) {
                         CameraCapturer.this.eventsHandler.onFirstFrameAvailable();
                         CameraCapturer.this.firstFrameObserved = true;
                     }
                     CameraCapturer.this.cameraStatistics.addFrame();
-                    CameraCapturer.this.capturerObserver.onFrameCaptured(frame);
+                    CameraCapturer.this.capturerObserver.onFrameCaptured(videoFrame);
                     return;
                 }
                 Logging.w(CameraCapturer.TAG, "onFrameCaptured from another session.");
@@ -171,7 +174,7 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
     private final Object stateLock = new Object();
     private SwitchState switchState = SwitchState.IDLE;
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public enum SwitchState {
         IDLE,
         PENDING,
@@ -185,21 +188,26 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
 
     protected abstract void createCameraSession(CameraSession.CreateSessionCallback createSessionCallback, CameraSession.Events events, Context context, SurfaceTextureHelper surfaceTextureHelper, String str, int i, int i2, int i3);
 
+    @Override // org.webrtc.VideoCapturer
+    public boolean isScreencast() {
+        return false;
+    }
+
     @Override // org.webrtc.CameraVideoCapturer
     public /* synthetic */ void removeMediaRecorderFromCamera(CameraVideoCapturer.MediaRecorderHandler mediaRecorderHandler) {
         CameraVideoCapturer.CC.$default$removeMediaRecorderFromCamera(this, mediaRecorderHandler);
     }
 
-    static /* synthetic */ int access$1710(CameraCapturer x0) {
-        int i = x0.openAttemptsRemaining;
-        x0.openAttemptsRemaining = i - 1;
+    static /* synthetic */ int access$1710(CameraCapturer cameraCapturer) {
+        int i = cameraCapturer.openAttemptsRemaining;
+        cameraCapturer.openAttemptsRemaining = i - 1;
         return i;
     }
 
-    public CameraCapturer(String cameraName, CameraVideoCapturer.CameraEventsHandler eventsHandler, CameraEnumerator cameraEnumerator) {
-        this.eventsHandler = eventsHandler == null ? new CameraVideoCapturer.CameraEventsHandler() { // from class: org.webrtc.CameraCapturer.4
+    public CameraCapturer(String str, CameraVideoCapturer.CameraEventsHandler cameraEventsHandler, CameraEnumerator cameraEnumerator) {
+        this.eventsHandler = cameraEventsHandler == null ? new CameraVideoCapturer.CameraEventsHandler() { // from class: org.webrtc.CameraCapturer.4
             @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
-            public void onCameraError(String errorDescription) {
+            public void onCameraClosed() {
             }
 
             @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
@@ -207,52 +215,53 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
             }
 
             @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
-            public void onCameraFreezed(String errorDescription) {
+            public void onCameraError(String str2) {
             }
 
             @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
-            public void onCameraOpening(String cameraName2) {
+            public void onCameraFreezed(String str2) {
+            }
+
+            @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
+            public void onCameraOpening(String str2) {
             }
 
             @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
             public void onFirstFrameAvailable() {
             }
-
-            @Override // org.webrtc.CameraVideoCapturer.CameraEventsHandler
-            public void onCameraClosed() {
-            }
-        } : eventsHandler;
+        } : cameraEventsHandler;
         this.cameraEnumerator = cameraEnumerator;
-        this.cameraName = cameraName;
-        List<String> deviceNames = Arrays.asList(cameraEnumerator.getDeviceNames());
+        this.cameraName = str;
+        List asList = Arrays.asList(cameraEnumerator.getDeviceNames());
         this.uiThreadHandler = new Handler(Looper.getMainLooper());
-        if (deviceNames.isEmpty()) {
+        if (asList.isEmpty()) {
             throw new RuntimeException("No cameras attached.");
         }
-        if (!deviceNames.contains(this.cameraName)) {
-            throw new IllegalArgumentException("Camera name " + this.cameraName + " does not match any known camera device.");
+        if (asList.contains(this.cameraName)) {
+            return;
         }
+        throw new IllegalArgumentException("Camera name " + this.cameraName + " does not match any known camera device.");
     }
 
     @Override // org.webrtc.VideoCapturer
-    public void initialize(SurfaceTextureHelper surfaceTextureHelper, Context applicationContext, CapturerObserver capturerObserver) {
-        this.applicationContext = applicationContext;
+    public void initialize(SurfaceTextureHelper surfaceTextureHelper, Context context, CapturerObserver capturerObserver) {
+        this.applicationContext = context;
         this.capturerObserver = capturerObserver;
         this.surfaceHelper = surfaceTextureHelper;
         this.cameraThreadHandler = surfaceTextureHelper.getHandler();
     }
 
     @Override // org.webrtc.VideoCapturer
-    public void startCapture(int width, int height, int framerate) {
-        Logging.d(TAG, "startCapture: " + width + "x" + height + "@" + framerate);
+    public void startCapture(int i, int i2, int i3) {
+        Logging.d(TAG, "startCapture: " + i + "x" + i2 + "@" + i3);
         if (this.applicationContext == null) {
             throw new RuntimeException("CameraCapturer must be initialized before calling startCapture.");
         }
         synchronized (this.stateLock) {
             if (!this.sessionOpening && this.currentSession == null) {
-                this.width = width;
-                this.height = height;
-                this.framerate = framerate;
+                this.width = i;
+                this.height = i2;
+                this.framerate = i3;
                 this.sessionOpening = true;
                 this.openAttemptsRemaining = 3;
                 createSessionInternal(0);
@@ -262,15 +271,15 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
         }
     }
 
-    public void createSessionInternal(int delayMs) {
-        this.uiThreadHandler.postDelayed(this.openCameraTimeoutRunnable, delayMs + 10000);
+    public void createSessionInternal(int i) {
+        this.uiThreadHandler.postDelayed(this.openCameraTimeoutRunnable, i + OPEN_CAMERA_TIMEOUT);
         this.cameraThreadHandler.postDelayed(new Runnable() { // from class: org.webrtc.CameraCapturer.5
             @Override // java.lang.Runnable
             public void run() {
                 CameraCapturer cameraCapturer = CameraCapturer.this;
                 cameraCapturer.createCameraSession(cameraCapturer.createSessionCallback, CameraCapturer.this.cameraSessionEventsHandler, CameraCapturer.this.applicationContext, CameraCapturer.this.surfaceHelper, CameraCapturer.this.cameraName, CameraCapturer.this.width, CameraCapturer.this.height, CameraCapturer.this.framerate);
             }
-        }, delayMs);
+        }, i);
     }
 
     @Override // org.webrtc.VideoCapturer
@@ -281,7 +290,7 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
                 Logging.d(TAG, "Stop capture: Waiting for session to open");
                 try {
                     this.stateLock.wait();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException unused) {
                     Logging.w(TAG, "Stop capture interrupted while waiting for the session to open.");
                     Thread.currentThread().interrupt();
                     return;
@@ -291,11 +300,11 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
                 Logging.d(TAG, "Stop capture: Nulling session");
                 this.cameraStatistics.release();
                 this.cameraStatistics = null;
-                final CameraSession oldSession = this.currentSession;
+                final CameraSession cameraSession = this.currentSession;
                 this.cameraThreadHandler.post(new Runnable() { // from class: org.webrtc.CameraCapturer.6
                     @Override // java.lang.Runnable
                     public void run() {
-                        oldSession.stop();
+                        cameraSession.stop();
                     }
                 });
                 this.currentSession = null;
@@ -308,11 +317,11 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
     }
 
     @Override // org.webrtc.VideoCapturer
-    public void changeCaptureFormat(int width, int height, int framerate) {
-        Logging.d(TAG, "changeCaptureFormat: " + width + "x" + height + "@" + framerate);
+    public void changeCaptureFormat(int i, int i2, int i3) {
+        Logging.d(TAG, "changeCaptureFormat: " + i + "x" + i2 + "@" + i3);
         synchronized (this.stateLock) {
             stopCapture();
-            startCapture(width, height, framerate);
+            startCapture(i, i2, i3);
         }
     }
 
@@ -323,99 +332,89 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
     }
 
     @Override // org.webrtc.CameraVideoCapturer
-    public void switchCamera(final CameraVideoCapturer.CameraSwitchHandler switchEventsHandler) {
+    public void switchCamera(final CameraVideoCapturer.CameraSwitchHandler cameraSwitchHandler) {
         Logging.d(TAG, "switchCamera");
         this.cameraThreadHandler.post(new Runnable() { // from class: org.webrtc.CameraCapturer.7
             @Override // java.lang.Runnable
             public void run() {
-                List<String> deviceNames = Arrays.asList(CameraCapturer.this.cameraEnumerator.getDeviceNames());
-                if (deviceNames.size() < 2) {
-                    CameraCapturer.this.reportCameraSwitchError("No camera to switch to.", switchEventsHandler);
+                List asList = Arrays.asList(CameraCapturer.this.cameraEnumerator.getDeviceNames());
+                if (asList.size() < 2) {
+                    CameraCapturer.this.reportCameraSwitchError("No camera to switch to.", cameraSwitchHandler);
                     return;
                 }
-                int cameraNameIndex = deviceNames.indexOf(CameraCapturer.this.cameraName);
-                String cameraName = deviceNames.get((cameraNameIndex + 1) % deviceNames.size());
-                CameraCapturer.this.switchCameraInternal(switchEventsHandler, cameraName);
+                CameraCapturer.this.switchCameraInternal(cameraSwitchHandler, (String) asList.get((asList.indexOf(CameraCapturer.this.cameraName) + 1) % asList.size()));
             }
         });
     }
 
     @Override // org.webrtc.CameraVideoCapturer
-    public void switchCamera(final CameraVideoCapturer.CameraSwitchHandler switchEventsHandler, final String cameraName) {
+    public void switchCamera(final CameraVideoCapturer.CameraSwitchHandler cameraSwitchHandler, final String str) {
         Logging.d(TAG, "switchCamera");
         this.cameraThreadHandler.post(new Runnable() { // from class: org.webrtc.CameraCapturer.8
             @Override // java.lang.Runnable
             public void run() {
-                CameraCapturer.this.switchCameraInternal(switchEventsHandler, cameraName);
+                CameraCapturer.this.switchCameraInternal(cameraSwitchHandler, str);
             }
         });
     }
 
-    @Override // org.webrtc.VideoCapturer
-    public boolean isScreencast() {
-        return false;
-    }
-
     public void printStackTrace() {
-        Thread cameraThread = null;
         Handler handler = this.cameraThreadHandler;
-        if (handler != null) {
-            cameraThread = handler.getLooper().getThread();
-        }
-        if (cameraThread != null) {
-            StackTraceElement[] cameraStackTrace = cameraThread.getStackTrace();
-            if (cameraStackTrace.length > 0) {
-                Logging.d(TAG, "CameraCapturer stack trace:");
-                for (StackTraceElement traceElem : cameraStackTrace) {
-                    Logging.d(TAG, traceElem.toString());
-                }
+        Thread thread = handler != null ? handler.getLooper().getThread() : null;
+        if (thread != null) {
+            StackTraceElement[] stackTrace = thread.getStackTrace();
+            if (stackTrace.length <= 0) {
+                return;
+            }
+            Logging.d(TAG, "CameraCapturer stack trace:");
+            for (StackTraceElement stackTraceElement : stackTrace) {
+                Logging.d(TAG, stackTraceElement.toString());
             }
         }
     }
 
-    public void reportCameraSwitchError(String error, CameraVideoCapturer.CameraSwitchHandler switchEventsHandler) {
-        Logging.e(TAG, error);
-        if (switchEventsHandler != null) {
-            switchEventsHandler.onCameraSwitchError(error);
+    public void reportCameraSwitchError(String str, CameraVideoCapturer.CameraSwitchHandler cameraSwitchHandler) {
+        Logging.e(TAG, str);
+        if (cameraSwitchHandler != null) {
+            cameraSwitchHandler.onCameraSwitchError(str);
         }
     }
 
-    public void switchCameraInternal(CameraVideoCapturer.CameraSwitchHandler switchEventsHandler, String selectedCameraName) {
+    public void switchCameraInternal(CameraVideoCapturer.CameraSwitchHandler cameraSwitchHandler, String str) {
         Logging.d(TAG, "switchCamera internal");
-        List<String> deviceNames = Arrays.asList(this.cameraEnumerator.getDeviceNames());
-        if (!deviceNames.contains(selectedCameraName)) {
-            reportCameraSwitchError("Attempted to switch to unknown camera device " + selectedCameraName, switchEventsHandler);
+        if (!Arrays.asList(this.cameraEnumerator.getDeviceNames()).contains(str)) {
+            reportCameraSwitchError("Attempted to switch to unknown camera device " + str, cameraSwitchHandler);
             return;
         }
         synchronized (this.stateLock) {
             if (this.switchState != SwitchState.IDLE) {
-                reportCameraSwitchError("Camera switch already in progress.", switchEventsHandler);
+                reportCameraSwitchError("Camera switch already in progress.", cameraSwitchHandler);
                 return;
             }
             boolean z = this.sessionOpening;
             if (!z && this.currentSession == null) {
-                reportCameraSwitchError("switchCamera: camera is not running.", switchEventsHandler);
+                reportCameraSwitchError("switchCamera: camera is not running.", cameraSwitchHandler);
                 return;
             }
-            this.switchEventsHandler = switchEventsHandler;
+            this.switchEventsHandler = cameraSwitchHandler;
             if (z) {
                 this.switchState = SwitchState.PENDING;
-                this.pendingCameraName = selectedCameraName;
+                this.pendingCameraName = str;
                 return;
             }
             this.switchState = SwitchState.IN_PROGRESS;
             Logging.d(TAG, "switchCamera: Stopping session");
             this.cameraStatistics.release();
             this.cameraStatistics = null;
-            final CameraSession oldSession = this.currentSession;
+            final CameraSession cameraSession = this.currentSession;
             this.cameraThreadHandler.post(new Runnable() { // from class: org.webrtc.CameraCapturer.9
                 @Override // java.lang.Runnable
                 public void run() {
-                    oldSession.stop();
+                    cameraSession.stop();
                 }
             });
             this.currentSession = null;
-            this.cameraName = selectedCameraName;
+            this.cameraName = str;
             this.sessionOpening = true;
             this.openAttemptsRemaining = 1;
             createSessionInternal(0);
@@ -424,10 +423,11 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
     }
 
     public void checkIsOnCameraThread() {
-        if (Thread.currentThread() != this.cameraThreadHandler.getLooper().getThread()) {
-            Logging.e(TAG, "Check is on camera thread failed.");
-            throw new RuntimeException("Not on camera thread.");
+        if (Thread.currentThread() == this.cameraThreadHandler.getLooper().getThread()) {
+            return;
         }
+        Logging.e(TAG, "Check is on camera thread failed.");
+        throw new RuntimeException("Not on camera thread.");
     }
 
     protected String getCameraName() {

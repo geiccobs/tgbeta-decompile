@@ -5,20 +5,20 @@ import com.google.android.datatransport.runtime.scheduling.jobscheduling.Schedul
 import com.google.android.datatransport.runtime.time.Clock;
 import java.util.Map;
 /* JADX INFO: Access modifiers changed from: package-private */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class AutoValue_SchedulerConfig extends SchedulerConfig {
     private final Clock clock;
     private final Map<Priority, SchedulerConfig.ConfigValue> values;
 
-    public AutoValue_SchedulerConfig(Clock clock, Map<Priority, SchedulerConfig.ConfigValue> values) {
+    public AutoValue_SchedulerConfig(Clock clock, Map<Priority, SchedulerConfig.ConfigValue> map) {
         if (clock == null) {
             throw new NullPointerException("Null clock");
         }
         this.clock = clock;
-        if (values == null) {
+        if (map == null) {
             throw new NullPointerException("Null values");
         }
-        this.values = values;
+        this.values = map;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
@@ -37,19 +37,18 @@ public final class AutoValue_SchedulerConfig extends SchedulerConfig {
         return "SchedulerConfig{clock=" + this.clock + ", values=" + this.values + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof SchedulerConfig)) {
+        if (!(obj instanceof SchedulerConfig)) {
             return false;
         }
-        SchedulerConfig that = (SchedulerConfig) o;
-        return this.clock.equals(that.getClock()) && this.values.equals(that.getValues());
+        SchedulerConfig schedulerConfig = (SchedulerConfig) obj;
+        return this.clock.equals(schedulerConfig.getClock()) && this.values.equals(schedulerConfig.getValues());
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
-        return ((h$ ^ this.clock.hashCode()) * 1000003) ^ this.values.hashCode();
+        return ((this.clock.hashCode() ^ 1000003) * 1000003) ^ this.values.hashCode();
     }
 }

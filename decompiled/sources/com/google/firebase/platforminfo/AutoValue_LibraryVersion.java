@@ -7,15 +7,15 @@ public final class AutoValue_LibraryVersion extends LibraryVersion {
     private final String libraryName;
     private final String version;
 
-    public AutoValue_LibraryVersion(String libraryName, String version) {
-        if (libraryName == null) {
+    public AutoValue_LibraryVersion(String str, String str2) {
+        if (str == null) {
             throw new NullPointerException("Null libraryName");
         }
-        this.libraryName = libraryName;
-        if (version == null) {
+        this.libraryName = str;
+        if (str2 == null) {
             throw new NullPointerException("Null version");
         }
-        this.version = version;
+        this.version = str2;
     }
 
     @Override // com.google.firebase.platforminfo.LibraryVersion
@@ -34,19 +34,18 @@ public final class AutoValue_LibraryVersion extends LibraryVersion {
         return "LibraryVersion{libraryName=" + this.libraryName + ", version=" + this.version + "}";
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof LibraryVersion)) {
+        if (!(obj instanceof LibraryVersion)) {
             return false;
         }
-        LibraryVersion that = (LibraryVersion) o;
-        return this.libraryName.equals(that.getLibraryName()) && this.version.equals(that.getVersion());
+        LibraryVersion libraryVersion = (LibraryVersion) obj;
+        return this.libraryName.equals(libraryVersion.getLibraryName()) && this.version.equals(libraryVersion.getVersion());
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
-        return ((h$ ^ this.libraryName.hashCode()) * 1000003) ^ this.version.hashCode();
+        return ((this.libraryName.hashCode() ^ 1000003) * 1000003) ^ this.version.hashCode();
     }
 }

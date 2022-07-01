@@ -11,7 +11,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -28,9 +27,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class AcceptDeclineView extends View {
     private FabBackgroundDrawable acceptDrawable;
     private StaticLayout acceptLayout;
@@ -41,7 +40,6 @@ public class AcceptDeclineView extends View {
     private Drawable callDrawable;
     private Drawable cancelDrawable;
     boolean captured;
-    long capturedTime;
     private FabBackgroundDrawable declineDrawable;
     private StaticLayout declineLayout;
     Animator leftAnimator;
@@ -68,7 +66,7 @@ public class AcceptDeclineView extends View {
     Paint linePaint = new Paint(1);
     private int buttonWidth = AndroidUtilities.dp(60.0f);
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public interface Listener {
         void onAccept();
 
@@ -93,12 +91,12 @@ public class AcceptDeclineView extends View {
         TextPaint textPaint = new TextPaint(1);
         textPaint.setTextSize(AndroidUtilities.dp(11.0f));
         textPaint.setColor(-1);
-        String acceptStr = LocaleController.getString("AcceptCall", R.string.AcceptCall);
-        String declineStr = LocaleController.getString("DeclineCall", R.string.DeclineCall);
-        String retryStr = LocaleController.getString("RetryCall", R.string.RetryCall);
-        this.acceptLayout = new StaticLayout(acceptStr, textPaint, (int) textPaint.measureText(acceptStr), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        this.declineLayout = new StaticLayout(declineStr, textPaint, (int) textPaint.measureText(declineStr), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        this.retryLayout = new StaticLayout(retryStr, textPaint, (int) textPaint.measureText(retryStr), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        String string = LocaleController.getString("AcceptCall", R.string.AcceptCall);
+        String string2 = LocaleController.getString("DeclineCall", R.string.DeclineCall);
+        String string3 = LocaleController.getString("RetryCall", R.string.RetryCall);
+        this.acceptLayout = new StaticLayout(string, textPaint, (int) textPaint.measureText(string), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        this.declineLayout = new StaticLayout(string2, textPaint, (int) textPaint.measureText(string2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        this.retryLayout = new StaticLayout(string3, textPaint, (int) textPaint.measureText(string3), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         this.callDrawable = ContextCompat.getDrawable(context, R.drawable.calls_decline).mutate();
         Drawable mutate = ContextCompat.getDrawable(context, R.drawable.ic_close_white).mutate();
         this.cancelDrawable = mutate;
@@ -111,136 +109,39 @@ public class AcceptDeclineView extends View {
     }
 
     @Override // android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(i, i2);
         this.maxOffset = (getMeasuredWidth() / 2.0f) - ((this.buttonWidth / 2.0f) + AndroidUtilities.dp(46.0f));
-        int padding = (this.buttonWidth - AndroidUtilities.dp(28.0f)) / 2;
-        this.callDrawable.setBounds(padding, padding, AndroidUtilities.dp(28.0f) + padding, AndroidUtilities.dp(28.0f) + padding);
-        this.cancelDrawable.setBounds(padding, padding, AndroidUtilities.dp(28.0f) + padding, AndroidUtilities.dp(28.0f) + padding);
+        int dp = (this.buttonWidth - AndroidUtilities.dp(28.0f)) / 2;
+        this.callDrawable.setBounds(dp, dp, AndroidUtilities.dp(28.0f) + dp, AndroidUtilities.dp(28.0f) + dp);
+        this.cancelDrawable.setBounds(dp, dp, AndroidUtilities.dp(28.0f) + dp, AndroidUtilities.dp(28.0f) + dp);
         this.linePaint.setStrokeWidth(AndroidUtilities.dp(3.0f));
         this.linePaint.setColor(-1);
     }
 
+    /* JADX WARN: Code restructure failed: missing block: B:11:0x0016, code lost:
+        if (r0 != 3) goto L80;
+     */
     @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent event) {
-        if (!isEnabled()) {
-            return false;
-        }
-        switch (event.getAction()) {
-            case 0:
-                this.startX = event.getX();
-                this.startY = event.getY();
-                if (this.leftAnimator == null && this.declineRect.contains((int) event.getX(), (int) event.getY())) {
-                    this.rippleDrawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(52.0f), 0, -51130);
-                    this.captured = true;
-                    this.leftDrag = true;
-                    setPressed(true);
-                    return true;
-                } else if (this.rightAnimator == null && this.acceptRect.contains((int) event.getX(), (int) event.getY())) {
-                    this.rippleDrawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(52.0f), 0, -11677354);
-                    this.captured = true;
-                    this.leftDrag = false;
-                    setPressed(true);
-                    Animator animator = this.rightAnimator;
-                    if (animator != null) {
-                        animator.cancel();
-                    }
-                    return true;
-                }
-                break;
-            case 1:
-            case 3:
-                float dy = event.getY() - this.startY;
-                if (this.captured) {
-                    if (this.leftDrag) {
-                        ValueAnimator animator2 = ValueAnimator.ofFloat(this.leftOffsetX, 0.0f);
-                        animator2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.voip.AcceptDeclineView$$ExternalSyntheticLambda0
-                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                            public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                AcceptDeclineView.this.m3227x4fc0e726(valueAnimator);
-                            }
-                        });
-                        animator2.start();
-                        this.leftAnimator = animator2;
-                        if (this.listener != null && ((!this.startDrag && Math.abs(dy) < this.touchSlop && !this.screenWasWakeup) || this.leftOffsetX > this.maxOffset * 0.8f)) {
-                            this.listener.onDecline();
-                        }
-                    } else {
-                        ValueAnimator animator3 = ValueAnimator.ofFloat(this.rigthOffsetX, 0.0f);
-                        animator3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.voip.AcceptDeclineView$$ExternalSyntheticLambda1
-                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
-                            public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                AcceptDeclineView.this.m3228x934c04e7(valueAnimator);
-                            }
-                        });
-                        animator3.start();
-                        this.rightAnimator = animator3;
-                        if (this.listener != null && ((!this.startDrag && Math.abs(dy) < this.touchSlop && !this.screenWasWakeup) || (-this.rigthOffsetX) > this.maxOffset * 0.8f)) {
-                            this.listener.onAccept();
-                        }
-                    }
-                }
-                getParent().requestDisallowInterceptTouchEvent(false);
-                this.captured = false;
-                this.startDrag = false;
-                setPressed(false);
-                break;
-            case 2:
-                if (this.captured) {
-                    float dx = event.getX() - this.startX;
-                    if (!this.startDrag && Math.abs(dx) > this.touchSlop) {
-                        if (!this.retryMod) {
-                            this.startX = event.getX();
-                            dx = 0.0f;
-                            this.startDrag = true;
-                            setPressed(false);
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                        } else {
-                            setPressed(false);
-                            this.captured = false;
-                        }
-                    }
-                    if (this.startDrag) {
-                        if (this.leftDrag) {
-                            this.leftOffsetX = dx;
-                            if (dx < 0.0f) {
-                                this.leftOffsetX = 0.0f;
-                            } else {
-                                float f = this.maxOffset;
-                                if (dx > f) {
-                                    this.leftOffsetX = f;
-                                    dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), 1, 0.0f, 0.0f, 0));
-                                }
-                            }
-                        } else {
-                            this.rigthOffsetX = dx;
-                            if (dx > 0.0f) {
-                                this.rigthOffsetX = 0.0f;
-                            } else {
-                                float f2 = this.maxOffset;
-                                if (dx < (-f2)) {
-                                    this.rigthOffsetX = -f2;
-                                    dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), 1, 0.0f, 0.0f, 0));
-                                }
-                            }
-                        }
-                    }
-                    return true;
-                }
-                break;
-        }
-        return false;
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public boolean onTouchEvent(android.view.MotionEvent r12) {
+        /*
+            Method dump skipped, instructions count: 431
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.voip.AcceptDeclineView.onTouchEvent(android.view.MotionEvent):boolean");
     }
 
-    /* renamed from: lambda$onTouchEvent$0$org-telegram-ui-Components-voip-AcceptDeclineView */
-    public /* synthetic */ void m3227x4fc0e726(ValueAnimator valueAnimator) {
+    public /* synthetic */ void lambda$onTouchEvent$0(ValueAnimator valueAnimator) {
         this.leftOffsetX = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         invalidate();
         this.leftAnimator = null;
     }
 
-    /* renamed from: lambda$onTouchEvent$1$org-telegram-ui-Components-voip-AcceptDeclineView */
-    public /* synthetic */ void m3228x934c04e7(ValueAnimator valueAnimator) {
+    public /* synthetic */ void lambda$onTouchEvent$1(ValueAnimator valueAnimator) {
         this.rigthOffsetX = ((Float) valueAnimator.getAnimatedValue()).floatValue();
         invalidate();
         this.rightAnimator = null;
@@ -248,7 +149,7 @@ public class AcceptDeclineView extends View {
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
-        float startX;
+        float f;
         if (!this.retryMod) {
             if (this.expandSmallRadius) {
                 float dp = this.smallRadius + (AndroidUtilities.dp(2.0f) * 0.04f);
@@ -282,52 +183,55 @@ public class AcceptDeclineView extends View {
             }
             invalidate();
         }
-        float f = 1.0f;
+        float f2 = 0.6f;
         if (this.screenWasWakeup && !this.retryMod) {
-            float f2 = this.arrowProgress + 0.010666667f;
-            this.arrowProgress = f2;
-            if (f2 > 1.0f) {
+            float f3 = this.arrowProgress + 0.010666667f;
+            this.arrowProgress = f3;
+            if (f3 > 1.0f) {
                 this.arrowProgress = 0.0f;
             }
-            int cY = (int) (AndroidUtilities.dp(40.0f) + (this.buttonWidth / 2.0f));
-            float startX2 = AndroidUtilities.dp(46.0f) + this.buttonWidth + AndroidUtilities.dp(8.0f);
-            float endX = (getMeasuredWidth() / 2.0f) - AndroidUtilities.dp(8.0f);
-            float lineLength = AndroidUtilities.dp(10.0f);
-            float stepProgress = (1.0f - 0.6f) / 3.0f;
+            int dp5 = (int) (AndroidUtilities.dp(40.0f) + (this.buttonWidth / 2.0f));
+            float dp6 = AndroidUtilities.dp(46.0f) + this.buttonWidth + AndroidUtilities.dp(8.0f);
+            float measuredWidth = (getMeasuredWidth() / 2.0f) - AndroidUtilities.dp(8.0f);
+            float dp7 = AndroidUtilities.dp(10.0f);
+            float f4 = 0.13333333f;
             int i = 0;
             while (i < 3) {
-                int x = (int) (((((endX - startX2) - lineLength) / 3.0f) * i) + startX2);
-                float alpha = 0.5f;
-                float startAlphaFrom = i * stepProgress;
-                float f3 = this.arrowProgress;
-                if (f3 > startAlphaFrom && f3 < startAlphaFrom + 0.6f) {
-                    float p = (f3 - startAlphaFrom) / 0.6f;
-                    startX = startX2;
-                    if (p > 0.5d) {
-                        p = f - p;
-                    }
-                    alpha = p + 0.5f;
+                float f5 = i;
+                float f6 = ((((measuredWidth - dp6) - dp7) / 3.0f) * f5) + dp6;
+                int i2 = (int) f6;
+                float f7 = f5 * f4;
+                float f8 = this.arrowProgress;
+                float f9 = 0.5f;
+                if (f8 <= f7 || f8 >= f7 + f2) {
+                    f = dp7;
                 } else {
-                    startX = startX2;
+                    float f10 = (f8 - f7) / f2;
+                    f = dp7;
+                    if (f10 > 0.5d) {
+                        f10 = 1.0f - f10;
+                    }
+                    f9 = f10 + 0.5f;
                 }
                 canvas.save();
                 canvas.clipRect(this.leftOffsetX + AndroidUtilities.dp(46.0f) + (this.buttonWidth / 2), 0.0f, getMeasuredHeight(), getMeasuredWidth() >> 1);
-                this.arrowDrawable.setAlpha((int) (255.0f * alpha));
+                this.arrowDrawable.setAlpha((int) (255.0f * f9));
                 Drawable drawable = this.arrowDrawable;
-                drawable.setBounds(x, cY - (drawable.getIntrinsicHeight() / 2), this.arrowDrawable.getIntrinsicWidth() + x, (this.arrowDrawable.getIntrinsicHeight() / 2) + cY);
+                drawable.setBounds(i2, dp5 - (drawable.getIntrinsicHeight() / 2), this.arrowDrawable.getIntrinsicWidth() + i2, (this.arrowDrawable.getIntrinsicHeight() / 2) + dp5);
                 this.arrowDrawable.draw(canvas);
                 canvas.restore();
-                int x2 = (int) (getMeasuredWidth() - (startX + ((((endX - startX) - lineLength) / 3.0f) * i)));
+                int measuredWidth2 = (int) (getMeasuredWidth() - f6);
                 canvas.save();
                 canvas.clipRect(getMeasuredWidth() >> 1, 0.0f, ((this.rigthOffsetX + getMeasuredWidth()) - AndroidUtilities.dp(46.0f)) - (this.buttonWidth / 2), getMeasuredHeight());
-                canvas.rotate(180.0f, x2 - (this.arrowDrawable.getIntrinsicWidth() / 2.0f), cY);
+                canvas.rotate(180.0f, measuredWidth2 - (this.arrowDrawable.getIntrinsicWidth() / 2.0f), dp5);
                 Drawable drawable2 = this.arrowDrawable;
-                drawable2.setBounds(x2 - drawable2.getIntrinsicWidth(), cY - (this.arrowDrawable.getIntrinsicHeight() / 2), x2, (this.arrowDrawable.getIntrinsicHeight() / 2) + cY);
+                drawable2.setBounds(measuredWidth2 - drawable2.getIntrinsicWidth(), dp5 - (this.arrowDrawable.getIntrinsicHeight() / 2), measuredWidth2, (this.arrowDrawable.getIntrinsicHeight() / 2) + dp5);
                 this.arrowDrawable.draw(canvas);
                 canvas.restore();
                 i++;
-                startX2 = startX;
-                f = 1.0f;
+                dp7 = f;
+                f2 = 0.6f;
+                f4 = 0.13333333f;
             }
             invalidate();
         }
@@ -355,10 +259,10 @@ public class AcceptDeclineView extends View {
         canvas.save();
         canvas.translate(((this.rigthOffsetX + getMeasuredWidth()) - AndroidUtilities.dp(46.0f)) - this.buttonWidth, 0.0f);
         if (!this.retryMod) {
-            int i2 = this.buttonWidth;
-            canvas.drawCircle(i2 / 2.0f, i2 / 2.0f, ((i2 / 2.0f) - AndroidUtilities.dp(4.0f)) + this.bigRadius, this.acceptCirclePaint);
             int i3 = this.buttonWidth;
-            canvas.drawCircle(i3 / 2.0f, i3 / 2.0f, ((i3 / 2.0f) - AndroidUtilities.dp(4.0f)) + this.smallRadius, this.acceptCirclePaint);
+            canvas.drawCircle(i3 / 2.0f, i3 / 2.0f, ((i3 / 2.0f) - AndroidUtilities.dp(4.0f)) + this.bigRadius, this.acceptCirclePaint);
+            int i4 = this.buttonWidth;
+            canvas.drawCircle(i4 / 2.0f, i4 / 2.0f, ((i4 / 2.0f) - AndroidUtilities.dp(4.0f)) + this.smallRadius, this.acceptCirclePaint);
         }
         this.acceptDrawable.draw(canvas);
         this.acceptRect.set((getMeasuredWidth() - AndroidUtilities.dp(46.0f)) - this.buttonWidth, AndroidUtilities.dp(40.0f), getMeasuredWidth() - AndroidUtilities.dp(46.0f), AndroidUtilities.dp(40.0f) + this.buttonWidth);
@@ -390,9 +294,9 @@ public class AcceptDeclineView extends View {
         this.listener = listener;
     }
 
-    public void setRetryMod(boolean retryMod) {
-        this.retryMod = retryMod;
-        if (retryMod) {
+    public void setRetryMod(boolean z) {
+        this.retryMod = z;
+        if (z) {
             this.declineDrawable.setColor(-1);
             this.screenWasWakeup = false;
             return;
@@ -421,68 +325,69 @@ public class AcceptDeclineView extends View {
     }
 
     @Override // android.view.View
-    public boolean onHoverEvent(MotionEvent event) {
+    public boolean onHoverEvent(MotionEvent motionEvent) {
         AcceptDeclineAccessibilityNodeProvider acceptDeclineAccessibilityNodeProvider = this.accessibilityNodeProvider;
-        if (acceptDeclineAccessibilityNodeProvider != null && acceptDeclineAccessibilityNodeProvider.onHoverEvent(event)) {
-            return true;
+        if (acceptDeclineAccessibilityNodeProvider == null || !acceptDeclineAccessibilityNodeProvider.onHoverEvent(motionEvent)) {
+            return super.onHoverEvent(motionEvent);
         }
-        return super.onHoverEvent(event);
+        return true;
     }
 
     @Override // android.view.View
     public AccessibilityNodeProvider getAccessibilityNodeProvider() {
         if (this.accessibilityNodeProvider == null) {
             this.accessibilityNodeProvider = new AcceptDeclineAccessibilityNodeProvider(this, 2) { // from class: org.telegram.ui.Components.voip.AcceptDeclineView.1
-                private static final int ACCEPT_VIEW_ID = 0;
-                private static final int DECLINE_VIEW_ID = 1;
                 private final int[] coords = {0, 0};
 
                 @Override // org.telegram.ui.Components.voip.AcceptDeclineView.AcceptDeclineAccessibilityNodeProvider
-                protected CharSequence getVirtualViewText(int virtualViewId) {
-                    if (virtualViewId == 0) {
-                        if (AcceptDeclineView.this.retryMod) {
-                            if (AcceptDeclineView.this.retryLayout != null) {
-                                return AcceptDeclineView.this.retryLayout.getText();
-                            }
-                            return null;
-                        } else if (AcceptDeclineView.this.acceptLayout != null) {
-                            return AcceptDeclineView.this.acceptLayout.getText();
-                        } else {
-                            return null;
+                protected CharSequence getVirtualViewText(int i) {
+                    if (i != 0) {
+                        if (i == 1 && AcceptDeclineView.this.declineLayout != null) {
+                            return AcceptDeclineView.this.declineLayout.getText();
                         }
-                    } else if (virtualViewId == 1 && AcceptDeclineView.this.declineLayout != null) {
-                        return AcceptDeclineView.this.declineLayout.getText();
-                    } else {
                         return null;
                     }
-                }
-
-                @Override // org.telegram.ui.Components.voip.AcceptDeclineView.AcceptDeclineAccessibilityNodeProvider
-                protected void getVirtualViewBoundsInScreen(int virtualViewId, Rect outRect) {
-                    getVirtualViewBoundsInParent(virtualViewId, outRect);
-                    AcceptDeclineView.this.getLocationOnScreen(this.coords);
-                    int[] iArr = this.coords;
-                    outRect.offset(iArr[0], iArr[1]);
-                }
-
-                @Override // org.telegram.ui.Components.voip.AcceptDeclineView.AcceptDeclineAccessibilityNodeProvider
-                protected void getVirtualViewBoundsInParent(int virtualViewId, Rect outRect) {
-                    if (virtualViewId == 0) {
-                        outRect.set(AcceptDeclineView.this.acceptRect);
-                    } else if (virtualViewId == 1) {
-                        outRect.set(AcceptDeclineView.this.declineRect);
+                    AcceptDeclineView acceptDeclineView = AcceptDeclineView.this;
+                    if (acceptDeclineView.retryMod) {
+                        if (acceptDeclineView.retryLayout == null) {
+                            return null;
+                        }
+                        return AcceptDeclineView.this.retryLayout.getText();
+                    } else if (acceptDeclineView.acceptLayout == null) {
+                        return null;
                     } else {
-                        outRect.setEmpty();
+                        return AcceptDeclineView.this.acceptLayout.getText();
                     }
                 }
 
                 @Override // org.telegram.ui.Components.voip.AcceptDeclineView.AcceptDeclineAccessibilityNodeProvider
-                protected void onVirtualViewClick(int virtualViewId) {
-                    if (AcceptDeclineView.this.listener != null) {
-                        if (virtualViewId == 0) {
-                            AcceptDeclineView.this.listener.onAccept();
-                        } else if (virtualViewId == 1) {
-                            AcceptDeclineView.this.listener.onDecline();
+                protected void getVirtualViewBoundsInScreen(int i, Rect rect) {
+                    getVirtualViewBoundsInParent(i, rect);
+                    AcceptDeclineView.this.getLocationOnScreen(this.coords);
+                    int[] iArr = this.coords;
+                    rect.offset(iArr[0], iArr[1]);
+                }
+
+                @Override // org.telegram.ui.Components.voip.AcceptDeclineView.AcceptDeclineAccessibilityNodeProvider
+                protected void getVirtualViewBoundsInParent(int i, Rect rect) {
+                    if (i == 0) {
+                        rect.set(AcceptDeclineView.this.acceptRect);
+                    } else if (i == 1) {
+                        rect.set(AcceptDeclineView.this.declineRect);
+                    } else {
+                        rect.setEmpty();
+                    }
+                }
+
+                @Override // org.telegram.ui.Components.voip.AcceptDeclineView.AcceptDeclineAccessibilityNodeProvider
+                protected void onVirtualViewClick(int i) {
+                    Listener listener = AcceptDeclineView.this.listener;
+                    if (listener != null) {
+                        if (i == 0) {
+                            listener.onAccept();
+                        } else if (i != 1) {
+                        } else {
+                            listener.onDecline();
                         }
                     }
                 }
@@ -491,11 +396,11 @@ public class AcceptDeclineView extends View {
         return this.accessibilityNodeProvider;
     }
 
-    public void setScreenWasWakeup(boolean screenWasWakeup) {
-        this.screenWasWakeup = screenWasWakeup;
+    public void setScreenWasWakeup(boolean z) {
+        this.screenWasWakeup = z;
     }
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static abstract class AcceptDeclineAccessibilityNodeProvider extends AccessibilityNodeProvider {
         private final AccessibilityManager accessibilityManager;
         private final View hostView;
@@ -511,62 +416,62 @@ public class AcceptDeclineView extends View {
 
         protected abstract void onVirtualViewClick(int i);
 
-        protected AcceptDeclineAccessibilityNodeProvider(View hostView, int virtualViewsCount) {
-            this.hostView = hostView;
-            this.virtualViewsCount = virtualViewsCount;
-            this.accessibilityManager = (AccessibilityManager) ContextCompat.getSystemService(hostView.getContext(), AccessibilityManager.class);
+        protected AcceptDeclineAccessibilityNodeProvider(View view, int i) {
+            this.hostView = view;
+            this.virtualViewsCount = i;
+            this.accessibilityManager = (AccessibilityManager) ContextCompat.getSystemService(view.getContext(), AccessibilityManager.class);
         }
 
         @Override // android.view.accessibility.AccessibilityNodeProvider
-        public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
-            AccessibilityNodeInfo nodeInfo;
-            if (virtualViewId == -1) {
-                nodeInfo = AccessibilityNodeInfo.obtain(this.hostView);
-                nodeInfo.setPackageName(this.hostView.getContext().getPackageName());
-                for (int i = 0; i < this.virtualViewsCount; i++) {
-                    nodeInfo.addChild(this.hostView, i);
+        public AccessibilityNodeInfo createAccessibilityNodeInfo(int i) {
+            if (i == -1) {
+                AccessibilityNodeInfo obtain = AccessibilityNodeInfo.obtain(this.hostView);
+                obtain.setPackageName(this.hostView.getContext().getPackageName());
+                for (int i2 = 0; i2 < this.virtualViewsCount; i2++) {
+                    obtain.addChild(this.hostView, i2);
                 }
-            } else {
-                nodeInfo = AccessibilityNodeInfo.obtain(this.hostView, virtualViewId);
-                nodeInfo.setPackageName(this.hostView.getContext().getPackageName());
-                if (Build.VERSION.SDK_INT >= 21) {
-                    nodeInfo.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
-                }
-                nodeInfo.setText(getVirtualViewText(virtualViewId));
-                nodeInfo.setClassName(Button.class.getName());
-                if (Build.VERSION.SDK_INT >= 24) {
-                    nodeInfo.setImportantForAccessibility(true);
-                }
-                nodeInfo.setVisibleToUser(true);
-                nodeInfo.setClickable(true);
-                nodeInfo.setEnabled(true);
-                nodeInfo.setParent(this.hostView);
-                getVirtualViewBoundsInScreen(virtualViewId, this.rect);
-                nodeInfo.setBoundsInScreen(this.rect);
+                return obtain;
             }
-            return nodeInfo;
+            AccessibilityNodeInfo obtain2 = AccessibilityNodeInfo.obtain(this.hostView, i);
+            obtain2.setPackageName(this.hostView.getContext().getPackageName());
+            int i3 = Build.VERSION.SDK_INT;
+            if (i3 >= 21) {
+                obtain2.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+            }
+            obtain2.setText(getVirtualViewText(i));
+            obtain2.setClassName(Button.class.getName());
+            if (i3 >= 24) {
+                obtain2.setImportantForAccessibility(true);
+            }
+            obtain2.setVisibleToUser(true);
+            obtain2.setClickable(true);
+            obtain2.setEnabled(true);
+            obtain2.setParent(this.hostView);
+            getVirtualViewBoundsInScreen(i, this.rect);
+            obtain2.setBoundsInScreen(this.rect);
+            return obtain2;
         }
 
         @Override // android.view.accessibility.AccessibilityNodeProvider
-        public boolean performAction(int virtualViewId, int action, Bundle arguments) {
-            if (virtualViewId == -1) {
-                return this.hostView.performAccessibilityAction(action, arguments);
+        public boolean performAction(int i, int i2, Bundle bundle) {
+            if (i == -1) {
+                return this.hostView.performAccessibilityAction(i2, bundle);
             }
-            if (action == 64) {
-                sendAccessibilityEventForVirtualView(virtualViewId, 32768);
+            if (i2 == 64) {
+                sendAccessibilityEventForVirtualView(i, 32768);
                 return false;
-            } else if (action == 16) {
-                onVirtualViewClick(virtualViewId);
+            } else if (i2 != 16) {
+                return false;
+            } else {
+                onVirtualViewClick(i);
                 return true;
-            } else {
-                return false;
             }
         }
 
-        public boolean onHoverEvent(MotionEvent event) {
-            int x = (int) event.getX();
-            int y = (int) event.getY();
-            if (event.getAction() == 9 || event.getAction() == 7) {
+        public boolean onHoverEvent(MotionEvent motionEvent) {
+            int x = (int) motionEvent.getX();
+            int y = (int) motionEvent.getY();
+            if (motionEvent.getAction() == 9 || motionEvent.getAction() == 7) {
                 for (int i = 0; i < this.virtualViewsCount; i++) {
                     getVirtualViewBoundsInParent(i, this.rect);
                     if (this.rect.contains(x, y)) {
@@ -577,23 +482,22 @@ public class AcceptDeclineView extends View {
                         return true;
                     }
                 }
-                return false;
-            } else if (event.getAction() == 10 && this.currentFocusedVirtualViewId != -1) {
+            } else if (motionEvent.getAction() == 10 && this.currentFocusedVirtualViewId != -1) {
                 this.currentFocusedVirtualViewId = -1;
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
-        private void sendAccessibilityEventForVirtualView(int virtualViewId, int eventType) {
+        private void sendAccessibilityEventForVirtualView(int i, int i2) {
             ViewParent parent;
-            if (this.accessibilityManager.isTouchExplorationEnabled() && (parent = this.hostView.getParent()) != null) {
-                AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-                event.setPackageName(this.hostView.getContext().getPackageName());
-                event.setSource(this.hostView, virtualViewId);
-                parent.requestSendAccessibilityEvent(this.hostView, event);
+            if (!this.accessibilityManager.isTouchExplorationEnabled() || (parent = this.hostView.getParent()) == null) {
+                return;
             }
+            AccessibilityEvent obtain = AccessibilityEvent.obtain(i2);
+            obtain.setPackageName(this.hostView.getContext().getPackageName());
+            obtain.setSource(this.hostView, i);
+            parent.requestSendAccessibilityEvent(this.hostView, obtain);
         }
     }
 }

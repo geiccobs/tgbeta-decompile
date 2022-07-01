@@ -5,40 +5,45 @@ import android.os.Parcelable;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class TrackGroup implements Parcelable {
     public static final Parcelable.Creator<TrackGroup> CREATOR = new Parcelable.Creator<TrackGroup>() { // from class: com.google.android.exoplayer2.source.TrackGroup.1
         @Override // android.os.Parcelable.Creator
-        public TrackGroup createFromParcel(Parcel in) {
-            return new TrackGroup(in);
+        public TrackGroup createFromParcel(Parcel parcel) {
+            return new TrackGroup(parcel);
         }
 
         @Override // android.os.Parcelable.Creator
-        public TrackGroup[] newArray(int size) {
-            return new TrackGroup[size];
+        public TrackGroup[] newArray(int i) {
+            return new TrackGroup[i];
         }
     };
     private final Format[] formats;
     private int hashCode;
     public final int length;
 
-    public TrackGroup(Format... formats) {
-        Assertions.checkState(formats.length > 0);
-        this.formats = formats;
-        this.length = formats.length;
+    @Override // android.os.Parcelable
+    public int describeContents() {
+        return 0;
     }
 
-    TrackGroup(Parcel in) {
-        int readInt = in.readInt();
+    public TrackGroup(Format... formatArr) {
+        Assertions.checkState(formatArr.length > 0);
+        this.formats = formatArr;
+        this.length = formatArr.length;
+    }
+
+    TrackGroup(Parcel parcel) {
+        int readInt = parcel.readInt();
         this.length = readInt;
         this.formats = new Format[readInt];
         for (int i = 0; i < this.length; i++) {
-            this.formats[i] = (Format) in.readParcelable(Format.class.getClassLoader());
+            this.formats[i] = (Format) parcel.readParcelable(Format.class.getClassLoader());
         }
     }
 
-    public Format getFormat(int index) {
-        return this.formats[index];
+    public Format getFormat(int i) {
+        return this.formats[i];
     }
 
     public int indexOf(Format format) {
@@ -46,11 +51,10 @@ public final class TrackGroup implements Parcelable {
         while (true) {
             Format[] formatArr = this.formats;
             if (i < formatArr.length) {
-                if (format != formatArr[i]) {
-                    i++;
-                } else {
+                if (format == formatArr[i]) {
                     return i;
                 }
+                i++;
             } else {
                 return -1;
             }
@@ -59,8 +63,7 @@ public final class TrackGroup implements Parcelable {
 
     public int hashCode() {
         if (this.hashCode == 0) {
-            int result = (17 * 31) + Arrays.hashCode(this.formats);
-            this.hashCode = result;
+            this.hashCode = 527 + Arrays.hashCode(this.formats);
         }
         return this.hashCode;
     }
@@ -69,23 +72,18 @@ public final class TrackGroup implements Parcelable {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || TrackGroup.class != obj.getClass()) {
             return false;
         }
-        TrackGroup other = (TrackGroup) obj;
-        return this.length == other.length && Arrays.equals(this.formats, other.formats);
+        TrackGroup trackGroup = (TrackGroup) obj;
+        return this.length == trackGroup.length && Arrays.equals(this.formats, trackGroup.formats);
     }
 
     @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override // android.os.Parcelable
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.length);
-        for (int i = 0; i < this.length; i++) {
-            dest.writeParcelable(this.formats[i], 0);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(this.length);
+        for (int i2 = 0; i2 < this.length; i2++) {
+            parcel.writeParcelable(this.formats[i2], 0);
         }
     }
 }

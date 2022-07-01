@@ -2,7 +2,7 @@ package com.google.android.gms.internal.clearcut;
 
 import j$.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzea {
     private static final zzea zznc = new zzea();
     private final zzeg zznd;
@@ -27,7 +27,7 @@ public final class zzea {
     private static zzeg zzk(String str) {
         try {
             return (zzeg) Class.forName(str).getConstructor(new Class[0]).newInstance(new Object[0]);
-        } catch (Throwable th) {
+        } catch (Throwable unused) {
             return null;
         }
     }

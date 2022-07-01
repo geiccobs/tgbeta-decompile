@@ -12,14 +12,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.MessagesController;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.RecyclerAnimationScrollHelper;
 import org.telegram.ui.Components.RecyclerListView;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class RecyclerAnimationScrollHelper {
-    public static final int SCROLL_DIRECTION_DOWN = 0;
-    public static final int SCROLL_DIRECTION_UNSET = -1;
-    public static final int SCROLL_DIRECTION_UP = 1;
     private AnimationCallback animationCallback;
     private ValueAnimator animator;
     private LinearLayoutManager layoutManager;
@@ -29,86 +27,88 @@ public class RecyclerAnimationScrollHelper {
     public SparseArray<View> positionToOldView = new SparseArray<>();
     private HashMap<Long, View> oldStableIds = new HashMap<>();
 
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
+    public static class AnimationCallback {
+        public void onEndAnimation() {
+            throw null;
+        }
+
+        public void onStartAnimation() {
+        }
+
+        public void recycleView(View view) {
+            throw null;
+        }
+    }
+
+    /* loaded from: classes3.dex */
     public interface ScrollListener {
         void onScroll();
     }
 
-    public RecyclerAnimationScrollHelper(RecyclerListView recyclerView, LinearLayoutManager layoutManager) {
-        this.recyclerView = recyclerView;
-        this.layoutManager = layoutManager;
+    public RecyclerAnimationScrollHelper(RecyclerListView recyclerListView, LinearLayoutManager linearLayoutManager) {
+        this.recyclerView = recyclerListView;
+        this.layoutManager = linearLayoutManager;
     }
 
-    public void scrollToPosition(int position, int offset) {
-        scrollToPosition(position, offset, this.layoutManager.getReverseLayout(), false);
-    }
-
-    public void scrollToPosition(int position, int offset, boolean bottom) {
-        scrollToPosition(position, offset, bottom, false);
-    }
-
-    public void scrollToPosition(int position, int offset, boolean bottom, boolean smooth) {
-        AnimatableAdapter animatableAdapter;
-        if (!this.recyclerView.fastScrollAnimationRunning) {
-            if (this.recyclerView.getItemAnimator() != null && this.recyclerView.getItemAnimator().isRunning()) {
+    public void scrollToPosition(int i, int i2, boolean z, boolean z2) {
+        RecyclerListView recyclerListView = this.recyclerView;
+        if (!recyclerListView.fastScrollAnimationRunning) {
+            if (recyclerListView.getItemAnimator() != null && this.recyclerView.getItemAnimator().isRunning()) {
                 return;
             }
-            if (!smooth || this.scrollDirection == -1) {
-                this.layoutManager.scrollToPositionWithOffset(position, offset, bottom);
+            if (!z2 || this.scrollDirection == -1) {
+                this.layoutManager.scrollToPositionWithOffset(i, i2, z);
                 return;
             }
-            int n = this.recyclerView.getChildCount();
-            if (n != 0 && MessagesController.getGlobalMainSettings().getBoolean("view_animations", true)) {
-                boolean scrollDown = this.scrollDirection == 0;
-                this.recyclerView.setScrollEnabled(false);
-                ArrayList<View> oldViews = new ArrayList<>();
-                this.positionToOldView.clear();
-                RecyclerView.Adapter adapter = this.recyclerView.getAdapter();
-                this.oldStableIds.clear();
-                for (int i = 0; i < n; i++) {
-                    View child = this.recyclerView.getChildAt(i);
-                    oldViews.add(child);
-                    int childPosition = this.layoutManager.getPosition(child);
-                    this.positionToOldView.put(childPosition, child);
-                    if (adapter != null && adapter.hasStableIds()) {
-                        long itemId = ((RecyclerView.LayoutParams) child.getLayoutParams()).mViewHolder.getItemId();
-                        this.oldStableIds.put(Long.valueOf(itemId), child);
-                    }
-                    if (child instanceof ChatMessageCell) {
-                        ((ChatMessageCell) child).setAnimationRunning(true, true);
-                    }
-                }
-                this.recyclerView.prepareForFastScroll();
-                if (!(adapter instanceof AnimatableAdapter)) {
-                    animatableAdapter = null;
-                } else {
-                    AnimatableAdapter animatableAdapter2 = (AnimatableAdapter) adapter;
-                    animatableAdapter = animatableAdapter2;
-                }
-                this.layoutManager.scrollToPositionWithOffset(position, offset, bottom);
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
-                }
-                AnimatableAdapter finalAnimatableAdapter = animatableAdapter;
-                this.recyclerView.stopScroll();
-                this.recyclerView.setVerticalScrollBarEnabled(false);
-                AnimationCallback animationCallback = this.animationCallback;
-                if (animationCallback != null) {
-                    animationCallback.onStartAnimation();
-                }
-                this.recyclerView.fastScrollAnimationRunning = true;
-                if (finalAnimatableAdapter != null) {
-                    finalAnimatableAdapter.onAnimationStart();
-                }
-                this.recyclerView.addOnLayoutChangeListener(new AnonymousClass1(adapter, oldViews, scrollDown, finalAnimatableAdapter));
+            int childCount = this.recyclerView.getChildCount();
+            if (childCount == 0 || !MessagesController.getGlobalMainSettings().getBoolean("view_animations", true)) {
+                this.layoutManager.scrollToPositionWithOffset(i, i2, z);
                 return;
             }
-            this.layoutManager.scrollToPositionWithOffset(position, offset, bottom);
+            boolean z3 = this.scrollDirection == 0;
+            this.recyclerView.setScrollEnabled(false);
+            ArrayList arrayList = new ArrayList();
+            this.positionToOldView.clear();
+            RecyclerView.Adapter adapter = this.recyclerView.getAdapter();
+            this.oldStableIds.clear();
+            for (int i3 = 0; i3 < childCount; i3++) {
+                View childAt = this.recyclerView.getChildAt(i3);
+                arrayList.add(childAt);
+                this.positionToOldView.put(this.layoutManager.getPosition(childAt), childAt);
+                if (adapter != null && adapter.hasStableIds()) {
+                    this.oldStableIds.put(Long.valueOf(((RecyclerView.LayoutParams) childAt.getLayoutParams()).mViewHolder.getItemId()), childAt);
+                }
+                if (childAt instanceof ChatMessageCell) {
+                    ((ChatMessageCell) childAt).setAnimationRunning(true, true);
+                }
+            }
+            this.recyclerView.prepareForFastScroll();
+            AnimatableAdapter animatableAdapter = null;
+            if (adapter instanceof AnimatableAdapter) {
+                animatableAdapter = (AnimatableAdapter) adapter;
+            }
+            AnimatableAdapter animatableAdapter2 = animatableAdapter;
+            this.layoutManager.scrollToPositionWithOffset(i, i2, z);
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+            this.recyclerView.stopScroll();
+            this.recyclerView.setVerticalScrollBarEnabled(false);
+            AnimationCallback animationCallback = this.animationCallback;
+            if (animationCallback != null) {
+                animationCallback.onStartAnimation();
+            }
+            this.recyclerView.fastScrollAnimationRunning = true;
+            if (animatableAdapter2 != null) {
+                animatableAdapter2.onAnimationStart();
+            }
+            this.recyclerView.addOnLayoutChangeListener(new AnonymousClass1(adapter, arrayList, z3, animatableAdapter2));
         }
     }
 
     /* renamed from: org.telegram.ui.Components.RecyclerAnimationScrollHelper$1 */
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public class AnonymousClass1 implements View.OnLayoutChangeListener {
         final /* synthetic */ RecyclerView.Adapter val$adapter;
         final /* synthetic */ AnimatableAdapter val$finalAnimatableAdapter;
@@ -116,7 +116,7 @@ public class RecyclerAnimationScrollHelper {
         final /* synthetic */ boolean val$scrollDown;
 
         AnonymousClass1(RecyclerView.Adapter adapter, ArrayList arrayList, boolean z, AnimatableAdapter animatableAdapter) {
-            RecyclerAnimationScrollHelper.this = this$0;
+            RecyclerAnimationScrollHelper.this = r1;
             this.val$adapter = adapter;
             this.val$oldViews = arrayList;
             this.val$scrollDown = z;
@@ -124,193 +124,191 @@ public class RecyclerAnimationScrollHelper {
         }
 
         @Override // android.view.View.OnLayoutChangeListener
-        public void onLayoutChange(View v, int l, int t, int r, int b, int ol, int ot, int or, int ob) {
-            int oldT;
-            int scrollLength;
-            long duration;
-            View view;
-            final ArrayList<View> incomingViews = new ArrayList<>();
+        public void onLayoutChange(View view, int i, int i2, int i3, int i4, int i5, int i6, int i7, int i8) {
+            int height;
+            long j;
+            View view2;
+            final ArrayList arrayList = new ArrayList();
             RecyclerAnimationScrollHelper.this.recyclerView.stopScroll();
-            int n = RecyclerAnimationScrollHelper.this.recyclerView.getChildCount();
-            int top = 0;
-            int bottom = 0;
-            int scrollDiff = 0;
-            boolean hasSameViews = false;
-            for (int i = 0; i < n; i++) {
-                View child = RecyclerAnimationScrollHelper.this.recyclerView.getChildAt(i);
-                incomingViews.add(child);
-                if (child.getTop() < top) {
-                    top = child.getTop();
+            int childCount = RecyclerAnimationScrollHelper.this.recyclerView.getChildCount();
+            int i9 = 0;
+            int i10 = 0;
+            int i11 = 0;
+            int i12 = 0;
+            boolean z = false;
+            for (int i13 = 0; i13 < childCount; i13++) {
+                View childAt = RecyclerAnimationScrollHelper.this.recyclerView.getChildAt(i13);
+                arrayList.add(childAt);
+                if (childAt.getTop() < i10) {
+                    i10 = childAt.getTop();
                 }
-                if (child.getBottom() > bottom) {
-                    bottom = child.getBottom();
+                if (childAt.getBottom() > i11) {
+                    i11 = childAt.getBottom();
                 }
-                if (child instanceof ChatMessageCell) {
-                    ((ChatMessageCell) child).setAnimationRunning(true, false);
+                if (childAt instanceof ChatMessageCell) {
+                    ((ChatMessageCell) childAt).setAnimationRunning(true, false);
                 }
                 RecyclerView.Adapter adapter = this.val$adapter;
                 if (adapter != null && adapter.hasStableIds()) {
-                    long stableId = this.val$adapter.getItemId(RecyclerAnimationScrollHelper.this.recyclerView.getChildAdapterPosition(child));
-                    if (RecyclerAnimationScrollHelper.this.oldStableIds.containsKey(Long.valueOf(stableId)) && (view = (View) RecyclerAnimationScrollHelper.this.oldStableIds.get(Long.valueOf(stableId))) != null) {
-                        if (view instanceof ChatMessageCell) {
-                            ((ChatMessageCell) view).setAnimationRunning(false, false);
+                    long itemId = this.val$adapter.getItemId(RecyclerAnimationScrollHelper.this.recyclerView.getChildAdapterPosition(childAt));
+                    if (RecyclerAnimationScrollHelper.this.oldStableIds.containsKey(Long.valueOf(itemId)) && (view2 = (View) RecyclerAnimationScrollHelper.this.oldStableIds.get(Long.valueOf(itemId))) != null) {
+                        if (view2 instanceof ChatMessageCell) {
+                            ((ChatMessageCell) view2).setAnimationRunning(false, false);
                         }
-                        this.val$oldViews.remove(view);
+                        this.val$oldViews.remove(view2);
                         if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
-                            RecyclerAnimationScrollHelper.this.animationCallback.recycleView(view);
+                            RecyclerAnimationScrollHelper.this.animationCallback.recycleView(view2);
                         }
-                        int dif = child.getTop() - view.getTop();
-                        if (dif != 0) {
-                            hasSameViews = true;
-                            scrollDiff = dif;
-                        } else {
-                            hasSameViews = true;
+                        int top = childAt.getTop() - view2.getTop();
+                        if (top != 0) {
+                            i12 = top;
                         }
+                        z = true;
                     }
                 }
             }
             RecyclerAnimationScrollHelper.this.oldStableIds.clear();
-            int oldT2 = Integer.MAX_VALUE;
             Iterator it = this.val$oldViews.iterator();
-            int oldH = 0;
+            int i14 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i15 = 0;
             while (it.hasNext()) {
-                View view2 = (View) it.next();
-                int bot = view2.getBottom();
-                int topl = view2.getTop();
-                if (bot > oldH) {
-                    oldH = bot;
+                View view3 = (View) it.next();
+                int bottom = view3.getBottom();
+                int top2 = view3.getTop();
+                if (bottom > i15) {
+                    i15 = bottom;
                 }
-                if (topl < oldT2) {
-                    oldT2 = topl;
+                if (top2 < i14) {
+                    i14 = top2;
                 }
-                if (view2.getParent() == null) {
-                    RecyclerAnimationScrollHelper.this.recyclerView.addView(view2);
-                    RecyclerAnimationScrollHelper.this.layoutManager.ignoreView(view2);
+                if (view3.getParent() == null) {
+                    RecyclerAnimationScrollHelper.this.recyclerView.addView(view3);
+                    RecyclerAnimationScrollHelper.this.layoutManager.ignoreView(view3);
                 }
-                if (view2 instanceof ChatMessageCell) {
-                    ((ChatMessageCell) view2).setAnimationRunning(true, true);
+                if (view3 instanceof ChatMessageCell) {
+                    ((ChatMessageCell) view3).setAnimationRunning(true, true);
                 }
             }
-            if (oldT2 != Integer.MAX_VALUE) {
-                oldT = oldT2;
-            } else {
-                oldT = 0;
+            if (i14 != Integer.MAX_VALUE) {
+                i9 = i14;
             }
             if (this.val$oldViews.isEmpty()) {
-                scrollLength = Math.abs(scrollDiff);
+                height = Math.abs(i12);
             } else {
-                int finalHeight = this.val$scrollDown ? oldH : RecyclerAnimationScrollHelper.this.recyclerView.getHeight() - oldT;
-                scrollLength = (this.val$scrollDown ? -top : bottom - RecyclerAnimationScrollHelper.this.recyclerView.getHeight()) + finalHeight;
+                if (!this.val$scrollDown) {
+                    i15 = RecyclerAnimationScrollHelper.this.recyclerView.getHeight() - i9;
+                }
+                height = (this.val$scrollDown ? -i10 : i11 - RecyclerAnimationScrollHelper.this.recyclerView.getHeight()) + i15;
             }
+            final int i16 = height;
             if (RecyclerAnimationScrollHelper.this.animator != null) {
                 RecyclerAnimationScrollHelper.this.animator.removeAllListeners();
                 RecyclerAnimationScrollHelper.this.animator.cancel();
             }
             RecyclerAnimationScrollHelper.this.animator = ValueAnimator.ofFloat(0.0f, 1.0f);
             ValueAnimator valueAnimator = RecyclerAnimationScrollHelper.this.animator;
-            final ArrayList arrayList = this.val$oldViews;
-            final boolean z = this.val$scrollDown;
-            final int i2 = scrollLength;
+            final ArrayList arrayList2 = this.val$oldViews;
+            final boolean z2 = this.val$scrollDown;
             valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.RecyclerAnimationScrollHelper$1$$ExternalSyntheticLambda0
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                    RecyclerAnimationScrollHelper.AnonymousClass1.this.m2954xb4285cce(arrayList, z, i2, incomingViews, valueAnimator2);
+                    RecyclerAnimationScrollHelper.AnonymousClass1.this.lambda$onLayoutChange$0(arrayList2, z2, i16, arrayList, valueAnimator2);
                 }
             });
             RecyclerAnimationScrollHelper.this.animator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.RecyclerAnimationScrollHelper.1.1
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-                public void onAnimationEnd(Animator animation) {
-                    if (RecyclerAnimationScrollHelper.this.animator != null) {
-                        RecyclerAnimationScrollHelper.this.recyclerView.fastScrollAnimationRunning = false;
-                        Iterator it2 = AnonymousClass1.this.val$oldViews.iterator();
-                        while (it2.hasNext()) {
-                            View view3 = (View) it2.next();
-                            if (view3 instanceof ChatMessageCell) {
-                                ((ChatMessageCell) view3).setAnimationRunning(false, true);
-                            }
-                            view3.setTranslationY(0.0f);
-                            RecyclerAnimationScrollHelper.this.layoutManager.stopIgnoringView(view3);
-                            RecyclerAnimationScrollHelper.this.recyclerView.removeView(view3);
-                            if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
-                                RecyclerAnimationScrollHelper.this.animationCallback.recycleView(view3);
-                            }
-                        }
-                        RecyclerAnimationScrollHelper.this.recyclerView.setScrollEnabled(true);
-                        RecyclerAnimationScrollHelper.this.recyclerView.setVerticalScrollBarEnabled(true);
-                        if (BuildVars.DEBUG_PRIVATE_VERSION) {
-                            if (RecyclerAnimationScrollHelper.this.recyclerView.mChildHelper.getChildCount() == RecyclerAnimationScrollHelper.this.recyclerView.getChildCount()) {
-                                if (RecyclerAnimationScrollHelper.this.recyclerView.mChildHelper.getHiddenChildCount() != 0) {
-                                    throw new RuntimeException("hidden child count must be 0");
-                                }
-                            } else {
-                                throw new RuntimeException("views count in child helper must be quals views count in recycler view");
-                            }
-                        }
-                        int n2 = RecyclerAnimationScrollHelper.this.recyclerView.getChildCount();
-                        for (int i3 = 0; i3 < n2; i3++) {
-                            View child2 = RecyclerAnimationScrollHelper.this.recyclerView.getChildAt(i3);
-                            if (child2 instanceof ChatMessageCell) {
-                                ((ChatMessageCell) child2).setAnimationRunning(false, false);
-                            }
-                            child2.setTranslationY(0.0f);
-                        }
-                        Iterator it3 = incomingViews.iterator();
-                        while (it3.hasNext()) {
-                            View v2 = (View) it3.next();
-                            if (v2 instanceof ChatMessageCell) {
-                                ((ChatMessageCell) v2).setAnimationRunning(false, false);
-                            }
-                            v2.setTranslationY(0.0f);
-                        }
-                        if (AnonymousClass1.this.val$finalAnimatableAdapter != null) {
-                            AnonymousClass1.this.val$finalAnimatableAdapter.onAnimationEnd();
-                        }
-                        if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
-                            RecyclerAnimationScrollHelper.this.animationCallback.onEndAnimation();
-                        }
-                        RecyclerAnimationScrollHelper.this.positionToOldView.clear();
-                        RecyclerAnimationScrollHelper.this.animator = null;
+                public void onAnimationEnd(Animator animator) {
+                    if (RecyclerAnimationScrollHelper.this.animator == null) {
+                        return;
                     }
+                    RecyclerAnimationScrollHelper.this.recyclerView.fastScrollAnimationRunning = false;
+                    Iterator it2 = AnonymousClass1.this.val$oldViews.iterator();
+                    while (it2.hasNext()) {
+                        View view4 = (View) it2.next();
+                        if (view4 instanceof ChatMessageCell) {
+                            ((ChatMessageCell) view4).setAnimationRunning(false, true);
+                        }
+                        view4.setTranslationY(0.0f);
+                        RecyclerAnimationScrollHelper.this.layoutManager.stopIgnoringView(view4);
+                        RecyclerAnimationScrollHelper.this.recyclerView.removeView(view4);
+                        if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
+                            RecyclerAnimationScrollHelper.this.animationCallback.recycleView(view4);
+                        }
+                    }
+                    RecyclerAnimationScrollHelper.this.recyclerView.setScrollEnabled(true);
+                    RecyclerAnimationScrollHelper.this.recyclerView.setVerticalScrollBarEnabled(true);
+                    if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                        if (RecyclerAnimationScrollHelper.this.recyclerView.mChildHelper.getChildCount() == RecyclerAnimationScrollHelper.this.recyclerView.getChildCount()) {
+                            if (RecyclerAnimationScrollHelper.this.recyclerView.mChildHelper.getHiddenChildCount() != 0) {
+                                throw new RuntimeException("hidden child count must be 0");
+                            }
+                        } else {
+                            throw new RuntimeException("views count in child helper must be quals views count in recycler view");
+                        }
+                    }
+                    int childCount2 = RecyclerAnimationScrollHelper.this.recyclerView.getChildCount();
+                    for (int i17 = 0; i17 < childCount2; i17++) {
+                        View childAt2 = RecyclerAnimationScrollHelper.this.recyclerView.getChildAt(i17);
+                        if (childAt2 instanceof ChatMessageCell) {
+                            ((ChatMessageCell) childAt2).setAnimationRunning(false, false);
+                        }
+                        childAt2.setTranslationY(0.0f);
+                    }
+                    Iterator it3 = arrayList.iterator();
+                    while (it3.hasNext()) {
+                        View view5 = (View) it3.next();
+                        if (view5 instanceof ChatMessageCell) {
+                            ((ChatMessageCell) view5).setAnimationRunning(false, false);
+                        }
+                        view5.setTranslationY(0.0f);
+                    }
+                    AnimatableAdapter animatableAdapter = AnonymousClass1.this.val$finalAnimatableAdapter;
+                    if (animatableAdapter != null) {
+                        animatableAdapter.onAnimationEnd();
+                    }
+                    if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
+                        RecyclerAnimationScrollHelper.this.animationCallback.onEndAnimation();
+                    }
+                    RecyclerAnimationScrollHelper.this.positionToOldView.clear();
+                    RecyclerAnimationScrollHelper.this.animator = null;
                 }
             });
             RecyclerAnimationScrollHelper.this.recyclerView.removeOnLayoutChangeListener(this);
-            if (!hasSameViews) {
-                long duration2 = ((scrollLength / RecyclerAnimationScrollHelper.this.recyclerView.getMeasuredHeight()) + 1.0f) * 200.0f;
-                if (duration2 < 300) {
-                    duration2 = 300;
-                }
-                duration = Math.min(duration2, 1300L);
+            if (z) {
+                j = 600;
             } else {
-                duration = 600;
+                long measuredHeight = ((i16 / RecyclerAnimationScrollHelper.this.recyclerView.getMeasuredHeight()) + 1.0f) * 200.0f;
+                if (measuredHeight < 300) {
+                    measuredHeight = 300;
+                }
+                j = Math.min(measuredHeight, 1300L);
             }
-            RecyclerAnimationScrollHelper.this.animator.setDuration(duration);
+            RecyclerAnimationScrollHelper.this.animator.setDuration(j);
             RecyclerAnimationScrollHelper.this.animator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
             RecyclerAnimationScrollHelper.this.animator.start();
         }
 
-        /* renamed from: lambda$onLayoutChange$0$org-telegram-ui-Components-RecyclerAnimationScrollHelper$1 */
-        public /* synthetic */ void m2954xb4285cce(ArrayList oldViews, boolean scrollDown, int scrollLength, ArrayList incomingViews, ValueAnimator animation) {
-            float value = ((Float) animation.getAnimatedValue()).floatValue();
-            int size = oldViews.size();
-            for (int i = 0; i < size; i++) {
-                View view = (View) oldViews.get(i);
-                float viewTop = view.getY();
-                float viewBottom = view.getY() + view.getMeasuredHeight();
-                if (viewBottom >= 0.0f && viewTop <= RecyclerAnimationScrollHelper.this.recyclerView.getMeasuredHeight()) {
-                    if (scrollDown) {
-                        view.setTranslationY((-scrollLength) * value);
+        public /* synthetic */ void lambda$onLayoutChange$0(ArrayList arrayList, boolean z, int i, ArrayList arrayList2, ValueAnimator valueAnimator) {
+            float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+            int size = arrayList.size();
+            for (int i2 = 0; i2 < size; i2++) {
+                View view = (View) arrayList.get(i2);
+                float y = view.getY();
+                if (view.getY() + view.getMeasuredHeight() >= 0.0f && y <= RecyclerAnimationScrollHelper.this.recyclerView.getMeasuredHeight()) {
+                    if (z) {
+                        view.setTranslationY((-i) * floatValue);
                     } else {
-                        view.setTranslationY(scrollLength * value);
+                        view.setTranslationY(i * floatValue);
                     }
                 }
             }
-            int size2 = incomingViews.size();
-            for (int i2 = 0; i2 < size2; i2++) {
-                View view2 = (View) incomingViews.get(i2);
-                if (scrollDown) {
-                    view2.setTranslationY(scrollLength * (1.0f - value));
+            int size2 = arrayList2.size();
+            for (int i3 = 0; i3 < size2; i3++) {
+                View view2 = (View) arrayList2.get(i3);
+                if (z) {
+                    view2.setTranslationY(i * (1.0f - floatValue));
                 } else {
-                    view2.setTranslationY((-scrollLength) * (1.0f - value));
+                    view2.setTranslationY((-i) * (1.0f - floatValue));
                 }
             }
             RecyclerAnimationScrollHelper.this.recyclerView.invalidate();
@@ -330,51 +328,36 @@ public class RecyclerAnimationScrollHelper {
 
     private void clear() {
         this.recyclerView.setVerticalScrollBarEnabled(true);
-        this.recyclerView.fastScrollAnimationRunning = false;
-        RecyclerView.Adapter adapter = this.recyclerView.getAdapter();
+        RecyclerListView recyclerListView = this.recyclerView;
+        recyclerListView.fastScrollAnimationRunning = false;
+        RecyclerView.Adapter adapter = recyclerListView.getAdapter();
         if (adapter instanceof AnimatableAdapter) {
             ((AnimatableAdapter) adapter).onAnimationEnd();
         }
         this.animator = null;
-        int n = this.recyclerView.getChildCount();
-        for (int i = 0; i < n; i++) {
-            View child = this.recyclerView.getChildAt(i);
-            child.setTranslationY(0.0f);
-            if (child instanceof ChatMessageCell) {
-                ((ChatMessageCell) child).setAnimationRunning(false, false);
+        int childCount = this.recyclerView.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View childAt = this.recyclerView.getChildAt(i);
+            childAt.setTranslationY(0.0f);
+            if (childAt instanceof ChatMessageCell) {
+                ((ChatMessageCell) childAt).setAnimationRunning(false, false);
             }
         }
     }
 
-    public void setScrollDirection(int scrollDirection) {
-        this.scrollDirection = scrollDirection;
+    public void setScrollDirection(int i) {
+        this.scrollDirection = i;
     }
 
-    public void setScrollListener(ScrollListener listener) {
-        this.scrollListener = listener;
+    public void setScrollListener(ScrollListener scrollListener) {
+        this.scrollListener = scrollListener;
     }
 
     public void setAnimationCallback(AnimationCallback animationCallback) {
         this.animationCallback = animationCallback;
     }
 
-    public int getScrollDirection() {
-        return this.scrollDirection;
-    }
-
-    /* loaded from: classes5.dex */
-    public static class AnimationCallback {
-        public void onStartAnimation() {
-        }
-
-        public void onEndAnimation() {
-        }
-
-        public void recycleView(View view) {
-        }
-    }
-
-    /* loaded from: classes5.dex */
+    /* loaded from: classes3.dex */
     public static abstract class AnimatableAdapter extends RecyclerListView.SelectionAdapter {
         public boolean animationRunning;
         private ArrayList<Integer> rangeInserted = new ArrayList<>();
@@ -391,56 +374,56 @@ public class RecyclerAnimationScrollHelper {
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void notifyItemInserted(int position) {
+        public void notifyItemInserted(int i) {
             if (!this.animationRunning) {
-                super.notifyItemInserted(position);
+                super.notifyItemInserted(i);
                 return;
             }
-            this.rangeInserted.add(Integer.valueOf(position));
+            this.rangeInserted.add(Integer.valueOf(i));
             this.rangeInserted.add(1);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void notifyItemRangeInserted(int positionStart, int itemCount) {
+        public void notifyItemRangeInserted(int i, int i2) {
             if (!this.animationRunning) {
-                super.notifyItemRangeInserted(positionStart, itemCount);
+                super.notifyItemRangeInserted(i, i2);
                 return;
             }
-            this.rangeInserted.add(Integer.valueOf(positionStart));
-            this.rangeInserted.add(Integer.valueOf(itemCount));
+            this.rangeInserted.add(Integer.valueOf(i));
+            this.rangeInserted.add(Integer.valueOf(i2));
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void notifyItemRemoved(int position) {
+        public void notifyItemRemoved(int i) {
             if (!this.animationRunning) {
-                super.notifyItemRemoved(position);
+                super.notifyItemRemoved(i);
                 return;
             }
-            this.rangeRemoved.add(Integer.valueOf(position));
+            this.rangeRemoved.add(Integer.valueOf(i));
             this.rangeRemoved.add(1);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void notifyItemRangeRemoved(int positionStart, int itemCount) {
+        public void notifyItemRangeRemoved(int i, int i2) {
             if (!this.animationRunning) {
-                super.notifyItemRangeRemoved(positionStart, itemCount);
+                super.notifyItemRangeRemoved(i, i2);
                 return;
             }
-            this.rangeRemoved.add(Integer.valueOf(positionStart));
-            this.rangeRemoved.add(Integer.valueOf(itemCount));
+            this.rangeRemoved.add(Integer.valueOf(i));
+            this.rangeRemoved.add(Integer.valueOf(i2));
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void notifyItemChanged(int position) {
+        public void notifyItemChanged(int i) {
             if (!this.animationRunning) {
-                super.notifyItemChanged(position);
+                super.notifyItemChanged(i);
             }
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public void notifyItemRangeChanged(int positionStart, int itemCount) {
+        public void notifyItemRangeChanged(int i, int i2) {
             if (!this.animationRunning) {
-                super.notifyItemRangeChanged(positionStart, itemCount);
+                super.notifyItemRangeChanged(i, i2);
             }
         }
 

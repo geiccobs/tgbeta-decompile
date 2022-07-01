@@ -1,15 +1,21 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzgy extends zzfu<zzgy> implements Cloneable {
-    private String[] zzbiw = zzgb.zzsc;
-    private String[] zzbix = zzgb.zzsc;
+    private String[] zzbiw;
+    private String[] zzbix;
     private int[] zzbiy = zzgb.zzrx;
-    private long[] zzbiz = zzgb.zzry;
-    private long[] zzbja = zzgb.zzry;
+    private long[] zzbiz;
+    private long[] zzbja;
 
     public zzgy() {
+        String[] strArr = zzgb.zzsc;
+        this.zzbiw = strArr;
+        this.zzbix = strArr;
+        long[] jArr = zzgb.zzry;
+        this.zzbiz = jArr;
+        this.zzbja = jArr;
         this.zzrj = null;
         this.zzrs = -1;
     }
@@ -55,11 +61,18 @@ public final class zzgy extends zzfu<zzgy> implements Cloneable {
         if (!zzfy.equals(this.zzbiw, zzgyVar.zzbiw) || !zzfy.equals(this.zzbix, zzgyVar.zzbix) || !zzfy.equals(this.zzbiy, zzgyVar.zzbiy) || !zzfy.equals(this.zzbiz, zzgyVar.zzbiz) || !zzfy.equals(this.zzbja, zzgyVar.zzbja)) {
             return false;
         }
-        return (this.zzrj == null || this.zzrj.isEmpty()) ? zzgyVar.zzrj == null || zzgyVar.zzrj.isEmpty() : this.zzrj.equals(zzgyVar.zzrj);
+        zzfw zzfwVar = this.zzrj;
+        if (zzfwVar != null && !zzfwVar.isEmpty()) {
+            return this.zzrj.equals(zzgyVar.zzrj);
+        }
+        zzfw zzfwVar2 = zzgyVar.zzrj;
+        return zzfwVar2 == null || zzfwVar2.isEmpty();
     }
 
     public final int hashCode() {
-        return ((((((((((((getClass().getName().hashCode() + 527) * 31) + zzfy.hashCode(this.zzbiw)) * 31) + zzfy.hashCode(this.zzbix)) * 31) + zzfy.hashCode(this.zzbiy)) * 31) + zzfy.hashCode(this.zzbiz)) * 31) + zzfy.hashCode(this.zzbja)) * 31) + ((this.zzrj == null || this.zzrj.isEmpty()) ? 0 : this.zzrj.hashCode());
+        int hashCode = (((((((((((zzgy.class.getName().hashCode() + 527) * 31) + zzfy.hashCode(this.zzbiw)) * 31) + zzfy.hashCode(this.zzbix)) * 31) + zzfy.hashCode(this.zzbiy)) * 31) + zzfy.hashCode(this.zzbiz)) * 31) + zzfy.hashCode(this.zzbja)) * 31;
+        zzfw zzfwVar = this.zzrj;
+        return hashCode + ((zzfwVar == null || zzfwVar.isEmpty()) ? 0 : this.zzrj.hashCode());
     }
 
     @Override // com.google.android.gms.internal.clearcut.zzfu, com.google.android.gms.internal.clearcut.zzfz

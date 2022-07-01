@@ -1,15 +1,15 @@
 package com.google.android.exoplayer2.text;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class SubtitleDecoderException extends Exception {
-    public SubtitleDecoderException(String message) {
-        super(message);
+    public SubtitleDecoderException(String str) {
+        super(str);
     }
 
-    public SubtitleDecoderException(Exception cause) {
-        super(cause);
+    public SubtitleDecoderException(Exception exc) {
+        super(exc);
     }
 
-    public SubtitleDecoderException(String message, Throwable cause) {
-        super(message, cause);
+    public SubtitleDecoderException(String str, Throwable th) {
+        super(str, th);
     }
 }

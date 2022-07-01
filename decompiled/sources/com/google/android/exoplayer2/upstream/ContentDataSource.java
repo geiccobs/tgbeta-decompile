@@ -10,7 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ContentDataSource extends BaseDataSource {
     private AssetFileDescriptor assetFileDescriptor;
     private long bytesRemaining;
@@ -19,10 +19,10 @@ public final class ContentDataSource extends BaseDataSource {
     private final ContentResolver resolver;
     private Uri uri;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class ContentDataSourceException extends IOException {
-        public ContentDataSourceException(IOException cause) {
-            super(cause);
+        public ContentDataSourceException(IOException iOException) {
+            super(iOException);
         }
     }
 
@@ -37,32 +37,33 @@ public final class ContentDataSource extends BaseDataSource {
             Uri uri = dataSpec.uri;
             this.uri = uri;
             transferInitializing(dataSpec);
-            AssetFileDescriptor assetFileDescriptor = this.resolver.openAssetFileDescriptor(uri, "r");
-            this.assetFileDescriptor = assetFileDescriptor;
-            if (assetFileDescriptor == null) {
+            AssetFileDescriptor openAssetFileDescriptor = this.resolver.openAssetFileDescriptor(uri, "r");
+            this.assetFileDescriptor = openAssetFileDescriptor;
+            if (openAssetFileDescriptor == null) {
                 throw new FileNotFoundException("Could not open file descriptor for: " + uri);
             }
-            FileInputStream inputStream = new FileInputStream(assetFileDescriptor.getFileDescriptor());
-            this.inputStream = inputStream;
-            long assetStartOffset = assetFileDescriptor.getStartOffset();
-            long skipped = inputStream.skip(dataSpec.position + assetStartOffset) - assetStartOffset;
-            if (skipped != dataSpec.position) {
+            FileInputStream fileInputStream = new FileInputStream(openAssetFileDescriptor.getFileDescriptor());
+            this.inputStream = fileInputStream;
+            long startOffset = openAssetFileDescriptor.getStartOffset();
+            long skip = fileInputStream.skip(dataSpec.position + startOffset) - startOffset;
+            if (skip != dataSpec.position) {
                 throw new EOFException();
             }
-            long j = -1;
-            if (dataSpec.length != -1) {
-                this.bytesRemaining = dataSpec.length;
+            long j = dataSpec.length;
+            long j2 = -1;
+            if (j != -1) {
+                this.bytesRemaining = j;
             } else {
-                long assetFileDescriptorLength = assetFileDescriptor.getLength();
-                if (assetFileDescriptorLength == -1) {
-                    FileChannel channel = inputStream.getChannel();
-                    long channelSize = channel.size();
-                    if (channelSize != 0) {
-                        j = channelSize - channel.position();
+                long length = openAssetFileDescriptor.getLength();
+                if (length == -1) {
+                    FileChannel channel = fileInputStream.getChannel();
+                    long size = channel.size();
+                    if (size != 0) {
+                        j2 = size - channel.position();
                     }
-                    this.bytesRemaining = j;
+                    this.bytesRemaining = j2;
                 } else {
-                    this.bytesRemaining = assetFileDescriptorLength - skipped;
+                    this.bytesRemaining = length - skip;
                 }
             }
             this.opened = true;
@@ -74,27 +75,23 @@ public final class ContentDataSource extends BaseDataSource {
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource
-    public int read(byte[] buffer, int offset, int readLength) throws ContentDataSourceException {
-        int i;
-        if (readLength == 0) {
+    public int read(byte[] bArr, int i, int i2) throws ContentDataSourceException {
+        if (i2 == 0) {
             return 0;
         }
         long j = this.bytesRemaining;
         if (j == 0) {
             return -1;
         }
-        if (j == -1) {
-            i = readLength;
-        } else {
+        if (j != -1) {
             try {
-                i = (int) Math.min(j, readLength);
+                i2 = (int) Math.min(j, i2);
             } catch (IOException e) {
                 throw new ContentDataSourceException(e);
             }
         }
-        int bytesToRead = i;
-        int bytesRead = ((FileInputStream) Util.castNonNull(this.inputStream)).read(buffer, offset, bytesToRead);
-        if (bytesRead == -1) {
+        int read = ((FileInputStream) Util.castNonNull(this.inputStream)).read(bArr, i, i2);
+        if (read == -1) {
             if (this.bytesRemaining != -1) {
                 throw new ContentDataSourceException(new EOFException());
             }
@@ -102,10 +99,10 @@ public final class ContentDataSource extends BaseDataSource {
         }
         long j2 = this.bytesRemaining;
         if (j2 != -1) {
-            this.bytesRemaining = j2 - bytesRead;
+            this.bytesRemaining = j2 - read;
         }
-        bytesTransferred(bytesRead);
-        return bytesRead;
+        bytesTransferred(read);
+        return read;
     }
 
     @Override // com.google.android.exoplayer2.upstream.DataSource

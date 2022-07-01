@@ -2,7 +2,7 @@ package androidx.core.view;
 
 import android.view.View;
 import android.view.ViewGroup;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class NestedScrollingParentHelper {
     private int mNestedScrollAxesNonTouch;
     private int mNestedScrollAxesTouch;

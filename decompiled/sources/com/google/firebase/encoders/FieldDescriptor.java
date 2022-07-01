@@ -4,66 +4,65 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class FieldDescriptor {
     private final String name;
     private final Map<Class<?>, Object> properties;
 
-    private FieldDescriptor(String name, Map<Class<?>, Object> properties) {
-        this.name = name;
-        this.properties = properties;
+    private FieldDescriptor(String str, Map<Class<?>, Object> map) {
+        this.name = str;
+        this.properties = map;
     }
 
     public String getName() {
         return this.name;
     }
 
-    public <T extends Annotation> T getProperty(Class<T> type) {
-        return (T) this.properties.get(type);
+    public <T extends Annotation> T getProperty(Class<T> cls) {
+        return (T) this.properties.get(cls);
     }
 
-    public static FieldDescriptor of(String name) {
-        return new FieldDescriptor(name, Collections.emptyMap());
+    public static FieldDescriptor of(String str) {
+        return new FieldDescriptor(str, Collections.emptyMap());
     }
 
-    public static Builder builder(String name) {
-        return new Builder(name);
+    public static Builder builder(String str) {
+        return new Builder(str);
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof FieldDescriptor)) {
+        if (!(obj instanceof FieldDescriptor)) {
             return false;
         }
-        FieldDescriptor that = (FieldDescriptor) o;
-        return this.name.equals(that.name) && this.properties.equals(that.properties);
+        FieldDescriptor fieldDescriptor = (FieldDescriptor) obj;
+        return this.name.equals(fieldDescriptor.name) && this.properties.equals(fieldDescriptor.properties);
     }
 
     public int hashCode() {
-        int result = this.name.hashCode();
-        return (result * 31) + this.properties.hashCode();
+        return (this.name.hashCode() * 31) + this.properties.hashCode();
     }
 
     public String toString() {
         return "FieldDescriptor{name=" + this.name + ", properties=" + this.properties.values() + "}";
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder {
         private final String name;
         private Map<Class<?>, Object> properties = null;
 
-        Builder(String name) {
-            this.name = name;
+        Builder(String str) {
+            this.name = str;
         }
 
-        public <T extends Annotation> Builder withProperty(T value) {
+        public <T extends Annotation> Builder withProperty(T t) {
             if (this.properties == null) {
                 this.properties = new HashMap();
             }
-            this.properties.put(value.annotationType(), value);
+            this.properties.put(t.annotationType(), t);
             return this;
         }
 

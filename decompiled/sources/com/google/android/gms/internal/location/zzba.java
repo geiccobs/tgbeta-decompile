@@ -10,7 +10,7 @@ import com.google.android.gms.location.LocationRequest;
 import java.util.Collections;
 import java.util.List;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzba extends AbstractSafeParcelable {
     final LocationRequest zzb;
     final List<ClientIdentity> zzc;
@@ -106,30 +106,5 @@ public final class zzba extends AbstractSafeParcelable {
         SafeParcelWriter.writeString(parcel, 13, this.zzk, false);
         SafeParcelWriter.writeLong(parcel, 14, this.zzl);
         SafeParcelWriter.finishObjectHeader(parcel, beginObjectHeader);
-    }
-
-    public final zzba zzb(long j) {
-        if (this.zzb.getMaxWaitTime() > this.zzb.getInterval()) {
-            long interval = this.zzb.getInterval();
-            long maxWaitTime = this.zzb.getMaxWaitTime();
-            StringBuilder sb = new StringBuilder(120);
-            sb.append("could not set max age when location batching is requested, interval=");
-            sb.append(interval);
-            sb.append("maxWaitTime=");
-            sb.append(maxWaitTime);
-            throw new IllegalArgumentException(sb.toString());
-        }
-        this.zzl = 10000L;
-        return this;
-    }
-
-    public final zzba zzc(String str) {
-        this.zzk = str;
-        return this;
-    }
-
-    public final zzba zzd(boolean z) {
-        this.zzj = true;
-        return this;
     }
 }

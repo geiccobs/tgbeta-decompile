@@ -8,13 +8,12 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class ProxyDrawable extends Drawable {
     private boolean connected;
     private float connectedAnimationProgress;
-    private int currentColorType;
     private Drawable emptyDrawable;
     private Drawable fullDrawable;
     private boolean isEnabled;
@@ -22,6 +21,15 @@ public class ProxyDrawable extends Drawable {
     private RectF cicleRect = new RectF();
     private int radOffset = 0;
     private long lastUpdateTime = SystemClock.elapsedRealtime();
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int i) {
+    }
 
     public ProxyDrawable(Context context) {
         this.emptyDrawable = context.getResources().getDrawable(R.drawable.proxy_off);
@@ -31,11 +39,11 @@ public class ProxyDrawable extends Drawable {
         this.outerPaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
-    public void setConnected(boolean enabled, boolean value, boolean animated) {
-        this.isEnabled = enabled;
-        this.connected = value;
+    public void setConnected(boolean z, boolean z2, boolean z3) {
+        this.isEnabled = z;
+        this.connected = z2;
         this.lastUpdateTime = SystemClock.elapsedRealtime();
-        if (!animated) {
+        if (!z3) {
             this.connectedAnimationProgress = this.connected ? 1.0f : 0.0f;
         }
         invalidateSelf();
@@ -43,23 +51,23 @@ public class ProxyDrawable extends Drawable {
 
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
-        long newTime = SystemClock.elapsedRealtime();
-        long dt = newTime - this.lastUpdateTime;
-        this.lastUpdateTime = newTime;
+        long elapsedRealtime = SystemClock.elapsedRealtime();
+        long j = elapsedRealtime - this.lastUpdateTime;
+        this.lastUpdateTime = elapsedRealtime;
         if (!this.isEnabled) {
             this.emptyDrawable.setBounds(getBounds());
             this.emptyDrawable.draw(canvas);
         } else if (!this.connected || this.connectedAnimationProgress != 1.0f) {
             this.emptyDrawable.setBounds(getBounds());
             this.emptyDrawable.draw(canvas);
-            this.outerPaint.setColor(Theme.getColor(Theme.key_contextProgressOuter2));
+            this.outerPaint.setColor(Theme.getColor("contextProgressOuter2"));
             this.outerPaint.setAlpha((int) ((1.0f - this.connectedAnimationProgress) * 255.0f));
-            this.radOffset = (int) (this.radOffset + (((float) (360 * dt)) / 1000.0f));
+            this.radOffset = (int) (this.radOffset + (((float) (360 * j)) / 1000.0f));
             int width = getBounds().width();
             int height = getBounds().height();
-            int x = (width / 2) - AndroidUtilities.dp(3.0f);
-            int y = (height / 2) - AndroidUtilities.dp(3.0f);
-            this.cicleRect.set(x, y, x + AndroidUtilities.dp(6.0f), AndroidUtilities.dp(6.0f) + y);
+            int dp = (width / 2) - AndroidUtilities.dp(3.0f);
+            int dp2 = (height / 2) - AndroidUtilities.dp(3.0f);
+            this.cicleRect.set(dp, dp2, dp + AndroidUtilities.dp(6.0f), dp2 + AndroidUtilities.dp(6.0f));
             canvas.drawArc(this.cicleRect, this.radOffset - 90, 90.0f, false, this.outerPaint);
             invalidateSelf();
         }
@@ -72,7 +80,7 @@ public class ProxyDrawable extends Drawable {
         if (z) {
             float f = this.connectedAnimationProgress;
             if (f != 1.0f) {
-                float f2 = f + (((float) dt) / 300.0f);
+                float f2 = f + (((float) j) / 300.0f);
                 this.connectedAnimationProgress = f2;
                 if (f2 > 1.0f) {
                     this.connectedAnimationProgress = 1.0f;
@@ -83,30 +91,22 @@ public class ProxyDrawable extends Drawable {
         }
         if (!z) {
             float f3 = this.connectedAnimationProgress;
-            if (f3 != 0.0f) {
-                float f4 = f3 - (((float) dt) / 300.0f);
-                this.connectedAnimationProgress = f4;
-                if (f4 < 0.0f) {
-                    this.connectedAnimationProgress = 0.0f;
-                }
-                invalidateSelf();
+            if (f3 == 0.0f) {
+                return;
             }
+            float f4 = f3 - (((float) j) / 300.0f);
+            this.connectedAnimationProgress = f4;
+            if (f4 < 0.0f) {
+                this.connectedAnimationProgress = 0.0f;
+            }
+            invalidateSelf();
         }
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int alpha) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter cf) {
-        this.emptyDrawable.setColorFilter(cf);
-        this.fullDrawable.setColorFilter(cf);
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
+    public void setColorFilter(ColorFilter colorFilter) {
+        this.emptyDrawable.setColorFilter(colorFilter);
+        this.fullDrawable.setColorFilter(colorFilter);
     }
 
     @Override // android.graphics.drawable.Drawable

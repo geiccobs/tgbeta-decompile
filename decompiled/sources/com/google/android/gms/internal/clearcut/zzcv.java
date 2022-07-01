@@ -1,10 +1,12 @@
 package com.google.android.gms.internal.clearcut;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzcv {
-    private static final zzbt zzez = zzbt.zzan();
-    private zzbb zzln;
     private volatile zzdo zzlo;
     private volatile zzbb zzlp;
+
+    static {
+        zzbt.zzan();
+    }
 
     private final zzdo zzh(zzdo zzdoVar) {
         if (this.zzlo == null) {
@@ -13,7 +15,7 @@ public class zzcv {
                     try {
                         this.zzlo = zzdoVar;
                         this.zzlp = zzbb.zzfi;
-                    } catch (zzco e) {
+                    } catch (zzco unused) {
                         this.zzlo = zzdoVar;
                         this.zzlp = zzbb.zzfi;
                     }
@@ -52,7 +54,6 @@ public class zzcv {
 
     public final zzdo zzi(zzdo zzdoVar) {
         zzdo zzdoVar2 = this.zzlo;
-        this.zzln = null;
         this.zzlp = null;
         this.zzlo = zzdoVar;
         return zzdoVar2;

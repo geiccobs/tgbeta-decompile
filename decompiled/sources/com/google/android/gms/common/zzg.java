@@ -2,7 +2,7 @@ package com.google.android.gms.common;
 
 import java.util.Arrays;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class zzg extends zzd {
     private final byte[] zza;
 
@@ -12,7 +12,7 @@ final class zzg extends zzd {
     }
 
     @Override // com.google.android.gms.common.zzd
-    public final byte[] zza() {
+    final byte[] zza() {
         return this.zza;
     }
 }

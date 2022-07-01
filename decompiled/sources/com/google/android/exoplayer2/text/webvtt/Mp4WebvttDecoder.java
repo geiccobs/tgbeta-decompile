@@ -9,13 +9,8 @@ import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Mp4WebvttDecoder extends SimpleSubtitleDecoder {
-    private static final int BOX_HEADER_SIZE = 8;
-    private static final int TYPE_payl = 1885436268;
-    private static final int TYPE_sttg = 1937011815;
-    private static final int TYPE_vttc = 1987343459;
     private final ParsableByteArray sampleData = new ParsableByteArray();
     private final WebvttCue.Builder builder = new WebvttCue.Builder();
 
@@ -24,40 +19,39 @@ public final class Mp4WebvttDecoder extends SimpleSubtitleDecoder {
     }
 
     @Override // com.google.android.exoplayer2.text.SimpleSubtitleDecoder
-    protected Subtitle decode(byte[] bytes, int length, boolean reset) throws SubtitleDecoderException {
-        this.sampleData.reset(bytes, length);
-        List<Cue> resultingCueList = new ArrayList<>();
+    protected Subtitle decode(byte[] bArr, int i, boolean z) throws SubtitleDecoderException {
+        this.sampleData.reset(bArr, i);
+        ArrayList arrayList = new ArrayList();
         while (this.sampleData.bytesLeft() > 0) {
             if (this.sampleData.bytesLeft() < 8) {
                 throw new SubtitleDecoderException("Incomplete Mp4Webvtt Top Level box header found.");
             }
-            int boxSize = this.sampleData.readInt();
-            int boxType = this.sampleData.readInt();
-            if (boxType == TYPE_vttc) {
-                resultingCueList.add(parseVttCueBox(this.sampleData, this.builder, boxSize - 8));
+            int readInt = this.sampleData.readInt();
+            if (this.sampleData.readInt() == 1987343459) {
+                arrayList.add(parseVttCueBox(this.sampleData, this.builder, readInt - 8));
             } else {
-                this.sampleData.skipBytes(boxSize - 8);
+                this.sampleData.skipBytes(readInt - 8);
             }
         }
-        return new Mp4WebvttSubtitle(resultingCueList);
+        return new Mp4WebvttSubtitle(arrayList);
     }
 
-    private static Cue parseVttCueBox(ParsableByteArray sampleData, WebvttCue.Builder builder, int remainingCueBoxBytes) throws SubtitleDecoderException {
+    private static Cue parseVttCueBox(ParsableByteArray parsableByteArray, WebvttCue.Builder builder, int i) throws SubtitleDecoderException {
         builder.reset();
-        while (remainingCueBoxBytes > 0) {
-            if (remainingCueBoxBytes < 8) {
+        while (i > 0) {
+            if (i < 8) {
                 throw new SubtitleDecoderException("Incomplete vtt cue box header found.");
             }
-            int boxSize = sampleData.readInt();
-            int boxType = sampleData.readInt();
-            int payloadLength = boxSize - 8;
-            String boxPayload = Util.fromUtf8Bytes(sampleData.data, sampleData.getPosition(), payloadLength);
-            sampleData.skipBytes(payloadLength);
-            remainingCueBoxBytes = (remainingCueBoxBytes - 8) - payloadLength;
-            if (boxType == TYPE_sttg) {
-                WebvttCueParser.parseCueSettingsList(boxPayload, builder);
-            } else if (boxType == TYPE_payl) {
-                WebvttCueParser.parseCueText(null, boxPayload.trim(), builder, Collections.emptyList());
+            int readInt = parsableByteArray.readInt();
+            int readInt2 = parsableByteArray.readInt();
+            int i2 = readInt - 8;
+            String fromUtf8Bytes = Util.fromUtf8Bytes(parsableByteArray.data, parsableByteArray.getPosition(), i2);
+            parsableByteArray.skipBytes(i2);
+            i = (i - 8) - i2;
+            if (readInt2 == 1937011815) {
+                WebvttCueParser.parseCueSettingsList(fromUtf8Bytes, builder);
+            } else if (readInt2 == 1885436268) {
+                WebvttCueParser.parseCueText(null, fromUtf8Bytes.trim(), builder, Collections.emptyList());
             }
         }
         return builder.build();

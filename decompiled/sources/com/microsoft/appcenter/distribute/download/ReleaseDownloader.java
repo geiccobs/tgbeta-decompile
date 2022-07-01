@@ -2,10 +2,10 @@ package com.microsoft.appcenter.distribute.download;
 
 import android.net.Uri;
 import com.microsoft.appcenter.distribute.ReleaseDetails;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface ReleaseDownloader {
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Listener {
         boolean onComplete(Uri uri);
 

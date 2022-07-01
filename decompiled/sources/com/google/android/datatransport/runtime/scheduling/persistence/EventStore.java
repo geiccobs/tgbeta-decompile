@@ -3,7 +3,7 @@ package com.google.android.datatransport.runtime.scheduling.persistence;
 import com.google.android.datatransport.runtime.EventInternal;
 import com.google.android.datatransport.runtime.TransportContext;
 import java.io.Closeable;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface EventStore extends Closeable {
     int cleanUp();
 

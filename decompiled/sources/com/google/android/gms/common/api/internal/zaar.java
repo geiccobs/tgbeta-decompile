@@ -1,26 +1,21 @@
 package com.google.android.gms.common.api.internal;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
-import androidx.fragment.app.FragmentActivity;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.api.internal.BaseImplementation;
 import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.Preconditions;
-import com.google.android.gms.common.internal.service.Common;
 import com.google.android.gms.common.util.ClientLibraryUtils;
 import com.google.android.gms.signin.SignInOptions;
+import com.google.android.gms.signin.zae;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -31,11 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
+import javax.annotation.concurrent.GuardedBy;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zaar extends GoogleApiClient implements zabn {
     final Map<Api.AnyClientKey<?>, Api.Client> zab;
     Set<Scope> zac;
@@ -54,17 +48,17 @@ public final class zaar extends GoogleApiClient implements zabn {
     private zabk zaq;
     private final ClientSettings zar;
     private final Map<Api<?>, Boolean> zas;
-    private final Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> zat;
+    private final Api.AbstractClientBuilder<? extends zae, SignInOptions> zat;
     private final ListenerHolders zau;
     private final ArrayList<zaq> zav;
     private Integer zaw;
     private final com.google.android.gms.common.internal.zak zax;
     private zabo zah = null;
-    final Queue<BaseImplementation.ApiMethodImpl<?, ?>> zaa = new LinkedList();
+    final Queue<BaseImplementation$ApiMethodImpl<?, ?>> zaa = new LinkedList();
 
-    public zaar(Context context, Lock lock, Looper looper, ClientSettings clientSettings, GoogleApiAvailability googleApiAvailability, Api.AbstractClientBuilder<? extends com.google.android.gms.signin.zae, SignInOptions> abstractClientBuilder, Map<Api<?>, Boolean> map, List<GoogleApiClient.ConnectionCallbacks> list, List<GoogleApiClient.OnConnectionFailedListener> list2, Map<Api.AnyClientKey<?>, Api.Client> map2, int i, int i2, ArrayList<zaq> arrayList) {
+    public zaar(Context context, Lock lock, Looper looper, ClientSettings clientSettings, GoogleApiAvailability googleApiAvailability, Api.AbstractClientBuilder<? extends zae, SignInOptions> abstractClientBuilder, Map<Api<?>, Boolean> map, List<GoogleApiClient.ConnectionCallbacks> list, List<GoogleApiClient.OnConnectionFailedListener> list2, Map<Api.AnyClientKey<?>, Api.Client> map2, int i, int i2, ArrayList<zaq> arrayList) {
         this.zam = ClientLibraryUtils.isPackageSide() ? 10000L : 120000L;
-        this.zan = DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS;
+        this.zan = 5000L;
         this.zac = new HashSet();
         this.zau = new ListenerHolders();
         this.zaw = null;
@@ -95,8 +89,12 @@ public final class zaar extends GoogleApiClient implements zabn {
         this.zat = abstractClientBuilder;
     }
 
+    private static String zab(int i) {
+        return i != 1 ? i != 2 ? i != 3 ? "UNKNOWN" : "SIGN_IN_MODE_NONE" : "SIGN_IN_MODE_OPTIONAL" : "SIGN_IN_MODE_REQUIRED";
+    }
+
     @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation.ApiMethodImpl<R, A>> T enqueue(T t) {
+    public final <A extends Api.AnyClient, R extends Result, T extends BaseImplementation$ApiMethodImpl<R, A>> T enqueue(T t) {
         Api<?> api = t.getApi();
         boolean containsKey = this.zab.containsKey(t.getClientKey());
         String zad = api != null ? api.zad() : "the API";
@@ -119,7 +117,7 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final <A extends Api.AnyClient, T extends BaseImplementation.ApiMethodImpl<? extends Result, A>> T execute(T t) {
+    public final <A extends Api.AnyClient, T extends BaseImplementation$ApiMethodImpl<? extends Result, A>> T execute(T t) {
         Api<?> api = t.getApi();
         boolean containsKey = this.zab.containsKey(t.getClientKey());
         String zad = api != null ? api.zad() : "the API";
@@ -137,7 +135,7 @@ public final class zaar extends GoogleApiClient implements zabn {
             if (this.zal) {
                 this.zaa.add(t);
                 while (!this.zaa.isEmpty()) {
-                    BaseImplementation.ApiMethodImpl<?, ?> remove = this.zaa.remove();
+                    BaseImplementation$ApiMethodImpl<?, ?> remove = this.zaa.remove();
                     this.zae.zaa(remove);
                     remove.setFailedResult(Status.RESULT_INTERNAL_ERROR);
                 }
@@ -150,56 +148,10 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final <L> ListenerHolder<L> registerListener(L l) {
-        this.zaf.lock();
-        try {
-            return this.zau.zaa(l, this.zak, "NO_TYPE");
-        } finally {
-            this.zaf.unlock();
-        }
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
     public final <C extends Api.Client> C getClient(Api.AnyClientKey<C> anyClientKey) {
         C c = (C) this.zab.get(anyClientKey);
         Preconditions.checkNotNull(c, "Appropriate Api was not requested.");
         return c;
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final boolean hasApi(Api<?> api) {
-        return this.zab.containsKey(api.zac());
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final boolean hasConnectedApi(Api<?> api) {
-        Api.Client client;
-        return isConnected() && (client = this.zab.get(api.zac())) != null && client.isConnected();
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final ConnectionResult getConnectionResult(Api<?> api) {
-        this.zaf.lock();
-        try {
-            if (!isConnected() && !this.zal) {
-                throw new IllegalStateException("Cannot invoke getConnectionResult unless GoogleApiClient is connected");
-            }
-            if (this.zab.containsKey(api.zac())) {
-                ConnectionResult zaa = ((zabo) Preconditions.checkNotNull(this.zah)).zaa(api);
-                if (zaa == null) {
-                    if (!this.zal) {
-                        Log.w("GoogleApiClientImpl", zac());
-                        Log.wtf("GoogleApiClientImpl", String.valueOf(api.zad()).concat(" requested in getConnectionResult is not connected but is not present in the failed  connections map"), new Exception());
-                        return new ConnectionResult(8, null);
-                    }
-                    return ConnectionResult.RESULT_SUCCESS;
-                }
-                return zaa;
-            }
-            throw new IllegalArgumentException(String.valueOf(api.zad()).concat(" was never registered with GoogleApiClient"));
-        } finally {
-            this.zaf.unlock();
-        }
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
@@ -246,53 +198,6 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final ConnectionResult blockingConnect() {
-        boolean z = true;
-        Preconditions.checkState(Looper.myLooper() != Looper.getMainLooper(), "blockingConnect must not be called on the UI thread");
-        this.zaf.lock();
-        try {
-            if (this.zai >= 0) {
-                if (this.zaw == null) {
-                    z = false;
-                }
-                Preconditions.checkState(z, "Sign-in mode should have been set explicitly by auto-manage.");
-            } else {
-                Integer num = this.zaw;
-                if (num == null) {
-                    this.zaw = Integer.valueOf(zaa((Iterable<Api.Client>) this.zab.values(), false));
-                } else if (num.intValue() == 2) {
-                    throw new IllegalStateException("Cannot call blockingConnect() when sign-in mode is set to SIGN_IN_MODE_OPTIONAL. Call connect(SIGN_IN_MODE_OPTIONAL) instead.");
-                }
-            }
-            zaa(((Integer) Preconditions.checkNotNull(this.zaw)).intValue());
-            this.zag.zab();
-            return ((zabo) Preconditions.checkNotNull(this.zah)).zab();
-        } finally {
-            this.zaf.unlock();
-        }
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final ConnectionResult blockingConnect(long j, TimeUnit timeUnit) {
-        Preconditions.checkState(Looper.myLooper() != Looper.getMainLooper(), "blockingConnect must not be called on the UI thread");
-        Preconditions.checkNotNull(timeUnit, "TimeUnit must not be null");
-        this.zaf.lock();
-        try {
-            Integer num = this.zaw;
-            if (num == null) {
-                this.zaw = Integer.valueOf(zaa((Iterable<Api.Client>) this.zab.values(), false));
-            } else if (num.intValue() == 2) {
-                throw new IllegalStateException("Cannot call blockingConnect() when sign-in mode is set to SIGN_IN_MODE_OPTIONAL. Call connect(SIGN_IN_MODE_OPTIONAL) instead.");
-            }
-            zaa(((Integer) Preconditions.checkNotNull(this.zaw)).intValue());
-            this.zag.zab();
-            return ((zabo) Preconditions.checkNotNull(this.zah)).zaa(j, timeUnit);
-        } finally {
-            this.zaf.unlock();
-        }
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
     public final void disconnect() {
         this.zaf.lock();
         try {
@@ -302,9 +207,9 @@ public final class zaar extends GoogleApiClient implements zabn {
                 zaboVar.zac();
             }
             this.zau.zaa();
-            for (BaseImplementation.ApiMethodImpl<?, ?> apiMethodImpl : this.zaa) {
-                apiMethodImpl.zaa((zacq) null);
-                apiMethodImpl.cancel();
+            for (BaseImplementation$ApiMethodImpl<?, ?> baseImplementation$ApiMethodImpl : this.zaa) {
+                baseImplementation$ApiMethodImpl.zaa((zacq) null);
+                baseImplementation$ApiMethodImpl.cancel();
             }
             this.zaa.clear();
             if (this.zah == null) {
@@ -318,52 +223,9 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final void reconnect() {
-        disconnect();
-        connect();
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final PendingResult<Status> clearDefaultAccountAndReconnect() {
-        Preconditions.checkState(isConnected(), "GoogleApiClient is not connected yet.");
-        Integer num = this.zaw;
-        Preconditions.checkState(num == null || num.intValue() != 2, "Cannot use clearDefaultAccountAndReconnect with GOOGLE_SIGN_IN_API");
-        StatusPendingResult statusPendingResult = new StatusPendingResult(this);
-        if (this.zab.containsKey(Common.CLIENT_KEY)) {
-            zaa(this, statusPendingResult, false);
-        } else {
-            AtomicReference atomicReference = new AtomicReference();
-            GoogleApiClient build = new GoogleApiClient.Builder(this.zaj).addApi(Common.API).addConnectionCallbacks(new zaat(this, atomicReference, statusPendingResult)).addOnConnectionFailedListener(new zaas(this, statusPendingResult)).setHandler(this.zao).build();
-            atomicReference.set(build);
-            build.connect();
-        }
-        return statusPendingResult;
-    }
-
-    public final void zaa(GoogleApiClient googleApiClient, StatusPendingResult statusPendingResult, boolean z) {
-        Common.zaa.zaa(googleApiClient).setResultCallback(new zaav(this, statusPendingResult, z, googleApiClient));
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final void stopAutoManage(FragmentActivity fragmentActivity) {
-        LifecycleActivity lifecycleActivity = new LifecycleActivity((Activity) fragmentActivity);
-        if (this.zai >= 0) {
-            zai.zaa(lifecycleActivity).zaa(this.zai);
-            return;
-        }
-        throw new IllegalStateException("Called stopAutoManage but automatic lifecycle management is not enabled.");
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
     public final boolean isConnected() {
         zabo zaboVar = this.zah;
         return zaboVar != null && zaboVar.zad();
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final boolean isConnecting() {
-        zabo zaboVar = this.zah;
-        return zaboVar != null && zaboVar.zae();
     }
 
     private final void zaa(int i) {
@@ -393,25 +255,23 @@ public final class zaar extends GoogleApiClient implements zabn {
                 z2 = true;
             }
         }
-        switch (this.zaw.intValue()) {
-            case 1:
-                if (!z) {
-                    throw new IllegalStateException("SIGN_IN_MODE_REQUIRED cannot be used on a GoogleApiClient that does not contain any authenticated APIs. Use connect() instead.");
-                }
-                if (z2) {
-                    throw new IllegalStateException("Cannot use SIGN_IN_MODE_REQUIRED with GOOGLE_SIGN_IN_API. Use connect(SIGN_IN_MODE_OPTIONAL) instead.");
-                }
-                break;
-            case 2:
-                if (z) {
-                    this.zah = zas.zaa(this.zaj, this, this.zaf, this.zak, this.zap, this.zab, this.zar, this.zas, this.zat, this.zav);
-                    return;
-                }
-                break;
+        int intValue = this.zaw.intValue();
+        if (intValue != 1) {
+            if (intValue == 2 && z) {
+                this.zah = zas.zaa(this.zaj, this, this.zaf, this.zak, this.zap, this.zab, this.zar, this.zas, this.zat, this.zav);
+                return;
+            }
+        } else if (!z) {
+            throw new IllegalStateException("SIGN_IN_MODE_REQUIRED cannot be used on a GoogleApiClient that does not contain any authenticated APIs. Use connect() instead.");
+        } else {
+            if (z2) {
+                throw new IllegalStateException("Cannot use SIGN_IN_MODE_REQUIRED with GOOGLE_SIGN_IN_API. Use connect(SIGN_IN_MODE_OPTIONAL) instead.");
+            }
         }
         this.zah = new zaaz(this.zaj, this, this.zaf, this.zak, this.zap, this.zab, this.zar, this.zas, this.zat, this.zav, this);
     }
 
+    @GuardedBy("mLock")
     private final void zad() {
         this.zag.zab();
         ((zabo) Preconditions.checkNotNull(this.zah)).zaa();
@@ -439,6 +299,7 @@ public final class zaar extends GoogleApiClient implements zabn {
         }
     }
 
+    @GuardedBy("mLock")
     public final boolean zab() {
         if (!this.zal) {
             return false;
@@ -455,28 +316,8 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final void registerConnectionCallbacks(GoogleApiClient.ConnectionCallbacks connectionCallbacks) {
-        this.zag.zaa(connectionCallbacks);
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final boolean isConnectionCallbacksRegistered(GoogleApiClient.ConnectionCallbacks connectionCallbacks) {
-        return this.zag.zab(connectionCallbacks);
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final void unregisterConnectionCallbacks(GoogleApiClient.ConnectionCallbacks connectionCallbacks) {
-        this.zag.zac(connectionCallbacks);
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
     public final void registerConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         this.zag.zaa(onConnectionFailedListener);
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final boolean isConnectionFailedListenerRegistered(GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
-        return this.zag.zab(onConnectionFailedListener);
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient
@@ -485,6 +326,7 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.internal.zabn
+    @GuardedBy("mLock")
     public final void zaa(Bundle bundle) {
         while (!this.zaa.isEmpty()) {
             execute(this.zaa.remove());
@@ -493,6 +335,7 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.internal.zabn
+    @GuardedBy("mLock")
     public final void zaa(ConnectionResult connectionResult) {
         if (!this.zap.isPlayServicesPossiblyUpdating(this.zaj, connectionResult.getErrorCode())) {
             zab();
@@ -504,13 +347,14 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     @Override // com.google.android.gms.common.api.internal.zabn
+    @GuardedBy("mLock")
     public final void zaa(int i, boolean z) {
         if (i == 1 && !z && !this.zal) {
             this.zal = true;
             if (this.zaq == null && !ClientLibraryUtils.isPackageSide()) {
                 try {
                     this.zaq = this.zap.zaa(this.zaj.getApplicationContext(), new zaax(this));
-                } catch (SecurityException e) {
+                } catch (SecurityException unused) {
                 }
             }
             zaau zaauVar = this.zao;
@@ -549,19 +393,6 @@ public final class zaar extends GoogleApiClient implements zabn {
         zabo zaboVar = this.zah;
         if (zaboVar != null) {
             zaboVar.zag();
-        }
-    }
-
-    @Override // com.google.android.gms.common.api.GoogleApiClient
-    public final void zaa(zacn zacnVar) {
-        this.zaf.lock();
-        try {
-            if (this.zad == null) {
-                this.zad = new HashSet();
-            }
-            this.zad.add(zacnVar);
-        } finally {
-            this.zaf.unlock();
         }
     }
 
@@ -630,18 +461,5 @@ public final class zaar extends GoogleApiClient implements zabn {
             return (!z3 || !z) ? 1 : 2;
         }
         return 3;
-    }
-
-    private static String zab(int i) {
-        switch (i) {
-            case 1:
-                return "SIGN_IN_MODE_REQUIRED";
-            case 2:
-                return "SIGN_IN_MODE_OPTIONAL";
-            case 3:
-                return "SIGN_IN_MODE_NONE";
-            default:
-                return "UNKNOWN";
-        }
     }
 }

@@ -1,5 +1,6 @@
 package org.webrtc;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.VirtualDisplay;
@@ -7,8 +8,10 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.view.Surface;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.R;
 import org.webrtc.VideoSink;
-/* loaded from: classes5.dex */
+@TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+/* loaded from: classes3.dex */
 public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
     private static final int DISPLAY_FLAGS = 3;
     private static final int VIRTUAL_DISPLAY_DPI = 400;
@@ -24,20 +27,26 @@ public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
     private VirtualDisplay virtualDisplay;
     private int width;
 
+    @Override // org.webrtc.VideoCapturer
+    public boolean isScreencast() {
+        return true;
+    }
+
     @Override // org.webrtc.VideoSink
     public /* synthetic */ void setParentSink(VideoSink videoSink) {
         VideoSink.CC.$default$setParentSink(this, videoSink);
     }
 
-    public ScreenCapturerAndroid(Intent mediaProjectionPermissionResultData, MediaProjection.Callback mediaProjectionCallback) {
-        this.mediaProjectionPermissionResultData = mediaProjectionPermissionResultData;
-        this.mediaProjectionCallback = mediaProjectionCallback;
+    public ScreenCapturerAndroid(Intent intent, MediaProjection.Callback callback) {
+        this.mediaProjectionPermissionResultData = intent;
+        this.mediaProjectionCallback = callback;
     }
 
     private void checkNotDisposed() {
-        if (this.isDisposed) {
-            throw new RuntimeException("capturer is disposed.");
+        if (!this.isDisposed) {
+            return;
         }
+        throw new RuntimeException("capturer is disposed.");
     }
 
     public MediaProjection getMediaProjection() {
@@ -45,7 +54,7 @@ public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
     }
 
     @Override // org.webrtc.VideoCapturer
-    public synchronized void initialize(SurfaceTextureHelper surfaceTextureHelper, Context applicationContext, CapturerObserver capturerObserver) {
+    public synchronized void initialize(SurfaceTextureHelper surfaceTextureHelper, Context context, CapturerObserver capturerObserver) {
         checkNotDisposed();
         if (capturerObserver == null) {
             throw new RuntimeException("capturerObserver not set.");
@@ -55,17 +64,17 @@ public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
             throw new RuntimeException("surfaceTextureHelper not set.");
         }
         this.surfaceTextureHelper = surfaceTextureHelper;
-        this.mediaProjectionManager = (MediaProjectionManager) applicationContext.getSystemService("media_projection");
+        this.mediaProjectionManager = (MediaProjectionManager) context.getSystemService("media_projection");
     }
 
     @Override // org.webrtc.VideoCapturer
-    public synchronized void startCapture(int width, int height, int ignoredFramerate) {
+    public synchronized void startCapture(int i, int i2, int i3) {
         if (this.mediaProjection != null || this.mediaProjectionManager == null) {
             return;
         }
         checkNotDisposed();
-        this.width = width;
-        this.height = height;
+        this.width = i;
+        this.height = i2;
         MediaProjection mediaProjection = this.mediaProjectionManager.getMediaProjection(-1, this.mediaProjectionPermissionResultData);
         this.mediaProjection = mediaProjection;
         mediaProjection.registerCallback(this.mediaProjectionCallback, this.surfaceTextureHelper.getHandler());
@@ -80,13 +89,12 @@ public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
         ThreadUtils.invokeAtFrontUninterruptibly(this.surfaceTextureHelper.getHandler(), new Runnable() { // from class: org.webrtc.ScreenCapturerAndroid$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                ScreenCapturerAndroid.this.m4842lambda$stopCapture$0$orgwebrtcScreenCapturerAndroid();
+                ScreenCapturerAndroid.this.lambda$stopCapture$0();
             }
         });
     }
 
-    /* renamed from: lambda$stopCapture$0$org-webrtc-ScreenCapturerAndroid */
-    public /* synthetic */ void m4842lambda$stopCapture$0$orgwebrtcScreenCapturerAndroid() {
+    public /* synthetic */ void lambda$stopCapture$0() {
         this.surfaceTextureHelper.stopListening();
         this.capturerObserver.onCapturerStopped();
         VirtualDisplay virtualDisplay = this.virtualDisplay;
@@ -108,23 +116,22 @@ public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
     }
 
     @Override // org.webrtc.VideoCapturer
-    public synchronized void changeCaptureFormat(int width, int height, int ignoredFramerate) {
+    public synchronized void changeCaptureFormat(int i, int i2, int i3) {
         checkNotDisposed();
-        this.width = width;
-        this.height = height;
+        this.width = i;
+        this.height = i2;
         if (this.virtualDisplay == null) {
             return;
         }
         ThreadUtils.invokeAtFrontUninterruptibly(this.surfaceTextureHelper.getHandler(), new Runnable() { // from class: org.webrtc.ScreenCapturerAndroid$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                ScreenCapturerAndroid.this.m4841lambda$changeCaptureFormat$1$orgwebrtcScreenCapturerAndroid();
+                ScreenCapturerAndroid.this.lambda$changeCaptureFormat$1();
             }
         });
     }
 
-    /* renamed from: lambda$changeCaptureFormat$1$org-webrtc-ScreenCapturerAndroid */
-    public /* synthetic */ void m4841lambda$changeCaptureFormat$1$orgwebrtcScreenCapturerAndroid() {
+    public /* synthetic */ void lambda$changeCaptureFormat$1() {
         this.virtualDisplay.release();
         createVirtualDisplay();
     }
@@ -133,20 +140,15 @@ public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
         this.surfaceTextureHelper.setTextureSize(this.width, this.height);
         try {
             this.virtualDisplay = this.mediaProjection.createVirtualDisplay("WebRTC_ScreenCapture", this.width, this.height, VIRTUAL_DISPLAY_DPI, 3, new Surface(this.surfaceTextureHelper.getSurfaceTexture()), null, null);
-        } catch (Throwable e) {
-            FileLog.e(e);
+        } catch (Throwable th) {
+            FileLog.e(th);
         }
     }
 
     @Override // org.webrtc.VideoSink
-    public void onFrame(VideoFrame frame) {
+    public void onFrame(VideoFrame videoFrame) {
         this.numCapturedFrames++;
-        this.capturerObserver.onFrameCaptured(frame);
-    }
-
-    @Override // org.webrtc.VideoCapturer
-    public boolean isScreencast() {
-        return true;
+        this.capturerObserver.onFrameCaptured(videoFrame);
     }
 
     public long getNumCapturedFrames() {

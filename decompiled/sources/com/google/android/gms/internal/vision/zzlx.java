@@ -3,7 +3,7 @@ package com.google.android.gms.internal.vision;
 import java.io.IOException;
 import java.util.Arrays;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzlx {
     private static final zzlx zza = new zzlx(0, new int[0], new Object[0], false);
     private int zzb;
@@ -74,33 +74,27 @@ public final class zzlx {
 
     private static void zza(int i, Object obj, zzmr zzmrVar) throws IOException {
         int i2 = i >>> 3;
-        switch (i & 7) {
-            case 0:
-                zzmrVar.zza(i2, ((Long) obj).longValue());
-                return;
-            case 1:
-                zzmrVar.zzd(i2, ((Long) obj).longValue());
-                return;
-            case 2:
-                zzmrVar.zza(i2, (zzht) obj);
-                return;
-            case 3:
-                if (zzmrVar.zza() == zzmq.zza) {
-                    zzmrVar.zza(i2);
-                    ((zzlx) obj).zzb(zzmrVar);
-                    zzmrVar.zzb(i2);
-                    return;
-                }
-                zzmrVar.zzb(i2);
-                ((zzlx) obj).zzb(zzmrVar);
-                zzmrVar.zza(i2);
-                return;
-            case 4:
-            default:
-                throw new RuntimeException(zzjk.zzf());
-            case 5:
+        int i3 = i & 7;
+        if (i3 == 0) {
+            zzmrVar.zza(i2, ((Long) obj).longValue());
+        } else if (i3 == 1) {
+            zzmrVar.zzd(i2, ((Long) obj).longValue());
+        } else if (i3 == 2) {
+            zzmrVar.zza(i2, (zzht) obj);
+        } else if (i3 != 3) {
+            if (i3 == 5) {
                 zzmrVar.zzd(i2, ((Integer) obj).intValue());
                 return;
+            }
+            throw new RuntimeException(zzjk.zzf());
+        } else if (zzmrVar.zza() == zzmq.zza) {
+            zzmrVar.zza(i2);
+            ((zzlx) obj).zzb(zzmrVar);
+            zzmrVar.zzb(i2);
+        } else {
+            zzmrVar.zzb(i2);
+            ((zzlx) obj).zzb(zzmrVar);
+            zzmrVar.zza(i2);
         }
     }
 
@@ -127,25 +121,19 @@ public final class zzlx {
         for (int i4 = 0; i4 < this.zzb; i4++) {
             int i5 = this.zzc[i4];
             int i6 = i5 >>> 3;
-            switch (i5 & 7) {
-                case 0:
-                    i = zzii.zze(i6, ((Long) this.zzd[i4]).longValue());
-                    break;
-                case 1:
-                    i = zzii.zzg(i6, ((Long) this.zzd[i4]).longValue());
-                    break;
-                case 2:
-                    i = zzii.zzc(i6, (zzht) this.zzd[i4]);
-                    break;
-                case 3:
-                    i = (zzii.zze(i6) << 1) + ((zzlx) this.zzd[i4]).zze();
-                    break;
-                case 4:
-                default:
-                    throw new IllegalStateException(zzjk.zzf());
-                case 5:
-                    i = zzii.zzi(i6, ((Integer) this.zzd[i4]).intValue());
-                    break;
+            int i7 = i5 & 7;
+            if (i7 == 0) {
+                i = zzii.zze(i6, ((Long) this.zzd[i4]).longValue());
+            } else if (i7 == 1) {
+                i = zzii.zzg(i6, ((Long) this.zzd[i4]).longValue());
+            } else if (i7 == 2) {
+                i = zzii.zzc(i6, (zzht) this.zzd[i4]);
+            } else if (i7 == 3) {
+                i = (zzii.zze(i6) << 1) + ((zzlx) this.zzd[i4]).zze();
+            } else if (i7 == 5) {
+                i = zzii.zzi(i6, ((Integer) this.zzd[i4]).intValue());
+            } else {
+                throw new IllegalStateException(zzjk.zzf());
             }
             i3 += i;
         }
@@ -169,15 +157,14 @@ public final class zzlx {
             int[] iArr2 = zzlxVar.zzc;
             int i2 = 0;
             while (true) {
-                if (i2 < i) {
-                    if (iArr[i2] != iArr2[i2]) {
-                        z = false;
-                        break;
-                    }
-                    i2++;
-                } else {
+                if (i2 >= i) {
                     z = true;
                     break;
+                } else if (iArr[i2] != iArr2[i2]) {
+                    z = false;
+                    break;
+                } else {
+                    i2++;
                 }
             }
             if (z) {
@@ -186,15 +173,14 @@ public final class zzlx {
                 int i3 = this.zzb;
                 int i4 = 0;
                 while (true) {
-                    if (i4 < i3) {
-                        if (!objArr[i4].equals(objArr2[i4])) {
-                            z2 = false;
-                            break;
-                        }
-                        i4++;
-                    } else {
+                    if (i4 >= i3) {
                         z2 = true;
                         break;
+                    } else if (!objArr[i4].equals(objArr2[i4])) {
+                        z2 = false;
+                        break;
+                    } else {
+                        i4++;
                     }
                 }
                 if (z2) {

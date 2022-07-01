@@ -6,9 +6,8 @@ import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzk extends AbstractSafeParcelable {
-    private static final zzs zzf;
     public final String zzb;
     final zzs zzc;
     public final int zzd;
@@ -20,7 +19,7 @@ public final class zzk extends AbstractSafeParcelable {
         zzr zzrVar = new zzr("SsbContext");
         zzrVar.zzb(true);
         zzrVar.zza("blob");
-        zzf = zzrVar.zze();
+        zzrVar.zze();
     }
 
     public zzk(String str, zzs zzsVar, int i, byte[] bArr) {
@@ -52,10 +51,6 @@ public final class zzk extends AbstractSafeParcelable {
         throw new IllegalArgumentException(str2);
     }
 
-    public static zzk zza(byte[] bArr) {
-        return new zzk(null, zzf, zza, bArr);
-    }
-
     @Override // android.os.Parcelable
     public final void writeToParcel(Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
@@ -64,9 +59,5 @@ public final class zzk extends AbstractSafeParcelable {
         SafeParcelWriter.writeInt(parcel, 4, this.zzd);
         SafeParcelWriter.writeByteArray(parcel, 5, this.zze, false);
         SafeParcelWriter.finishObjectHeader(parcel, beginObjectHeader);
-    }
-
-    public zzk(byte[] bArr, zzs zzsVar) {
-        this(null, zzsVar, zza, bArr);
     }
 }

@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class RecyclerViewAccessibilityDelegate extends AccessibilityDelegateCompat {
     final AccessibilityDelegateCompat mItemDelegate = new ItemDelegate(this);
     final RecyclerView mRecyclerView;
@@ -19,62 +19,66 @@ public class RecyclerViewAccessibilityDelegate extends AccessibilityDelegateComp
     }
 
     @Override // androidx.core.view.AccessibilityDelegateCompat
-    public boolean performAccessibilityAction(View host, int action, Bundle args) {
-        if (super.performAccessibilityAction(host, action, args)) {
+    public boolean performAccessibilityAction(View view, int i, Bundle bundle) {
+        if (super.performAccessibilityAction(view, i, bundle)) {
             return true;
         }
         if (!shouldIgnore() && this.mRecyclerView.getLayoutManager() != null) {
-            return this.mRecyclerView.getLayoutManager().performAccessibilityAction(action, args);
+            return this.mRecyclerView.getLayoutManager().performAccessibilityAction(i, bundle);
         }
         return false;
     }
 
     @Override // androidx.core.view.AccessibilityDelegateCompat
-    public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
-        super.onInitializeAccessibilityNodeInfo(host, info);
-        if (!shouldIgnore() && this.mRecyclerView.getLayoutManager() != null) {
-            this.mRecyclerView.getLayoutManager().onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfo(View view, AccessibilityNodeInfoCompat accessibilityNodeInfoCompat) {
+        super.onInitializeAccessibilityNodeInfo(view, accessibilityNodeInfoCompat);
+        if (shouldIgnore() || this.mRecyclerView.getLayoutManager() == null) {
+            return;
         }
+        this.mRecyclerView.getLayoutManager().onInitializeAccessibilityNodeInfo(accessibilityNodeInfoCompat);
     }
 
     @Override // androidx.core.view.AccessibilityDelegateCompat
-    public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(host, event);
-        if ((host instanceof RecyclerView) && !shouldIgnore()) {
-            RecyclerView rv = (RecyclerView) host;
-            if (rv.getLayoutManager() != null) {
-                rv.getLayoutManager().onInitializeAccessibilityEvent(event);
-            }
+    public void onInitializeAccessibilityEvent(View view, AccessibilityEvent accessibilityEvent) {
+        super.onInitializeAccessibilityEvent(view, accessibilityEvent);
+        if (!(view instanceof RecyclerView) || shouldIgnore()) {
+            return;
         }
+        RecyclerView recyclerView = (RecyclerView) view;
+        if (recyclerView.getLayoutManager() == null) {
+            return;
+        }
+        recyclerView.getLayoutManager().onInitializeAccessibilityEvent(accessibilityEvent);
     }
 
     public AccessibilityDelegateCompat getItemDelegate() {
         return this.mItemDelegate;
     }
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class ItemDelegate extends AccessibilityDelegateCompat {
         final RecyclerViewAccessibilityDelegate mRecyclerViewDelegate;
 
-        public ItemDelegate(RecyclerViewAccessibilityDelegate recyclerViewDelegate) {
-            this.mRecyclerViewDelegate = recyclerViewDelegate;
+        public ItemDelegate(RecyclerViewAccessibilityDelegate recyclerViewAccessibilityDelegate) {
+            this.mRecyclerViewDelegate = recyclerViewAccessibilityDelegate;
         }
 
         @Override // androidx.core.view.AccessibilityDelegateCompat
-        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
-            super.onInitializeAccessibilityNodeInfo(host, info);
-            if (!this.mRecyclerViewDelegate.shouldIgnore() && this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager() != null) {
-                this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager().onInitializeAccessibilityNodeInfoForItem(host, info);
+        public void onInitializeAccessibilityNodeInfo(View view, AccessibilityNodeInfoCompat accessibilityNodeInfoCompat) {
+            super.onInitializeAccessibilityNodeInfo(view, accessibilityNodeInfoCompat);
+            if (this.mRecyclerViewDelegate.shouldIgnore() || this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager() == null) {
+                return;
             }
+            this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager().onInitializeAccessibilityNodeInfoForItem(view, accessibilityNodeInfoCompat);
         }
 
         @Override // androidx.core.view.AccessibilityDelegateCompat
-        public boolean performAccessibilityAction(View host, int action, Bundle args) {
-            if (super.performAccessibilityAction(host, action, args)) {
+        public boolean performAccessibilityAction(View view, int i, Bundle bundle) {
+            if (super.performAccessibilityAction(view, i, bundle)) {
                 return true;
             }
             if (!this.mRecyclerViewDelegate.shouldIgnore() && this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager() != null) {
-                return this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager().performAccessibilityActionForItem(host, action, args);
+                return this.mRecyclerViewDelegate.mRecyclerView.getLayoutManager().performAccessibilityActionForItem(view, i, bundle);
             }
             return false;
         }

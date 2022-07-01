@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import com.google.android.exoplayer2.C;
 import java.util.Set;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
@@ -18,7 +17,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class DrawerActionCell extends FrameLayout {
     private int currentId;
     private RectF rect = new RectF();
@@ -28,7 +27,7 @@ public class DrawerActionCell extends FrameLayout {
         super(context);
         TextView textView = new TextView(context);
         this.textView = textView;
-        textView.setTextColor(Theme.getColor(Theme.key_chats_menuItemText));
+        textView.setTextColor(Theme.getColor("chats_menuItemText"));
         this.textView.setTextSize(1, 15.0f);
         this.textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         this.textView.setLines(1);
@@ -42,54 +41,56 @@ public class DrawerActionCell extends FrameLayout {
 
     @Override // android.view.View
     protected void onDraw(Canvas canvas) {
+        int dp;
+        int measuredWidth;
         super.onDraw(canvas);
         if (this.currentId == 8) {
-            Set<String> suggestions = MessagesController.getInstance(UserConfig.selectedAccount).pendingSuggestions;
-            if (suggestions.contains("VALIDATE_PHONE_NUMBER") || suggestions.contains("VALIDATE_PASSWORD")) {
-                int countTop = AndroidUtilities.dp(12.5f);
-                int countWidth = AndroidUtilities.dp(9.0f);
-                int countLeft = (getMeasuredWidth() - countWidth) - AndroidUtilities.dp(25.0f);
-                int x = countLeft - AndroidUtilities.dp(5.5f);
-                this.rect.set(x, countTop, x + countWidth + AndroidUtilities.dp(14.0f), AndroidUtilities.dp(23.0f) + countTop);
-                Theme.chat_docBackPaint.setColor(Theme.getColor(Theme.key_chats_archiveBackground));
-                canvas.drawRoundRect(this.rect, AndroidUtilities.density * 11.5f, AndroidUtilities.density * 11.5f, Theme.chat_docBackPaint);
-                int w = Theme.dialogs_errorDrawable.getIntrinsicWidth();
-                int h = Theme.dialogs_errorDrawable.getIntrinsicHeight();
-                Theme.dialogs_errorDrawable.setBounds((int) (this.rect.centerX() - (w / 2)), (int) (this.rect.centerY() - (h / 2)), (int) (this.rect.centerX() + (w / 2)), (int) (this.rect.centerY() + (h / 2)));
-                Theme.dialogs_errorDrawable.draw(canvas);
+            Set<String> set = MessagesController.getInstance(UserConfig.selectedAccount).pendingSuggestions;
+            if (!set.contains("VALIDATE_PHONE_NUMBER") && !set.contains("VALIDATE_PASSWORD")) {
+                return;
             }
+            int dp2 = AndroidUtilities.dp(12.5f);
+            this.rect.set(((getMeasuredWidth() - AndroidUtilities.dp(9.0f)) - AndroidUtilities.dp(25.0f)) - AndroidUtilities.dp(5.5f), dp2, measuredWidth + dp + AndroidUtilities.dp(14.0f), dp2 + AndroidUtilities.dp(23.0f));
+            Theme.chat_docBackPaint.setColor(Theme.getColor("chats_archiveBackground"));
+            RectF rectF = this.rect;
+            float f = AndroidUtilities.density;
+            canvas.drawRoundRect(rectF, f * 11.5f, f * 11.5f, Theme.chat_docBackPaint);
+            float intrinsicWidth = Theme.dialogs_errorDrawable.getIntrinsicWidth() / 2;
+            float intrinsicHeight = Theme.dialogs_errorDrawable.getIntrinsicHeight() / 2;
+            Theme.dialogs_errorDrawable.setBounds((int) (this.rect.centerX() - intrinsicWidth), (int) (this.rect.centerY() - intrinsicHeight), (int) (this.rect.centerX() + intrinsicWidth), (int) (this.rect.centerY() + intrinsicHeight));
+            Theme.dialogs_errorDrawable.draw(canvas);
         }
     }
 
     @Override // android.widget.FrameLayout, android.view.View
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(widthMeasureSpec), C.BUFFER_FLAG_ENCRYPTED), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48.0f), C.BUFFER_FLAG_ENCRYPTED));
+    protected void onMeasure(int i, int i2) {
+        super.onMeasure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(i), 1073741824), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48.0f), 1073741824));
     }
 
     @Override // android.view.ViewGroup, android.view.View
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        this.textView.setTextColor(Theme.getColor(Theme.key_chats_menuItemText));
+        this.textView.setTextColor(Theme.getColor("chats_menuItemText"));
     }
 
-    public void setTextAndIcon(int id, String text, int resId) {
-        this.currentId = id;
+    public void setTextAndIcon(int i, String str, int i2) {
+        this.currentId = i;
         try {
-            this.textView.setText(text);
-            Drawable drawable = getResources().getDrawable(resId).mutate();
-            if (drawable != null) {
-                drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_menuItemIcon), PorterDuff.Mode.MULTIPLY));
+            this.textView.setText(str);
+            Drawable mutate = getResources().getDrawable(i2).mutate();
+            if (mutate != null) {
+                mutate.setColorFilter(new PorterDuffColorFilter(Theme.getColor("chats_menuItemIcon"), PorterDuff.Mode.MULTIPLY));
             }
-            this.textView.setCompoundDrawablesWithIntrinsicBounds(drawable, (Drawable) null, (Drawable) null, (Drawable) null);
-        } catch (Throwable e) {
-            FileLog.e(e);
+            this.textView.setCompoundDrawablesWithIntrinsicBounds(mutate, (Drawable) null, (Drawable) null, (Drawable) null);
+        } catch (Throwable th) {
+            FileLog.e(th);
         }
     }
 
     @Override // android.view.View
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.addAction(16);
-        info.addAction(32);
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.addAction(16);
+        accessibilityNodeInfo.addAction(32);
     }
 }

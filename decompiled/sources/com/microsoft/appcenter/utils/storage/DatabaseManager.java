@@ -3,7 +3,6 @@ package com.microsoft.appcenter.utils.storage;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -11,10 +10,9 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import java.io.Closeable;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class DatabaseManager implements Closeable {
-    public static final String PRIMARY_KEY = "oid";
-    public static final String[] SELECT_PRIMARY_KEY = {PRIMARY_KEY};
+    public static final String[] SELECT_PRIMARY_KEY = {"oid"};
     private final Context mContext;
     private final String mDatabase;
     private final String mDefaultTable;
@@ -22,67 +20,67 @@ public class DatabaseManager implements Closeable {
     private SQLiteOpenHelper mSQLiteOpenHelper;
     private final ContentValues mSchema;
 
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public interface Listener {
         void onCreate(SQLiteDatabase sQLiteDatabase);
 
         void onUpgrade(SQLiteDatabase sQLiteDatabase, int i, int i2);
     }
 
-    public DatabaseManager(Context context, String database, String defaultTable, int version, ContentValues schema, final String sqlCreateCommand, Listener listener) {
+    public DatabaseManager(Context context, String str, String str2, int i, ContentValues contentValues, final String str3, Listener listener) {
         this.mContext = context;
-        this.mDatabase = database;
-        this.mDefaultTable = defaultTable;
-        this.mSchema = schema;
+        this.mDatabase = str;
+        this.mDefaultTable = str2;
+        this.mSchema = contentValues;
         this.mListener = listener;
-        this.mSQLiteOpenHelper = new SQLiteOpenHelper(context, database, null, version) { // from class: com.microsoft.appcenter.utils.storage.DatabaseManager.1
+        this.mSQLiteOpenHelper = new SQLiteOpenHelper(context, str, null, i) { // from class: com.microsoft.appcenter.utils.storage.DatabaseManager.1
             @Override // android.database.sqlite.SQLiteOpenHelper
-            public void onCreate(SQLiteDatabase db) {
-                db.execSQL(sqlCreateCommand);
-                DatabaseManager.this.mListener.onCreate(db);
+            public void onCreate(SQLiteDatabase sQLiteDatabase) {
+                sQLiteDatabase.execSQL(str3);
+                DatabaseManager.this.mListener.onCreate(sQLiteDatabase);
             }
 
             @Override // android.database.sqlite.SQLiteOpenHelper
-            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-                DatabaseManager.this.mListener.onUpgrade(db, oldVersion, newVersion);
+            public void onUpgrade(SQLiteDatabase sQLiteDatabase, int i2, int i3) {
+                DatabaseManager.this.mListener.onUpgrade(sQLiteDatabase, i2, i3);
             }
         };
     }
 
-    private static ContentValues buildValues(Cursor cursor, ContentValues schema) {
-        ContentValues values = new ContentValues();
+    private static ContentValues buildValues(Cursor cursor, ContentValues contentValues) {
+        ContentValues contentValues2 = new ContentValues();
         for (int i = 0; i < cursor.getColumnCount(); i++) {
             if (!cursor.isNull(i)) {
-                String key = cursor.getColumnName(i);
-                if (key.equals(PRIMARY_KEY)) {
-                    values.put(key, Long.valueOf(cursor.getLong(i)));
+                String columnName = cursor.getColumnName(i);
+                if (columnName.equals("oid")) {
+                    contentValues2.put(columnName, Long.valueOf(cursor.getLong(i)));
                 } else {
-                    Object specimen = schema.get(key);
-                    if (specimen instanceof byte[]) {
-                        values.put(key, cursor.getBlob(i));
-                    } else if (specimen instanceof Double) {
-                        values.put(key, Double.valueOf(cursor.getDouble(i)));
-                    } else if (specimen instanceof Float) {
-                        values.put(key, Float.valueOf(cursor.getFloat(i)));
-                    } else if (specimen instanceof Integer) {
-                        values.put(key, Integer.valueOf(cursor.getInt(i)));
-                    } else if (specimen instanceof Long) {
-                        values.put(key, Long.valueOf(cursor.getLong(i)));
-                    } else if (specimen instanceof Short) {
-                        values.put(key, Short.valueOf(cursor.getShort(i)));
-                    } else if (specimen instanceof Boolean) {
+                    Object obj = contentValues.get(columnName);
+                    if (obj instanceof byte[]) {
+                        contentValues2.put(columnName, cursor.getBlob(i));
+                    } else if (obj instanceof Double) {
+                        contentValues2.put(columnName, Double.valueOf(cursor.getDouble(i)));
+                    } else if (obj instanceof Float) {
+                        contentValues2.put(columnName, Float.valueOf(cursor.getFloat(i)));
+                    } else if (obj instanceof Integer) {
+                        contentValues2.put(columnName, Integer.valueOf(cursor.getInt(i)));
+                    } else if (obj instanceof Long) {
+                        contentValues2.put(columnName, Long.valueOf(cursor.getLong(i)));
+                    } else if (obj instanceof Short) {
+                        contentValues2.put(columnName, Short.valueOf(cursor.getShort(i)));
+                    } else if (obj instanceof Boolean) {
                         boolean z = true;
                         if (cursor.getInt(i) != 1) {
                             z = false;
                         }
-                        values.put(key, Boolean.valueOf(z));
+                        contentValues2.put(columnName, Boolean.valueOf(z));
                     } else {
-                        values.put(key, cursor.getString(i));
+                        contentValues2.put(columnName, cursor.getString(i));
                     }
                 }
             }
         }
-        return values;
+        return contentValues2;
     }
 
     public ContentValues buildValues(Cursor cursor) {
@@ -91,76 +89,69 @@ public class DatabaseManager implements Closeable {
 
     public ContentValues nextValues(Cursor cursor) {
         try {
-            if (cursor.moveToNext()) {
-                return buildValues(cursor);
+            if (!cursor.moveToNext()) {
+                return null;
             }
-            return null;
+            return buildValues(cursor);
         } catch (RuntimeException e) {
             AppCenterLog.error("AppCenter", "Failed to get next cursor value: ", e);
             return null;
         }
     }
 
-    public long put(ContentValues values, String priorityColumn) {
-        Long id = null;
+    public long put(ContentValues contentValues, String str) {
+        Long l = null;
         Cursor cursor = null;
-        while (id == null) {
+        while (l == null) {
             try {
                 try {
-                    id = Long.valueOf(getDatabase().insertOrThrow(this.mDefaultTable, null, values));
-                } catch (SQLiteFullException e) {
-                    AppCenterLog.debug("AppCenter", "Storage is full, trying to delete the oldest log that has the lowest priority which is lower or equal priority than the new log");
-                    if (cursor == null) {
-                        String priority = values.getAsString(priorityColumn);
-                        SQLiteQueryBuilder queryBuilder = SQLiteUtils.newSQLiteQueryBuilder();
-                        queryBuilder.appendWhere(priorityColumn + " <= ?");
-                        cursor = getCursor(queryBuilder, SELECT_PRIMARY_KEY, new String[]{priority}, priorityColumn + " , " + PRIMARY_KEY);
-                    }
-                    if (!cursor.moveToNext()) {
-                        throw e;
-                    }
-                    long deletedId = cursor.getLong(0);
-                    delete(deletedId);
-                    AppCenterLog.debug("AppCenter", "Deleted log id=" + deletedId);
+                    l = Long.valueOf(getDatabase().insertOrThrow(this.mDefaultTable, null, contentValues));
+                } catch (RuntimeException e) {
+                    l = -1L;
+                    AppCenterLog.error("AppCenter", String.format("Failed to insert values (%s) to database %s.", contentValues.toString(), this.mDatabase), e);
                 }
-            } catch (RuntimeException e2) {
-                id = -1L;
-                AppCenterLog.error("AppCenter", String.format("Failed to insert values (%s) to database %s.", values.toString(), this.mDatabase), e2);
+            } catch (SQLiteFullException e2) {
+                AppCenterLog.debug("AppCenter", "Storage is full, trying to delete the oldest log that has the lowest priority which is lower or equal priority than the new log");
+                if (cursor == null) {
+                    String asString = contentValues.getAsString(str);
+                    SQLiteQueryBuilder newSQLiteQueryBuilder = SQLiteUtils.newSQLiteQueryBuilder();
+                    newSQLiteQueryBuilder.appendWhere(str + " <= ?");
+                    cursor = getCursor(newSQLiteQueryBuilder, SELECT_PRIMARY_KEY, new String[]{asString}, str + " , oid");
+                }
+                if (cursor.moveToNext()) {
+                    long j = cursor.getLong(0);
+                    delete(j);
+                    AppCenterLog.debug("AppCenter", "Deleted log id=" + j);
+                } else {
+                    throw e2;
+                }
             }
         }
         if (cursor != null) {
             try {
                 cursor.close();
-            } catch (RuntimeException e3) {
+            } catch (RuntimeException unused) {
             }
         }
-        return id.longValue();
+        return l.longValue();
     }
 
-    public void delete(long id) {
-        delete(this.mDefaultTable, PRIMARY_KEY, Long.valueOf(id));
+    public void delete(long j) {
+        delete(this.mDefaultTable, "oid", Long.valueOf(j));
     }
 
-    public int delete(String key, Object value) {
-        return delete(this.mDefaultTable, key, value);
+    public int delete(String str, Object obj) {
+        return delete(this.mDefaultTable, str, obj);
     }
 
-    private int delete(String table, String key, Object value) {
-        String[] whereArgs = {String.valueOf(value)};
+    private int delete(String str, String str2, Object obj) {
+        String[] strArr = {String.valueOf(obj)};
         try {
             SQLiteDatabase database = getDatabase();
-            return database.delete(table, key + " = ?", whereArgs);
+            return database.delete(str, str2 + " = ?", strArr);
         } catch (RuntimeException e) {
-            AppCenterLog.error("AppCenter", String.format("Failed to delete values that match condition=\"%s\" and values=\"%s\" from database %s.", key + " = ?", Arrays.toString(whereArgs), this.mDatabase), e);
+            AppCenterLog.error("AppCenter", String.format("Failed to delete values that match condition=\"%s\" and values=\"%s\" from database %s.", str2 + " = ?", Arrays.toString(strArr), this.mDatabase), e);
             return 0;
-        }
-    }
-
-    public void clear() {
-        try {
-            getDatabase().delete(this.mDefaultTable, null, null);
-        } catch (RuntimeException e) {
-            AppCenterLog.error("AppCenter", "Failed to clear the table.", e);
         }
     }
 
@@ -173,25 +164,17 @@ public class DatabaseManager implements Closeable {
         }
     }
 
-    public final long getRowCount() {
-        try {
-            return DatabaseUtils.queryNumEntries(getDatabase(), this.mDefaultTable);
-        } catch (RuntimeException e) {
-            AppCenterLog.error("AppCenter", "Failed to get row count of database.", e);
-            return -1L;
-        }
+    public Cursor getCursor(SQLiteQueryBuilder sQLiteQueryBuilder, String[] strArr, String[] strArr2, String str) throws RuntimeException {
+        return getCursor(this.mDefaultTable, sQLiteQueryBuilder, strArr, strArr2, str);
     }
 
-    public Cursor getCursor(SQLiteQueryBuilder queryBuilder, String[] columns, String[] selectionArgs, String sortOrder) throws RuntimeException {
-        return getCursor(this.mDefaultTable, queryBuilder, columns, selectionArgs, sortOrder);
-    }
-
-    Cursor getCursor(String table, SQLiteQueryBuilder queryBuilder, String[] columns, String[] selectionArgs, String sortOrder) throws RuntimeException {
-        if (queryBuilder == null) {
-            queryBuilder = SQLiteUtils.newSQLiteQueryBuilder();
+    Cursor getCursor(String str, SQLiteQueryBuilder sQLiteQueryBuilder, String[] strArr, String[] strArr2, String str2) throws RuntimeException {
+        if (sQLiteQueryBuilder == null) {
+            sQLiteQueryBuilder = SQLiteUtils.newSQLiteQueryBuilder();
         }
-        queryBuilder.setTables(table);
-        return queryBuilder.query(getDatabase(), columns, null, selectionArgs, null, null, sortOrder);
+        SQLiteQueryBuilder sQLiteQueryBuilder2 = sQLiteQueryBuilder;
+        sQLiteQueryBuilder2.setTables(str);
+        return sQLiteQueryBuilder2.query(getDatabase(), strArr, null, strArr2, null, null, str2);
     }
 
     SQLiteDatabase getDatabase() {
@@ -208,30 +191,25 @@ public class DatabaseManager implements Closeable {
         }
     }
 
-    void setSQLiteOpenHelper(SQLiteOpenHelper helper) {
-        this.mSQLiteOpenHelper.close();
-        this.mSQLiteOpenHelper = helper;
-    }
-
-    public boolean setMaxSize(long maxStorageSizeInBytes) {
+    public boolean setMaxSize(long j) {
         try {
-            SQLiteDatabase db = getDatabase();
-            long newMaxSize = db.setMaximumSize(maxStorageSizeInBytes);
-            long pageSize = db.getPageSize();
-            long expectedMultipleMaxSize = maxStorageSizeInBytes / pageSize;
-            if (maxStorageSizeInBytes % pageSize != 0) {
-                expectedMultipleMaxSize++;
+            SQLiteDatabase database = getDatabase();
+            long maximumSize = database.setMaximumSize(j);
+            long pageSize = database.getPageSize();
+            long j2 = j / pageSize;
+            if (j % pageSize != 0) {
+                j2++;
             }
-            if (newMaxSize == expectedMultipleMaxSize * pageSize) {
-                if (maxStorageSizeInBytes == newMaxSize) {
-                    AppCenterLog.info("AppCenter", "Changed maximum database size to " + newMaxSize + " bytes.");
-                    return true;
-                }
-                AppCenterLog.info("AppCenter", "Changed maximum database size to " + newMaxSize + " bytes (next multiple of page size).");
+            if (maximumSize != j2 * pageSize) {
+                AppCenterLog.error("AppCenter", "Could not change maximum database size to " + j + " bytes, current maximum size is " + maximumSize + " bytes.");
+                return false;
+            } else if (j == maximumSize) {
+                AppCenterLog.info("AppCenter", "Changed maximum database size to " + maximumSize + " bytes.");
+                return true;
+            } else {
+                AppCenterLog.info("AppCenter", "Changed maximum database size to " + maximumSize + " bytes (next multiple of page size).");
                 return true;
             }
-            AppCenterLog.error("AppCenter", "Could not change maximum database size to " + maxStorageSizeInBytes + " bytes, current maximum size is " + newMaxSize + " bytes.");
-            return false;
         } catch (RuntimeException e) {
             AppCenterLog.error("AppCenter", "Could not change maximum database size.", e);
             return false;

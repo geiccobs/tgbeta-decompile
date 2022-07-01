@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzl implements Parcelable.Creator<zzk> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ zzk createFromParcel(Parcel parcel) {
@@ -15,23 +15,17 @@ public final class zzl implements Parcelable.Creator<zzk> {
         int i = -1;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            switch (SafeParcelReader.getFieldId(readHeader)) {
-                case 1:
-                    str = SafeParcelReader.createString(parcel, readHeader);
-                    break;
-                case 2:
-                default:
-                    SafeParcelReader.skipUnknownField(parcel, readHeader);
-                    break;
-                case 3:
-                    zzsVar = (zzs) SafeParcelReader.createParcelable(parcel, readHeader, zzs.CREATOR);
-                    break;
-                case 4:
-                    i = SafeParcelReader.readInt(parcel, readHeader);
-                    break;
-                case 5:
-                    bArr = SafeParcelReader.createByteArray(parcel, readHeader);
-                    break;
+            int fieldId = SafeParcelReader.getFieldId(readHeader);
+            if (fieldId == 1) {
+                str = SafeParcelReader.createString(parcel, readHeader);
+            } else if (fieldId == 3) {
+                zzsVar = (zzs) SafeParcelReader.createParcelable(parcel, readHeader, zzs.CREATOR);
+            } else if (fieldId == 4) {
+                i = SafeParcelReader.readInt(parcel, readHeader);
+            } else if (fieldId == 5) {
+                bArr = SafeParcelReader.createByteArray(parcel, readHeader);
+            } else {
+                SafeParcelReader.skipUnknownField(parcel, readHeader);
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

@@ -13,75 +13,70 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class OneCollectorChannelListener extends AbstractChannelListener {
-    static final String ONE_COLLECTOR_GROUP_NAME_SUFFIX = "/one";
-    static final int ONE_COLLECTOR_TRIGGER_COUNT = 50;
-    static final int ONE_COLLECTOR_TRIGGER_MAX_PARALLEL_REQUESTS = 2;
     private final Channel mChannel;
     private final Map<String, EpochAndSeq> mEpochsAndSeqsByIKey;
     private final Ingestion mIngestion;
     private final UUID mInstallId;
     private final LogSerializer mLogSerializer;
 
-    public OneCollectorChannelListener(Channel channel, LogSerializer logSerializer, HttpClient httpClient, UUID installId) {
-        this(new OneCollectorIngestion(httpClient, logSerializer), channel, logSerializer, installId);
+    public OneCollectorChannelListener(Channel channel, LogSerializer logSerializer, HttpClient httpClient, UUID uuid) {
+        this(new OneCollectorIngestion(httpClient, logSerializer), channel, logSerializer, uuid);
     }
 
-    OneCollectorChannelListener(OneCollectorIngestion ingestion, Channel channel, LogSerializer logSerializer, UUID installId) {
+    OneCollectorChannelListener(OneCollectorIngestion oneCollectorIngestion, Channel channel, LogSerializer logSerializer, UUID uuid) {
         this.mEpochsAndSeqsByIKey = new HashMap();
         this.mChannel = channel;
         this.mLogSerializer = logSerializer;
-        this.mInstallId = installId;
-        this.mIngestion = ingestion;
+        this.mInstallId = uuid;
+        this.mIngestion = oneCollectorIngestion;
     }
 
-    public void setLogUrl(String logUrl) {
-        this.mIngestion.setLogUrl(logUrl);
+    public void setLogUrl(String str) {
+        this.mIngestion.setLogUrl(str);
     }
 
     @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onGroupAdded(String groupName, Channel.GroupListener groupListener, long batchTimeInterval) {
-        if (isOneCollectorGroup(groupName)) {
+    public void onGroupAdded(String str, Channel.GroupListener groupListener, long j) {
+        if (isOneCollectorGroup(str)) {
             return;
         }
-        String oneCollectorGroupName = getOneCollectorGroupName(groupName);
-        this.mChannel.addGroup(oneCollectorGroupName, 50, batchTimeInterval, 2, this.mIngestion, groupListener);
+        this.mChannel.addGroup(getOneCollectorGroupName(str), 50, j, 2, this.mIngestion, groupListener);
     }
 
     @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onGroupRemoved(String groupName) {
-        if (isOneCollectorGroup(groupName)) {
+    public void onGroupRemoved(String str) {
+        if (isOneCollectorGroup(str)) {
             return;
         }
-        String oneCollectorGroupName = getOneCollectorGroupName(groupName);
-        this.mChannel.removeGroup(oneCollectorGroupName);
+        this.mChannel.removeGroup(getOneCollectorGroupName(str));
     }
 
     @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onPreparedLog(Log log, String groupName, int flags) {
+    public void onPreparedLog(Log log, String str, int i) {
         if (!isOneCollectorCompatible(log)) {
             return;
         }
         try {
-            Collection<CommonSchemaLog> commonSchemaLogs = this.mLogSerializer.toCommonSchemaLog(log);
-            for (CommonSchemaLog commonSchemaLog : commonSchemaLogs) {
-                commonSchemaLog.setFlags(Long.valueOf(flags));
-                EpochAndSeq epochAndSeq = this.mEpochsAndSeqsByIKey.get(commonSchemaLog.getIKey());
+            Collection<CommonSchemaLog> commonSchemaLog = this.mLogSerializer.toCommonSchemaLog(log);
+            for (CommonSchemaLog commonSchemaLog2 : commonSchemaLog) {
+                commonSchemaLog2.setFlags(Long.valueOf(i));
+                EpochAndSeq epochAndSeq = this.mEpochsAndSeqsByIKey.get(commonSchemaLog2.getIKey());
                 if (epochAndSeq == null) {
                     epochAndSeq = new EpochAndSeq(UUID.randomUUID().toString());
-                    this.mEpochsAndSeqsByIKey.put(commonSchemaLog.getIKey(), epochAndSeq);
+                    this.mEpochsAndSeqsByIKey.put(commonSchemaLog2.getIKey(), epochAndSeq);
                 }
-                SdkExtension sdk = commonSchemaLog.getExt().getSdk();
+                SdkExtension sdk = commonSchemaLog2.getExt().getSdk();
                 sdk.setEpoch(epochAndSeq.epoch);
                 long j = epochAndSeq.seq + 1;
                 epochAndSeq.seq = j;
                 sdk.setSeq(Long.valueOf(j));
                 sdk.setInstallId(this.mInstallId);
             }
-            String oneCollectorGroupName = getOneCollectorGroupName(groupName);
-            for (CommonSchemaLog commonSchemaLog2 : commonSchemaLogs) {
-                this.mChannel.enqueue(commonSchemaLog2, oneCollectorGroupName, flags);
+            String oneCollectorGroupName = getOneCollectorGroupName(str);
+            for (CommonSchemaLog commonSchemaLog3 : commonSchemaLog) {
+                this.mChannel.enqueue(commonSchemaLog3, oneCollectorGroupName, i);
             }
         } catch (IllegalArgumentException e) {
             AppCenterLog.error("AppCenter", "Cannot send a log to one collector: " + e.getMessage());
@@ -93,36 +88,20 @@ public class OneCollectorChannelListener extends AbstractChannelListener {
         return isOneCollectorCompatible(log);
     }
 
-    private static String getOneCollectorGroupName(String groupName) {
-        return groupName + ONE_COLLECTOR_GROUP_NAME_SUFFIX;
+    private static String getOneCollectorGroupName(String str) {
+        return str + "/one";
     }
 
     @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onClear(String groupName) {
-        if (isOneCollectorGroup(groupName)) {
+    public void onClear(String str) {
+        if (isOneCollectorGroup(str)) {
             return;
         }
-        this.mChannel.clear(getOneCollectorGroupName(groupName));
+        this.mChannel.clear(getOneCollectorGroupName(str));
     }
 
-    @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onPaused(String groupName, String targetToken) {
-        if (isOneCollectorGroup(groupName)) {
-            return;
-        }
-        this.mChannel.pauseGroup(getOneCollectorGroupName(groupName), targetToken);
-    }
-
-    @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onResumed(String groupName, String targetToken) {
-        if (isOneCollectorGroup(groupName)) {
-            return;
-        }
-        this.mChannel.resumeGroup(getOneCollectorGroupName(groupName), targetToken);
-    }
-
-    private static boolean isOneCollectorGroup(String groupName) {
-        return groupName.endsWith(ONE_COLLECTOR_GROUP_NAME_SUFFIX);
+    private static boolean isOneCollectorGroup(String str) {
+        return str.endsWith("/one");
     }
 
     private static boolean isOneCollectorCompatible(Log log) {
@@ -130,20 +109,20 @@ public class OneCollectorChannelListener extends AbstractChannelListener {
     }
 
     @Override // com.microsoft.appcenter.channel.AbstractChannelListener, com.microsoft.appcenter.channel.Channel.Listener
-    public void onGloballyEnabled(boolean isEnabled) {
-        if (!isEnabled) {
+    public void onGloballyEnabled(boolean z) {
+        if (!z) {
             this.mEpochsAndSeqsByIKey.clear();
         }
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static class EpochAndSeq {
         final String epoch;
         long seq;
 
-        EpochAndSeq(String epoch) {
-            this.epoch = epoch;
+        EpochAndSeq(String str) {
+            this.epoch = str;
         }
     }
 }

@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import java.util.Comparator;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public final /* synthetic */ class InstantCameraView$$ExternalSyntheticLambda6 implements Comparator {
     public static final /* synthetic */ InstantCameraView$$ExternalSyntheticLambda6 INSTANCE = new InstantCameraView$$ExternalSyntheticLambda6();
 
@@ -10,6 +10,8 @@ public final /* synthetic */ class InstantCameraView$$ExternalSyntheticLambda6 i
 
     @Override // java.util.Comparator
     public final int compare(Object obj, Object obj2) {
-        return InstantCameraView.lambda$chooseOptimalSize$2((org.telegram.messenger.camera.Size) obj, (org.telegram.messenger.camera.Size) obj2);
+        int lambda$chooseOptimalSize$2;
+        lambda$chooseOptimalSize$2 = InstantCameraView.lambda$chooseOptimalSize$2((org.telegram.messenger.camera.Size) obj, (org.telegram.messenger.camera.Size) obj2);
+        return lambda$chooseOptimalSize$2;
     }
 }

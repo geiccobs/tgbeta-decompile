@@ -2,7 +2,7 @@ package com.google.android.gms.internal.flags;
 
 import android.os.StrictMode;
 import java.util.concurrent.Callable;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zze {
     public static <T> T zza(Callable<T> callable) throws Exception {
         StrictMode.ThreadPolicy threadPolicy = StrictMode.getThreadPolicy();

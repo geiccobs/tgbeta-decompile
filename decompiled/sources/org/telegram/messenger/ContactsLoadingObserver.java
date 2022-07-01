@@ -3,7 +3,7 @@ package org.telegram.messenger;
 import android.os.Handler;
 import android.os.Looper;
 import org.telegram.messenger.NotificationCenter;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public final class ContactsLoadingObserver {
     private final Callback callback;
     private final ContactsController contactsController;
@@ -13,30 +13,29 @@ public final class ContactsLoadingObserver {
     private final NotificationCenter.NotificationCenterDelegate observer = new NotificationCenter.NotificationCenterDelegate() { // from class: org.telegram.messenger.ContactsLoadingObserver$$ExternalSyntheticLambda1
         @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
         public final void didReceivedNotification(int i, int i2, Object[] objArr) {
-            ContactsLoadingObserver.this.m182lambda$new$0$orgtelegrammessengerContactsLoadingObserver(i, i2, objArr);
+            ContactsLoadingObserver.this.lambda$new$0(i, i2, objArr);
         }
     };
     private final Runnable releaseRunnable = new Runnable() { // from class: org.telegram.messenger.ContactsLoadingObserver$$ExternalSyntheticLambda0
         @Override // java.lang.Runnable
         public final void run() {
-            ContactsLoadingObserver.this.m183lambda$new$1$orgtelegrammessengerContactsLoadingObserver();
+            ContactsLoadingObserver.this.lambda$new$1();
         }
     };
     private final Handler handler = new Handler(Looper.myLooper());
 
-    /* loaded from: classes4.dex */
+    /* loaded from: classes.dex */
     public interface Callback {
         void onResult(boolean z);
     }
 
-    public static void observe(Callback callback, long expirationTime) {
-        new ContactsLoadingObserver(callback).start(expirationTime);
+    public static void observe(Callback callback, long j) {
+        new ContactsLoadingObserver(callback).start(j);
     }
 
-    /* renamed from: lambda$new$0$org-telegram-messenger-ContactsLoadingObserver */
-    public /* synthetic */ void m182lambda$new$0$orgtelegrammessengerContactsLoadingObserver(int id, int account, Object[] args) {
-        if (id == NotificationCenter.contactsDidLoad) {
-            onContactsLoadingStateUpdated(account, false);
+    public /* synthetic */ void lambda$new$0(int i, int i2, Object[] objArr) {
+        if (i == NotificationCenter.contactsDidLoad) {
+            onContactsLoadingStateUpdated(i2, false);
         }
     }
 
@@ -48,15 +47,14 @@ public final class ContactsLoadingObserver {
         this.notificationCenter = NotificationCenter.getInstance(i);
     }
 
-    /* renamed from: lambda$new$1$org-telegram-messenger-ContactsLoadingObserver */
-    public /* synthetic */ void m183lambda$new$1$orgtelegrammessengerContactsLoadingObserver() {
+    public /* synthetic */ void lambda$new$1() {
         onContactsLoadingStateUpdated(this.currentAccount, true);
     }
 
-    public void start(long expirationTime) {
+    public void start(long j) {
         if (!onContactsLoadingStateUpdated(this.currentAccount, false)) {
             this.notificationCenter.addObserver(this.observer, NotificationCenter.contactsDidLoad);
-            this.handler.postDelayed(this.releaseRunnable, expirationTime);
+            this.handler.postDelayed(this.releaseRunnable, j);
         }
     }
 
@@ -74,15 +72,15 @@ public final class ContactsLoadingObserver {
         }
     }
 
-    private boolean onContactsLoadingStateUpdated(int account, boolean force) {
+    private boolean onContactsLoadingStateUpdated(int i, boolean z) {
         if (!this.released) {
-            boolean contactsLoaded = this.contactsController.contactsLoaded;
-            if (contactsLoaded || force) {
-                release();
-                this.callback.onResult(contactsLoaded);
-                return true;
+            boolean z2 = this.contactsController.contactsLoaded;
+            if (!z2 && !z) {
+                return false;
             }
-            return false;
+            release();
+            this.callback.onResult(z2);
+            return true;
         }
         return false;
     }

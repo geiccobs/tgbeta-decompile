@@ -1,6 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzp<E> extends zzk<E> {
     static final zzk<Object> zza = new zzp(new Object[0], 0);
     private final transient Object[] zzb;
@@ -11,6 +11,11 @@ public final class zzp<E> extends zzk<E> {
         this.zzc = i;
     }
 
+    @Override // com.google.android.gms.internal.mlkit_language_id.zzl
+    public final int zzc() {
+        return 0;
+    }
+
     @Override // java.util.AbstractCollection, java.util.Collection, java.util.List
     public final int size() {
         return this.zzc;
@@ -19,11 +24,6 @@ public final class zzp<E> extends zzk<E> {
     @Override // com.google.android.gms.internal.mlkit_language_id.zzl
     public final Object[] zzb() {
         return this.zzb;
-    }
-
-    @Override // com.google.android.gms.internal.mlkit_language_id.zzl
-    public final int zzc() {
-        return 0;
     }
 
     @Override // com.google.android.gms.internal.mlkit_language_id.zzl

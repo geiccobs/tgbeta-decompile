@@ -4,17 +4,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.exoplayer2.util.Util;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class ColorInfo implements Parcelable {
     public static final Parcelable.Creator<ColorInfo> CREATOR = new Parcelable.Creator<ColorInfo>() { // from class: com.google.android.exoplayer2.video.ColorInfo.1
         @Override // android.os.Parcelable.Creator
-        public ColorInfo createFromParcel(Parcel in) {
-            return new ColorInfo(in);
+        public ColorInfo createFromParcel(Parcel parcel) {
+            return new ColorInfo(parcel);
         }
 
         @Override // android.os.Parcelable.Creator
-        public ColorInfo[] newArray(int size) {
-            return new ColorInfo[size];
+        public ColorInfo[] newArray(int i) {
+            return new ColorInfo[i];
         }
     };
     public final int colorRange;
@@ -23,30 +23,34 @@ public final class ColorInfo implements Parcelable {
     private int hashCode;
     public final byte[] hdrStaticInfo;
 
-    public ColorInfo(int colorSpace, int colorRange, int colorTransfer, byte[] hdrStaticInfo) {
-        this.colorSpace = colorSpace;
-        this.colorRange = colorRange;
-        this.colorTransfer = colorTransfer;
-        this.hdrStaticInfo = hdrStaticInfo;
+    @Override // android.os.Parcelable
+    public int describeContents() {
+        return 0;
     }
 
-    ColorInfo(Parcel in) {
-        this.colorSpace = in.readInt();
-        this.colorRange = in.readInt();
-        this.colorTransfer = in.readInt();
-        boolean hasHdrStaticInfo = Util.readBoolean(in);
-        this.hdrStaticInfo = hasHdrStaticInfo ? in.createByteArray() : null;
+    public ColorInfo(int i, int i2, int i3, byte[] bArr) {
+        this.colorSpace = i;
+        this.colorRange = i2;
+        this.colorTransfer = i3;
+        this.hdrStaticInfo = bArr;
+    }
+
+    ColorInfo(Parcel parcel) {
+        this.colorSpace = parcel.readInt();
+        this.colorRange = parcel.readInt();
+        this.colorTransfer = parcel.readInt();
+        this.hdrStaticInfo = Util.readBoolean(parcel) ? parcel.createByteArray() : null;
     }
 
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || ColorInfo.class != obj.getClass()) {
             return false;
         }
-        ColorInfo other = (ColorInfo) obj;
-        return this.colorSpace == other.colorSpace && this.colorRange == other.colorRange && this.colorTransfer == other.colorTransfer && Arrays.equals(this.hdrStaticInfo, other.hdrStaticInfo);
+        ColorInfo colorInfo = (ColorInfo) obj;
+        return this.colorSpace == colorInfo.colorSpace && this.colorRange == colorInfo.colorRange && this.colorTransfer == colorInfo.colorTransfer && Arrays.equals(this.hdrStaticInfo, colorInfo.hdrStaticInfo);
     }
 
     public String toString() {
@@ -65,27 +69,20 @@ public final class ColorInfo implements Parcelable {
 
     public int hashCode() {
         if (this.hashCode == 0) {
-            int result = (17 * 31) + this.colorSpace;
-            this.hashCode = (((((result * 31) + this.colorRange) * 31) + this.colorTransfer) * 31) + Arrays.hashCode(this.hdrStaticInfo);
+            this.hashCode = ((((((527 + this.colorSpace) * 31) + this.colorRange) * 31) + this.colorTransfer) * 31) + Arrays.hashCode(this.hdrStaticInfo);
         }
-        int result2 = this.hashCode;
-        return result2;
+        return this.hashCode;
     }
 
     @Override // android.os.Parcelable
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override // android.os.Parcelable
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.colorSpace);
-        dest.writeInt(this.colorRange);
-        dest.writeInt(this.colorTransfer);
-        Util.writeBoolean(dest, this.hdrStaticInfo != null);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(this.colorSpace);
+        parcel.writeInt(this.colorRange);
+        parcel.writeInt(this.colorTransfer);
+        Util.writeBoolean(parcel, this.hdrStaticInfo != null);
         byte[] bArr = this.hdrStaticInfo;
         if (bArr != null) {
-            dest.writeByteArray(bArr);
+            parcel.writeByteArray(bArr);
         }
     }
 }

@@ -1,36 +1,35 @@
 package com.google.android.datatransport;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Encoding {
     private final String name;
 
-    public static Encoding of(String name) {
-        return new Encoding(name);
+    public static Encoding of(String str) {
+        return new Encoding(str);
     }
 
     public String getName() {
         return this.name;
     }
 
-    private Encoding(String name) {
-        if (name == null) {
+    private Encoding(String str) {
+        if (str == null) {
             throw new NullPointerException("name is null");
         }
-        this.name = name;
+        this.name = str;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o instanceof Encoding) {
-            return this.name.equals(((Encoding) o).name);
+        if (obj instanceof Encoding) {
+            return this.name.equals(((Encoding) obj).name);
         }
         return false;
     }
 
     public int hashCode() {
-        int h = 1000003 ^ this.name.hashCode();
-        return h;
+        return this.name.hashCode() ^ 1000003;
     }
 
     public String toString() {

@@ -1,7 +1,7 @@
 package com.google.android.gms.internal.clearcut;
 
 import java.nio.ByteBuffer;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzff {
     private static final zzfg zzqb;
 
@@ -94,16 +94,17 @@ public final class zzff {
 
     public static int zzf(byte[] bArr, int i, int i2) {
         byte b = bArr[i - 1];
-        switch (i2 - i) {
-            case 0:
-                return zzam(b);
-            case 1:
+        int i3 = i2 - i;
+        if (i3 != 0) {
+            if (i3 == 1) {
                 return zzp(b, bArr[i]);
-            case 2:
-                return zzd(b, bArr[i], bArr[i + 1]);
-            default:
+            }
+            if (i3 != 2) {
                 throw new AssertionError();
+            }
+            return zzd(b, bArr[i], bArr[i + 1]);
         }
+        return zzam(b);
     }
 
     public static int zzp(int i, int i2) {

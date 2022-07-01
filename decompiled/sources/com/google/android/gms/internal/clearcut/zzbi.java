@@ -2,7 +2,7 @@ package com.google.android.gms.internal.clearcut;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class zzbi extends zzbh {
     protected final byte[] zzfp;
 
@@ -45,7 +45,7 @@ public class zzbi extends zzbh {
 
     @Override // com.google.android.gms.internal.clearcut.zzbb
     public final zzbb zza(int i, int i2) {
-        int zzb = zzb(0, i2, size());
+        int zzb = zzbb.zzb(0, i2, size());
         return zzb == 0 ? zzbb.zzfi : new zzbe(this.zzfp, zzac(), zzb);
     }
 

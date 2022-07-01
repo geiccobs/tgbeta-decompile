@@ -1,27 +1,13 @@
 package org.aspectj.runtime.reflect;
 
-import com.microsoft.appcenter.Constants;
-import com.microsoft.appcenter.ingestion.models.properties.BooleanTypedProperty;
-import com.microsoft.appcenter.ingestion.models.properties.DoubleTypedProperty;
-import com.microsoft.appcenter.ingestion.models.properties.LongTypedProperty;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
-import org.aspectj.lang.reflect.AdviceSignature;
-import org.aspectj.lang.reflect.CatchClauseSignature;
-import org.aspectj.lang.reflect.ConstructorSignature;
-import org.aspectj.lang.reflect.FieldSignature;
-import org.aspectj.lang.reflect.InitializerSignature;
-import org.aspectj.lang.reflect.LockSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.aspectj.lang.reflect.UnlockSignature;
 import org.aspectj.runtime.reflect.JoinPointImpl;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class Factory {
     private static Object[] NO_ARGS = new Object[0];
     static /* synthetic */ Class class$java$lang$ClassNotFoundException;
@@ -35,33 +21,33 @@ public final class Factory {
         Hashtable hashtable = new Hashtable();
         prims = hashtable;
         hashtable.put("void", Void.TYPE);
-        prims.put(BooleanTypedProperty.TYPE, Boolean.TYPE);
+        prims.put("boolean", Boolean.TYPE);
         prims.put("byte", Byte.TYPE);
         prims.put("char", Character.TYPE);
         prims.put("short", Short.TYPE);
         prims.put("int", Integer.TYPE);
-        prims.put(LongTypedProperty.TYPE, Long.TYPE);
+        prims.put("long", Long.TYPE);
         prims.put("float", Float.TYPE);
-        prims.put(DoubleTypedProperty.TYPE, Double.TYPE);
+        prims.put("double", Double.TYPE);
     }
 
-    public static Class makeClass(String s, ClassLoader loader) {
-        if (s.equals("*")) {
+    public static Class makeClass(String str, ClassLoader classLoader) {
+        if (str.equals("*")) {
             return null;
         }
-        Class ret = (Class) prims.get(s);
-        if (ret != null) {
-            return ret;
+        Class cls = (Class) prims.get(str);
+        if (cls != null) {
+            return cls;
         }
         try {
-            if (loader == null) {
-                return Class.forName(s);
+            if (classLoader == null) {
+                return Class.forName(str);
             }
-            return Class.forName(s, false, loader);
-        } catch (ClassNotFoundException e) {
-            Class cls = class$java$lang$ClassNotFoundException;
-            if (cls != null) {
-                return cls;
+            return Class.forName(str, false, classLoader);
+        } catch (ClassNotFoundException unused) {
+            Class cls2 = class$java$lang$ClassNotFoundException;
+            if (cls2 != null) {
+                return cls2;
             }
             Class class$ = class$("java.lang.ClassNotFoundException");
             class$java$lang$ClassNotFoundException = class$;
@@ -69,321 +55,59 @@ public final class Factory {
         }
     }
 
-    static /* synthetic */ Class class$(String x0) {
+    static /* synthetic */ Class class$(String str) {
         try {
-            return Class.forName(x0);
-        } catch (ClassNotFoundException x1) {
-            throw new NoClassDefFoundError(x1.getMessage());
+            return Class.forName(str);
+        } catch (ClassNotFoundException e) {
+            throw new NoClassDefFoundError(e.getMessage());
         }
     }
 
-    public Factory(String filename, Class lexicalClass) {
-        this.filename = filename;
-        this.lexicalClass = lexicalClass;
-        this.lookupClassLoader = lexicalClass.getClassLoader();
+    public Factory(String str, Class cls) {
+        this.filename = str;
+        this.lexicalClass = cls;
+        this.lookupClassLoader = cls.getClassLoader();
     }
 
-    public JoinPoint.StaticPart makeSJP(String kind, String modifiers, String methodName, String declaringType, String paramTypes, String paramNames, String exceptionTypes, String returnType, int l) {
-        Signature sig = makeMethodSig(modifiers, methodName, declaringType, paramTypes, paramNames, exceptionTypes, returnType);
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.StaticPartImpl(i, kind, sig, makeSourceLoc(l, -1));
+    public JoinPoint.StaticPart makeSJP(String str, Signature signature, int i) {
+        int i2 = this.count;
+        this.count = i2 + 1;
+        return new JoinPointImpl.StaticPartImpl(i2, str, signature, makeSourceLoc(i, -1));
     }
 
-    public JoinPoint.StaticPart makeSJP(String kind, String modifiers, String methodName, String declaringType, String paramTypes, String paramNames, String returnType, int l) {
-        Signature sig = makeMethodSig(modifiers, methodName, declaringType, paramTypes, paramNames, "", returnType);
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.StaticPartImpl(i, kind, sig, makeSourceLoc(l, -1));
+    public static JoinPoint makeJP(JoinPoint.StaticPart staticPart, Object obj, Object obj2) {
+        return new JoinPointImpl(staticPart, obj, obj2, NO_ARGS);
     }
 
-    public JoinPoint.StaticPart makeSJP(String kind, Signature sig, SourceLocation loc) {
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.StaticPartImpl(i, kind, sig, loc);
+    public static JoinPoint makeJP(JoinPoint.StaticPart staticPart, Object obj, Object obj2, Object obj3) {
+        return new JoinPointImpl(staticPart, obj, obj2, new Object[]{obj3});
     }
 
-    public JoinPoint.StaticPart makeSJP(String kind, Signature sig, int l, int c) {
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.StaticPartImpl(i, kind, sig, makeSourceLoc(l, c));
-    }
-
-    public JoinPoint.StaticPart makeSJP(String kind, Signature sig, int l) {
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.StaticPartImpl(i, kind, sig, makeSourceLoc(l, -1));
-    }
-
-    public JoinPoint.EnclosingStaticPart makeESJP(String kind, Signature sig, SourceLocation loc) {
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.EnclosingStaticPartImpl(i, kind, sig, loc);
-    }
-
-    public JoinPoint.EnclosingStaticPart makeESJP(String kind, Signature sig, int l, int c) {
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.EnclosingStaticPartImpl(i, kind, sig, makeSourceLoc(l, c));
-    }
-
-    public JoinPoint.EnclosingStaticPart makeESJP(String kind, Signature sig, int l) {
-        int i = this.count;
-        this.count = i + 1;
-        return new JoinPointImpl.EnclosingStaticPartImpl(i, kind, sig, makeSourceLoc(l, -1));
-    }
-
-    public static JoinPoint.StaticPart makeEncSJP(Member member) {
-        String kind;
-        Signature sig;
-        if (member instanceof Method) {
-            Method method = (Method) member;
-            sig = new MethodSignatureImpl(method.getModifiers(), method.getName(), method.getDeclaringClass(), method.getParameterTypes(), new String[method.getParameterTypes().length], method.getExceptionTypes(), method.getReturnType());
-            kind = JoinPoint.METHOD_EXECUTION;
-        } else if (member instanceof Constructor) {
-            Constructor cons = (Constructor) member;
-            sig = new ConstructorSignatureImpl(cons.getModifiers(), cons.getDeclaringClass(), cons.getParameterTypes(), new String[cons.getParameterTypes().length], cons.getExceptionTypes());
-            kind = JoinPoint.CONSTRUCTOR_EXECUTION;
-        } else {
-            throw new IllegalArgumentException("member must be either a method or constructor");
+    public MethodSignature makeMethodSig(String str, String str2, String str3, String str4, String str5, String str6, String str7) {
+        int parseInt = Integer.parseInt(str, 16);
+        Class makeClass = makeClass(str3, this.lookupClassLoader);
+        StringTokenizer stringTokenizer = new StringTokenizer(str4, ":");
+        int countTokens = stringTokenizer.countTokens();
+        Class[] clsArr = new Class[countTokens];
+        for (int i = 0; i < countTokens; i++) {
+            clsArr[i] = makeClass(stringTokenizer.nextToken(), this.lookupClassLoader);
         }
-        return new JoinPointImpl.EnclosingStaticPartImpl(-1, kind, sig, null);
-    }
-
-    public static JoinPoint makeJP(JoinPoint.StaticPart staticPart, Object _this, Object target) {
-        return new JoinPointImpl(staticPart, _this, target, NO_ARGS);
-    }
-
-    public static JoinPoint makeJP(JoinPoint.StaticPart staticPart, Object _this, Object target, Object arg0) {
-        return new JoinPointImpl(staticPart, _this, target, new Object[]{arg0});
-    }
-
-    public static JoinPoint makeJP(JoinPoint.StaticPart staticPart, Object _this, Object target, Object arg0, Object arg1) {
-        return new JoinPointImpl(staticPart, _this, target, new Object[]{arg0, arg1});
-    }
-
-    public static JoinPoint makeJP(JoinPoint.StaticPart staticPart, Object _this, Object target, Object[] args) {
-        return new JoinPointImpl(staticPart, _this, target, args);
-    }
-
-    public MethodSignature makeMethodSig(String stringRep) {
-        MethodSignatureImpl ret = new MethodSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public MethodSignature makeMethodSig(String modifiers, String methodName, String declaringType, String paramTypes, String paramNames, String exceptionTypes, String returnType) {
-        int modifiersAsInt = Integer.parseInt(modifiers, 16);
-        Class declaringTypeClass = makeClass(declaringType, this.lookupClassLoader);
-        StringTokenizer st = new StringTokenizer(paramTypes, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams = st.countTokens();
-        Class[] paramTypeClasses = new Class[numParams];
-        for (int i = 0; i < numParams; i++) {
-            paramTypeClasses[i] = makeClass(st.nextToken(), this.lookupClassLoader);
+        StringTokenizer stringTokenizer2 = new StringTokenizer(str5, ":");
+        int countTokens2 = stringTokenizer2.countTokens();
+        String[] strArr = new String[countTokens2];
+        for (int i2 = 0; i2 < countTokens2; i2++) {
+            strArr[i2] = stringTokenizer2.nextToken();
         }
-        StringTokenizer st2 = new StringTokenizer(paramNames, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams2 = st2.countTokens();
-        String[] paramNamesArray = new String[numParams2];
-        for (int i2 = 0; i2 < numParams2; i2++) {
-            paramNamesArray[i2] = st2.nextToken();
+        StringTokenizer stringTokenizer3 = new StringTokenizer(str6, ":");
+        int countTokens3 = stringTokenizer3.countTokens();
+        Class[] clsArr2 = new Class[countTokens3];
+        for (int i3 = 0; i3 < countTokens3; i3++) {
+            clsArr2[i3] = makeClass(stringTokenizer3.nextToken(), this.lookupClassLoader);
         }
-        StringTokenizer st3 = new StringTokenizer(exceptionTypes, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams3 = st3.countTokens();
-        Class[] exceptionTypeClasses = new Class[numParams3];
-        for (int i3 = 0; i3 < numParams3; i3++) {
-            exceptionTypeClasses[i3] = makeClass(st3.nextToken(), this.lookupClassLoader);
-        }
-        Class returnTypeClass = makeClass(returnType, this.lookupClassLoader);
-        MethodSignatureImpl ret = new MethodSignatureImpl(modifiersAsInt, methodName, declaringTypeClass, paramTypeClasses, paramNamesArray, exceptionTypeClasses, returnTypeClass);
-        return ret;
+        return new MethodSignatureImpl(parseInt, str2, makeClass, clsArr, strArr, clsArr2, makeClass(str7, this.lookupClassLoader));
     }
 
-    public MethodSignature makeMethodSig(int modifiers, String name, Class declaringType, Class[] parameterTypes, String[] parameterNames, Class[] exceptionTypes, Class returnType) {
-        MethodSignatureImpl ret = new MethodSignatureImpl(modifiers, name, declaringType, parameterTypes, parameterNames, exceptionTypes, returnType);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public ConstructorSignature makeConstructorSig(String stringRep) {
-        ConstructorSignatureImpl ret = new ConstructorSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public ConstructorSignature makeConstructorSig(String modifiers, String declaringType, String paramTypes, String paramNames, String exceptionTypes) {
-        int modifiersAsInt = Integer.parseInt(modifiers, 16);
-        Class declaringTypeClass = makeClass(declaringType, this.lookupClassLoader);
-        StringTokenizer st = new StringTokenizer(paramTypes, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams = st.countTokens();
-        Class[] paramTypeClasses = new Class[numParams];
-        for (int i = 0; i < numParams; i++) {
-            paramTypeClasses[i] = makeClass(st.nextToken(), this.lookupClassLoader);
-        }
-        StringTokenizer st2 = new StringTokenizer(paramNames, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams2 = st2.countTokens();
-        String[] paramNamesArray = new String[numParams2];
-        for (int i2 = 0; i2 < numParams2; i2++) {
-            paramNamesArray[i2] = st2.nextToken();
-        }
-        StringTokenizer st3 = new StringTokenizer(exceptionTypes, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams3 = st3.countTokens();
-        Class[] exceptionTypeClasses = new Class[numParams3];
-        for (int i3 = 0; i3 < numParams3; i3++) {
-            exceptionTypeClasses[i3] = makeClass(st3.nextToken(), this.lookupClassLoader);
-        }
-        ConstructorSignatureImpl ret = new ConstructorSignatureImpl(modifiersAsInt, declaringTypeClass, paramTypeClasses, paramNamesArray, exceptionTypeClasses);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public ConstructorSignature makeConstructorSig(int modifiers, Class declaringType, Class[] parameterTypes, String[] parameterNames, Class[] exceptionTypes) {
-        ConstructorSignatureImpl ret = new ConstructorSignatureImpl(modifiers, declaringType, parameterTypes, parameterNames, exceptionTypes);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public FieldSignature makeFieldSig(String stringRep) {
-        FieldSignatureImpl ret = new FieldSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public FieldSignature makeFieldSig(String modifiers, String name, String declaringType, String fieldType) {
-        int modifiersAsInt = Integer.parseInt(modifiers, 16);
-        Class declaringTypeClass = makeClass(declaringType, this.lookupClassLoader);
-        Class fieldTypeClass = makeClass(fieldType, this.lookupClassLoader);
-        FieldSignatureImpl ret = new FieldSignatureImpl(modifiersAsInt, name, declaringTypeClass, fieldTypeClass);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public FieldSignature makeFieldSig(int modifiers, String name, Class declaringType, Class fieldType) {
-        FieldSignatureImpl ret = new FieldSignatureImpl(modifiers, name, declaringType, fieldType);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public AdviceSignature makeAdviceSig(String stringRep) {
-        AdviceSignatureImpl ret = new AdviceSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public AdviceSignature makeAdviceSig(String modifiers, String name, String declaringType, String paramTypes, String paramNames, String exceptionTypes, String returnType) {
-        int modifiersAsInt = Integer.parseInt(modifiers, 16);
-        Class declaringTypeClass = makeClass(declaringType, this.lookupClassLoader);
-        StringTokenizer st = new StringTokenizer(paramTypes, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams = st.countTokens();
-        Class[] paramTypeClasses = new Class[numParams];
-        for (int i = 0; i < numParams; i++) {
-            paramTypeClasses[i] = makeClass(st.nextToken(), this.lookupClassLoader);
-        }
-        StringTokenizer st2 = new StringTokenizer(paramNames, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams2 = st2.countTokens();
-        String[] paramNamesArray = new String[numParams2];
-        for (int i2 = 0; i2 < numParams2; i2++) {
-            paramNamesArray[i2] = st2.nextToken();
-        }
-        StringTokenizer st3 = new StringTokenizer(exceptionTypes, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        int numParams3 = st3.countTokens();
-        Class[] exceptionTypeClasses = new Class[numParams3];
-        for (int i3 = 0; i3 < numParams3; i3++) {
-            exceptionTypeClasses[i3] = makeClass(st3.nextToken(), this.lookupClassLoader);
-        }
-        Class returnTypeClass = makeClass(returnType, this.lookupClassLoader);
-        AdviceSignatureImpl ret = new AdviceSignatureImpl(modifiersAsInt, name, declaringTypeClass, paramTypeClasses, paramNamesArray, exceptionTypeClasses, returnTypeClass);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public AdviceSignature makeAdviceSig(int modifiers, String name, Class declaringType, Class[] parameterTypes, String[] parameterNames, Class[] exceptionTypes, Class returnType) {
-        AdviceSignatureImpl ret = new AdviceSignatureImpl(modifiers, name, declaringType, parameterTypes, parameterNames, exceptionTypes, returnType);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public InitializerSignature makeInitializerSig(String stringRep) {
-        InitializerSignatureImpl ret = new InitializerSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public InitializerSignature makeInitializerSig(String modifiers, String declaringType) {
-        int modifiersAsInt = Integer.parseInt(modifiers, 16);
-        Class declaringTypeClass = makeClass(declaringType, this.lookupClassLoader);
-        InitializerSignatureImpl ret = new InitializerSignatureImpl(modifiersAsInt, declaringTypeClass);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public InitializerSignature makeInitializerSig(int modifiers, Class declaringType) {
-        InitializerSignatureImpl ret = new InitializerSignatureImpl(modifiers, declaringType);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public CatchClauseSignature makeCatchClauseSig(String stringRep) {
-        CatchClauseSignatureImpl ret = new CatchClauseSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public CatchClauseSignature makeCatchClauseSig(String declaringType, String parameterType, String parameterName) {
-        Class declaringTypeClass = makeClass(declaringType, this.lookupClassLoader);
-        StringTokenizer st = new StringTokenizer(parameterType, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        Class parameterTypeClass = makeClass(st.nextToken(), this.lookupClassLoader);
-        StringTokenizer st2 = new StringTokenizer(parameterName, Constants.COMMON_SCHEMA_PREFIX_SEPARATOR);
-        String parameterNameForReturn = st2.nextToken();
-        CatchClauseSignatureImpl ret = new CatchClauseSignatureImpl(declaringTypeClass, parameterTypeClass, parameterNameForReturn);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public CatchClauseSignature makeCatchClauseSig(Class declaringType, Class parameterType, String parameterName) {
-        CatchClauseSignatureImpl ret = new CatchClauseSignatureImpl(declaringType, parameterType, parameterName);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public LockSignature makeLockSig(String stringRep) {
-        LockSignatureImpl ret = new LockSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public LockSignature makeLockSig() {
-        Class declaringTypeClass = makeClass("Ljava/lang/Object;", this.lookupClassLoader);
-        LockSignatureImpl ret = new LockSignatureImpl(declaringTypeClass);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public LockSignature makeLockSig(Class declaringType) {
-        LockSignatureImpl ret = new LockSignatureImpl(declaringType);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public UnlockSignature makeUnlockSig(String stringRep) {
-        UnlockSignatureImpl ret = new UnlockSignatureImpl(stringRep);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public UnlockSignature makeUnlockSig() {
-        Class declaringTypeClass = makeClass("Ljava/lang/Object;", this.lookupClassLoader);
-        UnlockSignatureImpl ret = new UnlockSignatureImpl(declaringTypeClass);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public UnlockSignature makeUnlockSig(Class declaringType) {
-        UnlockSignatureImpl ret = new UnlockSignatureImpl(declaringType);
-        ret.setLookupClassLoader(this.lookupClassLoader);
-        return ret;
-    }
-
-    public SourceLocation makeSourceLoc(int line, int col) {
-        return new SourceLocationImpl(this.lexicalClass, this.filename, line);
+    public SourceLocation makeSourceLoc(int i, int i2) {
+        return new SourceLocationImpl(this.lexicalClass, this.filename, i);
     }
 }

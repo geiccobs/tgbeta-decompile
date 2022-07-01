@@ -6,12 +6,17 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzlz extends AbstractList<String> implements zzjv, RandomAccess {
     private final zzjv zza;
 
     public zzlz(zzjv zzjvVar) {
         this.zza = zzjvVar;
+    }
+
+    @Override // com.google.android.gms.internal.vision.zzjv
+    public final zzjv zze() {
+        return this;
     }
 
     @Override // com.google.android.gms.internal.vision.zzjv
@@ -42,11 +47,6 @@ public final class zzlz extends AbstractList<String> implements zzjv, RandomAcce
     @Override // com.google.android.gms.internal.vision.zzjv
     public final List<?> zzd() {
         return this.zza.zzd();
-    }
-
-    @Override // com.google.android.gms.internal.vision.zzjv
-    public final zzjv zze() {
-        return this;
     }
 
     @Override // java.util.AbstractList, java.util.List

@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.android.gms:play-services-vision@@20.1.3 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzj implements Parcelable.Creator<zzk> {
     @Override // android.os.Parcelable.Creator
     public final /* synthetic */ zzk[] newArray(int i) {
@@ -18,16 +18,13 @@ public final class zzj implements Parcelable.Creator<zzk> {
         boolean z = false;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            switch (SafeParcelReader.getFieldId(readHeader)) {
-                case 2:
-                    i = SafeParcelReader.readInt(parcel, readHeader);
-                    break;
-                case 3:
-                    z = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                default:
-                    SafeParcelReader.skipUnknownField(parcel, readHeader);
-                    break;
+            int fieldId = SafeParcelReader.getFieldId(readHeader);
+            if (fieldId == 2) {
+                i = SafeParcelReader.readInt(parcel, readHeader);
+            } else if (fieldId == 3) {
+                z = SafeParcelReader.readBoolean(parcel, readHeader);
+            } else {
+                SafeParcelReader.skipUnknownField(parcel, readHeader);
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

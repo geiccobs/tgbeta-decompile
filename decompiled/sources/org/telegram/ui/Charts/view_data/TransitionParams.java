@@ -1,8 +1,7 @@
 package org.telegram.ui.Charts.view_data;
-/* loaded from: classes4.dex */
+/* loaded from: classes3.dex */
 public class TransitionParams {
     public float[] angle;
-    public long date;
     public float[] endX;
     public float[] endY;
     public boolean needScaleY = true;

@@ -1,5 +1,5 @@
 package com.google.zxing;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface ResultPointCallback {
     void foundPossibleResultPoint(ResultPoint resultPoint);
 }

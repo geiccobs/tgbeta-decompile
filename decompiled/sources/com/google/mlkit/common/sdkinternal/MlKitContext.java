@@ -9,7 +9,7 @@ import com.google.firebase.components.ComponentRuntime;
 import com.google.mlkit.common.internal.MlKitComponentDiscoveryService;
 import java.util.concurrent.atomic.AtomicReference;
 /* compiled from: com.google.mlkit:common@@17.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class MlKitContext {
     private static final AtomicReference<MlKitContext> zzb = new AtomicReference<>();
     private final ComponentRuntime zza;
@@ -39,9 +39,5 @@ public class MlKitContext {
         MlKitContext mlKitContext = zzb.get();
         Preconditions.checkState(mlKitContext != null, "MlKitContext has not been initialized");
         return mlKitContext;
-    }
-
-    public Context getApplicationContext() {
-        return (Context) get(Context.class);
     }
 }

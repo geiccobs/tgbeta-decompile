@@ -11,7 +11,7 @@ import com.google.android.gms.common.internal.ClientSettings;
 import com.google.android.gms.common.internal.GmsClient;
 /* compiled from: com.google.android.gms:play-services-auth@@19.2.0 */
 /* renamed from: com.google.android.gms.internal.auth-api.zbo */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zbo extends GmsClient<zbt> {
     private final Auth.AuthCredentialsOptions zba;
 
@@ -52,9 +52,5 @@ public final class zbo extends GmsClient<zbt> {
     @Override // com.google.android.gms.common.internal.BaseGmsClient
     protected final String getStartServiceAction() {
         return "com.google.android.gms.auth.api.credentials.service.START";
-    }
-
-    public final Auth.AuthCredentialsOptions zba() {
-        return this.zba;
     }
 }

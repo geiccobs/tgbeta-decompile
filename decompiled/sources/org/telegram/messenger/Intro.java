@@ -1,7 +1,7 @@
 package org.telegram.messenger;
 
 import android.graphics.Color;
-/* loaded from: classes4.dex */
+/* loaded from: classes.dex */
 public class Intro {
     public static native void onDrawFrame(int i);
 
@@ -29,7 +29,7 @@ public class Intro {
 
     public static native void setTelegramTextures(int i, int i2, int i3);
 
-    public static void setBackgroundColor(int color) {
-        setBackgroundColor(Color.red(color) / 255.0f, Color.green(color) / 255.0f, Color.blue(color) / 255.0f, Color.alpha(color) / 255.0f);
+    public static void setBackgroundColor(int i) {
+        setBackgroundColor(Color.red(i) / 255.0f, Color.green(i) / 255.0f, Color.blue(i) / 255.0f, Color.alpha(i) / 255.0f);
     }
 }

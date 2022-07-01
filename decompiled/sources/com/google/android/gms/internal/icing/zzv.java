@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public final class zzv implements Parcelable.Creator<zzu> {
     @Override // android.os.Parcelable.Creator
     public final /* bridge */ /* synthetic */ zzu createFromParcel(Parcel parcel) {
@@ -12,13 +12,10 @@ public final class zzv implements Parcelable.Creator<zzu> {
         boolean z = false;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
-            switch (SafeParcelReader.getFieldId(readHeader)) {
-                case 1:
-                    z = SafeParcelReader.readBoolean(parcel, readHeader);
-                    break;
-                default:
-                    SafeParcelReader.skipUnknownField(parcel, readHeader);
-                    break;
+            if (SafeParcelReader.getFieldId(readHeader) == 1) {
+                z = SafeParcelReader.readBoolean(parcel, readHeader);
+            } else {
+                SafeParcelReader.skipUnknownField(parcel, readHeader);
             }
         }
         SafeParcelReader.ensureAtEnd(parcel, validateObjectHeader);

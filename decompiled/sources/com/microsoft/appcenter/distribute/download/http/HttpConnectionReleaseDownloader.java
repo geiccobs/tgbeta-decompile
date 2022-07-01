@@ -6,9 +6,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import com.microsoft.appcenter.distribute.DistributeConstants;
 import com.microsoft.appcenter.distribute.PermissionUtils;
-import com.microsoft.appcenter.distribute.R;
+import com.microsoft.appcenter.distribute.R$string;
 import com.microsoft.appcenter.distribute.ReleaseDetails;
 import com.microsoft.appcenter.distribute.download.AbstractReleaseDownloader;
 import com.microsoft.appcenter.distribute.download.ReleaseDownloader;
@@ -18,7 +17,7 @@ import com.microsoft.appcenter.utils.NetworkStateHelper;
 import com.microsoft.appcenter.utils.storage.SharedPreferencesManager;
 import java.io.File;
 import java.util.ArrayList;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class HttpConnectionReleaseDownloader extends AbstractReleaseDownloader {
     private HttpConnectionCheckTask mCheckTask;
     private HttpConnectionDownloadFileTask mDownloadTask;
@@ -30,9 +29,9 @@ public class HttpConnectionReleaseDownloader extends AbstractReleaseDownloader {
     }
 
     public File getTargetFile() {
-        File downloadsDirectory;
-        if (this.mTargetFile == null && (downloadsDirectory = this.mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)) != null) {
-            this.mTargetFile = new File(downloadsDirectory, this.mReleaseDetails.getReleaseHash() + ".apk");
+        File externalFilesDir;
+        if (this.mTargetFile == null && (externalFilesDir = this.mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)) != null) {
+            this.mTargetFile = new File(externalFilesDir, this.mReleaseDetails.getReleaseHash() + ".apk");
         }
         return this.mTargetFile;
     }
@@ -42,17 +41,17 @@ public class HttpConnectionReleaseDownloader extends AbstractReleaseDownloader {
     }
 
     public synchronized String getDownloadedReleaseFilePath() {
-        return SharedPreferencesManager.getString(DistributeConstants.PREFERENCE_KEY_DOWNLOADED_RELEASE_FILE, null);
+        return SharedPreferencesManager.getString("Distribute.downloaded_release_file", null);
     }
 
-    public synchronized void setDownloadedReleaseFilePath(String downloadedReleaseFilePath) {
+    public synchronized void setDownloadedReleaseFilePath(String str) {
         if (isCancelled()) {
             return;
         }
-        if (downloadedReleaseFilePath != null) {
-            SharedPreferencesManager.putString(DistributeConstants.PREFERENCE_KEY_DOWNLOADED_RELEASE_FILE, downloadedReleaseFilePath);
+        if (str != null) {
+            SharedPreferencesManager.putString("Distribute.downloaded_release_file", str);
         } else {
-            SharedPreferencesManager.remove(DistributeConstants.PREFERENCE_KEY_DOWNLOADED_RELEASE_FILE);
+            SharedPreferencesManager.remove("Distribute.downloaded_release_file");
         }
     }
 
@@ -77,9 +76,7 @@ public class HttpConnectionReleaseDownloader extends AbstractReleaseDownloader {
             this.mListener.onError("No network connection, abort downloading.");
             return;
         }
-        String[] permissions = requiredPermissions();
-        int[] permissionsState = PermissionUtils.permissionsState(this.mContext, permissions);
-        if (!PermissionUtils.permissionsAreGranted(permissionsState)) {
+        if (!PermissionUtils.permissionsAreGranted(PermissionUtils.permissionsState(this.mContext, requiredPermissions()))) {
             this.mListener.onError("No external storage permission.");
         } else {
             check();
@@ -102,98 +99,98 @@ public class HttpConnectionReleaseDownloader extends AbstractReleaseDownloader {
             httpConnectionDownloadFileTask.cancel(true);
             this.mDownloadTask = null;
         }
-        String filePath = getDownloadedReleaseFilePath();
-        if (filePath != null) {
-            removeFile(new File(filePath));
-            SharedPreferencesManager.remove(DistributeConstants.PREFERENCE_KEY_DOWNLOADED_RELEASE_FILE);
+        String downloadedReleaseFilePath = getDownloadedReleaseFilePath();
+        if (downloadedReleaseFilePath != null) {
+            removeFile(new File(downloadedReleaseFilePath));
+            SharedPreferencesManager.remove("Distribute.downloaded_release_file");
         }
         cancelProgressNotification();
     }
 
     private synchronized void check() {
-        this.mCheckTask = (HttpConnectionCheckTask) AsyncTaskUtils.execute(DistributeConstants.LOG_TAG, new HttpConnectionCheckTask(this), new Void[0]);
+        this.mCheckTask = (HttpConnectionCheckTask) AsyncTaskUtils.execute("AppCenterDistribute", new HttpConnectionCheckTask(this), new Void[0]);
     }
 
     private synchronized void downloadFile(File file) {
         if (this.mDownloadTask != null) {
-            AppCenterLog.debug(DistributeConstants.LOG_TAG, "Downloading of " + file.getPath() + " is already in progress.");
+            AppCenterLog.debug("AppCenterDistribute", "Downloading of " + file.getPath() + " is already in progress.");
             return;
         }
         Uri downloadUrl = this.mReleaseDetails.getDownloadUrl();
-        AppCenterLog.debug(DistributeConstants.LOG_TAG, "Start downloading new release from " + downloadUrl);
-        this.mDownloadTask = (HttpConnectionDownloadFileTask) AsyncTaskUtils.execute(DistributeConstants.LOG_TAG, new HttpConnectionDownloadFileTask(this, downloadUrl, file), new Void[0]);
+        AppCenterLog.debug("AppCenterDistribute", "Start downloading new release from " + downloadUrl);
+        this.mDownloadTask = (HttpConnectionDownloadFileTask) AsyncTaskUtils.execute("AppCenterDistribute", new HttpConnectionDownloadFileTask(this, downloadUrl, file), new Void[0]);
     }
 
     private void removeFile(File file) {
-        AppCenterLog.debug(DistributeConstants.LOG_TAG, "Removing downloaded file from " + file.getAbsolutePath());
-        AsyncTaskUtils.execute(DistributeConstants.LOG_TAG, new HttpConnectionRemoveFileTask(file), new Void[0]);
+        AppCenterLog.debug("AppCenterDistribute", "Removing downloaded file from " + file.getAbsolutePath());
+        AsyncTaskUtils.execute("AppCenterDistribute", new HttpConnectionRemoveFileTask(file), new Void[0]);
     }
 
-    private void showProgressNotification(long currentSize, long totalSize) {
+    private void showProgressNotification(long j, long j2) {
         if (this.mReleaseDetails.isMandatoryUpdate()) {
             return;
         }
-        Notification.Builder builder = getNotificationBuilder();
-        builder.setContentTitle(this.mContext.getString(R.string.appcenter_distribute_downloading_update)).setSmallIcon(this.mContext.getApplicationInfo().icon).setProgress((int) (totalSize / DistributeConstants.KIBIBYTE_IN_BYTES), (int) (currentSize / DistributeConstants.KIBIBYTE_IN_BYTES), totalSize <= 0);
-        getNotificationManager().notify(getNotificationId(), builder.build());
+        Notification.Builder notificationBuilder = getNotificationBuilder();
+        notificationBuilder.setContentTitle(this.mContext.getString(R$string.appcenter_distribute_downloading_update)).setSmallIcon(this.mContext.getApplicationInfo().icon).setProgress((int) (j2 / 1024), (int) (j / 1024), j2 <= 0);
+        getNotificationManager().notify(getNotificationId(), notificationBuilder.build());
     }
 
     private void cancelProgressNotification() {
         getNotificationManager().cancel(getNotificationId());
     }
 
-    public synchronized void onStart(File targetFile) {
+    public synchronized void onStart(File file) {
         if (isCancelled()) {
             return;
         }
-        downloadFile(targetFile);
+        downloadFile(file);
     }
 
-    public synchronized void onDownloadStarted(long enqueueTime) {
+    public synchronized void onDownloadStarted(long j) {
         if (isCancelled()) {
             return;
         }
         showProgressNotification(0L, 0L);
-        this.mListener.onStart(enqueueTime);
+        this.mListener.onStart(j);
     }
 
-    public synchronized void onDownloadProgress(long currentSize, long totalSize) {
+    public synchronized void onDownloadProgress(long j, long j2) {
         if (isCancelled()) {
             return;
         }
-        showProgressNotification(currentSize, totalSize);
-        this.mListener.onProgress(currentSize, totalSize);
+        showProgressNotification(j, j2);
+        this.mListener.onProgress(j, j2);
     }
 
-    public synchronized void onDownloadComplete(File targetFile) {
+    public synchronized void onDownloadComplete(File file) {
         if (isCancelled()) {
             return;
         }
         cancelProgressNotification();
-        if (this.mReleaseDetails.getSize() != targetFile.length()) {
+        if (this.mReleaseDetails.getSize() != file.length()) {
             this.mListener.onError("Downloaded file has incorrect size.");
             return;
         }
-        String downloadedReleaseFilePath = targetFile.getAbsolutePath();
-        setDownloadedReleaseFilePath(downloadedReleaseFilePath);
+        String absolutePath = file.getAbsolutePath();
+        setDownloadedReleaseFilePath(absolutePath);
         ReleaseDownloader.Listener listener = this.mListener;
-        listener.onComplete(Uri.parse("file://" + downloadedReleaseFilePath));
+        listener.onComplete(Uri.parse("file://" + absolutePath));
     }
 
-    public synchronized void onDownloadError(String errorMessage) {
+    public synchronized void onDownloadError(String str) {
         if (isCancelled()) {
             return;
         }
         cancelProgressNotification();
-        this.mListener.onError(errorMessage);
+        this.mListener.onError(str);
     }
 
     static String[] requiredPermissions() {
-        ArrayList<String> permissions = new ArrayList<>();
+        ArrayList arrayList = new ArrayList();
         if (Build.VERSION.SDK_INT < 19) {
-            permissions.add("android.permission.WRITE_EXTERNAL_STORAGE");
+            arrayList.add("android.permission.WRITE_EXTERNAL_STORAGE");
         }
-        return (String[]) permissions.toArray(new String[0]);
+        return (String[]) arrayList.toArray(new String[0]);
     }
 
     private static int getNotificationId() {

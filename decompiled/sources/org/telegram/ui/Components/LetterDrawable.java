@@ -11,7 +11,7 @@ import android.text.TextPaint;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.ui.ActionBar.Theme;
-/* loaded from: classes5.dex */
+/* loaded from: classes3.dex */
 public class LetterDrawable extends Drawable {
     private static TextPaint namePaint;
     public static Paint paint = new Paint();
@@ -21,6 +21,25 @@ public class LetterDrawable extends Drawable {
     private StaticLayout textLayout;
     private float textLeft;
     private float textWidth;
+
+    @Override // android.graphics.drawable.Drawable
+    public int getIntrinsicHeight() {
+        return 0;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getIntrinsicWidth() {
+        return 0;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -2;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
 
     public LetterDrawable() {
         this(null);
@@ -33,34 +52,33 @@ public class LetterDrawable extends Drawable {
             namePaint = new TextPaint(1);
         }
         namePaint.setTextSize(AndroidUtilities.dp(28.0f));
-        paint.setColor(Theme.getColor(Theme.key_sharedMedia_linkPlaceholder, resourcesProvider));
-        namePaint.setColor(Theme.getColor(Theme.key_sharedMedia_linkPlaceholderText, resourcesProvider));
+        paint.setColor(Theme.getColor("sharedMedia_linkPlaceholder", resourcesProvider));
+        namePaint.setColor(Theme.getColor("sharedMedia_linkPlaceholderText", resourcesProvider));
     }
 
-    public void setBackgroundColor(int value) {
-        paint.setColor(value);
+    public void setBackgroundColor(int i) {
+        paint.setColor(i);
     }
 
-    public void setColor(int value) {
-        namePaint.setColor(value);
+    public void setColor(int i) {
+        namePaint.setColor(i);
     }
 
-    public void setTitle(String title) {
+    public void setTitle(String str) {
         this.stringBuilder.setLength(0);
-        if (title != null && title.length() > 0) {
-            this.stringBuilder.append(title.substring(0, 1));
+        if (str != null && str.length() > 0) {
+            this.stringBuilder.append(str.substring(0, 1));
         }
         if (this.stringBuilder.length() > 0) {
-            String text = this.stringBuilder.toString().toUpperCase();
             try {
-                StaticLayout staticLayout = new StaticLayout(text, namePaint, AndroidUtilities.dp(100.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                StaticLayout staticLayout = new StaticLayout(this.stringBuilder.toString().toUpperCase(), namePaint, AndroidUtilities.dp(100.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
                 this.textLayout = staticLayout;
-                if (staticLayout.getLineCount() > 0) {
-                    this.textLeft = this.textLayout.getLineLeft(0);
-                    this.textWidth = this.textLayout.getLineWidth(0);
-                    this.textHeight = this.textLayout.getLineBottom(0);
+                if (staticLayout.getLineCount() <= 0) {
                     return;
                 }
+                this.textLeft = this.textLayout.getLineLeft(0);
+                this.textWidth = this.textLayout.getLineWidth(0);
+                this.textHeight = this.textLayout.getLineBottom(0);
                 return;
             } catch (Exception e) {
                 FileLog.e(e);
@@ -80,35 +98,16 @@ public class LetterDrawable extends Drawable {
         canvas.drawRoundRect(this.rect, AndroidUtilities.dp(4.0f), AndroidUtilities.dp(4.0f), paint);
         canvas.save();
         if (this.textLayout != null) {
-            int size = bounds.width();
-            canvas.translate((bounds.left + ((size - this.textWidth) / 2.0f)) - this.textLeft, bounds.top + ((size - this.textHeight) / 2.0f));
+            float width = bounds.width();
+            canvas.translate((bounds.left + ((width - this.textWidth) / 2.0f)) - this.textLeft, bounds.top + ((width - this.textHeight) / 2.0f));
             this.textLayout.draw(canvas);
         }
         canvas.restore();
     }
 
     @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int alpha) {
-        namePaint.setAlpha(alpha);
-        paint.setAlpha(alpha);
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter cf) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getOpacity() {
-        return -2;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getIntrinsicWidth() {
-        return 0;
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public int getIntrinsicHeight() {
-        return 0;
+    public void setAlpha(int i) {
+        namePaint.setAlpha(i);
+        paint.setAlpha(i);
     }
 }

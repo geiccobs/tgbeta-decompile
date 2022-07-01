@@ -4,28 +4,27 @@ import android.content.SharedPreferences;
 import android.os.Build;
 /* loaded from: classes.dex */
 public class BuildVars {
-    public static String APPCENTER_HASH;
-    public static String APP_HASH;
-    public static int APP_ID;
-    public static int BUILD_VERSION;
-    public static String BUILD_VERSION_STRING;
-    public static boolean IS_BILLING_UNAVAILABLE;
-    public static boolean LOGS_ENABLED;
-    public static boolean NO_SCOPED_STORAGE;
-    public static String PLAYSTORE_APP_URL;
-    public static String SMS_HASH;
+    public static String APPCENTER_HASH = null;
+    public static String APP_HASH = null;
+    public static int APP_ID = 0;
+    public static int BUILD_VERSION = 0;
+    public static String BUILD_VERSION_STRING = null;
+    public static boolean CHECK_UPDATES = true;
+    public static boolean DEBUG_PRIVATE_VERSION = false;
+    public static boolean DEBUG_VERSION = true;
+    public static boolean IS_BILLING_UNAVAILABLE = false;
+    public static boolean LOGS_ENABLED = true;
+    public static boolean NO_SCOPED_STORAGE = false;
+    public static String PLAYSTORE_APP_URL = null;
+    public static String SMS_HASH = null;
+    public static boolean USE_CLOUD_STRINGS = true;
     private static Boolean betaApp;
     private static Boolean standaloneApp;
-    public static boolean DEBUG_VERSION = true;
-    public static boolean DEBUG_PRIVATE_VERSION = false;
-    public static boolean USE_CLOUD_STRINGS = true;
-    public static boolean CHECK_UPDATES = true;
 
     static {
         boolean z = true;
-        LOGS_ENABLED = true;
         NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= 29;
-        BUILD_VERSION = 2710;
+        BUILD_VERSION = 2721;
         BUILD_VERSION_STRING = BuildConfig.VERSION_NAME;
         APP_ID = 4;
         APP_HASH = "014b35b6184100b085b0d0572f9b5103";

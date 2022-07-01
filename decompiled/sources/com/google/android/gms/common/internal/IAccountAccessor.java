@@ -5,19 +5,17 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
+import androidx.annotation.RecentlyNonNull;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface IAccountAccessor extends IInterface {
 
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static abstract class Stub extends com.google.android.gms.internal.common.zza implements IAccountAccessor {
-        public Stub() {
-            super("com.google.android.gms.common.internal.IAccountAccessor");
-        }
 
         /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-        /* loaded from: classes3.dex */
+        /* loaded from: classes.dex */
         public static class zza extends com.google.android.gms.internal.common.zzb implements IAccountAccessor {
             zza(IBinder iBinder) {
                 super(iBinder, "com.google.android.gms.common.internal.IAccountAccessor");
@@ -32,7 +30,8 @@ public interface IAccountAccessor extends IInterface {
             }
         }
 
-        public static IAccountAccessor asInterface(IBinder iBinder) {
+        @RecentlyNonNull
+        public static IAccountAccessor asInterface(@RecentlyNonNull IBinder iBinder) {
             if (iBinder == null) {
                 return null;
             }
@@ -42,18 +41,8 @@ public interface IAccountAccessor extends IInterface {
             }
             return new zza(iBinder);
         }
-
-        @Override // com.google.android.gms.internal.common.zza
-        protected final boolean zza(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            if (i == 2) {
-                Account zza2 = zza();
-                parcel2.writeNoException();
-                com.google.android.gms.internal.common.zzd.zzb(parcel2, zza2);
-                return true;
-            }
-            return false;
-        }
     }
 
+    @RecentlyNonNull
     Account zza() throws RemoteException;
 }

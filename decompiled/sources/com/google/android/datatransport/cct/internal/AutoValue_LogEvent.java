@@ -2,7 +2,7 @@ package com.google.android.datatransport.cct.internal;
 
 import com.google.android.datatransport.cct.internal.LogEvent;
 import java.util.Arrays;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 final class AutoValue_LogEvent extends LogEvent {
     private final Integer eventCode;
     private final long eventTimeMs;
@@ -12,13 +12,13 @@ final class AutoValue_LogEvent extends LogEvent {
     private final String sourceExtensionJsonProto3;
     private final long timezoneOffsetSeconds;
 
-    private AutoValue_LogEvent(long eventTimeMs, Integer eventCode, long eventUptimeMs, byte[] sourceExtension, String sourceExtensionJsonProto3, long timezoneOffsetSeconds, NetworkConnectionInfo networkConnectionInfo) {
-        this.eventTimeMs = eventTimeMs;
-        this.eventCode = eventCode;
-        this.eventUptimeMs = eventUptimeMs;
-        this.sourceExtension = sourceExtension;
-        this.sourceExtensionJsonProto3 = sourceExtensionJsonProto3;
-        this.timezoneOffsetSeconds = timezoneOffsetSeconds;
+    private AutoValue_LogEvent(long j, Integer num, long j2, byte[] bArr, String str, long j3, NetworkConnectionInfo networkConnectionInfo) {
+        this.eventTimeMs = j;
+        this.eventCode = num;
+        this.eventUptimeMs = j2;
+        this.sourceExtension = bArr;
+        this.sourceExtensionJsonProto3 = str;
+        this.timezoneOffsetSeconds = j3;
         this.networkConnectionInfo = networkConnectionInfo;
     }
 
@@ -61,24 +61,24 @@ final class AutoValue_LogEvent extends LogEvent {
         return "LogEvent{eventTimeMs=" + this.eventTimeMs + ", eventCode=" + this.eventCode + ", eventUptimeMs=" + this.eventUptimeMs + ", sourceExtension=" + Arrays.toString(this.sourceExtension) + ", sourceExtensionJsonProto3=" + this.sourceExtensionJsonProto3 + ", timezoneOffsetSeconds=" + this.timezoneOffsetSeconds + ", networkConnectionInfo=" + this.networkConnectionInfo + "}";
     }
 
-    public boolean equals(Object o) {
+    public boolean equals(Object obj) {
         Integer num;
         String str;
-        if (o == this) {
+        if (obj == this) {
             return true;
         }
-        if (!(o instanceof LogEvent)) {
+        if (!(obj instanceof LogEvent)) {
             return false;
         }
-        LogEvent that = (LogEvent) o;
-        if (this.eventTimeMs == that.getEventTimeMs() && ((num = this.eventCode) != null ? num.equals(that.getEventCode()) : that.getEventCode() == null) && this.eventUptimeMs == that.getEventUptimeMs()) {
-            if (Arrays.equals(this.sourceExtension, that instanceof AutoValue_LogEvent ? ((AutoValue_LogEvent) that).sourceExtension : that.getSourceExtension()) && ((str = this.sourceExtensionJsonProto3) != null ? str.equals(that.getSourceExtensionJsonProto3()) : that.getSourceExtensionJsonProto3() == null) && this.timezoneOffsetSeconds == that.getTimezoneOffsetSeconds()) {
+        LogEvent logEvent = (LogEvent) obj;
+        if (this.eventTimeMs == logEvent.getEventTimeMs() && ((num = this.eventCode) != null ? num.equals(logEvent.getEventCode()) : logEvent.getEventCode() == null) && this.eventUptimeMs == logEvent.getEventUptimeMs()) {
+            if (Arrays.equals(this.sourceExtension, logEvent instanceof AutoValue_LogEvent ? ((AutoValue_LogEvent) logEvent).sourceExtension : logEvent.getSourceExtension()) && ((str = this.sourceExtensionJsonProto3) != null ? str.equals(logEvent.getSourceExtensionJsonProto3()) : logEvent.getSourceExtensionJsonProto3() == null) && this.timezoneOffsetSeconds == logEvent.getTimezoneOffsetSeconds()) {
                 NetworkConnectionInfo networkConnectionInfo = this.networkConnectionInfo;
                 if (networkConnectionInfo == null) {
-                    if (that.getNetworkConnectionInfo() == null) {
+                    if (logEvent.getNetworkConnectionInfo() == null) {
                         return true;
                     }
-                } else if (networkConnectionInfo.equals(that.getNetworkConnectionInfo())) {
+                } else if (networkConnectionInfo.equals(logEvent.getNetworkConnectionInfo())) {
                     return true;
                 }
             }
@@ -87,27 +87,26 @@ final class AutoValue_LogEvent extends LogEvent {
     }
 
     public int hashCode() {
-        int h$ = 1 * 1000003;
         long j = this.eventTimeMs;
-        int h$2 = (h$ ^ ((int) (j ^ (j >>> 32)))) * 1000003;
+        int i = (((int) (j ^ (j >>> 32))) ^ 1000003) * 1000003;
         Integer num = this.eventCode;
-        int i = 0;
+        int i2 = 0;
         int hashCode = num == null ? 0 : num.hashCode();
         long j2 = this.eventUptimeMs;
-        int h$3 = (((((h$2 ^ hashCode) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003) ^ Arrays.hashCode(this.sourceExtension)) * 1000003;
+        int hashCode2 = (((((i ^ hashCode) * 1000003) ^ ((int) (j2 ^ (j2 >>> 32)))) * 1000003) ^ Arrays.hashCode(this.sourceExtension)) * 1000003;
         String str = this.sourceExtensionJsonProto3;
-        int hashCode2 = str == null ? 0 : str.hashCode();
+        int hashCode3 = str == null ? 0 : str.hashCode();
         long j3 = this.timezoneOffsetSeconds;
-        int h$4 = (((h$3 ^ hashCode2) * 1000003) ^ ((int) (j3 ^ (j3 >>> 32)))) * 1000003;
+        int i3 = (((hashCode2 ^ hashCode3) * 1000003) ^ ((int) ((j3 >>> 32) ^ j3))) * 1000003;
         NetworkConnectionInfo networkConnectionInfo = this.networkConnectionInfo;
         if (networkConnectionInfo != null) {
-            i = networkConnectionInfo.hashCode();
+            i2 = networkConnectionInfo.hashCode();
         }
-        return h$4 ^ i;
+        return i3 ^ i2;
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes3.dex */
+    /* loaded from: classes.dex */
     public static final class Builder extends LogEvent.Builder {
         private Integer eventCode;
         private Long eventTimeMs;
@@ -118,38 +117,38 @@ final class AutoValue_LogEvent extends LogEvent {
         private Long timezoneOffsetSeconds;
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
-        public LogEvent.Builder setEventTimeMs(long eventTimeMs) {
-            this.eventTimeMs = Long.valueOf(eventTimeMs);
+        public LogEvent.Builder setEventTimeMs(long j) {
+            this.eventTimeMs = Long.valueOf(j);
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
-        public LogEvent.Builder setEventCode(Integer eventCode) {
-            this.eventCode = eventCode;
+        public LogEvent.Builder setEventCode(Integer num) {
+            this.eventCode = num;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
-        public LogEvent.Builder setEventUptimeMs(long eventUptimeMs) {
-            this.eventUptimeMs = Long.valueOf(eventUptimeMs);
+        public LogEvent.Builder setEventUptimeMs(long j) {
+            this.eventUptimeMs = Long.valueOf(j);
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
-        LogEvent.Builder setSourceExtension(byte[] sourceExtension) {
-            this.sourceExtension = sourceExtension;
+        LogEvent.Builder setSourceExtension(byte[] bArr) {
+            this.sourceExtension = bArr;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
-        LogEvent.Builder setSourceExtensionJsonProto3(String sourceExtensionJsonProto3) {
-            this.sourceExtensionJsonProto3 = sourceExtensionJsonProto3;
+        LogEvent.Builder setSourceExtensionJsonProto3(String str) {
+            this.sourceExtensionJsonProto3 = str;
             return this;
         }
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
-        public LogEvent.Builder setTimezoneOffsetSeconds(long timezoneOffsetSeconds) {
-            this.timezoneOffsetSeconds = Long.valueOf(timezoneOffsetSeconds);
+        public LogEvent.Builder setTimezoneOffsetSeconds(long j) {
+            this.timezoneOffsetSeconds = Long.valueOf(j);
             return this;
         }
 
@@ -161,18 +160,18 @@ final class AutoValue_LogEvent extends LogEvent {
 
         @Override // com.google.android.datatransport.cct.internal.LogEvent.Builder
         public LogEvent build() {
-            String missing = "";
+            String str = "";
             if (this.eventTimeMs == null) {
-                missing = missing + " eventTimeMs";
+                str = str + " eventTimeMs";
             }
             if (this.eventUptimeMs == null) {
-                missing = missing + " eventUptimeMs";
+                str = str + " eventUptimeMs";
             }
             if (this.timezoneOffsetSeconds == null) {
-                missing = missing + " timezoneOffsetSeconds";
+                str = str + " timezoneOffsetSeconds";
             }
-            if (!missing.isEmpty()) {
-                throw new IllegalStateException("Missing required properties:" + missing);
+            if (!str.isEmpty()) {
+                throw new IllegalStateException("Missing required properties:" + str);
             }
             return new AutoValue_LogEvent(this.eventTimeMs.longValue(), this.eventCode, this.eventUptimeMs.longValue(), this.sourceExtension, this.sourceExtensionJsonProto3, this.timezoneOffsetSeconds.longValue(), this.networkConnectionInfo);
         }

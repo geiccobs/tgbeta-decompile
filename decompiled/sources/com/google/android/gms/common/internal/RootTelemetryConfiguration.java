@@ -2,11 +2,13 @@ package com.google.android.gms.common.internal;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public class RootTelemetryConfiguration extends AbstractSafeParcelable {
+    @RecentlyNonNull
     public static final Parcelable.Creator<RootTelemetryConfiguration> CREATOR = new zzv();
     private final int zza;
     private final boolean zzb;
@@ -43,7 +45,7 @@ public class RootTelemetryConfiguration extends AbstractSafeParcelable {
     }
 
     @Override // android.os.Parcelable
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@RecentlyNonNull Parcel parcel, int i) {
         int beginObjectHeader = SafeParcelWriter.beginObjectHeader(parcel);
         SafeParcelWriter.writeInt(parcel, 1, getVersion());
         SafeParcelWriter.writeBoolean(parcel, 2, getMethodInvocationTelemetryEnabled());

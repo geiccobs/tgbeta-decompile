@@ -1,10 +1,8 @@
 package com.google.android.exoplayer2.source.dash;
 
 import com.google.android.exoplayer2.source.dash.manifest.RangedUri;
-/* loaded from: classes3.dex */
+/* loaded from: classes.dex */
 public interface DashSegmentIndex {
-    public static final int INDEX_UNBOUNDED = -1;
-
     long getDurationUs(long j, long j2);
 
     long getFirstSegmentNum();
