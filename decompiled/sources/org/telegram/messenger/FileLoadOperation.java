@@ -148,6 +148,8 @@ public class FileLoadOperation {
 
         void didFinishLoadingFile(FileLoadOperation fileLoadOperation, File file);
 
+        boolean hasAnotherRefOnFile(String str);
+
         void saveFilePath(FilePathDatabase.PathData pathData, File file);
     }
 
@@ -731,28 +733,28 @@ public class FileLoadOperation {
     /* JADX WARN: Removed duplicated region for block: B:104:0x0394  */
     /* JADX WARN: Removed duplicated region for block: B:105:0x03ba  */
     /* JADX WARN: Removed duplicated region for block: B:111:0x03db  */
-    /* JADX WARN: Removed duplicated region for block: B:119:0x03fb  */
-    /* JADX WARN: Removed duplicated region for block: B:202:0x05d7  */
-    /* JADX WARN: Removed duplicated region for block: B:215:0x0601  */
-    /* JADX WARN: Removed duplicated region for block: B:230:0x0673  */
-    /* JADX WARN: Removed duplicated region for block: B:233:0x067d  */
-    /* JADX WARN: Removed duplicated region for block: B:246:0x06d6  */
-    /* JADX WARN: Removed duplicated region for block: B:253:0x0701  */
-    /* JADX WARN: Removed duplicated region for block: B:259:0x072d  */
-    /* JADX WARN: Removed duplicated region for block: B:264:0x076a  */
-    /* JADX WARN: Removed duplicated region for block: B:279:0x07ba  */
-    /* JADX WARN: Removed duplicated region for block: B:287:0x07dd A[Catch: Exception -> 0x07e2, TRY_LEAVE, TryCatch #12 {Exception -> 0x07e2, blocks: (B:285:0x07cc, B:287:0x07dd), top: B:328:0x07cc }] */
-    /* JADX WARN: Removed duplicated region for block: B:293:0x07eb  */
-    /* JADX WARN: Removed duplicated region for block: B:295:0x07f0  */
-    /* JADX WARN: Removed duplicated region for block: B:296:0x07fe  */
-    /* JADX WARN: Removed duplicated region for block: B:313:0x05e2 A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:122:0x0409  */
+    /* JADX WARN: Removed duplicated region for block: B:205:0x05e5  */
+    /* JADX WARN: Removed duplicated region for block: B:218:0x060f  */
+    /* JADX WARN: Removed duplicated region for block: B:233:0x0681  */
+    /* JADX WARN: Removed duplicated region for block: B:236:0x068b  */
+    /* JADX WARN: Removed duplicated region for block: B:249:0x06e4  */
+    /* JADX WARN: Removed duplicated region for block: B:256:0x070f  */
+    /* JADX WARN: Removed duplicated region for block: B:262:0x073b  */
+    /* JADX WARN: Removed duplicated region for block: B:267:0x0778  */
+    /* JADX WARN: Removed duplicated region for block: B:282:0x07c8  */
+    /* JADX WARN: Removed duplicated region for block: B:290:0x07eb A[Catch: Exception -> 0x07f0, TRY_LEAVE, TryCatch #0 {Exception -> 0x07f0, blocks: (B:288:0x07da, B:290:0x07eb), top: B:308:0x07da }] */
+    /* JADX WARN: Removed duplicated region for block: B:296:0x07f9  */
+    /* JADX WARN: Removed duplicated region for block: B:298:0x07fe  */
+    /* JADX WARN: Removed duplicated region for block: B:299:0x080c  */
+    /* JADX WARN: Removed duplicated region for block: B:314:0x05f0 A[EXC_TOP_SPLITTER, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public boolean start(final org.telegram.messenger.FileLoadOperationStream r31, final long r32, final boolean r34) {
         /*
-            Method dump skipped, instructions count: 2077
+            Method dump skipped, instructions count: 2091
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.FileLoadOperation.start(org.telegram.messenger.FileLoadOperationStream, long, boolean):boolean");

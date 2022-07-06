@@ -268,6 +268,35 @@ public class FilePathDatabase {
         }
     }
 
+    public boolean hasAnotherRefOnFile(final String str) {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final boolean[] zArr = {false};
+        this.dispatchQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.FilePathDatabase$$ExternalSyntheticLambda5
+            @Override // java.lang.Runnable
+            public final void run() {
+                FilePathDatabase.this.lambda$hasAnotherRefOnFile$5(str, zArr, countDownLatch);
+            }
+        });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            FileLog.e(e);
+        }
+        return zArr[0];
+    }
+
+    public /* synthetic */ void lambda$hasAnotherRefOnFile$5(String str, boolean[] zArr, CountDownLatch countDownLatch) {
+        try {
+            SQLiteDatabase sQLiteDatabase = this.database;
+            if (sQLiteDatabase.queryFinalized("SELECT document_id FROM paths WHERE path = '" + str + "'", new Object[0]).next()) {
+                zArr[0] = true;
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        countDownLatch.countDown();
+    }
+
     /* loaded from: classes.dex */
     public static class PathData {
         public final int dc;
