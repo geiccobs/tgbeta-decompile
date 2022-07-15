@@ -40,8 +40,8 @@ public class HintEditText extends EditTextBoldCursor {
         setText(getText());
     }
 
-    @Override // android.widget.TextView, android.view.View
-    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+    @Override // org.telegram.ui.Components.EditTextEffects, android.widget.TextView, android.view.View
+    public void onLayout(boolean z, int i, int i2, int i3, int i4) {
         super.onLayout(z, i, i2, i3, i4);
         onTextChange();
     }

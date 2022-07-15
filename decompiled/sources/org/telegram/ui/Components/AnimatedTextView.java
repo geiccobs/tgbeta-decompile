@@ -32,13 +32,22 @@ public class AnimatedTextView extends View {
 
     /* loaded from: classes3.dex */
     public static class AnimatedTextDrawable extends Drawable {
+        private int alpha;
+        private long animateDelay;
+        private long animateDuration;
+        private TimeInterpolator animateInterpolator;
         private ValueAnimator animator;
+        private android.graphics.Rect bounds;
         private int currentHeight;
         private StaticLayout[] currentLayout;
         private Integer[] currentLayoutOffsets;
         private Integer[] currentLayoutToOldIndex;
         private CharSequence currentText;
         private int currentWidth;
+        private int gravity;
+        private boolean isRTL;
+        private float moveAmplitude;
+        private boolean moveDown;
         private int oldHeight;
         private StaticLayout[] oldLayout;
         private Integer[] oldLayoutOffsets;
@@ -49,19 +58,10 @@ public class AnimatedTextView extends View {
         private boolean preserveIndex;
         private boolean splitByWords;
         private boolean startFromEnd;
+        private float t;
+        private TextPaint textPaint;
         private CharSequence toSetText;
         private boolean toSetTextMoveDown;
-        private TextPaint textPaint = new TextPaint();
-        private int gravity = 0;
-        private boolean isRTL = false;
-        private float t = 0.0f;
-        private boolean moveDown = true;
-        private long animateDelay = 0;
-        private long animateDuration = 450;
-        private TimeInterpolator animateInterpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
-        private float moveAmplitude = 1.0f;
-        private int alpha = 255;
-        private android.graphics.Rect bounds = new android.graphics.Rect();
 
         /* loaded from: classes3.dex */
         public interface RegionCallback {
@@ -74,7 +74,22 @@ public class AnimatedTextView extends View {
             return -2;
         }
 
+        public AnimatedTextDrawable() {
+            this(false, false, false);
+        }
+
         public AnimatedTextDrawable(boolean z, boolean z2, boolean z3) {
+            this.textPaint = new TextPaint();
+            this.gravity = 0;
+            this.isRTL = false;
+            this.t = 0.0f;
+            this.moveDown = true;
+            this.animateDelay = 0L;
+            this.animateDuration = 450L;
+            this.animateInterpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
+            this.moveAmplitude = 1.0f;
+            this.alpha = 255;
+            this.bounds = new android.graphics.Rect();
             this.splitByWords = z;
             this.preserveIndex = z2;
             this.startFromEnd = z3;
@@ -201,6 +216,13 @@ public class AnimatedTextView extends View {
                 }
             }
             canvas.restore();
+        }
+
+        public void cancelAnimation() {
+            ValueAnimator valueAnimator = this.animator;
+            if (valueAnimator != null) {
+                valueAnimator.cancel();
+            }
         }
 
         public boolean isAnimating() {
@@ -714,6 +736,13 @@ public class AnimatedTextView extends View {
         }
     }
 
+    public AnimatedTextView(Context context) {
+        super(context);
+        AnimatedTextDrawable animatedTextDrawable = new AnimatedTextDrawable();
+        this.drawable = animatedTextDrawable;
+        animatedTextDrawable.setCallback(this);
+    }
+
     public AnimatedTextView(Context context, boolean z, boolean z2, boolean z3) {
         super(context);
         AnimatedTextDrawable animatedTextDrawable = new AnimatedTextDrawable(z, z2, z3);
@@ -763,6 +792,14 @@ public class AnimatedTextView extends View {
 
     public void setText(CharSequence charSequence, boolean z) {
         setText(charSequence, z, true);
+    }
+
+    public void cancelAnimation() {
+        this.drawable.cancelAnimation();
+    }
+
+    public boolean isAnimating() {
+        return this.drawable.isAnimating();
     }
 
     public void setText(CharSequence charSequence, boolean z, boolean z2) {

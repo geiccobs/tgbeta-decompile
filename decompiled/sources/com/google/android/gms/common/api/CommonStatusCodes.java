@@ -45,7 +45,7 @@ public class CommonStatusCodes {
                 return "CANCELED";
             case 17:
                 return "API_NOT_CONNECTED";
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return "DEAD_CLIENT";
             case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 return "REMOTE_EXCEPTION";

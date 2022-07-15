@@ -517,7 +517,9 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
         this.linearLayout.addView(textInfoPrivacyCell3, LayoutHelper.createLinear(-1, -2));
         JoinToSendSettingsView joinToSendSettingsView = new JoinToSendSettingsView(context, this.currentChat);
         this.joinContainer = joinToSendSettingsView;
-        this.linearLayout.addView(joinToSendSettingsView);
+        TLRPC$ChatFull tLRPC$ChatFull = this.info;
+        joinToSendSettingsView.showJoinToSend((tLRPC$ChatFull == null || tLRPC$ChatFull.linked_chat_id == 0) ? false : true);
+        this.linearLayout.addView(this.joinContainer);
         LinearLayout linearLayout7 = new LinearLayout(context);
         this.saveContainer = linearLayout7;
         linearLayout7.setOrientation(1);
@@ -894,6 +896,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
         }
         Drawable drawable = null;
         int i3 = 8;
+        boolean z = false;
         if (!this.isPrivate && !this.canCreatePublic && getUserConfig().isPremium()) {
             this.typeInfoCell.setText(LocaleController.getString("ChangePublicLimitReached", R.string.ChangePublicLimitReached));
             this.typeInfoCell.setTag("windowBackgroundWhiteRedText4");
@@ -986,6 +989,12 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                 i3 = 0;
             }
             joinToSendSettingsView.setVisibility(i3);
+            JoinToSendSettingsView joinToSendSettingsView2 = this.joinContainer;
+            TLRPC$ChatFull tLRPC$ChatFull = this.info;
+            if (tLRPC$ChatFull != null && tLRPC$ChatFull.linked_chat_id != 0) {
+                z = true;
+            }
+            joinToSendSettingsView2.showJoinToSend(z);
         }
         checkDoneButton();
     }

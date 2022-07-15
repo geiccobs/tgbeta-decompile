@@ -28,16 +28,9 @@ public class BackDrawable extends Drawable {
         return -2;
     }
 
-    @Override // android.graphics.drawable.Drawable
-    public void setAlpha(int i) {
-    }
-
-    @Override // android.graphics.drawable.Drawable
-    public void setColorFilter(ColorFilter colorFilter) {
-    }
-
     public BackDrawable(boolean z) {
         this.paint.setStrokeWidth(AndroidUtilities.dp(2.0f));
+        this.paint.setStrokeCap(Paint.Cap.ROUND);
         this.alwaysClose = z;
     }
 
@@ -86,7 +79,7 @@ public class BackDrawable extends Drawable {
 
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
-        float f;
+        float f = 1.0f;
         if (this.currentRotation != this.finalRotation) {
             if (this.lastFrameTime != 0) {
                 int currentTimeMillis = (int) (this.currentAnimationTime + (System.currentTimeMillis() - this.lastFrameTime));
@@ -122,16 +115,25 @@ public class BackDrawable extends Drawable {
             f = f3;
         } else {
             canvas.rotate((f3 * (this.reverseAngle ? -180 : 180)) + 135.0f);
-            f = 1.0f;
         }
-        canvas.drawLine((-AndroidUtilities.dp(7.0f)) - (AndroidUtilities.dp(1.0f) * f), 0.0f, AndroidUtilities.dp(8.0f), 0.0f, this.paint);
-        float f4 = -AndroidUtilities.dp(0.5f);
-        float dp = AndroidUtilities.dp(7.0f) + (AndroidUtilities.dp(1.0f) * f);
-        float dp2 = (-AndroidUtilities.dp(7.0f)) + (AndroidUtilities.dp(7.0f) * f);
-        float dp3 = AndroidUtilities.dp(0.5f) - (AndroidUtilities.dp(0.5f) * f);
-        canvas.drawLine(dp2, -f4, dp3, -dp, this.paint);
-        canvas.drawLine(dp2, f4, dp3, dp, this.paint);
+        canvas.drawLine(AndroidUtilities.dp(AndroidUtilities.lerp(-6.75f, -8.0f, f)), 0.0f, AndroidUtilities.dp(8.0f), 0.0f, this.paint);
+        float dp = AndroidUtilities.dp(-0.25f);
+        float dp2 = AndroidUtilities.dp(AndroidUtilities.lerp(7.0f, 8.0f, f));
+        float dp3 = AndroidUtilities.dp(AndroidUtilities.lerp(-7.25f, 0.0f, f));
+        float dp4 = AndroidUtilities.dp(AndroidUtilities.lerp(0.5f, 0.0f, f));
+        canvas.drawLine(dp3, -dp, dp4, -dp2, this.paint);
+        canvas.drawLine(dp3, dp, dp4, dp2, this.paint);
         canvas.restore();
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int i) {
+        this.paint.setAlpha(i);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+        this.paint.setColorFilter(colorFilter);
     }
 
     @Override // android.graphics.drawable.Drawable

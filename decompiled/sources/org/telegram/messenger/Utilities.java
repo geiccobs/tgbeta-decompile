@@ -442,6 +442,10 @@ public class Utilities {
         }
     }
 
+    public static int clamp(int i, int i2, int i3) {
+        return Math.max(Math.min(i, i2), i3);
+    }
+
     public static float clamp(float f, float f2, float f3) {
         return Float.isNaN(f) ? f3 : Float.isInfinite(f) ? f2 : Math.max(Math.min(f, f2), f3);
     }

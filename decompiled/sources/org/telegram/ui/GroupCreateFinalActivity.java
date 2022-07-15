@@ -261,6 +261,7 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
     public View createView(Context context) {
         String str;
         int i;
+        SizeNotifierFrameLayout sizeNotifierFrameLayout;
         EditTextEmoji editTextEmoji = this.editText;
         if (editTextEmoji != null) {
             editTextEmoji.onDestroy();
@@ -276,7 +277,7 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
                 }
             }
         });
-        SizeNotifierFrameLayout sizeNotifierFrameLayout = new SizeNotifierFrameLayout(context) { // from class: org.telegram.ui.GroupCreateFinalActivity.2
+        SizeNotifierFrameLayout sizeNotifierFrameLayout2 = new SizeNotifierFrameLayout(context) { // from class: org.telegram.ui.GroupCreateFinalActivity.2
             private boolean ignoreLayout;
 
             @Override // android.widget.FrameLayout, android.view.View
@@ -453,8 +454,8 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
                 super.requestLayout();
             }
         };
-        this.fragmentView = sizeNotifierFrameLayout;
-        sizeNotifierFrameLayout.setLayoutParams(new ViewGroup.LayoutParams(-1, -1));
+        this.fragmentView = sizeNotifierFrameLayout2;
+        sizeNotifierFrameLayout2.setLayoutParams(new ViewGroup.LayoutParams(-1, -1));
         this.fragmentView.setOnTouchListener(GroupCreateFinalActivity$$ExternalSyntheticLambda3.INSTANCE);
         this.shadowDrawable = context.getResources().getDrawable(R.drawable.greydivider_top).mutate();
         LinearLayout linearLayout = new LinearLayout(context) { // from class: org.telegram.ui.GroupCreateFinalActivity.3
@@ -470,7 +471,7 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
             }
         };
         linearLayout.setOrientation(1);
-        sizeNotifierFrameLayout.addView(linearLayout, LayoutHelper.createFrame(-1, -1.0f));
+        sizeNotifierFrameLayout2.addView(linearLayout, LayoutHelper.createFrame(-1, -1.0f));
         FrameLayout frameLayout = new FrameLayout(context);
         this.editTextContainer = frameLayout;
         linearLayout.addView(frameLayout, LayoutHelper.createLinear(-1, -2));
@@ -563,7 +564,7 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
         boolean z4 = LocaleController.isRTL;
         frameLayout5.addView(radialProgressView2, LayoutHelper.createFrame(64, 64.0f, (z4 ? 5 : 3) | 48, z4 ? 0.0f : 16.0f, 16.0f, z4 ? 16.0f : 0.0f, 16.0f));
         showAvatarProgress(false, false);
-        EditTextEmoji editTextEmoji2 = new EditTextEmoji(context, sizeNotifierFrameLayout, this, 0);
+        EditTextEmoji editTextEmoji2 = new EditTextEmoji(context, sizeNotifierFrameLayout2, this, 0, false);
         this.editText = editTextEmoji2;
         int i3 = this.chatType;
         if (i3 == 0 || i3 == 4) {
@@ -624,6 +625,7 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
         this.floatingButtonContainer.setBackgroundDrawable(createSimpleSelectorCircleDrawable);
         if (i4 >= 21) {
             StateListAnimator stateListAnimator = new StateListAnimator();
+            sizeNotifierFrameLayout = sizeNotifierFrameLayout2;
             stateListAnimator.addState(new int[]{16842919}, ObjectAnimator.ofFloat(this.floatingButtonIcon, "translationZ", AndroidUtilities.dp(2.0f), AndroidUtilities.dp(4.0f)).setDuration(200L));
             stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(this.floatingButtonIcon, "translationZ", AndroidUtilities.dp(4.0f), AndroidUtilities.dp(2.0f)).setDuration(200L));
             this.floatingButtonContainer.setStateListAnimator(stateListAnimator);
@@ -634,6 +636,8 @@ public class GroupCreateFinalActivity extends BaseFragment implements Notificati
                     outline.setOval(0, 0, AndroidUtilities.dp(56.0f), AndroidUtilities.dp(56.0f));
                 }
             });
+        } else {
+            sizeNotifierFrameLayout = sizeNotifierFrameLayout2;
         }
         VerticalPositionAutoAnimator.attach(this.floatingButtonContainer);
         View view2 = this.floatingButtonContainer;

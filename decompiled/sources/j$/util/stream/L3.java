@@ -2,24 +2,24 @@ package j$.util.stream;
 
 import java.util.Arrays;
 /* loaded from: classes2.dex */
-final class L3 extends AbstractC0056b1 {
-    public L3(AbstractC0060c abstractC0060c) {
-        super(abstractC0060c, EnumC0077e4.LONG_VALUE, EnumC0071d4.q | EnumC0071d4.o);
+final class L3 extends AbstractC0057b1 {
+    public L3(AbstractC0061c abstractC0061c) {
+        super(abstractC0061c, EnumC0078e4.LONG_VALUE, EnumC0072d4.q | EnumC0072d4.o);
     }
 
-    @Override // j$.util.stream.AbstractC0060c
-    public A1 E0(AbstractC0187y2 abstractC0187y2, j$.util.u uVar, j$.util.function.m mVar) {
-        if (EnumC0071d4.SORTED.d(abstractC0187y2.s0())) {
-            return abstractC0187y2.p0(uVar, false, mVar);
+    @Override // j$.util.stream.AbstractC0061c
+    public A1 E0(AbstractC0188y2 abstractC0188y2, j$.util.u uVar, j$.util.function.m mVar) {
+        if (EnumC0072d4.SORTED.d(abstractC0188y2.s0())) {
+            return abstractC0188y2.p0(uVar, false, mVar);
         }
-        long[] jArr = (long[]) ((AbstractC0186y1) abstractC0187y2.p0(uVar, true, mVar)).e();
+        long[] jArr = (long[]) ((AbstractC0187y1) abstractC0188y2.p0(uVar, true, mVar)).e();
         Arrays.sort(jArr);
-        return new C0117l2(jArr);
+        return new C0118l2(jArr);
     }
 
-    @Override // j$.util.stream.AbstractC0060c
-    public AbstractC0124m3 H0(int i, AbstractC0124m3 abstractC0124m3) {
-        abstractC0124m3.getClass();
-        return EnumC0071d4.SORTED.d(i) ? abstractC0124m3 : EnumC0071d4.SIZED.d(i) ? new Q3(abstractC0124m3) : new I3(abstractC0124m3);
+    @Override // j$.util.stream.AbstractC0061c
+    public AbstractC0125m3 H0(int i, AbstractC0125m3 abstractC0125m3) {
+        abstractC0125m3.getClass();
+        return EnumC0072d4.SORTED.d(i) ? abstractC0125m3 : EnumC0072d4.SIZED.d(i) ? new Q3(abstractC0125m3) : new I3(abstractC0125m3);
     }
 }

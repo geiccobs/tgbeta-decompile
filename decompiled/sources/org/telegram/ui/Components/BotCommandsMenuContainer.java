@@ -74,7 +74,8 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
             }
         };
         this.listView = recyclerListView;
-        recyclerListView.setClipToPadding(false);
+        recyclerListView.setOverScrollMode(2);
+        this.listView.setClipToPadding(false);
         addView(this.listView);
         updateColors();
         setClipChildren(false);
@@ -238,7 +239,7 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     }
 
     public void updateColors() {
-        this.topBackground.setColor(Theme.getColor("dialogGrayLine"));
+        this.topBackground.setColor(Theme.getColor("key_sheet_scrollUp"));
         this.backgroundPaint.setColor(Theme.getColor("windowBackgroundWhite"));
         this.shadowDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor("windowBackgroundWhite"), PorterDuff.Mode.MULTIPLY));
         invalidate();

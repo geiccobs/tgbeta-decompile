@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.telegram.messenger.R;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
 /* loaded from: classes.dex */
@@ -367,7 +366,7 @@ public final class zzej<T extends zzel<T>> {
                 return zzea.zzh(((Integer) obj).intValue());
             case 17:
                 return zzea.zzf(((Long) obj).longValue());
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 if (obj instanceof zzet) {
                     return zzea.zzk(((zzet) obj).zza());
                 }

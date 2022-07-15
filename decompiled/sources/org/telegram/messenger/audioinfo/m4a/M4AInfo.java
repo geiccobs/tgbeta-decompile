@@ -455,7 +455,7 @@ public class M4AInfo extends AudioInfo {
             case 17:
                 this.lyrics = mP4Atom.readString("UTF-8");
                 return;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 this.title = mP4Atom.readString("UTF-8");
                 return;
             default:

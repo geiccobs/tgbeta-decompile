@@ -1628,7 +1628,7 @@ public class MatroskaExtractor implements Extractor {
                     i3 = -1;
                     i2 = -1;
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     str2 = "video/x-vnd.on2.vp9";
                     str5 = str2;
                     list = null;

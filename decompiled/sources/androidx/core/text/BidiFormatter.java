@@ -2,7 +2,6 @@ package androidx.core.text;
 
 import android.text.SpannableStringBuilder;
 import java.util.Locale;
-import org.telegram.messenger.R;
 /* loaded from: classes.dex */
 public final class BidiFormatter {
     static final BidiFormatter DEFAULT_LTR_INSTANCE;
@@ -162,7 +161,7 @@ public final class BidiFormatter {
                                 i3++;
                                 i2 = 1;
                                 break;
-                            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                            case 18:
                                 i3--;
                                 i2 = 0;
                                 break;
@@ -193,7 +192,7 @@ public final class BidiFormatter {
                             return 1;
                         }
                         break;
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         i3++;
                         continue;
                 }
@@ -232,7 +231,7 @@ public final class BidiFormatter {
                                 }
                                 i--;
                                 break;
-                            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                            case 18:
                                 i++;
                                 break;
                             default:

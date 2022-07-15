@@ -119,6 +119,10 @@ public class ContentPreviewViewer {
         /* renamed from: org.telegram.ui.ContentPreviewViewer$ContentPreviewViewerDelegate$-CC */
         /* loaded from: classes3.dex */
         public final /* synthetic */ class CC {
+            public static boolean $default$can(ContentPreviewViewerDelegate contentPreviewViewerDelegate) {
+                return true;
+            }
+
             public static String $default$getQuery(ContentPreviewViewerDelegate contentPreviewViewerDelegate, boolean z) {
                 return null;
             }
@@ -144,6 +148,8 @@ public class ContentPreviewViewer {
             public static void $default$sendGif(ContentPreviewViewerDelegate contentPreviewViewerDelegate, Object obj, Object obj2, boolean z, int i) {
             }
         }
+
+        boolean can();
 
         boolean canSchedule();
 
@@ -268,12 +274,12 @@ public class ContentPreviewViewer {
                     for (int i7 = 0; i7 < arrayList3.size(); i7++) {
                         iArr[i7] = ((Integer) arrayList3.get(i7)).intValue();
                     }
-                    View$OnClickListenerC00311 view$OnClickListenerC00311 = new View$OnClickListenerC00311(arrayList2, isStickerInFavorites);
+                    View$OnClickListenerC00321 view$OnClickListenerC00321 = new View$OnClickListenerC00321(arrayList2, isStickerInFavorites);
                     ActionBarPopupWindow.ActionBarPopupWindowLayout actionBarPopupWindowLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(ContentPreviewViewer.this.containerView.getContext(), R.drawable.popup_fixed_alert2, ContentPreviewViewer.this.resourcesProvider);
                     for (int i8 = 0; i8 < arrayList.size(); i8++) {
                         ActionBarMenuSubItem addItem = ActionBarMenuItem.addItem(actionBarPopupWindowLayout, ((Integer) arrayList3.get(i8)).intValue(), (CharSequence) arrayList.get(i8), false, ContentPreviewViewer.this.resourcesProvider);
                         addItem.setTag(Integer.valueOf(i8));
-                        addItem.setOnClickListener(view$OnClickListenerC00311);
+                        addItem.setOnClickListener(view$OnClickListenerC00321);
                     }
                     ContentPreviewViewer.this.popupWindow = new ActionBarPopupWindow(actionBarPopupWindowLayout, -2, -2) { // from class: org.telegram.ui.ContentPreviewViewer.1.2
                         {
@@ -432,11 +438,11 @@ public class ContentPreviewViewer {
 
         /* renamed from: org.telegram.ui.ContentPreviewViewer$1$1 */
         /* loaded from: classes3.dex */
-        class View$OnClickListenerC00311 implements View.OnClickListener {
+        class View$OnClickListenerC00321 implements View.OnClickListener {
             final /* synthetic */ ArrayList val$actions;
             final /* synthetic */ boolean val$inFavs;
 
-            View$OnClickListenerC00311(ArrayList arrayList, boolean z) {
+            View$OnClickListenerC00321(ArrayList arrayList, boolean z) {
                 AnonymousClass1.this = r1;
                 this.val$actions = arrayList;
                 this.val$inFavs = z;
@@ -611,19 +617,19 @@ public class ContentPreviewViewer {
         }
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:64:0x012c  */
-    /* JADX WARN: Removed duplicated region for block: B:68:0x0136  */
-    /* JADX WARN: Removed duplicated region for block: B:69:0x013c  */
-    /* JADX WARN: Removed duplicated region for block: B:77:0x015b  */
-    /* JADX WARN: Removed duplicated region for block: B:80:0x0169  */
-    /* JADX WARN: Removed duplicated region for block: B:85:0x019e  */
+    /* JADX WARN: Removed duplicated region for block: B:69:0x0135  */
+    /* JADX WARN: Removed duplicated region for block: B:73:0x013f  */
+    /* JADX WARN: Removed duplicated region for block: B:74:0x0145  */
+    /* JADX WARN: Removed duplicated region for block: B:82:0x0164  */
+    /* JADX WARN: Removed duplicated region for block: B:85:0x0172  */
+    /* JADX WARN: Removed duplicated region for block: B:90:0x01a7  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public boolean onTouch(android.view.MotionEvent r16, final org.telegram.ui.Components.RecyclerListView r17, int r18, final java.lang.Object r19, org.telegram.ui.ContentPreviewViewer.ContentPreviewViewerDelegate r20, org.telegram.ui.ActionBar.Theme.ResourcesProvider r21) {
         /*
-            Method dump skipped, instructions count: 662
+            Method dump skipped, instructions count: 671
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ContentPreviewViewer.onTouch(android.view.MotionEvent, org.telegram.ui.Components.RecyclerListView, int, java.lang.Object, org.telegram.ui.ContentPreviewViewer$ContentPreviewViewerDelegate, org.telegram.ui.ActionBar.Theme$ResourcesProvider):boolean");
@@ -650,7 +656,7 @@ public class ContentPreviewViewer {
         final int i2;
         this.delegate = contentPreviewViewerDelegate;
         this.resourcesProvider = resourcesProvider;
-        if (motionEvent.getAction() == 0) {
+        if ((contentPreviewViewerDelegate == null || contentPreviewViewerDelegate.can()) && motionEvent.getAction() == 0) {
             int x = (int) motionEvent.getX();
             int y = (int) motionEvent.getY();
             int childCount = recyclerListView.getChildCount();

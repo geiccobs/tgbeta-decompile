@@ -95,7 +95,7 @@ public final class zzr implements Parcelable.Creator<LoyaltyWalletObject> {
                 case 17:
                     str12 = SafeParcelReader.createString(parcel, readHeader);
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     arrayList3 = SafeParcelReader.createTypedList(parcel, readHeader, LabelValueRow.CREATOR);
                     break;
                 case R.styleable.MapAttrs_uiTiltGestures /* 19 */:

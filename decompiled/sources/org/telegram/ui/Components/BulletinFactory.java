@@ -5,6 +5,7 @@ import android.widget.FrameLayout;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -126,6 +127,17 @@ public final class BulletinFactory {
         lottieLayout.textView.setSingleLine(false);
         lottieLayout.textView.setMaxLines(2);
         return create(lottieLayout, 1500);
+    }
+
+    public Bulletin createEmojiBulletin(TLRPC$Document tLRPC$Document, CharSequence charSequence, CharSequence charSequence2, Runnable runnable) {
+        Bulletin.LottieLayout lottieLayout = new Bulletin.LottieLayout(getContext(), this.resourcesProvider);
+        lottieLayout.setAnimation(tLRPC$Document, 36, 36, new String[0]);
+        lottieLayout.textView.setText(charSequence);
+        lottieLayout.textView.setTextSize(1, 14.0f);
+        lottieLayout.textView.setSingleLine(false);
+        lottieLayout.textView.setMaxLines(2);
+        lottieLayout.setButton(new Bulletin.UndoButton(getContext(), true, this.resourcesProvider).setText(charSequence2).setUndoAction(runnable));
+        return create(lottieLayout, 2750);
     }
 
     public Bulletin createDownloadBulletin(FileType fileType) {
@@ -264,7 +276,7 @@ public final class BulletinFactory {
             r1 = 5
             r2 = 4
             r3 = 3
-            r4 = 2131627046(0x7f0e0c26, float:1.8881345E38)
+            r4 = 2131627088(0x7f0e0c50, float:1.888143E38)
             java.lang.String r5 = "NotificationsMutedForHint"
             r6 = 2
             r7 = 0
@@ -286,14 +298,14 @@ public final class BulletinFactory {
             r10.<init>()
             throw r10
         L36:
-            r11 = 2131627071(0x7f0e0c3f, float:1.8881396E38)
+            r11 = 2131627113(0x7f0e0c69, float:1.8881481E38)
             java.lang.String r12 = "NotificationsUnmutedHint"
             java.lang.String r11 = org.telegram.messenger.LocaleController.getString(r12, r11)
             r12 = 0
             r13 = 0
             goto L7e
         L42:
-            r11 = 2131627047(0x7f0e0c27, float:1.8881347E38)
+            r11 = 2131627089(0x7f0e0c51, float:1.8881433E38)
             java.lang.String r12 = "NotificationsMutedHint"
             java.lang.String r11 = org.telegram.messenger.LocaleController.getString(r12, r11)
             goto L7c
@@ -325,13 +337,13 @@ public final class BulletinFactory {
             r13 = 1
         L7e:
             if (r12 == 0) goto L89
-            r12 = 2131558485(0x7f0d0055, float:1.8742287E38)
+            r12 = 2131558489(0x7f0d0059, float:1.8742295E38)
             java.lang.String[] r13 = new java.lang.String[r7]
             r0.setAnimation(r12, r13)
             goto Lc0
         L89:
             if (r13 == 0) goto La8
-            r12 = 2131558464(0x7f0d0040, float:1.8742245E38)
+            r12 = 2131558465(0x7f0d0041, float:1.8742247E38)
             java.lang.String[] r13 = new java.lang.String[r1]
             java.lang.String r1 = "Body Main"
             r13[r7] = r1
@@ -346,7 +358,7 @@ public final class BulletinFactory {
             r0.setAnimation(r12, r13)
             goto Lc0
         La8:
-            r12 = 2131558470(0x7f0d0046, float:1.8742257E38)
+            r12 = 2131558471(0x7f0d0047, float:1.8742259E38)
             java.lang.String[] r13 = new java.lang.String[r2]
             java.lang.String r1 = "BODY"
             r13[r7] = r1
@@ -417,6 +429,99 @@ public final class BulletinFactory {
         lottieLayout.setAnimation(R.raw.ic_admin, "Shield");
         lottieLayout.textView.setText(AndroidUtilities.replaceTags(LocaleController.formatString("UserAddedAsAdminHint", R.string.UserAddedAsAdminHint, str)));
         return Bulletin.make(baseFragment, lottieLayout, 1500);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:16:0x00ae  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public static org.telegram.ui.Components.Bulletin createInviteSentBulletin(android.content.Context r4, android.widget.FrameLayout r5, int r6, long r7, int r9, int r10, int r11) {
+        /*
+            org.telegram.ui.Components.Bulletin$LottieLayout r9 = new org.telegram.ui.Components.Bulletin$LottieLayout
+            r0 = 0
+            r9.<init>(r4, r0, r10, r11)
+            r4 = 300(0x12c, float:4.2E-43)
+            r10 = 2131558454(0x7f0d0036, float:1.8742224E38)
+            r11 = 1
+            r0 = 30
+            r1 = 0
+            if (r6 > r11) goto L86
+            int r6 = org.telegram.messenger.UserConfig.selectedAccount
+            org.telegram.messenger.UserConfig r6 = org.telegram.messenger.UserConfig.getInstance(r6)
+            long r2 = r6.clientUserId
+            int r6 = (r7 > r2 ? 1 : (r7 == r2 ? 0 : -1))
+            if (r6 != 0) goto L34
+            r4 = 2131626281(0x7f0e0929, float:1.8879794E38)
+            java.lang.String r6 = "InvLinkToSavedMessages"
+            java.lang.String r4 = org.telegram.messenger.LocaleController.getString(r6, r4)
+            android.text.SpannableStringBuilder r4 = org.telegram.messenger.AndroidUtilities.replaceTags(r4)
+            r6 = 2131558533(0x7f0d0085, float:1.8742384E38)
+            java.lang.String[] r7 = new java.lang.String[r1]
+            r9.setAnimation(r6, r0, r0, r7)
+            r6 = -1
+            goto La7
+        L34:
+            boolean r6 = org.telegram.messenger.DialogObject.isChatDialog(r7)
+            if (r6 == 0) goto L5d
+            int r6 = org.telegram.messenger.UserConfig.selectedAccount
+            org.telegram.messenger.MessagesController r6 = org.telegram.messenger.MessagesController.getInstance(r6)
+            long r7 = -r7
+            java.lang.Long r7 = java.lang.Long.valueOf(r7)
+            org.telegram.tgnet.TLRPC$Chat r6 = r6.getChat(r7)
+            r7 = 2131626280(0x7f0e0928, float:1.8879792E38)
+            java.lang.Object[] r8 = new java.lang.Object[r11]
+            java.lang.String r6 = r6.title
+            r8[r1] = r6
+            java.lang.String r6 = "InvLinkToGroup"
+            java.lang.String r6 = org.telegram.messenger.LocaleController.formatString(r6, r7, r8)
+            android.text.SpannableStringBuilder r6 = org.telegram.messenger.AndroidUtilities.replaceTags(r6)
+            goto L80
+        L5d:
+            int r6 = org.telegram.messenger.UserConfig.selectedAccount
+            org.telegram.messenger.MessagesController r6 = org.telegram.messenger.MessagesController.getInstance(r6)
+            java.lang.Long r7 = java.lang.Long.valueOf(r7)
+            org.telegram.tgnet.TLRPC$User r6 = r6.getUser(r7)
+            r7 = 2131626282(0x7f0e092a, float:1.8879796E38)
+            java.lang.Object[] r8 = new java.lang.Object[r11]
+            java.lang.String r6 = org.telegram.messenger.UserObject.getFirstName(r6)
+            r8[r1] = r6
+            java.lang.String r6 = "InvLinkToUser"
+            java.lang.String r6 = org.telegram.messenger.LocaleController.formatString(r6, r7, r8)
+            android.text.SpannableStringBuilder r6 = org.telegram.messenger.AndroidUtilities.replaceTags(r6)
+        L80:
+            java.lang.String[] r7 = new java.lang.String[r1]
+            r9.setAnimation(r10, r0, r0, r7)
+            goto La4
+        L86:
+            r7 = 2131626279(0x7f0e0927, float:1.887979E38)
+            java.lang.Object[] r8 = new java.lang.Object[r11]
+            java.lang.Object[] r11 = new java.lang.Object[r1]
+            java.lang.String r2 = "Chats"
+            java.lang.String r6 = org.telegram.messenger.LocaleController.formatPluralString(r2, r6, r11)
+            r8[r1] = r6
+            java.lang.String r6 = "InvLinkToChats"
+            java.lang.String r6 = org.telegram.messenger.LocaleController.formatString(r6, r7, r8)
+            android.text.SpannableStringBuilder r6 = org.telegram.messenger.AndroidUtilities.replaceTags(r6)
+            java.lang.String[] r7 = new java.lang.String[r1]
+            r9.setAnimation(r10, r0, r0, r7)
+        La4:
+            r4 = r6
+            r6 = 300(0x12c, float:4.2E-43)
+        La7:
+            android.widget.TextView r7 = r9.textView
+            r7.setText(r4)
+            if (r6 <= 0) goto Lb7
+            org.telegram.ui.Components.BulletinFactory$$ExternalSyntheticLambda1 r4 = new org.telegram.ui.Components.BulletinFactory$$ExternalSyntheticLambda1
+            r4.<init>()
+            long r6 = (long) r6
+            r9.postDelayed(r4, r6)
+        Lb7:
+            r4 = 1500(0x5dc, float:2.102E-42)
+            org.telegram.ui.Components.Bulletin r4 = org.telegram.ui.Components.Bulletin.make(r5, r9, r4)
+            return r4
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.BulletinFactory.createInviteSentBulletin(android.content.Context, android.widget.FrameLayout, int, long, int, int, int):org.telegram.ui.Components.Bulletin");
     }
 
     /* JADX WARN: Removed duplicated region for block: B:29:0x0107  */

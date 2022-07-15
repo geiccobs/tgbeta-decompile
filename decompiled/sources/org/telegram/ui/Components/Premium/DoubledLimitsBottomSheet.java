@@ -139,6 +139,7 @@ public class DoubledLimitsBottomSheet extends BottomSheetWithRecyclerListView im
         }
     }
 
+    /* JADX INFO: Access modifiers changed from: protected */
     @Override // org.telegram.ui.Components.BottomSheetWithRecyclerListView
     public void onPreMeasure(int i, int i2) {
         super.onPreMeasure(i, i2);

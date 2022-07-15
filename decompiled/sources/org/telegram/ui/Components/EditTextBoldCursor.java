@@ -46,6 +46,7 @@ public class EditTextBoldCursor extends EditTextEffects {
     private static Method getVerticalOffsetMethod;
     private static Field mCursorDrawableResField;
     private static Field mEditor;
+    private static Method mEditorInvalidateDisplayList;
     private static Field mScrollYField;
     private static boolean mScrollYGet;
     private static Field mShowCursorField;
@@ -304,9 +305,15 @@ public class EditTextBoldCursor extends EditTextEffects {
                     declaredField3.setAccessible(true);
                 } catch (Exception unused2) {
                 }
-                Method declaredMethod = TextView.class.getDeclaredMethod("getVerticalOffset", Boolean.TYPE);
-                getVerticalOffsetMethod = declaredMethod;
-                declaredMethod.setAccessible(true);
+                try {
+                    Method declaredMethod = editorClass.getDeclaredMethod("invalidateTextDisplayList", new Class[0]);
+                    mEditorInvalidateDisplayList = declaredMethod;
+                    declaredMethod.setAccessible(true);
+                } catch (Exception unused3) {
+                }
+                Method declaredMethod2 = TextView.class.getDeclaredMethod("getVerticalOffset", Boolean.TYPE);
+                getVerticalOffsetMethod = declaredMethod2;
+                declaredMethod2.setAccessible(true);
             }
         } catch (Throwable th) {
             FileLog.e(th);
@@ -319,7 +326,7 @@ public class EditTextBoldCursor extends EditTextEffects {
                     setTextCursorDrawable(gradientDrawable);
                 }
                 this.editor = mEditor.get(this);
-            } catch (Throwable unused3) {
+            } catch (Throwable unused4) {
             }
             try {
                 if (mCursorDrawableResField == null) {
@@ -331,7 +338,7 @@ public class EditTextBoldCursor extends EditTextEffects {
                 if (field != null) {
                     field.set(this, Integer.valueOf((int) R.drawable.field_carret_empty));
                 }
-            } catch (Throwable unused4) {
+            } catch (Throwable unused5) {
             }
         }
         this.cursorSize = AndroidUtilities.dp(24.0f);

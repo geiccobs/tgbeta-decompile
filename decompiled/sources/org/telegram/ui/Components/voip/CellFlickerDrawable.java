@@ -213,7 +213,7 @@ public class CellFlickerDrawable {
                 int i = cellFlickerDrawable.parentWidth;
                 int i2 = cellFlickerDrawable.size;
                 float f = (((i2 * 2) + i) * cellFlickerDrawable.progress) - i2;
-                float scale = this.svgDrawable.getScale();
+                float scale = this.svgDrawable.getScale(getBounds().width(), getBounds().height());
                 CellFlickerDrawable.this.matrix.reset();
                 CellFlickerDrawable cellFlickerDrawable2 = CellFlickerDrawable.this;
                 cellFlickerDrawable2.matrix.setScale(1.0f / scale, 0.0f, cellFlickerDrawable2.size / 2.0f, 0.0f);

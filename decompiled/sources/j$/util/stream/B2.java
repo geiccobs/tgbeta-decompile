@@ -5,8 +5,8 @@ class B2 extends U2 {
     final /* synthetic */ double c;
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public B2(EnumC0077e4 enumC0077e4, j$.util.function.d dVar, double d) {
-        super(enumC0077e4);
+    public B2(EnumC0078e4 enumC0078e4, j$.util.function.d dVar, double d) {
+        super(enumC0078e4);
         this.b = dVar;
         this.c = d;
     }

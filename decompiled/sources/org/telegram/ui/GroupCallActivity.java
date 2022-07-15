@@ -762,7 +762,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         private RectF rect = new RectF();
         private float[] volumeAlphas = new float[3];
         private float colorChangeProgress = 1.0f;
-        private RLottieDrawable speakerDrawable = new RLottieDrawable(R.raw.speaker, "2131558536", AndroidUtilities.dp(24.0f), AndroidUtilities.dp(24.0f), true, null);
+        private RLottieDrawable speakerDrawable = new RLottieDrawable(R.raw.speaker, "2131558544", AndroidUtilities.dp(24.0f), AndroidUtilities.dp(24.0f), true, null);
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
         public VolumeSlider(Context context, TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant) {
@@ -1858,8 +1858,8 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.didEndCall);
         this.shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
-        this.bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "2131558588", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
-        this.handDrawables = new RLottieDrawable(R.raw.hand_2, "2131558459", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
+        this.bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "2131558599", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
+        this.handDrawables = new RLottieDrawable(R.raw.hand_2, "2131558460", AndroidUtilities.dp(72.0f), AndroidUtilities.dp(72.0f), true, null);
         FrameLayout frameLayout = new FrameLayout(context) { // from class: org.telegram.ui.GroupCallActivity.7
             private int lastSize;
             boolean localHasVideo;
@@ -6106,14 +6106,14 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             org.telegram.tgnet.TLRPC$Chat r0 = r12.currentChat
             boolean r0 = org.telegram.messenger.ChatObject.isChannelOrGiga(r0)
             if (r0 == 0) goto L81
-            r0 = 2131628971(0x7f0e13ab, float:1.888525E38)
+            r0 = 2131629031(0x7f0e13e7, float:1.8885371E38)
             java.lang.Object[] r1 = new java.lang.Object[r4]
             r1[r3] = r8
             java.lang.String r2 = "VoipChannelInviteText"
             java.lang.String r0 = org.telegram.messenger.LocaleController.formatString(r2, r0, r1)
             goto L8e
         L81:
-            r0 = 2131629059(0x7f0e1403, float:1.8885428E38)
+            r0 = 2131629119(0x7f0e143f, float:1.888555E38)
             java.lang.Object[] r1 = new java.lang.Object[r4]
             r1[r3] = r8
             java.lang.String r2 = "VoipGroupInviteText"
@@ -7312,11 +7312,13 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                 };
             } else if (i == 1) {
                 view = new GroupCallUserCell(this.mContext) { // from class: org.telegram.ui.GroupCallActivity.ListAdapter.2
+                    /* JADX INFO: Access modifiers changed from: protected */
                     @Override // org.telegram.ui.Cells.GroupCallUserCell
                     public void onMuteClick(GroupCallUserCell groupCallUserCell) {
                         GroupCallActivity.this.showMenuForCell(groupCallUserCell);
                     }
 
+                    /* JADX INFO: Access modifiers changed from: protected */
                     @Override // org.telegram.ui.Cells.GroupCallUserCell, android.widget.FrameLayout, android.view.View
                     public void onMeasure(int i2, int i3) {
                         if (AndroidUtilities.isTablet()) {

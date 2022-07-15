@@ -70,7 +70,7 @@ import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.TypefaceSpan;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.PhotoAlbumPickerActivity;
-@TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+@TargetApi(18)
 /* loaded from: classes3.dex */
 public class CameraScanActivity extends BaseFragment {
     private CameraView cameraView;

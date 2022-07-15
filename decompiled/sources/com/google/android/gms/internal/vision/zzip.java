@@ -4,7 +4,6 @@ import com.google.android.gms.internal.vision.zzjb;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
 /* loaded from: classes.dex */
 final class zzip extends zziq<zzjb.zzf> {
@@ -93,7 +92,7 @@ final class zzip extends zziq<zzjb.zzf> {
                     }
                     zzle.zzb(zzfVar.zzb, (List) entry.getValue(), zzmrVar, zzky.zza().zza((Class) list.get(0).getClass()));
                     return;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     List list2 = (List) entry.getValue();
                     if (list2 == null || list2.isEmpty()) {
                         return;
@@ -156,7 +155,7 @@ final class zzip extends zziq<zzjb.zzf> {
             case 17:
                 zzmrVar.zzb(zzfVar.zzb, entry.getValue(), zzky.zza().zza((Class) entry.getValue().getClass()));
                 return;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 zzmrVar.zza(zzfVar.zzb, entry.getValue(), zzky.zza().zza((Class) entry.getValue().getClass()));
                 return;
             default:

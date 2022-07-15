@@ -203,7 +203,7 @@ public class GooglePlayServicesUtilLight {
         return applicationInfo.enabled && !isRestrictedUserProfile(context);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+    @TargetApi(18)
     public static boolean isRestrictedUserProfile(@RecentlyNonNull Context context) {
         Bundle applicationRestrictions;
         return PlatformVersion.isAtLeastJellyBeanMR2() && (applicationRestrictions = ((UserManager) Preconditions.checkNotNull(context.getSystemService("user"))).getApplicationRestrictions(context.getPackageName())) != null && "true".equals(applicationRestrictions.getString("restricted_profile"));

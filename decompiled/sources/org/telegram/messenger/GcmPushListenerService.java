@@ -353,7 +353,7 @@ public class GcmPushListenerService extends FirebaseMessagingService {
                 return LocaleController.formatString("PushChatReactAudio", R.string.PushChatReactAudio, objArr);
             case 17:
                 return LocaleController.formatString("PushChatReactPhoto", R.string.PushChatReactPhoto, objArr);
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return LocaleController.formatString("PushChatReactRound", R.string.PushChatReactRound, objArr);
             case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 return LocaleController.formatString("PushChatReactVideo", R.string.PushChatReactVideo, objArr);

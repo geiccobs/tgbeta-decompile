@@ -405,7 +405,7 @@ public class TextureRenderer {
     */
     public void surfaceCreated() {
         /*
-            Method dump skipped, instructions count: 1078
+            Method dump skipped, instructions count: 1080
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.video.TextureRenderer.surfaceCreated():void");

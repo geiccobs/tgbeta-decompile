@@ -200,6 +200,7 @@ import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.Cells.PhotoPickerPhotoCell;
 import org.telegram.ui.ChooseSpeedLayout;
 import org.telegram.ui.Components.AlertsCreator;
+import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AnimationProperties;
 import org.telegram.ui.Components.BackupImageView;
@@ -231,6 +232,7 @@ import org.telegram.ui.Components.PhotoViewerWebView;
 import org.telegram.ui.Components.PickerBottomLayoutViewer;
 import org.telegram.ui.Components.PipVideoOverlay;
 import org.telegram.ui.Components.PlayPauseDrawable;
+import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RadialProgressView;
 import org.telegram.ui.Components.RecyclerListView;
@@ -1297,11 +1299,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         L45:
             r6 = 2
             java.lang.CharSequence[] r7 = new java.lang.CharSequence[r6]
-            r8 = 2131627090(0x7f0e0c52, float:1.8881435E38)
+            r8 = 2131627132(0x7f0e0c7c, float:1.888152E38)
             java.lang.String r9 = "Open"
             java.lang.String r8 = org.telegram.messenger.LocaleController.getString(r9, r8)
             r7[r3] = r8
-            r8 = 2131625256(0x7f0e0528, float:1.8877715E38)
+            r8 = 2131625265(0x7f0e0531, float:1.8877733E38)
             java.lang.String r9 = "Copy"
             java.lang.String r8 = org.telegram.messenger.LocaleController.getString(r9, r8)
             r7[r5] = r8
@@ -5752,8 +5754,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             if (!z2 && (chatActivity = this.parentChatActivity) != null) {
                 TLRPC$Chat currentChat = chatActivity.getCurrentChat();
                 if (this.parentChatActivity.getCurrentUser() != null || ((ChatObject.isChannel(currentChat) && currentChat.megagroup) || !ChatObject.isChannel(currentChat))) {
-                    SharedPreferences.Editor edit = MessagesController.getNotificationsSettings(this.currentAccount).edit();
-                    edit.putBoolean("silent_" + this.parentChatActivity.getDialogId(), !z).commit();
+                    MessagesController.getNotificationsSettings(this.currentAccount).edit().putBoolean("silent_" + this.parentChatActivity.getDialogId(), !z).commit();
                 }
             }
             VideoEditedInfo currentVideoEditedInfo = getCurrentVideoEditedInfo();
@@ -5764,6 +5765,13 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 }
             }
             this.doneButtonPressed = true;
+            if (currentVideoEditedInfo != null) {
+                long j = ((float) currentVideoEditedInfo.estimatedSize) * 0.9f;
+                if ((j > FileLoader.DEFAULT_MAX_FILE_SIZE && !UserConfig.getInstance(this.currentAccount).isPremium()) || j > FileLoader.DEFAULT_MAX_FILE_SIZE_PREMIUM) {
+                    new LimitReachedBottomSheet(this.parentAlert.getBaseFragment(), this.parentAlert.getContainer().getContext(), 6, UserConfig.selectedAccount).show();
+                    return;
+                }
+            }
             if (!z2) {
                 this.placeProvider.sendButtonPressed(this.currentIndex, currentVideoEditedInfo, z, i, z3);
             } else {
@@ -5965,6 +5973,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     /* renamed from: org.telegram.ui.PhotoViewer$38 */
     /* loaded from: classes3.dex */
     public class AnonymousClass38 extends SpoilersTextView {
+        private AnimatedEmojiSpan.EmojiGroupedSpans animatedEmojiDrawables;
         private LinkSpanDrawable.LinkCollector links = new LinkSpanDrawable.LinkCollector(this);
         private LinkSpanDrawable<ClickableSpan> pressedLink;
 
@@ -6025,6 +6034,28 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             canvas.restore();
             super.onDraw(canvas);
+        }
+
+        @Override // org.telegram.ui.Components.spoilers.SpoilersTextView, android.widget.TextView
+        public void setText(CharSequence charSequence, TextView.BufferType bufferType) {
+            super.setText(charSequence, bufferType);
+            this.animatedEmojiDrawables = AnimatedEmojiSpan.update(0, this, this.animatedEmojiDrawables, getLayout());
+        }
+
+        @Override // android.view.View
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            AnimatedEmojiSpan.release(this, this.animatedEmojiDrawables);
+        }
+
+        @Override // android.view.View
+        protected void dispatchDraw(Canvas canvas) {
+            super.dispatchDraw(canvas);
+            canvas.save();
+            canvas.translate(getPaddingLeft(), getPaddingTop());
+            canvas.clipRect(0.0f, getScrollY(), getWidth() - getPaddingRight(), (getHeight() + getScrollY()) - (getPaddingBottom() * 0.75f));
+            AnimatedEmojiSpan.drawAnimatedEmojis(canvas, getLayout(), this.animatedEmojiDrawables, 0.0f, null, 0.0f, 0.0f, 0.0f, 1.0f);
+            canvas.restore();
         }
     }
 
@@ -6512,7 +6543,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     public void onUserLeaveHint() {
-        if (this.pipItem.getAlpha() != 1.0f || !AndroidUtilities.checkInlinePermissions(this.parentActivity) || PipVideoOverlay.isVisible()) {
+        if (this.pipItem.getAlpha() != 1.0f || !AndroidUtilities.checkInlinePermissions(this.parentActivity) || PipVideoOverlay.isVisible() || !this.isPlaying) {
             return;
         }
         if (this.isEmbedVideo) {
@@ -12868,7 +12899,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                             }
                         }
                         if (chatActivity2 != null) {
-                            chatActivity2.lambda$openDiscussionMessageChat$227(PhotoViewer.this.animationEndRunnable);
+                            chatActivity2.lambda$openDiscussionMessageChat$228(PhotoViewer.this.animationEndRunnable);
                             return;
                         }
                         PhotoViewer.this.animationEndRunnable.run();
@@ -14372,6 +14403,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     public int selectCompression() {
+        if (this.originalSize > 1048576000) {
+            return this.compressionsCount - 1;
+        }
         SharedPreferences globalMainSettings = MessagesController.getGlobalMainSettings();
         int i = this.compressionsCount;
         while (i < 5) {
@@ -14638,7 +14672,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 File file = new File(uri.getPath());
                 int i2 = UserConfig.selectedAccount;
                 Point point = AndroidUtilities.displaySize;
-                AnimatedFileDrawable animatedFileDrawable = new AnimatedFileDrawable(file, true, 0L, null, null, null, 0L, i2, false, point.x, point.y);
+                AnimatedFileDrawable animatedFileDrawable = new AnimatedFileDrawable(file, true, 0L, null, null, null, 0L, i2, false, point.x, point.y, null);
                 final Bitmap frameAtTime = animatedFileDrawable.getFrameAtTime(0L);
                 animatedFileDrawable.recycle();
                 AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.PhotoViewer$FirstFrameView$$ExternalSyntheticLambda2

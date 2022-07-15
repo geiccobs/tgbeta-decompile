@@ -258,7 +258,7 @@ final class zzgd<T> implements zzgp<T> {
                     }
                     i3 = (i3 * 53) + i6;
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                 case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
@@ -609,7 +609,7 @@ final class zzgd<T> implements zzgp<T> {
                 case 17:
                     zza(t, t2, i);
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                 case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
@@ -926,7 +926,7 @@ final class zzgd<T> implements zzgp<T> {
                             i14 += 3;
                             i11 = 267386880;
                         }
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         zzb3 = zzgr.zzi(i17, zza(t, j2), false);
                         break;
                     case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
@@ -1516,7 +1516,7 @@ final class zzgd<T> implements zzgp<T> {
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     zzb2 = zzgr.zzi(i23, (List) unsafe2.getObject(t, j3), false);
                     i20 += zzb2;
                     j = 0;

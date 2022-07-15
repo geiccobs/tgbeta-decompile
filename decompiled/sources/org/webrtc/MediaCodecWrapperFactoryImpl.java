@@ -81,7 +81,7 @@ class MediaCodecWrapperFactoryImpl implements MediaCodecWrapperFactory {
         }
 
         @Override // org.webrtc.MediaCodecWrapper
-        @TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+        @TargetApi(18)
         public Surface createInputSurface() {
             return this.mediaCodec.createInputSurface();
         }

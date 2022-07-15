@@ -923,7 +923,7 @@ public class GoogleApiManager implements Handler.Callback {
             case 17:
                 zag();
                 break;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 zabq zabqVar = (zabq) message.obj;
                 if (zabqVar.zac == 0) {
                     zah().zaa(new com.google.android.gms.common.internal.zaaa(zabqVar.zab, Arrays.asList(zabqVar.zaa)));

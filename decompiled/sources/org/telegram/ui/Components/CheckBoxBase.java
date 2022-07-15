@@ -14,6 +14,7 @@ import android.text.TextPaint;
 import android.view.View;
 import androidx.annotation.Keep;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.GenericProvider;
 import org.telegram.ui.ActionBar.Theme;
 /* loaded from: classes3.dex */
 public class CheckBoxBase {
@@ -45,6 +46,7 @@ public class CheckBoxBase {
     private String backgroundColorKey = "chat_serviceBackground";
     private String background2ColorKey = "chat_serviceBackground";
     private boolean drawUnchecked = true;
+    private GenericProvider<Void, Paint> circlePaintProvider = CheckBoxBase$$ExternalSyntheticLambda0.INSTANCE;
     public long animationDuration = 200;
 
     /* loaded from: classes3.dex */
@@ -232,7 +234,7 @@ public class CheckBoxBase {
     }
 
     /* JADX WARN: Removed duplicated region for block: B:15:0x0045  */
-    /* JADX WARN: Removed duplicated region for block: B:160:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:162:? A[RETURN, SYNTHETIC] */
     /* JADX WARN: Removed duplicated region for block: B:16:0x0048  */
     /* JADX WARN: Removed duplicated region for block: B:19:0x0066  */
     /* JADX WARN: Removed duplicated region for block: B:35:0x00ef  */
@@ -243,10 +245,14 @@ public class CheckBoxBase {
     */
     public void draw(android.graphics.Canvas r21) {
         /*
-            Method dump skipped, instructions count: 1178
+            Method dump skipped, instructions count: 1193
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.CheckBoxBase.draw(android.graphics.Canvas):void");
+    }
+
+    public void setCirclePaintProvider(GenericProvider<Void, Paint> genericProvider) {
+        this.circlePaintProvider = genericProvider;
     }
 
     private int getThemedColor(String str) {

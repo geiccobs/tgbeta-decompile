@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
 /* loaded from: classes.dex */
 public final class zziu<T extends zziw<T>> {
@@ -398,7 +397,7 @@ public final class zziu<T extends zziw<T>> {
                 return zzii.zzh(((Integer) obj).intValue());
             case 17:
                 return zzii.zzf(((Long) obj).longValue());
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 if (obj instanceof zzje) {
                     return zzii.zzk(((zzje) obj).zza());
                 }

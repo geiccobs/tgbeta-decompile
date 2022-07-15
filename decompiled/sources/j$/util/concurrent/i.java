@@ -1,6 +1,6 @@
 package j$.util.concurrent;
 
-import j$.util.stream.AbstractC0134o1;
+import j$.util.stream.AbstractC0135o1;
 import j$.wrappers.C$r8$wrapper$java$util$stream$IntStream$WRP;
 import j$.wrappers.M0;
 import j$.wrappers.O0;
@@ -100,7 +100,7 @@ public class i extends Random {
 
     @Override // java.util.Random
     public DoubleStream doubles() {
-        return M0.n0(AbstractC0134o1.r(new f(0L, Long.MAX_VALUE, Double.MAX_VALUE, 0.0d), false));
+        return M0.n0(AbstractC0135o1.r(new f(0L, Long.MAX_VALUE, Double.MAX_VALUE, 0.0d), false));
     }
 
     public final int e(int i, int i2) {
@@ -167,7 +167,7 @@ public class i extends Random {
 
     @Override // java.util.Random
     public IntStream ints() {
-        return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0134o1.s(new g(0L, Long.MAX_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID, 0), false));
+        return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0135o1.s(new g(0L, Long.MAX_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID, 0), false));
     }
 
     final long j() {
@@ -178,7 +178,7 @@ public class i extends Random {
 
     @Override // java.util.Random
     public LongStream longs() {
-        return O0.n0(AbstractC0134o1.t(new h(0L, Long.MAX_VALUE, Long.MAX_VALUE, 0L), false));
+        return O0.n0(AbstractC0135o1.t(new h(0L, Long.MAX_VALUE, Long.MAX_VALUE, 0L), false));
     }
 
     @Override // java.util.Random
@@ -266,7 +266,7 @@ public class i extends Random {
     @Override // java.util.Random
     public DoubleStream doubles(double d2, double d3) {
         if (d2 < d3) {
-            return M0.n0(AbstractC0134o1.r(new f(0L, Long.MAX_VALUE, d2, d3), false));
+            return M0.n0(AbstractC0135o1.r(new f(0L, Long.MAX_VALUE, d2, d3), false));
         }
         throw new IllegalArgumentException("bound must be greater than origin");
     }
@@ -274,7 +274,7 @@ public class i extends Random {
     @Override // java.util.Random
     public IntStream ints(int i, int i2) {
         if (i < i2) {
-            return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0134o1.s(new g(0L, Long.MAX_VALUE, i, i2), false));
+            return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0135o1.s(new g(0L, Long.MAX_VALUE, i, i2), false));
         }
         throw new IllegalArgumentException("bound must be greater than origin");
     }
@@ -282,7 +282,7 @@ public class i extends Random {
     @Override // java.util.Random
     public LongStream longs(long j) {
         if (j >= 0) {
-            return O0.n0(AbstractC0134o1.t(new h(0L, j, Long.MAX_VALUE, 0L), false));
+            return O0.n0(AbstractC0135o1.t(new h(0L, j, Long.MAX_VALUE, 0L), false));
         }
         throw new IllegalArgumentException("size must be non-negative");
     }
@@ -290,7 +290,7 @@ public class i extends Random {
     @Override // java.util.Random
     public DoubleStream doubles(long j) {
         if (j >= 0) {
-            return M0.n0(AbstractC0134o1.r(new f(0L, j, Double.MAX_VALUE, 0.0d), false));
+            return M0.n0(AbstractC0135o1.r(new f(0L, j, Double.MAX_VALUE, 0.0d), false));
         }
         throw new IllegalArgumentException("size must be non-negative");
     }
@@ -298,7 +298,7 @@ public class i extends Random {
     @Override // java.util.Random
     public IntStream ints(long j) {
         if (j >= 0) {
-            return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0134o1.s(new g(0L, j, ConnectionsManager.DEFAULT_DATACENTER_ID, 0), false));
+            return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0135o1.s(new g(0L, j, ConnectionsManager.DEFAULT_DATACENTER_ID, 0), false));
         }
         throw new IllegalArgumentException("size must be non-negative");
     }
@@ -306,7 +306,7 @@ public class i extends Random {
     @Override // java.util.Random
     public LongStream longs(long j, long j2) {
         if (j < j2) {
-            return O0.n0(AbstractC0134o1.t(new h(0L, Long.MAX_VALUE, j, j2), false));
+            return O0.n0(AbstractC0135o1.t(new h(0L, Long.MAX_VALUE, j, j2), false));
         }
         throw new IllegalArgumentException("bound must be greater than origin");
     }
@@ -315,7 +315,7 @@ public class i extends Random {
     public DoubleStream doubles(long j, double d2, double d3) {
         if (j >= 0) {
             if (d2 < d3) {
-                return M0.n0(AbstractC0134o1.r(new f(0L, j, d2, d3), false));
+                return M0.n0(AbstractC0135o1.r(new f(0L, j, d2, d3), false));
             }
             throw new IllegalArgumentException("bound must be greater than origin");
         }
@@ -326,7 +326,7 @@ public class i extends Random {
     public IntStream ints(long j, int i, int i2) {
         if (j >= 0) {
             if (i < i2) {
-                return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0134o1.s(new g(0L, j, i, i2), false));
+                return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(AbstractC0135o1.s(new g(0L, j, i, i2), false));
             }
             throw new IllegalArgumentException("bound must be greater than origin");
         }
@@ -337,7 +337,7 @@ public class i extends Random {
     public LongStream longs(long j, long j2, long j3) {
         if (j >= 0) {
             if (j2 < j3) {
-                return O0.n0(AbstractC0134o1.t(new h(0L, j, j2, j3), false));
+                return O0.n0(AbstractC0135o1.t(new h(0L, j, j2, j3), false));
             }
             throw new IllegalArgumentException("bound must be greater than origin");
         }

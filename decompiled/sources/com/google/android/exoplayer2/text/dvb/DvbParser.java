@@ -166,7 +166,7 @@ final class DvbParser {
                     break;
                 }
                 break;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 if (readBits2 == subtitleService.subtitlePageId) {
                     ClutDefinition parseClutDefinition = parseClutDefinition(parsableBitArray, readBits3);
                     subtitleService.cluts.put(parseClutDefinition.id, parseClutDefinition);
@@ -512,7 +512,7 @@ final class DvbParser {
                         i4 = paint4BitPixelCodeString(parsableBitArray, iArr, bArr4, i4, i5, paint, canvas);
                         parsableBitArray.byteAlign();
                         continue;
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         i4 = paint8BitPixelCodeString(parsableBitArray, iArr, null, i4, i5, paint, canvas);
                         continue;
                     default:

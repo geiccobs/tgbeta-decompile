@@ -48,6 +48,8 @@ public abstract class BillingClient {
         return new Builder(context, null);
     }
 
+    public abstract void consumeAsync(ConsumeParams consumeParams, ConsumeResponseListener consumeResponseListener);
+
     public abstract boolean isReady();
 
     public abstract BillingResult launchBillingFlow(Activity activity, BillingFlowParams billingFlowParams);

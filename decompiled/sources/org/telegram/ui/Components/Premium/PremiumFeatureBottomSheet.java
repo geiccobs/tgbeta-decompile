@@ -60,6 +60,7 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
 
     public PremiumFeatureBottomSheet(final BaseFragment baseFragment, int i, final boolean z) {
         super(baseFragment.getParentActivity(), false);
+        fixNavigationBar();
         this.startType = i;
         this.onlySelectedType = z;
         final Activity parentActivity = baseFragment.getParentActivity();

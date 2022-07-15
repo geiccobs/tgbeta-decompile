@@ -403,7 +403,7 @@ public class BottomSheet extends Dialog {
                 int y = (int) motionEvent.getY();
                 this.startedTrackingY = y;
                 if (y < BottomSheet.this.containerView.getTop() || this.startedTrackingX < BottomSheet.this.containerView.getLeft() || this.startedTrackingX > BottomSheet.this.containerView.getRight()) {
-                    BottomSheet.this.dismiss();
+                    BottomSheet.this.onDismissWithTouchOutside();
                     return true;
                 }
                 BottomSheet.this.onScrollUpBegin(this.y);
@@ -1231,6 +1231,10 @@ public class BottomSheet extends Dialog {
 
     public void setApplyBottomPadding(boolean z) {
         this.applyBottomPadding = z;
+    }
+
+    protected void onDismissWithTouchOutside() {
+        dismiss();
     }
 
     public TextView getTitleView() {

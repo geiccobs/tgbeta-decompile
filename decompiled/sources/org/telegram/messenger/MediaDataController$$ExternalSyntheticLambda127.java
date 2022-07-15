@@ -1,7 +1,7 @@
 package org.telegram.messenger;
 
 import java.util.Comparator;
-import org.telegram.tgnet.TLRPC$TL_topPeer;
+import org.telegram.tgnet.TLRPC$MessageEntity;
 /* loaded from: classes.dex */
 public final /* synthetic */ class MediaDataController$$ExternalSyntheticLambda127 implements Comparator {
     public static final /* synthetic */ MediaDataController$$ExternalSyntheticLambda127 INSTANCE = new MediaDataController$$ExternalSyntheticLambda127();
@@ -11,8 +11,8 @@ public final /* synthetic */ class MediaDataController$$ExternalSyntheticLambda1
 
     @Override // java.util.Comparator
     public final int compare(Object obj, Object obj2) {
-        int lambda$increasePeerRaiting$115;
-        lambda$increasePeerRaiting$115 = MediaDataController.lambda$increasePeerRaiting$115((TLRPC$TL_topPeer) obj, (TLRPC$TL_topPeer) obj2);
-        return lambda$increasePeerRaiting$115;
+        int lambda$getTextStyleRuns$142;
+        lambda$getTextStyleRuns$142 = MediaDataController.lambda$getTextStyleRuns$142((TLRPC$MessageEntity) obj, (TLRPC$MessageEntity) obj2);
+        return lambda$getTextStyleRuns$142;
     }
 }

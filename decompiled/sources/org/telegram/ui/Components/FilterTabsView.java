@@ -1158,7 +1158,7 @@ public class FilterTabsView extends FrameLayout {
             r9.requestLayout()
             r9.allTabsWidth = r1
             org.telegram.ui.Components.FilterTabsView$Tab r2 = r9.findDefaultTab()
-            r3 = 2131625829(0x7f0e0765, float:1.8878877E38)
+            r3 = 2131625860(0x7f0e0784, float:1.887894E38)
             java.lang.String r5 = "FilterAllChats"
             java.lang.String r3 = org.telegram.messenger.LocaleController.getString(r5, r3)
             r2.setTitle(r3)

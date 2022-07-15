@@ -76,6 +76,9 @@ public abstract class TLRPC$DocumentAttribute extends TLObject {
                     }
                 };
                 break;
+            case -48981863:
+                tLRPC$DocumentAttribute = new TLRPC$TL_documentAttributeCustomEmoji();
+                break;
             case 85215461:
                 tLRPC$DocumentAttribute = new TLRPC$TL_documentAttributeAudio() { // from class: org.telegram.tgnet.TLRPC$TL_documentAttributeAudio_old
                     public static int constructor = 85215461;

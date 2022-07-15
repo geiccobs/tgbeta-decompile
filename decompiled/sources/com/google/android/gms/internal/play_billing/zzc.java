@@ -12,6 +12,18 @@ public final class zzc extends zzh implements zze {
     }
 
     @Override // com.google.android.gms.internal.play_billing.zze
+    public final int zza(int i, String str, String str2) throws RemoteException {
+        Parcel zzo = zzo();
+        zzo.writeInt(3);
+        zzo.writeString(str);
+        zzo.writeString(str2);
+        Parcel zzp = zzp(5, zzo);
+        int readInt = zzp.readInt();
+        zzp.recycle();
+        return readInt;
+    }
+
+    @Override // com.google.android.gms.internal.play_billing.zze
     public final int zzc(int i, String str, String str2, Bundle bundle) throws RemoteException {
         Parcel zzo = zzo();
         zzo.writeInt(i);
@@ -22,6 +34,19 @@ public final class zzc extends zzh implements zze {
         int readInt = zzp.readInt();
         zzp.recycle();
         return readInt;
+    }
+
+    @Override // com.google.android.gms.internal.play_billing.zze
+    public final Bundle zze(int i, String str, String str2, Bundle bundle) throws RemoteException {
+        Parcel zzo = zzo();
+        zzo.writeInt(9);
+        zzo.writeString(str);
+        zzo.writeString(str2);
+        zzj.zzc(zzo, bundle);
+        Parcel zzp = zzp(12, zzo);
+        Bundle bundle2 = (Bundle) zzj.zza(zzp, Bundle.CREATOR);
+        zzp.recycle();
+        return bundle2;
     }
 
     @Override // com.google.android.gms.internal.play_billing.zze

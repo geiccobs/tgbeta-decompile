@@ -33,7 +33,7 @@ public final class zac {
                 return resources.getString(R$string.common_google_play_services_enable_title);
             case 4:
             case 6:
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return null;
             case 5:
                 Log.e("GoogleApiAvailability", "An invalid account was specified when connecting. Please provide a valid account.");
@@ -110,7 +110,7 @@ public final class zac {
                             return zaa(context, "common_google_play_services_api_unavailable_text", zab2);
                         case 17:
                             return zaa(context, "common_google_play_services_sign_in_failed_text", zab2);
-                        case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                        case 18:
                             return resources.getString(R$string.common_google_play_services_updating_text, zab2);
                         default:
                             return resources.getString(com.google.android.gms.common.R$string.common_google_play_services_unknown_issue, zab2);

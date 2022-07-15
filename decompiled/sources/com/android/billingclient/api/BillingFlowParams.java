@@ -1,7 +1,6 @@
 package com.android.billingclient.api;
 
 import android.text.TextUtils;
-import com.google.android.gms.internal.play_billing.zzu;
 import java.util.ArrayList;
 import java.util.List;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
@@ -11,7 +10,7 @@ public class BillingFlowParams {
     private String zzb;
     private String zzc;
     private SubscriptionUpdateParams zzd;
-    private zzu zze;
+    private com.google.android.gms.internal.play_billing.zzu zze;
     private ArrayList zzf;
     private boolean zzg;
 
@@ -26,7 +25,7 @@ public class BillingFlowParams {
         private SubscriptionUpdateParams.Builder zzf;
 
         public BillingFlowParams build() {
-            zzu zzuVar;
+            com.google.android.gms.internal.play_billing.zzu zzuVar;
             ArrayList arrayList = this.zzd;
             boolean z = true;
             boolean z2 = arrayList != null && !arrayList.isEmpty();
@@ -90,9 +89,9 @@ public class BillingFlowParams {
                     billingFlowParams.zzg = this.zze;
                     List list2 = this.zzc;
                     if (list2 != null) {
-                        zzuVar = zzu.zzk(list2);
+                        zzuVar = com.google.android.gms.internal.play_billing.zzu.zzk(list2);
                     } else {
-                        zzuVar = zzu.zzl();
+                        zzuVar = com.google.android.gms.internal.play_billing.zzu.zzl();
                     }
                     billingFlowParams.zze = zzuVar;
                     return billingFlowParams;

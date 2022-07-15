@@ -12,6 +12,6 @@ public final /* synthetic */ class MediaDataController$$ExternalSyntheticLambda1
 
     @Override // org.telegram.tgnet.RequestDelegate
     public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-        MediaDataController.lambda$removeInline$113(tLObject, tLRPC$TL_error);
+        MediaDataController.lambda$markFaturedStickersAsRead$49(tLObject, tLRPC$TL_error);
     }
 }

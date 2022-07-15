@@ -79,7 +79,6 @@ public class TranscribeButton {
         this.outIconDrawable = rLottieDrawable;
         rLottieDrawable.setCurrentFrame(0);
         this.outIconDrawable.setCallback(chatMessageCell);
-        this.outIconDrawable.addParentView(chatMessageCell);
         this.outIconDrawable.setOnFinishCallback(new Runnable() { // from class: org.telegram.ui.Components.TranscribeButton$$ExternalSyntheticLambda5
             @Override // java.lang.Runnable
             public final void run() {
@@ -91,7 +90,7 @@ public class TranscribeButton {
         this.inIconDrawable = rLottieDrawable2;
         rLottieDrawable2.setCurrentFrame(0);
         this.inIconDrawable.setCallback(chatMessageCell);
-        this.inIconDrawable.addParentView(chatMessageCell);
+        this.inIconDrawable.setMasterParent(chatMessageCell);
         this.inIconDrawable.setOnFinishCallback(new Runnable() { // from class: org.telegram.ui.Components.TranscribeButton$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
@@ -245,12 +244,12 @@ public class TranscribeButton {
             this.inIconDrawable.setLayerColor("Artboard Outlines.**", this.iconColor);
             this.inIconDrawable.commitApplyLayerColors();
             this.inIconDrawable.setAllowDecodeSingleFrame(true);
-            this.inIconDrawable.updateCurrentFrame();
+            this.inIconDrawable.updateCurrentFrame(0L, false);
             this.outIconDrawable.beginApplyLayerColors();
             this.outIconDrawable.setLayerColor("Artboard Outlines.**", this.iconColor);
             this.outIconDrawable.commitApplyLayerColors();
             this.outIconDrawable.setAllowDecodeSingleFrame(true);
-            this.outIconDrawable.updateCurrentFrame();
+            this.outIconDrawable.updateCurrentFrame(0L, false);
         }
         if (this.strokePaint == null) {
             Paint paint = new Paint(1);
@@ -428,7 +427,7 @@ public class TranscribeButton {
             this.lottie.setLayerColor("Comp 1.**", i);
             this.lottie.commitApplyLayerColors();
             this.lottie.setAllowDecodeSingleFrame(true);
-            this.lottie.updateCurrentFrame();
+            this.lottie.updateCurrentFrame(0L, false);
         }
 
         @Override // android.graphics.drawable.Drawable

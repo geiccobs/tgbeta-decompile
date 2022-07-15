@@ -51,6 +51,7 @@ import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneNumber;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneP2P;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyProfilePhoto;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyStatusTimestamp;
+import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyVoiceMessages;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowChatParticipants;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueAllowUsers;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyValueDisallowChatParticipants;
@@ -528,6 +529,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             this.actionBar.setTitle(LocaleController.getString("Calls", R.string.Calls));
         } else if (i == 1) {
             this.actionBar.setTitle(LocaleController.getString("GroupsAndChannels", R.string.GroupsAndChannels));
+        } else if (i == 8) {
+            this.actionBar.setTitle(LocaleController.getString("PrivacyVoiceMessages", R.string.PrivacyVoiceMessages));
         } else {
             this.actionBar.setTitle(LocaleController.getString("PrivacyLastSeen", R.string.PrivacyLastSeen));
         }
@@ -761,6 +764,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyPhoneCall();
         } else if (i == 1) {
             tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyChatInvite();
+        } else if (i == 8) {
+            tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyVoiceMessages();
         } else {
             tLRPC$TL_account_setPrivacy.key = new TLRPC$TL_inputPrivacyKeyStatusTimestamp();
         }
@@ -1025,7 +1030,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         int i11 = i10 + 1;
         this.rowCount = i11;
         this.myContactsRow = i10;
-        if (i7 != 0 && i7 != 2 && i7 != 3 && i7 != 5 && i7 != 6) {
+        if (i7 != 0 && i7 != 2 && i7 != 3 && i7 != 5 && i7 != 6 && i7 != 8) {
             this.nobodyRow = -1;
         } else {
             this.rowCount = i11 + 1;
@@ -1281,7 +1286,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter
         public boolean isEnabled(RecyclerView.ViewHolder viewHolder) {
             int adapterPosition = viewHolder.getAdapterPosition();
-            return adapterPosition == PrivacyControlActivity.this.nobodyRow || adapterPosition == PrivacyControlActivity.this.everybodyRow || adapterPosition == PrivacyControlActivity.this.myContactsRow || adapterPosition == PrivacyControlActivity.this.neverShareRow || adapterPosition == PrivacyControlActivity.this.alwaysShareRow || (adapterPosition == PrivacyControlActivity.this.p2pRow && !ContactsController.getInstance(((BaseFragment) PrivacyControlActivity.this).currentAccount).getLoadingPrivicyInfo(3));
+            return adapterPosition == PrivacyControlActivity.this.nobodyRow || adapterPosition == PrivacyControlActivity.this.everybodyRow || adapterPosition == PrivacyControlActivity.this.myContactsRow || adapterPosition == PrivacyControlActivity.this.neverShareRow || adapterPosition == PrivacyControlActivity.this.alwaysShareRow || (adapterPosition == PrivacyControlActivity.this.p2pRow && !ContactsController.getInstance(((BaseFragment) PrivacyControlActivity.this).currentAccount).getLoadingPrivacyInfo(3));
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
@@ -1335,22 +1340,22 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             return i;
         }
 
-        /* JADX WARN: Code restructure failed: missing block: B:151:0x03c2, code lost:
-            if (org.telegram.ui.PrivacyControlActivity.this.rulesType == 2) goto L128;
+        /* JADX WARN: Code restructure failed: missing block: B:160:0x0406, code lost:
+            if (org.telegram.ui.PrivacyControlActivity.this.rulesType == 2) goto L134;
          */
-        /* JADX WARN: Code restructure failed: missing block: B:153:0x03cc, code lost:
-            if (r12 == org.telegram.ui.PrivacyControlActivity.this.p2pDetailRow) goto L154;
+        /* JADX WARN: Code restructure failed: missing block: B:162:0x0410, code lost:
+            if (r13 == org.telegram.ui.PrivacyControlActivity.this.p2pDetailRow) goto L163;
          */
-        /* JADX WARN: Removed duplicated region for block: B:156:0x03d3  */
-        /* JADX WARN: Removed duplicated region for block: B:211:? A[RETURN, SYNTHETIC] */
+        /* JADX WARN: Removed duplicated region for block: B:165:0x0417  */
+        /* JADX WARN: Removed duplicated region for block: B:221:? A[RETURN, SYNTHETIC] */
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r11, int r12) {
+        public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r12, int r13) {
             /*
-                Method dump skipped, instructions count: 1249
+                Method dump skipped, instructions count: 1317
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.PrivacyControlActivity.ListAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");

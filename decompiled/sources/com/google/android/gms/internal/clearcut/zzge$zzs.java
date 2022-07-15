@@ -91,7 +91,7 @@ public final class zzge$zzs extends zzcg<zzge$zzs, zza> implements zzdq {
                         return GSM;
                     case 17:
                         return TD_SCDMA;
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         return IWLAN;
                     case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                         return LTE_CA;

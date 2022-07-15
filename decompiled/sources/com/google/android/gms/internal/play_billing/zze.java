@@ -6,7 +6,11 @@ import android.os.RemoteException;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
 /* loaded from: classes.dex */
 public interface zze extends IInterface {
+    int zza(int i, String str, String str2) throws RemoteException;
+
     int zzc(int i, String str, String str2, Bundle bundle) throws RemoteException;
+
+    Bundle zze(int i, String str, String str2, Bundle bundle) throws RemoteException;
 
     Bundle zzf(int i, String str, String str2, String str3, String str4) throws RemoteException;
 

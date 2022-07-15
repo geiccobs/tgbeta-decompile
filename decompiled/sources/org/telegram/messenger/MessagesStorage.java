@@ -2051,7 +2051,7 @@ public class MessagesStorage extends BaseController {
                                     }
                                 });
                                 break;
-                            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                            case 18:
                                 final long readInt644 = byteBufferValue.readInt64(false);
                                 byteBufferValue.readInt32(false);
                                 final TLRPC$TL_messages_deleteScheduledMessages TLdeserialize11 = TLRPC$TL_messages_deleteScheduledMessages.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(false), false);
@@ -8823,12 +8823,12 @@ public class MessagesStorage extends BaseController {
             if (tLRPC$MessageMedia.bytes.length != 0) {
                 return;
             }
-            tLRPC$MessageMedia.bytes = Utilities.intToBytes(143);
+            tLRPC$MessageMedia.bytes = Utilities.intToBytes(144);
         } else if (!(tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaUnsupported)) {
         } else {
             TLRPC$TL_messageMediaUnsupported_old tLRPC$TL_messageMediaUnsupported_old = new TLRPC$TL_messageMediaUnsupported_old();
             tLRPC$Message.media = tLRPC$TL_messageMediaUnsupported_old;
-            tLRPC$TL_messageMediaUnsupported_old.bytes = Utilities.intToBytes(143);
+            tLRPC$TL_messageMediaUnsupported_old.bytes = Utilities.intToBytes(144);
             tLRPC$Message.flags |= 512;
         }
     }

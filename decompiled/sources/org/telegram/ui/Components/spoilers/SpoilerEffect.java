@@ -469,7 +469,7 @@ public class SpoilerEffect extends Drawable {
         synchronized (SpoilerEffect.class) {
             int width = layout.getWidth();
             int height = layout.getHeight();
-            if (width != 0 && height != 0) {
+            if (width > 0 && height > 0) {
                 Bitmap createBitmap = Bitmap.createBitmap(Math.round(width), Math.round(height), Bitmap.Config.ARGB_4444);
                 layout.draw(new Canvas(createBitmap));
                 int width2 = createBitmap.getWidth() * createBitmap.getHeight();

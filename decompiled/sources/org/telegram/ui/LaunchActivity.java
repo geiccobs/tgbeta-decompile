@@ -1442,87 +1442,88 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
     /* JADX WARN: Code restructure failed: missing block: B:166:0x0326, code lost:
-        if (r75.sendingText == null) goto L78;
+        if (r81.sendingText == null) goto L78;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:417:0x0938, code lost:
-        if (r7 == 0) goto L418;
+    /* JADX WARN: Code restructure failed: missing block: B:420:0x0974, code lost:
+        if (r7 == 0) goto L421;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:437:0x09c8, code lost:
-        if (r1.intValue() == 0) goto L438;
+    /* JADX WARN: Code restructure failed: missing block: B:440:0x0a06, code lost:
+        if (r1.intValue() == 0) goto L441;
      */
     /* JADX WARN: Code restructure failed: missing block: B:64:0x0153, code lost:
         if (r1.equals(r0) != false) goto L66;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:785:0x1844, code lost:
-        if (r3 == 0) goto L787;
+    /* JADX WARN: Code restructure failed: missing block: B:794:0x1958, code lost:
+        if (r3 == 0) goto L796;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:957:0x1dfa, code lost:
-        if (r1.checkCanOpenChat(r0, r2.get(r2.size() - r5)) != false) goto L958;
+    /* JADX WARN: Code restructure failed: missing block: B:965:0x1f38, code lost:
+        if (r1.checkCanOpenChat(r0, r2.get(r2.size() - r3)) != false) goto L966;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:974:0x1e71, code lost:
-        if (r1.checkCanOpenChat(r0, r2.get(r2.size() - r5)) != false) goto L975;
+    /* JADX WARN: Code restructure failed: missing block: B:982:0x1fb6, code lost:
+        if (r1.checkCanOpenChat(r0, r2.get(r2.size() - r3)) != false) goto L983;
      */
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:1050:0x1fd1  */
-    /* JADX WARN: Removed duplicated region for block: B:1051:0x1fde  */
-    /* JADX WARN: Removed duplicated region for block: B:1054:0x1fec  */
-    /* JADX WARN: Removed duplicated region for block: B:1055:0x1ffd  */
-    /* JADX WARN: Removed duplicated region for block: B:1120:0x2236 A[ADDED_TO_REGION] */
-    /* JADX WARN: Removed duplicated region for block: B:1123:0x223e  */
-    /* JADX WARN: Removed duplicated region for block: B:1134:0x2289  */
-    /* JADX WARN: Removed duplicated region for block: B:1145:0x22d4  */
-    /* JADX WARN: Removed duplicated region for block: B:1147:0x22e0  */
-    /* JADX WARN: Removed duplicated region for block: B:1149:0x22e8  */
-    /* JADX WARN: Removed duplicated region for block: B:1173:0x137a A[EXC_TOP_SPLITTER, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:1182:0x1a95 A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:1060:0x211f  */
+    /* JADX WARN: Removed duplicated region for block: B:1061:0x2131  */
+    /* JADX WARN: Removed duplicated region for block: B:1064:0x213f  */
+    /* JADX WARN: Removed duplicated region for block: B:1065:0x2150  */
+    /* JADX WARN: Removed duplicated region for block: B:1131:0x239e A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:1134:0x23a6  */
+    /* JADX WARN: Removed duplicated region for block: B:1145:0x23f1  */
+    /* JADX WARN: Removed duplicated region for block: B:1156:0x243c  */
+    /* JADX WARN: Removed duplicated region for block: B:1158:0x2448  */
+    /* JADX WARN: Removed duplicated region for block: B:1160:0x2450  */
+    /* JADX WARN: Removed duplicated region for block: B:1189:0x1bb3 A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:1209:0x1421 A[EXC_TOP_SPLITTER, SYNTHETIC] */
     /* JADX WARN: Removed duplicated region for block: B:165:0x0324  */
     /* JADX WARN: Removed duplicated region for block: B:169:0x032d  */
-    /* JADX WARN: Removed duplicated region for block: B:197:0x03c6  */
-    /* JADX WARN: Removed duplicated region for block: B:264:0x04f3  */
-    /* JADX WARN: Removed duplicated region for block: B:334:0x06c1  */
-    /* JADX WARN: Removed duplicated region for block: B:374:0x07b3 A[Catch: Exception -> 0x07c1, TRY_LEAVE, TryCatch #26 {Exception -> 0x07c1, blocks: (B:372:0x07a7, B:374:0x07b3), top: B:1218:0x07a7 }] */
-    /* JADX WARN: Removed duplicated region for block: B:375:0x07c0  */
+    /* JADX WARN: Removed duplicated region for block: B:197:0x03e5  */
+    /* JADX WARN: Removed duplicated region for block: B:264:0x0512  */
+    /* JADX WARN: Removed duplicated region for block: B:334:0x06dc  */
+    /* JADX WARN: Removed duplicated region for block: B:374:0x07ce A[Catch: Exception -> 0x07dc, TRY_LEAVE, TryCatch #7 {Exception -> 0x07dc, blocks: (B:372:0x07c2, B:374:0x07ce), top: B:1195:0x07c2 }] */
+    /* JADX WARN: Removed duplicated region for block: B:375:0x07db  */
     /* JADX WARN: Removed duplicated region for block: B:63:0x014f  */
-    /* JADX WARN: Removed duplicated region for block: B:779:0x17b5 A[Catch: Exception -> 0x17c3, TRY_LEAVE, TryCatch #25 {Exception -> 0x17c3, blocks: (B:777:0x17a9, B:779:0x17b5), top: B:1216:0x17a9 }] */
-    /* JADX WARN: Removed duplicated region for block: B:803:0x1973  */
+    /* JADX WARN: Removed duplicated region for block: B:788:0x18c9 A[Catch: Exception -> 0x18d7, TRY_LEAVE, TryCatch #17 {Exception -> 0x18d7, blocks: (B:786:0x18bd, B:788:0x18c9), top: B:1212:0x18bd }] */
+    /* JADX WARN: Removed duplicated region for block: B:812:0x1a8c  */
+    /* JADX WARN: Removed duplicated region for block: B:824:0x1ad0  */
     /* JADX WARN: Removed duplicated region for block: B:86:0x01bd  */
-    /* JADX WARN: Removed duplicated region for block: B:885:0x1b63  */
-    /* JADX WARN: Removed duplicated region for block: B:886:0x1b73  */
-    /* JADX WARN: Removed duplicated region for block: B:935:0x1d93  */
-    /* JADX WARN: Removed duplicated region for block: B:949:0x1dc6  */
+    /* JADX WARN: Removed duplicated region for block: B:896:0x1c7a  */
+    /* JADX WARN: Removed duplicated region for block: B:897:0x1c8a  */
+    /* JADX WARN: Removed duplicated region for block: B:944:0x1ed5  */
     /* JADX WARN: Removed duplicated region for block: B:94:0x01e8  */
-    /* JADX WARN: Removed duplicated region for block: B:966:0x1e3e  */
+    /* JADX WARN: Removed duplicated region for block: B:957:0x1f04  */
+    /* JADX WARN: Removed duplicated region for block: B:974:0x1f81  */
     /* JADX WARN: Removed duplicated region for block: B:99:0x01f6  */
-    /* JADX WARN: Type inference failed for: r0v55, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
-    /* JADX WARN: Type inference failed for: r0v68, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
-    /* JADX WARN: Type inference failed for: r0v72, types: [android.os.Bundle] */
-    /* JADX WARN: Type inference failed for: r0v77, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
-    /* JADX WARN: Type inference failed for: r0v81, types: [android.os.Bundle] */
-    /* JADX WARN: Type inference failed for: r0v83, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
-    /* JADX WARN: Type inference failed for: r0v88, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
-    /* JADX WARN: Type inference failed for: r10v2, types: [android.os.Bundle, java.lang.String] */
-    /* JADX WARN: Type inference failed for: r10v6 */
-    /* JADX WARN: Type inference failed for: r10v7 */
-    /* JADX WARN: Type inference failed for: r10v71 */
-    /* JADX WARN: Type inference failed for: r10v80 */
+    /* JADX WARN: Type inference failed for: r0v52, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
+    /* JADX WARN: Type inference failed for: r0v58, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
+    /* JADX WARN: Type inference failed for: r0v62, types: [android.os.Bundle] */
+    /* JADX WARN: Type inference failed for: r0v66, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
+    /* JADX WARN: Type inference failed for: r0v70, types: [android.os.Bundle] */
+    /* JADX WARN: Type inference failed for: r0v72, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
+    /* JADX WARN: Type inference failed for: r0v78, types: [org.telegram.ui.ActionBar.DrawerLayoutContainer] */
+    /* JADX WARN: Type inference failed for: r11v1, types: [android.content.Intent] */
     /* JADX WARN: Type inference failed for: r1v157, types: [org.telegram.tgnet.TLRPC$TL_wallPaper, org.telegram.tgnet.TLRPC$WallPaper] */
-    /* JADX WARN: Type inference failed for: r1v377, types: [org.telegram.tgnet.TLRPC$TL_wallPaper, org.telegram.tgnet.TLRPC$WallPaper] */
-    /* JADX WARN: Type inference failed for: r2v108, types: [java.lang.Long] */
+    /* JADX WARN: Type inference failed for: r1v385, types: [org.telegram.tgnet.TLRPC$TL_wallPaper, org.telegram.tgnet.TLRPC$WallPaper] */
+    /* JADX WARN: Type inference failed for: r2v109, types: [java.lang.Long] */
+    /* JADX WARN: Type inference failed for: r3v0, types: [int, boolean] */
+    /* JADX WARN: Type inference failed for: r3v11 */
+    /* JADX WARN: Type inference failed for: r3v14 */
+    /* JADX WARN: Type inference failed for: r3v15 */
     /* JADX WARN: Type inference failed for: r3v198, types: [java.lang.Long] */
-    /* JADX WARN: Type inference failed for: r5v11 */
-    /* JADX WARN: Type inference failed for: r5v14 */
-    /* JADX WARN: Type inference failed for: r5v15 */
-    /* JADX WARN: Type inference failed for: r5v2, types: [int, boolean] */
-    /* JADX WARN: Type inference failed for: r5v9 */
-    /* JADX WARN: Type inference failed for: r76v0, types: [android.content.Intent] */
+    /* JADX WARN: Type inference failed for: r3v9 */
+    /* JADX WARN: Type inference failed for: r8v10 */
+    /* JADX WARN: Type inference failed for: r8v3, types: [android.os.Bundle, java.lang.String] */
+    /* JADX WARN: Type inference failed for: r8v46 */
+    /* JADX WARN: Type inference failed for: r8v57 */
+    /* JADX WARN: Type inference failed for: r8v8 */
     @android.annotation.SuppressLint({"Range"})
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    private boolean handleIntent(android.content.Intent r76, boolean r77, boolean r78, boolean r79) {
+    private boolean handleIntent(android.content.Intent r82, boolean r83, boolean r84, boolean r85) {
         /*
-            Method dump skipped, instructions count: 8986
+            Method dump skipped, instructions count: 9344
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.LaunchActivity.handleIntent(android.content.Intent, boolean, boolean, boolean):boolean");
@@ -1797,7 +1798,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             org.telegram.ui.ActionBar.BaseFragment r0 = (org.telegram.ui.ActionBar.BaseFragment) r0     // Catch: java.lang.Exception -> Lbe
             org.telegram.ui.Components.BulletinFactory r0 = org.telegram.ui.Components.BulletinFactory.of(r0)     // Catch: java.lang.Exception -> Lbe
             java.lang.String r2 = "ChannelPostDeleted"
-            r3 = 2131624945(0x7f0e03f1, float:1.8877084E38)
+            r3 = 2131624954(0x7f0e03fa, float:1.8877102E38)
             java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r2, r3)     // Catch: java.lang.Exception -> Lbe
             org.telegram.ui.Components.Bulletin r0 = r0.createErrorBulletin(r2)     // Catch: java.lang.Exception -> Lbe
             r0.show()     // Catch: java.lang.Exception -> Lbe
@@ -1938,26 +1939,26 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:101:0x0469  */
-    /* JADX WARN: Removed duplicated region for block: B:113:? A[RETURN, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:79:0x0365  */
+    /* JADX WARN: Removed duplicated region for block: B:118:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:71:0x030d  */
+    /* JADX WARN: Removed duplicated region for block: B:93:0x040f  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    private void runLinkRequest(final int r34, final java.lang.String r35, final java.lang.String r36, final java.lang.String r37, final java.lang.String r38, final java.lang.String r39, final java.lang.String r40, final java.lang.String r41, final java.lang.String r42, final boolean r43, final java.lang.Integer r44, final java.lang.Long r45, final java.lang.Integer r46, final java.lang.Integer r47, final java.lang.String r48, final java.util.HashMap<java.lang.String, java.lang.String> r49, final java.lang.String r50, final java.lang.String r51, final java.lang.String r52, final java.lang.String r53, final org.telegram.tgnet.TLRPC$TL_wallPaper r54, final java.lang.String r55, final java.lang.String r56, final java.lang.String r57, final java.lang.String r58, int r59, final int r60, final java.lang.String r61, final java.lang.String r62, final java.lang.String r63) {
+    private void runLinkRequest(final int r35, final java.lang.String r36, final java.lang.String r37, final java.lang.String r38, final java.lang.String r39, final java.lang.String r40, final java.lang.String r41, final java.lang.String r42, final java.lang.String r43, final java.lang.String r44, final boolean r45, final java.lang.Integer r46, final java.lang.Long r47, final java.lang.Integer r48, final java.lang.Integer r49, final java.lang.String r50, final java.util.HashMap<java.lang.String, java.lang.String> r51, final java.lang.String r52, final java.lang.String r53, final java.lang.String r54, final java.lang.String r55, final org.telegram.tgnet.TLRPC$TL_wallPaper r56, final java.lang.String r57, final java.lang.String r58, final java.lang.String r59, final java.lang.String r60, int r61, final int r62, final java.lang.String r63, final java.lang.String r64, final java.lang.String r65) {
         /*
-            Method dump skipped, instructions count: 1143
+            Method dump skipped, instructions count: 1160
             To view this dump add '--comments-level debug' option
         */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.LaunchActivity.runLinkRequest(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.Integer, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.String, java.util.HashMap, java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.telegram.tgnet.TLRPC$TL_wallPaper, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, int, java.lang.String, java.lang.String, java.lang.String):void");
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.LaunchActivity.runLinkRequest(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.Integer, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.String, java.util.HashMap, java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.telegram.tgnet.TLRPC$TL_wallPaper, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, int, java.lang.String, java.lang.String, java.lang.String):void");
     }
 
-    public /* synthetic */ void lambda$runLinkRequest$28(int i, String str, String str2, String str3, String str4, String str5, String str6, String str7, String str8, boolean z, Integer num, Long l, Integer num2, Integer num3, String str9, HashMap hashMap, String str10, String str11, String str12, String str13, TLRPC$TL_wallPaper tLRPC$TL_wallPaper, String str14, String str15, String str16, String str17, int i2, String str18, String str19, String str20, int i3) {
+    public /* synthetic */ void lambda$runLinkRequest$28(int i, String str, String str2, String str3, String str4, String str5, String str6, String str7, String str8, String str9, boolean z, Integer num, Long l, Integer num2, Integer num3, String str10, HashMap hashMap, String str11, String str12, String str13, String str14, TLRPC$TL_wallPaper tLRPC$TL_wallPaper, String str15, String str16, String str17, String str18, int i2, String str19, String str20, String str21, int i3) {
         if (i3 != i) {
             switchToAccount(i3, true);
         }
-        runLinkRequest(i3, str, str2, str3, str4, str5, str6, str7, str8, z, num, l, num2, num3, str9, hashMap, str10, str11, str12, str13, tLRPC$TL_wallPaper, str14, str15, str16, str17, 1, i2, str18, str19, str20);
+        runLinkRequest(i3, str, str2, str3, str4, str5, str6, str7, str8, str9, z, num, l, num2, num3, str10, hashMap, str11, str12, str13, str14, tLRPC$TL_wallPaper, str15, str16, str17, str18, 1, i2, str19, str20, str21);
     }
 
     public /* synthetic */ void lambda$runLinkRequest$30(final int i, final String str, final AlertDialog alertDialog, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
@@ -2909,11 +2910,11 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             r6 = move-exception
             org.telegram.messenger.FileLog.e(r6)
         La3:
-            r6 = 2131628598(0x7f0e1236, float:1.8884493E38)
+            r6 = 2131628652(0x7f0e126c, float:1.8884603E38)
             java.lang.String r7 = "Theme"
             if (r2 != r1) goto Lbf
             java.lang.String r6 = org.telegram.messenger.LocaleController.getString(r7, r6)
-            r7 = 2131628620(0x7f0e124c, float:1.8884538E38)
+            r7 = 2131628674(0x7f0e1282, float:1.8884647E38)
             java.lang.String r8 = "ThemeNotSupported"
             java.lang.String r7 = org.telegram.messenger.LocaleController.getString(r8, r7)
             org.telegram.ui.ActionBar.AlertDialog$Builder r6 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r5, r6, r7)
@@ -2921,7 +2922,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             goto Ld3
         Lbf:
             java.lang.String r6 = org.telegram.messenger.LocaleController.getString(r7, r6)
-            r7 = 2131628619(0x7f0e124b, float:1.8884536E38)
+            r7 = 2131628673(0x7f0e1281, float:1.8884645E38)
             java.lang.String r8 = "ThemeNotFound"
             java.lang.String r7 = org.telegram.messenger.LocaleController.getString(r8, r7)
             org.telegram.ui.ActionBar.AlertDialog$Builder r6 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r5, r6, r7)
@@ -2987,7 +2988,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             r1 = r0
             org.telegram.messenger.FileLog.e(r1)
         L40:
-            r0 = 2131626456(0x7f0e09d8, float:1.8880149E38)
+            r0 = 2131626493(0x7f0e09fd, float:1.8880224E38)
             java.lang.String r1 = "LinkNotFound"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             org.telegram.ui.ActionBar.AlertDialog$Builder r0 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r10, r0)

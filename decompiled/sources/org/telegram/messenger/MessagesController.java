@@ -2891,7 +2891,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         } else {
                             break;
                         }
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         tLRPC$TL_jsonObject = tLRPC$TL_jsonObject5;
                         i = size;
                         TLRPC$JSONValue tLRPC$JSONValue23 = tLRPC$TL_jsonObjectValue.value;
@@ -3734,7 +3734,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     private boolean savePremiumFeaturesPreviewOrder(SharedPreferences.Editor editor, ArrayList<TLRPC$JSONValue> arrayList) {
-        int severStringToFeatureType;
+        int serverStringToFeatureType;
         StringBuilder sb = new StringBuilder();
         this.premiumFeaturesTypesToPosition.clear();
         boolean z = false;
@@ -3747,12 +3747,12 @@ public class MessagesController extends BaseController implements NotificationCe
             if (arrayList.get(i) instanceof TLRPC$TL_jsonString) {
                 str = ((TLRPC$TL_jsonString) arrayList.get(i)).value;
             }
-            if (str != null && (severStringToFeatureType = PremiumPreviewFragment.severStringToFeatureType(str)) >= 0) {
-                this.premiumFeaturesTypesToPosition.put(severStringToFeatureType, i);
+            if (str != null && (serverStringToFeatureType = PremiumPreviewFragment.serverStringToFeatureType(str)) >= 0) {
+                this.premiumFeaturesTypesToPosition.put(serverStringToFeatureType, i);
                 if (sb.length() > 0) {
                     sb.append('_');
                 }
-                sb.append(severStringToFeatureType);
+                sb.append(serverStringToFeatureType);
             }
             i++;
         }
@@ -9212,10 +9212,10 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     /* JADX WARN: Code restructure failed: missing block: B:152:0x03e7, code lost:
-        if (r1[0] >= 143) goto L154;
+        if (r1[0] >= 144) goto L154;
      */
     /* JADX WARN: Code restructure failed: missing block: B:157:0x03f6, code lost:
-        if (org.telegram.messenger.Utilities.bytesToInt(r1) < 143) goto L158;
+        if (org.telegram.messenger.Utilities.bytesToInt(r1) < 144) goto L158;
      */
     /* JADX WARN: Removed duplicated region for block: B:123:0x033a  */
     /* JADX WARN: Removed duplicated region for block: B:126:0x033f  */
@@ -11842,20 +11842,18 @@ public class MessagesController extends BaseController implements NotificationCe
                     MessagesController.this.lambda$toggleChatJoinToSend$228();
                 }
             });
-            if (runnable != null) {
-                runnable.run();
+            if (runnable == null) {
+                return;
             }
-        }
-        if (tLRPC$TL_error != null) {
-            if (!"CHAT_NOT_MODIFIED".equals(tLRPC$TL_error.text)) {
-                if (runnable2 == null) {
-                    return;
-                }
-                runnable2.run();
-            } else if (tLObject != null || runnable == null) {
-            } else {
-                runnable.run();
+            runnable.run();
+        } else if (tLRPC$TL_error == null || "CHAT_NOT_MODIFIED".equals(tLRPC$TL_error.text)) {
+            if (runnable == null) {
+                return;
             }
+            runnable.run();
+        } else if (runnable2 == null) {
+        } else {
+            runnable2.run();
         }
     }
 
@@ -11884,20 +11882,18 @@ public class MessagesController extends BaseController implements NotificationCe
                     MessagesController.this.lambda$toggleChatJoinRequest$230();
                 }
             });
-            if (runnable != null) {
-                runnable.run();
+            if (runnable == null) {
+                return;
             }
-        }
-        if (tLRPC$TL_error != null) {
-            if (!"CHAT_NOT_MODIFIED".equals(tLRPC$TL_error.text)) {
-                if (runnable2 == null) {
-                    return;
-                }
-                runnable2.run();
-            } else if (tLObject != null || runnable == null) {
-            } else {
-                runnable.run();
+            runnable.run();
+        } else if (tLRPC$TL_error == null || "CHAT_NOT_MODIFIED".equals(tLRPC$TL_error.text)) {
+            if (runnable == null) {
+                return;
             }
+            runnable.run();
+        } else if (runnable2 == null) {
+        } else {
+            runnable2.run();
         }
     }
 
@@ -14719,22 +14715,22 @@ public class MessagesController extends BaseController implements NotificationCe
         }
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:590:0x0e5e  */
-    /* JADX WARN: Removed duplicated region for block: B:595:0x0e7a  */
-    /* JADX WARN: Removed duplicated region for block: B:633:0x0f5d  */
-    /* JADX WARN: Removed duplicated region for block: B:635:0x0f6b  */
-    /* JADX WARN: Removed duplicated region for block: B:637:0x0f71  */
-    /* JADX WARN: Removed duplicated region for block: B:640:0x0f7d  */
-    /* JADX WARN: Removed duplicated region for block: B:649:0x0fb9  */
-    /* JADX WARN: Removed duplicated region for block: B:652:0x0fcf  */
-    /* JADX WARN: Removed duplicated region for block: B:758:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:600:0x0e7a  */
+    /* JADX WARN: Removed duplicated region for block: B:605:0x0e96  */
+    /* JADX WARN: Removed duplicated region for block: B:643:0x0f79  */
+    /* JADX WARN: Removed duplicated region for block: B:645:0x0f87  */
+    /* JADX WARN: Removed duplicated region for block: B:647:0x0f8d  */
+    /* JADX WARN: Removed duplicated region for block: B:650:0x0f99  */
+    /* JADX WARN: Removed duplicated region for block: B:659:0x0fd5  */
+    /* JADX WARN: Removed duplicated region for block: B:662:0x0feb  */
+    /* JADX WARN: Removed duplicated region for block: B:768:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public /* synthetic */ void lambda$processUpdateArray$327(int r45, java.util.ArrayList r46, androidx.collection.LongSparseArray r47, int r48, org.telegram.messenger.support.LongSparseIntArray r49, androidx.collection.LongSparseArray r50, androidx.collection.LongSparseArray r51, java.util.ArrayList r52, androidx.collection.LongSparseArray r53, androidx.collection.LongSparseArray r54, boolean r55, java.util.ArrayList r56, java.util.ArrayList r57, androidx.collection.LongSparseArray r58, androidx.collection.LongSparseArray r59, androidx.collection.LongSparseArray r60, java.util.ArrayList r61) {
         /*
-            Method dump skipped, instructions count: 4055
+            Method dump skipped, instructions count: 4083
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesController.lambda$processUpdateArray$327(int, java.util.ArrayList, androidx.collection.LongSparseArray, int, org.telegram.messenger.support.LongSparseIntArray, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray, java.util.ArrayList, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray, boolean, java.util.ArrayList, java.util.ArrayList, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray, java.util.ArrayList):void");

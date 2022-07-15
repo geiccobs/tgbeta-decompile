@@ -93,6 +93,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         int i3;
         int i4;
         Theme.MessageDrawable currentBackgroundDrawable;
+        int i5;
         this.drawBitmaps = false;
         this.animationIndex = -1;
         this.resourcesProvider = resourcesProvider;
@@ -144,17 +145,18 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         z = false;
         if (text.length() != charSequence.length() || z) {
             this.crossfade = true;
-            String charSequence2 = text.toString();
-            String trim = charSequence2.trim();
-            int indexOf = charSequence2.indexOf(trim);
-            if (indexOf > 0) {
-                i = chatActivityEnterView.getEditField().getLayout().getLineTop(chatActivityEnterView.getEditField().getLayout().getLineForOffset(indexOf));
-                i2 = chatActivityEnterView.getEditField().getLayout().getLineBottom(chatActivityEnterView.getEditField().getLayout().getLineForOffset(indexOf + trim.length())) - i;
+            int[] iArr = new int[1];
+            CharSequence trim = AndroidUtilities.trim(text, iArr);
+            if (iArr[0] > 0) {
+                i = chatActivityEnterView.getEditField().getLayout().getLineTop(chatActivityEnterView.getEditField().getLayout().getLineForOffset(iArr[0]));
+                i5 = chatActivityEnterView.getEditField().getLayout().getLineBottom(chatActivityEnterView.getEditField().getLayout().getLineForOffset(iArr[0] + trim.length())) - i;
             } else {
-                i2 = height;
+                i5 = height;
                 i = 0;
             }
-            charSequence = Emoji.replaceEmoji(trim, textPaint.getFontMetricsInt(), dp, false);
+            int i6 = i5;
+            charSequence = Emoji.replaceEmoji(text, textPaint.getFontMetricsInt(), dp, false);
+            i2 = i6;
         } else {
             i2 = height;
             i = 0;
@@ -172,8 +174,8 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         this.fromStartY = ((AndroidUtilities.dp(10.0f) + y) - chatActivityEnterView.getEditField().getScrollY()) + i;
         this.toXOffset = 0.0f;
         float f2 = Float.MAX_VALUE;
-        for (int i5 = 0; i5 < this.layout.getLineCount(); i5++) {
-            float lineLeft = this.layout.getLineLeft(i5);
+        for (int i7 = 0; i7 < this.layout.getLineCount(); i7++) {
+            float lineLeft = this.layout.getLineLeft(i7);
             if (lineLeft < f2) {
                 f2 = lineLeft;
             }
@@ -198,23 +200,23 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         this.toColor = getThemedColor("chat_messageTextOut");
         if (staticLayout.getLineCount() == this.layout.getLineCount()) {
             lineCount = staticLayout.getLineCount();
-            int i6 = 0;
+            int i8 = 0;
             i4 = 0;
             i3 = 0;
             while (true) {
-                if (i6 >= lineCount) {
+                if (i8 >= lineCount) {
                     break;
                 }
-                if (isRtlLine(this.layout, i6)) {
+                if (isRtlLine(this.layout, i8)) {
                     i3++;
                 } else {
                     i4++;
                 }
-                if (staticLayout.getLineEnd(i6) != this.layout.getLineEnd(i6)) {
+                if (staticLayout.getLineEnd(i8) != this.layout.getLineEnd(i8)) {
                     this.crossfade = true;
                     break;
                 }
-                i6++;
+                i8++;
             }
         } else {
             this.crossfade = true;
@@ -225,13 +227,13 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
             SpannableString spannableString = new SpannableString(charSequence);
             SpannableString spannableString2 = new SpannableString(charSequence);
             float f3 = Float.MAX_VALUE;
-            for (int i7 = 0; i7 < lineCount; i7++) {
-                if (isRtlLine(this.layout, i7)) {
-                    spannableString.setSpan(new EmptyStubSpan(), this.layout.getLineStart(i7), this.layout.getLineEnd(i7), 0);
-                    float lineLeft2 = this.layout.getLineLeft(i7);
+            for (int i9 = 0; i9 < lineCount; i9++) {
+                if (isRtlLine(this.layout, i9)) {
+                    spannableString.setSpan(new EmptyStubSpan(), this.layout.getLineStart(i9), this.layout.getLineEnd(i9), 0);
+                    float lineLeft2 = this.layout.getLineLeft(i9);
                     f3 = lineLeft2 < f3 ? lineLeft2 : f3;
                 } else {
-                    spannableString2.setSpan(new EmptyStubSpan(), this.layout.getLineStart(i7), this.layout.getLineEnd(i7), 0);
+                    spannableString2.setSpan(new EmptyStubSpan(), this.layout.getLineStart(i9), this.layout.getLineEnd(i9), 0);
                 }
             }
             if (Build.VERSION.SDK_INT >= 24) {
@@ -345,12 +347,12 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         return layout.getLineRight(i) == ((float) layout.getWidth()) && layout.getLineLeft(i) != 0.0f;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:65:0x0353  */
-    /* JADX WARN: Removed duplicated region for block: B:66:0x0360  */
-    /* JADX WARN: Removed duplicated region for block: B:69:0x0392  */
-    /* JADX WARN: Removed duplicated region for block: B:72:0x03f8  */
-    /* JADX WARN: Removed duplicated region for block: B:75:0x043d  */
-    /* JADX WARN: Removed duplicated region for block: B:78:0x0453  */
+    /* JADX WARN: Removed duplicated region for block: B:65:0x0359  */
+    /* JADX WARN: Removed duplicated region for block: B:66:0x0366  */
+    /* JADX WARN: Removed duplicated region for block: B:69:0x0398  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x03fe  */
+    /* JADX WARN: Removed duplicated region for block: B:75:0x0443  */
+    /* JADX WARN: Removed duplicated region for block: B:78:0x0459  */
     @Override // org.telegram.ui.MessageEnterTransitionContainer.Transition
     /*
         Code decompiled incorrectly, please refer to instructions dump.
@@ -358,7 +360,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
     */
     public void onDraw(android.graphics.Canvas r38) {
         /*
-            Method dump skipped, instructions count: 1954
+            Method dump skipped, instructions count: 1965
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.TextMessageEnterTransition.onDraw(android.graphics.Canvas):void");

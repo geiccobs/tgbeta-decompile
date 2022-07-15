@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.telegram.messenger.R;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* loaded from: classes.dex */
 public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
@@ -215,7 +214,7 @@ public final class zzby<FieldDescriptorType extends zzca<FieldDescriptorType>> {
                 return zzbn.zzu(((Integer) obj).intValue());
             case 17:
                 return zzbn.zzg(((Long) obj).longValue());
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return obj instanceof zzcj ? zzbn.zzx(((zzcj) obj).zzc()) : zzbn.zzx(((Integer) obj).intValue());
             default:
                 throw new RuntimeException("There is no way to get here, but the compiler thinks otherwise.");

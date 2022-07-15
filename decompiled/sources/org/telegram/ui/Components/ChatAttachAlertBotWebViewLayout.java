@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import androidx.core.math.MathUtils;
 import androidx.core.util.Consumer;
 import androidx.core.view.GestureDetectorCompat;
@@ -26,6 +28,7 @@ import androidx.recyclerview.widget.ChatListItemAnimator;
 import java.util.Iterator;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.GenericProvider;
 import org.telegram.messenger.LocaleController;
@@ -45,10 +48,12 @@ import org.telegram.tgnet.TLRPC$TL_error;
 import org.telegram.tgnet.TLRPC$TL_messages_prolongWebView;
 import org.telegram.tgnet.TLRPC$TL_messages_requestWebView;
 import org.telegram.tgnet.TLRPC$TL_webViewResultUrl;
+import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
@@ -66,10 +71,11 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
     private boolean ignoreMeasure;
     private boolean isBotButtonAvailable;
     private int measureOffsetY;
+    private boolean needCloseConfirmation;
     private boolean needReload;
     private ActionBarMenuItem otherItem;
     private long peerId;
-    private Runnable pollRunnable = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda4
+    private Runnable pollRunnable = new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda5
         @Override // java.lang.Runnable
         public final void run() {
             ChatAttachAlertBotWebViewLayout.this.lambda$new$2();
@@ -113,7 +119,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
                 tLRPC$TL_messages_prolongWebView.send_as = MessagesController.getInstance(this.currentAccount).getInputPeer(tLRPC$Peer);
                 tLRPC$TL_messages_prolongWebView.flags |= 8192;
             }
-            ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_messages_prolongWebView, new RequestDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda11
+            ConnectionsManager.getInstance(this.currentAccount).sendRequest(tLRPC$TL_messages_prolongWebView, new RequestDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda12
                 @Override // org.telegram.tgnet.RequestDelegate
                 public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
                     ChatAttachAlertBotWebViewLayout.this.lambda$new$1(tLObject, tLRPC$TL_error);
@@ -123,7 +129,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
     }
 
     public /* synthetic */ void lambda$new$1(TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda9
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda10
             @Override // java.lang.Runnable
             public final void run() {
                 ChatAttachAlertBotWebViewLayout.this.lambda$new$0(tLRPC$TL_error);
@@ -154,10 +160,10 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
             @Override // org.telegram.ui.ActionBar.ActionBar.ActionBarMenuOnItemClick
             public void onItemClick(int i) {
                 if (i == -1) {
-                    if (ChatAttachAlertBotWebViewLayout.this.onBackPressed()) {
+                    if (ChatAttachAlertBotWebViewLayout.this.webViewContainer.onBackPressed()) {
                         return;
                     }
-                    ChatAttachAlertBotWebViewLayout.this.parentAlert.dismiss();
+                    ChatAttachAlertBotWebViewLayout.this.onCheckDismissByUser();
                 } else if (i == R.id.menu_open_bot) {
                     Bundle bundle = new Bundle();
                     bundle.putLong("user_id", ChatAttachAlertBotWebViewLayout.this.botId);
@@ -210,25 +216,25 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         };
         this.swipeContainer = webViewSwipeContainer;
         webViewSwipeContainer.addView(this.webViewContainer, LayoutHelper.createFrame(-1, -1.0f));
-        this.swipeContainer.setScrollListener(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda6
+        this.swipeContainer.setScrollListener(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda7
             @Override // java.lang.Runnable
             public final void run() {
                 ChatAttachAlertBotWebViewLayout.this.lambda$new$3();
             }
         });
-        this.swipeContainer.setScrollEndListener(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda7
+        this.swipeContainer.setScrollEndListener(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda8
             @Override // java.lang.Runnable
             public final void run() {
                 ChatAttachAlertBotWebViewLayout.this.lambda$new$4();
             }
         });
-        this.swipeContainer.setDelegate(new WebViewSwipeContainer.Delegate() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda13
+        this.swipeContainer.setDelegate(new WebViewSwipeContainer.Delegate() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda14
             @Override // org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout.WebViewSwipeContainer.Delegate
             public final void onDismiss() {
                 ChatAttachAlertBotWebViewLayout.this.lambda$new$5();
             }
         });
-        this.swipeContainer.setIsKeyboardVisible(new GenericProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda10
+        this.swipeContainer.setIsKeyboardVisible(new GenericProvider() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda11
             @Override // org.telegram.messenger.GenericProvider
             public final Object provide(Object obj) {
                 Boolean lambda$new$6;
@@ -240,7 +246,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         WebProgressView webProgressView = new WebProgressView(context, resourcesProvider);
         this.progressView = webProgressView;
         addView(webProgressView, LayoutHelper.createFrame(-1, -2.0f, 80, 0.0f, 0.0f, 0.0f, 84.0f));
-        this.webViewContainer.setWebViewProgressListener(new Consumer() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda2
+        this.webViewContainer.setWebViewProgressListener(new Consumer() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda3
             @Override // androidx.core.util.Consumer
             public final void accept(Object obj) {
                 ChatAttachAlertBotWebViewLayout.this.lambda$new$8((Float) obj);
@@ -260,7 +266,9 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
     }
 
     public /* synthetic */ void lambda$new$5() {
-        this.parentAlert.dismiss();
+        if (!onCheckDismissByUser()) {
+            this.swipeContainer.stickTo(0.0f);
+        }
     }
 
     public /* synthetic */ Boolean lambda$new$6(Void r2) {
@@ -291,6 +299,37 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
 
     public /* synthetic */ void lambda$new$7(ValueAnimator valueAnimator) {
         this.progressView.setAlpha(((Float) valueAnimator.getAnimatedValue()).floatValue());
+    }
+
+    public void setNeedCloseConfirmation(boolean z) {
+        this.needCloseConfirmation = z;
+    }
+
+    @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
+    boolean onDismissWithTouchOutside() {
+        onCheckDismissByUser();
+        return false;
+    }
+
+    public boolean onCheckDismissByUser() {
+        if (this.needCloseConfirmation) {
+            TLRPC$User user = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.botId));
+            AlertDialog create = new AlertDialog.Builder(getContext()).setTitle(user != null ? ContactsController.formatName(user.first_name, user.last_name) : null).setMessage(LocaleController.getString((int) R.string.BotWebViewChangesMayNotBeSaved)).setPositiveButton(LocaleController.getString((int) R.string.BotWebViewCloseAnyway), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda2
+                @Override // android.content.DialogInterface.OnClickListener
+                public final void onClick(DialogInterface dialogInterface, int i) {
+                    ChatAttachAlertBotWebViewLayout.this.lambda$onCheckDismissByUser$9(dialogInterface, i);
+                }
+            }).setNegativeButton(LocaleController.getString((int) R.string.Cancel), null).create();
+            create.show();
+            ((TextView) create.getButton(-1)).setTextColor(getThemedColor("dialogTextRed"));
+            return false;
+        }
+        this.parentAlert.dismiss();
+        return true;
+    }
+
+    public /* synthetic */ void lambda$onCheckDismissByUser$9(DialogInterface dialogInterface, int i) {
+        this.parentAlert.dismiss();
     }
 
     public void setCustomBackground(int i) {
@@ -367,7 +406,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         this.webViewScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda0
             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
             public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
-                ChatAttachAlertBotWebViewLayout.this.lambda$onPanTransitionStart$9(valueAnimator2);
+                ChatAttachAlertBotWebViewLayout.this.lambda$onPanTransitionStart$10(valueAnimator2);
             }
         });
         this.webViewScrollAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout.5
@@ -384,7 +423,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         this.webViewScrollAnimator.start();
     }
 
-    public /* synthetic */ void lambda$onPanTransitionStart$9(ValueAnimator valueAnimator) {
+    public /* synthetic */ void lambda$onPanTransitionStart$10(ValueAnimator valueAnimator) {
         int intValue = ((Integer) valueAnimator.getAnimatedValue()).intValue();
         if (this.webViewContainer.getWebView() != null) {
             this.webViewContainer.getWebView().setScrollY(intValue);
@@ -421,15 +460,15 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
             requestEnableKeyboard();
         }
         this.swipeContainer.setSwipeOffsetAnimationDisallowed(false);
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda5
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda6
             @Override // java.lang.Runnable
             public final void run() {
-                ChatAttachAlertBotWebViewLayout.this.lambda$onShown$10();
+                ChatAttachAlertBotWebViewLayout.this.lambda$onShown$11();
             }
         });
     }
 
-    public /* synthetic */ void lambda$onShown$10() {
+    public /* synthetic */ void lambda$onShown$11() {
         this.webViewContainer.restoreButtonData();
     }
 
@@ -437,7 +476,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         BaseFragment baseFragment = this.parentAlert.getBaseFragment();
         if ((baseFragment instanceof ChatActivity) && ((ChatActivity) baseFragment).contentView.measureKeyboardHeight() > AndroidUtilities.dp(20.0f)) {
             AndroidUtilities.hideKeyboard(this.parentAlert.baseFragment.getFragmentView());
-            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda3
+            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda4
                 @Override // java.lang.Runnable
                 public final void run() {
                     ChatAttachAlertBotWebViewLayout.this.requestEnableKeyboard();
@@ -515,25 +554,25 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         } catch (Exception e) {
             FileLog.e(e);
         }
-        ConnectionsManager.getInstance(i).sendRequest(tLRPC$TL_messages_requestWebView, new RequestDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda12
+        ConnectionsManager.getInstance(i).sendRequest(tLRPC$TL_messages_requestWebView, new RequestDelegate() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda13
             @Override // org.telegram.tgnet.RequestDelegate
             public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-                ChatAttachAlertBotWebViewLayout.this.lambda$requestWebView$12(i, tLObject, tLRPC$TL_error);
+                ChatAttachAlertBotWebViewLayout.this.lambda$requestWebView$13(i, tLObject, tLRPC$TL_error);
             }
         });
         NotificationCenter.getInstance(i).addObserver(this, NotificationCenter.webViewResultSent);
     }
 
-    public /* synthetic */ void lambda$requestWebView$12(final int i, final TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda8
+    public /* synthetic */ void lambda$requestWebView$13(final int i, final TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout$$ExternalSyntheticLambda9
             @Override // java.lang.Runnable
             public final void run() {
-                ChatAttachAlertBotWebViewLayout.this.lambda$requestWebView$11(tLObject, i);
+                ChatAttachAlertBotWebViewLayout.this.lambda$requestWebView$12(tLObject, i);
             }
         });
     }
 
-    public /* synthetic */ void lambda$requestWebView$11(TLObject tLObject, int i) {
+    public /* synthetic */ void lambda$requestWebView$12(TLObject tLObject, int i) {
         if (tLObject instanceof TLRPC$TL_webViewResultUrl) {
             TLRPC$TL_webViewResultUrl tLRPC$TL_webViewResultUrl = (TLRPC$TL_webViewResultUrl) tLObject;
             this.queryId = tLRPC$TL_webViewResultUrl.query_id;
@@ -643,7 +682,11 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
     public boolean onBackPressed() {
-        return this.webViewContainer.onBackPressed();
+        if (this.webViewContainer.onBackPressed()) {
+            return true;
+        }
+        onCheckDismissByUser();
+        return true;
     }
 
     @Override // android.view.View, android.view.ViewParent

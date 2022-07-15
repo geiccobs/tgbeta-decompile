@@ -1652,7 +1652,7 @@ public class LocaleController {
                 }
                 d = d4;
                 break;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 double d5 = abs;
                 Double.isNaN(d5);
                 d = d5 / 10.0d;
@@ -1888,7 +1888,7 @@ public class LocaleController {
             case '\n':
             case 14:
             case 15:
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
             case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
                 return 1000;
             case 1:
@@ -2159,7 +2159,7 @@ public class LocaleController {
                 }
                 d = d4;
                 break;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 double d5 = abs;
                 Double.isNaN(d5);
                 d = d5 / 10.0d;

@@ -662,7 +662,7 @@ public class FlickerLoadingView extends View {
             case 5:
                 return AndroidUtilities.dp(80.0f);
             case 6:
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return AndroidUtilities.dp(64.0f);
             case 7:
                 return AndroidUtilities.dp((SharedConfig.useThreeLinesLayout ? 78 : 72) + 1);

@@ -1,10 +1,10 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0033a;
+import j$.util.AbstractC0034a;
 import java.util.Arrays;
 import java.util.Comparator;
 /* loaded from: classes2.dex */
-public abstract class Z3 extends AbstractC0072e implements Iterable, j$.lang.e {
+public abstract class Z3 extends AbstractC0073e implements Iterable, j$.lang.e {
     Object e = c(16);
     Object[] f;
 
@@ -79,14 +79,14 @@ public abstract class Z3 extends AbstractC0072e implements Iterable, j$.lang.e {
 
         @Override // j$.util.u
         public /* synthetic */ long getExactSizeIfKnown() {
-            return AbstractC0033a.e(this);
+            return AbstractC0034a.e(this);
         }
 
         abstract j$.util.w h(int i, int i2, int i3, int i4);
 
         @Override // j$.util.u
         public /* synthetic */ boolean hasCharacteristics(int i) {
-            return AbstractC0033a.f(this, i);
+            return AbstractC0034a.f(this, i);
         }
 
         @Override // j$.util.w
@@ -177,7 +177,7 @@ public abstract class Z3 extends AbstractC0072e implements Iterable, j$.lang.e {
 
     public abstract Object c(int i);
 
-    @Override // j$.util.stream.AbstractC0072e
+    @Override // j$.util.stream.AbstractC0073e
     public void clear() {
         Object[] objArr = this.f;
         if (objArr != null) {

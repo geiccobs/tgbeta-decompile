@@ -57,31 +57,8 @@ public abstract class TLRPC$MessageEntity extends TLObject {
             case -1090087980:
                 tLRPC$MessageEntity = new TLRPC$TL_messageEntityStrike();
                 break;
-            case -727707947:
-                tLRPC$MessageEntity = new TLRPC$MessageEntity() { // from class: org.telegram.tgnet.TLRPC$TL_messageEntityCustomEmoji
-                    public static int constructor = -727707947;
-                    public long document_id;
-                    public int length;
-                    public int offset;
-                    public TLRPC$InputStickerSet stickerset;
-
-                    @Override // org.telegram.tgnet.TLObject
-                    public void readParams(AbstractSerializedData abstractSerializedData2, boolean z2) {
-                        this.offset = abstractSerializedData2.readInt32(z2);
-                        this.length = abstractSerializedData2.readInt32(z2);
-                        this.stickerset = TLRPC$InputStickerSet.TLdeserialize(abstractSerializedData2, abstractSerializedData2.readInt32(z2), z2);
-                        this.document_id = abstractSerializedData2.readInt64(z2);
-                    }
-
-                    @Override // org.telegram.tgnet.TLObject
-                    public void serializeToStream(AbstractSerializedData abstractSerializedData2) {
-                        abstractSerializedData2.writeInt32(constructor);
-                        abstractSerializedData2.writeInt32(this.offset);
-                        abstractSerializedData2.writeInt32(this.length);
-                        this.stickerset.serializeToStream(abstractSerializedData2);
-                        abstractSerializedData2.writeInt64(this.document_id);
-                    }
-                };
+            case -925956616:
+                tLRPC$MessageEntity = new TLRPC$TL_messageEntityCustomEmoji();
                 break;
             case -595914432:
                 tLRPC$MessageEntity = new TLRPC$TL_messageEntityMentionName();

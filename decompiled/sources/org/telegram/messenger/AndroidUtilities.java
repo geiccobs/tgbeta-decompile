@@ -467,7 +467,10 @@ public class AndroidUtilities {
 
                 @Override // android.text.style.ClickableSpan
                 public void onClick(View view) {
-                    runnable.run();
+                    Runnable runnable2 = runnable;
+                    if (runnable2 != null) {
+                        runnable2.run();
+                    }
                 }
             }, indexOf, i + indexOf, 0);
         }
@@ -487,7 +490,7 @@ public class AndroidUtilities {
     }
 
     public static /* synthetic */ void lambda$recycleBitmaps$1(final ArrayList arrayList) {
-        NotificationCenter.getInstance(UserConfig.selectedAccount).doOnIdle(new Runnable() { // from class: org.telegram.messenger.AndroidUtilities$$ExternalSyntheticLambda8
+        Utilities.globalQueue.postRunnable(new Runnable() { // from class: org.telegram.messenger.AndroidUtilities$$ExternalSyntheticLambda8
             @Override // java.lang.Runnable
             public final void run() {
                 AndroidUtilities.lambda$recycleBitmaps$0(arrayList);
@@ -3765,10 +3768,6 @@ public class AndroidUtilities {
         return lerp(fArr[0], fArr[1], f);
     }
 
-    public static int lerpColor(int i, int i2, float f) {
-        return Color.argb(lerp(Color.alpha(i), Color.alpha(i2), f), lerp(Color.red(i), Color.red(i2), f), lerp(Color.green(i), Color.green(i2), f), lerp(Color.blue(i), Color.blue(i2), f));
-    }
-
     public static void lerp(RectF rectF, RectF rectF2, float f, RectF rectF3) {
         if (rectF3 != null) {
             rectF3.set(lerp(rectF.left, rectF2.left, f), lerp(rectF.top, rectF2.top, f), lerp(rectF.right, rectF2.right, f), lerp(rectF.bottom, rectF2.bottom, f));
@@ -4347,5 +4346,23 @@ public class AndroidUtilities {
         } catch (NumberFormatException unused) {
             return false;
         }
+    }
+
+    public static CharSequence trim(CharSequence charSequence, int[] iArr) {
+        if (charSequence == null) {
+            return null;
+        }
+        int length = charSequence.length();
+        int i = 0;
+        while (i < length && charSequence.charAt(i) <= ' ') {
+            i++;
+        }
+        while (i < length && charSequence.charAt(length - 1) <= ' ') {
+            length--;
+        }
+        if (iArr != null) {
+            iArr[0] = i;
+        }
+        return (i > 0 || length < charSequence.length()) ? charSequence.subSequence(i, length) : charSequence;
     }
 }

@@ -8,7 +8,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLExt;
 import android.opengl.EGLSurface;
 import android.view.Surface;
-import org.telegram.messenger.R;
 @TargetApi(17)
 /* loaded from: classes.dex */
 public class InputSurface {
@@ -84,7 +83,7 @@ public class InputSurface {
         return this.mSurface;
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+    @TargetApi(18)
     public void setPresentationTime(long j) {
         EGLExt.eglPresentationTimeANDROID(this.mEGLDisplay, this.mEGLSurface, j);
     }

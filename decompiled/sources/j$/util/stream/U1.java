@@ -3,21 +3,21 @@ package j$.util.stream;
 import j$.util.function.Consumer;
 import java.util.Arrays;
 /* loaded from: classes2.dex */
-public final class U1 extends T1 implements AbstractC0140p1 {
+public final class U1 extends T1 implements AbstractC0141p1 {
     public U1(long j) {
         super(j);
     }
 
-    @Override // j$.util.stream.AbstractC0140p1, j$.util.stream.AbstractC0156s1
+    @Override // j$.util.stream.AbstractC0141p1, j$.util.stream.AbstractC0157s1
     /* renamed from: a */
-    public AbstractC0166u1 mo70a() {
+    public AbstractC0167u1 mo70a() {
         if (this.b >= this.a.length) {
             return this;
         }
         throw new IllegalStateException(String.format("Current size %d is less than fixed size %d", Integer.valueOf(this.b), Integer.valueOf(this.a.length)));
     }
 
-    @Override // j$.util.stream.AbstractC0124m3
+    @Override // j$.util.stream.AbstractC0125m3
     public void accept(double d) {
         int i = this.b;
         double[] dArr = this.a;
@@ -29,15 +29,15 @@ public final class U1 extends T1 implements AbstractC0140p1 {
         throw new IllegalStateException(String.format("Accept exceeded fixed size of %d", Integer.valueOf(this.a.length)));
     }
 
-    @Override // j$.util.stream.AbstractC0124m3
+    @Override // j$.util.stream.AbstractC0125m3
     public /* synthetic */ void accept(int i) {
-        AbstractC0134o1.d(this);
+        AbstractC0135o1.d(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0124m3, j$.util.stream.AbstractC0118l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0125m3, j$.util.stream.AbstractC0119l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0134o1.e(this);
+        AbstractC0135o1.e(this);
         throw null;
     }
 
@@ -54,10 +54,10 @@ public final class U1 extends T1 implements AbstractC0140p1 {
 
     /* renamed from: l */
     public /* synthetic */ void accept(Double d) {
-        AbstractC0134o1.a(this, d);
+        AbstractC0135o1.a(this, d);
     }
 
-    @Override // j$.util.stream.AbstractC0124m3
+    @Override // j$.util.stream.AbstractC0125m3
     public void m() {
         if (this.b >= this.a.length) {
             return;
@@ -65,7 +65,7 @@ public final class U1 extends T1 implements AbstractC0140p1 {
         throw new IllegalStateException(String.format("End size %d is less than fixed size %d", Integer.valueOf(this.b), Integer.valueOf(this.a.length)));
     }
 
-    @Override // j$.util.stream.AbstractC0124m3
+    @Override // j$.util.stream.AbstractC0125m3
     public void n(long j) {
         if (j == this.a.length) {
             this.b = 0;
@@ -74,7 +74,7 @@ public final class U1 extends T1 implements AbstractC0140p1 {
         throw new IllegalStateException(String.format("Begin size %d is not equal to fixed size %d", Long.valueOf(j), Integer.valueOf(this.a.length)));
     }
 
-    @Override // j$.util.stream.AbstractC0124m3
+    @Override // j$.util.stream.AbstractC0125m3
     public /* synthetic */ boolean o() {
         return false;
     }

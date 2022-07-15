@@ -23,8 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import org.telegram.messenger.R;
-@TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+@TargetApi(18)
 /* loaded from: classes.dex */
 public class DefaultDrmSessionManager<T extends ExoMediaCrypto> implements DrmSessionManager<T> {
     private final MediaDrmCallback callback;

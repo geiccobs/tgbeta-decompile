@@ -1,5 +1,6 @@
 package org.telegram.messenger;
 
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,12 +15,10 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.util.Base64;
-import android.view.View;
 import androidx.collection.LongSparseArray;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.StringReader;
-import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -68,6 +67,7 @@ import org.telegram.tgnet.TLRPC$TL_decryptedMessageActionSetMessageTTL;
 import org.telegram.tgnet.TLRPC$TL_document;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeAnimated;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeAudio;
+import org.telegram.tgnet.TLRPC$TL_documentAttributeCustomEmoji;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeHasStickers;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeImageSize;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeSticker;
@@ -85,12 +85,14 @@ import org.telegram.tgnet.TLRPC$TL_messageActionChatEditPhoto;
 import org.telegram.tgnet.TLRPC$TL_messageActionChatJoinedByRequest;
 import org.telegram.tgnet.TLRPC$TL_messageActionContactSignUp;
 import org.telegram.tgnet.TLRPC$TL_messageActionEmpty;
+import org.telegram.tgnet.TLRPC$TL_messageActionGiftPremium;
 import org.telegram.tgnet.TLRPC$TL_messageActionHistoryClear;
 import org.telegram.tgnet.TLRPC$TL_messageActionLoginUnknownLocation;
 import org.telegram.tgnet.TLRPC$TL_messageActionPhoneCall;
 import org.telegram.tgnet.TLRPC$TL_messageActionUserUpdatedPhoto;
 import org.telegram.tgnet.TLRPC$TL_messageEmpty;
 import org.telegram.tgnet.TLRPC$TL_messageEncryptedAction;
+import org.telegram.tgnet.TLRPC$TL_messageEntityCustomEmoji;
 import org.telegram.tgnet.TLRPC$TL_messageEntityItalic;
 import org.telegram.tgnet.TLRPC$TL_messageEntityMentionName;
 import org.telegram.tgnet.TLRPC$TL_messageForwarded_old2;
@@ -136,6 +138,7 @@ import org.telegram.tgnet.TLRPC$WebDocument;
 import org.telegram.tgnet.TLRPC$WebPage;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
+import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.TranscribeButton;
 import org.telegram.ui.Components.URLSpanNoUnderlineBold;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
@@ -152,6 +155,7 @@ public class MessageObject {
     public static final int POSITION_FLAG_TOP = 4;
     public static final int TYPE_ANIMATED_STICKER = 15;
     public static final int TYPE_GEO = 4;
+    public static final int TYPE_GIFT_PREMIUM = 18;
     public static final int TYPE_PHOTO = 1;
     public static final int TYPE_POLL = 17;
     public static final int TYPE_ROUND_VIDEO = 5;
@@ -262,7 +266,6 @@ public class MessageObject {
     public boolean useCustomPhoto;
     public CharSequence vCardData;
     public VideoEditedInfo videoEditedInfo;
-    public AtomicReference<WeakReference<View>> viewRef;
     public boolean viewsReloaded;
     public int wantedBotKeyboardWidth;
     public boolean wasJustSent;
@@ -644,7 +647,6 @@ public class MessageObject {
     public MessageObject(int i, TLRPC$Message tLRPC$Message, String str, String str2, String str3, boolean z, boolean z2, boolean z3, boolean z4) {
         this.type = 1000;
         this.forceSeekTo = -1.0f;
-        this.viewRef = new AtomicReference<>(null);
         this.localType = z ? 2 : 1;
         this.currentAccount = i;
         this.localName = str2;
@@ -685,14 +687,13 @@ public class MessageObject {
     }
 
     public MessageObject(int i, TLRPC$Message tLRPC$Message, MessageObject messageObject, AbstractMap<Long, TLRPC$User> abstractMap, AbstractMap<Long, TLRPC$Chat> abstractMap2, LongSparseArray<TLRPC$User> longSparseArray, LongSparseArray<TLRPC$Chat> longSparseArray2, boolean z, boolean z2, long j) {
-        TLRPC$User tLRPC$User;
         LongSparseArray<TLRPC$Chat> longSparseArray3;
         AbstractMap<Long, TLRPC$Chat> abstractMap3;
+        TLRPC$User tLRPC$User;
         TextPaint textPaint;
         int i2;
         this.type = 1000;
         this.forceSeekTo = -1.0f;
-        this.viewRef = new AtomicReference<>(null);
         Theme.createCommonMessageResources();
         this.currentAccount = i;
         this.messageOwner = tLRPC$Message;
@@ -732,7 +733,9 @@ public class MessageObject {
                 textPaint = Theme.chat_msgTextPaint;
             }
             int[] iArr = allowsBigEmoji() ? new int[1] : null;
-            this.messageText = Emoji.replaceEmoji(this.messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, iArr, this.contentType == 0, this.viewRef);
+            CharSequence replaceEmoji = Emoji.replaceEmoji(this.messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, iArr);
+            this.messageText = replaceEmoji;
+            replaceAnimatedEmoji(replaceEmoji, this.messageOwner.entities, textPaint.getFontMetricsInt());
             checkEmojiOnly(iArr);
             this.emojiAnimatedSticker = null;
             if (this.emojiOnlyCount == 1) {
@@ -873,37 +876,44 @@ public class MessageObject {
             }
             CharSequence charSequence = this.messageText;
             Emoji.EmojiSpan[] emojiSpanArr = (Emoji.EmojiSpan[]) ((Spannable) charSequence).getSpans(0, charSequence.length(), Emoji.EmojiSpan.class);
-            if (emojiSpanArr == null || emojiSpanArr.length <= 0) {
+            if (emojiSpanArr != null && emojiSpanArr.length > 0) {
+                for (Emoji.EmojiSpan emojiSpan : emojiSpanArr) {
+                    emojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i);
+                }
+            }
+            CharSequence charSequence2 = this.messageText;
+            AnimatedEmojiSpan[] animatedEmojiSpanArr = (AnimatedEmojiSpan[]) ((Spannable) charSequence2).getSpans(0, charSequence2.length(), AnimatedEmojiSpan.class);
+            if (animatedEmojiSpanArr == null || animatedEmojiSpanArr.length <= 0) {
                 return;
             }
-            for (Emoji.EmojiSpan emojiSpan : emojiSpanArr) {
-                emojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i);
+            for (AnimatedEmojiSpan animatedEmojiSpan : animatedEmojiSpanArr) {
+                animatedEmojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i, 1);
             }
         }
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:432:0x0bde, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:432:0x0bd6, code lost:
         if (r9.id == r11.id) goto L434;
      */
-    /* JADX WARN: Removed duplicated region for block: B:184:0x04e4  */
-    /* JADX WARN: Removed duplicated region for block: B:190:0x04f4 A[LOOP:0: B:169:0x04b1->B:190:0x04f4, LOOP_END] */
-    /* JADX WARN: Removed duplicated region for block: B:447:0x0c11  */
-    /* JADX WARN: Removed duplicated region for block: B:448:0x0c21  */
-    /* JADX WARN: Removed duplicated region for block: B:451:0x0c36  */
-    /* JADX WARN: Removed duplicated region for block: B:733:0x1483  */
-    /* JADX WARN: Removed duplicated region for block: B:736:0x14d1  */
-    /* JADX WARN: Removed duplicated region for block: B:738:0x14d4  */
-    /* JADX WARN: Removed duplicated region for block: B:748:0x1546  */
-    /* JADX WARN: Removed duplicated region for block: B:751:0x154d  */
-    /* JADX WARN: Removed duplicated region for block: B:775:0x050c A[EDGE_INSN: B:775:0x050c->B:192:0x050c ?: BREAK  , SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:776:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:184:0x04dc  */
+    /* JADX WARN: Removed duplicated region for block: B:190:0x04ec A[LOOP:0: B:169:0x04a9->B:190:0x04ec, LOOP_END] */
+    /* JADX WARN: Removed duplicated region for block: B:447:0x0c09  */
+    /* JADX WARN: Removed duplicated region for block: B:448:0x0c19  */
+    /* JADX WARN: Removed duplicated region for block: B:451:0x0c2e  */
+    /* JADX WARN: Removed duplicated region for block: B:733:0x147b  */
+    /* JADX WARN: Removed duplicated region for block: B:736:0x14c9  */
+    /* JADX WARN: Removed duplicated region for block: B:738:0x14cc  */
+    /* JADX WARN: Removed duplicated region for block: B:748:0x153e  */
+    /* JADX WARN: Removed duplicated region for block: B:751:0x1545  */
+    /* JADX WARN: Removed duplicated region for block: B:771:0x0504 A[EDGE_INSN: B:771:0x0504->B:192:0x0504 ?: BREAK  , SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:772:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public MessageObject(int r27, org.telegram.tgnet.TLRPC$TL_channelAdminLogEvent r28, java.util.ArrayList<org.telegram.messenger.MessageObject> r29, java.util.HashMap<java.lang.String, java.util.ArrayList<org.telegram.messenger.MessageObject>> r30, org.telegram.tgnet.TLRPC$Chat r31, int[] r32, boolean r33) {
         /*
-            Method dump skipped, instructions count: 5599
+            Method dump skipped, instructions count: 5582
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.<init>(int, org.telegram.tgnet.TLRPC$TL_channelAdminLogEvent, java.util.ArrayList, java.util.HashMap, org.telegram.tgnet.TLRPC$Chat, int[], boolean):void");
@@ -980,7 +990,9 @@ public class MessageObject {
         if (allowsBigEmoji()) {
             iArr = new int[1];
         }
-        this.messageText = Emoji.replaceEmoji(this.messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, iArr, this.contentType == 0, this.viewRef);
+        CharSequence replaceEmoji = Emoji.replaceEmoji(this.messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, iArr);
+        this.messageText = replaceEmoji;
+        this.messageText = replaceAnimatedEmoji(replaceEmoji, this.messageOwner.entities, textPaint.getFontMetricsInt());
         checkEmojiOnly(iArr);
         generateLayout(user);
     }
@@ -1077,18 +1089,159 @@ public class MessageObject {
         }
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:137:0x02c5  */
-    /* JADX WARN: Removed duplicated region for block: B:20:0x006a  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public void generatePinMessageText(org.telegram.tgnet.TLRPC$User r18, org.telegram.tgnet.TLRPC$Chat r19) {
-        /*
-            Method dump skipped, instructions count: 717
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.generatePinMessageText(org.telegram.tgnet.TLRPC$User, org.telegram.tgnet.TLRPC$Chat):void");
+    public void generatePinMessageText(TLRPC$User tLRPC$User, TLRPC$Chat tLRPC$Chat) {
+        if (tLRPC$User == null && tLRPC$Chat == 0) {
+            if (isFromUser()) {
+                tLRPC$User = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.messageOwner.from_id.user_id));
+            }
+            if (tLRPC$User == null) {
+                TLRPC$Peer tLRPC$Peer = this.messageOwner.peer_id;
+                if (tLRPC$Peer instanceof TLRPC$TL_peerChannel) {
+                    tLRPC$Chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(this.messageOwner.peer_id.channel_id));
+                } else if (tLRPC$Peer instanceof TLRPC$TL_peerChat) {
+                    tLRPC$Chat = MessagesController.getInstance(this.currentAccount).getChat(Long.valueOf(this.messageOwner.peer_id.chat_id));
+                }
+            }
+        }
+        MessageObject messageObject = this.replyMessageObject;
+        if (messageObject != null) {
+            TLRPC$Message tLRPC$Message = messageObject.messageOwner;
+            if (!(tLRPC$Message instanceof TLRPC$TL_messageEmpty) && !(tLRPC$Message.action instanceof TLRPC$TL_messageActionHistoryClear)) {
+                if (messageObject.isMusic()) {
+                    String string = LocaleController.getString("ActionPinnedMusic", R.string.ActionPinnedMusic);
+                    if (tLRPC$User == null) {
+                        tLRPC$User = tLRPC$Chat;
+                    }
+                    this.messageText = replaceWithLink(string, "un1", tLRPC$User);
+                    return;
+                } else if (this.replyMessageObject.isVideo()) {
+                    String string2 = LocaleController.getString("ActionPinnedVideo", R.string.ActionPinnedVideo);
+                    if (tLRPC$User == null) {
+                        tLRPC$User = tLRPC$Chat;
+                    }
+                    this.messageText = replaceWithLink(string2, "un1", tLRPC$User);
+                    return;
+                } else if (this.replyMessageObject.isGif()) {
+                    String string3 = LocaleController.getString("ActionPinnedGif", R.string.ActionPinnedGif);
+                    if (tLRPC$User == null) {
+                        tLRPC$User = tLRPC$Chat;
+                    }
+                    this.messageText = replaceWithLink(string3, "un1", tLRPC$User);
+                    return;
+                } else if (this.replyMessageObject.isVoice()) {
+                    String string4 = LocaleController.getString("ActionPinnedVoice", R.string.ActionPinnedVoice);
+                    if (tLRPC$User == null) {
+                        tLRPC$User = tLRPC$Chat;
+                    }
+                    this.messageText = replaceWithLink(string4, "un1", tLRPC$User);
+                    return;
+                } else if (this.replyMessageObject.isRoundVideo()) {
+                    String string5 = LocaleController.getString("ActionPinnedRound", R.string.ActionPinnedRound);
+                    if (tLRPC$User == null) {
+                        tLRPC$User = tLRPC$Chat;
+                    }
+                    this.messageText = replaceWithLink(string5, "un1", tLRPC$User);
+                    return;
+                } else if ((this.replyMessageObject.isSticker() || this.replyMessageObject.isAnimatedSticker()) && !this.replyMessageObject.isAnimatedEmoji()) {
+                    String string6 = LocaleController.getString("ActionPinnedSticker", R.string.ActionPinnedSticker);
+                    if (tLRPC$User == null) {
+                        tLRPC$User = tLRPC$Chat;
+                    }
+                    this.messageText = replaceWithLink(string6, "un1", tLRPC$User);
+                    return;
+                } else {
+                    MessageObject messageObject2 = this.replyMessageObject;
+                    TLRPC$MessageMedia tLRPC$MessageMedia = messageObject2.messageOwner.media;
+                    if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaDocument) {
+                        String string7 = LocaleController.getString("ActionPinnedFile", R.string.ActionPinnedFile);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string7, "un1", tLRPC$User);
+                        return;
+                    } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGeo) {
+                        String string8 = LocaleController.getString("ActionPinnedGeo", R.string.ActionPinnedGeo);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string8, "un1", tLRPC$User);
+                        return;
+                    } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGeoLive) {
+                        String string9 = LocaleController.getString("ActionPinnedGeoLive", R.string.ActionPinnedGeoLive);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string9, "un1", tLRPC$User);
+                        return;
+                    } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaContact) {
+                        String string10 = LocaleController.getString("ActionPinnedContact", R.string.ActionPinnedContact);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string10, "un1", tLRPC$User);
+                        return;
+                    } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPoll) {
+                        if (((TLRPC$TL_messageMediaPoll) tLRPC$MessageMedia).poll.quiz) {
+                            String string11 = LocaleController.getString("ActionPinnedQuiz", R.string.ActionPinnedQuiz);
+                            if (tLRPC$User == null) {
+                                tLRPC$User = tLRPC$Chat;
+                            }
+                            this.messageText = replaceWithLink(string11, "un1", tLRPC$User);
+                            return;
+                        }
+                        String string12 = LocaleController.getString("ActionPinnedPoll", R.string.ActionPinnedPoll);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string12, "un1", tLRPC$User);
+                        return;
+                    } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPhoto) {
+                        String string13 = LocaleController.getString("ActionPinnedPhoto", R.string.ActionPinnedPhoto);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string13, "un1", tLRPC$User);
+                        return;
+                    } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGame) {
+                        String formatString = LocaleController.formatString("ActionPinnedGame", R.string.ActionPinnedGame, "🎮 " + this.replyMessageObject.messageOwner.media.game.title);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        CharSequence replaceWithLink = replaceWithLink(formatString, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink;
+                        this.messageText = Emoji.replaceEmoji(replaceWithLink, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
+                        return;
+                    } else {
+                        CharSequence charSequence = messageObject2.messageText;
+                        if (charSequence != null && charSequence.length() > 0) {
+                            CharSequence charSequence2 = this.replyMessageObject.messageText;
+                            if (charSequence2.length() > 20) {
+                                charSequence2 = ((Object) charSequence2.subSequence(0, 20)) + "...";
+                            }
+                            CharSequence replaceEmoji = Emoji.replaceEmoji(charSequence2, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
+                            MediaDataController.addTextStyleRuns(this.replyMessageObject, (Spannable) replaceEmoji);
+                            SpannableStringBuilder formatSpannable = AndroidUtilities.formatSpannable(LocaleController.getString("ActionPinnedText", R.string.ActionPinnedText), replaceEmoji);
+                            if (tLRPC$User == null) {
+                                tLRPC$User = tLRPC$Chat;
+                            }
+                            this.messageText = replaceWithLink(formatSpannable, "un1", tLRPC$User);
+                            return;
+                        }
+                        String string14 = LocaleController.getString("ActionPinnedNoText", R.string.ActionPinnedNoText);
+                        if (tLRPC$User == null) {
+                            tLRPC$User = tLRPC$Chat;
+                        }
+                        this.messageText = replaceWithLink(string14, "un1", tLRPC$User);
+                        return;
+                    }
+                }
+            }
+        }
+        String string15 = LocaleController.getString("ActionPinnedNoText", R.string.ActionPinnedNoText);
+        if (tLRPC$User == null) {
+            tLRPC$User = tLRPC$Chat;
+        }
+        this.messageText = replaceWithLink(string15, "un1", tLRPC$User);
     }
 
     public static void updateReactions(TLRPC$Message tLRPC$Message, TLRPC$TL_messageReactions tLRPC$TL_messageReactions) {
@@ -1438,7 +1591,7 @@ public class MessageObject {
 
     public void measureInlineBotButtons() {
         int i;
-        CharSequence replaceEmoji;
+        CharSequence charSequence;
         TLRPC$TL_messageReactions tLRPC$TL_messageReactions;
         if (this.isRestrictedMessage) {
             return;
@@ -1466,15 +1619,15 @@ public class MessageObject {
                     sb2.append(i2);
                     sb2.append(i4);
                     if ((tLRPC$KeyboardButton instanceof TLRPC$TL_keyboardButtonBuy) && (this.messageOwner.media.flags & 4) != 0) {
-                        replaceEmoji = LocaleController.getString("PaymentReceipt", R.string.PaymentReceipt);
+                        charSequence = LocaleController.getString("PaymentReceipt", R.string.PaymentReceipt);
                     } else {
                         String str = tLRPC$KeyboardButton.text;
                         if (str == null) {
                             str = "";
                         }
-                        replaceEmoji = Emoji.replaceEmoji(str, Theme.chat_msgBotButtonPaint.getFontMetricsInt(), AndroidUtilities.dp(15.0f), false, this.contentType == 0, this.viewRef);
+                        charSequence = Emoji.replaceEmoji(str, Theme.chat_msgBotButtonPaint.getFontMetricsInt(), AndroidUtilities.dp(15.0f), false);
                     }
-                    StaticLayout staticLayout = new StaticLayout(replaceEmoji, Theme.chat_msgBotButtonPaint, AndroidUtilities.dp(2000.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                    StaticLayout staticLayout = new StaticLayout(charSequence, Theme.chat_msgBotButtonPaint, AndroidUtilities.dp(2000.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
                     if (staticLayout.getLineCount() > 0) {
                         float lineWidth = staticLayout.getLineWidth(0);
                         float lineLeft = staticLayout.getLineLeft(0);
@@ -1498,7 +1651,7 @@ public class MessageObject {
             StringBuilder sb3 = this.botButtonsLayout;
             sb3.append(0);
             sb3.append(i5);
-            StaticLayout staticLayout2 = new StaticLayout(Emoji.replaceEmoji(String.format("%d %s", Integer.valueOf(tLRPC$TL_reactionCount.count), tLRPC$TL_reactionCount.reaction), Theme.chat_msgBotButtonPaint.getFontMetricsInt(), AndroidUtilities.dp(15.0f), false, this.contentType == 0, this.viewRef), Theme.chat_msgBotButtonPaint, AndroidUtilities.dp(2000.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            StaticLayout staticLayout2 = new StaticLayout(Emoji.replaceEmoji(String.format("%d %s", Integer.valueOf(tLRPC$TL_reactionCount.count), tLRPC$TL_reactionCount.reaction), Theme.chat_msgBotButtonPaint.getFontMetricsInt(), AndroidUtilities.dp(15.0f), false), Theme.chat_msgBotButtonPaint, AndroidUtilities.dp(2000.0f), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (staticLayout2.getLineCount() > 0) {
                 float lineWidth2 = staticLayout2.getLineWidth(0);
                 float lineLeft2 = staticLayout2.getLineLeft(0);
@@ -1546,24 +1699,24 @@ public class MessageObject {
     /* JADX WARN: Removed duplicated region for block: B:11:0x002a  */
     /* JADX WARN: Removed duplicated region for block: B:12:0x002c  */
     /* JADX WARN: Removed duplicated region for block: B:15:0x0037  */
-    /* JADX WARN: Removed duplicated region for block: B:194:0x0556  */
-    /* JADX WARN: Removed duplicated region for block: B:198:0x0576  */
-    /* JADX WARN: Removed duplicated region for block: B:217:0x05d9  */
-    /* JADX WARN: Removed duplicated region for block: B:218:0x05f0  */
-    /* JADX WARN: Removed duplicated region for block: B:234:0x063c  */
-    /* JADX WARN: Removed duplicated region for block: B:235:0x0649  */
-    /* JADX WARN: Removed duplicated region for block: B:265:0x0717  */
-    /* JADX WARN: Removed duplicated region for block: B:269:0x0751  */
-    /* JADX WARN: Removed duplicated region for block: B:489:0x0d0f  */
-    /* JADX WARN: Removed duplicated region for block: B:586:0x0f35  */
-    /* JADX WARN: Removed duplicated region for block: B:606:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:205:0x05bd  */
+    /* JADX WARN: Removed duplicated region for block: B:209:0x05dd  */
+    /* JADX WARN: Removed duplicated region for block: B:228:0x0640  */
+    /* JADX WARN: Removed duplicated region for block: B:229:0x0657  */
+    /* JADX WARN: Removed duplicated region for block: B:245:0x06a3  */
+    /* JADX WARN: Removed duplicated region for block: B:246:0x06b0  */
+    /* JADX WARN: Removed duplicated region for block: B:276:0x077e  */
+    /* JADX WARN: Removed duplicated region for block: B:280:0x07b8  */
+    /* JADX WARN: Removed duplicated region for block: B:500:0x0d76  */
+    /* JADX WARN: Removed duplicated region for block: B:597:0x0f9c  */
+    /* JADX WARN: Removed duplicated region for block: B:617:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private void updateMessageText(java.util.AbstractMap<java.lang.Long, org.telegram.tgnet.TLRPC$User> r21, java.util.AbstractMap<java.lang.Long, org.telegram.tgnet.TLRPC$Chat> r22, androidx.collection.LongSparseArray<org.telegram.tgnet.TLRPC$User> r23, androidx.collection.LongSparseArray<org.telegram.tgnet.TLRPC$Chat> r24) {
         /*
-            Method dump skipped, instructions count: 3896
+            Method dump skipped, instructions count: 3999
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.updateMessageText(java.util.AbstractMap, java.util.AbstractMap, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray):void");
@@ -1657,6 +1810,9 @@ public class MessageObject {
             TLRPC$MessageAction tLRPC$MessageAction = tLRPC$Message.action;
             if (tLRPC$MessageAction instanceof TLRPC$TL_messageActionLoginUnknownLocation) {
                 this.type = 0;
+            } else if (tLRPC$MessageAction instanceof TLRPC$TL_messageActionGiftPremium) {
+                this.contentType = 1;
+                this.type = 18;
             } else if ((tLRPC$MessageAction instanceof TLRPC$TL_messageActionChatEditPhoto) || (tLRPC$MessageAction instanceof TLRPC$TL_messageActionUserUpdatedPhoto)) {
                 this.contentType = 1;
                 this.type = 11;
@@ -1707,7 +1863,9 @@ public class MessageObject {
                 if (allowsBigEmoji()) {
                     iArr = new int[1];
                 }
-                this.messageText = Emoji.replaceEmoji(this.messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, iArr, this.contentType == 0, this.viewRef);
+                CharSequence replaceEmoji = Emoji.replaceEmoji(this.messageText, textPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, iArr);
+                this.messageText = replaceEmoji;
+                this.messageText = replaceAnimatedEmoji(replaceEmoji, this.messageOwner.entities, textPaint.getFontMetricsInt());
                 checkEmojiOnly(iArr);
                 generateLayout(user);
                 return true;
@@ -2220,15 +2378,124 @@ public class MessageObject {
     }
 
     /* JADX WARN: Removed duplicated region for block: B:35:0x008e  */
-    /* JADX WARN: Removed duplicated region for block: B:53:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:49:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void generateLinkDescription() {
         /*
-            Method dump skipped, instructions count: 220
-            To view this dump add '--comments-level debug' option
+            r10 = this;
+            java.lang.CharSequence r0 = r10.linkDescription
+            if (r0 == 0) goto L5
+            return
+        L5:
+            org.telegram.tgnet.TLRPC$Message r0 = r10.messageOwner
+            org.telegram.tgnet.TLRPC$MessageMedia r0 = r0.media
+            boolean r1 = r0 instanceof org.telegram.tgnet.TLRPC$TL_messageMediaWebPage
+            r2 = 1
+            r3 = 0
+            if (r1 == 0) goto L50
+            org.telegram.tgnet.TLRPC$WebPage r1 = r0.webpage
+            boolean r4 = r1 instanceof org.telegram.tgnet.TLRPC$TL_webPage
+            if (r4 == 0) goto L50
+            java.lang.String r1 = r1.description
+            if (r1 == 0) goto L50
+            android.text.Spannable$Factory r0 = android.text.Spannable.Factory.getInstance()
+            org.telegram.tgnet.TLRPC$Message r1 = r10.messageOwner
+            org.telegram.tgnet.TLRPC$MessageMedia r1 = r1.media
+            org.telegram.tgnet.TLRPC$WebPage r1 = r1.webpage
+            java.lang.String r1 = r1.description
+            android.text.Spannable r0 = r0.newSpannable(r1)
+            r10.linkDescription = r0
+            org.telegram.tgnet.TLRPC$Message r0 = r10.messageOwner
+            org.telegram.tgnet.TLRPC$MessageMedia r0 = r0.media
+            org.telegram.tgnet.TLRPC$WebPage r0 = r0.webpage
+            java.lang.String r0 = r0.site_name
+            if (r0 == 0) goto L39
+            java.lang.String r0 = r0.toLowerCase()
+        L39:
+            java.lang.String r1 = "instagram"
+            boolean r1 = r1.equals(r0)
+            if (r1 == 0) goto L43
+            r0 = 1
+            goto L4e
+        L43:
+            java.lang.String r1 = "twitter"
+            boolean r0 = r1.equals(r0)
+            if (r0 == 0) goto L4d
+            r0 = 2
+            goto L4e
+        L4d:
+            r0 = 0
+        L4e:
+            r7 = r0
+            goto L86
+        L50:
+            boolean r1 = r0 instanceof org.telegram.tgnet.TLRPC$TL_messageMediaGame
+            if (r1 == 0) goto L6d
+            org.telegram.tgnet.TLRPC$TL_game r1 = r0.game
+            java.lang.String r1 = r1.description
+            if (r1 == 0) goto L6d
+            android.text.Spannable$Factory r0 = android.text.Spannable.Factory.getInstance()
+            org.telegram.tgnet.TLRPC$Message r1 = r10.messageOwner
+            org.telegram.tgnet.TLRPC$MessageMedia r1 = r1.media
+            org.telegram.tgnet.TLRPC$TL_game r1 = r1.game
+            java.lang.String r1 = r1.description
+            android.text.Spannable r0 = r0.newSpannable(r1)
+            r10.linkDescription = r0
+            goto L85
+        L6d:
+            boolean r1 = r0 instanceof org.telegram.tgnet.TLRPC$TL_messageMediaInvoice
+            if (r1 == 0) goto L85
+            java.lang.String r0 = r0.description
+            if (r0 == 0) goto L85
+            android.text.Spannable$Factory r0 = android.text.Spannable.Factory.getInstance()
+            org.telegram.tgnet.TLRPC$Message r1 = r10.messageOwner
+            org.telegram.tgnet.TLRPC$MessageMedia r1 = r1.media
+            java.lang.String r1 = r1.description
+            android.text.Spannable r0 = r0.newSpannable(r1)
+            r10.linkDescription = r0
+        L85:
+            r7 = 0
+        L86:
+            java.lang.CharSequence r0 = r10.linkDescription
+            boolean r0 = android.text.TextUtils.isEmpty(r0)
+            if (r0 != 0) goto Ld1
+            java.lang.CharSequence r0 = r10.linkDescription
+            boolean r0 = containsUrls(r0)
+            if (r0 == 0) goto La2
+            java.lang.CharSequence r0 = r10.linkDescription     // Catch: java.lang.Exception -> L9e
+            android.text.Spannable r0 = (android.text.Spannable) r0     // Catch: java.lang.Exception -> L9e
+            org.telegram.messenger.AndroidUtilities.addLinks(r0, r2)     // Catch: java.lang.Exception -> L9e
+            goto La2
+        L9e:
+            r0 = move-exception
+            org.telegram.messenger.FileLog.e(r0)
+        La2:
+            java.lang.CharSequence r0 = r10.linkDescription
+            android.text.TextPaint r1 = org.telegram.ui.ActionBar.Theme.chat_msgTextPaint
+            android.graphics.Paint$FontMetricsInt r1 = r1.getFontMetricsInt()
+            r2 = 1101004800(0x41a00000, float:20.0)
+            int r2 = org.telegram.messenger.AndroidUtilities.dp(r2)
+            java.lang.CharSequence r0 = org.telegram.messenger.Emoji.replaceEmoji(r0, r1, r2, r3)
+            r10.linkDescription = r0
+            if (r7 == 0) goto Ld1
+            boolean r0 = r0 instanceof android.text.Spannable
+            if (r0 != 0) goto Lc5
+            android.text.SpannableStringBuilder r0 = new android.text.SpannableStringBuilder
+            java.lang.CharSequence r1 = r10.linkDescription
+            r0.<init>(r1)
+            r10.linkDescription = r0
+        Lc5:
+            boolean r4 = r10.isOutOwner()
+            java.lang.CharSequence r5 = r10.linkDescription
+            r6 = 0
+            r8 = 0
+            r9 = 0
+            addUrlsByPattern(r4, r5, r6, r7, r8, r9)
+        Ld1:
+            return
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.generateLinkDescription():void");
     }
@@ -2251,10 +2518,7 @@ public class MessageObject {
             return spannableString;
         }
         String str2 = this.messageOwner.voiceTranscription;
-        if (TextUtils.isEmpty(str2)) {
-            return str2;
-        }
-        return Emoji.replaceEmoji(str2, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false, this.contentType == 0, this.viewRef);
+        return !TextUtils.isEmpty(str2) ? Emoji.replaceEmoji(str2, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false) : str2;
     }
 
     public float measureVoiceTranscriptionHeight() {
@@ -2277,22 +2541,19 @@ public class MessageObject {
         return isVoice() && (tLRPC$Message = this.messageOwner) != null && tLRPC$Message.voiceTranscriptionOpen && tLRPC$Message.voiceTranscription != null && (tLRPC$Message.voiceTranscriptionFinal || TranscribeButton.isTranscribing(this)) && UserConfig.getInstance(this.currentAccount).isPremium();
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:38:0x0083, code lost:
-        if (r9.messageOwner.send_state == 0) goto L39;
+    /* JADX WARN: Code restructure failed: missing block: B:34:0x0089, code lost:
+        if (r10.messageOwner.send_state == 0) goto L35;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:40:0x0089, code lost:
-        if (r9.messageOwner.id >= 0) goto L41;
+    /* JADX WARN: Code restructure failed: missing block: B:36:0x008f, code lost:
+        if (r10.messageOwner.id >= 0) goto L38;
      */
-    /* JADX WARN: Removed duplicated region for block: B:43:0x008f  */
-    /* JADX WARN: Removed duplicated region for block: B:51:0x00bc  */
-    /* JADX WARN: Removed duplicated region for block: B:52:0x00cd  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void generateCaption() {
         /*
-            Method dump skipped, instructions count: 234
+            Method dump skipped, instructions count: 239
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.generateCaption():void");
@@ -2427,18 +2688,46 @@ public class MessageObject {
         return addEntitiesToText(charSequence, this.messageOwner.entities, isOutOwner(), true, z, z2);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:118:0x0171  */
-    /* JADX WARN: Removed duplicated region for block: B:146:0x0220  */
-    /* JADX WARN: Removed duplicated region for block: B:200:0x03df  */
-    /* JADX WARN: Removed duplicated region for block: B:203:0x03f3 A[ADDED_TO_REGION] */
-    /* JADX WARN: Removed duplicated region for block: B:208:0x0225 A[SYNTHETIC] */
+    public static Spannable replaceAnimatedEmoji(CharSequence charSequence, ArrayList<TLRPC$MessageEntity> arrayList, Paint.FontMetricsInt fontMetricsInt) {
+        Spannable spannableString = charSequence instanceof Spannable ? (Spannable) charSequence : new SpannableString(charSequence);
+        Emoji.EmojiSpan[] emojiSpanArr = (Emoji.EmojiSpan[]) spannableString.getSpans(0, spannableString.length(), Emoji.EmojiSpan.class);
+        for (int i = 0; i < arrayList.size(); i++) {
+            TLRPC$MessageEntity tLRPC$MessageEntity = arrayList.get(i);
+            if (tLRPC$MessageEntity instanceof TLRPC$TL_messageEntityCustomEmoji) {
+                TLRPC$TL_messageEntityCustomEmoji tLRPC$TL_messageEntityCustomEmoji = (TLRPC$TL_messageEntityCustomEmoji) tLRPC$MessageEntity;
+                for (int i2 = 0; i2 < emojiSpanArr.length; i2++) {
+                    Emoji.EmojiSpan emojiSpan = emojiSpanArr[i2];
+                    if (emojiSpan != null) {
+                        int spanStart = spannableString.getSpanStart(emojiSpan);
+                        int spanEnd = spannableString.getSpanEnd(emojiSpan);
+                        if (tLRPC$TL_messageEntityCustomEmoji.offset == spanStart && tLRPC$TL_messageEntityCustomEmoji.length == spanEnd - spanStart) {
+                            spannableString.removeSpan(emojiSpan);
+                            emojiSpanArr[i2] = null;
+                        }
+                    }
+                }
+                if (tLRPC$MessageEntity.offset + tLRPC$MessageEntity.length <= spannableString.length()) {
+                    AnimatedEmojiSpan animatedEmojiSpan = new AnimatedEmojiSpan(tLRPC$TL_messageEntityCustomEmoji.document_id, fontMetricsInt);
+                    int i3 = tLRPC$MessageEntity.offset;
+                    spannableString.setSpan(animatedEmojiSpan, i3, tLRPC$MessageEntity.length + i3, 33);
+                }
+            }
+        }
+        return spannableString;
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:122:0x017b  */
+    /* JADX WARN: Removed duplicated region for block: B:150:0x022a  */
+    /* JADX WARN: Removed duplicated region for block: B:204:0x03e9  */
+    /* JADX WARN: Removed duplicated region for block: B:207:0x03fd A[ADDED_TO_REGION] */
+    /* JADX WARN: Removed duplicated region for block: B:212:0x022f A[SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public static boolean addEntitiesToText(java.lang.CharSequence r17, java.util.ArrayList<org.telegram.tgnet.TLRPC$MessageEntity> r18, boolean r19, boolean r20, boolean r21, boolean r22) {
         /*
-            Method dump skipped, instructions count: 1020
+            Method dump skipped, instructions count: 1030
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.addEntitiesToText(java.lang.CharSequence, java.util.ArrayList, boolean, boolean, boolean, boolean):boolean");
@@ -3318,7 +3607,7 @@ public class MessageObject {
         int size = tLRPC$Document.attributes.size();
         for (int i = 0; i < size; i++) {
             TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i);
-            if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeSticker) {
+            if ((tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeSticker) || (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeCustomEmoji)) {
                 TLRPC$InputStickerSet tLRPC$InputStickerSet = tLRPC$DocumentAttribute.stickerset;
                 if (!(tLRPC$InputStickerSet instanceof TLRPC$TL_inputStickerSetEmpty)) {
                     return tLRPC$InputStickerSet;
@@ -3327,6 +3616,34 @@ public class MessageObject {
             }
         }
         return null;
+    }
+
+    public static String findAnimatedEmojiEmoticon(TLRPC$Document tLRPC$Document) {
+        if (tLRPC$Document == null) {
+            return "😀";
+        }
+        int size = tLRPC$Document.attributes.size();
+        for (int i = 0; i < size; i++) {
+            TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i);
+            if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeCustomEmoji) {
+                return tLRPC$DocumentAttribute.alt;
+            }
+        }
+        return "😀";
+    }
+
+    public static boolean isFreeEmoji(TLRPC$Document tLRPC$Document) {
+        if (tLRPC$Document == null) {
+            return false;
+        }
+        int size = tLRPC$Document.attributes.size();
+        for (int i = 0; i < size; i++) {
+            TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i);
+            if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeCustomEmoji) {
+                return ((TLRPC$TL_documentAttributeCustomEmoji) tLRPC$DocumentAttribute).free;
+            }
+        }
+        return false;
     }
 
     public static long getStickerSetId(TLRPC$Document tLRPC$Document) {
@@ -3412,7 +3729,7 @@ public class MessageObject {
             if (i5 == 10) {
                 return AndroidUtilities.dp(30.0f);
             }
-            if (i5 == 11) {
+            if (i5 == 11 || i5 == 18) {
                 return AndroidUtilities.dp(50.0f);
             }
             if (i5 == 5) {

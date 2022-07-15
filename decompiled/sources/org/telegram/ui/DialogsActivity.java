@@ -1970,18 +1970,18 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:214:0x09e8  */
-    /* JADX WARN: Removed duplicated region for block: B:217:0x09f5  */
-    /* JADX WARN: Removed duplicated region for block: B:229:0x0a34  */
-    /* JADX WARN: Removed duplicated region for block: B:234:0x0ad3 A[LOOP:3: B:232:0x0ad0->B:234:0x0ad3, LOOP_END] */
-    /* JADX WARN: Removed duplicated region for block: B:237:0x0afc  */
-    /* JADX WARN: Removed duplicated region for block: B:244:0x0b5b  */
-    /* JADX WARN: Removed duplicated region for block: B:248:0x0ba0  */
-    /* JADX WARN: Removed duplicated region for block: B:249:0x0ba3  */
-    /* JADX WARN: Removed duplicated region for block: B:252:0x0bb0  */
-    /* JADX WARN: Removed duplicated region for block: B:260:0x0c33  */
-    /* JADX WARN: Removed duplicated region for block: B:261:0x0c3e  */
-    /* JADX WARN: Removed duplicated region for block: B:269:0x0c68  */
+    /* JADX WARN: Removed duplicated region for block: B:214:0x09ee  */
+    /* JADX WARN: Removed duplicated region for block: B:217:0x09fb  */
+    /* JADX WARN: Removed duplicated region for block: B:229:0x0a3a  */
+    /* JADX WARN: Removed duplicated region for block: B:234:0x0ad9 A[LOOP:3: B:232:0x0ad6->B:234:0x0ad9, LOOP_END] */
+    /* JADX WARN: Removed duplicated region for block: B:237:0x0b02  */
+    /* JADX WARN: Removed duplicated region for block: B:244:0x0b61  */
+    /* JADX WARN: Removed duplicated region for block: B:248:0x0ba6  */
+    /* JADX WARN: Removed duplicated region for block: B:249:0x0ba9  */
+    /* JADX WARN: Removed duplicated region for block: B:252:0x0bb6  */
+    /* JADX WARN: Removed duplicated region for block: B:260:0x0c39  */
+    /* JADX WARN: Removed duplicated region for block: B:261:0x0c44  */
+    /* JADX WARN: Removed duplicated region for block: B:269:0x0c6e  */
     /* JADX WARN: Type inference failed for: r0v186, types: [org.telegram.ui.DialogsActivity$DialogsRecyclerView, org.telegram.ui.Components.RecyclerListView] */
     /* JADX WARN: Type inference failed for: r0v230, types: [org.telegram.ui.ActionBar.ActionBar] */
     /* JADX WARN: Type inference failed for: r0v232, types: [org.telegram.ui.ActionBar.ActionBar] */
@@ -1994,7 +1994,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     */
     public android.view.View createView(final android.content.Context r36) {
         /*
-            Method dump skipped, instructions count: 3190
+            Method dump skipped, instructions count: 3196
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.DialogsActivity.createView(android.content.Context):android.view.View");

@@ -385,23 +385,23 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         return checkDiscard();
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:144:0x05c5  */
-    /* JADX WARN: Removed duplicated region for block: B:157:0x0638  */
-    /* JADX WARN: Removed duplicated region for block: B:167:0x0672  */
-    /* JADX WARN: Removed duplicated region for block: B:182:0x06ec  */
-    /* JADX WARN: Removed duplicated region for block: B:185:0x06fd  */
-    /* JADX WARN: Removed duplicated region for block: B:188:0x070b  */
-    /* JADX WARN: Removed duplicated region for block: B:198:0x074a  */
-    /* JADX WARN: Removed duplicated region for block: B:205:0x07cb  */
-    /* JADX WARN: Removed duplicated region for block: B:211:0x0811  */
+    /* JADX WARN: Removed duplicated region for block: B:148:0x05bf  */
+    /* JADX WARN: Removed duplicated region for block: B:161:0x0633  */
+    /* JADX WARN: Removed duplicated region for block: B:171:0x066d  */
+    /* JADX WARN: Removed duplicated region for block: B:186:0x06ea  */
+    /* JADX WARN: Removed duplicated region for block: B:189:0x06fc  */
+    /* JADX WARN: Removed duplicated region for block: B:192:0x070a  */
+    /* JADX WARN: Removed duplicated region for block: B:202:0x074b  */
+    /* JADX WARN: Removed duplicated region for block: B:209:0x07cf  */
+    /* JADX WARN: Removed duplicated region for block: B:215:0x0815  */
     @Override // org.telegram.ui.ActionBar.BaseFragment
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public android.view.View createView(final android.content.Context r24) {
+    public android.view.View createView(final android.content.Context r32) {
         /*
-            Method dump skipped, instructions count: 2081
+            Method dump skipped, instructions count: 2085
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ChatEditActivity.createView(android.content.Context):android.view.View");

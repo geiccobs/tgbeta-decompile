@@ -221,6 +221,10 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
         this.recyclerListView.getAdapter().notifyDataSetChanged();
     }
 
+    public BaseFragment getBaseFragment() {
+        return this.baseFragment;
+    }
+
     public void updateStatusBar() {
         ActionBar actionBar = this.actionBar;
         if (actionBar != null && actionBar.getTag() != null) {

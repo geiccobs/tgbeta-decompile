@@ -96,7 +96,7 @@ import org.telegram.ui.Components.InstantCameraView;
 import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
 import org.webrtc.EglBase;
-@TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+@TargetApi(18)
 /* loaded from: classes3.dex */
 public class InstantCameraView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private float animationTranslationY;

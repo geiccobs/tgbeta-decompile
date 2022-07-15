@@ -3,27 +3,27 @@ package j$.util.stream;
 class O extends S {
     public final /* synthetic */ int l = 1;
 
-    public O(T t, AbstractC0060c abstractC0060c, EnumC0077e4 enumC0077e4, int i) {
-        super(abstractC0060c, enumC0077e4, i);
+    public O(T t, AbstractC0061c abstractC0061c, EnumC0078e4 enumC0078e4, int i) {
+        super(abstractC0061c, enumC0078e4, i);
     }
 
-    @Override // j$.util.stream.AbstractC0060c
-    public AbstractC0124m3 H0(int i, AbstractC0124m3 abstractC0124m3) {
+    @Override // j$.util.stream.AbstractC0061c
+    public AbstractC0125m3 H0(int i, AbstractC0125m3 abstractC0125m3) {
         switch (this.l) {
             case 0:
-                return abstractC0124m3;
+                return abstractC0125m3;
             case 1:
-                return new F0(this, abstractC0124m3);
+                return new F0(this, abstractC0125m3);
             default:
-                return new Z0(this, abstractC0124m3);
+                return new Z0(this, abstractC0125m3);
         }
     }
 
-    public O(L0 l0, AbstractC0060c abstractC0060c, EnumC0077e4 enumC0077e4, int i) {
-        super(abstractC0060c, enumC0077e4, i);
+    public O(L0 l0, AbstractC0061c abstractC0061c, EnumC0078e4 enumC0078e4, int i) {
+        super(abstractC0061c, enumC0078e4, i);
     }
 
-    public O(AbstractC0068d1 abstractC0068d1, AbstractC0060c abstractC0060c, EnumC0077e4 enumC0077e4, int i) {
-        super(abstractC0060c, enumC0077e4, i);
+    public O(AbstractC0069d1 abstractC0069d1, AbstractC0061c abstractC0061c, EnumC0078e4 enumC0078e4, int i) {
+        super(abstractC0061c, enumC0078e4, i);
     }
 }

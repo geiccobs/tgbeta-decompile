@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import com.google.android.gms.internal.play_billing.zzb;
-import com.google.android.gms.internal.play_billing.zzu;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,13 +35,13 @@ public final class zzn extends BroadcastReceiver {
         } else if (action.equals("com.android.vending.billing.ALTERNATIVE_BILLING")) {
             Bundle extras = intent.getExtras();
             if (zzi.getResponseCode() != 0) {
-                this.zzb.onPurchasesUpdated(zzi, zzu.zzl());
+                this.zzb.onPurchasesUpdated(zzi, com.google.android.gms.internal.play_billing.zzu.zzl());
             } else if (this.zzd == null) {
                 zzb.zzo("BillingBroadcastManager", "AlternativeBillingListener is null.");
-                this.zzb.onPurchasesUpdated(zzbb.zzj, zzu.zzl());
+                this.zzb.onPurchasesUpdated(zzbb.zzj, com.google.android.gms.internal.play_billing.zzu.zzl());
             } else if (extras == null) {
                 zzb.zzo("BillingBroadcastManager", "Bundle is null.");
-                this.zzb.onPurchasesUpdated(zzbb.zzj, zzu.zzl());
+                this.zzb.onPurchasesUpdated(zzbb.zzj, com.google.android.gms.internal.play_billing.zzu.zzl());
             } else {
                 String string = extras.getString("ALTERNATIVE_BILLING_USER_CHOICE_DATA");
                 if (string != null) {
@@ -61,12 +60,12 @@ public final class zzn extends BroadcastReceiver {
                         return;
                     } catch (JSONException unused) {
                         zzb.zzo("BillingBroadcastManager", String.format("Error when parsing invalid alternative choice data: [%s]", string));
-                        this.zzb.onPurchasesUpdated(zzbb.zzj, zzu.zzl());
+                        this.zzb.onPurchasesUpdated(zzbb.zzj, com.google.android.gms.internal.play_billing.zzu.zzl());
                         return;
                     }
                 }
                 zzb.zzo("BillingBroadcastManager", "Couldn't find alternative billing user choice data in bundle.");
-                this.zzb.onPurchasesUpdated(zzbb.zzj, zzu.zzl());
+                this.zzb.onPurchasesUpdated(zzbb.zzj, com.google.android.gms.internal.play_billing.zzu.zzl());
             }
         }
     }

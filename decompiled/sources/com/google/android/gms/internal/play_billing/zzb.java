@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import java.util.ArrayList;
@@ -41,6 +42,14 @@ public final class zzb {
             zzo(str, "Unexpected type for bundle response code: ".concat(obj.getClass().getName()));
             return 6;
         }
+    }
+
+    public static Bundle zzd(ConsumeParams consumeParams, boolean z, String str) {
+        Bundle bundle = new Bundle();
+        if (z) {
+            bundle.putString("playBillingLibraryVersion", str);
+        }
+        return bundle;
     }
 
     public static Bundle zzf(BillingFlowParams billingFlowParams, boolean z, boolean z2, boolean z3, String str) {

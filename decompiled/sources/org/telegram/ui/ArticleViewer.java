@@ -5366,7 +5366,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     case 17:
                         textView = new BlockCollageCell(this.context, this);
                         break;
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         view = new BlockChannelCell(this.context, this, 0);
                         textView = view;
                         break;
@@ -5517,7 +5517,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     case 17:
                         ((BlockCollageCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockCollage) tLRPC$PageBlock2);
                         return;
-                    case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                    case 18:
                         ((BlockChannelCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockChannel) tLRPC$PageBlock2);
                         return;
                     case R.styleable.MapAttrs_uiTiltGestures /* 19 */:

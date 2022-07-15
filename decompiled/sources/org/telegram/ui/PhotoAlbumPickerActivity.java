@@ -300,7 +300,7 @@ public class PhotoAlbumPickerActivity extends BaseFragment implements Notificati
         if (editTextEmoji != null) {
             editTextEmoji.onDestroy();
         }
-        this.commentTextView = new EditTextEmoji(context, this.sizeNotifierFrameLayout, null, 1);
+        this.commentTextView = new EditTextEmoji(context, this.sizeNotifierFrameLayout, null, 1, false);
         this.commentTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(MessagesController.getInstance(UserConfig.selectedAccount).maxCaptionLength)});
         this.commentTextView.setHint(LocaleController.getString("AddCaption", R.string.AddCaption));
         EditTextCaption editText = this.commentTextView.getEditText();

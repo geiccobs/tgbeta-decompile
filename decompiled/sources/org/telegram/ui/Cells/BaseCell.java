@@ -61,10 +61,10 @@ public abstract class BaseCell extends ViewGroup {
                 return;
             }
             BaseCell.this.checkingForLongPress = false;
-            BaseCell.this.performHapticFeedback(0);
             if (!BaseCell.this.onLongPress()) {
                 return;
             }
+            BaseCell.this.performHapticFeedback(0);
             MotionEvent obtain = MotionEvent.obtain(0L, 0L, 3, 0.0f, 0.0f, 0);
             BaseCell.this.onTouchEvent(obtain);
             obtain.recycle();

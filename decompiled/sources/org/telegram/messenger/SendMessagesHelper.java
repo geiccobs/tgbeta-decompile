@@ -1192,7 +1192,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         if (tLRPC$TL_decryptedMessage != null) {
                             TLRPC$DecryptedMessageMedia tLRPC$DecryptedMessageMedia = tLRPC$TL_decryptedMessage.media;
                             if ((tLRPC$DecryptedMessageMedia instanceof TLRPC$TL_decryptedMessageMediaVideo) || (tLRPC$DecryptedMessageMedia instanceof TLRPC$TL_decryptedMessageMediaPhoto) || (tLRPC$DecryptedMessageMedia instanceof TLRPC$TL_decryptedMessageMediaDocument)) {
-                                tLRPC$TL_decryptedMessage.media.size = (int) ((Long) objArr[5]).longValue();
+                                tLRPC$TL_decryptedMessage.media.size = ((Long) objArr[5]).longValue();
                             }
                             TLRPC$DecryptedMessageMedia tLRPC$DecryptedMessageMedia2 = tLRPC$TL_decryptedMessage.media;
                             tLRPC$DecryptedMessageMedia2.key = (byte[]) objArr[3];
@@ -1406,7 +1406,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                             if (messageObject8 == messageObject7) {
                                 delayedMessage4.obj.shouldRemoveVideoEditedInfo = true;
                                 messageObject8.messageOwner.params.remove("ve");
-                                messageObject8.messageOwner.media.document.size = (int) longValue2;
+                                messageObject8.messageOwner.media.document.size = longValue2;
                                 ArrayList<TLRPC$Message> arrayList8 = new ArrayList<>();
                                 arrayList8.add(messageObject8.messageOwner);
                                 getMessagesStorage().putMessages(arrayList8, false, true, false, 0, messageObject8.scheduled);
@@ -1419,7 +1419,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         if (messageObject9 == messageObject7) {
                             messageObject9.shouldRemoveVideoEditedInfo = true;
                             messageObject9.messageOwner.params.remove("ve");
-                            delayedMessage4.obj.messageOwner.media.document.size = (int) longValue2;
+                            delayedMessage4.obj.messageOwner.media.document.size = longValue2;
                             ArrayList<TLRPC$Message> arrayList9 = new ArrayList<>();
                             arrayList9.add(delayedMessage4.obj.messageOwner);
                             getMessagesStorage().putMessages(arrayList9, false, true, false, 0, delayedMessage4.obj.scheduled);
@@ -1756,7 +1756,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     */
     public void processForwardFromMyName(org.telegram.messenger.MessageObject r18, long r19) {
         /*
-            Method dump skipped, instructions count: 404
+            Method dump skipped, instructions count: 408
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.SendMessagesHelper.processForwardFromMyName(org.telegram.messenger.MessageObject, long):void");
@@ -2933,7 +2933,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 } else if (videoEditedInfo2.encryptedFile != null) {
                     TLRPC$TL_decryptedMessage tLRPC$TL_decryptedMessage = (TLRPC$TL_decryptedMessage) delayedMessage.sendEncryptedRequest;
                     TLRPC$DecryptedMessageMedia tLRPC$DecryptedMessageMedia = tLRPC$TL_decryptedMessage.media;
-                    tLRPC$DecryptedMessageMedia.size = (int) videoEditedInfo2.estimatedSize;
+                    tLRPC$DecryptedMessageMedia.size = videoEditedInfo2.estimatedSize;
                     tLRPC$DecryptedMessageMedia.key = videoEditedInfo2.key;
                     tLRPC$DecryptedMessageMedia.iv = videoEditedInfo2.iv;
                     SecretChatHelper secretChatHelper = getSecretChatHelper();
@@ -5496,7 +5496,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     /* JADX WARN: Code restructure failed: missing block: B:383:0x08fe, code lost:
         if (r11 == (r15 - 1)) goto L385;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:536:0x0cc6, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:536:0x0cc4, code lost:
         if (r5 == (r11 - 1)) goto L538;
      */
     /* JADX WARN: Multi-variable type inference failed */
@@ -5511,16 +5511,16 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     /* JADX WARN: Removed duplicated region for block: B:380:0x08e0  */
     /* JADX WARN: Removed duplicated region for block: B:386:0x0909  */
     /* JADX WARN: Removed duplicated region for block: B:451:0x0b2e  */
-    /* JADX WARN: Removed duplicated region for block: B:507:0x0c27  */
+    /* JADX WARN: Removed duplicated region for block: B:507:0x0c25  */
     /* JADX WARN: Removed duplicated region for block: B:50:0x00ac  */
-    /* JADX WARN: Removed duplicated region for block: B:513:0x0c3d  */
-    /* JADX WARN: Removed duplicated region for block: B:519:0x0c4f  */
+    /* JADX WARN: Removed duplicated region for block: B:513:0x0c3b  */
+    /* JADX WARN: Removed duplicated region for block: B:519:0x0c4d  */
     /* JADX WARN: Removed duplicated region for block: B:51:0x00d0  */
-    /* JADX WARN: Removed duplicated region for block: B:528:0x0c98  */
-    /* JADX WARN: Removed duplicated region for block: B:530:0x0c9d  */
-    /* JADX WARN: Removed duplicated region for block: B:548:0x0d14 A[LOOP:4: B:546:0x0d0c->B:548:0x0d14, LOOP_END] */
+    /* JADX WARN: Removed duplicated region for block: B:528:0x0c96  */
+    /* JADX WARN: Removed duplicated region for block: B:530:0x0c9b  */
+    /* JADX WARN: Removed duplicated region for block: B:548:0x0d12 A[LOOP:4: B:546:0x0d0a->B:548:0x0d12, LOOP_END] */
     /* JADX WARN: Removed duplicated region for block: B:594:0x0627 A[EXC_TOP_SPLITTER, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:630:0x0c4c A[SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:630:0x0c4a A[SYNTHETIC] */
     /* JADX WARN: Removed duplicated region for block: B:83:0x0161  */
     /* JADX WARN: Removed duplicated region for block: B:84:0x0166  */
     /* JADX WARN: Type inference failed for: r6v27 */
@@ -5534,7 +5534,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     */
     public static /* synthetic */ void lambda$prepareSendingMedia$89(java.util.ArrayList r65, final long r66, boolean r68, boolean r69, final org.telegram.messenger.AccountInstance r70, final org.telegram.messenger.MessageObject r71, final org.telegram.messenger.MessageObject r72, final org.telegram.messenger.MessageObject r73, final boolean r74, final int r75, androidx.core.view.inputmethod.InputContentInfoCompat r76) {
         /*
-            Method dump skipped, instructions count: 3815
+            Method dump skipped, instructions count: 3813
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.SendMessagesHelper.lambda$prepareSendingMedia$89(java.util.ArrayList, long, boolean, boolean, org.telegram.messenger.AccountInstance, org.telegram.messenger.MessageObject, org.telegram.messenger.MessageObject, org.telegram.messenger.MessageObject, boolean, int, androidx.core.view.inputmethod.InputContentInfoCompat):void");
@@ -5745,7 +5745,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     public static Bitmap createVideoThumbnailAtTime(String str, long j, int[] iArr, boolean z) {
         Bitmap bitmap;
         if (z) {
-            AnimatedFileDrawable animatedFileDrawable = new AnimatedFileDrawable(new File(str), true, 0L, null, null, null, 0L, 0, true);
+            AnimatedFileDrawable animatedFileDrawable = new AnimatedFileDrawable(new File(str), true, 0L, null, null, null, 0L, 0, true, null);
             bitmap = animatedFileDrawable.getFrameAtTime(j, z);
             if (iArr != null) {
                 iArr[0] = animatedFileDrawable.getOrientation();
@@ -5768,13 +5768,13 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         }
                     }
                     bitmap = frameAtTime;
-                } finally {
-                    try {
-                        mediaMetadataRetriever.release();
-                    } catch (RuntimeException unused2) {
-                    }
+                } catch (Exception unused2) {
                 }
-            } catch (Exception unused3) {
+            } finally {
+                try {
+                    mediaMetadataRetriever.release();
+                } catch (RuntimeException unused3) {
+                }
             }
         }
         return bitmap;
@@ -5782,9 +5782,9 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
 
     private static VideoEditedInfo createCompressionSettings(String str) {
         MediaCodecInfo selectCodec;
+        boolean z;
         int[] iArr = new int[11];
         AnimatedFileDrawable.getVideoInfo(str, iArr);
-        boolean z = false;
         if (iArr[0] == 0) {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("video hasn't avc1 atom");
@@ -5849,28 +5849,34 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         if (round > i) {
             round = i;
         }
-        if (round != i || Math.max(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight) > 1280) {
-            if (round == 1) {
-                f2 = 432.0f;
-            } else if (round != 2) {
-                f2 = round != 3 ? 1280.0f : 848.0f;
+        if (new File(str).length() < 1048576000) {
+            if (round != i || Math.max(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight) > 1280) {
+                if (round == 1) {
+                    f2 = 432.0f;
+                } else if (round != 2) {
+                    f2 = round != 3 ? 1280.0f : 848.0f;
+                }
+                int i6 = videoEditedInfo.originalWidth;
+                int i7 = videoEditedInfo.originalHeight;
+                float f3 = f2 / (i6 > i7 ? i6 : i7);
+                videoEditedInfo.resultWidth = Math.round((i6 * f3) / 2.0f) * 2;
+                videoEditedInfo.resultHeight = Math.round((videoEditedInfo.originalHeight * f3) / 2.0f) * 2;
+                z = true;
+            } else {
+                z = false;
             }
-            int i6 = videoEditedInfo.originalWidth;
-            int i7 = videoEditedInfo.originalHeight;
-            float f3 = f2 / (i6 > i7 ? i6 : i7);
-            videoEditedInfo.resultWidth = Math.round((i6 * f3) / 2.0f) * 2;
-            videoEditedInfo.resultHeight = Math.round((videoEditedInfo.originalHeight * f3) / 2.0f) * 2;
-            z = true;
+            videoBitrate = MediaController.makeVideoBitrate(videoEditedInfo.originalHeight, videoEditedInfo.originalWidth, videoBitrate, videoEditedInfo.resultHeight, videoEditedInfo.resultWidth);
+        } else {
+            z = false;
         }
-        int makeVideoBitrate = MediaController.makeVideoBitrate(videoEditedInfo.originalHeight, videoEditedInfo.originalWidth, videoBitrate, videoEditedInfo.resultHeight, videoEditedInfo.resultWidth);
         if (!z) {
             videoEditedInfo.resultWidth = videoEditedInfo.originalWidth;
             videoEditedInfo.resultHeight = videoEditedInfo.originalHeight;
-            videoEditedInfo.bitrate = makeVideoBitrate;
+            videoEditedInfo.bitrate = videoBitrate;
         } else {
-            videoEditedInfo.bitrate = makeVideoBitrate;
+            videoEditedInfo.bitrate = videoBitrate;
         }
-        long j2 = (int) (((float) j) + (((f / 1000.0f) * makeVideoBitrate) / 8.0f));
+        long j2 = ((float) j) + (((f / 1000.0f) * videoBitrate) / 8.0f);
         videoEditedInfo.estimatedSize = j2;
         if (j2 == 0) {
             videoEditedInfo.estimatedSize = 1L;
@@ -5891,12 +5897,12 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     /* JADX WARN: Removed duplicated region for block: B:100:0x027f  */
-    /* JADX WARN: Removed duplicated region for block: B:121:0x02e6  */
-    /* JADX WARN: Removed duplicated region for block: B:124:0x02f6  */
-    /* JADX WARN: Removed duplicated region for block: B:131:0x0335  */
-    /* JADX WARN: Removed duplicated region for block: B:132:0x033b  */
-    /* JADX WARN: Removed duplicated region for block: B:135:0x0340  */
-    /* JADX WARN: Removed duplicated region for block: B:137:0x0347  */
+    /* JADX WARN: Removed duplicated region for block: B:121:0x02e4  */
+    /* JADX WARN: Removed duplicated region for block: B:124:0x02f4  */
+    /* JADX WARN: Removed duplicated region for block: B:131:0x0333  */
+    /* JADX WARN: Removed duplicated region for block: B:132:0x0339  */
+    /* JADX WARN: Removed duplicated region for block: B:135:0x033e  */
+    /* JADX WARN: Removed duplicated region for block: B:137:0x0345  */
     /* JADX WARN: Removed duplicated region for block: B:53:0x0120  */
     /* JADX WARN: Removed duplicated region for block: B:93:0x024a  */
     /* JADX WARN: Removed duplicated region for block: B:96:0x0266  */
@@ -5906,7 +5912,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     */
     public static /* synthetic */ void lambda$prepareSendingVideo$91(org.telegram.messenger.VideoEditedInfo r29, java.lang.String r30, final long r31, final int r33, final org.telegram.messenger.AccountInstance r34, java.lang.CharSequence r35, final org.telegram.messenger.MessageObject r36, final org.telegram.messenger.MessageObject r37, final org.telegram.messenger.MessageObject r38, final java.util.ArrayList r39, final boolean r40, final int r41, boolean r42) {
         /*
-            Method dump skipped, instructions count: 880
+            Method dump skipped, instructions count: 878
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.SendMessagesHelper.lambda$prepareSendingVideo$91(org.telegram.messenger.VideoEditedInfo, java.lang.String, long, int, org.telegram.messenger.AccountInstance, java.lang.CharSequence, org.telegram.messenger.MessageObject, org.telegram.messenger.MessageObject, org.telegram.messenger.MessageObject, java.util.ArrayList, boolean, int, boolean):void");

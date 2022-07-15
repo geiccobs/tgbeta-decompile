@@ -87,6 +87,11 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
     private int favTabBum = -2;
     private ContentPreviewViewer.ContentPreviewViewerDelegate contentPreviewViewerDelegate = new ContentPreviewViewer.ContentPreviewViewerDelegate() { // from class: org.telegram.ui.Components.StickerMasksAlert.1
         @Override // org.telegram.ui.ContentPreviewViewer.ContentPreviewViewerDelegate
+        public /* synthetic */ boolean can() {
+            return ContentPreviewViewer.ContentPreviewViewerDelegate.CC.$default$can(this);
+        }
+
+        @Override // org.telegram.ui.ContentPreviewViewer.ContentPreviewViewerDelegate
         public boolean canSchedule() {
             return false;
         }

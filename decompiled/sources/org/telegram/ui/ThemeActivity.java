@@ -970,7 +970,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         if (i == 3) {
             this.actionBar.setTitle(LocaleController.getString("BrowseThemes", R.string.BrowseThemes));
             ActionBarMenu createMenu = this.actionBar.createMenu();
-            RLottieDrawable rLottieDrawable = new RLottieDrawable(R.raw.sun, "2131558540", AndroidUtilities.dp(28.0f), AndroidUtilities.dp(28.0f), true, null);
+            RLottieDrawable rLottieDrawable = new RLottieDrawable(R.raw.sun, "2131558549", AndroidUtilities.dp(28.0f), AndroidUtilities.dp(28.0f), true, null);
             this.sunDrawable = rLottieDrawable;
             if (this.lastIsDarkTheme) {
                 rLottieDrawable.setCurrentFrame(rLottieDrawable.getFramesCount() - 1);
@@ -2110,7 +2110,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                     textCell = bubbleRadiusCell;
                     break;
                 case 14:
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                 default:
                     TextCell textCell2 = new TextCell(this.mContext);
                     textCell2.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
@@ -2358,7 +2358,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case 13:
                 case 15:
                 case 16:
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                 default:
                     return;
                 case 10:

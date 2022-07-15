@@ -67,6 +67,7 @@ public class PipVideoOverlay {
     private boolean isShowingControls;
     private boolean isVideoCompleted;
     private boolean isVisible;
+    private boolean isWebView;
     private int mVideoHeight;
     private int mVideoWidth;
     private boolean onSideToDismiss;
@@ -746,7 +747,9 @@ public class PipVideoOverlay {
                 PipVideoOverlay.this.lambda$showInternal$11(view3);
             }
         });
-        this.playPauseButton.setVisibility(this.innerView instanceof WebView ? 8 : 0);
+        boolean z3 = this.innerView instanceof WebView;
+        this.isWebView = z3;
+        this.playPauseButton.setVisibility(z3 ? 8 : 0);
         this.controlsView.addView(this.playPauseButton, LayoutHelper.createFrame(38, 38, 17));
         VideoProgressView videoProgressView = new VideoProgressView(context);
         this.videoProgressView = videoProgressView;
@@ -1158,6 +1161,9 @@ public class PipVideoOverlay {
         @Override // android.view.View
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+            if (PipVideoOverlay.this.isWebView) {
+                return;
+            }
             int width = getWidth();
             int dp = AndroidUtilities.dp(10.0f);
             float f = (width - dp) - dp;

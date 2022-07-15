@@ -18,14 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.ui.Components.AnimatedEmojiSpan;
 /* loaded from: classes.dex */
 public class Emoji {
     private static final int MAX_RECENT_EMOJI_COUNT = 48;
@@ -370,24 +369,18 @@ public class Emoji {
     }
 
     public static CharSequence replaceEmoji(CharSequence charSequence, Paint.FontMetricsInt fontMetricsInt, int i, boolean z) {
-        return replaceEmoji(charSequence, fontMetricsInt, i, z, null, false, null);
-    }
-
-    public static CharSequence replaceEmoji(CharSequence charSequence, Paint.FontMetricsInt fontMetricsInt, int i, boolean z, boolean z2, AtomicReference<WeakReference<View>> atomicReference) {
-        return replaceEmoji(charSequence, fontMetricsInt, i, z, null, z2, atomicReference);
-    }
-
-    public static CharSequence replaceEmoji(CharSequence charSequence, Paint.FontMetricsInt fontMetricsInt, int i, boolean z, int[] iArr) {
-        return replaceEmoji(charSequence, fontMetricsInt, i, z, iArr, false, null);
+        return replaceEmoji(charSequence, fontMetricsInt, i, z, null);
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Type inference failed for: r3v0, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r3v1, types: [java.lang.CharSequence] */
-    /* JADX WARN: Type inference failed for: r3v2, types: [java.lang.CharSequence, android.text.Spannable] */
-    /* JADX WARN: Type inference failed for: r3v6 */
-    /* JADX WARN: Type inference failed for: r3v7 */
-    public static CharSequence replaceEmoji(CharSequence charSequence, Paint.FontMetricsInt fontMetricsInt, int i, boolean z, int[] iArr, boolean z2, AtomicReference<WeakReference<View>> atomicReference) {
+    /* JADX WARN: Type inference failed for: r7v0, types: [java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r7v1, types: [java.lang.CharSequence] */
+    /* JADX WARN: Type inference failed for: r7v2, types: [java.lang.CharSequence, android.text.Spannable] */
+    /* JADX WARN: Type inference failed for: r7v6 */
+    /* JADX WARN: Type inference failed for: r7v7 */
+    public static CharSequence replaceEmoji(CharSequence charSequence, Paint.FontMetricsInt fontMetricsInt, int i, boolean z, int[] iArr) {
+        EmojiSpanRange emojiSpanRange;
+        boolean z2;
         if (!SharedConfig.useSystemEmoji && charSequence != 0 && charSequence.length() != 0) {
             if (!z && (charSequence instanceof Spannable)) {
                 charSequence = (Spannable) charSequence;
@@ -395,18 +388,36 @@ public class Emoji {
                 charSequence = Spannable.Factory.getInstance().newSpannable(charSequence.toString());
             }
             ArrayList<EmojiSpanRange> parseEmojis = parseEmojis(charSequence, iArr);
+            AnimatedEmojiSpan[] animatedEmojiSpanArr = (AnimatedEmojiSpan[]) charSequence.getSpans(0, charSequence.length(), AnimatedEmojiSpan.class);
             for (int i2 = 0; i2 < parseEmojis.size(); i2++) {
-                EmojiSpanRange emojiSpanRange = parseEmojis.get(i2);
                 try {
-                    EmojiDrawable emojiDrawable = getEmojiDrawable(emojiSpanRange.code);
-                    if (emojiDrawable != null) {
-                        charSequence.setSpan(new EmojiSpan(emojiDrawable, 0, i, fontMetricsInt), emojiSpanRange.start, emojiSpanRange.end, 33);
-                    }
+                    emojiSpanRange = parseEmojis.get(i2);
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
-                int i3 = Build.VERSION.SDK_INT;
-                if ((i3 < 23 || i3 >= 29) && !BuildVars.DEBUG_PRIVATE_VERSION && i2 + 1 >= 50) {
+                if (animatedEmojiSpanArr != null) {
+                    int i3 = 0;
+                    while (true) {
+                        if (i3 >= animatedEmojiSpanArr.length) {
+                            z2 = false;
+                            break;
+                        }
+                        AnimatedEmojiSpan animatedEmojiSpan = animatedEmojiSpanArr[i3];
+                        if (animatedEmojiSpan != null && charSequence.getSpanStart(animatedEmojiSpan) == emojiSpanRange.start && charSequence.getSpanEnd(animatedEmojiSpan) == emojiSpanRange.end) {
+                            z2 = true;
+                            break;
+                        }
+                        i3++;
+                    }
+                    if (z2) {
+                    }
+                }
+                EmojiDrawable emojiDrawable = getEmojiDrawable(emojiSpanRange.code);
+                if (emojiDrawable != null) {
+                    charSequence.setSpan(new EmojiSpan(emojiDrawable, 0, i, fontMetricsInt), emojiSpanRange.start, emojiSpanRange.end, 33);
+                }
+                int i4 = Build.VERSION.SDK_INT;
+                if ((i4 < 23 || i4 >= 29) && i2 + 1 >= 50) {
                     break;
                 }
             }

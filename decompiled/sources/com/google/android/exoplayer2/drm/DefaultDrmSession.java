@@ -28,8 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
-import org.telegram.messenger.R;
-@TargetApi(R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+@TargetApi(18)
 /* loaded from: classes.dex */
 public class DefaultDrmSession<T extends ExoMediaCrypto> implements DrmSession<T> {
     final MediaDrmCallback callback;

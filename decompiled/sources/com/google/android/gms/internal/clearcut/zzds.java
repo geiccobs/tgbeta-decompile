@@ -1055,7 +1055,7 @@ final class zzds<T> implements zzef<T> {
                     zzfd.zza((Object) t, j, zzfd.zzk(t2, j));
                     zzb((zzds<T>) t, i);
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                 case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 case R.styleable.MapAttrs_uiZoomGestures /* 21 */:

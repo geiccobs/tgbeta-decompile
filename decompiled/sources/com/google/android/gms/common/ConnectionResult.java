@@ -106,7 +106,7 @@ public final class ConnectionResult extends AbstractSafeParcelable {
                             return "API_UNAVAILABLE";
                         case 17:
                             return "SIGN_IN_FAILED";
-                        case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                        case 18:
                             return "SERVICE_UPDATING";
                         case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                             return "SERVICE_MISSING_PERMISSION";

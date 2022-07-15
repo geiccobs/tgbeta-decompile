@@ -1284,11 +1284,11 @@ public class AlertsCreator {
             android.app.Activity r1 = r12.getParentActivity()
             r2 = r17
             r10.<init>(r1, r2)
-            r1 = 2131627108(0x7f0e0c64, float:1.8881471E38)
+            r1 = 2131627150(0x7f0e0c8e, float:1.8881556E38)
             java.lang.String r2 = "OpenUrlTitle"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             r10.setTitle(r1)
-            r1 = 2131627105(0x7f0e0c61, float:1.8881465E38)
+            r1 = 2131627147(0x7f0e0c8b, float:1.888155E38)
             java.lang.String r2 = "OpenUrlAlert2"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             java.lang.String r2 = "%"
@@ -1308,7 +1308,7 @@ public class AlertsCreator {
         L9f:
             r10.setMessage(r11)
             r10.setMessageTextViewClickable(r9)
-            r0 = 2131627090(0x7f0e0c52, float:1.8881435E38)
+            r0 = 2131627132(0x7f0e0c7c, float:1.888152E38)
             java.lang.String r1 = "Open"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             org.telegram.ui.Components.AlertsCreator$$ExternalSyntheticLambda27 r9 = new org.telegram.ui.Components.AlertsCreator$$ExternalSyntheticLambda27
@@ -1318,7 +1318,7 @@ public class AlertsCreator {
             r6 = r15
             r1.<init>()
             r10.setPositiveButton(r0, r9)
-            r0 = 2131624819(0x7f0e0373, float:1.8876828E38)
+            r0 = 2131624828(0x7f0e037c, float:1.8876847E38)
             java.lang.String r1 = "Cancel"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             r10.setNegativeButton(r0, r8)
@@ -4161,7 +4161,7 @@ public class AlertsCreator {
                     builder.setMessage(LocaleController.getString("GroupUserLeftError", R.string.GroupUserLeftError));
                     break;
                 }
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 builder.setMessage(LocaleController.getString("AddAdminErrorNotAMember", R.string.AddAdminErrorNotAMember));
                 break;
             case R.styleable.MapAttrs_uiTiltGestures /* 19 */:

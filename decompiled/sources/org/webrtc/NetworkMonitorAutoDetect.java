@@ -511,7 +511,7 @@ public class NetworkMonitorAutoDetect extends BroadcastReceiver implements Netwo
                 case 17:
                     return NetworkChangeDetector.ConnectionType.CONNECTION_3G;
                 case 13:
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     return NetworkChangeDetector.ConnectionType.CONNECTION_4G;
                 case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 default:

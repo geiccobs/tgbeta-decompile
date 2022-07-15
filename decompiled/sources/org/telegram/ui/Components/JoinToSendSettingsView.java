@@ -181,6 +181,16 @@ public class JoinToSendSettingsView extends LinearLayout {
         requestLayout();
     }
 
+    public void showJoinToSend(boolean z) {
+        this.joinToSendCell.setVisibility(z ? 0 : 8);
+        if (!z) {
+            this.isJoinToSend = true;
+            this.joinRequestCell.setVisibility(0);
+            updateToggleValue(1.0f);
+        }
+        requestLayout();
+    }
+
     /* renamed from: setJoinRequest */
     public void lambda$new$3(boolean z) {
         this.isJoinRequest = z;
@@ -234,12 +244,15 @@ public class JoinToSendSettingsView extends LinearLayout {
         int i5 = i3 - i;
         int measuredHeight = headerCell.getMeasuredHeight() + 0;
         headerCell.layout(0, 0, i5, measuredHeight);
-        TextCheckCell textCheckCell = this.joinToSendCell;
-        int measuredHeight2 = textCheckCell.getMeasuredHeight() + measuredHeight;
-        textCheckCell.layout(0, measuredHeight, i5, measuredHeight2);
+        if (this.joinToSendCell.getVisibility() == 0) {
+            TextCheckCell textCheckCell = this.joinToSendCell;
+            int measuredHeight2 = textCheckCell.getMeasuredHeight() + measuredHeight;
+            textCheckCell.layout(0, measuredHeight, i5, measuredHeight2);
+            measuredHeight = measuredHeight2;
+        }
         TextCheckCell textCheckCell2 = this.joinRequestCell;
-        int measuredHeight3 = textCheckCell2.getMeasuredHeight() + measuredHeight2;
-        textCheckCell2.layout(0, measuredHeight2, i5, measuredHeight3);
+        int measuredHeight3 = textCheckCell2.getMeasuredHeight() + measuredHeight;
+        textCheckCell2.layout(0, measuredHeight, i5, measuredHeight3);
         TextInfoPrivacyCell textInfoPrivacyCell = this.joinToSendInfoCell;
         textInfoPrivacyCell.layout(0, measuredHeight3, i5, textInfoPrivacyCell.getMeasuredHeight() + measuredHeight3);
         TextInfoPrivacyCell textInfoPrivacyCell2 = this.joinRequestInfoCell;
@@ -247,7 +260,14 @@ public class JoinToSendSettingsView extends LinearLayout {
     }
 
     private int calcHeight() {
-        return (int) (this.joinHeaderCell.getMeasuredHeight() + this.joinToSendCell.getMeasuredHeight() + (this.joinRequestCell.getMeasuredHeight() * this.toggleValue) + AndroidUtilities.lerp(this.joinToSendInfoCell.getMeasuredHeight(), this.joinRequestInfoCell.getMeasuredHeight(), this.toggleValue));
+        float f;
+        float measuredHeight = this.joinHeaderCell.getMeasuredHeight();
+        if (this.joinToSendCell.getVisibility() == 0) {
+            f = this.joinToSendCell.getMeasuredHeight() + (this.joinRequestCell.getMeasuredHeight() * this.toggleValue);
+        } else {
+            f = this.joinRequestCell.getMeasuredHeight();
+        }
+        return (int) (measuredHeight + f + AndroidUtilities.lerp(this.joinToSendInfoCell.getMeasuredHeight(), this.joinRequestInfoCell.getMeasuredHeight(), this.toggleValue));
     }
 
     @Override // android.widget.LinearLayout, android.view.View

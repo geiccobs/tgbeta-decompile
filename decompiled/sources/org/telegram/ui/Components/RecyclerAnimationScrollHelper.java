@@ -37,7 +37,6 @@ public class RecyclerAnimationScrollHelper {
         }
 
         public void recycleView(View view) {
-            throw null;
         }
     }
 

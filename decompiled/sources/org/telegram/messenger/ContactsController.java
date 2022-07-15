@@ -50,6 +50,7 @@ import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneNumber;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyPhoneP2P;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyProfilePhoto;
 import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyStatusTimestamp;
+import org.telegram.tgnet.TLRPC$TL_inputPrivacyKeyVoiceMessages;
 import org.telegram.tgnet.TLRPC$TL_popularContact;
 import org.telegram.tgnet.TLRPC$TL_user;
 import org.telegram.tgnet.TLRPC$TL_userStatusLastMonth;
@@ -65,13 +66,14 @@ public class ContactsController extends BaseController {
     private static volatile ContactsController[] Instance = new ContactsController[4];
     public static final int PRIVACY_RULES_TYPE_ADDED_BY_PHONE = 7;
     public static final int PRIVACY_RULES_TYPE_CALLS = 2;
-    public static final int PRIVACY_RULES_TYPE_COUNT = 8;
+    public static final int PRIVACY_RULES_TYPE_COUNT = 9;
     public static final int PRIVACY_RULES_TYPE_FORWARDS = 5;
     public static final int PRIVACY_RULES_TYPE_INVITE = 1;
     public static final int PRIVACY_RULES_TYPE_LASTSEEN = 0;
     public static final int PRIVACY_RULES_TYPE_P2P = 3;
     public static final int PRIVACY_RULES_TYPE_PHONE = 6;
     public static final int PRIVACY_RULES_TYPE_PHOTO = 4;
+    public static final int PRIVACY_RULES_TYPE_VOICE_MESSAGES = 8;
     private ArrayList<TLRPC$PrivacyRule> addedByPhonePrivacyRules;
     private ArrayList<TLRPC$PrivacyRule> callPrivacyRules;
     private int completedRequestsCount;
@@ -95,12 +97,13 @@ public class ContactsController extends BaseController {
     private ArrayList<TLRPC$PrivacyRule> profilePhotoPrivacyRules;
     private Account systemAccount;
     private boolean updatingInviteLink;
+    private ArrayList<TLRPC$PrivacyRule> voiceMessagesRules;
     private final Object loadContactsSync = new Object();
     private final Object observerLock = new Object();
     private String lastContactsVersions = "";
     private ArrayList<Long> delayedContactsUpdate = new ArrayList<>();
     private HashMap<String, String> sectionsToReplace = new HashMap<>();
-    private int[] loadingPrivacyInfo = new int[8];
+    private int[] loadingPrivacyInfo = new int[9];
     private String[] projectionPhones = {"lookup", "data1", "data2", "data3", "display_name", "account_type"};
     private String[] projectionNames = {"lookup", "data2", "data3", "data5"};
     public HashMap<String, Contact> contactsBook = new HashMap<>();
@@ -2279,8 +2282,12 @@ public class ContactsController extends BaseController {
                         case 6:
                             tLRPC$TL_account_getPrivacy.key = new TLRPC$TL_inputPrivacyKeyPhoneNumber();
                             break;
+                        case 7:
                         default:
                             tLRPC$TL_account_getPrivacy.key = new TLRPC$TL_inputPrivacyKeyAddedByPhone();
+                            break;
+                        case 8:
+                            tLRPC$TL_account_getPrivacy.key = new TLRPC$TL_inputPrivacyKeyVoiceMessages();
                             break;
                     }
                     getConnectionsManager().sendRequest(tLRPC$TL_account_getPrivacy, new RequestDelegate() { // from class: org.telegram.messenger.ContactsController$$ExternalSyntheticLambda55
@@ -2372,8 +2379,12 @@ public class ContactsController extends BaseController {
                 case 6:
                     this.phonePrivacyRules = tLRPC$TL_account_privacyRules.rules;
                     break;
+                case 7:
                 default:
                     this.addedByPhonePrivacyRules = tLRPC$TL_account_privacyRules.rules;
+                    break;
+                case 8:
+                    this.voiceMessagesRules = tLRPC$TL_account_privacyRules.rules;
                     break;
             }
             this.loadingPrivacyInfo[i] = 2;
@@ -2399,7 +2410,7 @@ public class ContactsController extends BaseController {
         return this.loadingGlobalSettings != 2;
     }
 
-    public boolean getLoadingPrivicyInfo(int i) {
+    public boolean getLoadingPrivacyInfo(int i) {
         return this.loadingPrivacyInfo[i] != 2;
     }
 
@@ -2425,6 +2436,8 @@ public class ContactsController extends BaseController {
                 return this.phonePrivacyRules;
             case 7:
                 return this.addedByPhonePrivacyRules;
+            case 8:
+                return this.voiceMessagesRules;
             default:
                 return null;
         }
@@ -2455,6 +2468,9 @@ public class ContactsController extends BaseController {
                 break;
             case 7:
                 this.addedByPhonePrivacyRules = arrayList;
+                break;
+            case 8:
+                this.voiceMessagesRules = arrayList;
                 break;
         }
         getNotificationCenter().postNotificationName(NotificationCenter.privacyRulesUpdated, new Object[0]);

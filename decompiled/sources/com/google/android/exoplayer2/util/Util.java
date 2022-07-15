@@ -925,7 +925,7 @@ public final class Util {
             case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
             default:
                 return 6;
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 return 2;
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 return 9;

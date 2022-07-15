@@ -283,6 +283,11 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         }
 
         @Override // org.telegram.ui.Components.BotWebViewContainer.Delegate
+        public void onWebAppSetupClosingBehavior(boolean z) {
+            this.val$webViewLayout.setNeedCloseConfirmation(z);
+        }
+
+        @Override // org.telegram.ui.Components.BotWebViewContainer.Delegate
         public void onCloseRequested(final Runnable runnable) {
             if (ChatAttachAlert.this.currentAttachLayout != this.val$webViewLayout) {
                 return;
@@ -593,6 +598,10 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         }
 
         void onDismissWithButtonClick(int i) {
+        }
+
+        boolean onDismissWithTouchOutside() {
+            return true;
         }
 
         public void onHidden() {
@@ -1556,7 +1565,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         numberTextView.setCenterAlign(true);
         this.frameLayout2.addView(numberTextView, LayoutHelper.createFrame(56, 20.0f, 85, 3.0f, 0.0f, 14.0f, 78.0f));
         this.currentLimit = MessagesController.getInstance(UserConfig.selectedAccount).getCaptionMaxLengthLimit();
-        AnonymousClass11 anonymousClass11 = new AnonymousClass11(context, this.sizeNotifierFrameLayout, null, 1, resourcesProvider);
+        AnonymousClass11 anonymousClass11 = new AnonymousClass11(context, this.sizeNotifierFrameLayout, null, 1, true, resourcesProvider);
         this.commentTextView = anonymousClass11;
         anonymousClass11.setHint(LocaleController.getString("AddCaption", R.string.AddCaption));
         this.commentTextView.onResume();
@@ -1689,23 +1698,86 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 AnonymousClass3.this = this;
             }
 
+            /* JADX WARN: Removed duplicated region for block: B:14:0x005d  */
+            /* JADX WARN: Removed duplicated region for block: B:15:0x0074  */
             @Override // org.telegram.ui.ActionBar.AdjustPanLayoutHelper
-            public void onTransitionStart(boolean z, int i) {
-                super.onTransitionStart(z, i);
-                if (ChatAttachAlert.this.previousScrollOffsetY > 0) {
-                    int i2 = ChatAttachAlert.this.previousScrollOffsetY;
-                    ChatAttachAlert chatAttachAlert = ChatAttachAlert.this;
-                    if (i2 != chatAttachAlert.scrollOffsetY[0] && z) {
-                        chatAttachAlert.fromScrollY = chatAttachAlert.previousScrollOffsetY;
-                        ChatAttachAlert chatAttachAlert2 = ChatAttachAlert.this;
-                        chatAttachAlert2.toScrollY = chatAttachAlert2.scrollOffsetY[0];
-                        AnonymousClass3.this.invalidate();
-                        ChatAttachAlert.this.currentAttachLayout.onPanTransitionStart(z, i);
-                    }
-                }
-                ChatAttachAlert.this.fromScrollY = -1.0f;
-                AnonymousClass3.this.invalidate();
-                ChatAttachAlert.this.currentAttachLayout.onPanTransitionStart(z, i);
+            /*
+                Code decompiled incorrectly, please refer to instructions dump.
+                To view partially-correct add '--show-bad-code' argument
+            */
+            public void onTransitionStart(boolean r5, int r6) {
+                /*
+                    r4 = this;
+                    super.onTransitionStart(r5, r6)
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    int r0 = org.telegram.ui.Components.ChatAttachAlert.access$3300(r0)
+                    r1 = 0
+                    if (r0 <= 0) goto L37
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    int r0 = org.telegram.ui.Components.ChatAttachAlert.access$3300(r0)
+                    org.telegram.ui.Components.ChatAttachAlert$3 r2 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r2 = org.telegram.ui.Components.ChatAttachAlert.this
+                    int[] r3 = r2.scrollOffsetY
+                    r3 = r3[r1]
+                    if (r0 == r3) goto L37
+                    if (r5 == 0) goto L37
+                    int r0 = org.telegram.ui.Components.ChatAttachAlert.access$3300(r2)
+                    float r0 = (float) r0
+                    org.telegram.ui.Components.ChatAttachAlert.access$3402(r2, r0)
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    int[] r2 = r0.scrollOffsetY
+                    r2 = r2[r1]
+                    float r2 = (float) r2
+                    org.telegram.ui.Components.ChatAttachAlert.access$3502(r0, r2)
+                    goto L40
+                L37:
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    r2 = -1082130432(0xffffffffbf800000, float:-1.0)
+                    org.telegram.ui.Components.ChatAttachAlert.access$3402(r0, r2)
+                L40:
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    r0.invalidate()
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    org.telegram.ui.Components.ChatAttachAlert$AttachAlertLayout r0 = org.telegram.ui.Components.ChatAttachAlert.access$000(r0)
+                    boolean r0 = r0 instanceof org.telegram.ui.Components.ChatAttachAlertBotWebViewLayout
+                    if (r0 == 0) goto L88
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    boolean r0 = org.telegram.ui.Components.ChatAttachAlert.access$500(r0)
+                    if (r0 != 0) goto L88
+                    if (r5 == 0) goto L74
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    android.view.View r0 = org.telegram.ui.Components.ChatAttachAlert.access$1100(r0)
+                    r1 = 8
+                    r0.setVisibility(r1)
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    org.telegram.ui.Components.RecyclerListView r0 = r0.buttonsRecyclerView
+                    r0.setVisibility(r1)
+                    goto L88
+                L74:
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    android.view.View r0 = org.telegram.ui.Components.ChatAttachAlert.access$1100(r0)
+                    r0.setVisibility(r1)
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    org.telegram.ui.Components.RecyclerListView r0 = r0.buttonsRecyclerView
+                    r0.setVisibility(r1)
+                L88:
+                    org.telegram.ui.Components.ChatAttachAlert$3 r0 = org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.this
+                    org.telegram.ui.Components.ChatAttachAlert r0 = org.telegram.ui.Components.ChatAttachAlert.this
+                    org.telegram.ui.Components.ChatAttachAlert$AttachAlertLayout r0 = org.telegram.ui.Components.ChatAttachAlert.access$000(r0)
+                    r0.onPanTransitionStart(r5, r6)
+                    return
+                */
+                throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ChatAttachAlert.AnonymousClass3.AnonymousClass1.onTransitionStart(boolean, int):void");
             }
 
             @Override // org.telegram.ui.ActionBar.AdjustPanLayoutHelper
@@ -1716,6 +1788,13 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 ChatAttachAlert chatAttachAlert2 = ChatAttachAlert.this;
                 chatAttachAlert2.previousScrollOffsetY = chatAttachAlert2.scrollOffsetY[0];
                 ChatAttachAlert.this.currentAttachLayout.onPanTransitionEnd();
+                if (!(ChatAttachAlert.this.currentAttachLayout instanceof ChatAttachAlertBotWebViewLayout) || ChatAttachAlert.this.botButtonWasVisible) {
+                    return;
+                }
+                int dp = ((BottomSheet) ChatAttachAlert.this).keyboardVisible ? AndroidUtilities.dp(84.0f) : 0;
+                for (int i = 0; i < ChatAttachAlert.this.botAttachLayouts.size(); i++) {
+                    ((ChatAttachAlertBotWebViewLayout) ChatAttachAlert.this.botAttachLayouts.valueAt(i)).setMeasureOffsetY(dp);
+                }
             }
 
             @Override // org.telegram.ui.ActionBar.AdjustPanLayoutHelper
@@ -1767,7 +1846,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 return true;
             }
             if (motionEvent.getAction() == 0 && ChatAttachAlert.this.scrollOffsetY[0] != 0 && motionEvent.getY() < getCurrentTop() && ChatAttachAlert.this.actionBar.getAlpha() == 0.0f) {
-                ChatAttachAlert.this.dismiss();
+                ChatAttachAlert.this.onDismissWithTouchOutside();
                 return true;
             }
             return super.onInterceptTouchEvent(motionEvent);
@@ -2317,9 +2396,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         private boolean shouldAnimateEditTextWithBounds;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        AnonymousClass11(Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, BaseFragment baseFragment, int i, Theme.ResourcesProvider resourcesProvider) {
-            super(context, sizeNotifierFrameLayout, baseFragment, i, resourcesProvider);
-            ChatAttachAlert.this = r7;
+        AnonymousClass11(Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, BaseFragment baseFragment, int i, boolean z, Theme.ResourcesProvider resourcesProvider) {
+            super(context, sizeNotifierFrameLayout, baseFragment, i, z, resourcesProvider);
+            ChatAttachAlert.this = r8;
         }
 
         @Override // android.view.ViewGroup
@@ -4293,6 +4372,13 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
     @Override // org.telegram.ui.ActionBar.BottomSheet
     protected boolean canDismissWithTouchOutside() {
         return this.currentAttachLayout.canDismissWithTouchOutside();
+    }
+
+    @Override // org.telegram.ui.ActionBar.BottomSheet
+    protected void onDismissWithTouchOutside() {
+        if (this.currentAttachLayout.onDismissWithTouchOutside()) {
+            dismiss();
+        }
     }
 
     public void dismiss(boolean z) {

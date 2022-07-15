@@ -447,7 +447,7 @@ public class ID3v2Info extends AudioInfo {
                 this.coverPictureType = parseAttachedPictureFrame.type;
                 return;
             case 2:
-            case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+            case 18:
                 this.album = parseTextFrame(iD3v2FrameBody);
                 return;
             case 3:

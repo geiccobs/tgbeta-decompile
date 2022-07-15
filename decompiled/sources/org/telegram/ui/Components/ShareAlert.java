@@ -1169,7 +1169,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.frameLayout2.setVisibility(4);
         this.containerView.addView(this.frameLayout2, LayoutHelper.createFrame(-1, -2, 83));
         this.frameLayout2.setOnTouchListener(ShareAlert$$ExternalSyntheticLambda8.INSTANCE);
-        AnonymousClass12 anonymousClass12 = new AnonymousClass12(context, sizeNotifierFrameLayout, null, 1, resourcesProvider);
+        AnonymousClass12 anonymousClass12 = new AnonymousClass12(context, sizeNotifierFrameLayout, null, 1, true, resourcesProvider);
         this.commentTextView = anonymousClass12;
         if (this.darkTheme) {
             anonymousClass12.getEditText().setTextColor(getThemedColor("voipgroup_nameText"));
@@ -1438,9 +1438,9 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         private boolean shouldAnimateEditTextWithBounds;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        AnonymousClass12(Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, BaseFragment baseFragment, int i, Theme.ResourcesProvider resourcesProvider) {
-            super(context, sizeNotifierFrameLayout, baseFragment, i, resourcesProvider);
-            ShareAlert.this = r7;
+        AnonymousClass12(Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, BaseFragment baseFragment, int i, boolean z, Theme.ResourcesProvider resourcesProvider) {
+            super(context, sizeNotifierFrameLayout, baseFragment, i, z, resourcesProvider);
+            ShareAlert.this = r8;
         }
 
         @Override // android.view.ViewGroup, android.view.View

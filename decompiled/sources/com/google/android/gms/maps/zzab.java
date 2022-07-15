@@ -81,7 +81,7 @@ public final class zzab implements Parcelable.Creator<GoogleMapOptions> {
                 case 17:
                     f2 = SafeParcelReader.readFloatObject(parcel, readHeader);
                     break;
-                case R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom /* 18 */:
+                case 18:
                     latLngBounds = (LatLngBounds) SafeParcelReader.createParcelable(parcel, readHeader, LatLngBounds.CREATOR);
                     break;
                 case R.styleable.MapAttrs_uiTiltGestures /* 19 */:

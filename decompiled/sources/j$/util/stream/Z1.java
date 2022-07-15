@@ -2,7 +2,7 @@ package j$.util.stream;
 
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-class Z1 extends AbstractC0051a2 {
+class Z1 extends AbstractC0052a2 {
     public Z1(B1 b1) {
     }
 

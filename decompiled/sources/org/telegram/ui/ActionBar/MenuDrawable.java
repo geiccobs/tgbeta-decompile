@@ -32,6 +32,7 @@ public class MenuDrawable extends Drawable {
     private RectF rect;
     private boolean reverseAngle;
     private boolean rotateToBack;
+    private boolean roundCap;
     private int type;
     private float typeAnimationProgress;
 
@@ -108,18 +109,17 @@ public class MenuDrawable extends Drawable {
     }
 
     /* JADX WARN: Removed duplicated region for block: B:39:0x0101  */
-    /* JADX WARN: Removed duplicated region for block: B:46:0x019b  */
-    /* JADX WARN: Removed duplicated region for block: B:56:0x02fa  */
-    /* JADX WARN: Removed duplicated region for block: B:57:0x0319  */
-    /* JADX WARN: Removed duplicated region for block: B:60:0x033b  */
-    /* JADX WARN: Removed duplicated region for block: B:68:0x036d  */
-    /* JADX WARN: Removed duplicated region for block: B:71:0x038a  */
-    /* JADX WARN: Removed duplicated region for block: B:75:0x03a0  */
-    /* JADX WARN: Removed duplicated region for block: B:76:0x03b0  */
-    /* JADX WARN: Removed duplicated region for block: B:80:0x03d9  */
-    /* JADX WARN: Removed duplicated region for block: B:84:0x03ed  */
-    /* JADX WARN: Removed duplicated region for block: B:85:0x03fc  */
-    /* JADX WARN: Removed duplicated region for block: B:88:0x0458  */
+    /* JADX WARN: Removed duplicated region for block: B:50:0x01c9  */
+    /* JADX WARN: Removed duplicated region for block: B:60:0x032d  */
+    /* JADX WARN: Removed duplicated region for block: B:61:0x034c  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x03a0  */
+    /* JADX WARN: Removed duplicated region for block: B:75:0x03bd  */
+    /* JADX WARN: Removed duplicated region for block: B:79:0x03d3  */
+    /* JADX WARN: Removed duplicated region for block: B:80:0x03e3  */
+    /* JADX WARN: Removed duplicated region for block: B:84:0x040c  */
+    /* JADX WARN: Removed duplicated region for block: B:88:0x0420  */
+    /* JADX WARN: Removed duplicated region for block: B:89:0x042f  */
+    /* JADX WARN: Removed duplicated region for block: B:92:0x048b  */
     @Override // android.graphics.drawable.Drawable
     /*
         Code decompiled incorrectly, please refer to instructions dump.
@@ -127,7 +127,7 @@ public class MenuDrawable extends Drawable {
     */
     public void draw(android.graphics.Canvas r26) {
         /*
-            Method dump skipped, instructions count: 1150
+            Method dump skipped, instructions count: 1201
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ActionBar.MenuDrawable.draw(android.graphics.Canvas):void");
@@ -178,6 +178,7 @@ public class MenuDrawable extends Drawable {
 
     public void setRoundCap() {
         this.paint.setStrokeCap(Paint.Cap.ROUND);
+        this.roundCap = true;
     }
 
     public void setMiniIcon(boolean z) {

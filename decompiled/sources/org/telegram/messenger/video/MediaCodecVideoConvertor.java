@@ -288,7 +288,7 @@ public class MediaCodecVideoConvertor {
     /* JADX WARN: Type inference failed for: r9v53, types: [org.telegram.messenger.video.InputSurface] */
     /* JADX WARN: Type inference failed for: r9v55 */
     /* JADX WARN: Type inference failed for: r9v60, types: [org.telegram.messenger.video.InputSurface] */
-    @android.annotation.TargetApi(org.telegram.messenger.R.styleable.MapAttrs_uiScrollGesturesDuringRotateOrZoom)
+    @android.annotation.TargetApi(18)
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument

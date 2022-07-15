@@ -25,6 +25,9 @@ public class LinearSmoothScrollerCustom extends RecyclerView.SmoothScroller {
         return i3;
     }
 
+    public void onEnd() {
+    }
+
     @Override // androidx.recyclerview.widget.RecyclerView.SmoothScroller
     protected void onStart() {
     }
@@ -40,6 +43,8 @@ public class LinearSmoothScrollerCustom extends RecyclerView.SmoothScroller {
         int calculateTimeForDeceleration = calculateTimeForDeceleration(calculateDyToMakeVisible);
         if (calculateTimeForDeceleration > 0) {
             action.update(0, -calculateDyToMakeVisible, Math.max(400, calculateTimeForDeceleration), this.mDecelerateInterpolator);
+        } else {
+            onEnd();
         }
     }
 

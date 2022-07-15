@@ -96,16 +96,24 @@ public class StickerSetBulletinLayout extends Bulletin.TwoLineLayout {
         } else {
             this.imageView.setImage((ImageLocation) null, (String) null, "webp", (Drawable) null, tLObject);
         }
+        if (tLRPC$StickerSet == null) {
+            return;
+        }
         switch (i) {
             case 0:
                 if (tLRPC$StickerSet.masks) {
                     this.titleTextView.setText(LocaleController.getString("MasksRemoved", R.string.MasksRemoved));
                     this.subtitleTextView.setText(LocaleController.formatString("MasksRemovedInfo", R.string.MasksRemovedInfo, tLRPC$StickerSet.title));
                     return;
+                } else if (tLRPC$StickerSet.emojis) {
+                    this.titleTextView.setText(LocaleController.getString("EmojiRemoved", R.string.EmojiRemoved));
+                    this.subtitleTextView.setText(LocaleController.formatString("EmojiRemovedInfo", R.string.EmojiRemovedInfo, tLRPC$StickerSet.title));
+                    return;
+                } else {
+                    this.titleTextView.setText(LocaleController.getString("StickersRemoved", R.string.StickersRemoved));
+                    this.subtitleTextView.setText(LocaleController.formatString("StickersRemovedInfo", R.string.StickersRemovedInfo, tLRPC$StickerSet.title));
+                    return;
                 }
-                this.titleTextView.setText(LocaleController.getString("StickersRemoved", R.string.StickersRemoved));
-                this.subtitleTextView.setText(LocaleController.formatString("StickersRemovedInfo", R.string.StickersRemovedInfo, tLRPC$StickerSet.title));
-                return;
             case 1:
                 if (tLRPC$StickerSet.masks) {
                     this.titleTextView.setText(LocaleController.getString("MasksArchived", R.string.MasksArchived));
@@ -120,10 +128,15 @@ public class StickerSetBulletinLayout extends Bulletin.TwoLineLayout {
                     this.titleTextView.setText(LocaleController.getString("AddMasksInstalled", R.string.AddMasksInstalled));
                     this.subtitleTextView.setText(LocaleController.formatString("AddMasksInstalledInfo", R.string.AddMasksInstalledInfo, tLRPC$StickerSet.title));
                     return;
+                } else if (tLRPC$StickerSet.emojis) {
+                    this.titleTextView.setText(LocaleController.getString("AddEmojiInstalled", R.string.AddEmojiInstalled));
+                    this.subtitleTextView.setText(LocaleController.formatString("AddEmojiInstalledInfo", R.string.AddEmojiInstalledInfo, tLRPC$StickerSet.title));
+                    return;
+                } else {
+                    this.titleTextView.setText(LocaleController.getString("AddStickersInstalled", R.string.AddStickersInstalled));
+                    this.subtitleTextView.setText(LocaleController.formatString("AddStickersInstalledInfo", R.string.AddStickersInstalledInfo, tLRPC$StickerSet.title));
+                    return;
                 }
-                this.titleTextView.setText(LocaleController.getString("AddStickersInstalled", R.string.AddStickersInstalled));
-                this.subtitleTextView.setText(LocaleController.formatString("AddStickersInstalledInfo", R.string.AddStickersInstalledInfo, tLRPC$StickerSet.title));
-                return;
             case 3:
                 this.titleTextView.setText(LocaleController.getString("RemovedFromRecent", R.string.RemovedFromRecent));
                 this.subtitleTextView.setVisibility(8);
