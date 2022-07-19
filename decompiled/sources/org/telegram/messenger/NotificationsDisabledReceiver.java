@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import com.huawei.hms.adapter.internal.AvailableCode;
-@TargetApi(AvailableCode.APP_IS_BACKGROUND_OR_LOCKED)
+import org.telegram.tgnet.ConnectionsManager;
+@TargetApi(28)
 /* loaded from: classes.dex */
 public class NotificationsDisabledReceiver extends BroadcastReceiver {
     @Override // android.content.BroadcastReceiver
@@ -42,8 +42,9 @@ public class NotificationsDisabledReceiver extends BroadcastReceiver {
             return;
         }
         SharedPreferences notificationsSettings = AccountInstance.getInstance(intValue).getNotificationsSettings();
-        int i2 = Integer.MAX_VALUE;
-        if (split[1].startsWith("channel")) {
+        boolean startsWith = split[1].startsWith("channel");
+        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        if (startsWith) {
             if (!stringExtra.equals(notificationsSettings.getString("channels", null))) {
                 return;
             }
@@ -53,7 +54,7 @@ public class NotificationsDisabledReceiver extends BroadcastReceiver {
             SharedPreferences.Editor edit = notificationsSettings.edit();
             String globalNotificationsKey = NotificationsController.getGlobalNotificationsKey(2);
             if (booleanExtra) {
-                i = Integer.MAX_VALUE;
+                i = ConnectionsManager.DEFAULT_DATACENTER_ID;
             }
             edit.putInt(globalNotificationsKey, i).commit();
             AccountInstance.getInstance(intValue).getNotificationsController().updateServerNotificationsSettings(2);
@@ -81,7 +82,7 @@ public class NotificationsDisabledReceiver extends BroadcastReceiver {
             SharedPreferences.Editor edit3 = notificationsSettings.edit();
             String globalNotificationsKey3 = NotificationsController.getGlobalNotificationsKey(1);
             if (booleanExtra) {
-                i = Integer.MAX_VALUE;
+                i = ConnectionsManager.DEFAULT_DATACENTER_ID;
             }
             edit3.putInt(globalNotificationsKey3, i).commit();
             AccountInstance.getInstance(intValue).getNotificationsController().updateServerNotificationsSettings(1);

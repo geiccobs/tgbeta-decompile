@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.util.Base64;
-import com.huawei.hms.common.AccountPicker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -134,7 +133,7 @@ public class UserConfig extends BaseController {
             try {
                 SharedPreferences.Editor edit = getPreferences().edit();
                 if (this.currentAccount == 0) {
-                    edit.putInt(AccountPicker.EXTRA_SELECTED_ACCOUNT, selectedAccount);
+                    edit.putInt("selectedAccount", selectedAccount);
                 }
                 edit.putBoolean("registeredForPush", this.registeredForPush);
                 edit.putInt("lastSendMessageId", this.lastSendMessageId);

@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.util.Base64;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,7 +70,7 @@ public class ExperimentTokens extends AbstractSafeParcelable {
     private static void zza(StringBuilder sb, String str, byte[][] bArr) {
         String str2;
         sb.append(str);
-        sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
+        sb.append("=");
         if (bArr == null) {
             str2 = "null";
         } else {
@@ -123,7 +122,7 @@ public class ExperimentTokens extends AbstractSafeParcelable {
         sb.append(", ");
         byte[] bArr = this.zzq;
         sb.append("direct");
-        sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
+        sb.append("=");
         if (bArr == null) {
             sb.append("null");
         } else {
@@ -142,7 +141,7 @@ public class ExperimentTokens extends AbstractSafeParcelable {
         sb.append(", ");
         int[] iArr = this.zzv;
         sb.append("weak");
-        sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
+        sb.append("=");
         if (iArr == null) {
             sb.append("null");
         } else {

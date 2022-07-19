@@ -3,6 +3,7 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
+import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
 /* loaded from: classes.dex */
 final class zzfn extends zzdi<Long> implements zzew<Long>, zzgi {
@@ -103,7 +104,7 @@ final class zzfn extends zzdi<Long> implements zzew<Long>, zzgi {
             return false;
         }
         int i2 = this.zzc;
-        if (Integer.MAX_VALUE - i2 < i) {
+        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;

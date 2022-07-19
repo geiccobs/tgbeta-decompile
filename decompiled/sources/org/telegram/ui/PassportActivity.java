@@ -51,7 +51,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.content.FileProvider;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -85,6 +84,7 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MrzRecognizer;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.SecureDocument;
 import org.telegram.messenger.SecureDocumentKey;
@@ -93,7 +93,6 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -2242,7 +2241,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                         byte[] decryptValueSecret = decryptValueSecret(tLRPC$TL_secureData.secret, tLRPC$TL_secureData.data_hash);
                         jSONObject2.put("data_hash", Base64.encodeToString(tLRPC$TL_secureValue.data.data_hash, 2));
                         jSONObject2.put("secret", Base64.encodeToString(decryptValueSecret, 2));
-                        jSONObject3.put(RemoteMessageConst.DATA, jSONObject2);
+                        jSONObject3.put("data", jSONObject2);
                     }
                     if (!tLRPC$TL_secureValue.files.isEmpty()) {
                         JSONArray jSONArray = new JSONArray();

@@ -10,7 +10,6 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import com.huawei.hms.adapter.internal.CommonCode;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,9 +19,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 /* loaded from: classes3.dex */
 public class Star3DIcon {
@@ -109,7 +108,7 @@ public class Star3DIcon {
         this.normalSpecColorHandle = GLES20.glGetUniformLocation(this.mProgramObject, "normalSpecColor");
         this.normalSpecHandle = GLES20.glGetUniformLocation(this.mProgramObject, "normalSpec");
         this.specColorHandle = GLES20.glGetUniformLocation(this.mProgramObject, "specColor");
-        this.resolutionHandle = GLES20.glGetUniformLocation(this.mProgramObject, CommonCode.MapKey.HAS_RESOLUTION);
+        this.resolutionHandle = GLES20.glGetUniformLocation(this.mProgramObject, "resolution");
         this.gradientPositionHandle = GLES20.glGetUniformLocation(this.mProgramObject, "gradientPosition");
         this.mTextures.position(0);
         GLES20.glVertexAttribPointer(this.mTextureCoordinateHandle, 2, 5126, false, 0, (Buffer) this.mTextures);

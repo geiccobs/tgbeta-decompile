@@ -40,7 +40,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.util.Consumer;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -66,13 +65,13 @@ import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.OneUIUtilities;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SecretChatHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -984,7 +983,7 @@ public class AlertsCreator {
 
     /* JADX WARN: Multi-variable type inference failed */
     /* JADX WARN: Type inference failed for: r8v0 */
-    /* JADX WARN: Type inference failed for: r8v1, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r8v1, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r8v2 */
     public static void showCustomNotificationsDialog(final BaseFragment baseFragment, final long j, final int i, final ArrayList<NotificationsSettingsActivity.NotificationException> arrayList, final int i2, final MessagesStorage.IntCallback intCallback, final MessagesStorage.IntCallback intCallback2) {
         String[] strArr;
@@ -1106,7 +1105,7 @@ public class AlertsCreator {
             } else if (intValue == 2) {
                 currentTime += 172800;
             } else if (intValue == 4) {
-                currentTime = Integer.MAX_VALUE;
+                currentTime = ConnectionsManager.DEFAULT_DATACENTER_ID;
             }
             NotificationsController.getInstance(i).muteUntil(j, currentTime);
             if (j != 0 && intCallback != null) {
@@ -1117,7 +1116,7 @@ public class AlertsCreator {
                 }
             }
             if (j == 0) {
-                NotificationsController.getInstance(i).setGlobalNotificationsEnabled(i2, Integer.MAX_VALUE);
+                NotificationsController.getInstance(i).setGlobalNotificationsEnabled(i2, ConnectionsManager.DEFAULT_DATACENTER_ID);
             }
         } else if (j != 0) {
             Bundle bundle = new Bundle();
@@ -1285,11 +1284,11 @@ public class AlertsCreator {
             android.app.Activity r1 = r12.getParentActivity()
             r2 = r17
             r10.<init>(r1, r2)
-            r1 = 2131627160(0x7f0e0c98, float:1.8881577E38)
+            r1 = 2131627150(0x7f0e0c8e, float:1.8881556E38)
             java.lang.String r2 = "OpenUrlTitle"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             r10.setTitle(r1)
-            r1 = 2131627157(0x7f0e0c95, float:1.888157E38)
+            r1 = 2131627147(0x7f0e0c8b, float:1.888155E38)
             java.lang.String r2 = "OpenUrlAlert2"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             java.lang.String r2 = "%"
@@ -1309,7 +1308,7 @@ public class AlertsCreator {
         L9f:
             r10.setMessage(r11)
             r10.setMessageTextViewClickable(r9)
-            r0 = 2131627142(0x7f0e0c86, float:1.888154E38)
+            r0 = 2131627132(0x7f0e0c7c, float:1.888152E38)
             java.lang.String r1 = "Open"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             org.telegram.ui.Components.AlertsCreator$$ExternalSyntheticLambda27 r9 = new org.telegram.ui.Components.AlertsCreator$$ExternalSyntheticLambda27
@@ -1319,7 +1318,7 @@ public class AlertsCreator {
             r6 = r15
             r1.<init>()
             r10.setPositiveButton(r0, r9)
-            r0 = 2131624832(0x7f0e0380, float:1.8876855E38)
+            r0 = 2131624828(0x7f0e037c, float:1.8876847E38)
             java.lang.String r1 = "Cancel"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             r10.setNegativeButton(r0, r8)
@@ -3917,7 +3916,7 @@ public class AlertsCreator {
             return;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(baseFragment.getParentActivity(), resourcesProvider);
-        builder.setTitle(LocaleController.getString("UnableForward", R.string.UnableForward));
+        builder.setTitle(LocaleController.getString("AppName", R.string.AppName));
         if (i == 1) {
             builder.setMessage(LocaleController.getString("ErrorSendRestrictedStickers", R.string.ErrorSendRestrictedStickers));
         } else if (i == 2) {
@@ -3930,10 +3929,6 @@ public class AlertsCreator {
             builder.setMessage(LocaleController.getString("ErrorSendRestrictedMediaAll", R.string.ErrorSendRestrictedMediaAll));
         } else if (i == 6) {
             builder.setMessage(LocaleController.getString("ErrorSendRestrictedPollsAll", R.string.ErrorSendRestrictedPollsAll));
-        } else if (i == 7) {
-            builder.setMessage(LocaleController.getString("ErrorSendRestrictedPrivacyVoiceMessages", R.string.ErrorSendRestrictedPrivacyVoiceMessages));
-        } else if (i == 8) {
-            builder.setMessage(LocaleController.getString("ErrorSendRestrictedPrivacyVideoMessages", R.string.ErrorSendRestrictedPrivacyVideoMessages));
         }
         builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
         baseFragment.showDialog(builder.create(), true, null);
@@ -4169,7 +4164,7 @@ public class AlertsCreator {
             case 18:
                 builder.setMessage(LocaleController.getString("AddAdminErrorNotAMember", R.string.AddAdminErrorNotAMember));
                 break;
-            case 19:
+            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 if (z) {
                     builder.setMessage(LocaleController.getString("InviteToChannelError", R.string.InviteToChannelError));
                     break;
@@ -4177,7 +4172,7 @@ public class AlertsCreator {
                     builder.setMessage(LocaleController.getString("InviteToGroupError", R.string.InviteToGroupError));
                     break;
                 }
-            case org.telegram.messenger.R.styleable.MapAttrs_uiZoomControls /* 20 */:
+            case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 builder.setTitle(LocaleController.getString("VoipGroupVoiceChat", R.string.VoipGroupVoiceChat));
                 builder.setMessage(LocaleController.getString("VoipGroupInviteAlreadyParticipant", R.string.VoipGroupInviteAlreadyParticipant));
                 break;
@@ -5068,7 +5063,7 @@ public class AlertsCreator {
             return LocaleController.formatTTLString(3600);
         }
         if (i == 19) {
-            return LocaleController.formatTTLString(RemoteMessageConst.DEFAULT_TTL);
+            return LocaleController.formatTTLString(86400);
         }
         return i == 20 ? LocaleController.formatTTLString(604800) : "";
     }
@@ -5085,7 +5080,7 @@ public class AlertsCreator {
         } else if (value == 18) {
             tLRPC$EncryptedChat.ttl = 3600;
         } else if (value == 19) {
-            tLRPC$EncryptedChat.ttl = RemoteMessageConst.DEFAULT_TTL;
+            tLRPC$EncryptedChat.ttl = 86400;
         } else if (value == 20) {
             tLRPC$EncryptedChat.ttl = 604800;
         }
@@ -5572,7 +5567,7 @@ public class AlertsCreator {
             i = AndroidUtilities.calcDrawableColor(Theme.getCachedWallpaper())[0];
         }
         String str = null;
-        int i2 = Integer.MAX_VALUE;
+        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         int red = Color.red(i);
         int green = Color.green(i);
         int blue = Color.blue(i);

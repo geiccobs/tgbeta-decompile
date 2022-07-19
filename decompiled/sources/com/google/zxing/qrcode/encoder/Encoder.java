@@ -10,6 +10,7 @@ import com.google.zxing.qrcode.decoder.Mode;
 import com.google.zxing.qrcode.decoder.Version;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public final class Encoder {
     private static final int[] ALPHANUMERIC_TABLE = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 44, -1, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1};
@@ -98,7 +99,7 @@ public final class Encoder {
     }
 
     private static int chooseMaskPattern(BitArray bitArray, ErrorCorrectionLevel errorCorrectionLevel, Version version, ByteMatrix byteMatrix) throws WriterException {
-        int i = Integer.MAX_VALUE;
+        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
         int i2 = -1;
         for (int i3 = 0; i3 < 8; i3++) {
             MatrixUtil.buildMatrix(bitArray, errorCorrectionLevel, version, i3, byteMatrix);

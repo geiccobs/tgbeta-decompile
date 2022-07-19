@@ -26,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.widget.NestedScrollView;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -35,8 +34,9 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$TL_restrictionReason;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -346,7 +346,7 @@ public class PhonebookShareAlert extends BottomSheet {
             this.buttonTextView.setEnabled(z);
             TextView textView = this.buttonTextView;
             if (!z) {
-                themedColor &= Integer.MAX_VALUE;
+                themedColor &= ConnectionsManager.DEFAULT_DATACENTER_ID;
             }
             textView.setTextColor(themedColor);
         }
@@ -658,7 +658,7 @@ public class PhonebookShareAlert extends BottomSheet {
                     }
                     Intent intent3 = intent;
                     intent3.putExtra("finishActivityOnSaveCompleted", true);
-                    intent3.putParcelableArrayListExtra(RemoteMessageConst.DATA, arrayList);
+                    intent3.putParcelableArrayListExtra("data", arrayList);
                     try {
                         PhonebookShareAlert.this.parentFragment.getParentActivity().startActivity(intent3);
                         PhonebookShareAlert.this.dismiss();

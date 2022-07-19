@@ -17,8 +17,6 @@ import android.text.style.ImageSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.huawei.hms.framework.common.ContainerUtils;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -565,7 +563,7 @@ public class Emoji {
                 sb.append(",");
             }
             sb.append(entry.getKey());
-            sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
+            sb.append("=");
             sb.append(entry.getValue());
         }
         globalEmojiSettings.edit().putString("emojis2", sb.toString()).commit();
@@ -594,7 +592,7 @@ public class Emoji {
                     int length = split.length;
                     int i2 = 0;
                     while (i2 < length) {
-                        String[] split2 = split[i2].split(ContainerUtils.KEY_VALUE_DELIMITER);
+                        String[] split2 = split[i2].split("=");
                         long longValue = Utilities.parseLong(split2[0]).longValue();
                         StringBuilder sb = new StringBuilder();
                         int i3 = 0;
@@ -620,7 +618,7 @@ public class Emoji {
                 String string2 = globalEmojiSettings.getString("emojis2", "");
                 if (string2 != null && string2.length() > 0) {
                     for (String str : string2.split(",")) {
-                        String[] split3 = str.split(ContainerUtils.KEY_VALUE_DELIMITER);
+                        String[] split3 = str.split("=");
                         emojiUseHistory.put(split3[0], Utilities.parseInt((CharSequence) split3[1]));
                     }
                 }
@@ -638,12 +636,12 @@ public class Emoji {
             FileLog.e(e);
         }
         try {
-            String string3 = globalEmojiSettings.getString(RemoteMessageConst.Notification.COLOR, "");
+            String string3 = globalEmojiSettings.getString("color", "");
             if (string3 == null || string3.length() <= 0) {
                 return;
             }
             for (String str2 : string3.split(",")) {
-                String[] split4 = str2.split(ContainerUtils.KEY_VALUE_DELIMITER);
+                String[] split4 = str2.split("=");
                 emojiColor.put(split4[0], split4[1]);
             }
         } catch (Exception e2) {
@@ -659,9 +657,9 @@ public class Emoji {
                 sb.append(",");
             }
             sb.append(entry.getKey());
-            sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
+            sb.append("=");
             sb.append(entry.getValue());
         }
-        globalEmojiSettings.edit().putString(RemoteMessageConst.Notification.COLOR, sb.toString()).commit();
+        globalEmojiSettings.edit().putString("color", sb.toString()).commit();
     }
 }

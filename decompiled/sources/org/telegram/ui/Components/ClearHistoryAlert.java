@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
@@ -135,7 +134,7 @@ public class ClearHistoryAlert extends BottomSheet {
             } else if (i2 == 2) {
                 i = 604800;
             } else if (i2 == 1) {
-                i = RemoteMessageConst.DEFAULT_TTL;
+                i = 86400;
             } else {
                 i = 0;
                 i3 = 71;

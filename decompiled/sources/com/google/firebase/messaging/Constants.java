@@ -2,7 +2,6 @@ package com.google.firebase.messaging;
 
 import android.os.Bundle;
 import androidx.collection.ArrayMap;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.concurrent.TimeUnit;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
 /* loaded from: classes.dex */
@@ -18,7 +17,7 @@ public final class Constants {
                 Object obj = bundle.get(str);
                 if (obj instanceof String) {
                     String str2 = (String) obj;
-                    if (!str.startsWith("google.") && !str.startsWith("gcm.") && !str.equals(RemoteMessageConst.FROM) && !str.equals(RemoteMessageConst.MSGTYPE) && !str.equals("collapse_key")) {
+                    if (!str.startsWith("google.") && !str.startsWith("gcm.") && !str.equals("from") && !str.equals("message_type") && !str.equals("collapse_key")) {
                         arrayMap.put(str, str2);
                     }
                 }

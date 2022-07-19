@@ -18,16 +18,15 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -414,9 +413,9 @@ public class TwoStepVerificationActivity extends BaseFragment implements Notific
         } else {
             int currentTime = ((TLRPC$TL_account_resetPasswordFailedWait) tLObject).retry_date - getConnectionsManager().getCurrentTime();
             if (currentTime > 86400) {
-                str = LocaleController.formatPluralString("Days", currentTime / RemoteMessageConst.DEFAULT_TTL, new Object[0]);
+                str = LocaleController.formatPluralString("Days", currentTime / 86400, new Object[0]);
             } else if (currentTime > 3600) {
-                str = LocaleController.formatPluralString("Hours", currentTime / RemoteMessageConst.DEFAULT_TTL, new Object[0]);
+                str = LocaleController.formatPluralString("Hours", currentTime / 86400, new Object[0]);
             } else if (currentTime > 60) {
                 str = LocaleController.formatPluralString("Minutes", currentTime / 60, new Object[0]);
             } else {

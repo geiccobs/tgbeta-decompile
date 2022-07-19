@@ -61,10 +61,10 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -674,7 +674,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                 SharedMediaData[] sharedMediaDataArr = this.sharedMediaData;
                 if (i < sharedMediaDataArr.length) {
                     sharedMediaDataArr[i] = new SharedMediaData();
-                    this.sharedMediaData[i].setMaxId(0, DialogObject.isEncryptedDialog(this.dialogId) ? Integer.MIN_VALUE : Integer.MAX_VALUE);
+                    this.sharedMediaData[i].setMaxId(0, DialogObject.isEncryptedDialog(this.dialogId) ? Integer.MIN_VALUE : ConnectionsManager.DEFAULT_DATACENTER_ID);
                     i++;
                 } else {
                     loadMediaCounts();
@@ -973,7 +973,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                 break;
             }
             sharedMediaDataArr[i4] = new SharedMediaData();
-            this.sharedMediaData[i4].max_id[0] = DialogObject.isEncryptedDialog(this.dialog_id) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            this.sharedMediaData[i4].max_id[0] = DialogObject.isEncryptedDialog(this.dialog_id) ? Integer.MIN_VALUE : ConnectionsManager.DEFAULT_DATACENTER_ID;
             fillMediaData(i4);
             if (this.mergeDialogId != 0 && (tLRPC$ChatFull2 = this.info) != null) {
                 SharedMediaData[] sharedMediaDataArr2 = this.sharedMediaData;
@@ -1973,7 +1973,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             sharedMediaDataArr[0].setTotalCount(lastMediaCount[7]);
         }
         this.sharedMediaData[0].fastScrollDataLoaded = false;
-        jumpToDate(0, DialogObject.isEncryptedDialog(this.dialog_id) ? Integer.MIN_VALUE : Integer.MAX_VALUE, 0, true);
+        jumpToDate(0, DialogObject.isEncryptedDialog(this.dialog_id) ? Integer.MIN_VALUE : ConnectionsManager.DEFAULT_DATACENTER_ID, 0, true);
         loadFastScrollData(false);
         this.delegate.updateSelectedMediaTabText();
         boolean isEncryptedDialog = DialogObject.isEncryptedDialog(this.dialog_id);
@@ -3752,10 +3752,10 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.chatUsersAdapter.chatInfo != null) goto L105;
      */
     /* JADX WARN: Code restructure failed: missing block: B:104:0x0157, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(0, org.telegram.messenger.LocaleController.getString("SharedMediaTabFull2", org.telegram.messenger.beta.R.string.SharedMediaTabFull2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(0, org.telegram.messenger.LocaleController.getString("SharedMediaTabFull2", org.telegram.messenger.R.string.SharedMediaTabFull2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:105:0x0166, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(0, org.telegram.messenger.LocaleController.getString("SharedMediaTab2", org.telegram.messenger.beta.R.string.SharedMediaTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(0, org.telegram.messenger.LocaleController.getString("SharedMediaTab2", org.telegram.messenger.R.string.SharedMediaTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:107:0x0178, code lost:
         if (r12.hasMedia[1] <= 0) goto L111;
@@ -3764,7 +3764,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(1) != false) goto L111;
      */
     /* JADX WARN: Code restructure failed: missing block: B:110:0x0182, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(1, org.telegram.messenger.LocaleController.getString("SharedFilesTab2", org.telegram.messenger.beta.R.string.SharedFilesTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(1, org.telegram.messenger.LocaleController.getString("SharedFilesTab2", org.telegram.messenger.R.string.SharedFilesTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:112:0x019b, code lost:
         if (org.telegram.messenger.DialogObject.isEncryptedDialog(r12.dialog_id) != false) goto L123;
@@ -3776,7 +3776,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(3) != false) goto L118;
      */
     /* JADX WARN: Code restructure failed: missing block: B:117:0x01ab, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(3, org.telegram.messenger.LocaleController.getString("SharedLinksTab2", org.telegram.messenger.beta.R.string.SharedLinksTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(3, org.telegram.messenger.LocaleController.getString("SharedLinksTab2", org.telegram.messenger.R.string.SharedLinksTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:119:0x01bd, code lost:
         if (r12.hasMedia[4] <= 0) goto L128;
@@ -3785,7 +3785,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(4) != false) goto L128;
      */
     /* JADX WARN: Code restructure failed: missing block: B:122:0x01c7, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(4, org.telegram.messenger.LocaleController.getString("SharedMusicTab2", org.telegram.messenger.beta.R.string.SharedMusicTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(4, org.telegram.messenger.LocaleController.getString("SharedMusicTab2", org.telegram.messenger.R.string.SharedMusicTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:124:0x01d5, code lost:
         if (r12.hasMedia[4] <= 0) goto L128;
@@ -3794,7 +3794,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(4) != false) goto L128;
      */
     /* JADX WARN: Code restructure failed: missing block: B:127:0x01df, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(4, org.telegram.messenger.LocaleController.getString("SharedMusicTab2", org.telegram.messenger.beta.R.string.SharedMusicTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(4, org.telegram.messenger.LocaleController.getString("SharedMusicTab2", org.telegram.messenger.R.string.SharedMusicTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:129:0x01ec, code lost:
         if (r12.hasMedia[2] <= 0) goto L133;
@@ -3803,7 +3803,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(2) != false) goto L133;
      */
     /* JADX WARN: Code restructure failed: missing block: B:132:0x01f6, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(2, org.telegram.messenger.LocaleController.getString("SharedVoiceTab2", org.telegram.messenger.beta.R.string.SharedVoiceTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(2, org.telegram.messenger.LocaleController.getString("SharedVoiceTab2", org.telegram.messenger.R.string.SharedVoiceTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:134:0x0208, code lost:
         if (r12.hasMedia[5] <= 0) goto L138;
@@ -3812,7 +3812,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(5) != false) goto L138;
      */
     /* JADX WARN: Code restructure failed: missing block: B:137:0x0212, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(5, org.telegram.messenger.LocaleController.getString("SharedGIFsTab2", org.telegram.messenger.beta.R.string.SharedGIFsTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(5, org.telegram.messenger.LocaleController.getString("SharedGIFsTab2", org.telegram.messenger.R.string.SharedGIFsTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:139:0x0224, code lost:
         if (r12.hasMedia[6] <= 0) goto L143;
@@ -3821,7 +3821,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(6) != false) goto L143;
      */
     /* JADX WARN: Code restructure failed: missing block: B:142:0x022e, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(6, org.telegram.messenger.LocaleController.getString("SharedGroupsTab2", org.telegram.messenger.beta.R.string.SharedGroupsTab2), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(6, org.telegram.messenger.LocaleController.getString("SharedGroupsTab2", org.telegram.messenger.R.string.SharedGroupsTab2), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:143:0x023c, code lost:
         r13 = r12.scrollSlidingTextTabStrip.getCurrentTabId();
@@ -3926,7 +3926,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         if (r12.scrollSlidingTextTabStrip.hasTab(7) != false) goto L86;
      */
     /* JADX WARN: Code restructure failed: missing block: B:85:0x0119, code lost:
-        r12.scrollSlidingTextTabStrip.addTextTab(7, org.telegram.messenger.LocaleController.getString("GroupMembers", org.telegram.messenger.beta.R.string.GroupMembers), r13);
+        r12.scrollSlidingTextTabStrip.addTextTab(7, org.telegram.messenger.LocaleController.getString("GroupMembers", org.telegram.messenger.R.string.GroupMembers), r13);
      */
     /* JADX WARN: Code restructure failed: missing block: B:87:0x012b, code lost:
         if (r12.hasMedia[0] <= 0) goto L106;

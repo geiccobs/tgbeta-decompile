@@ -250,11 +250,12 @@ public class DrawingInBackgroundThreadDrawable implements NotificationCenter.Not
     public void reset() {
         this.reset = true;
         this.frameGuid++;
-        if (this.bitmap != null) {
-            ArrayList arrayList = new ArrayList();
-            arrayList.add(this.bitmap);
-            this.bitmap = null;
-            AndroidUtilities.recycleBitmaps(arrayList);
+        ArrayList arrayList = new ArrayList();
+        Bitmap bitmap = this.bitmap;
+        if (bitmap != null) {
+            arrayList.add(bitmap);
         }
+        this.bitmap = null;
+        AndroidUtilities.recycleBitmaps(arrayList);
     }
 }

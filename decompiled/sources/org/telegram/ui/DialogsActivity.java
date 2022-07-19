@@ -71,12 +71,13 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
-import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
@@ -99,6 +100,7 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BackDrawable;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.MenuDrawable;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DialogsAdapter;
@@ -3261,9 +3263,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     private void updateFilterTabs(boolean z, boolean z2) {
         int findFirstVisibleItemPosition;
-        boolean z3;
-        int i;
-        int i2;
         if (this.filterTabsView == null || this.inPreviewMode || this.searchIsShowed) {
             return;
         }
@@ -3274,6 +3273,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         ArrayList<MessagesController.DialogFilter> arrayList = getMessagesController().dialogFilters;
         MessagesController.getMainSettings(this.currentAccount);
+        boolean z3 = true;
         if (arrayList.size() > 1) {
             if (z || this.filterTabsView.getVisibility() != 0) {
                 boolean z4 = this.filterTabsView.getVisibility() != 0 ? false : z2;
@@ -3282,48 +3282,33 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 updateFilterTabsVisibility(z2);
                 int currentTabId = this.filterTabsView.getCurrentTabId();
                 int currentTabStableId = this.filterTabsView.getCurrentTabStableId();
-                if (currentTabId == this.filterTabsView.getDefaultTabId() || currentTabId < arrayList.size()) {
-                    z3 = false;
-                } else {
+                if (currentTabId != this.filterTabsView.getDefaultTabId() && currentTabId >= arrayList.size()) {
                     this.filterTabsView.resetTabId();
-                    z3 = true;
                 }
                 this.filterTabsView.removeTabs();
                 int size = arrayList.size();
-                int i3 = 0;
-                while (i3 < size) {
-                    if (arrayList.get(i3).isDefault()) {
-                        i2 = i3;
-                        this.filterTabsView.addTab(i3, 0, LocaleController.getString("FilterAllChats", R.string.FilterAllChats), true, arrayList.get(i3).locked);
+                for (int i = 0; i < size; i++) {
+                    if (arrayList.get(i).isDefault()) {
+                        this.filterTabsView.addTab(i, 0, LocaleController.getString("FilterAllChats", R.string.FilterAllChats), true, arrayList.get(i).locked);
                     } else {
-                        i2 = i3;
-                        this.filterTabsView.addTab(i2, arrayList.get(i2).localId, arrayList.get(i2).name, false, arrayList.get(i2).locked);
-                    }
-                    i3 = i2 + 1;
-                }
-                if (currentTabStableId >= 0) {
-                    if (this.filterTabsView.getStableId(this.viewPages[0].selectedType) != currentTabStableId) {
-                        this.viewPages[0].selectedType = currentTabId;
-                        isEmpty = true;
-                    }
-                    if (z3) {
-                        this.filterTabsView.selectTabWithStableId(currentTabStableId);
+                        this.filterTabsView.addTab(i, arrayList.get(i).localId, arrayList.get(i).name, false, arrayList.get(i).locked);
                     }
                 }
-                int i4 = 0;
+                if (currentTabStableId >= 0 && this.filterTabsView.getStableId(this.viewPages[0].selectedType) != currentTabStableId) {
+                    this.viewPages[0].selectedType = currentTabId;
+                    isEmpty = true;
+                }
+                int i2 = 0;
                 while (true) {
                     ViewPage[] viewPageArr = this.viewPages;
-                    if (i4 >= viewPageArr.length) {
+                    if (i2 >= viewPageArr.length) {
                         break;
                     }
-                    if (viewPageArr[i4].selectedType >= arrayList.size()) {
-                        i = 1;
-                        this.viewPages[i4].selectedType = arrayList.size() - 1;
-                    } else {
-                        i = 1;
+                    if (viewPageArr[i2].selectedType >= arrayList.size()) {
+                        this.viewPages[i2].selectedType = arrayList.size() - 1;
                     }
-                    this.viewPages[i4].listView.setScrollingTouchSlop(i);
-                    i4++;
+                    this.viewPages[i2].listView.setScrollingTouchSlop(1);
+                    i2++;
                 }
                 this.filterTabsView.finishAddingTabs(z4);
                 if (isEmpty) {
@@ -3331,7 +3316,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 }
                 ActionBarLayout actionBarLayout = this.parentLayout;
                 if (actionBarLayout != null) {
-                    actionBarLayout.getDrawerLayoutContainer().setAllowOpenDrawerBySwipe(currentTabId == this.filterTabsView.getFirstTabId() || SharedConfig.getChatSwipeAction(this.currentAccount) != 5);
+                    DrawerLayoutContainer drawerLayoutContainer = actionBarLayout.getDrawerLayoutContainer();
+                    if (currentTabId != this.filterTabsView.getFirstTabId() && SharedConfig.getChatSwipeAction(this.currentAccount) == 5) {
+                        z3 = false;
+                    }
+                    drawerLayoutContainer.setAllowOpenDrawerBySwipe(z3);
                 }
                 FilterTabsView filterTabsView = this.filterTabsView;
                 if (filterTabsView.isLocked(filterTabsView.getCurrentTabId())) {
@@ -3362,19 +3351,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 this.viewPages[1].dialogsAdapter.notifyDataSetChanged();
                 this.canShowFilterTabsView = false;
                 updateFilterTabsVisibility(z2);
-                int i5 = 0;
+                int i3 = 0;
                 while (true) {
                     ViewPage[] viewPageArr3 = this.viewPages;
-                    if (i5 >= viewPageArr3.length) {
+                    if (i3 >= viewPageArr3.length) {
                         break;
                     }
-                    if (viewPageArr3[i5].dialogsType == 0 && this.viewPages[i5].archivePullViewState == 2 && hasHiddenArchive() && ((findFirstVisibleItemPosition = this.viewPages[i5].layoutManager.findFirstVisibleItemPosition()) == 0 || findFirstVisibleItemPosition == 1)) {
-                        this.viewPages[i5].layoutManager.scrollToPositionWithOffset(1, 0);
+                    if (viewPageArr3[i3].dialogsType == 0 && this.viewPages[i3].archivePullViewState == 2 && hasHiddenArchive() && ((findFirstVisibleItemPosition = this.viewPages[i3].layoutManager.findFirstVisibleItemPosition()) == 0 || findFirstVisibleItemPosition == 1)) {
+                        this.viewPages[i3].layoutManager.scrollToPositionWithOffset(1, 0);
                     }
-                    this.viewPages[i5].listView.setScrollingTouchSlop(0);
-                    this.viewPages[i5].listView.requestLayout();
-                    this.viewPages[i5].requestLayout();
-                    i5++;
+                    this.viewPages[i3].listView.setScrollingTouchSlop(0);
+                    this.viewPages[i3].listView.requestLayout();
+                    this.viewPages[i3].requestLayout();
+                    i3++;
                 }
             }
             ActionBarLayout actionBarLayout2 = this.parentLayout;
@@ -4720,9 +4709,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     public /* synthetic */ void lambda$showChatPreview$26(MessagesController.DialogFilter dialogFilter, TLRPC$Dialog tLRPC$Dialog, long j) {
         int i;
         boolean z;
-        int i2 = Integer.MAX_VALUE;
+        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         if (dialogFilter == null || !isDialogPinned(tLRPC$Dialog)) {
-            i = Integer.MAX_VALUE;
+            i = ConnectionsManager.DEFAULT_DATACENTER_ID;
         } else {
             int size = dialogFilter.pinnedDialogs.size();
             for (int i3 = 0; i3 < size; i3++) {
@@ -5930,7 +5919,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         AndroidUtilities.updateViewVisibilityAnimated(this.writeButton[1], this.isNextButton, 0.5f, true);
     }
 
-    @TargetApi(org.telegram.messenger.R.styleable.MapAttrs_zOrderOnTop)
+    @TargetApi(R.styleable.MapAttrs_zOrderOnTop)
     private void askForPermissons(boolean z) {
         Activity parentActivity = getParentActivity();
         if (parentActivity == null) {

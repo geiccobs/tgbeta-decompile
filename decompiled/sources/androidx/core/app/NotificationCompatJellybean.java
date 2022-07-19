@@ -6,7 +6,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import androidx.core.app.NotificationCompat;
 import androidx.core.graphics.drawable.IconCompat;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +83,7 @@ public class NotificationCompatJellybean {
         Bundle bundle;
         Bundle bundle2 = new Bundle();
         IconCompat iconCompat = action.getIconCompat();
-        bundle2.putInt(RemoteMessageConst.Notification.ICON, iconCompat != null ? iconCompat.getResId() : 0);
+        bundle2.putInt("icon", iconCompat != null ? iconCompat.getResId() : 0);
         bundle2.putCharSequence("title", action.getTitle());
         bundle2.putParcelable("actionIntent", action.getActionIntent());
         if (action.getExtras() != null) {

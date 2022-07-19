@@ -3,7 +3,7 @@ package org.telegram.ui;
 import android.content.Context;
 import android.view.View;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;

@@ -20,8 +20,8 @@ import java.util.List;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Document;
@@ -138,7 +138,7 @@ public class StickersSearchAdapter extends RecyclerListView.SelectionAdapter {
         */
         public void run() {
             /*
-                Method dump skipped, instructions count: 789
+                Method dump skipped, instructions count: 787
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Adapters.StickersSearchAdapter.AnonymousClass1.run():void");
@@ -618,7 +618,7 @@ public class StickersSearchAdapter extends RecyclerListView.SelectionAdapter {
             }
         }
         if (z6) {
-            mediaDataController.markFeaturedStickersByIdAsRead(false, tLRPC$StickerSetCovered.set.id);
+            mediaDataController.markFaturedStickersByIdAsRead(tLRPC$StickerSetCovered.set.id);
         }
         boolean z7 = this.installingStickerSets.indexOfKey(tLRPC$StickerSetCovered.set.id) >= 0;
         boolean z8 = this.removingStickerSets.indexOfKey(tLRPC$StickerSetCovered.set.id) >= 0;

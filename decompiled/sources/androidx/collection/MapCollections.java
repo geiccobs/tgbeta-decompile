@@ -1,6 +1,5 @@
 package androidx.collection;
 
-import com.huawei.hms.framework.common.ContainerUtils;
 import j$.util.Iterator;
 import j$.util.Map;
 import j$.util.function.Consumer;
@@ -175,7 +174,7 @@ public abstract class MapCollections<K, V> {
         }
 
         public String toString() {
-            return getKey() + ContainerUtils.KEY_VALUE_DELIMITER + getValue();
+            return getKey() + "=" + getValue();
         }
     }
 

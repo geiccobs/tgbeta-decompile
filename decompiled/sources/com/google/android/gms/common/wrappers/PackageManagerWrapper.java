@@ -8,6 +8,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.util.PlatformVersion;
+import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
 public class PackageManagerWrapper {
@@ -27,7 +28,7 @@ public class PackageManagerWrapper {
         return this.zza.getPackageManager().getPackageInfo(str, i);
     }
 
-    @TargetApi(19)
+    @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
     public final boolean zza(int i, @RecentlyNonNull String str) {
         if (PlatformVersion.isAtLeastKitKat()) {
             try {

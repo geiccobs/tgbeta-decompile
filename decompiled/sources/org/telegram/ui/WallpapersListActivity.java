@@ -26,7 +26,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.huawei.hms.opendevice.c;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,10 +41,10 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -291,9 +290,9 @@ public class WallpapersListActivity extends BaseFragment implements Notification
             int[][] iArr = Theme.isCurrentThemeDark() ? defaultColorsDark : defaultColorsLight;
             for (int i = 0; i < iArr.length; i++) {
                 if (iArr[i].length == 1) {
-                    this.wallPapers.add(new ColorWallpaper(c.a, iArr[i][0], 0, 45));
+                    this.wallPapers.add(new ColorWallpaper("c", iArr[i][0], 0, 45));
                 } else {
-                    this.wallPapers.add(new ColorWallpaper(c.a, iArr[i][0], iArr[i][1], iArr[i][2], iArr[i][3]));
+                    this.wallPapers.add(new ColorWallpaper("c", iArr[i][0], iArr[i][1], iArr[i][2], iArr[i][3]));
                 }
             }
             if (this.currentType == 1 && this.patterns.isEmpty()) {
@@ -1218,7 +1217,7 @@ public class WallpapersListActivity extends BaseFragment implements Notification
                 if (str3 != null) {
                     r4.pattern = (TLRPC$TL_wallPaper) this.allWallPapersDict.get(str3);
                 }
-                if (!c.a.equals(r4.slug)) {
+                if (!"c".equals(r4.slug)) {
                     String str4 = r4.slug;
                     if (str4 != null && !TextUtils.equals(this.selectedBackgroundSlug, str4)) {
                         i5++;
@@ -1297,7 +1296,7 @@ public class WallpapersListActivity extends BaseFragment implements Notification
         }
         Theme.ThemeInfo activeTheme = Theme.getActiveTheme();
         if (TextUtils.isEmpty(this.selectedBackgroundSlug) || (!"d".equals(this.selectedBackgroundSlug) && obj == null)) {
-            if (!c.a.equals(this.selectedBackgroundSlug) && (i2 = this.selectedColor) != 0) {
+            if (!"c".equals(this.selectedBackgroundSlug) && (i2 = this.selectedColor) != 0) {
                 if (activeTheme.overrideWallpaper != null) {
                     ColorWallpaper colorWallpaper4 = new ColorWallpaper(this.selectedBackgroundSlug, i2, this.selectedGradientColor1, this.selectedGradientColor2, this.selectedGradientColor3, this.selectedGradientRotation, this.selectedIntensity, this.selectedBackgroundMotion, new File(ApplicationLoader.getFilesDirFixed(), activeTheme.overrideWallpaper.fileName));
                     this.addedColorWallpaper = colorWallpaper4;
@@ -1322,7 +1321,7 @@ public class WallpapersListActivity extends BaseFragment implements Notification
                     this.wallPapers.add(this.themeWallpaper != null ? 1 : 0, fileWallpaper3);
                 }
             }
-        } else if (obj == null && this.selectedColor != 0 && c.a.equals(this.selectedBackgroundSlug)) {
+        } else if (obj == null && this.selectedColor != 0 && "c".equals(this.selectedBackgroundSlug)) {
             int i9 = this.selectedGradientColor1;
             if (i9 != 0 && (i3 = this.selectedGradientColor2) != 0 && (i4 = this.selectedGradientColor3) != 0) {
                 ColorWallpaper colorWallpaper6 = new ColorWallpaper(this.selectedBackgroundSlug, this.selectedColor, i9, i3, i4);
@@ -1981,7 +1980,7 @@ public class WallpapersListActivity extends BaseFragment implements Notification
                         j = r3.id;
                     } else if (colorWallpaper instanceof ColorWallpaper) {
                         ColorWallpaper colorWallpaper2 = colorWallpaper;
-                        if (("d".equals(colorWallpaper2.slug) && WallpapersListActivity.this.selectedBackgroundSlug.equals(colorWallpaper2.slug)) || (colorWallpaper2.color == WallpapersListActivity.this.selectedColor && colorWallpaper2.gradientColor1 == WallpapersListActivity.this.selectedGradientColor1 && colorWallpaper2.gradientColor2 == WallpapersListActivity.this.selectedGradientColor2 && colorWallpaper2.gradientColor3 == WallpapersListActivity.this.selectedGradientColor3 && ((WallpapersListActivity.this.selectedGradientColor1 == 0 || colorWallpaper2.gradientRotation == WallpapersListActivity.this.selectedGradientRotation) && ((!c.a.equals(WallpapersListActivity.this.selectedBackgroundSlug) || colorWallpaper2.slug == null) && (c.a.equals(WallpapersListActivity.this.selectedBackgroundSlug) || (TextUtils.equals(WallpapersListActivity.this.selectedBackgroundSlug, colorWallpaper2.slug) && ((int) (colorWallpaper2.intensity * 100.0f)) == ((int) (WallpapersListActivity.this.selectedIntensity * 100.0f)))))))) {
+                        if (("d".equals(colorWallpaper2.slug) && WallpapersListActivity.this.selectedBackgroundSlug.equals(colorWallpaper2.slug)) || (colorWallpaper2.color == WallpapersListActivity.this.selectedColor && colorWallpaper2.gradientColor1 == WallpapersListActivity.this.selectedGradientColor1 && colorWallpaper2.gradientColor2 == WallpapersListActivity.this.selectedGradientColor2 && colorWallpaper2.gradientColor3 == WallpapersListActivity.this.selectedGradientColor3 && ((WallpapersListActivity.this.selectedGradientColor1 == 0 || colorWallpaper2.gradientRotation == WallpapersListActivity.this.selectedGradientRotation) && ((!"c".equals(WallpapersListActivity.this.selectedBackgroundSlug) || colorWallpaper2.slug == null) && ("c".equals(WallpapersListActivity.this.selectedBackgroundSlug) || (TextUtils.equals(WallpapersListActivity.this.selectedBackgroundSlug, colorWallpaper2.slug) && ((int) (colorWallpaper2.intensity * 100.0f)) == ((int) (WallpapersListActivity.this.selectedIntensity * 100.0f)))))))) {
                             fileWallpaper = colorWallpaper;
                         }
                         TLRPC$WallPaper tLRPC$WallPaper = colorWallpaper2.parentWallpaper;

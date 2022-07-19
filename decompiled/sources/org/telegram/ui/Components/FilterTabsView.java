@@ -35,8 +35,8 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$TL_error;
@@ -177,16 +177,6 @@ public class FilterTabsView extends FrameLayout {
 
     public int getStableId(int i) {
         return this.positionToStableId.get(i, -1);
-    }
-
-    public void selectTabWithStableId(int i) {
-        for (int i2 = 0; i2 < this.tabs.size(); i2++) {
-            if (this.positionToStableId.get(i2, -1) == i) {
-                this.currentPosition = i2;
-                this.selectedTabId = this.positionToId.get(i2);
-                return;
-            }
-        }
     }
 
     /* loaded from: classes3.dex */
@@ -1168,7 +1158,7 @@ public class FilterTabsView extends FrameLayout {
             r9.requestLayout()
             r9.allTabsWidth = r1
             org.telegram.ui.Components.FilterTabsView$Tab r2 = r9.findDefaultTab()
-            r3 = 2131625870(0x7f0e078e, float:1.887896E38)
+            r3 = 2131625860(0x7f0e0784, float:1.887894E38)
             java.lang.String r5 = "FilterAllChats"
             java.lang.String r3 = org.telegram.messenger.LocaleController.getString(r5, r3)
             r2.setTitle(r3)

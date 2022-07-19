@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
 /* loaded from: classes.dex */
 public final class Api<O extends ApiOptions> {
@@ -141,7 +142,7 @@ public final class Api<O extends ApiOptions> {
     /* loaded from: classes.dex */
     public static abstract class BaseClientBuilder<T extends AnyClient, O> {
         public int getPriority() {
-            return Integer.MAX_VALUE;
+            return ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
 
         @RecentlyNonNull

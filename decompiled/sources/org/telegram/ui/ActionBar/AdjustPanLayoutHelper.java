@@ -383,8 +383,24 @@ public class AdjustPanLayoutHelper {
         view2.setWindowInsetsAnimationCallback(null);
     }
 
+    public void setEnabled(boolean z) {
+        this.enabled = z;
+    }
+
     public void ignoreOnce() {
         this.ignoreOnce = true;
+    }
+
+    public void OnPanTranslationUpdate(float f, float f2, boolean z) {
+        onPanTranslationUpdate(f, f2, z);
+    }
+
+    public void OnTransitionStart(boolean z, int i) {
+        onTransitionStart(z, i);
+    }
+
+    public void OnTransitionEnd() {
+        onTransitionEnd();
     }
 
     public void setResizableView(FrameLayout frameLayout) {

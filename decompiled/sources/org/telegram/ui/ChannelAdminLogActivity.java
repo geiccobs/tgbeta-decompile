@@ -61,9 +61,9 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -1265,7 +1265,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                 this.roundVideoContainer = frameLayout;
                 frameLayout.setOutlineProvider(new ViewOutlineProvider(this) { // from class: org.telegram.ui.ChannelAdminLogActivity.13
                     @Override // android.view.ViewOutlineProvider
-                    @TargetApi(21)
+                    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                     public void getOutline(View view, Outline outline) {
                         int i = AndroidUtilities.roundMessageSize;
                         outline.setOval(0, 0, i, i);
@@ -1552,8 +1552,8 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
         }
         int childCount = recyclerListView.getChildCount();
         int measuredHeight = this.chatListView.getMeasuredHeight();
-        int i = Integer.MAX_VALUE;
-        int i2 = Integer.MAX_VALUE;
+        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         boolean z2 = false;
         ChatMessageCell chatMessageCell = null;
         View view = null;

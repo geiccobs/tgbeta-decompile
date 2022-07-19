@@ -1,7 +1,6 @@
 package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.internal.clearcut.zzcg;
-import com.huawei.hms.adapter.internal.AvailableCode;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -1057,19 +1056,19 @@ final class zzds<T> implements zzef<T> {
                     zzb((zzds<T>) t, i);
                     break;
                 case 18:
-                case 19:
+                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                case 21:
+                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
                 case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 case 24:
-                case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
-                case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
-                case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
-                case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
-                case AvailableCode.HMS_IS_SPOOF /* 29 */:
-                case AvailableCode.USER_ALREADY_KNOWS_SERVICE_UNAVAILABLE /* 30 */:
-                case AvailableCode.CURRENT_SHOWING_SERVICE_UNAVAILABLE /* 31 */:
+                case 25:
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
                 case ConnectionsManager.RequestFlagForceDownload /* 32 */:
                 case 33:
                 case 34:

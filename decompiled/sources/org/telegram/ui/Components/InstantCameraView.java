@@ -47,7 +47,6 @@ import android.widget.ImageView;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
-import com.huawei.hms.adapter.internal.CommonCode;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
@@ -77,11 +76,11 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.messenger.camera.CameraInfo;
 import org.telegram.messenger.camera.CameraSession;
@@ -218,7 +217,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             this.cameraContainer = instantViewCameraContainer;
             instantViewCameraContainer.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.InstantCameraView.3
                 @Override // android.view.ViewOutlineProvider
-                @TargetApi(21)
+                @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, InstantCameraView.this.textureViewSize, InstantCameraView.this.textureViewSize);
                 }
@@ -2232,7 +2231,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 this.positionHandle = GLES20.glGetAttribLocation(this.drawProgram, "aPosition");
                 this.textureHandle = GLES20.glGetAttribLocation(this.drawProgram, "aTextureCoord");
                 this.previewSizeHandle = GLES20.glGetUniformLocation(this.drawProgram, "preview");
-                this.resolutionHandle = GLES20.glGetUniformLocation(this.drawProgram, CommonCode.MapKey.HAS_RESOLUTION);
+                this.resolutionHandle = GLES20.glGetUniformLocation(this.drawProgram, "resolution");
                 this.alphaHandle = GLES20.glGetUniformLocation(this.drawProgram, "alpha");
                 this.vertexMatrixHandle = GLES20.glGetUniformLocation(this.drawProgram, "uMVPMatrix");
                 this.textureMatrixHandle = GLES20.glGetUniformLocation(this.drawProgram, "uSTMatrix");

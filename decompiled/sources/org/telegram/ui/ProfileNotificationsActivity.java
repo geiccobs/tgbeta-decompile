@@ -33,7 +33,8 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$Dialog;
 import org.telegram.tgnet.TLRPC$Document;
@@ -186,7 +187,7 @@ public class ProfileNotificationsActivity extends BaseFragment implements Notifi
                         if (tLRPC$Dialog != null) {
                             TLRPC$TL_peerNotifySettings tLRPC$TL_peerNotifySettings = new TLRPC$TL_peerNotifySettings();
                             tLRPC$Dialog.notify_settings = tLRPC$TL_peerNotifySettings;
-                            tLRPC$TL_peerNotifySettings.mute_until = Integer.MAX_VALUE;
+                            tLRPC$TL_peerNotifySettings.mute_until = ConnectionsManager.DEFAULT_DATACENTER_ID;
                         }
                     }
                     edit2.apply();

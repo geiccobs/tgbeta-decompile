@@ -10,14 +10,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Xml;
-import com.huawei.hms.adapter.internal.AvailableCode;
-import com.huawei.hms.android.HwBuildEx;
-import com.huawei.hms.framework.common.ContainerUtils;
-import com.huawei.hms.opendevice.c;
-import com.huawei.hms.opendevice.i;
-import com.huawei.hms.push.constant.RemoteMessageConst;
-import com.huawei.hms.push.e;
-import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -273,7 +265,7 @@ public class LocaleController {
                 str = "";
             }
             TextUtils.isEmpty(this.pluralLangCode);
-            return this.name + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.nameEnglish + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.shortName + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.pathToFile + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.version + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + str + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.pluralLangCode + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + (this.isRtl ? 1 : 0) + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.baseVersion + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + this.serverIndex;
+            return this.name + "|" + this.nameEnglish + "|" + this.shortName + "|" + this.pathToFile + "|" + this.version + "|" + str + "|" + this.pluralLangCode + "|" + (this.isRtl ? 1 : 0) + "|" + this.baseVersion + "|" + this.serverIndex;
         }
 
         public static LocaleInfo createWithString(String str) {
@@ -304,7 +296,7 @@ public class LocaleController {
                     if (split.length >= 10) {
                         localeInfo.serverIndex = Utilities.parseInt((CharSequence) split[9]).intValue();
                     } else {
-                        localeInfo.serverIndex = Integer.MAX_VALUE;
+                        localeInfo.serverIndex = ConnectionsManager.DEFAULT_DATACENTER_ID;
                     }
                     if (!TextUtils.isEmpty(localeInfo.baseLangCode)) {
                         localeInfo.baseLangCode = localeInfo.baseLangCode.replace("-", "_");
@@ -412,7 +404,7 @@ public class LocaleController {
         addRules(new String[]{"mt"}, new PluralRules_Maltese());
         addRules(new String[]{"ga", "se", "sma", "smi", "smj", "smn", "sms"}, new PluralRules_Two());
         addRules(new String[]{"ak", "am", "bh", "fil", "tl", "guw", "hi", "ln", "mg", "nso", "ti", "wa"}, new PluralRules_Zero());
-        addRules(new String[]{"az", "bm", "fa", "ig", "hu", "ja", "kde", "kea", "ko", "my", "ses", "sg", RemoteMessageConst.TO, "tr", "vi", "wo", "yo", "zh", "bo", "dz", "id", "jv", "jw", "ka", "km", "kn", "ms", "th", "in"}, new PluralRules_None());
+        addRules(new String[]{"az", "bm", "fa", "ig", "hu", "ja", "kde", "kea", "ko", "my", "ses", "sg", "to", "tr", "vi", "wo", "yo", "zh", "bo", "dz", "id", "jv", "jw", "ka", "km", "kn", "ms", "th", "in"}, new PluralRules_None());
         LocaleInfo localeInfo2 = new LocaleInfo();
         localeInfo2.name = "English";
         localeInfo2.nameEnglish = "English";
@@ -841,7 +833,7 @@ public class LocaleController {
             String str = localeFileStrings.get("LanguageName");
             String str2 = localeFileStrings.get("LanguageNameInEnglish");
             String str3 = localeFileStrings.get("LanguageCode");
-            if (str != null && str.length() > 0 && str2 != null && str2.length() > 0 && str3 != null && str3.length() > 0 && !str.contains(ContainerUtils.FIELD_DELIMITER) && !str.contains(HiAnalyticsConstant.REPORT_VAL_SEPARATOR) && !str2.contains(ContainerUtils.FIELD_DELIMITER) && !str2.contains(HiAnalyticsConstant.REPORT_VAL_SEPARATOR) && !str3.contains(ContainerUtils.FIELD_DELIMITER) && !str3.contains(HiAnalyticsConstant.REPORT_VAL_SEPARATOR) && !str3.contains("/") && !str3.contains("\\")) {
+            if (str != null && str.length() > 0 && str2 != null && str2.length() > 0 && str3 != null && str3.length() > 0 && !str.contains("&") && !str.contains("|") && !str2.contains("&") && !str2.contains("|") && !str3.contains("&") && !str3.contains("|") && !str3.contains("/") && !str3.contains("\\")) {
                 File filesDirFixed = ApplicationLoader.getFilesDirFixed();
                 File file2 = new File(filesDirFixed, str3 + ".xml");
                 if (!AndroidUtilities.copyFile(file, file2)) {
@@ -879,7 +871,7 @@ public class LocaleController {
             String saveString = this.otherLanguages.get(i).getSaveString();
             if (saveString != null) {
                 if (sb.length() != 0) {
-                    sb.append(ContainerUtils.FIELD_DELIMITER);
+                    sb.append("&");
                 }
                 sb.append(saveString);
             }
@@ -890,7 +882,7 @@ public class LocaleController {
             String saveString2 = this.remoteLanguages.get(i2).getSaveString();
             if (saveString2 != null) {
                 if (sb.length() != 0) {
-                    sb.append(ContainerUtils.FIELD_DELIMITER);
+                    sb.append("&");
                 }
                 sb.append(saveString2);
             }
@@ -901,7 +893,7 @@ public class LocaleController {
             String saveString3 = this.unofficialLanguages.get(i3).getSaveString();
             if (saveString3 != null) {
                 if (sb.length() != 0) {
-                    sb.append(ContainerUtils.FIELD_DELIMITER);
+                    sb.append("&");
                 }
                 sb.append(saveString3);
             }
@@ -942,7 +934,7 @@ public class LocaleController {
         SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("langconfig", 0);
         String string = sharedPreferences.getString("locales", null);
         if (!TextUtils.isEmpty(string)) {
-            for (String str : string.split(ContainerUtils.FIELD_DELIMITER)) {
+            for (String str : string.split("&")) {
                 LocaleInfo createWithString = LocaleInfo.createWithString(str);
                 if (createWithString != null) {
                     this.otherLanguages.add(createWithString);
@@ -951,7 +943,7 @@ public class LocaleController {
         }
         String string2 = sharedPreferences.getString("remote", null);
         if (!TextUtils.isEmpty(string2)) {
-            for (String str2 : string2.split(ContainerUtils.FIELD_DELIMITER)) {
+            for (String str2 : string2.split("&")) {
                 LocaleInfo createWithString2 = LocaleInfo.createWithString(str2);
                 createWithString2.shortName = createWithString2.shortName.replace("-", "_");
                 if (!this.remoteLanguagesDict.containsKey(createWithString2.getKey())) {
@@ -962,7 +954,7 @@ public class LocaleController {
         }
         String string3 = sharedPreferences.getString("unofficial", null);
         if (!TextUtils.isEmpty(string3)) {
-            for (String str3 : string3.split(ContainerUtils.FIELD_DELIMITER)) {
+            for (String str3 : string3.split("&")) {
                 LocaleInfo createWithString3 = LocaleInfo.createWithString(str3);
                 if (createWithString3 != null) {
                     createWithString3.shortName = createWithString3.shortName.replace("-", "_");
@@ -1214,7 +1206,7 @@ public class LocaleController {
 
     public static String getCurrentLanguageName() {
         LocaleInfo localeInfo = getInstance().currentLocaleInfo;
-        return (localeInfo == null || TextUtils.isEmpty(localeInfo.name)) ? getString("LanguageName", org.telegram.messenger.beta.R.string.LanguageName) : localeInfo.name;
+        return (localeInfo == null || TextUtils.isEmpty(localeInfo.name)) ? getString("LanguageName", R.string.LanguageName) : localeInfo.name;
     }
 
     private String getStringInternal(String str, int i) {
@@ -1617,7 +1609,7 @@ public class LocaleController {
             case 11:
             case 15:
             case 16:
-            case 19:
+            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 double d2 = abs;
                 Double.isNaN(d2);
@@ -1636,14 +1628,14 @@ public class LocaleController {
             case 14:
             case 17:
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-            case 21:
+            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
             case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
             case 24:
-            case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
-            case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
-            case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
-            case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
-            case AvailableCode.HMS_IS_SPOOF /* 29 */:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
                 d = abs;
                 str2 = str3;
                 break;
@@ -1897,7 +1889,7 @@ public class LocaleController {
             case 14:
             case 15:
             case 18:
-            case 21:
+            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
                 return 1000;
             case 1:
             case 2:
@@ -1910,18 +1902,18 @@ public class LocaleController {
             case '\f':
             case '\r':
             case 16:
-            case 19:
+            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
             case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
             case 24:
-            case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
-            case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
-            case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
-            case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
                 return 1;
             case 3:
-                return HwBuildEx.VersionCodes.CUR_DEVELOPMENT;
+                return 10000;
             case 17:
                 return 10;
             default:
@@ -2124,7 +2116,7 @@ public class LocaleController {
             case 11:
             case 15:
             case 16:
-            case 19:
+            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 double d2 = abs;
                 Double.isNaN(d2);
@@ -2143,14 +2135,14 @@ public class LocaleController {
             case 14:
             case 17:
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-            case 21:
+            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
             case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
             case 24:
-            case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
-            case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
-            case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
-            case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
-            case AvailableCode.HMS_IS_SPOOF /* 29 */:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
                 d = abs;
                 str2 = " %.0f";
                 break;
@@ -2312,7 +2304,7 @@ public class LocaleController {
                 return getInstance().formatterDay.format(new Date(j2));
             }
             if (i3 + 1 == i && i2 == i4) {
-                return getString("Yesterday", org.telegram.messenger.beta.R.string.Yesterday);
+                return getString("Yesterday", R.string.Yesterday);
             }
             if (Math.abs(System.currentTimeMillis() - j2) < 31536000000L) {
                 return getInstance().formatterDayMonth.format(new Date(j2));
@@ -2333,7 +2325,7 @@ public class LocaleController {
             calendar.setTimeInMillis(j2);
             int i3 = calendar.get(6);
             int i4 = calendar.get(1);
-            return (i3 == i && i2 == i4) ? z ? formatString("TodayAtFormatted", org.telegram.messenger.beta.R.string.TodayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : formatString("TodayAtFormattedWithToday", org.telegram.messenger.beta.R.string.TodayAtFormattedWithToday, getInstance().formatterDay.format(new Date(j2))) : (i3 + 1 == i && i2 == i4) ? formatString("YesterdayAtFormatted", org.telegram.messenger.beta.R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2)));
+            return (i3 == i && i2 == i4) ? z ? formatString("TodayAtFormatted", R.string.TodayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : formatString("TodayAtFormattedWithToday", R.string.TodayAtFormattedWithToday, getInstance().formatterDay.format(new Date(j2))) : (i3 + 1 == i && i2 == i4) ? formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2)));
         } catch (Exception e) {
             FileLog.e(e);
             return "LOC_ERR";
@@ -2352,7 +2344,7 @@ public class LocaleController {
             if (i3 == i && i2 == i4) {
                 return getInstance().formatterDay.format(new Date(j2));
             }
-            return (i3 + 1 == i && i2 == i4) ? formatString("YesterdayAtFormatted", org.telegram.messenger.beta.R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().chatDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().chatFullDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2)));
+            return (i3 + 1 == i && i2 == i4) ? formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().chatDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().chatFullDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2)));
         } catch (Exception e) {
             FileLog.e(e);
             return "LOC_ERR";
@@ -2368,7 +2360,7 @@ public class LocaleController {
             calendar.setTimeInMillis(j2);
             int i3 = calendar.get(6);
             int i4 = calendar.get(1);
-            return (i3 == i && i2 == i4) ? formatString("TodayAtFormattedWithToday", org.telegram.messenger.beta.R.string.TodayAtFormattedWithToday, getInstance().formatterDay.format(new Date(j2))) : (i3 + 1 == i && i2 == i4) ? formatString("YesterdayAtFormatted", org.telegram.messenger.beta.R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().chatDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().chatFullDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2)));
+            return (i3 == i && i2 == i4) ? formatString("TodayAtFormattedWithToday", R.string.TodayAtFormattedWithToday, getInstance().formatterDay.format(new Date(j2))) : (i3 + 1 == i && i2 == i4) ? formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().chatDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().chatFullDate.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2)));
         } catch (Exception e) {
             FileLog.e(e);
             return "LOC_ERR";
@@ -2387,16 +2379,16 @@ public class LocaleController {
             if (i3 == i && i2 == i4) {
                 int currentTime = ((int) (ConnectionsManager.getInstance(UserConfig.selectedAccount).getCurrentTime() - (j2 / 1000))) / 60;
                 if (currentTime < 1) {
-                    return getString("LocationUpdatedJustNow", org.telegram.messenger.beta.R.string.LocationUpdatedJustNow);
+                    return getString("LocationUpdatedJustNow", R.string.LocationUpdatedJustNow);
                 }
-                return currentTime < 60 ? formatPluralString("UpdatedMinutes", currentTime, new Object[0]) : formatString("LocationUpdatedFormatted", org.telegram.messenger.beta.R.string.LocationUpdatedFormatted, formatString("TodayAtFormatted", org.telegram.messenger.beta.R.string.TodayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
+                return currentTime < 60 ? formatPluralString("UpdatedMinutes", currentTime, new Object[0]) : formatString("LocationUpdatedFormatted", R.string.LocationUpdatedFormatted, formatString("TodayAtFormatted", R.string.TodayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
             } else if (i3 + 1 == i && i2 == i4) {
-                return formatString("LocationUpdatedFormatted", org.telegram.messenger.beta.R.string.LocationUpdatedFormatted, formatString("YesterdayAtFormatted", org.telegram.messenger.beta.R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
+                return formatString("LocationUpdatedFormatted", R.string.LocationUpdatedFormatted, formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
             } else {
                 if (Math.abs(System.currentTimeMillis() - j2) < 31536000000L) {
-                    return formatString("LocationUpdatedFormatted", org.telegram.messenger.beta.R.string.LocationUpdatedFormatted, formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
+                    return formatString("LocationUpdatedFormatted", R.string.LocationUpdatedFormatted, formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
                 }
-                return formatString("LocationUpdatedFormatted", org.telegram.messenger.beta.R.string.LocationUpdatedFormatted, formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
+                return formatString("LocationUpdatedFormatted", R.string.LocationUpdatedFormatted, formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
             }
         } catch (Exception e) {
             FileLog.e(e);
@@ -2441,18 +2433,18 @@ public class LocaleController {
             int i5 = calendar.get(1);
             int i6 = calendar.get(11);
             if (i4 == i && i2 == i5) {
-                return formatString("LastSeenFormatted", org.telegram.messenger.beta.R.string.LastSeenFormatted, formatString("TodayAtFormatted", org.telegram.messenger.beta.R.string.TodayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
+                return formatString("LastSeenFormatted", R.string.LastSeenFormatted, formatString("TodayAtFormatted", R.string.TodayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
             }
             if (i4 + 1 != i || i2 != i5) {
                 if (Math.abs(System.currentTimeMillis() - j2) < 31536000000L) {
-                    return formatString("LastSeenDateFormatted", org.telegram.messenger.beta.R.string.LastSeenDateFormatted, formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
+                    return formatString("LastSeenDateFormatted", R.string.LastSeenDateFormatted, formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
                 }
-                return formatString("LastSeenDateFormatted", org.telegram.messenger.beta.R.string.LastSeenDateFormatted, formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
+                return formatString("LastSeenDateFormatted", R.string.LastSeenDateFormatted, formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
             } else if (zArr == null) {
-                return formatString("LastSeenFormatted", org.telegram.messenger.beta.R.string.LastSeenFormatted, formatString("YesterdayAtFormatted", org.telegram.messenger.beta.R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
+                return formatString("LastSeenFormatted", R.string.LastSeenFormatted, formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))));
             } else {
                 zArr[0] = true;
-                return (i3 > 6 || i6 <= 18 || !is24HourFormat) ? formatString("YesterdayAtFormatted", org.telegram.messenger.beta.R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : formatString("LastSeenFormatted", org.telegram.messenger.beta.R.string.LastSeenFormatted, getInstance().formatterDay.format(new Date(j2)));
+                return (i3 > 6 || i6 <= 18 || !is24HourFormat) ? formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(j2))) : formatString("LastSeenFormatted", R.string.LastSeenFormatted, getInstance().formatterDay.format(new Date(j2)));
             }
         } catch (Exception e) {
             FileLog.e(e);
@@ -2492,39 +2484,39 @@ public class LocaleController {
         String lowerCase = language.toLowerCase();
         isRTL = (lowerCase.length() == 2 && (lowerCase.equals("ar") || lowerCase.equals("fa") || lowerCase.equals("he") || lowerCase.equals("iw"))) || lowerCase.startsWith("ar_") || lowerCase.startsWith("fa_") || lowerCase.startsWith("he_") || lowerCase.startsWith("iw_") || ((localeInfo = this.currentLocaleInfo) != null && localeInfo.isRtl);
         nameDisplayOrder = lowerCase.equals("ko") ? 2 : 1;
-        this.formatterMonthYear = createFormatter(locale, getStringInternal("formatterMonthYear", org.telegram.messenger.beta.R.string.formatterMonthYear), "MMM yyyy");
-        this.formatterDayMonth = createFormatter(locale, getStringInternal("formatterMonth", org.telegram.messenger.beta.R.string.formatterMonth), "dd MMM");
-        this.formatterYear = createFormatter(locale, getStringInternal("formatterYear", org.telegram.messenger.beta.R.string.formatterYear), "dd.MM.yy");
-        this.formatterYearMax = createFormatter(locale, getStringInternal("formatterYearMax", org.telegram.messenger.beta.R.string.formatterYearMax), "dd.MM.yyyy");
-        this.chatDate = createFormatter(locale, getStringInternal("chatDate", org.telegram.messenger.beta.R.string.chatDate), "d MMMM");
-        this.chatFullDate = createFormatter(locale, getStringInternal("chatFullDate", org.telegram.messenger.beta.R.string.chatFullDate), "d MMMM yyyy");
-        this.formatterWeek = createFormatter(locale, getStringInternal("formatterWeek", org.telegram.messenger.beta.R.string.formatterWeek), "EEE");
-        this.formatterWeekLong = createFormatter(locale, getStringInternal("formatterWeekLong", org.telegram.messenger.beta.R.string.formatterWeekLong), "EEEE");
-        this.formatterScheduleDay = createFormatter(locale, getStringInternal("formatDateSchedule", org.telegram.messenger.beta.R.string.formatDateSchedule), "MMM d");
-        this.formatterScheduleYear = createFormatter(locale, getStringInternal("formatDateScheduleYear", org.telegram.messenger.beta.R.string.formatDateScheduleYear), "MMM d yyyy");
+        this.formatterMonthYear = createFormatter(locale, getStringInternal("formatterMonthYear", R.string.formatterMonthYear), "MMM yyyy");
+        this.formatterDayMonth = createFormatter(locale, getStringInternal("formatterMonth", R.string.formatterMonth), "dd MMM");
+        this.formatterYear = createFormatter(locale, getStringInternal("formatterYear", R.string.formatterYear), "dd.MM.yy");
+        this.formatterYearMax = createFormatter(locale, getStringInternal("formatterYearMax", R.string.formatterYearMax), "dd.MM.yyyy");
+        this.chatDate = createFormatter(locale, getStringInternal("chatDate", R.string.chatDate), "d MMMM");
+        this.chatFullDate = createFormatter(locale, getStringInternal("chatFullDate", R.string.chatFullDate), "d MMMM yyyy");
+        this.formatterWeek = createFormatter(locale, getStringInternal("formatterWeek", R.string.formatterWeek), "EEE");
+        this.formatterWeekLong = createFormatter(locale, getStringInternal("formatterWeekLong", R.string.formatterWeekLong), "EEEE");
+        this.formatterScheduleDay = createFormatter(locale, getStringInternal("formatDateSchedule", R.string.formatDateSchedule), "MMM d");
+        this.formatterScheduleYear = createFormatter(locale, getStringInternal("formatDateScheduleYear", R.string.formatDateScheduleYear), "MMM d yyyy");
         Locale locale2 = (lowerCase.toLowerCase().equals("ar") || lowerCase.toLowerCase().equals("ko")) ? locale : Locale.US;
         if (is24HourFormat) {
-            i = org.telegram.messenger.beta.R.string.formatterDay24H;
+            i = R.string.formatterDay24H;
             str = "formatterDay24H";
         } else {
-            i = org.telegram.messenger.beta.R.string.formatterDay12H;
+            i = R.string.formatterDay12H;
             str = "formatterDay12H";
         }
         this.formatterDay = createFormatter(locale2, getStringInternal(str, i), is24HourFormat ? "HH:mm" : "h:mm a");
         if (is24HourFormat) {
-            i2 = org.telegram.messenger.beta.R.string.formatterStats24H;
+            i2 = R.string.formatterStats24H;
             str2 = "formatterStats24H";
         } else {
-            i2 = org.telegram.messenger.beta.R.string.formatterStats12H;
+            i2 = R.string.formatterStats12H;
             str2 = "formatterStats12H";
         }
         String str5 = "MMM dd yyyy, HH:mm";
         this.formatterStats = createFormatter(locale, getStringInternal(str2, i2), is24HourFormat ? str5 : "MMM dd yyyy, h:mm a");
         if (is24HourFormat) {
-            i3 = org.telegram.messenger.beta.R.string.formatterBannedUntil24H;
+            i3 = R.string.formatterBannedUntil24H;
             str3 = "formatterBannedUntil24H";
         } else {
-            i3 = org.telegram.messenger.beta.R.string.formatterBannedUntil12H;
+            i3 = R.string.formatterBannedUntil12H;
             str3 = "formatterBannedUntil12H";
         }
         String stringInternal = getStringInternal(str3, i3);
@@ -2533,28 +2525,28 @@ public class LocaleController {
         }
         this.formatterBannedUntil = createFormatter(locale, stringInternal, str5);
         if (is24HourFormat) {
-            i4 = org.telegram.messenger.beta.R.string.formatterBannedUntilThisYear24H;
+            i4 = R.string.formatterBannedUntilThisYear24H;
             str4 = "formatterBannedUntilThisYear24H";
         } else {
-            i4 = org.telegram.messenger.beta.R.string.formatterBannedUntilThisYear12H;
+            i4 = R.string.formatterBannedUntilThisYear12H;
             str4 = "formatterBannedUntilThisYear12H";
         }
         this.formatterBannedUntilThisYear = createFormatter(locale, getStringInternal(str4, i4), is24HourFormat ? "MMM dd, HH:mm" : "MMM dd, h:mm a");
-        this.formatterScheduleSend[0] = createFormatter(locale, getStringInternal("SendTodayAt", org.telegram.messenger.beta.R.string.SendTodayAt), "'Send today at' HH:mm");
-        this.formatterScheduleSend[1] = createFormatter(locale, getStringInternal("SendDayAt", org.telegram.messenger.beta.R.string.SendDayAt), "'Send on' MMM d 'at' HH:mm");
-        this.formatterScheduleSend[2] = createFormatter(locale, getStringInternal("SendDayYearAt", org.telegram.messenger.beta.R.string.SendDayYearAt), "'Send on' MMM d yyyy 'at' HH:mm");
-        this.formatterScheduleSend[3] = createFormatter(locale, getStringInternal("RemindTodayAt", org.telegram.messenger.beta.R.string.RemindTodayAt), "'Remind today at' HH:mm");
-        this.formatterScheduleSend[4] = createFormatter(locale, getStringInternal("RemindDayAt", org.telegram.messenger.beta.R.string.RemindDayAt), "'Remind on' MMM d 'at' HH:mm");
-        this.formatterScheduleSend[5] = createFormatter(locale, getStringInternal("RemindDayYearAt", org.telegram.messenger.beta.R.string.RemindDayYearAt), "'Remind on' MMM d yyyy 'at' HH:mm");
-        this.formatterScheduleSend[6] = createFormatter(locale, getStringInternal("StartTodayAt", org.telegram.messenger.beta.R.string.StartTodayAt), "'Start today at' HH:mm");
-        this.formatterScheduleSend[7] = createFormatter(locale, getStringInternal("StartDayAt", org.telegram.messenger.beta.R.string.StartDayAt), "'Start on' MMM d 'at' HH:mm");
-        this.formatterScheduleSend[8] = createFormatter(locale, getStringInternal("StartDayYearAt", org.telegram.messenger.beta.R.string.StartDayYearAt), "'Start on' MMM d yyyy 'at' HH:mm");
-        this.formatterScheduleSend[9] = createFormatter(locale, getStringInternal("StartShortTodayAt", org.telegram.messenger.beta.R.string.StartShortTodayAt), "'Today,' HH:mm");
-        this.formatterScheduleSend[10] = createFormatter(locale, getStringInternal("StartShortDayAt", org.telegram.messenger.beta.R.string.StartShortDayAt), "MMM d',' HH:mm");
-        this.formatterScheduleSend[11] = createFormatter(locale, getStringInternal("StartShortDayYearAt", org.telegram.messenger.beta.R.string.StartShortDayYearAt), "MMM d yyyy, HH:mm");
-        this.formatterScheduleSend[12] = createFormatter(locale, getStringInternal("StartsTodayAt", org.telegram.messenger.beta.R.string.StartsTodayAt), "'Starts today at' HH:mm");
-        this.formatterScheduleSend[13] = createFormatter(locale, getStringInternal("StartsDayAt", org.telegram.messenger.beta.R.string.StartsDayAt), "'Starts on' MMM d 'at' HH:mm");
-        this.formatterScheduleSend[14] = createFormatter(locale, getStringInternal("StartsDayYearAt", org.telegram.messenger.beta.R.string.StartsDayYearAt), "'Starts on' MMM d yyyy 'at' HH:mm");
+        this.formatterScheduleSend[0] = createFormatter(locale, getStringInternal("SendTodayAt", R.string.SendTodayAt), "'Send today at' HH:mm");
+        this.formatterScheduleSend[1] = createFormatter(locale, getStringInternal("SendDayAt", R.string.SendDayAt), "'Send on' MMM d 'at' HH:mm");
+        this.formatterScheduleSend[2] = createFormatter(locale, getStringInternal("SendDayYearAt", R.string.SendDayYearAt), "'Send on' MMM d yyyy 'at' HH:mm");
+        this.formatterScheduleSend[3] = createFormatter(locale, getStringInternal("RemindTodayAt", R.string.RemindTodayAt), "'Remind today at' HH:mm");
+        this.formatterScheduleSend[4] = createFormatter(locale, getStringInternal("RemindDayAt", R.string.RemindDayAt), "'Remind on' MMM d 'at' HH:mm");
+        this.formatterScheduleSend[5] = createFormatter(locale, getStringInternal("RemindDayYearAt", R.string.RemindDayYearAt), "'Remind on' MMM d yyyy 'at' HH:mm");
+        this.formatterScheduleSend[6] = createFormatter(locale, getStringInternal("StartTodayAt", R.string.StartTodayAt), "'Start today at' HH:mm");
+        this.formatterScheduleSend[7] = createFormatter(locale, getStringInternal("StartDayAt", R.string.StartDayAt), "'Start on' MMM d 'at' HH:mm");
+        this.formatterScheduleSend[8] = createFormatter(locale, getStringInternal("StartDayYearAt", R.string.StartDayYearAt), "'Start on' MMM d yyyy 'at' HH:mm");
+        this.formatterScheduleSend[9] = createFormatter(locale, getStringInternal("StartShortTodayAt", R.string.StartShortTodayAt), "'Today,' HH:mm");
+        this.formatterScheduleSend[10] = createFormatter(locale, getStringInternal("StartShortDayAt", R.string.StartShortDayAt), "MMM d',' HH:mm");
+        this.formatterScheduleSend[11] = createFormatter(locale, getStringInternal("StartShortDayYearAt", R.string.StartShortDayYearAt), "MMM d yyyy, HH:mm");
+        this.formatterScheduleSend[12] = createFormatter(locale, getStringInternal("StartsTodayAt", R.string.StartsTodayAt), "'Starts today at' HH:mm");
+        this.formatterScheduleSend[13] = createFormatter(locale, getStringInternal("StartsDayAt", R.string.StartsDayAt), "'Starts on' MMM d 'at' HH:mm");
+        this.formatterScheduleSend[14] = createFormatter(locale, getStringInternal("StartsDayYearAt", R.string.StartsDayYearAt), "'Starts on' MMM d yyyy 'at' HH:mm");
     }
 
     public static boolean isRTLCharacter(char c) {
@@ -2596,7 +2588,7 @@ public class LocaleController {
             calendar.setTimeInMillis(j2);
             int i2 = calendar.get(1);
             int i3 = calendar.get(2);
-            String[] strArr = {getString("January", org.telegram.messenger.beta.R.string.January), getString("February", org.telegram.messenger.beta.R.string.February), getString("March", org.telegram.messenger.beta.R.string.March), getString("April", org.telegram.messenger.beta.R.string.April), getString("May", org.telegram.messenger.beta.R.string.May), getString("June", org.telegram.messenger.beta.R.string.June), getString("July", org.telegram.messenger.beta.R.string.July), getString("August", org.telegram.messenger.beta.R.string.August), getString("September", org.telegram.messenger.beta.R.string.September), getString("October", org.telegram.messenger.beta.R.string.October), getString("November", org.telegram.messenger.beta.R.string.November), getString("December", org.telegram.messenger.beta.R.string.December)};
+            String[] strArr = {getString("January", R.string.January), getString("February", R.string.February), getString("March", R.string.March), getString("April", R.string.April), getString("May", R.string.May), getString("June", R.string.June), getString("July", R.string.July), getString("August", R.string.August), getString("September", R.string.September), getString("October", R.string.October), getString("November", R.string.November), getString("December", R.string.December)};
             if (i == i2 && !z) {
                 return strArr[i3];
             }
@@ -2680,7 +2672,7 @@ public class LocaleController {
     public static String formatJoined(long j) {
         long j2 = j * 1000;
         try {
-            return formatString("ChannelOtherSubscriberJoined", org.telegram.messenger.beta.R.string.ChannelOtherSubscriberJoined, Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", org.telegram.messenger.beta.R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
+            return formatString("ChannelOtherSubscriberJoined", R.string.ChannelOtherSubscriberJoined, Math.abs(System.currentTimeMillis() - j2) < 31536000000L ? formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterDayMonth.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))) : formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().formatterYear.format(new Date(j2)), getInstance().formatterDay.format(new Date(j2))));
         } catch (Exception e) {
             FileLog.e(e);
             return "LOC_ERR";
@@ -2718,9 +2710,9 @@ public class LocaleController {
             if (zArr != null) {
                 zArr[0] = true;
             }
-            return getString("Online", org.telegram.messenger.beta.R.string.Online);
+            return getString("Online", R.string.Online);
         } else if (tLRPC$User == null || (tLRPC$UserStatus = tLRPC$User.status) == null || tLRPC$UserStatus.expires == 0 || UserObject.isDeleted(tLRPC$User) || (tLRPC$User instanceof TLRPC$TL_userEmpty)) {
-            return getString("ALongTimeAgo", org.telegram.messenger.beta.R.string.ALongTimeAgo);
+            return getString("ALongTimeAgo", R.string.ALongTimeAgo);
         } else {
             int currentTime = ConnectionsManager.getInstance(i).getCurrentTime();
             int i2 = tLRPC$User.status.expires;
@@ -2728,18 +2720,18 @@ public class LocaleController {
                 if (zArr != null) {
                     zArr[0] = true;
                 }
-                return getString("Online", org.telegram.messenger.beta.R.string.Online);
+                return getString("Online", R.string.Online);
             } else if (i2 == -1) {
-                return getString("Invisible", org.telegram.messenger.beta.R.string.Invisible);
+                return getString("Invisible", R.string.Invisible);
             } else {
                 if (i2 == -100) {
-                    return getString("Lately", org.telegram.messenger.beta.R.string.Lately);
+                    return getString("Lately", R.string.Lately);
                 }
                 if (i2 == -101) {
-                    return getString("WithinAWeek", org.telegram.messenger.beta.R.string.WithinAWeek);
+                    return getString("WithinAWeek", R.string.WithinAWeek);
                 }
                 if (i2 == -102) {
-                    return getString("WithinAMonth", org.telegram.messenger.beta.R.string.WithinAMonth);
+                    return getString("WithinAMonth", R.string.WithinAMonth);
                 }
                 return formatDateOnline(i2, zArr2);
             }
@@ -2955,7 +2947,7 @@ public class LocaleController {
         TLRPC$Vector tLRPC$Vector = (TLRPC$Vector) tLObject;
         int size = this.remoteLanguages.size();
         for (int i2 = 0; i2 < size; i2++) {
-            this.remoteLanguages.get(i2).serverIndex = Integer.MAX_VALUE;
+            this.remoteLanguages.get(i2).serverIndex = ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
         int size2 = tLRPC$Vector.objects.size();
         for (int i3 = 0; i3 < size2; i3++) {
@@ -3150,14 +3142,14 @@ public class LocaleController {
             this.ruTranslitChars.put("в", "v");
             this.ruTranslitChars.put("г", ImageLoader.AUTOPLAY_FILTER);
             this.ruTranslitChars.put("д", "d");
-            this.ruTranslitChars.put("е", e.a);
+            this.ruTranslitChars.put("е", "e");
             HashMap<String, String> hashMap2 = this.ruTranslitChars;
             str2 = ImageLoader.AUTOPLAY_FILTER;
             hashMap2.put("ё", "yo");
             this.ruTranslitChars.put("ж", "zh");
             this.ruTranslitChars.put("з", "z");
-            this.ruTranslitChars.put("и", i.TAG);
-            this.ruTranslitChars.put("й", i.TAG);
+            this.ruTranslitChars.put("и", "i");
+            this.ruTranslitChars.put("й", "i");
             this.ruTranslitChars.put("к", "k");
             this.ruTranslitChars.put("л", "l");
             this.ruTranslitChars.put("м", "m");
@@ -3182,10 +3174,10 @@ public class LocaleController {
             this.ruTranslitChars.put("ч", "ch");
             this.ruTranslitChars.put("ш", "sh");
             this.ruTranslitChars.put("щ", "sch");
-            this.ruTranslitChars.put("ы", i.TAG);
+            this.ruTranslitChars.put("ы", "i");
             this.ruTranslitChars.put("ь", "");
             this.ruTranslitChars.put("ъ", "");
-            this.ruTranslitChars.put("э", e.a);
+            this.ruTranslitChars.put("э", "e");
             this.ruTranslitChars.put("ю", "yu");
             this.ruTranslitChars.put("я", "ya");
         } else {
@@ -3202,7 +3194,7 @@ public class LocaleController {
         if (this.translitChars == null) {
             HashMap<String, String> hashMap3 = new HashMap<>(487);
             this.translitChars = hashMap3;
-            hashMap3.put("ȼ", c.a);
+            hashMap3.put("ȼ", "c");
             this.translitChars.put("ᶇ", "n");
             this.translitChars.put("ɖ", "d");
             this.translitChars.put("ỿ", "y");
@@ -3217,24 +3209,24 @@ public class LocaleController {
             this.translitChars.put("ꜳ", "aa");
             this.translitChars.put("ĳ", "ij");
             this.translitChars.put("ḽ", "l");
-            this.translitChars.put("ɪ", i.TAG);
+            this.translitChars.put("ɪ", "i");
             this.translitChars.put("ḇ", "b");
             this.translitChars.put("ʀ", str10);
-            this.translitChars.put("ě", e.a);
+            this.translitChars.put("ě", "e");
             this.translitChars.put("ﬃ", "ffi");
             this.translitChars.put("ơ", "o");
             this.translitChars.put("ⱹ", str10);
             this.translitChars.put("ồ", "o");
-            this.translitChars.put("ǐ", i.TAG);
+            this.translitChars.put("ǐ", "i");
             String str12 = str7;
             this.translitChars.put("ꝕ", str12);
             this.translitChars.put("ý", "y");
-            this.translitChars.put("ḝ", e.a);
+            this.translitChars.put("ḝ", "e");
             this.translitChars.put("ₒ", "o");
             this.translitChars.put("ⱥ", "a");
             this.translitChars.put("ʙ", "b");
-            this.translitChars.put("ḛ", e.a);
-            this.translitChars.put("ƈ", c.a);
+            this.translitChars.put("ḛ", "e");
+            this.translitChars.put("ƈ", "c");
             this.translitChars.put("ɦ", str8);
             this.translitChars.put("ᵬ", "b");
             String str13 = str8;
@@ -3251,9 +3243,9 @@ public class LocaleController {
             this.translitChars.put("ᶄ", "k");
             this.translitChars.put("ḏ", "d");
             this.translitChars.put("ᴌ", "l");
-            this.translitChars.put("ė", e.a);
+            this.translitChars.put("ė", "e");
             this.translitChars.put("ᴋ", "k");
-            this.translitChars.put("ċ", c.a);
+            this.translitChars.put("ċ", "c");
             this.translitChars.put("ʁ", str10);
             this.translitChars.put("ƕ", "hv");
             this.translitChars.put("ƀ", "b");
@@ -3281,12 +3273,12 @@ public class LocaleController {
             this.translitChars.put("ȴ", "l");
             this.translitChars.put("ʂ", str14);
             this.translitChars.put("ﬂ", "fl");
-            this.translitChars.put("ȉ", i.TAG);
-            this.translitChars.put("ⱻ", e.a);
+            this.translitChars.put("ȉ", "i");
+            this.translitChars.put("ⱻ", "e");
             this.translitChars.put("ṉ", "n");
-            this.translitChars.put("ï", i.TAG);
+            this.translitChars.put("ï", "i");
             this.translitChars.put("ñ", "n");
-            this.translitChars.put("ᴉ", i.TAG);
+            this.translitChars.put("ᴉ", "i");
             this.translitChars.put("ʇ", "t");
             this.translitChars.put("ẓ", str16);
             this.translitChars.put("ỷ", "y");
@@ -3297,9 +3289,9 @@ public class LocaleController {
             this.translitChars.put("ᴝ", str11);
             this.translitChars.put("ḳ", "k");
             this.translitChars.put("ꝫ", "et");
-            this.translitChars.put("ī", i.TAG);
+            this.translitChars.put("ī", "i");
             this.translitChars.put("ť", "t");
-            this.translitChars.put("ꜿ", c.a);
+            this.translitChars.put("ꜿ", "c");
             this.translitChars.put("ʟ", "l");
             this.translitChars.put("ꜹ", "av");
             this.translitChars.put("û", str11);
@@ -3312,7 +3304,7 @@ public class LocaleController {
             this.translitChars.put("ƃ", "b");
             this.translitChars.put("ḩ", str13);
             this.translitChars.put("ṧ", str14);
-            this.translitChars.put("ₑ", e.a);
+            this.translitChars.put("ₑ", "e");
             this.translitChars.put("ʜ", str13);
             this.translitChars.put("ẋ", "x");
             this.translitChars.put("ꝅ", "k");
@@ -3334,7 +3326,7 @@ public class LocaleController {
             this.translitChars.put("ḃ", "b");
             this.translitChars.put("ṗ", str12);
             this.translitChars.put("å", "a");
-            this.translitChars.put("ɕ", c.a);
+            this.translitChars.put("ɕ", "c");
             this.translitChars.put("ọ", "o");
             this.translitChars.put("ắ", "a");
             this.translitChars.put("ƒ", "f");
@@ -3348,13 +3340,13 @@ public class LocaleController {
             this.translitChars.put("ȥ", str16);
             this.translitChars.put("ḟ", "f");
             this.translitChars.put("ḓ", "d");
-            this.translitChars.put("ȇ", e.a);
+            this.translitChars.put("ȇ", "e");
             this.translitChars.put("ȕ", str11);
             this.translitChars.put("ȵ", "n");
             this.translitChars.put("ʠ", "q");
             this.translitChars.put("ấ", "a");
             this.translitChars.put("ǩ", "k");
-            this.translitChars.put("ĩ", i.TAG);
+            this.translitChars.put("ĩ", "i");
             this.translitChars.put("ṵ", str11);
             this.translitChars.put("ŧ", "t");
             this.translitChars.put("ɾ", str10);
@@ -3369,7 +3361,7 @@ public class LocaleController {
             this.translitChars.put("ꞃ", str10);
             this.translitChars.put("ᶌ", str17);
             this.translitChars.put("ɵ", "o");
-            this.translitChars.put("ḉ", c.a);
+            this.translitChars.put("ḉ", "c");
             this.translitChars.put("ᵤ", str11);
             this.translitChars.put("ẑ", str16);
             this.translitChars.put("ṹ", str11);
@@ -3386,48 +3378,48 @@ public class LocaleController {
             this.translitChars.put("ư", str11);
             this.translitChars.put("ᶀ", "b");
             this.translitChars.put("ǜ", str11);
-            this.translitChars.put("ẹ", e.a);
+            this.translitChars.put("ẹ", "e");
             this.translitChars.put("ǡ", "a");
             this.translitChars.put("ɥ", str13);
             this.translitChars.put("ṏ", "o");
             this.translitChars.put("ǔ", str11);
             this.translitChars.put("ʎ", "y");
             this.translitChars.put("ȱ", "o");
-            this.translitChars.put("ệ", e.a);
-            this.translitChars.put("ế", e.a);
-            this.translitChars.put("ĭ", i.TAG);
-            this.translitChars.put("ⱸ", e.a);
+            this.translitChars.put("ệ", "e");
+            this.translitChars.put("ế", "e");
+            this.translitChars.put("ĭ", "i");
+            this.translitChars.put("ⱸ", "e");
             this.translitChars.put("ṯ", "t");
             this.translitChars.put("ᶑ", "d");
             this.translitChars.put("ḧ", str13);
             this.translitChars.put("ṥ", str14);
-            this.translitChars.put("ë", e.a);
+            this.translitChars.put("ë", "e");
             this.translitChars.put("ᴍ", str18);
             this.translitChars.put("ö", "o");
-            this.translitChars.put("é", e.a);
-            this.translitChars.put("ı", i.TAG);
+            this.translitChars.put("é", "e");
+            this.translitChars.put("ı", "i");
             this.translitChars.put("ď", "d");
             this.translitChars.put("ᵯ", str18);
             this.translitChars.put("ỵ", "y");
             this.translitChars.put("ŵ", "w");
-            this.translitChars.put("ề", e.a);
+            this.translitChars.put("ề", "e");
             this.translitChars.put("ứ", str11);
             this.translitChars.put("ƶ", str16);
             this.translitChars.put("ĵ", "j");
             this.translitChars.put("ḍ", "d");
             this.translitChars.put("ŭ", str11);
             this.translitChars.put("ʝ", "j");
-            this.translitChars.put("ê", e.a);
+            this.translitChars.put("ê", "e");
             this.translitChars.put("ǚ", str11);
             this.translitChars.put("ġ", str15);
             this.translitChars.put("ṙ", str10);
             this.translitChars.put("ƞ", "n");
-            this.translitChars.put("ḗ", e.a);
+            this.translitChars.put("ḗ", "e");
             this.translitChars.put("ẝ", str14);
             this.translitChars.put("ᶁ", "d");
             this.translitChars.put("ķ", "k");
             this.translitChars.put("ᴂ", "ae");
-            this.translitChars.put("ɘ", e.a);
+            this.translitChars.put("ɘ", "e");
             this.translitChars.put("ợ", "o");
             this.translitChars.put("ḿ", str18);
             this.translitChars.put("ꜰ", "f");
@@ -3444,7 +3436,7 @@ public class LocaleController {
             this.translitChars.put("á", "a");
             this.translitChars.put("ᴎ", "n");
             this.translitChars.put("ꝟ", str17);
-            this.translitChars.put("è", e.a);
+            this.translitChars.put("è", "e");
             this.translitChars.put("ᶎ", str16);
             this.translitChars.put("ꝺ", "d");
             this.translitChars.put("ᶈ", str12);
@@ -3470,11 +3462,11 @@ public class LocaleController {
             this.translitChars.put("ẫ", "a");
             this.translitChars.put("ʑ", str16);
             this.translitChars.put("ẛ", str14);
-            this.translitChars.put("ḭ", i.TAG);
+            this.translitChars.put("ḭ", "i");
             this.translitChars.put("ꜵ", "ao");
             this.translitChars.put("ɀ", str16);
             this.translitChars.put("ÿ", "y");
-            this.translitChars.put("ǝ", e.a);
+            this.translitChars.put("ǝ", "e");
             this.translitChars.put("ǭ", "o");
             this.translitChars.put("ᴅ", "d");
             this.translitChars.put("ᶅ", "l");
@@ -3493,18 +3485,18 @@ public class LocaleController {
             this.translitChars.put("ⱳ", "w");
             this.translitChars.put("ḵ", "k");
             this.translitChars.put("ờ", "o");
-            this.translitChars.put("î", i.TAG);
+            this.translitChars.put("î", "i");
             this.translitChars.put("ģ", str15);
-            this.translitChars.put("ȅ", e.a);
+            this.translitChars.put("ȅ", "e");
             this.translitChars.put("ȧ", "a");
             this.translitChars.put("ẳ", "a");
             this.translitChars.put("ɋ", "q");
             this.translitChars.put("ṭ", "t");
             this.translitChars.put("ꝸ", "um");
-            this.translitChars.put("ᴄ", c.a);
+            this.translitChars.put("ᴄ", "c");
             this.translitChars.put("ẍ", "x");
             this.translitChars.put("ủ", str11);
-            this.translitChars.put("ỉ", i.TAG);
+            this.translitChars.put("ỉ", "i");
             this.translitChars.put("ᴚ", str10);
             this.translitChars.put("ś", str14);
             this.translitChars.put("ꝋ", "o");
@@ -3520,20 +3512,20 @@ public class LocaleController {
             this.translitChars.put("ș", str14);
             this.translitChars.put("š", str14);
             this.translitChars.put("ᶙ", str11);
-            this.translitChars.put("ẽ", e.a);
+            this.translitChars.put("ẽ", "e");
             this.translitChars.put("ẜ", str14);
-            this.translitChars.put("ɇ", e.a);
+            this.translitChars.put("ɇ", "e");
             this.translitChars.put("ṷ", str11);
             this.translitChars.put("ố", "o");
             this.translitChars.put("ȿ", str14);
             this.translitChars.put("ᴠ", str17);
             this.translitChars.put("ꝭ", "is");
             this.translitChars.put("ᴏ", "o");
-            this.translitChars.put("ɛ", e.a);
+            this.translitChars.put("ɛ", "e");
             this.translitChars.put("ǻ", "a");
             this.translitChars.put("ﬄ", "ffl");
             this.translitChars.put("ⱺ", "o");
-            this.translitChars.put("ȋ", i.TAG);
+            this.translitChars.put("ȋ", "i");
             this.translitChars.put("ᵫ", "ue");
             this.translitChars.put("ȡ", "d");
             this.translitChars.put("ⱬ", str16);
@@ -3546,25 +3538,25 @@ public class LocaleController {
             this.translitChars.put("ᴜ", str11);
             this.translitChars.put("ẩ", "a");
             this.translitChars.put("ṅ", "n");
-            this.translitChars.put("ɨ", i.TAG);
+            this.translitChars.put("ɨ", "i");
             this.translitChars.put("ᴙ", str10);
             this.translitChars.put("ǎ", "a");
             this.translitChars.put("ſ", str14);
             this.translitChars.put("ȫ", "o");
             this.translitChars.put("ɿ", str10);
             this.translitChars.put("ƭ", "t");
-            this.translitChars.put("ḯ", i.TAG);
+            this.translitChars.put("ḯ", "i");
             this.translitChars.put("ǽ", "ae");
             this.translitChars.put("ⱱ", str17);
             this.translitChars.put("ɶ", "oe");
             this.translitChars.put("ṃ", str18);
             this.translitChars.put("ż", str16);
-            this.translitChars.put("ĕ", e.a);
+            this.translitChars.put("ĕ", "e");
             this.translitChars.put("ꜻ", "av");
             this.translitChars.put("ở", "o");
-            this.translitChars.put("ễ", e.a);
+            this.translitChars.put("ễ", "e");
             this.translitChars.put("ɬ", "l");
-            this.translitChars.put("ị", i.TAG);
+            this.translitChars.put("ị", "i");
             this.translitChars.put("ᵭ", "d");
             this.translitChars.put("ﬆ", "st");
             this.translitChars.put("ḷ", "l");
@@ -3572,9 +3564,9 @@ public class LocaleController {
             this.translitChars.put("ᴕ", "ou");
             this.translitChars.put("ʈ", "t");
             this.translitChars.put("ā", "a");
-            this.translitChars.put("ḙ", e.a);
+            this.translitChars.put("ḙ", "e");
             this.translitChars.put("ᴑ", "o");
-            this.translitChars.put("ç", c.a);
+            this.translitChars.put("ç", "c");
             this.translitChars.put("ᶊ", str14);
             this.translitChars.put("ặ", "a");
             this.translitChars.put("ų", str11);
@@ -3583,19 +3575,19 @@ public class LocaleController {
             this.translitChars.put("ꝁ", "k");
             this.translitChars.put("ẕ", str16);
             this.translitChars.put("ŝ", str14);
-            this.translitChars.put("ḕ", e.a);
+            this.translitChars.put("ḕ", "e");
             this.translitChars.put("ɠ", str15);
             this.translitChars.put("ꝉ", "l");
             this.translitChars.put("ꝼ", "f");
             this.translitChars.put("ᶍ", "x");
             this.translitChars.put("ǒ", "o");
-            this.translitChars.put("ę", e.a);
+            this.translitChars.put("ę", "e");
             this.translitChars.put("ổ", "o");
             this.translitChars.put("ƫ", "t");
             this.translitChars.put("ǫ", "o");
-            this.translitChars.put("i̇", i.TAG);
+            this.translitChars.put("i̇", "i");
             this.translitChars.put("ṇ", "n");
-            this.translitChars.put("ć", c.a);
+            this.translitChars.put("ć", "c");
             this.translitChars.put("ᵷ", str15);
             this.translitChars.put("ẅ", "w");
             this.translitChars.put("ḑ", "d");
@@ -3611,7 +3603,7 @@ public class LocaleController {
             this.translitChars.put("ä", "a");
             this.translitChars.put("ƥ", str12);
             this.translitChars.put("ỏ", "o");
-            this.translitChars.put("į", i.TAG);
+            this.translitChars.put("į", "i");
             this.translitChars.put("ȓ", str10);
             this.translitChars.put("ǆ", "dz");
             this.translitChars.put("ḡ", str15);
@@ -3641,14 +3633,14 @@ public class LocaleController {
             this.translitChars.put("ů", str11);
             this.translitChars.put("ỡ", "o");
             this.translitChars.put("ṕ", str12);
-            this.translitChars.put("ᶖ", i.TAG);
+            this.translitChars.put("ᶖ", "i");
             this.translitChars.put("ự", str11);
             this.translitChars.put("ã", "a");
-            this.translitChars.put("ᵢ", i.TAG);
+            this.translitChars.put("ᵢ", "i");
             this.translitChars.put("ṱ", "t");
-            this.translitChars.put("ể", e.a);
+            this.translitChars.put("ể", "e");
             this.translitChars.put("ử", str11);
-            this.translitChars.put("í", i.TAG);
+            this.translitChars.put("í", "i");
             this.translitChars.put("ɔ", "o");
             this.translitChars.put("ɺ", str10);
             this.translitChars.put("ɢ", str15);
@@ -3660,11 +3652,11 @@ public class LocaleController {
             this.translitChars.put("ḣ", str13);
             this.translitChars.put("ȶ", "t");
             this.translitChars.put("ņ", "n");
-            this.translitChars.put("ᶒ", e.a);
-            this.translitChars.put("ì", i.TAG);
+            this.translitChars.put("ᶒ", "e");
+            this.translitChars.put("ì", "i");
             this.translitChars.put("ẉ", "w");
-            this.translitChars.put("ē", e.a);
-            this.translitChars.put("ᴇ", e.a);
+            this.translitChars.put("ē", "e");
+            this.translitChars.put("ᴇ", "e");
             this.translitChars.put("ł", "l");
             this.translitChars.put("ộ", "o");
             this.translitChars.put("ɭ", "l");
@@ -3672,20 +3664,20 @@ public class LocaleController {
             this.translitChars.put("ᴊ", "j");
             this.translitChars.put("ḱ", "k");
             this.translitChars.put("ṿ", str17);
-            this.translitChars.put("ȩ", e.a);
+            this.translitChars.put("ȩ", "e");
             this.translitChars.put("â", "a");
             this.translitChars.put("ş", str14);
             this.translitChars.put("ŗ", str10);
             this.translitChars.put("ʋ", str17);
             this.translitChars.put("ₐ", "a");
-            this.translitChars.put("ↄ", c.a);
-            this.translitChars.put("ᶓ", e.a);
+            this.translitChars.put("ↄ", "c");
+            this.translitChars.put("ᶓ", "e");
             this.translitChars.put("ɰ", str18);
             this.translitChars.put("ᴡ", "w");
             this.translitChars.put("ȏ", "o");
-            this.translitChars.put("č", c.a);
+            this.translitChars.put("č", "c");
             this.translitChars.put("ǵ", str15);
-            this.translitChars.put("ĉ", c.a);
+            this.translitChars.put("ĉ", "c");
             this.translitChars.put("ᶗ", "o");
             this.translitChars.put("ꝃ", "k");
             this.translitChars.put("ꝙ", "q");
@@ -3695,7 +3687,7 @@ public class LocaleController {
             this.translitChars.put("ȟ", str13);
             this.translitChars.put("ő", "o");
             this.translitChars.put("ꜩ", "tz");
-            this.translitChars.put("ẻ", e.a);
+            this.translitChars.put("ẻ", "e");
         }
         StringBuilder sb = new StringBuilder(str.length());
         int length = str.length();
@@ -3955,28 +3947,28 @@ public class LocaleController {
         ensureImperialSystemInit();
         if (!((bool != null && bool.booleanValue()) || (bool == null && useImperialSystemType.booleanValue()))) {
             if (f < 1000.0f) {
-                return i != 0 ? i != 1 ? formatString("MetersShort", org.telegram.messenger.beta.R.string.MetersShort, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f)))) : formatString("MetersFromYou2", org.telegram.messenger.beta.R.string.MetersFromYou2, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f)))) : formatString("MetersAway2", org.telegram.messenger.beta.R.string.MetersAway2, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f))));
+                return i != 0 ? i != 1 ? formatString("MetersShort", R.string.MetersShort, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f)))) : formatString("MetersFromYou2", R.string.MetersFromYou2, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f)))) : formatString("MetersAway2", R.string.MetersAway2, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f))));
             }
             String format = f % 1000.0f == 0.0f ? String.format("%d", Integer.valueOf((int) (f / 1000.0f))) : String.format("%.2f", Float.valueOf(f / 1000.0f));
             if (i == 0) {
-                return formatString("KMetersAway2", org.telegram.messenger.beta.R.string.KMetersAway2, format);
+                return formatString("KMetersAway2", R.string.KMetersAway2, format);
             }
             if (i == 1) {
-                return formatString("KMetersFromYou2", org.telegram.messenger.beta.R.string.KMetersFromYou2, format);
+                return formatString("KMetersFromYou2", R.string.KMetersFromYou2, format);
             }
-            return formatString("KMetersShort", org.telegram.messenger.beta.R.string.KMetersShort, format);
+            return formatString("KMetersShort", R.string.KMetersShort, format);
         }
         float f2 = f * 3.28084f;
         if (f2 < 1000.0f) {
-            return i != 0 ? i != 1 ? formatString("FootsShort", org.telegram.messenger.beta.R.string.FootsShort, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f2)))) : formatString("FootsFromYou", org.telegram.messenger.beta.R.string.FootsFromYou, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f2)))) : formatString("FootsAway", org.telegram.messenger.beta.R.string.FootsAway, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f2))));
+            return i != 0 ? i != 1 ? formatString("FootsShort", R.string.FootsShort, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f2)))) : formatString("FootsFromYou", R.string.FootsFromYou, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f2)))) : formatString("FootsAway", R.string.FootsAway, String.format("%d", Integer.valueOf((int) Math.max(1.0f, f2))));
         }
         String format2 = f2 % 5280.0f == 0.0f ? String.format("%d", Integer.valueOf((int) (f2 / 5280.0f))) : String.format("%.2f", Float.valueOf(f2 / 5280.0f));
         if (i == 0) {
-            return formatString("MilesAway", org.telegram.messenger.beta.R.string.MilesAway, format2);
+            return formatString("MilesAway", R.string.MilesAway, format2);
         }
         if (i == 1) {
-            return formatString("MilesFromYou", org.telegram.messenger.beta.R.string.MilesFromYou, format2);
+            return formatString("MilesFromYou", R.string.MilesFromYou, format2);
         }
-        return formatString("MilesShort", org.telegram.messenger.beta.R.string.MilesShort, format2);
+        return formatString("MilesShort", R.string.MilesShort, format2);
     }
 }

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -72,7 +71,7 @@ public class FirebaseMessagingService extends EnhancedIntentService {
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
     private void passMessageIntentToSdk(Intent intent) {
         char c;
-        String stringExtra = intent.getStringExtra(RemoteMessageConst.MSGTYPE);
+        String stringExtra = intent.getStringExtra("message_type");
         if (stringExtra == null) {
             stringExtra = "gcm";
         }

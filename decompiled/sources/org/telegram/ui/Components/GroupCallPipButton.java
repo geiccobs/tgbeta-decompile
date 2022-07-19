@@ -19,8 +19,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.TLRPC$TL_groupCallParticipant;
 import org.telegram.ui.ActionBar.Theme;
@@ -97,7 +97,7 @@ public class GroupCallPipButton extends FrameLayout implements NotificationCente
         this.blobDrawable2.minRadius = AndroidUtilities.dp(32.0f);
         this.blobDrawable.generateBlob();
         this.blobDrawable2.generateBlob();
-        this.bigMicDrawable = new RLottieDrawable(R.raw.voice_outlined, "2131558600", AndroidUtilities.dp(22.0f), AndroidUtilities.dp(30.0f), true, null);
+        this.bigMicDrawable = new RLottieDrawable(R.raw.voice_outlined, "2131558588", AndroidUtilities.dp(22.0f), AndroidUtilities.dp(30.0f), true, null);
         setWillNotDraw(false);
         RLottieImageView rLottieImageView = new RLottieImageView(context);
         this.muteButton = rLottieImageView;

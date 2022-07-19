@@ -24,8 +24,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
@@ -161,7 +161,7 @@ public class VoIPTextureView extends FrameLayout {
         if (z3 && Build.VERSION.SDK_INT >= 21) {
             setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.voip.VoIPTextureView.2
                 @Override // android.view.ViewOutlineProvider
-                @TargetApi(21)
+                @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                 public void getOutline(View view2, Outline outline) {
                     VoIPTextureView voIPTextureView = VoIPTextureView.this;
                     if (voIPTextureView.roundRadius < 1.0f) {

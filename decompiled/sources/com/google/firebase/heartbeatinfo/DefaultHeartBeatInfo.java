@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 /* loaded from: classes.dex */
 public class DefaultHeartBeatInfo implements HeartBeatInfo {
     private static final ThreadFactory THREAD_FACTORY = DefaultHeartBeatInfo$$ExternalSyntheticLambda2.INSTANCE;
-    private final Executor backgroundExecutor;
     private Provider<HeartBeatInfoStorage> storageProvider;
 
     public static /* synthetic */ Thread lambda$static$0(Runnable runnable) {
@@ -36,7 +35,6 @@ public class DefaultHeartBeatInfo implements HeartBeatInfo {
 
     DefaultHeartBeatInfo(Provider<HeartBeatInfoStorage> provider, Set<HeartBeatConsumer> set, Executor executor) {
         this.storageProvider = provider;
-        this.backgroundExecutor = executor;
     }
 
     @Override // com.google.firebase.heartbeatinfo.HeartBeatInfo

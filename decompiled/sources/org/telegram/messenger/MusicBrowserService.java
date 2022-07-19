@@ -37,7 +37,7 @@ import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$Message;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.LaunchActivity;
-@TargetApi(21)
+@TargetApi(R.styleable.MapAttrs_uiZoomGestures)
 /* loaded from: classes.dex */
 public class MusicBrowserService extends MediaBrowserService implements NotificationCenter.NotificationCenterDelegate {
     public static final String ACTION_CMD = "com.example.android.mediabrowserservice.ACTION_CMD";

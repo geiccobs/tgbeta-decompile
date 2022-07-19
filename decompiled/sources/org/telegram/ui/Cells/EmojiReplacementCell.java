@@ -1,7 +1,6 @@
 package org.telegram.ui.Cells;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -10,15 +9,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.LayoutHelper;
 /* loaded from: classes3.dex */
 public class EmojiReplacementCell extends FrameLayout {
     private String emoji;
-    private AnimatedEmojiDrawable emojiDrawable;
     private ImageView imageView;
     private final Theme.ResourcesProvider resourcesProvider;
 
@@ -38,29 +34,7 @@ public class EmojiReplacementCell extends FrameLayout {
 
     public void setEmoji(String str, int i) {
         this.emoji = str;
-        if (str != null && str.startsWith("animated_")) {
-            try {
-                long parseLong = Long.parseLong(this.emoji.substring(9));
-                AnimatedEmojiDrawable animatedEmojiDrawable = this.emojiDrawable;
-                if (animatedEmojiDrawable == null || animatedEmojiDrawable.getDocumentId() != parseLong) {
-                    AnimatedEmojiDrawable make = AnimatedEmojiDrawable.make(UserConfig.selectedAccount, 1, parseLong);
-                    this.emojiDrawable = make;
-                    make.addView(this);
-                }
-            } catch (Exception unused) {
-            }
-        } else {
-            AnimatedEmojiDrawable animatedEmojiDrawable2 = this.emojiDrawable;
-            if (animatedEmojiDrawable2 != null) {
-                animatedEmojiDrawable2.removeView(this);
-                this.emojiDrawable = null;
-            }
-        }
-        if (this.emojiDrawable == null) {
-            this.imageView.setImageDrawable(Emoji.getEmojiBigDrawable(str));
-        } else {
-            this.imageView.setImageDrawable(null);
-        }
+        this.imageView.setImageDrawable(Emoji.getEmojiBigDrawable(str));
         if (i == -1) {
             setBackgroundResource(R.drawable.stickers_back_left);
             setPadding(AndroidUtilities.dp(7.0f), 0, 0, 0);
@@ -78,34 +52,6 @@ public class EmojiReplacementCell extends FrameLayout {
         if (background != null) {
             background.setAlpha(230);
             background.setColorFilter(new PorterDuffColorFilter(getThemedColor("chat_stickersHintPanel"), PorterDuff.Mode.MULTIPLY));
-        }
-    }
-
-    @Override // android.view.ViewGroup, android.view.View
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        if (this.emojiDrawable != null) {
-            int dp = AndroidUtilities.dp(38.0f);
-            this.emojiDrawable.setBounds((getWidth() - dp) / 2, (getHeight() - dp) / 2, (getWidth() + dp) / 2, (getHeight() + dp) / 2);
-            this.emojiDrawable.draw(canvas);
-        }
-    }
-
-    @Override // android.view.ViewGroup, android.view.View
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        AnimatedEmojiDrawable animatedEmojiDrawable = this.emojiDrawable;
-        if (animatedEmojiDrawable != null) {
-            animatedEmojiDrawable.removeView(this);
-        }
-    }
-
-    @Override // android.view.ViewGroup, android.view.View
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        AnimatedEmojiDrawable animatedEmojiDrawable = this.emojiDrawable;
-        if (animatedEmojiDrawable != null) {
-            animatedEmojiDrawable.addView(this);
         }
     }
 

@@ -15,7 +15,6 @@ import com.google.firebase.installations.FirebaseInstallationsException;
 import com.google.firebase.installations.remote.InstallationResponse;
 import com.google.firebase.installations.remote.TokenResult;
 import com.google.firebase.platforminfo.UserAgentPublisher;
-import com.huawei.hms.android.HwBuildEx;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -214,9 +213,9 @@ public class FirebaseInstallationServiceClient {
         HeartBeatInfo.HeartBeat heartBeatCode;
         try {
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setConnectTimeout(HwBuildEx.VersionCodes.CUR_DEVELOPMENT);
+            httpURLConnection.setConnectTimeout(10000);
             httpURLConnection.setUseCaches(false);
-            httpURLConnection.setReadTimeout(HwBuildEx.VersionCodes.CUR_DEVELOPMENT);
+            httpURLConnection.setReadTimeout(10000);
             httpURLConnection.addRequestProperty("Content-Type", "application/json");
             httpURLConnection.addRequestProperty("Accept", "application/json");
             httpURLConnection.addRequestProperty("Content-Encoding", "gzip");

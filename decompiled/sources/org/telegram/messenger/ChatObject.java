@@ -7,7 +7,6 @@ import android.util.SparseArray;
 import androidx.collection.LongSparseArray;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.gms.internal.mlkit_language_id.zzdp$$ExternalSyntheticBackport0;
-import com.huawei.hms.android.HwBuildEx;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -237,7 +236,7 @@ public class ChatObject {
             TLRPC$GroupCall tLRPC$GroupCall = tLRPC$TL_phone_groupCall.call;
             this.call = tLRPC$GroupCall;
             this.recording = tLRPC$GroupCall.record_start_date != 0;
-            int i = Integer.MAX_VALUE;
+            int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
             int size = tLRPC$TL_phone_groupCall.participants.size();
             for (int i2 = 0; i2 < size; i2++) {
                 TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant = tLRPC$TL_phone_groupCall.participants.get(i2);
@@ -1179,7 +1178,7 @@ public class ChatObject {
                     if (this.canStreamVideo) {
                         if (tLRPC$TL_groupCallParticipant2.videoIndex == 0) {
                             if (z2) {
-                                tLRPC$TL_groupCallParticipant2.videoIndex = Integer.MAX_VALUE;
+                                tLRPC$TL_groupCallParticipant2.videoIndex = ConnectionsManager.DEFAULT_DATACENTER_ID;
                             } else {
                                 int i3 = videoPointer + 1;
                                 videoPointer = i3;
@@ -1374,7 +1373,7 @@ public class ChatObject {
             this.speakingMembersCount = 0;
             int currentTime = this.currentAccount.getConnectionsManager().getCurrentTime();
             int size = this.sortedParticipants.size();
-            int i = Integer.MAX_VALUE;
+            int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
             for (int i2 = 0; i2 < size; i2++) {
                 TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant = this.sortedParticipants.get(i2);
                 int i3 = currentTime - tLRPC$TL_groupCallParticipant.active_date;
@@ -1423,7 +1422,10 @@ public class ChatObject {
     }
 
     public static int getParticipantVolume(TLRPC$TL_groupCallParticipant tLRPC$TL_groupCallParticipant) {
-        return (tLRPC$TL_groupCallParticipant.flags & ConnectionsManager.RequestFlagNeedQuickAck) != 0 ? tLRPC$TL_groupCallParticipant.volume : HwBuildEx.VersionCodes.CUR_DEVELOPMENT;
+        if ((tLRPC$TL_groupCallParticipant.flags & ConnectionsManager.RequestFlagNeedQuickAck) != 0) {
+            return tLRPC$TL_groupCallParticipant.volume;
+        }
+        return 10000;
     }
 
     private static boolean getBannedRight(TLRPC$TL_chatBannedRights tLRPC$TL_chatBannedRights, int i) {

@@ -1,6 +1,5 @@
 package com.microsoft.appcenter.crashes.ingestion.models;
 
-import com.huawei.hms.framework.common.hianalytics.CrashHianalyticsData;
 import com.microsoft.appcenter.crashes.ingestion.models.json.ExceptionFactory;
 import com.microsoft.appcenter.crashes.ingestion.models.json.StackFrameFactory;
 import com.microsoft.appcenter.ingestion.models.Model;
@@ -78,7 +77,7 @@ public class Exception implements Model {
     @Override // com.microsoft.appcenter.ingestion.models.Model
     public void read(JSONObject jSONObject) throws JSONException {
         setType(jSONObject.optString("type", null));
-        setMessage(jSONObject.optString(CrashHianalyticsData.MESSAGE, null));
+        setMessage(jSONObject.optString("message", null));
         setStackTrace(jSONObject.optString("stackTrace", null));
         setFrames(JSONUtils.readArray(jSONObject, "frames", StackFrameFactory.getInstance()));
         setInnerExceptions(JSONUtils.readArray(jSONObject, "innerExceptions", ExceptionFactory.getInstance()));
@@ -89,7 +88,7 @@ public class Exception implements Model {
     @Override // com.microsoft.appcenter.ingestion.models.Model
     public void write(JSONStringer jSONStringer) throws JSONException {
         JSONUtils.write(jSONStringer, "type", getType());
-        JSONUtils.write(jSONStringer, CrashHianalyticsData.MESSAGE, getMessage());
+        JSONUtils.write(jSONStringer, "message", getMessage());
         JSONUtils.write(jSONStringer, "stackTrace", getStackTrace());
         JSONUtils.writeArray(jSONStringer, "frames", getFrames());
         JSONUtils.writeArray(jSONStringer, "innerExceptions", getInnerExceptions());

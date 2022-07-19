@@ -6,10 +6,9 @@ import android.telecom.Connection;
 import android.telecom.ConnectionRequest;
 import android.telecom.ConnectionService;
 import android.telecom.PhoneAccountHandle;
-import com.huawei.hms.adapter.internal.AvailableCode;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
-@TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
+@TargetApi(26)
 /* loaded from: classes.dex */
 public class TelegramConnectionService extends ConnectionService {
     @Override // android.app.Service

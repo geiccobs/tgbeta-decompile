@@ -172,7 +172,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
             return new DecoderInitializationException(getMessage(), getCause(), this.mimeType, this.secureDecoderRequired, this.codecInfo, this.diagnosticInfo, decoderInitializationException);
         }
 
-        @TargetApi(21)
+        @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
         private static String getDiagnosticInfoV21(Throwable th) {
             if (th instanceof MediaCodec.CodecException) {
                 return ((MediaCodec.CodecException) th).getDiagnosticInfo();
@@ -1171,7 +1171,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
         return true;
     }
 
-    @TargetApi(21)
+    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
     private static boolean isMediaCodecExceptionV21(IllegalStateException illegalStateException) {
         return illegalStateException instanceof MediaCodec.CodecException;
     }

@@ -26,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.core.graphics.ColorUtils;
-import com.huawei.hms.framework.common.ContainerUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -35,9 +34,9 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -485,7 +484,7 @@ public class ProxySettingsActivity extends BaseFragment {
             }
             if (!TextUtils.isEmpty(obj4)) {
                 if (sb.length() != 0) {
-                    sb.append(ContainerUtils.FIELD_DELIMITER);
+                    sb.append("&");
                 }
                 sb.append("port=");
                 sb.append(URLEncoder.encode(obj4, "UTF-8"));
@@ -493,7 +492,7 @@ public class ProxySettingsActivity extends BaseFragment {
             if (this.currentType == 1) {
                 str = "https://t.me/proxy?";
                 if (sb.length() != 0) {
-                    sb.append(ContainerUtils.FIELD_DELIMITER);
+                    sb.append("&");
                 }
                 sb.append("secret=");
                 sb.append(URLEncoder.encode(obj5, "UTF-8"));
@@ -501,14 +500,14 @@ public class ProxySettingsActivity extends BaseFragment {
                 str = "https://t.me/socks?";
                 if (!TextUtils.isEmpty(obj3)) {
                     if (sb.length() != 0) {
-                        sb.append(ContainerUtils.FIELD_DELIMITER);
+                        sb.append("&");
                     }
                     sb.append("user=");
                     sb.append(URLEncoder.encode(obj3, "UTF-8"));
                 }
                 if (!TextUtils.isEmpty(obj2)) {
                     if (sb.length() != 0) {
-                        sb.append(ContainerUtils.FIELD_DELIMITER);
+                        sb.append("&");
                     }
                     sb.append("pass=");
                     sb.append(URLEncoder.encode(obj2, "UTF-8"));

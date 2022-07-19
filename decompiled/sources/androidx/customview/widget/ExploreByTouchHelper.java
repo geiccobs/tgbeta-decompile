@@ -19,7 +19,7 @@ import org.telegram.messenger.CharacterCompat;
 import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public abstract class ExploreByTouchHelper extends AccessibilityDelegateCompat {
-    private static final Rect INVALID_PARENT_BOUNDS = new Rect(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    private static final Rect INVALID_PARENT_BOUNDS = new Rect(ConnectionsManager.DEFAULT_DATACENTER_ID, ConnectionsManager.DEFAULT_DATACENTER_ID, Integer.MIN_VALUE, Integer.MIN_VALUE);
     private final View mHost;
     private final AccessibilityManager mManager;
     private MyNodeProvider mNodeProvider;

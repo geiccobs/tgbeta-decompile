@@ -2,7 +2,6 @@ package com.google.android.exoplayer2.upstream;
 
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Assertions;
-import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 /* loaded from: classes.dex */
 public final class DefaultHttpDataSourceFactory extends HttpDataSource.BaseFactory {
     private final boolean allowCrossProtocolRedirects;
@@ -12,7 +11,7 @@ public final class DefaultHttpDataSourceFactory extends HttpDataSource.BaseFacto
     private final String userAgent;
 
     public DefaultHttpDataSourceFactory(String str, TransferListener transferListener) {
-        this(str, transferListener, JosStatusCodes.RTN_CODE_COMMON_ERROR, JosStatusCodes.RTN_CODE_COMMON_ERROR, false);
+        this(str, transferListener, 8000, 8000, false);
     }
 
     public DefaultHttpDataSourceFactory(String str, TransferListener transferListener, int i, int i2, boolean z) {

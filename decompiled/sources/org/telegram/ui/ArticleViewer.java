@@ -77,7 +77,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.huawei.hms.adapter.internal.AvailableCode;
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -100,10 +99,10 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -470,7 +469,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private TLRPC$RichText textItem;
 
         private TL_pageBlockListItem(ArticleViewer articleViewer) {
-            this.index = Integer.MAX_VALUE;
+            this.index = ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
     }
 
@@ -498,7 +497,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private TLRPC$RichText textItem;
 
         private TL_pageBlockOrderedListItem(ArticleViewer articleViewer) {
-            this.index = Integer.MAX_VALUE;
+            this.index = ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
     }
 
@@ -808,7 +807,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override // android.view.ViewGroup, android.view.View
-        @TargetApi(21)
+        @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
         public WindowInsets dispatchApplyWindowInsets(WindowInsets windowInsets) {
             DisplayCutout displayCutout;
             List<Rect> boundingRects;
@@ -5371,35 +5370,35 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         view = new BlockChannelCell(this.context, this, 0);
                         textView = view;
                         break;
-                    case 19:
+                    case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                         textView = new BlockAudioCell(this.context, this);
                         break;
-                    case org.telegram.messenger.R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                    case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                         textView = new BlockKickerCell(this.context, this);
                         break;
-                    case 21:
+                    case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
                         textView = new BlockOrderedListItemCell(this.context, this);
                         break;
-                    case org.telegram.messenger.R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                    case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                         view = new BlockMapCell(this.context, this, 0);
                         textView = view;
                         break;
-                    case org.telegram.messenger.R.styleable.MapAttrs_zOrderOnTop /* 23 */:
+                    case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                         textView = new BlockRelatedArticlesCell(this.context, this);
                         break;
                     case 24:
                         textView = new BlockDetailsCell(this.context, this);
                         break;
-                    case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
+                    case 25:
                         textView = new BlockTableCell(this.context, this);
                         break;
-                    case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
+                    case 26:
                         textView = new BlockRelatedArticlesHeaderCell(this.context, this);
                         break;
-                    case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
+                    case 27:
                         textView = new BlockDetailsBottomCell(this.context);
                         break;
-                    case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
+                    case 28:
                         textView = new BlockRelatedArticlesShadowCell(this.context);
                         break;
                     default:
@@ -5521,7 +5520,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     case 18:
                         ((BlockChannelCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockChannel) tLRPC$PageBlock2);
                         return;
-                    case 19:
+                    case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
                         BlockAudioCell blockAudioCell = (BlockAudioCell) viewHolder.itemView;
                         TLRPC$TL_pageBlockAudio tLRPC$TL_pageBlockAudio = (TLRPC$TL_pageBlockAudio) tLRPC$PageBlock2;
                         boolean z4 = i2 == 0;
@@ -5530,13 +5529,13 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         }
                         blockAudioCell.setBlock(tLRPC$TL_pageBlockAudio, z4, z);
                         return;
-                    case org.telegram.messenger.R.styleable.MapAttrs_uiZoomControls /* 20 */:
+                    case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                         ((BlockKickerCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockKicker) tLRPC$PageBlock2);
                         return;
-                    case 21:
+                    case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
                         ((BlockOrderedListItemCell) viewHolder.itemView).setBlock((TL_pageBlockOrderedListItem) tLRPC$PageBlock2);
                         return;
-                    case org.telegram.messenger.R.styleable.MapAttrs_useViewLifecycle /* 22 */:
+                    case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                         BlockMapCell blockMapCell = (BlockMapCell) viewHolder.itemView;
                         TLRPC$TL_pageBlockMap tLRPC$TL_pageBlockMap = (TLRPC$TL_pageBlockMap) tLRPC$PageBlock2;
                         boolean z5 = i2 == 0;
@@ -5545,19 +5544,19 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         }
                         blockMapCell.setBlock(tLRPC$TL_pageBlockMap, z5, z);
                         return;
-                    case org.telegram.messenger.R.styleable.MapAttrs_zOrderOnTop /* 23 */:
+                    case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                         ((BlockRelatedArticlesCell) viewHolder.itemView).setBlock((TL_pageBlockRelatedArticlesChild) tLRPC$PageBlock2);
                         return;
                     case 24:
                         ((BlockDetailsCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockDetails) tLRPC$PageBlock2);
                         return;
-                    case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
+                    case 25:
                         ((BlockTableCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockTable) tLRPC$PageBlock2);
                         return;
-                    case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
+                    case 26:
                         ((BlockRelatedArticlesHeaderCell) viewHolder.itemView).setBlock((TLRPC$TL_pageBlockRelatedArticles) tLRPC$PageBlock2);
                         return;
-                    case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
+                    case 27:
                         BlockDetailsBottomCell blockDetailsBottomCell = (BlockDetailsBottomCell) viewHolder.itemView;
                         return;
                     default:

@@ -10,12 +10,13 @@ import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import org.telegram.messenger.R;
 import org.webrtc.EglBase14;
 import org.webrtc.EncodedImage;
 import org.webrtc.ThreadUtils;
 import org.webrtc.VideoEncoder;
 import org.webrtc.VideoFrame;
-@TargetApi(19)
+@TargetApi(R.styleable.MapAttrs_uiTiltGestures)
 /* loaded from: classes3.dex */
 public class HardwareVideoEncoder implements VideoEncoder {
     private static final int DEQUEUE_OUTPUT_BUFFER_TIMEOUT_US = 100000;
@@ -313,8 +314,8 @@ public class HardwareVideoEncoder implements VideoEncoder {
     @Override // org.webrtc.VideoEncoder
     public VideoCodecStatus setRateAllocation(VideoEncoder.BitrateAllocation bitrateAllocation, int i) {
         this.encodeThreadChecker.checkIsOnValidThread();
-        if (i > 30) {
-            i = 30;
+        if (i > MAX_VIDEO_FRAMERATE) {
+            i = MAX_VIDEO_FRAMERATE;
         }
         this.bitrateAdjuster.setTargets(bitrateAllocation.getSum(), i);
         return VideoCodecStatus.OK;

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import com.huawei.hms.framework.common.ContainerUtils;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -74,7 +73,7 @@ class BrowserUtils {
         URI uri = new URI(str);
         String query = uri.getQuery();
         if (query != null) {
-            str2 = query + ContainerUtils.FIELD_DELIMITER + str2;
+            str2 = query + "&" + str2;
         }
         return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), str2, uri.getFragment()).toString();
     }

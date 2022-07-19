@@ -8,6 +8,6 @@ public final /* synthetic */ class ApplicationLoader$$ExternalSyntheticLambda3 i
 
     @Override // java.lang.Runnable
     public final void run() {
-        ApplicationLoader.lambda$initPushServices$1();
+        ApplicationLoader.startPushService();
     }
 }

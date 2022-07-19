@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.Surface;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import org.telegram.messenger.R;
 /* loaded from: classes3.dex */
 class MediaCodecWrapperFactoryImpl implements MediaCodecWrapperFactory {
 
@@ -86,7 +87,7 @@ class MediaCodecWrapperFactoryImpl implements MediaCodecWrapperFactory {
         }
 
         @Override // org.webrtc.MediaCodecWrapper
-        @TargetApi(19)
+        @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
         public void setParameters(Bundle bundle) {
             this.mediaCodec.setParameters(bundle);
         }

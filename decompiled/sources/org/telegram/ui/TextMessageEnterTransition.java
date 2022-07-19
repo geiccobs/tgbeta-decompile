@@ -347,12 +347,12 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         return layout.getLineRight(i) == ((float) layout.getWidth()) && layout.getLineLeft(i) != 0.0f;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:68:0x0362  */
-    /* JADX WARN: Removed duplicated region for block: B:69:0x036f  */
-    /* JADX WARN: Removed duplicated region for block: B:72:0x03a1  */
-    /* JADX WARN: Removed duplicated region for block: B:75:0x0407  */
-    /* JADX WARN: Removed duplicated region for block: B:78:0x044c  */
-    /* JADX WARN: Removed duplicated region for block: B:81:0x0462  */
+    /* JADX WARN: Removed duplicated region for block: B:65:0x0359  */
+    /* JADX WARN: Removed duplicated region for block: B:66:0x0366  */
+    /* JADX WARN: Removed duplicated region for block: B:69:0x0398  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x03fe  */
+    /* JADX WARN: Removed duplicated region for block: B:75:0x0443  */
+    /* JADX WARN: Removed duplicated region for block: B:78:0x0459  */
     @Override // org.telegram.ui.MessageEnterTransitionContainer.Transition
     /*
         Code decompiled incorrectly, please refer to instructions dump.
@@ -360,7 +360,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
     */
     public void onDraw(android.graphics.Canvas r38) {
         /*
-            Method dump skipped, instructions count: 1974
+            Method dump skipped, instructions count: 1965
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.TextMessageEnterTransition.onDraw(android.graphics.Canvas):void");

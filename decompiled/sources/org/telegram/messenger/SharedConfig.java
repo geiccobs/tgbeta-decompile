@@ -10,7 +10,6 @@ import android.util.Base64;
 import android.util.SparseArray;
 import android.webkit.WebView;
 import androidx.core.content.pm.ShortcutManagerCompat;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.lang.annotation.Retention;
@@ -101,7 +100,6 @@ public class SharedConfig {
     public static long pushStringGetTimeEnd = 0;
     public static long pushStringGetTimeStart = 0;
     public static String pushStringStatus = "";
-    public static int pushType = 2;
     public static boolean raiseToSpeak = false;
     public static int repeatMode = 0;
     public static boolean roundCamera16to9 = false;
@@ -221,7 +219,6 @@ public class SharedConfig {
                 edit.putBoolean("useFingerprint", useFingerprint);
                 edit.putBoolean("allowScreenCapture", allowScreenCapture);
                 edit.putString("pushString2", pushString);
-                edit.putInt("pushType", pushType);
                 edit.putBoolean("pushStatSent", pushStatSent);
                 byte[] bArr2 = pushAuthKey;
                 edit.putString("pushAuthKey", bArr2 != null ? Base64.encodeToString(bArr2, 0) : "");
@@ -265,17 +262,17 @@ public class SharedConfig {
         return i;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:36:0x016a A[Catch: Exception -> 0x0188, all -> 0x03bd, TryCatch #1 {Exception -> 0x0188, blocks: (B:22:0x011b, B:24:0x0123, B:26:0x0133, B:27:0x0147, B:34:0x0164, B:36:0x016a, B:38:0x016e, B:39:0x0170, B:41:0x0174, B:43:0x017a, B:45:0x0180), top: B:81:0x011b, outer: #3 }] */
-    /* JADX WARN: Removed duplicated region for block: B:38:0x016e A[Catch: Exception -> 0x0188, all -> 0x03bd, TryCatch #1 {Exception -> 0x0188, blocks: (B:22:0x011b, B:24:0x0123, B:26:0x0133, B:27:0x0147, B:34:0x0164, B:36:0x016a, B:38:0x016e, B:39:0x0170, B:41:0x0174, B:43:0x017a, B:45:0x0180), top: B:81:0x011b, outer: #3 }] */
-    /* JADX WARN: Removed duplicated region for block: B:62:0x022a  */
-    /* JADX WARN: Removed duplicated region for block: B:63:0x022d  */
+    /* JADX WARN: Removed duplicated region for block: B:36:0x0161 A[Catch: Exception -> 0x017f, all -> 0x03b5, TryCatch #0 {Exception -> 0x017f, blocks: (B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177), top: B:79:0x0112, outer: #2 }] */
+    /* JADX WARN: Removed duplicated region for block: B:38:0x0165 A[Catch: Exception -> 0x017f, all -> 0x03b5, TryCatch #0 {Exception -> 0x017f, blocks: (B:22:0x0112, B:24:0x011a, B:26:0x012a, B:27:0x013e, B:34:0x015b, B:36:0x0161, B:38:0x0165, B:39:0x0167, B:41:0x016b, B:43:0x0171, B:45:0x0177), top: B:79:0x0112, outer: #2 }] */
+    /* JADX WARN: Removed duplicated region for block: B:62:0x0222  */
+    /* JADX WARN: Removed duplicated region for block: B:63:0x0225  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public static void loadConfig() {
         /*
-            Method dump skipped, instructions count: 960
+            Method dump skipped, instructions count: 952
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.SharedConfig.loadConfig():void");
@@ -590,7 +587,7 @@ public class SharedConfig {
     public static /* synthetic */ void lambda$checkKeepMedia$1(int i, File file) {
         int i2 = keepMedia;
         if (i2 != 2) {
-            long j = i - ((i2 == 0 ? 7 : i2 == 1 ? 30 : 3) * RemoteMessageConst.DEFAULT_TTL);
+            long j = i - ((i2 == 0 ? 7 : i2 == 1 ? 30 : 3) * 86400);
             SparseArray<File> createMediaPaths = ImageLoader.getInstance().createMediaPaths();
             for (int i3 = 0; i3 < createMediaPaths.size(); i3++) {
                 if (createMediaPaths.keyAt(i3) != 4) {
@@ -605,7 +602,7 @@ public class SharedConfig {
         File file2 = new File(file, "acache");
         if (file2.exists()) {
             try {
-                Utilities.clearDir(file2.getAbsolutePath(), 0, i - RemoteMessageConst.DEFAULT_TTL, false);
+                Utilities.clearDir(file2.getAbsolutePath(), 0, i - 86400, false);
             } catch (Throwable th2) {
                 FileLog.e(th2);
             }

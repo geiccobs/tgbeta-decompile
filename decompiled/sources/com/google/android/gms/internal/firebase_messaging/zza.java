@@ -4,7 +4,6 @@ import com.google.firebase.encoders.FieldDescriptor;
 import com.google.firebase.encoders.ObjectEncoder;
 import com.google.firebase.encoders.ObjectEncoderContext;
 import com.google.firebase.messaging.reporting.MessagingClientEvent;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.IOException;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
 /* loaded from: classes.dex */
@@ -51,15 +50,15 @@ final class zza implements ObjectEncoder<MessagingClientEvent> {
         zzv zzvVar6 = new zzv();
         zzvVar6.zza(6);
         zzg = builder6.withProperty(zzvVar6.zzb()).build();
-        FieldDescriptor.Builder builder7 = FieldDescriptor.builder(RemoteMessageConst.COLLAPSE_KEY);
+        FieldDescriptor.Builder builder7 = FieldDescriptor.builder("collapseKey");
         zzv zzvVar7 = new zzv();
         zzvVar7.zza(7);
         zzh = builder7.withProperty(zzvVar7.zzb()).build();
-        FieldDescriptor.Builder builder8 = FieldDescriptor.builder(RemoteMessageConst.Notification.PRIORITY);
+        FieldDescriptor.Builder builder8 = FieldDescriptor.builder("priority");
         zzv zzvVar8 = new zzv();
         zzvVar8.zza(8);
         zzi = builder8.withProperty(zzvVar8.zzb()).build();
-        FieldDescriptor.Builder builder9 = FieldDescriptor.builder(RemoteMessageConst.TTL);
+        FieldDescriptor.Builder builder9 = FieldDescriptor.builder("ttl");
         zzv zzvVar9 = new zzv();
         zzvVar9.zza(9);
         zzj = builder9.withProperty(zzvVar9.zzb()).build();

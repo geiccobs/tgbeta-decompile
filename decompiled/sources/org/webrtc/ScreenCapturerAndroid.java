@@ -8,8 +8,9 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.view.Surface;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.R;
 import org.webrtc.VideoSink;
-@TargetApi(21)
+@TargetApi(R.styleable.MapAttrs_uiZoomGestures)
 /* loaded from: classes3.dex */
 public class ScreenCapturerAndroid implements VideoCapturer, VideoSink {
     private static final int DISPLAY_FLAGS = 3;

@@ -1,4 +1,6 @@
 package com.google.android.gms.internal.vision;
+
+import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
 /* loaded from: classes.dex */
 public final class zzih extends zzif {
@@ -11,7 +13,7 @@ public final class zzih extends zzif {
     /* JADX INFO: Access modifiers changed from: private */
     public zzih(byte[] bArr, int i, int i2, boolean z) {
         super();
-        this.zzk = Integer.MAX_VALUE;
+        this.zzk = ConnectionsManager.DEFAULT_DATACENTER_ID;
         this.zzf = i2 + i;
         this.zzh = i;
         this.zzi = i;

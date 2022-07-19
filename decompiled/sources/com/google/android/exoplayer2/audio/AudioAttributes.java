@@ -3,6 +3,7 @@ package com.google.android.exoplayer2.audio;
 import android.annotation.TargetApi;
 import android.media.AudioAttributes;
 import com.google.android.exoplayer2.util.Util;
+import org.telegram.messenger.R;
 /* loaded from: classes.dex */
 public final class AudioAttributes {
     public static final AudioAttributes DEFAULT = new Builder().build();
@@ -41,7 +42,7 @@ public final class AudioAttributes {
         this.allowedCapturePolicy = i4;
     }
 
-    @TargetApi(21)
+    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
     public android.media.AudioAttributes getAudioAttributesV21() {
         if (this.audioAttributesV21 == null) {
             AudioAttributes.Builder usage = new AudioAttributes.Builder().setContentType(this.contentType).setFlags(this.flags).setUsage(this.usage);

@@ -8,7 +8,6 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.sharetarget.ShareTargetCompat;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.List;
 import org.telegram.tgnet.ConnectionsManager;
@@ -85,7 +84,7 @@ class ShareTargetXmlParser {
                 if (next == 2) {
                     String name = parser.getName();
                     name.hashCode();
-                    if (name.equals(RemoteMessageConst.DATA)) {
+                    if (name.equals("data")) {
                         arrayList.add(parseTargetData(parser));
                     } else if (name.equals("category")) {
                         arrayList2.add(getAttributeValue(parser, "name"));

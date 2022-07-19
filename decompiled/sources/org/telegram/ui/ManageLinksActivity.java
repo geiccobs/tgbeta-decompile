@@ -40,8 +40,8 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
@@ -1105,7 +1105,7 @@ public class ManageLinksActivity extends BaseFragment {
                 r4 = 0
                 r5 = 1
                 if (r2 == 0) goto L3d
-                r2 = 2131625384(0x7f0e05a8, float:1.8877974E38)
+                r2 = 2131625377(0x7f0e05a1, float:1.887796E38)
                 java.lang.String r6 = "Delete"
                 java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r6, r2)
                 r8.add(r2)
@@ -1118,7 +1118,7 @@ public class ManageLinksActivity extends BaseFragment {
                 r2 = 1
                 goto Lc9
             L3d:
-                r2 = 2131625274(0x7f0e053a, float:1.8877751E38)
+                r2 = 2131625267(0x7f0e0533, float:1.8877737E38)
                 java.lang.String r6 = "CopyLink"
                 java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r6, r2)
                 r8.add(r2)
@@ -1127,7 +1127,7 @@ public class ManageLinksActivity extends BaseFragment {
                 r0.add(r2)
                 java.lang.Integer r2 = java.lang.Integer.valueOf(r4)
                 r1.add(r2)
-                r2 = 2131628337(0x7f0e1131, float:1.8883964E38)
+                r2 = 2131628325(0x7f0e1125, float:1.888394E38)
                 java.lang.String r6 = "ShareLink"
                 java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r6, r2)
                 r8.add(r2)
@@ -1142,7 +1142,7 @@ public class ManageLinksActivity extends BaseFragment {
                 org.telegram.ui.ManageLinksActivity r2 = org.telegram.ui.ManageLinksActivity.this
                 boolean r2 = org.telegram.ui.ManageLinksActivity.access$2200(r2)
                 if (r2 == 0) goto La3
-                r2 = 2131625592(0x7f0e0678, float:1.8878396E38)
+                r2 = 2131625585(0x7f0e0671, float:1.8878382E38)
                 java.lang.String r6 = "EditLink"
                 java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r6, r2)
                 r8.add(r2)
@@ -1156,7 +1156,7 @@ public class ManageLinksActivity extends BaseFragment {
                 org.telegram.ui.ManageLinksActivity r2 = org.telegram.ui.ManageLinksActivity.this
                 boolean r2 = org.telegram.ui.ManageLinksActivity.access$2200(r2)
                 if (r2 == 0) goto Lc8
-                r2 = 2131628105(0x7f0e1049, float:1.8883493E38)
+                r2 = 2131628093(0x7f0e103d, float:1.8883469E38)
                 java.lang.String r6 = "RevokeLink"
                 java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r6, r2)
                 r8.add(r2)
@@ -1180,7 +1180,7 @@ public class ManageLinksActivity extends BaseFragment {
                 org.telegram.ui.ManageLinksActivity$LinkCell$$ExternalSyntheticLambda0 r6 = new org.telegram.ui.ManageLinksActivity$LinkCell$$ExternalSyntheticLambda0
                 r6.<init>()
                 r3.setItems(r4, r0, r6)
-                r0 = 2131626310(0x7f0e0946, float:1.8879853E38)
+                r0 = 2131626300(0x7f0e093c, float:1.8879832E38)
                 java.lang.String r1 = "InviteLink"
                 java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
                 r3.setTitle(r0)

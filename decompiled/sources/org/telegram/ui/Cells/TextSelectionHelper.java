@@ -3,6 +3,8 @@ package org.telegram.ui.Cells;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
@@ -38,8 +40,9 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.FloatingActionMode;
 import org.telegram.ui.ActionBar.FloatingToolbar;
@@ -1235,7 +1238,7 @@ public abstract class TextSelectionHelper<Cell extends SelectableView> {
     public void copyText() {
         CharSequence selectedText;
         if (isSelectionMode() && (selectedText = getSelectedText()) != null) {
-            AndroidUtilities.addToClipboard(selectedText);
+            ((ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("label", selectedText));
             hideActions();
             clear(true);
             Callback callback = this.callback;
@@ -1990,7 +1993,7 @@ public abstract class TextSelectionHelper<Cell extends SelectableView> {
                 return 0;
             }
             StaticLayout layout = this.arrayList.get(i).getLayout();
-            int i2 = Integer.MAX_VALUE;
+            int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
             for (int i3 = 0; i3 < layout.getLineCount(); i3++) {
                 int lineBottom = layout.getLineBottom(i3) - layout.getLineTop(i3);
                 if (lineBottom < i2) {
@@ -2043,8 +2046,8 @@ public abstract class TextSelectionHelper<Cell extends SelectableView> {
                 return -1;
             }
             int size = this.arrayList.size() - 1;
-            int i5 = Integer.MAX_VALUE;
-            int i6 = Integer.MAX_VALUE;
+            int i5 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i6 = ConnectionsManager.DEFAULT_DATACENTER_ID;
             int i7 = -1;
             while (true) {
                 if (size < 0) {

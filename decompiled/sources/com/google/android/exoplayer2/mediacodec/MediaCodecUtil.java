@@ -13,8 +13,6 @@ import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.ColorInfo;
-import com.huawei.hms.adapter.internal.AvailableCode;
-import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +24,7 @@ import java.util.regex.Pattern;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.telegram.messenger.CharacterCompat;
 import org.telegram.messenger.MediaController;
+import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 @SuppressLint({"InlinedApi"})
 /* loaded from: classes.dex */
@@ -182,7 +181,7 @@ public final class MediaCodecUtil {
         HashMap hashMap2 = new HashMap();
         DOLBY_VISION_STRING_TO_PROFILE = hashMap2;
         hashMap2.put("00", 1);
-        hashMap2.put(HiAnalyticsConstant.KeyAndValue.NUMBER_01, 2);
+        hashMap2.put("01", 2);
         hashMap2.put("02", 4);
         hashMap2.put("03", 8);
         hashMap2.put("04", 16);
@@ -193,7 +192,7 @@ public final class MediaCodecUtil {
         hashMap2.put("09", 512);
         HashMap hashMap3 = new HashMap();
         DOLBY_VISION_STRING_TO_LEVEL = hashMap3;
-        hashMap3.put(HiAnalyticsConstant.KeyAndValue.NUMBER_01, 1);
+        hashMap3.put("01", 1);
         hashMap3.put("02", 2);
         hashMap3.put("03", 4);
         hashMap3.put("04", 8);
@@ -603,7 +602,7 @@ public final class MediaCodecUtil {
         return !isSoftwareOnly(mediaCodecInfo);
     }
 
-    @TargetApi(AvailableCode.HMS_IS_SPOOF)
+    @TargetApi(29)
     private static boolean isHardwareAcceleratedV29(android.media.MediaCodecInfo mediaCodecInfo) {
         return mediaCodecInfo.isHardwareAccelerated();
     }
@@ -619,7 +618,7 @@ public final class MediaCodecUtil {
         return lowerInvariant.startsWith("omx.google.") || lowerInvariant.startsWith("omx.ffmpeg.") || (lowerInvariant.startsWith("omx.sec.") && lowerInvariant.contains(".sw.")) || lowerInvariant.equals("omx.qcom.video.decoder.hevcswvdec") || lowerInvariant.startsWith("c2.android.") || lowerInvariant.startsWith("c2.google.") || (!lowerInvariant.startsWith("omx.") && !lowerInvariant.startsWith("c2."));
     }
 
-    @TargetApi(AvailableCode.HMS_IS_SPOOF)
+    @TargetApi(29)
     private static boolean isSoftwareOnlyV29(android.media.MediaCodecInfo mediaCodecInfo) {
         return mediaCodecInfo.isSoftwareOnly();
     }
@@ -632,7 +631,7 @@ public final class MediaCodecUtil {
         return !lowerInvariant.startsWith("omx.google.") && !lowerInvariant.startsWith("c2.android.") && !lowerInvariant.startsWith("c2.google.");
     }
 
-    @TargetApi(AvailableCode.HMS_IS_SPOOF)
+    @TargetApi(29)
     private static boolean isVendorV29(android.media.MediaCodecInfo mediaCodecInfo) {
         return mediaCodecInfo.isVendor();
     }
@@ -828,7 +827,7 @@ public final class MediaCodecUtil {
         });
     }
 
-    @TargetApi(21)
+    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
     /* loaded from: classes.dex */
     public static final class MediaCodecListCompatV21 implements MediaCodecListCompat {
         private final int codecKind;

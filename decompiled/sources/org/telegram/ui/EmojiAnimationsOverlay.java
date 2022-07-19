@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.Canvas;
 import android.view.View;
 import android.widget.FrameLayout;
-import com.huawei.hms.opendevice.i;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,10 +22,10 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -177,7 +176,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
                 JSONArray jSONArray = new JSONObject(tLRPC$TL_sendMessageEmojiInteraction.interaction.data).getJSONArray("a");
                 for (int i4 = 0; i4 < jSONArray.length(); i4++) {
                     JSONObject jSONObject = jSONArray.getJSONObject(i4);
-                    final int optInt = jSONObject.optInt(i.TAG, 1) - 1;
+                    final int optInt = jSONObject.optInt("i", 1) - 1;
                     AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.EmojiAnimationsOverlay.1
                         @Override // java.lang.Runnable
                         public void run() {
@@ -251,9 +250,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
                     } else {
                         imageReceiver = null;
                     }
-                    if (messageObject == null || messageObject.getId() != drawingObject.messageId) {
-                        i2++;
-                    } else {
+                    if (messageObject.getId() == drawingObject.messageId) {
                         drawingObject.viewFound = true;
                         float x = this.listView.getX() + childAt.getX();
                         float y = this.listView.getY() + childAt.getY();
@@ -274,6 +271,8 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
                         }
                         drawingObject.lastW = imageReceiver.getImageWidth();
                         drawingObject.lastH = imageReceiver.getImageHeight();
+                    } else {
+                        i2++;
                     }
                 }
                 if (!drawingObject.viewFound || drawingObject.lastH + f < this.chatActivity.getChatListViewPadding() || f > this.listView.getMeasuredHeight() - this.chatActivity.blurredViewBottomOffset) {
@@ -339,7 +338,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
         }
     }
 
-    public boolean onTapItem(ChatMessageCell chatMessageCell, ChatActivity chatActivity, boolean z) {
+    public boolean onTapItem(ChatMessageCell chatMessageCell, ChatActivity chatActivity) {
         if (chatActivity.isSecretChat() || chatMessageCell.getMessageObject() == null || chatMessageCell.getMessageObject().getId() < 0) {
             return false;
         }
@@ -347,7 +346,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
             return false;
         }
         boolean showAnimationForCell = showAnimationForCell(chatMessageCell, -1, true, false);
-        if (showAnimationForCell && !EmojiData.hasEmojiSupportVibration(chatMessageCell.getMessageObject().getStickerEmoji()) && (!chatMessageCell.getMessageObject().isPremiumSticker() || z)) {
+        if (showAnimationForCell && (!EmojiData.hasEmojiSupportVibration(chatMessageCell.getMessageObject().getStickerEmoji()) || chatMessageCell.getMessageObject().isPremiumSticker())) {
             chatMessageCell.performHapticFeedback(3);
         }
         if (chatMessageCell.getMessageObject().isPremiumSticker()) {
@@ -429,7 +428,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
             ImageReceiver imageReceiver2 = drawingObject.imageReceiver;
             ImageLocation forDocument = ImageLocation.getForDocument(tLRPC$VideoSize, tLRPC$Document);
             imageReceiver2.setImage(forDocument, i4 + "_" + i4, null, "tgs", this.set, 1);
-            drawingObject.imageReceiver.setLayerNum(Integer.MAX_VALUE);
+            drawingObject.imageReceiver.setLayerNum(ConnectionsManager.DEFAULT_DATACENTER_ID);
             drawingObject.imageReceiver.setAutoRepeat(0);
             if (drawingObject.imageReceiver.getLottieAnimation() != null) {
                 if (drawingObject.isPremiumSticker) {
@@ -554,7 +553,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
                     drawingObject.document = messageObject.getDocument();
                     drawingObject.imageReceiver.setImage(ImageLocation.getForDocument(tLRPC$VideoSize, messageObject.getDocument()), i7 + "_" + i7, null, "tgs", this.set, 1);
                 }
-                drawingObject.imageReceiver.setLayerNum(Integer.MAX_VALUE);
+                drawingObject.imageReceiver.setLayerNum(ConnectionsManager.DEFAULT_DATACENTER_ID);
                 drawingObject.imageReceiver.setAutoRepeat(0);
                 if (drawingObject.imageReceiver.getLottieAnimation() != null) {
                     if (drawingObject.isPremiumSticker) {
@@ -749,7 +748,7 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
             JSONArray jSONArray = new JSONArray();
             for (int i = 0; i < this.timeIntervals.size(); i++) {
                 JSONObject jSONObject2 = new JSONObject();
-                jSONObject2.put(i.TAG, this.animationIndexes.get(i).intValue() + 1);
+                jSONObject2.put("i", this.animationIndexes.get(i).intValue() + 1);
                 jSONObject2.put("t", ((float) this.timeIntervals.get(i).longValue()) / 1000.0f);
                 jSONArray.put(i, jSONObject2);
             }

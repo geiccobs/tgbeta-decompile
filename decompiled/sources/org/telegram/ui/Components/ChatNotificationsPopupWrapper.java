@@ -3,11 +3,10 @@ package org.telegram.ui.Components;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.view.View;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
@@ -239,8 +238,8 @@ public class ChatNotificationsPopupWrapper {
 
     private String formatMuteForTime(int i) {
         StringBuilder sb = new StringBuilder();
-        int i2 = i / RemoteMessageConst.DEFAULT_TTL;
-        int i3 = (i - (RemoteMessageConst.DEFAULT_TTL * i2)) / 3600;
+        int i2 = i / 86400;
+        int i3 = (i - (86400 * i2)) / 3600;
         if (i2 != 0) {
             sb.append(i2);
             sb.append(LocaleController.getString("SecretChatTimerDays", R.string.SecretChatTimerDays));

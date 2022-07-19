@@ -31,6 +31,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$TL_help_premiumPromo;
 import org.telegram.tgnet.TLRPC$TL_photoStrippedSize;
@@ -96,7 +97,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
         this.svgIcon = svgDrawable;
         this.phoneFrame1.setColor(-16777216);
         this.phoneFrame2.setColor(ColorUtils.blendARGB(Theme.getColor("premiumGradient2"), -16777216, 0.5f));
-        this.imageReceiver.setLayerNum(Integer.MAX_VALUE);
+        this.imageReceiver.setLayerNum(ConnectionsManager.DEFAULT_DATACENTER_ID);
         setVideo();
         if (i2 == 1) {
             MatrixParticlesDrawable matrixParticlesDrawable = new MatrixParticlesDrawable();

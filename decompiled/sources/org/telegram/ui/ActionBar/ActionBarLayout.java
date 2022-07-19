@@ -40,8 +40,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.Theme;
@@ -1377,7 +1377,7 @@ public class ActionBarLayout extends FrameLayout {
             if (Build.VERSION.SDK_INT >= 21) {
                 view.setOutlineProvider(new ViewOutlineProvider(this) { // from class: org.telegram.ui.ActionBar.ActionBarLayout.3
                     @Override // android.view.ViewOutlineProvider
-                    @TargetApi(21)
+                    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                     public void getOutline(View view2, Outline outline) {
                         outline.setRoundRect(0, AndroidUtilities.statusBarHeight, view2.getMeasuredWidth(), view2.getMeasuredHeight(), AndroidUtilities.dp(6.0f));
                     }

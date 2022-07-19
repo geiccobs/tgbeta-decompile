@@ -17,8 +17,8 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
@@ -52,7 +52,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     private Rect srcRect = new Rect();
     private Rect destRect = new Rect();
     private Paint paint = new Paint();
-    private RLottieDrawable sunDrawable = new RLottieDrawable(R.raw.sun, "2131558561", AndroidUtilities.dp(28.0f), AndroidUtilities.dp(28.0f), true, null);
+    private RLottieDrawable sunDrawable = new RLottieDrawable(R.raw.sun, "2131558549", AndroidUtilities.dp(28.0f), AndroidUtilities.dp(28.0f), true, null);
 
     public DrawerProfileCell(Context context, final DrawerLayoutContainer drawerLayoutContainer) {
         super(context);
@@ -225,7 +225,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             int r2 = org.telegram.ui.ActionBar.Theme.selectedAutoNightType
             if (r2 == 0) goto La9
             android.content.Context r2 = r6.getContext()
-            r3 = 2131624621(0x7f0e02ad, float:1.8876427E38)
+            r3 = 2131624617(0x7f0e02a9, float:1.8876419E38)
             java.lang.String r4 = "AutoNightModeOff"
             java.lang.String r3 = org.telegram.messenger.LocaleController.getString(r4, r3)
             android.widget.Toast r2 = android.widget.Toast.makeText(r2, r3, r1)

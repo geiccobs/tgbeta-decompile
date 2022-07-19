@@ -10,7 +10,6 @@ import com.google.android.datatransport.runtime.TransportContext;
 import com.google.android.datatransport.runtime.logging.Logging;
 import com.google.android.datatransport.runtime.scheduling.persistence.EventStore;
 import com.google.android.datatransport.runtime.util.PriorityMapping;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.zip.Adler32;
@@ -66,7 +65,7 @@ public class JobInfoScheduler implements WorkScheduler {
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("attemptNumber", i);
         persistableBundle.putString("backendName", transportContext.getBackendName());
-        persistableBundle.putInt(RemoteMessageConst.Notification.PRIORITY, PriorityMapping.toInt(transportContext.getPriority()));
+        persistableBundle.putInt("priority", PriorityMapping.toInt(transportContext.getPriority()));
         if (transportContext.getExtras() != null) {
             persistableBundle.putString("extras", Base64.encodeToString(transportContext.getExtras(), 0));
         }

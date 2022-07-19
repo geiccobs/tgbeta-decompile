@@ -3,7 +3,6 @@ package org.telegram.messenger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 /* loaded from: classes.dex */
 public class NotificationCallbackReceiver extends BroadcastReceiver {
     @Override // android.content.BroadcastReceiver
@@ -17,7 +16,7 @@ public class NotificationCallbackReceiver extends BroadcastReceiver {
             return;
         }
         long longExtra = intent.getLongExtra("did", 777000L);
-        byte[] byteArrayExtra = intent.getByteArrayExtra(RemoteMessageConst.DATA);
+        byte[] byteArrayExtra = intent.getByteArrayExtra("data");
         SendMessagesHelper.getInstance(intExtra).sendNotificationCallback(longExtra, intent.getIntExtra("mid", 0), byteArrayExtra);
     }
 }

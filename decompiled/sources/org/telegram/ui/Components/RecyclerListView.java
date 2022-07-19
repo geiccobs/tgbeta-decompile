@@ -40,7 +40,8 @@ import java.util.HashSet;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.GestureDetectorFixDoubleTap;
 import org.telegram.ui.Components.RecyclerListView;
@@ -347,7 +348,7 @@ public class RecyclerListView extends RecyclerView {
         }
 
         private int internalGetCountForSection(int i) {
-            int i2 = this.sectionCountCache.get(i, Integer.MAX_VALUE);
+            int i2 = this.sectionCountCache.get(i, ConnectionsManager.DEFAULT_DATACENTER_ID);
             if (i2 != Integer.MAX_VALUE) {
                 return i2;
             }
@@ -367,7 +368,7 @@ public class RecyclerListView extends RecyclerView {
         }
 
         public final int getSectionForPosition(int i) {
-            int i2 = this.sectionCache.get(i, Integer.MAX_VALUE);
+            int i2 = this.sectionCache.get(i, ConnectionsManager.DEFAULT_DATACENTER_ID);
             if (i2 != Integer.MAX_VALUE) {
                 return i2;
             }
@@ -387,7 +388,7 @@ public class RecyclerListView extends RecyclerView {
         }
 
         public int getPositionInSectionForPosition(int i) {
-            int i2 = this.sectionPositionCache.get(i, Integer.MAX_VALUE);
+            int i2 = this.sectionPositionCache.get(i, ConnectionsManager.DEFAULT_DATACENTER_ID);
             if (i2 != Integer.MAX_VALUE) {
                 return i2;
             }
@@ -1324,7 +1325,7 @@ public class RecyclerListView extends RecyclerView {
             if (this.sectionsAdapter != null) {
                 int paddingTop = getPaddingTop();
                 int i3 = this.sectionsType;
-                int i4 = Integer.MAX_VALUE;
+                int i4 = ConnectionsManager.DEFAULT_DATACENTER_ID;
                 if (i3 != 1 && i3 != 3) {
                     if (i3 != 2) {
                         return;
@@ -1335,7 +1336,7 @@ public class RecyclerListView extends RecyclerView {
                     }
                     int childCount = getChildCount();
                     View view2 = null;
-                    int i5 = Integer.MAX_VALUE;
+                    int i5 = ConnectionsManager.DEFAULT_DATACENTER_ID;
                     View view3 = null;
                     int i6 = 0;
                     for (int i7 = 0; i7 < childCount; i7++) {
@@ -1388,7 +1389,7 @@ public class RecyclerListView extends RecyclerView {
                     return;
                 }
                 int childCount2 = getChildCount();
-                int i9 = Integer.MAX_VALUE;
+                int i9 = ConnectionsManager.DEFAULT_DATACENTER_ID;
                 View view5 = null;
                 int i10 = 0;
                 for (int i11 = 0; i11 < childCount2; i11++) {

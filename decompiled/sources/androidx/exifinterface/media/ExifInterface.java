@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
+import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class ExifInterface {
     static final Charset ASCII;
@@ -1616,7 +1617,7 @@ public class ExifInterface {
     public static class SeekableByteOrderedDataInputStream extends ByteOrderedDataInputStream {
         SeekableByteOrderedDataInputStream(byte[] bArr) throws IOException {
             super(bArr);
-            this.mDataInputStream.mark(Integer.MAX_VALUE);
+            this.mDataInputStream.mark(ConnectionsManager.DEFAULT_DATACENTER_ID);
         }
 
         SeekableByteOrderedDataInputStream(InputStream inputStream) throws IOException {
@@ -1624,7 +1625,7 @@ public class ExifInterface {
             if (!inputStream.markSupported()) {
                 throw new IllegalArgumentException("Cannot create SeekableByteOrderedDataInputStream with stream that does not support mark/reset");
             }
-            this.mDataInputStream.mark(Integer.MAX_VALUE);
+            this.mDataInputStream.mark(ConnectionsManager.DEFAULT_DATACENTER_ID);
         }
 
         public void seek(long j) throws IOException {

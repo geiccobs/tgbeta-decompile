@@ -28,9 +28,10 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$TL_availableReaction;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
@@ -331,12 +332,6 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
     }
 
     @Override // org.telegram.ui.ActionBar.BottomSheet, android.app.Dialog
-    public void show() {
-        super.show();
-        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.stopAllHeavyOperations, 16);
-    }
-
-    @Override // org.telegram.ui.ActionBar.BottomSheet, android.app.Dialog
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.billingProductDetailsUpdated);
@@ -350,7 +345,6 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.billingProductDetailsUpdated);
         NotificationCenter.getInstance(this.currentAccount).removeObserver(this, NotificationCenter.premiumPromoUpdated);
         NotificationCenter.getInstance(this.currentAccount).removeObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
-        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.startAllHeavyOperations, 16);
     }
 
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
@@ -510,8 +504,9 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
     }
 
     public static /* synthetic */ int lambda$getViewForPosition$3(HashMap hashMap, ReactionDrawingObject reactionDrawingObject, ReactionDrawingObject reactionDrawingObject2) {
-        int i = Integer.MAX_VALUE;
-        int intValue = hashMap.containsKey(reactionDrawingObject.reaction.reaction) ? ((Integer) hashMap.get(reactionDrawingObject.reaction.reaction)).intValue() : Integer.MAX_VALUE;
+        boolean containsKey = hashMap.containsKey(reactionDrawingObject.reaction.reaction);
+        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int intValue = containsKey ? ((Integer) hashMap.get(reactionDrawingObject.reaction.reaction)).intValue() : ConnectionsManager.DEFAULT_DATACENTER_ID;
         if (hashMap.containsKey(reactionDrawingObject2.reaction.reaction)) {
             i = ((Integer) hashMap.get(reactionDrawingObject2.reaction.reaction)).intValue();
         }

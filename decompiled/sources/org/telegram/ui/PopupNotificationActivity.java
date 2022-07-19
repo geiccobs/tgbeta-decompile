@@ -33,10 +33,10 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$KeyboardButton;
@@ -1008,7 +1008,7 @@ public class PopupNotificationActivity extends Activity implements NotificationC
             intent.putExtra("chatId", -dialogId);
         }
         intent.putExtra("currentAccount", this.currentMessageObject.currentAccount);
-        intent.setAction("com.tmessages.openchat" + Math.random() + Integer.MAX_VALUE);
+        intent.setAction("com.tmessages.openchat" + Math.random() + ConnectionsManager.DEFAULT_DATACENTER_ID);
         intent.setFlags(32768);
         startActivity(intent);
         onFinish();

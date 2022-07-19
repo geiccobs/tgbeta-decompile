@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 import android.widget.FrameLayout;
-import com.huawei.hms.adapter.internal.CommonCode;
 import java.util.ArrayList;
 import java.util.List;
 import org.telegram.messenger.AndroidUtilities;
@@ -131,7 +130,7 @@ public class PremiumAppIconsPreviewView extends FrameLayout implements PagerHead
                 drawable.type = 1001;
             }
             if (i == 0) {
-                drawable.type = CommonCode.BusInterceptor.PRIVACY_CANCEL;
+                drawable.type = 1002;
             }
             drawable.colorKey = "premiumStartSmallStarsColor2";
             drawable.init();

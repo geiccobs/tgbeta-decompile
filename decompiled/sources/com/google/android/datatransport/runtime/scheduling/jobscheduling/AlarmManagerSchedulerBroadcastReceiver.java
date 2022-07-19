@@ -7,7 +7,6 @@ import android.util.Base64;
 import com.google.android.datatransport.runtime.TransportContext;
 import com.google.android.datatransport.runtime.TransportRuntime;
 import com.google.android.datatransport.runtime.util.PriorityMapping;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 /* loaded from: classes.dex */
 public class AlarmManagerSchedulerBroadcastReceiver extends BroadcastReceiver {
     public static /* synthetic */ void lambda$onReceive$0() {
@@ -17,7 +16,7 @@ public class AlarmManagerSchedulerBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String queryParameter = intent.getData().getQueryParameter("backendName");
         String queryParameter2 = intent.getData().getQueryParameter("extras");
-        int intValue = Integer.valueOf(intent.getData().getQueryParameter(RemoteMessageConst.Notification.PRIORITY)).intValue();
+        int intValue = Integer.valueOf(intent.getData().getQueryParameter("priority")).intValue();
         int i = intent.getExtras().getInt("attemptNumber");
         TransportRuntime.initialize(context);
         TransportContext.Builder priority = TransportContext.builder().setBackendName(queryParameter).setPriority(PriorityMapping.valueOf(intValue));

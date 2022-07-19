@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import com.microsoft.appcenter.Constants;
 import com.microsoft.appcenter.ingestion.models.Log;
 import com.microsoft.appcenter.utils.AppCenterLog;
@@ -67,7 +66,7 @@ public class DatabasePersistence extends Persistence {
         contentValues.put("target_token", str3);
         contentValues.put("type", str4);
         contentValues.put("target_key", str5);
-        contentValues.put(RemoteMessageConst.Notification.PRIORITY, Integer.valueOf(i));
+        contentValues.put("priority", Integer.valueOf(i));
         return contentValues;
     }
 

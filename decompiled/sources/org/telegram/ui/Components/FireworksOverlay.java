@@ -15,9 +15,9 @@ import java.util.Calendar;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 /* loaded from: classes3.dex */
 public class FireworksOverlay extends View {
     private static int[] colors;

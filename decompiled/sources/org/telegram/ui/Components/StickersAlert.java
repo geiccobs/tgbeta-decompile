@@ -54,10 +54,9 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
-import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -114,7 +113,6 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
     private boolean clearsInputField;
     private StickersAlertCustomButtonDelegate customButtonDelegate;
     private StickersAlertDelegate delegate;
-    private TextView descriptionTextView;
     private FrameLayout emptyView;
     private RecyclerListView gridView;
     private boolean ignoreLayout;
@@ -691,7 +689,6 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
                     updateFields();
                     this.adapter.notifyDataSetChanged();
                 }
-                updateDescription();
                 mediaDataController.preloadStickerSetThumb(this.stickerSet);
                 checkPremiumStickers();
             }
@@ -728,12 +725,11 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
             mediaDataController.preloadStickerSetThumb(this.stickerSet);
             updateSendButton();
             updateFields();
-            updateDescription();
             this.adapter.notifyDataSetChanged();
             return;
         }
+        Toast.makeText(getContext(), LocaleController.getString("AddStickersNotFound", R.string.AddStickersNotFound), 0).show();
         dismiss();
-        BulletinFactory.of(this.parentFragment).createErrorBulletin(LocaleController.getString("AddStickersNotFound", R.string.AddStickersNotFound)).show();
     }
 
     /* renamed from: org.telegram.ui.Components.StickersAlert$2 */
@@ -820,14 +816,12 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
             }
 
             /* JADX WARN: Removed duplicated region for block: B:33:0x0197  */
-            /* JADX WARN: Removed duplicated region for block: B:36:0x01ae  */
-            /* JADX WARN: Removed duplicated region for block: B:39:0x01de  */
-            /* JADX WARN: Removed duplicated region for block: B:40:0x01e0  */
-            /* JADX WARN: Removed duplicated region for block: B:45:0x01ee  */
-            /* JADX WARN: Removed duplicated region for block: B:48:0x01fc  */
-            /* JADX WARN: Removed duplicated region for block: B:51:0x0216  */
-            /* JADX WARN: Removed duplicated region for block: B:54:0x0227  */
-            /* JADX WARN: Removed duplicated region for block: B:56:0x0254  */
+            /* JADX WARN: Removed duplicated region for block: B:36:0x01ba  */
+            /* JADX WARN: Removed duplicated region for block: B:37:0x01bc  */
+            /* JADX WARN: Removed duplicated region for block: B:42:0x01ca  */
+            /* JADX WARN: Removed duplicated region for block: B:45:0x01d8  */
+            /* JADX WARN: Removed duplicated region for block: B:48:0x01e9  */
+            /* JADX WARN: Removed duplicated region for block: B:50:0x0216  */
             @Override // android.widget.FrameLayout, android.view.View
             /*
                 Code decompiled incorrectly, please refer to instructions dump.
@@ -835,7 +829,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
             */
             protected void onMeasure(int r12, int r13) {
                 /*
-                    Method dump skipped, instructions count: 613
+                    Method dump skipped, instructions count: 551
                     To view this dump add '--comments-level debug' option
                 */
                 throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.StickersAlert.AnonymousClass3.onMeasure(int, int):void");
@@ -1088,7 +1082,6 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         }
         updateFields();
         updateSendButton();
-        updateDescription();
         updateColors();
         this.adapter.notifyDataSetChanged();
     }
@@ -1196,12 +1189,6 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         dismiss();
     }
 
-    private void updateDescription() {
-        if (this.containerView != null && !UserConfig.getInstance(this.currentAccount).isPremium()) {
-            MessageObject.isPremiumEmojiPack(this.stickerSet);
-        }
-    }
-
     private void updateSendButton() {
         TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet;
         android.graphics.Point point = AndroidUtilities.displaySize;
@@ -1296,17 +1283,17 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
     }
 
     /* JADX WARN: Removed duplicated region for block: B:30:0x0086  */
-    /* JADX WARN: Removed duplicated region for block: B:33:0x0096  */
-    /* JADX WARN: Removed duplicated region for block: B:41:0x00bc  */
-    /* JADX WARN: Removed duplicated region for block: B:93:0x019f  */
-    /* JADX WARN: Removed duplicated region for block: B:94:0x01c2  */
+    /* JADX WARN: Removed duplicated region for block: B:33:0x0095  */
+    /* JADX WARN: Removed duplicated region for block: B:41:0x00bb  */
+    /* JADX WARN: Removed duplicated region for block: B:62:0x0134  */
+    /* JADX WARN: Removed duplicated region for block: B:63:0x0157  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private void updateFields() {
         /*
-            Method dump skipped, instructions count: 801
+            Method dump skipped, instructions count: 706
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.StickersAlert.updateFields():void");
@@ -1716,10 +1703,6 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         if (this.stickerSetCovereds == null) {
             float f = i;
             this.titleTextView.setTranslationY(f);
-            TextView textView = this.descriptionTextView;
-            if (textView != null) {
-                textView.setTranslationY(f);
-            }
             if (this.importingStickers == null) {
                 this.optionsButton.setTranslationY(f);
             }
@@ -2031,9 +2014,6 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         arrayList.add(new ThemeDescription(this.shadow[1], ThemeDescription.FLAG_BACKGROUND, null, null, null, null, "dialogShadowLine"));
         arrayList.add(new ThemeDescription(this.gridView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, "dialogScrollGlow"));
         arrayList.add(new ThemeDescription(this.titleTextView, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, "dialogTextBlack"));
-        if (this.descriptionTextView != null) {
-            arrayList.add(new ThemeDescription(this.descriptionTextView, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, "chat_emojiPanelTrendingDescription"));
-        }
         arrayList.add(new ThemeDescription(this.titleTextView, ThemeDescription.FLAG_LINKCOLOR, null, null, null, null, "dialogTextLink"));
         arrayList.add(new ThemeDescription(this.optionsButton, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_DRAWABLESELECTEDSTATE, null, null, null, null, "player_actionBarSelector"));
         arrayList.add(new ThemeDescription(this.pickerBottomLayout, ThemeDescription.FLAG_BACKGROUNDFILTER, null, null, null, null, "dialogBackground"));

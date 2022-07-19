@@ -22,10 +22,10 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.WebFile;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$BotInlineMessage;
 import org.telegram.tgnet.TLRPC$BotInlineResult;
 import org.telegram.tgnet.TLRPC$Document;
@@ -184,7 +184,7 @@ public class ContextLinkCell extends FrameLayout implements DownloadController.F
     /* JADX WARN: Removed duplicated region for block: B:68:0x01ca  */
     /* JADX WARN: Removed duplicated region for block: B:78:0x01ec  */
     /* JADX WARN: Removed duplicated region for block: B:99:0x0240  */
-    /* JADX WARN: Type inference failed for: r3v1, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r3v1, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r3v38 */
     /* JADX WARN: Type inference failed for: r3v39 */
     /* JADX WARN: Type inference failed for: r3v40 */

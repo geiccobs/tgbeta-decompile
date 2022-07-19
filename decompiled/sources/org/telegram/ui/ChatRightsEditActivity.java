@@ -25,7 +25,6 @@ import android.widget.TimePicker;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.Calendar;
 import org.telegram.messenger.AccountInstance;
@@ -35,8 +34,8 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -791,7 +790,7 @@ public class ChatRightsEditActivity extends BaseFragment {
             this.bannedRights.until_date = 0;
             this.listViewAdapter.notifyItemChanged(this.untilDateRow);
         } else if (intValue == 1) {
-            this.bannedRights.until_date = ConnectionsManager.getInstance(this.currentAccount).getCurrentTime() + RemoteMessageConst.DEFAULT_TTL;
+            this.bannedRights.until_date = ConnectionsManager.getInstance(this.currentAccount).getCurrentTime() + 86400;
             this.listViewAdapter.notifyItemChanged(this.untilDateRow);
         } else if (intValue == 2) {
             this.bannedRights.until_date = ConnectionsManager.getInstance(this.currentAccount).getCurrentTime() + 604800;

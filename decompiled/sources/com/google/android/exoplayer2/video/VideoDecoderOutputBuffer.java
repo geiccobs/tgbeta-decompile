@@ -2,6 +2,7 @@ package com.google.android.exoplayer2.video;
 
 import com.google.android.exoplayer2.decoder.OutputBuffer;
 import java.nio.ByteBuffer;
+import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class VideoDecoderOutputBuffer extends OutputBuffer {
     public static final int COLORSPACE_BT2020 = 3;
@@ -103,6 +104,6 @@ public class VideoDecoderOutputBuffer extends OutputBuffer {
     }
 
     private static boolean isSafeToMultiply(int i, int i2) {
-        return i >= 0 && i2 >= 0 && (i2 <= 0 || i < Integer.MAX_VALUE / i2);
+        return i >= 0 && i2 >= 0 && (i2 <= 0 || i < ConnectionsManager.DEFAULT_DATACENTER_ID / i2);
     }
 }

@@ -6,7 +6,6 @@ import com.google.android.exoplayer2.text.SubtitleDecoderException;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.util.XmlPullParserUtil;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -482,7 +481,7 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
     }
 
     private static boolean isSupportedTag(String str) {
-        return str.equals("tt") || str.equals("head") || str.equals("body") || str.equals("div") || str.equals("p") || str.equals("span") || str.equals("br") || str.equals("style") || str.equals("styling") || str.equals("layout") || str.equals("region") || str.equals("metadata") || str.equals("image") || str.equals(RemoteMessageConst.DATA) || str.equals("information");
+        return str.equals("tt") || str.equals("head") || str.equals("body") || str.equals("div") || str.equals("p") || str.equals("span") || str.equals("br") || str.equals("style") || str.equals("styling") || str.equals("layout") || str.equals("region") || str.equals("metadata") || str.equals("image") || str.equals("data") || str.equals("information");
     }
 
     private static void parseFontSize(String str, TtmlStyle ttmlStyle) throws SubtitleDecoderException {

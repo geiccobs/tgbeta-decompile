@@ -4,7 +4,6 @@ import android.app.Person;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import androidx.core.graphics.drawable.IconCompat;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 /* loaded from: classes.dex */
 public class Person {
     IconCompat mIcon;
@@ -31,7 +30,7 @@ public class Person {
         Bundle bundle = new Bundle();
         bundle.putCharSequence("name", this.mName);
         IconCompat iconCompat = this.mIcon;
-        bundle.putBundle(RemoteMessageConst.Notification.ICON, iconCompat != null ? iconCompat.toBundle() : null);
+        bundle.putBundle("icon", iconCompat != null ? iconCompat.toBundle() : null);
         bundle.putString("uri", this.mUri);
         bundle.putString("key", this.mKey);
         bundle.putBoolean("isBot", this.mIsBot);

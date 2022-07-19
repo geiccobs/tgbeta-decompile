@@ -19,6 +19,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -253,7 +254,7 @@ public class PremiumStickersPreviewRecycler extends RecyclerListView implements 
     public class Adapter extends RecyclerListView.SelectionAdapter {
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public int getItemCount() {
-            return Integer.MAX_VALUE;
+            return ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
 
         @Override // org.telegram.ui.Components.RecyclerListView.SelectionAdapter

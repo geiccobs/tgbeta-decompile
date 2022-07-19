@@ -1,6 +1,5 @@
 package org.telegram.messenger.audioinfo.mp3;
 
-import com.huawei.hms.android.HwBuildEx;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -216,7 +215,7 @@ public class MP3Info extends AudioInfo {
             int bitrate = readFirstFrame.getHeader().getBitrate();
             long j2 = bitrate;
             boolean z = false;
-            int duration = HwBuildEx.VersionCodes.CUR_DEVELOPMENT / readFirstFrame.getHeader().getDuration();
+            int duration = 10000 / readFirstFrame.getHeader().getDuration();
             int i = 1;
             while (true) {
                 if (i == duration && !z && j > 0) {

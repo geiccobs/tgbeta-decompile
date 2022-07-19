@@ -1,7 +1,6 @@
 package com.google.android.gms.common.internal;
 
 import androidx.annotation.RecentlyNonNull;
-import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +41,7 @@ public final class Objects {
             String valueOf = String.valueOf(obj);
             StringBuilder sb = new StringBuilder(String.valueOf(str2).length() + 1 + valueOf.length());
             sb.append(str2);
-            sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
+            sb.append("=");
             sb.append(valueOf);
             list.add(sb.toString());
             return this;

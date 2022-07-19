@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.util.Util;
-import com.huawei.hms.framework.common.ContainerUtils;
 /* loaded from: classes.dex */
 public final class VorbisComment implements Metadata.Entry {
     public static final Parcelable.Creator<VorbisComment> CREATOR = new Parcelable.Creator<VorbisComment>() { // from class: com.google.android.exoplayer2.metadata.flac.VorbisComment.1
@@ -48,7 +47,7 @@ public final class VorbisComment implements Metadata.Entry {
     }
 
     public String toString() {
-        return "VC: " + this.key + ContainerUtils.KEY_VALUE_DELIMITER + this.value;
+        return "VC: " + this.key + "=" + this.value;
     }
 
     public boolean equals(Object obj) {

@@ -23,9 +23,9 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -1008,15 +1008,15 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
     /* JADX WARN: Removed duplicated region for block: B:229:0x03d6  */
     /* JADX WARN: Removed duplicated region for block: B:231:0x03dc  */
     /* JADX WARN: Type inference failed for: r20v0, types: [org.telegram.ui.Adapters.MentionsAdapter] */
+    /* JADX WARN: Type inference failed for: r6v59 */
     /* JADX WARN: Type inference failed for: r6v60 */
-    /* JADX WARN: Type inference failed for: r6v61 */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void searchUsernameOrHashtag(java.lang.String r21, int r22, java.util.ArrayList<org.telegram.messenger.MessageObject> r23, boolean r24, boolean r25) {
         /*
-            Method dump skipped, instructions count: 1839
+            Method dump skipped, instructions count: 1838
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Adapters.MentionsAdapter.searchUsernameOrHashtag(java.lang.String, int, java.util.ArrayList, boolean, boolean):void");

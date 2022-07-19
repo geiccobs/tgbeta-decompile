@@ -20,7 +20,6 @@ import com.google.android.gms.common.internal.IAccountAccessor;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.zat;
 import com.google.android.gms.signin.SignInOptions;
-import com.huawei.hms.api.HuaweiApiClientImpl;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
 /* loaded from: classes.dex */
 public class SignInClientImpl extends GmsClient<zag> implements com.google.android.gms.signin.zae {
@@ -87,7 +86,7 @@ public class SignInClientImpl extends GmsClient<zag> implements com.google.andro
         try {
             Account accountOrDefault = this.zab.getAccountOrDefault();
             GoogleSignInAccount googleSignInAccount = null;
-            if (HuaweiApiClientImpl.DEFAULT_ACCOUNT.equals(accountOrDefault.name)) {
+            if ("<<default account>>".equals(accountOrDefault.name)) {
                 googleSignInAccount = Storage.getInstance(getContext()).getSavedDefaultGoogleSignInAccount();
             }
             ((zag) getService()).zaa(new zaj(new zat(accountOrDefault, ((Integer) Preconditions.checkNotNull(this.zad)).intValue(), googleSignInAccount)), zaeVar);

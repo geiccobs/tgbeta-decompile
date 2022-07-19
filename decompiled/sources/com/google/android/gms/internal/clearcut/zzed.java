@@ -2,6 +2,7 @@ package com.google.android.gms.internal.clearcut;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 final class zzed {
     private final int flags;
@@ -20,7 +21,7 @@ final class zzed {
     private final int zzno;
     private int zznp;
     private int zznq;
-    private int zznr = Integer.MAX_VALUE;
+    private int zznr = ConnectionsManager.DEFAULT_DATACENTER_ID;
     private int zzns = Integer.MIN_VALUE;
     private int zznt = 0;
     private int zznu = 0;

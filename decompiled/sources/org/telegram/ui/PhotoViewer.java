@@ -103,7 +103,6 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.huawei.hms.android.HwBuildEx;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Array;
@@ -140,6 +139,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SecureDocument;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
@@ -148,7 +148,6 @@ import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.messenger.WebFile;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.video.VideoPlayerRewinder;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -201,7 +200,6 @@ import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.Cells.PhotoPickerPhotoCell;
 import org.telegram.ui.ChooseSpeedLayout;
 import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AnimationProperties;
@@ -1301,11 +1299,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         L45:
             r6 = 2
             java.lang.CharSequence[] r7 = new java.lang.CharSequence[r6]
-            r8 = 2131627142(0x7f0e0c86, float:1.888154E38)
+            r8 = 2131627132(0x7f0e0c7c, float:1.888152E38)
             java.lang.String r9 = "Open"
             java.lang.String r8 = org.telegram.messenger.LocaleController.getString(r9, r8)
             r7[r3] = r8
-            r8 = 2131625272(0x7f0e0538, float:1.8877747E38)
+            r8 = 2131625265(0x7f0e0531, float:1.8877733E38)
             java.lang.String r9 = "Copy"
             java.lang.String r8 = org.telegram.messenger.LocaleController.getString(r9, r8)
             r7[r5] = r8
@@ -1673,7 +1671,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 Drawable drawable = this.arrowDrawable;
                 drawable.setBounds(measuredWidth, 0, drawable.getIntrinsicWidth() + measuredWidth, AndroidUtilities.dp(6.0f));
                 this.arrowDrawable.draw(canvas);
-                int i = Integer.MAX_VALUE;
+                int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
                 int i2 = Integer.MIN_VALUE;
                 for (int i3 = 0; i3 < childCount; i3++) {
                     View childAt = getChildAt(i3);
@@ -4304,7 +4302,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         PhotoViewer.this.mentionListView.setAlpha(1.0f);
                         return;
                     }
-                    PhotoViewer.this.mentionLayoutManager.scrollToPositionWithOffset(0, HwBuildEx.VersionCodes.CUR_DEVELOPMENT);
+                    PhotoViewer.this.mentionLayoutManager.scrollToPositionWithOffset(0, 10000);
                     if (PhotoViewer.this.allowMentions) {
                         PhotoViewer.this.mentionListView.setVisibility(0);
                         PhotoViewer.this.mentionListAnimation = new AnimatorSet();
@@ -5180,34 +5178,34 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         if (org.telegram.messenger.UserObject.isUserSelf(r2) == false) goto L74;
      */
     /* JADX WARN: Code restructure failed: missing block: B:73:0x0110, code lost:
-        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SetReminder", org.telegram.messenger.beta.R.string.SetReminder), org.telegram.messenger.beta.R.drawable.msg_calendar2);
+        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SetReminder", org.telegram.messenger.R.string.SetReminder), org.telegram.messenger.R.drawable.msg_calendar2);
      */
     /* JADX WARN: Code restructure failed: missing block: B:74:0x011d, code lost:
-        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("ScheduleMessage", org.telegram.messenger.beta.R.string.ScheduleMessage), org.telegram.messenger.beta.R.drawable.msg_calendar2);
+        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("ScheduleMessage", org.telegram.messenger.R.string.ScheduleMessage), org.telegram.messenger.R.drawable.msg_calendar2);
      */
     /* JADX WARN: Code restructure failed: missing block: B:75:0x012a, code lost:
         if (r11 != 1) goto L77;
      */
     /* JADX WARN: Code restructure failed: missing block: B:76:0x012c, code lost:
-        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SendWithoutSound", org.telegram.messenger.beta.R.string.SendWithoutSound), org.telegram.messenger.beta.R.drawable.input_notify_off);
+        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SendWithoutSound", org.telegram.messenger.R.string.SendWithoutSound), org.telegram.messenger.R.drawable.input_notify_off);
      */
     /* JADX WARN: Code restructure failed: missing block: B:77:0x013c, code lost:
         if (r11 != 2) goto L79;
      */
     /* JADX WARN: Code restructure failed: missing block: B:78:0x013e, code lost:
-        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("ReplacePhoto", org.telegram.messenger.beta.R.string.ReplacePhoto), org.telegram.messenger.beta.R.drawable.msg_replace);
+        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("ReplacePhoto", org.telegram.messenger.R.string.ReplacePhoto), org.telegram.messenger.R.drawable.msg_replace);
      */
     /* JADX WARN: Code restructure failed: missing block: B:79:0x014e, code lost:
         if (r11 != 3) goto L81;
      */
     /* JADX WARN: Code restructure failed: missing block: B:80:0x0150, code lost:
-        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SendAsNewPhoto", org.telegram.messenger.beta.R.string.SendAsNewPhoto), org.telegram.messenger.beta.R.drawable.msg_send);
+        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SendAsNewPhoto", org.telegram.messenger.R.string.SendAsNewPhoto), org.telegram.messenger.R.drawable.msg_send);
      */
     /* JADX WARN: Code restructure failed: missing block: B:81:0x0160, code lost:
         if (r11 != 4) goto L83;
      */
     /* JADX WARN: Code restructure failed: missing block: B:82:0x0162, code lost:
-        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SendWithoutCompression", org.telegram.messenger.beta.R.string.SendWithoutCompression), org.telegram.messenger.beta.R.drawable.msg_sendfile);
+        r13.setTextAndIcon(org.telegram.messenger.LocaleController.getString("SendWithoutCompression", org.telegram.messenger.R.string.SendWithoutCompression), org.telegram.messenger.R.drawable.msg_sendfile);
      */
     /* JADX WARN: Code restructure failed: missing block: B:83:0x0171, code lost:
         r13.setMinimumWidth(org.telegram.messenger.AndroidUtilities.dp(196.0f));
@@ -5637,7 +5635,6 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     public /* synthetic */ void lambda$setParentActivity$39(View view, int i) {
-        AnimatedEmojiSpan animatedEmojiSpan;
         Object item = this.mentionsAdapter.getItem(i);
         int resultStartPosition = this.mentionsAdapter.getResultStartPosition();
         int resultLength = this.mentionsAdapter.getResultLength();
@@ -5659,24 +5656,6 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         } else {
             String str = ((MediaDataController.KeywordResult) item).emoji;
             this.captionEditText.addEmojiToRecent(str);
-            if (str != null && str.startsWith("animated_")) {
-                try {
-                    long parseLong = Long.parseLong(str.substring(9));
-                    TLRPC$Document findDocument = AnimatedEmojiDrawable.findDocument(this.currentAccount, parseLong);
-                    SpannableString spannableString2 = new SpannableString(MessageObject.findAnimatedEmojiEmoticon(findDocument));
-                    if (findDocument != null) {
-                        animatedEmojiSpan = new AnimatedEmojiSpan(findDocument, this.captionEditText.getMessageEditText().getPaint().getFontMetricsInt());
-                    } else {
-                        animatedEmojiSpan = new AnimatedEmojiSpan(parseLong, this.captionEditText.getMessageEditText().getPaint().getFontMetricsInt());
-                    }
-                    spannableString2.setSpan(animatedEmojiSpan, 0, spannableString2.length(), 33);
-                    this.captionEditText.replaceWithText(resultStartPosition, resultLength, spannableString2, false);
-                    return;
-                } catch (Exception unused) {
-                    this.captionEditText.replaceWithText(resultStartPosition, resultLength, str, true);
-                    return;
-                }
-            }
             this.captionEditText.replaceWithText(resultStartPosition, resultLength, str, true);
         }
     }
@@ -10995,7 +10974,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 Point point = AndroidUtilities.displaySize;
                 i2 = point.x > point.y ? 5 : 10;
             } else {
-                i2 = Integer.MAX_VALUE;
+                i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
             }
             if (maxLines != i2) {
                 this.captionTextViewSwitcher.getCurrentView().setMaxLines(i2);
@@ -13602,7 +13581,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     /* JADX WARN: Removed duplicated region for block: B:625:0x0dd0  */
     /* JADX WARN: Removed duplicated region for block: B:635:0x0bdf A[EDGE_INSN: B:635:0x0bdf->B:552:0x0bdf ?: BREAK  , SYNTHETIC] */
     /* JADX WARN: Removed duplicated region for block: B:640:? A[ADDED_TO_REGION, RETURN, SYNTHETIC] */
-    /* JADX WARN: Type inference failed for: r15v2, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r15v2, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r15v21 */
     /* JADX WARN: Type inference failed for: r15v30 */
     /* JADX WARN: Type inference failed for: r15v42 */

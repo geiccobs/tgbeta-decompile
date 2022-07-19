@@ -24,7 +24,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.StatFs;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -77,12 +76,12 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.messenger.voip.VoIPService;
@@ -257,9 +256,6 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
         boolean z;
         Intent intent;
         Uri data;
-        if (BuildVars.DEBUG_VERSION) {
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder(StrictMode.getVmPolicy()).detectLeakedClosableObjects().build());
-        }
         ApplicationLoader.postInitApplication();
         AndroidUtilities.checkDisplaySize(this, getResources().getConfiguration());
         int i = UserConfig.selectedAccount;
@@ -1509,7 +1505,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
     /* JADX WARN: Type inference failed for: r1v157, types: [org.telegram.tgnet.TLRPC$TL_wallPaper, org.telegram.tgnet.TLRPC$WallPaper] */
     /* JADX WARN: Type inference failed for: r1v385, types: [org.telegram.tgnet.TLRPC$TL_wallPaper, org.telegram.tgnet.TLRPC$WallPaper] */
     /* JADX WARN: Type inference failed for: r2v109, types: [java.lang.Long] */
-    /* JADX WARN: Type inference failed for: r3v0, types: [boolean, int] */
+    /* JADX WARN: Type inference failed for: r3v0, types: [int, boolean] */
     /* JADX WARN: Type inference failed for: r3v11 */
     /* JADX WARN: Type inference failed for: r3v14 */
     /* JADX WARN: Type inference failed for: r3v15 */
@@ -1802,7 +1798,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             org.telegram.ui.ActionBar.BaseFragment r0 = (org.telegram.ui.ActionBar.BaseFragment) r0     // Catch: java.lang.Exception -> Lbe
             org.telegram.ui.Components.BulletinFactory r0 = org.telegram.ui.Components.BulletinFactory.of(r0)     // Catch: java.lang.Exception -> Lbe
             java.lang.String r2 = "ChannelPostDeleted"
-            r3 = 2131624958(0x7f0e03fe, float:1.887711E38)
+            r3 = 2131624954(0x7f0e03fa, float:1.8877102E38)
             java.lang.String r2 = org.telegram.messenger.LocaleController.getString(r2, r3)     // Catch: java.lang.Exception -> Lbe
             org.telegram.ui.Components.Bulletin r0 = r0.createErrorBulletin(r2)     // Catch: java.lang.Exception -> Lbe
             r0.show()     // Catch: java.lang.Exception -> Lbe
@@ -1943,16 +1939,16 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:111:0x04b8  */
-    /* JADX WARN: Removed duplicated region for block: B:122:? A[RETURN, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:89:0x03b5  */
+    /* JADX WARN: Removed duplicated region for block: B:118:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:71:0x030d  */
+    /* JADX WARN: Removed duplicated region for block: B:93:0x040f  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private void runLinkRequest(final int r35, final java.lang.String r36, final java.lang.String r37, final java.lang.String r38, final java.lang.String r39, final java.lang.String r40, final java.lang.String r41, final java.lang.String r42, final java.lang.String r43, final java.lang.String r44, final boolean r45, final java.lang.Integer r46, final java.lang.Long r47, final java.lang.Integer r48, final java.lang.Integer r49, final java.lang.String r50, final java.util.HashMap<java.lang.String, java.lang.String> r51, final java.lang.String r52, final java.lang.String r53, final java.lang.String r54, final java.lang.String r55, final org.telegram.tgnet.TLRPC$TL_wallPaper r56, final java.lang.String r57, final java.lang.String r58, final java.lang.String r59, final java.lang.String r60, int r61, final int r62, final java.lang.String r63, final java.lang.String r64, final java.lang.String r65) {
         /*
-            Method dump skipped, instructions count: 1222
+            Method dump skipped, instructions count: 1160
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.LaunchActivity.runLinkRequest(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.Integer, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.String, java.util.HashMap, java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.telegram.tgnet.TLRPC$TL_wallPaper, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, int, java.lang.String, java.lang.String, java.lang.String):void");
@@ -2914,11 +2910,11 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             r6 = move-exception
             org.telegram.messenger.FileLog.e(r6)
         La3:
-            r6 = 2131628665(0x7f0e1279, float:1.888463E38)
+            r6 = 2131628652(0x7f0e126c, float:1.8884603E38)
             java.lang.String r7 = "Theme"
             if (r2 != r1) goto Lbf
             java.lang.String r6 = org.telegram.messenger.LocaleController.getString(r7, r6)
-            r7 = 2131628687(0x7f0e128f, float:1.8884674E38)
+            r7 = 2131628674(0x7f0e1282, float:1.8884647E38)
             java.lang.String r8 = "ThemeNotSupported"
             java.lang.String r7 = org.telegram.messenger.LocaleController.getString(r8, r7)
             org.telegram.ui.ActionBar.AlertDialog$Builder r6 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r5, r6, r7)
@@ -2926,7 +2922,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             goto Ld3
         Lbf:
             java.lang.String r6 = org.telegram.messenger.LocaleController.getString(r7, r6)
-            r7 = 2131628686(0x7f0e128e, float:1.8884672E38)
+            r7 = 2131628673(0x7f0e1281, float:1.8884645E38)
             java.lang.String r8 = "ThemeNotFound"
             java.lang.String r7 = org.telegram.messenger.LocaleController.getString(r8, r7)
             org.telegram.ui.ActionBar.AlertDialog$Builder r6 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r5, r6, r7)
@@ -2992,7 +2988,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
             r1 = r0
             org.telegram.messenger.FileLog.e(r1)
         L40:
-            r0 = 2131626503(0x7f0e0a07, float:1.8880244E38)
+            r0 = 2131626493(0x7f0e09fd, float:1.8880224E38)
             java.lang.String r1 = "LinkNotFound"
             java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r1, r0)
             org.telegram.ui.ActionBar.AlertDialog$Builder r0 = org.telegram.ui.Components.AlertsCreator.createSimpleAlert(r10, r0)

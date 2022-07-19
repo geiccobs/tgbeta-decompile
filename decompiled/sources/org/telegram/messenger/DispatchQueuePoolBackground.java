@@ -42,7 +42,7 @@ public class DispatchQueuePoolBackground {
                 DispatchQueuePoolBackground.this.cleanupScheduled = false;
                 return;
             }
-            Utilities.globalQueue.postRunnable(this, 30000L);
+            AndroidUtilities.runOnUIThread(this, 30000L);
             DispatchQueuePoolBackground.this.cleanupScheduled = true;
         }
     };

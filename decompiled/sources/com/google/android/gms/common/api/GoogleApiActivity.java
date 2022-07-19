@@ -16,7 +16,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.annotation.KeepName;
 import com.google.android.gms.common.api.internal.GoogleApiManager;
 import com.google.android.gms.common.internal.Preconditions;
-import com.huawei.hms.adapter.internal.CommonCode;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
 @KeepName
 /* loaded from: classes.dex */
@@ -41,7 +40,7 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         if (bundle != null) {
-            this.zaa = bundle.getInt(CommonCode.MapKey.HAS_RESOLUTION);
+            this.zaa = bundle.getInt("resolution");
         }
         if (this.zaa != 1) {
             Bundle extras = getIntent().getExtras();
@@ -111,7 +110,7 @@ public class GoogleApiActivity extends Activity implements DialogInterface.OnCan
 
     @Override // android.app.Activity
     protected void onSaveInstanceState(@RecentlyNonNull Bundle bundle) {
-        bundle.putInt(CommonCode.MapKey.HAS_RESOLUTION, this.zaa);
+        bundle.putInt("resolution", this.zaa);
         super.onSaveInstanceState(bundle);
     }
 

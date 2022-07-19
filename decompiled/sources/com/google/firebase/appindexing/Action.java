@@ -4,7 +4,6 @@ import android.os.Bundle;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.firebase.appindexing.builders.IndexableBuilder;
 import com.google.firebase.appindexing.internal.zzc;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 /* compiled from: com.google.firebase:firebase-appindexing@@20.0.0 */
 /* loaded from: classes.dex */
 public interface Action {
@@ -60,7 +59,7 @@ public interface Action {
         public final Builder setUrl(String str) {
             Preconditions.checkNotNull(str);
             this.zzd = str;
-            return put(RemoteMessageConst.Notification.URL, str);
+            return put("url", str);
         }
 
         public final String zza() {

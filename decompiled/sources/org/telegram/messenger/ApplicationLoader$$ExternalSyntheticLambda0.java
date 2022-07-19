@@ -11,6 +11,6 @@ public final /* synthetic */ class ApplicationLoader$$ExternalSyntheticLambda0 i
 
     @Override // com.google.android.gms.tasks.OnCompleteListener
     public final void onComplete(Task task) {
-        ApplicationLoader.lambda$initPushServices$0(task);
+        ApplicationLoader.lambda$initPlayServices$0(task);
     }
 }

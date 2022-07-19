@@ -1,6 +1,5 @@
 package androidx.core.util;
 
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.PrintWriter;
 /* loaded from: classes.dex */
 public final class TimeUtils {
@@ -74,8 +73,8 @@ public final class TimeUtils {
         int i7 = (int) (j % 1000);
         int floor = (int) Math.floor(j / 1000);
         if (floor > 86400) {
-            i = floor / RemoteMessageConst.DEFAULT_TTL;
-            floor -= RemoteMessageConst.DEFAULT_TTL * i;
+            i = floor / 86400;
+            floor -= 86400 * i;
         } else {
             i = 0;
         }

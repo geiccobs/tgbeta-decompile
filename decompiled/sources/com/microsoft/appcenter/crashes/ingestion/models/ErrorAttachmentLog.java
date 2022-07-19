@@ -1,7 +1,6 @@
 package com.microsoft.appcenter.crashes.ingestion.models;
 
 import android.util.Base64;
-import com.huawei.hms.push.constant.RemoteMessageConst;
 import com.microsoft.appcenter.ingestion.models.AbstractLog;
 import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
 import java.nio.charset.Charset;
@@ -87,7 +86,7 @@ public class ErrorAttachmentLog extends AbstractLog {
         setContentType(jSONObject.getString("contentType"));
         setFileName(jSONObject.optString("fileName", null));
         try {
-            setData(Base64.decode(jSONObject.getString(RemoteMessageConst.DATA), 0));
+            setData(Base64.decode(jSONObject.getString("data"), 0));
         } catch (IllegalArgumentException e) {
             throw new JSONException(e.getMessage());
         }
@@ -100,7 +99,7 @@ public class ErrorAttachmentLog extends AbstractLog {
         JSONUtils.write(jSONStringer, "errorId", getErrorId());
         JSONUtils.write(jSONStringer, "contentType", getContentType());
         JSONUtils.write(jSONStringer, "fileName", getFileName());
-        JSONUtils.write(jSONStringer, RemoteMessageConst.DATA, Base64.encodeToString(getData(), 2));
+        JSONUtils.write(jSONStringer, "data", Base64.encodeToString(getData(), 2));
     }
 
     @Override // com.microsoft.appcenter.ingestion.models.AbstractLog

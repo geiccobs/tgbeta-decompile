@@ -836,7 +836,7 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
 
     @Override // android.graphics.drawable.BitmapDrawable, android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
-        drawInternal(canvas, false, System.currentTimeMillis());
+        drawInternal(canvas, false);
     }
 
     public void drawInBackground(Canvas canvas, float f, float f2, float f3, float f4, int i) {
@@ -846,14 +846,14 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
         }
         this.backgroundPaint.setAlpha(i);
         this.dstRectBackground.set(f, f2, f3 + f, f4 + f2);
-        drawInternal(canvas, true, 0L);
+        drawInternal(canvas, true);
     }
 
-    public void drawInternal(Canvas canvas, boolean z, long j) {
+    private void drawInternal(Canvas canvas, boolean z) {
         if (!canLoadFrames() || this.destroyWhenDone) {
             return;
         }
-        long currentTimeMillis = j == 0 ? System.currentTimeMillis() : j;
+        long currentTimeMillis = System.currentTimeMillis();
         RectF rectF = z ? this.dstRectBackground : this.dstRect;
         Paint paint = z ? this.backgroundPaint : getPaint();
         int i = 0;

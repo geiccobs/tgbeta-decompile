@@ -1,8 +1,9 @@
 package org.webrtc;
 
 import org.telegram.messenger.MediaController;
+/* JADX INFO: Access modifiers changed from: package-private */
 /* loaded from: classes3.dex */
-enum VideoCodecMimeType {
+public enum VideoCodecMimeType {
     VP8("video/x-vnd.on2.vp8"),
     VP9("video/x-vnd.on2.vp9"),
     H264(MediaController.VIDEO_MIME_TYPE),

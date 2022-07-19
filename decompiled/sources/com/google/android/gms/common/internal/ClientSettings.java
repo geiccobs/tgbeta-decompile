@@ -8,7 +8,6 @@ import androidx.collection.ArraySet;
 import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.signin.SignInOptions;
-import com.huawei.hms.api.HuaweiApiClientImpl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -111,7 +110,7 @@ public final class ClientSettings {
     @RecentlyNonNull
     public final Account getAccountOrDefault() {
         Account account = this.zaa;
-        return account != null ? account : new Account(HuaweiApiClientImpl.DEFAULT_ACCOUNT, "com.google");
+        return account != null ? account : new Account("<<default account>>", "com.google");
     }
 
     @RecentlyNonNull

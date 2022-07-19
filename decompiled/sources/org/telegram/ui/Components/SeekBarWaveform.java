@@ -52,7 +52,7 @@ public class SeekBarWaveform {
     private boolean startDraging = false;
     private boolean pressed = false;
     private float clearProgress = 1.0f;
-    private AnimatedFloat appearFloat = new AnimatedFloat(125, 600, CubicBezierInterpolator.EASE_OUT_QUINT);
+    private AnimatedFloat appearFloat = new AnimatedFloat(125, 450, CubicBezierInterpolator.EASE_OUT_QUINT);
     private float waveScaling = 1.0f;
     private AnimatedFloat loadingFloat = new AnimatedFloat(150, CubicBezierInterpolator.DEFAULT);
 
@@ -341,8 +341,7 @@ public class SeekBarWaveform {
                     if (f7 >= dpf2 || i2 >= this.heights.length) {
                         break;
                     }
-                    float clamp2 = MathUtils.clamp((f4 * dpf2) - f7, 0.0f, 1.0f);
-                    addBar(this.path, AndroidUtilities.dpf2(3.0f) * f7, (AndroidUtilities.dpf2(this.heights[i2]) * clamp2) - (AndroidUtilities.dpf2(1.0f) * (1.0f - clamp2)));
+                    addBar(this.path, AndroidUtilities.dpf2(3.0f) * f7, AndroidUtilities.dpf2(this.heights[i2]) * MathUtils.clamp((f4 * dpf2) - f7, 0.0f, 1.0f));
                     i2++;
                 }
             }

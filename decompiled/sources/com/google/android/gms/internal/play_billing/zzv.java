@@ -1,6 +1,4 @@
 package com.google.android.gms.internal.play_billing;
-
-import com.huawei.hms.framework.common.ContainerUtils;
 /* compiled from: com.android.billingclient:billing@@5.0.0 */
 /* loaded from: classes.dex */
 final class zzv {
@@ -15,6 +13,6 @@ final class zzv {
     }
 
     public final IllegalArgumentException zza() {
-        return new IllegalArgumentException("Multiple entries with same key: " + this.zza + ContainerUtils.KEY_VALUE_DELIMITER + this.zzb + " and " + this.zza + ContainerUtils.KEY_VALUE_DELIMITER + this.zzc);
+        return new IllegalArgumentException("Multiple entries with same key: " + this.zza + "=" + this.zzb + " and " + this.zza + "=" + this.zzc);
     }
 }

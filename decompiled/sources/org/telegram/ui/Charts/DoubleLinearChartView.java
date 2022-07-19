@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import java.util.Iterator;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Charts.data.ChartData;
 import org.telegram.ui.Charts.data.DoubleLinearChartData;
 import org.telegram.ui.Charts.view_data.ChartHorizontalLinesData;
@@ -279,9 +280,9 @@ public class DoubleLinearChartView extends BaseChartView<DoubleLinearChartData, 
             return 0;
         }
         int size = this.lines.size();
-        int i3 = Integer.MAX_VALUE;
+        int i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         for (int i4 = 0; i4 < size; i4++) {
-            int rMinQ = ((LineViewData) this.lines.get(i4)).enabled ? (int) (((DoubleLinearChartData) this.chartData).lines.get(i4).segmentTree.rMinQ(i, i2) * ((DoubleLinearChartData) this.chartData).linesK[i4]) : Integer.MAX_VALUE;
+            int rMinQ = ((LineViewData) this.lines.get(i4)).enabled ? (int) (((DoubleLinearChartData) this.chartData).lines.get(i4).segmentTree.rMinQ(i, i2) * ((DoubleLinearChartData) this.chartData).linesK[i4]) : ConnectionsManager.DEFAULT_DATACENTER_ID;
             if (rMinQ < i3) {
                 i3 = rMinQ;
             }

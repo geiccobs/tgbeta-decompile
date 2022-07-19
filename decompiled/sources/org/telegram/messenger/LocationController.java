@@ -803,7 +803,7 @@ public class LocationController extends BaseController implements NotificationCe
                 if (byteBufferValue != null) {
                     MessageObject messageObject = new MessageObject(this.currentAccount, TLRPC$Message.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(false), false), false, false);
                     sharingLocationInfo.messageObject = messageObject;
-                    MessagesStorage.addUsersAndChatsFromMessage(messageObject.messageOwner, arrayList4, arrayList5, null);
+                    MessagesStorage.addUsersAndChatsFromMessage(messageObject.messageOwner, arrayList4, arrayList5);
                     byteBufferValue.reuse();
                 }
                 arrayList.add(sharingLocationInfo);

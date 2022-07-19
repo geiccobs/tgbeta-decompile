@@ -32,9 +32,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.huawei.hms.framework.common.ContainerUtils;
-import com.huawei.hms.push.constant.RemoteMessageConst;
-import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +47,7 @@ import org.telegram.messenger.Bitmaps;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.Components.WebPlayerView;
 import org.webrtc.MediaStreamTrack;
@@ -173,8 +170,8 @@ public class WebPlayerView extends ViewGroup implements VideoPlayer.VideoPlayerD
     public static class JSExtractor {
         private String jsCode;
         ArrayList<String> codeLines = new ArrayList<>();
-        private String[] operators = {HiAnalyticsConstant.REPORT_VAL_SEPARATOR, "^", ContainerUtils.FIELD_DELIMITER, ">>", "<<", "-", "+", "%", "/", "*"};
-        private String[] assign_operators = {"|=", "^=", "&=", ">>=", "<<=", "-=", "+=", "%=", "/=", "*=", ContainerUtils.KEY_VALUE_DELIMITER};
+        private String[] operators = {"|", "^", "&", ">>", "<<", "-", "+", "%", "/", "*"};
+        private String[] assign_operators = {"|=", "^=", "&=", ">>=", "<<=", "-=", "+=", "%=", "/=", "*=", "="};
 
         public JSExtractor(String str) {
             this.jsCode = str;
@@ -537,14 +534,14 @@ public class WebPlayerView extends ViewGroup implements VideoPlayer.VideoPlayerD
                 if (jSONObject.has("hls")) {
                     JSONObject jSONObject2 = jSONObject.getJSONObject("hls");
                     try {
-                        this.results[0] = jSONObject2.getString(RemoteMessageConst.Notification.URL);
+                        this.results[0] = jSONObject2.getString("url");
                     } catch (Exception unused) {
-                        this.results[0] = jSONObject2.getJSONObject("cdns").getJSONObject(jSONObject2.getString("default_cdn")).getString(RemoteMessageConst.Notification.URL);
+                        this.results[0] = jSONObject2.getJSONObject("cdns").getJSONObject(jSONObject2.getString("default_cdn")).getString("url");
                     }
                     this.results[1] = "hls";
                 } else if (jSONObject.has("progressive")) {
                     this.results[1] = "other";
-                    this.results[0] = jSONObject.getJSONArray("progressive").getJSONObject(0).getString(RemoteMessageConst.Notification.URL);
+                    this.results[0] = jSONObject.getJSONArray("progressive").getJSONObject(0).getString("url");
                 }
             } catch (Exception e) {
                 FileLog.e(e);

@@ -4,7 +4,6 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.os.Build;
-import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.webrtc.ContextUtils;
@@ -229,7 +228,7 @@ public class WebRtcAudioManager {
     private int getNativeOutputSampleRate() {
         if (WebRtcAudioUtils.runningOnEmulator()) {
             Logging.d(TAG, "Running emulator, overriding sample rate to 8 kHz.");
-            return JosStatusCodes.RTN_CODE_COMMON_ERROR;
+            return 8000;
         } else if (WebRtcAudioUtils.isDefaultSampleRateOverridden()) {
             Logging.d(TAG, "Default sample rate is overriden to " + WebRtcAudioUtils.getDefaultSampleRateHz() + " Hz");
             return WebRtcAudioUtils.getDefaultSampleRateHz();

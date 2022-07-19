@@ -23,7 +23,6 @@ import androidx.core.content.LocusIdCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.core.text.BidiFormatter;
-import com.huawei.hms.framework.common.hianalytics.CrashHianalyticsData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -788,7 +787,7 @@ public class NotificationCompat {
                 if (charSequence != null) {
                     bundle.putCharSequence("text", charSequence);
                 }
-                bundle.putLong(CrashHianalyticsData.TIME, this.mTimestamp);
+                bundle.putLong("time", this.mTimestamp);
                 Person person = this.mPerson;
                 if (person != null) {
                     bundle.putCharSequence("sender", person.getName());

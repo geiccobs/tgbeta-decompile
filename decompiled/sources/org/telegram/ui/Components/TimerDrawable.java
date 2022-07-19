@@ -11,12 +11,11 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import androidx.core.content.ContextCompat;
-import com.huawei.hms.opendevice.c;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 /* loaded from: classes3.dex */
 public class TimerDrawable extends Drawable {
@@ -86,7 +85,7 @@ public class TimerDrawable extends Drawable {
                 if (str.length() < 2) {
                     str = str + LocaleController.getString("SecretChatTimerWeeks", R.string.SecretChatTimerWeeks);
                 } else if (str.length() > 2) {
-                    str = c.a;
+                    str = "c";
                 }
             } else if (i2 < 31449600) {
                 str = "" + ((((i / 60) / 60) / 24) / 30);

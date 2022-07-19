@@ -18,7 +18,6 @@ import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.UriUtil;
 import com.google.android.exoplayer2.util.Util;
-import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -797,7 +796,7 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
     }
 
     private static Pattern compileBooleanAttrPattern(String str) {
-        return Pattern.compile(str + "=(NO" + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + "YES)");
+        return Pattern.compile(str + "=(NO|YES)");
     }
 
     /* loaded from: classes.dex */

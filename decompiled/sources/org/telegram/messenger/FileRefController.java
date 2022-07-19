@@ -1,7 +1,6 @@
 package org.telegram.messenger;
 
 import android.os.SystemClock;
-import com.huawei.hms.framework.common.hianalytics.CrashHianalyticsData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -167,12 +166,12 @@ public class FileRefController extends BaseController {
         } else if (obj instanceof MessageObject) {
             MessageObject messageObject = (MessageObject) obj;
             long channelId = messageObject.getChannelId();
-            return CrashHianalyticsData.MESSAGE + messageObject.getRealId() + "_" + channelId + "_" + messageObject.scheduled;
+            return "message" + messageObject.getRealId() + "_" + channelId + "_" + messageObject.scheduled;
         } else if (obj instanceof TLRPC$Message) {
             TLRPC$Message tLRPC$Message = (TLRPC$Message) obj;
             TLRPC$Peer tLRPC$Peer = tLRPC$Message.peer_id;
             long j2 = tLRPC$Peer != null ? tLRPC$Peer.channel_id : 0L;
-            return CrashHianalyticsData.MESSAGE + tLRPC$Message.id + "_" + j2 + "_" + tLRPC$Message.from_scheduled;
+            return "message" + tLRPC$Message.id + "_" + j2 + "_" + tLRPC$Message.from_scheduled;
         } else if (obj instanceof TLRPC$WebPage) {
             return "webpage" + ((TLRPC$WebPage) obj).id;
         } else if (obj instanceof TLRPC$User) {

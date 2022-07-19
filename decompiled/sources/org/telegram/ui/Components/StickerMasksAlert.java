@@ -39,9 +39,9 @@ import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Document;
@@ -594,7 +594,7 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
         this.stickersTab.setIndicatorColor(-9520403);
         this.stickersTab.setUnderlineColor(-16053493);
         this.stickersTab.setBackgroundColor(-14342875);
-        this.containerView.addView(this.stickersTab, LayoutHelper.createFrame(-1, 36, 51));
+        this.containerView.addView(this.stickersTab, LayoutHelper.createFrame(-1, 48, 51));
         this.stickersTab.setDelegate(new ScrollSlidingTabStrip.ScrollSlidingTabStripDelegate() { // from class: org.telegram.ui.Components.StickerMasksAlert$$ExternalSyntheticLambda4
             @Override // org.telegram.ui.Components.ScrollSlidingTabStrip.ScrollSlidingTabStripDelegate
             public final void onPageSelected(int i2) {
@@ -1249,7 +1249,7 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
             */
             public void run() {
                 /*
-                    Method dump skipped, instructions count: 808
+                    Method dump skipped, instructions count: 806
                     To view this dump add '--comments-level debug' option
                 */
                 throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.StickerMasksAlert.StickersSearchGridAdapter.AnonymousClass1.run():void");

@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
+import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public final class SingleSampleMediaChunk extends BaseMediaChunk {
     private boolean loadCompleted;
@@ -41,7 +42,7 @@ public final class SingleSampleMediaChunk extends BaseMediaChunk {
                 open += this.nextLoadPosition;
             }
             DefaultExtractorInput defaultExtractorInput = new DefaultExtractorInput(this.dataSource, this.nextLoadPosition, open);
-            for (int i = 0; i != -1; i = track.sampleData(defaultExtractorInput, Integer.MAX_VALUE, true)) {
+            for (int i = 0; i != -1; i = track.sampleData(defaultExtractorInput, ConnectionsManager.DEFAULT_DATACENTER_ID, true)) {
                 this.nextLoadPosition += i;
             }
             track.sampleMetadata(this.startTimeUs, 1, (int) this.nextLoadPosition, 0, null);

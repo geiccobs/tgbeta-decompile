@@ -60,6 +60,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.camera.CameraView;
 import org.telegram.messenger.video.MP4Builder;
 import org.telegram.messenger.video.Mp4Movie;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.InstantCameraView;
 import org.telegram.ui.Components.LayoutHelper;
@@ -244,7 +245,7 @@ public class CameraView extends FrameLayout implements TextureView.SurfaceTextur
         this.outerPaint.setColor(-1);
         this.outerPaint.setStyle(Paint.Style.STROKE);
         this.outerPaint.setStrokeWidth(AndroidUtilities.dp(2.0f));
-        this.innerPaint.setColor(Integer.MAX_VALUE);
+        this.innerPaint.setColor(ConnectionsManager.DEFAULT_DATACENTER_ID);
     }
 
     public void setOptimizeForBarcode(boolean z) {
@@ -1528,7 +1529,7 @@ public class CameraView extends FrameLayout implements TextureView.SurfaceTextur
                 MediaFormat createVideoFormat = MediaFormat.createVideoFormat("video/avc", this.videoWidth, this.videoHeight);
                 createVideoFormat.setInteger("color-format", 2130708361);
                 createVideoFormat.setInteger("bitrate", this.videoBitrate);
-                createVideoFormat.setInteger("frame-rate", 30);
+                createVideoFormat.setInteger("frame-rate", FRAME_RATE);
                 createVideoFormat.setInteger("i-frame-interval", 1);
                 this.videoEncoder.configure(createVideoFormat, (Surface) null, (MediaCrypto) null, 1);
                 this.surface = this.videoEncoder.createInputSurface();

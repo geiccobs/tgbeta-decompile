@@ -35,7 +35,7 @@ import org.telegram.messenger.ForwardingMessagesParams;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.beta.R;
+import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$KeyboardButton;
 import org.telegram.tgnet.TLRPC$Peer;
@@ -154,7 +154,7 @@ public class ForwardingPreviewView extends FrameLayout {
         if (Build.VERSION.SDK_INT >= 21) {
             this.chatPreviewContainer.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ForwardingPreviewView.3
                 @Override // android.view.ViewOutlineProvider
-                @TargetApi(21)
+                @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                 public void getOutline(View view, Outline outline) {
                     outline.setRoundRect(0, ForwardingPreviewView.this.currentTopOffset + 1, view.getMeasuredWidth(), view.getMeasuredHeight(), AndroidUtilities.dp(6.0f));
                 }
@@ -211,7 +211,7 @@ public class ForwardingPreviewView extends FrameLayout {
             }
 
             /* JADX WARN: Type inference failed for: r3v0 */
-            /* JADX WARN: Type inference failed for: r3v1, types: [boolean, int] */
+            /* JADX WARN: Type inference failed for: r3v1, types: [int, boolean] */
             /* JADX WARN: Type inference failed for: r3v9 */
             private void drawChatBackgroundElements(Canvas canvas) {
                 boolean z;

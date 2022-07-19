@@ -1,6 +1,5 @@
 package androidx.arch.core.internal;
 
-import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -309,7 +308,7 @@ public class SafeIterableMap<K, V> implements Iterable<Map.Entry<K, V>> {
         }
 
         public String toString() {
-            return this.mKey + ContainerUtils.KEY_VALUE_DELIMITER + this.mValue;
+            return this.mKey + "=" + this.mValue;
         }
 
         @Override // java.util.Map.Entry

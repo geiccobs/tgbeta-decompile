@@ -1113,15 +1113,16 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         this.useRoundForThumb = z;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:266:0x0661  */
-    /* JADX WARN: Removed duplicated region for block: B:267:0x066b  */
+    /* JADX WARN: Removed duplicated region for block: B:228:0x05c4  */
+    /* JADX WARN: Removed duplicated region for block: B:261:0x0683  */
+    /* JADX WARN: Removed duplicated region for block: B:262:0x068d  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private void drawDrawable(android.graphics.Canvas r28, android.graphics.drawable.Drawable r29, int r30, android.graphics.BitmapShader r31, int r32, int r33, org.telegram.messenger.ImageReceiver.BackgroundThreadDrawHolder r34) {
         /*
-            Method dump skipped, instructions count: 1826
+            Method dump skipped, instructions count: 1868
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.ImageReceiver.drawDrawable(android.graphics.Canvas, android.graphics.drawable.Drawable, int, android.graphics.BitmapShader, int, int, org.telegram.messenger.ImageReceiver$BackgroundThreadDrawHolder):void");
@@ -1131,19 +1132,8 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         if (backgroundThreadDrawHolder != null) {
             if (!(bitmapDrawable instanceof RLottieDrawable)) {
                 if (!(bitmapDrawable instanceof AnimatedFileDrawable)) {
-                    Bitmap bitmap = bitmapDrawable.getBitmap();
-                    if (bitmap == null) {
-                        return;
-                    }
-                    if (backgroundThreadDrawHolder.paint == null) {
-                        backgroundThreadDrawHolder.paint = new Paint(1);
-                    }
-                    backgroundThreadDrawHolder.paint.setAlpha(i);
-                    canvas.save();
-                    canvas.translate(backgroundThreadDrawHolder.imageX, backgroundThreadDrawHolder.imageY);
-                    canvas.scale(backgroundThreadDrawHolder.imageW / bitmap.getWidth(), backgroundThreadDrawHolder.imageH / bitmap.getHeight());
-                    canvas.drawBitmap(bitmap, 0.0f, 0.0f, backgroundThreadDrawHolder.paint);
-                    canvas.restore();
+                    bitmapDrawable.setAlpha(i);
+                    bitmapDrawable.draw(canvas);
                     return;
                 }
                 ((AnimatedFileDrawable) bitmapDrawable).drawInBackground(canvas, backgroundThreadDrawHolder.imageX, backgroundThreadDrawHolder.imageY, backgroundThreadDrawHolder.imageW, backgroundThreadDrawHolder.imageH, i);
@@ -1155,8 +1145,6 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         bitmapDrawable.setAlpha(i);
         if (bitmapDrawable instanceof RLottieDrawable) {
             ((RLottieDrawable) bitmapDrawable).drawInternal(canvas, false, this.currentTime);
-        } else if (bitmapDrawable instanceof AnimatedFileDrawable) {
-            ((AnimatedFileDrawable) bitmapDrawable).drawInternal(canvas, false, this.currentTime);
         } else {
             bitmapDrawable.draw(canvas);
         }
@@ -1218,9 +1206,6 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                 long j2 = currentTimeMillis - j;
                 if (j == 0) {
                     j2 = 18;
-                }
-                if (j2 > 36) {
-                    j2 = 36;
                 }
                 this.currentAlpha += ((float) j2) / this.crossfadeDuration;
             } else {
@@ -2314,14 +2299,12 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         private Drawable mediaDrawable;
         private BitmapShader mediaShader;
         public float overrideAlpha;
-        Paint paint;
         private float previousAlpha;
+        private int[] roundRadius = new int[4];
         private Drawable staticThumbDrawable;
         private Drawable thumbDrawable;
         private BitmapShader thumbShader;
         public long time;
-        private int[] roundRadius = new int[4];
-        private RectF drawRegion = new RectF();
 
         public void release() {
             this.animation = null;
@@ -2353,10 +2336,9 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             if (rectF != null) {
                 float f = this.imageX;
                 rectF.left = f;
-                float f2 = this.imageY;
-                rectF.top = f2;
+                rectF.right = this.imageY;
                 rectF.right = f + this.imageW;
-                rectF.bottom = f2 + this.imageH;
+                rectF.bottom = rectF.top + this.imageH;
             }
         }
     }

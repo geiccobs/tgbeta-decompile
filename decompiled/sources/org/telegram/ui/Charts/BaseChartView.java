@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Charts.ChartPickerDelegate;
 import org.telegram.ui.Charts.data.ChartData;
@@ -1152,7 +1153,7 @@ public abstract class BaseChartView<T extends ChartData, L extends LineViewData>
     public int findMinValue(int i, int i2) {
         int rMinQ;
         int size = this.lines.size();
-        int i3 = Integer.MAX_VALUE;
+        int i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         for (int i4 = 0; i4 < size; i4++) {
             if (this.lines.get(i4).enabled && (rMinQ = this.lines.get(i4).line.segmentTree.rMinQ(i, i2)) < i3) {
                 i3 = rMinQ;
@@ -1478,7 +1479,7 @@ public abstract class BaseChartView<T extends ChartData, L extends LineViewData>
             return;
         }
         Iterator<L> it = this.lines.iterator();
-        int i3 = Integer.MAX_VALUE;
+        int i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
         int i4 = 0;
         while (it.hasNext()) {
             L next = it.next();

@@ -29,8 +29,8 @@ import androidx.annotation.Keep;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 /* loaded from: classes3.dex */
 public class DrawerLayoutContainer extends FrameLayout {
     private boolean allowOpenDrawer;

@@ -46,12 +46,13 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.beta.R;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
@@ -760,7 +761,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout
     public int getCurrentItemTop() {
         if (this.listView.getChildCount() <= 0) {
-            return Integer.MAX_VALUE;
+            return ConnectionsManager.DEFAULT_DATACENTER_ID;
         }
         int i = 0;
         View childAt = this.listView.getChildAt(0);
@@ -982,7 +983,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
                 mediaMetadataRetriever.setDataSource(ApplicationLoader.applicationContext, Uri.fromFile(file));
                 i = Integer.parseInt(mediaMetadataRetriever.extractMetadata(9));
             } catch (Exception unused) {
-                i = Integer.MAX_VALUE;
+                i = ConnectionsManager.DEFAULT_DATACENTER_ID;
             }
             if (i <= MessagesController.getInstance(UserConfig.selectedAccount).ringtoneDurationMax * 1000) {
                 return true;

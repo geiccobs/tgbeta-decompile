@@ -2,7 +2,6 @@ package com.microsoft.appcenter.http;
 
 import android.content.Context;
 import android.os.Build;
-import com.huawei.hms.android.HwBuildEx;
 import com.microsoft.appcenter.utils.NetworkStateHelper;
 import java.io.EOFException;
 import java.io.IOException;
@@ -101,8 +100,8 @@ public class HttpUtils {
             if (Build.VERSION.SDK_INT <= 21) {
                 httpsURLConnection.setSSLSocketFactory(new TLS1_2SocketFactory());
             }
-            httpsURLConnection.setConnectTimeout(HwBuildEx.VersionCodes.CUR_DEVELOPMENT);
-            httpsURLConnection.setReadTimeout(HwBuildEx.VersionCodes.CUR_DEVELOPMENT);
+            httpsURLConnection.setConnectTimeout(10000);
+            httpsURLConnection.setReadTimeout(10000);
             return httpsURLConnection;
         }
         throw new IOException("App Center supports only HTTPS connection.");

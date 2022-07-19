@@ -36,6 +36,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
@@ -180,7 +181,7 @@ public class PipRoundVideoView implements NotificationCenter.NotificationCenterD
             this.aspectRatioFrameLayout = aspectRatioFrameLayout;
             aspectRatioFrameLayout.setOutlineProvider(new ViewOutlineProvider(this) { // from class: org.telegram.ui.Components.PipRoundVideoView.3
                 @Override // android.view.ViewOutlineProvider
-                @TargetApi(21)
+                @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, AndroidUtilities.dp(120.0f), AndroidUtilities.dp(120.0f));
                 }
