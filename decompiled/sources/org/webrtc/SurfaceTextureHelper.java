@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import java.util.concurrent.Callable;
-import org.telegram.messenger.R;
 import org.webrtc.EglBase;
 import org.webrtc.TextureBufferImpl;
 import org.webrtc.VideoFrame;
@@ -146,7 +145,7 @@ public class SurfaceTextureHelper {
         tryDeliverTextureFrame();
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static void setOnFrameAvailableListener(SurfaceTexture surfaceTexture, SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener, Handler handler) {
         if (Build.VERSION.SDK_INT >= 21) {
             surfaceTexture.setOnFrameAvailableListener(onFrameAvailableListener, handler);

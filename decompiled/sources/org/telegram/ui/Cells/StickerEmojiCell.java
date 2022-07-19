@@ -14,9 +14,9 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$DocumentAttribute;
 import org.telegram.tgnet.TLRPC$TL_documentAttributeSticker;
@@ -256,10 +256,10 @@ public class StickerEmojiCell extends FrameLayout implements NotificationCenter.
 
     @Override // android.view.ViewGroup, android.view.View
     protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
         if (!this.drawInParentView) {
             drawInternal(this, canvas);
         }
+        super.dispatchDraw(canvas);
     }
 
     @Override // org.telegram.ui.Components.ListView.RecyclerListViewWithOverlayDraw.OverlayView

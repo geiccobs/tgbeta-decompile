@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.os.Build;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import org.webrtc.CalledByNative;
 import org.webrtc.Logging;
 import org.webrtc.MediaStreamTrack;
@@ -51,7 +52,7 @@ class WebRtcAudioManager {
     public static int getSampleRate(AudioManager audioManager) {
         if (WebRtcAudioUtils.runningOnEmulator()) {
             Logging.d(TAG, "Running emulator, overriding sample rate to 8 kHz.");
-            return 8000;
+            return JosStatusCodes.RTN_CODE_COMMON_ERROR;
         }
         int sampleRateForApiLevel = getSampleRateForApiLevel(audioManager);
         Logging.d(TAG, "Sample rate is set to " + sampleRateForApiLevel + " Hz");

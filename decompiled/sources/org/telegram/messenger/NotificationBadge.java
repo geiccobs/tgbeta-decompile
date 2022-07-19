@@ -95,7 +95,7 @@ public class NotificationBadge {
         @Override // org.telegram.messenger.NotificationBadge.Badger
         public void executeBadge(int i) {
             final Intent intent = new Intent(INTENT_UPDATE_COUNTER);
-            intent.putExtra(PACKAGENAME, NotificationBadge.componentName.getPackageName());
+            intent.putExtra("package", NotificationBadge.componentName.getPackageName());
             intent.putExtra("count", i);
             intent.putExtra(CLASS, NotificationBadge.componentName.getClassName());
             if (NotificationBadge.canResolveBroadcast(intent)) {
@@ -263,7 +263,7 @@ public class NotificationBadge {
         @Override // org.telegram.messenger.NotificationBadge.Badger
         public void executeBadge(int i) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(TAG, NotificationBadge.componentName.getPackageName() + "/" + NotificationBadge.componentName.getClassName());
+            contentValues.put("tag", NotificationBadge.componentName.getPackageName() + "/" + NotificationBadge.componentName.getClassName());
             contentValues.put("count", Integer.valueOf(i));
             ApplicationLoader.applicationContext.getContentResolver().insert(Uri.parse(CONTENT_URI), contentValues);
         }

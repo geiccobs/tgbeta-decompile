@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.RecentlyNonNull;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
 public abstract class GmsClientSupervisor {
@@ -36,7 +37,7 @@ public abstract class GmsClientSupervisor {
     /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
     /* loaded from: classes.dex */
     public static final class zza {
-        private static final Uri zzf = new Uri.Builder().scheme("content").authority("com.google.android.gms.chimera").build();
+        private static final Uri zzf = new Uri.Builder().scheme(RemoteMessageConst.Notification.CONTENT).authority("com.google.android.gms.chimera").build();
         private final String zza;
         private final String zzb;
         private final ComponentName zzc = null;

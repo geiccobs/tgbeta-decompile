@@ -30,11 +30,11 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MrzRecognizer;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -400,7 +400,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
             if (userConfig.isClientActivated()) {
                 userConfig.registeredForPush = false;
                 userConfig.saveConfig(false);
-                MessagesController.getInstance(i).registerForPush(SharedConfig.pushString);
+                MessagesController.getInstance(i).registerForPush(SharedConfig.pushType, SharedConfig.pushString);
                 ConnectionsManager.getInstance(i).setUserId(userConfig.getClientUserId());
             }
         }

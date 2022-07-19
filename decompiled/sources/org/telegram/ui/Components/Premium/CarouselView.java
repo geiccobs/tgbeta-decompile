@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Components.Premium.CarouselView;
 /* loaded from: classes3.dex */
 public class CarouselView extends View implements PagerHeaderView {
@@ -176,7 +175,7 @@ public class CarouselView extends View implements PagerHeaderView {
                 Double.isNaN(f);
                 double sin = Math.sin(atan2);
                 Double.isNaN(f2);
-                CarouselView.this.overScroller.fling(0, 0, (int) ((cos * d) - (sin * d2)), 0, Integer.MIN_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID, Integer.MIN_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID);
+                CarouselView.this.overScroller.fling(0, 0, (int) ((cos * d) - (sin * d2)), 0, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 if (CarouselView.this.overScroller.isFinished()) {
                     CarouselView.this.scheduleAutoscroll();
                 }

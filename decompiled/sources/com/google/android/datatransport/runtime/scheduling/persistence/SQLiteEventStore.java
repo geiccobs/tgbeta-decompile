@@ -22,6 +22,7 @@ import com.google.android.datatransport.runtime.synchronization.SynchronizationE
 import com.google.android.datatransport.runtime.synchronization.SynchronizationGuard;
 import com.google.android.datatransport.runtime.time.Clock;
 import com.google.android.datatransport.runtime.util.PriorityMapping;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -142,7 +143,7 @@ public class SQLiteEventStore implements EventStore, SynchronizationGuard, Clien
         }
         ContentValues contentValues = new ContentValues();
         contentValues.put("backend_name", transportContext.getBackendName());
-        contentValues.put("priority", Integer.valueOf(PriorityMapping.toInt(transportContext.getPriority())));
+        contentValues.put(RemoteMessageConst.Notification.PRIORITY, Integer.valueOf(PriorityMapping.toInt(transportContext.getPriority())));
         contentValues.put("next_request_ms", (Integer) 0);
         if (transportContext.getExtras() != null) {
             contentValues.put("extras", Base64.encodeToString(transportContext.getExtras(), 0));
@@ -277,7 +278,7 @@ public class SQLiteEventStore implements EventStore, SynchronizationGuard, Clien
         contentValues.put("next_request_ms", Long.valueOf(j));
         if (sQLiteDatabase.update("transport_contexts", contentValues, "backend_name = ? and priority = ?", new String[]{transportContext.getBackendName(), String.valueOf(PriorityMapping.toInt(transportContext.getPriority()))}) < 1) {
             contentValues.put("backend_name", transportContext.getBackendName());
-            contentValues.put("priority", Integer.valueOf(PriorityMapping.toInt(transportContext.getPriority())));
+            contentValues.put(RemoteMessageConst.Notification.PRIORITY, Integer.valueOf(PriorityMapping.toInt(transportContext.getPriority())));
             sQLiteDatabase.insert("transport_contexts", null, contentValues);
         }
         return null;

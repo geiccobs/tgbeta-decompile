@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLngBounds;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-maps@@17.0.1 */
 /* loaded from: classes.dex */
 public final class zzab implements Parcelable.Creator<GoogleMapOptions> {
@@ -84,7 +83,7 @@ public final class zzab implements Parcelable.Creator<GoogleMapOptions> {
                 case 18:
                     latLngBounds = (LatLngBounds) SafeParcelReader.createParcelable(parcel, readHeader, LatLngBounds.CREATOR);
                     break;
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                     b12 = SafeParcelReader.readByte(parcel, readHeader);
                     break;
             }

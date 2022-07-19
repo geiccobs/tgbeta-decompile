@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$InputStickerSet;
 import org.telegram.tgnet.TLRPC$StickerSetCovered;
 import org.telegram.tgnet.TLRPC$TL_inputStickerSetID;
@@ -181,7 +181,7 @@ public class FeaturedStickersActivity extends BaseFragment implements Notificati
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
-        MediaDataController.getInstance(this.currentAccount).markFaturedStickersAsRead(true);
+        MediaDataController.getInstance(this.currentAccount).markFeaturedStickersAsRead(false, true);
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment

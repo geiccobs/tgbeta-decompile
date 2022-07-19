@@ -1,7 +1,7 @@
 package org.telegram.ui.Components;
 
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.Components.NumberPicker;
 /* loaded from: classes3.dex */
 public final /* synthetic */ class AlertsCreator$$ExternalSyntheticLambda109 implements NumberPicker.Formatter {

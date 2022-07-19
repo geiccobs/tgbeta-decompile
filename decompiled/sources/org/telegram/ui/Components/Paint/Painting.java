@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.opengl.GLES20;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -208,7 +209,7 @@ public class Painting {
         GLES20.glUniformMatrix4fv(shader.getUniform("mvpMatrix"), 1, false, FloatBuffer.wrap(this.projection));
         GLES20.glUniform1i(shader.getUniform("texture"), 0);
         GLES20.glUniform1i(shader.getUniform("mask"), 1);
-        Shader.SetColorUniform(shader.getUniform("color"), i);
+        Shader.SetColorUniform(shader.getUniform(RemoteMessageConst.Notification.COLOR), i);
         GLES20.glActiveTexture(33984);
         GLES20.glBindTexture(3553, getTexture());
         GLES20.glTexParameteri(3553, 10241, 9729);
@@ -318,7 +319,7 @@ public class Painting {
         GLES20.glUniformMatrix4fv(shader.getUniform("mvpMatrix"), 1, false, FloatBuffer.wrap(this.renderProjection));
         GLES20.glUniform1i(shader.getUniform("texture"), 0);
         GLES20.glUniform1i(shader.getUniform("mask"), 1);
-        Shader.SetColorUniform(shader.getUniform("color"), i2);
+        Shader.SetColorUniform(shader.getUniform(RemoteMessageConst.Notification.COLOR), i2);
         GLES20.glActiveTexture(33984);
         GLES20.glBindTexture(3553, getTexture());
         GLES20.glActiveTexture(33985);

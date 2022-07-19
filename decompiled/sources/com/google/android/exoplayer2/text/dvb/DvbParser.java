@@ -177,7 +177,7 @@ final class DvbParser {
                     break;
                 }
                 break;
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
                 if (readBits2 == subtitleService.subtitlePageId) {
                     ObjectData parseObjectData = parseObjectData(parsableBitArray);
                     subtitleService.objects.put(parseObjectData.id, parseObjectData);

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.Arrays;
 import java.util.MissingFormatArgumentException;
 import org.json.JSONArray;
@@ -17,7 +18,7 @@ public class NotificationParams {
 
     public NotificationParams(Bundle bundle) {
         if (bundle == null) {
-            throw new NullPointerException("data");
+            throw new NullPointerException(RemoteMessageConst.DATA);
         }
         this.data = new Bundle(bundle);
     }
@@ -31,7 +32,7 @@ public class NotificationParams {
     }
 
     private static boolean isAnalyticsKey(String str) {
-        return str.startsWith("google.c.a.") || str.equals("from");
+        return str.startsWith("google.c.a.") || str.equals(RemoteMessageConst.FROM);
     }
 
     private static boolean isReservedKey(String str) {

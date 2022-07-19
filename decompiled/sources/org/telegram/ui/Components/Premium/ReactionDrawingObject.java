@@ -8,7 +8,6 @@ import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC$TL_availableReaction;
 import org.telegram.ui.Components.Premium.CarouselView;
 import org.telegram.ui.Components.Reactions.ReactionsEffectOverlay;
@@ -32,11 +31,11 @@ public class ReactionDrawingObject extends CarouselView.DrawingObject {
         if (i == 0) {
             this.imageReceiver.setParentView(view);
             this.imageReceiver.onAttachedToWindow();
-            this.imageReceiver.setLayerNum(ConnectionsManager.DEFAULT_DATACENTER_ID);
+            this.imageReceiver.setLayerNum(Integer.MAX_VALUE);
             SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(this.reaction.activate_animation, "windowBackgroundGray", 0.5f);
             this.actionReceiver.setParentView(view);
             this.actionReceiver.onAttachedToWindow();
-            this.actionReceiver.setLayerNum(ConnectionsManager.DEFAULT_DATACENTER_ID);
+            this.actionReceiver.setLayerNum(Integer.MAX_VALUE);
             this.actionReceiver.setAllowStartLottieAnimation(false);
             this.actionReceiver.setImage(ImageLocation.getForDocument(this.reaction.activate_animation), "50_50_nolimit", null, null, svgThumb, 0L, "tgs", this.reaction, 0);
             this.actionReceiver.setAutoRepeat(0);
@@ -49,7 +48,7 @@ public class ReactionDrawingObject extends CarouselView.DrawingObject {
         }
         this.effectImageReceiver.setParentView(view);
         this.effectImageReceiver.onAttachedToWindow();
-        this.effectImageReceiver.setLayerNum(ConnectionsManager.DEFAULT_DATACENTER_ID);
+        this.effectImageReceiver.setLayerNum(Integer.MAX_VALUE);
         this.effectImageReceiver.setAllowStartLottieAnimation(false);
         int sizeForBigReaction = ReactionsEffectOverlay.sizeForBigReaction();
         ImageReceiver imageReceiver = this.effectImageReceiver;

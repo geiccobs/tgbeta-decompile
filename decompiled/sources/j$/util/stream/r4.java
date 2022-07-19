@@ -2,7 +2,7 @@ package j$.util.stream;
 
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-public final /* synthetic */ class r4 implements AbstractC0119l3 {
+public final /* synthetic */ class r4 implements AbstractC0124l3 {
     public final /* synthetic */ int a = 0;
     public final /* synthetic */ Object b;
 
@@ -10,14 +10,14 @@ public final /* synthetic */ class r4 implements AbstractC0119l3 {
         this.b = qVar;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(double d) {
         switch (this.a) {
             case 0:
-                AbstractC0135o1.f(this);
+                AbstractC0140o1.f(this);
                 throw null;
             default:
-                AbstractC0135o1.f(this);
+                AbstractC0140o1.f(this);
                 throw null;
         }
     }
@@ -35,10 +35,10 @@ public final /* synthetic */ class r4 implements AbstractC0119l3 {
     public /* synthetic */ void b(Long l) {
         switch (this.a) {
             case 0:
-                AbstractC0135o1.c(this, l);
+                AbstractC0140o1.c(this, l);
                 return;
             default:
-                AbstractC0135o1.c(this, l);
+                AbstractC0140o1.c(this, l);
                 return;
         }
     }
@@ -55,15 +55,15 @@ public final /* synthetic */ class r4 implements AbstractC0119l3 {
         }
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void n(long j) {
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ boolean o() {
         return false;
     }
@@ -72,19 +72,19 @@ public final /* synthetic */ class r4 implements AbstractC0119l3 {
         this.b = y3;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(int i) {
         switch (this.a) {
             case 0:
-                AbstractC0135o1.d(this);
+                AbstractC0140o1.d(this);
                 throw null;
             default:
-                AbstractC0135o1.d(this);
+                AbstractC0140o1.d(this);
                 throw null;
         }
     }
 
-    @Override // j$.util.stream.AbstractC0119l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0124l3, j$.util.function.q
     public final void accept(long j) {
         switch (this.a) {
             case 0:

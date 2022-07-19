@@ -1,5 +1,7 @@
 package com.stripe.android.net;
 
+import com.huawei.hms.framework.common.hianalytics.CrashHianalyticsData;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import com.stripe.android.util.StripeJsonUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,8 +14,8 @@ class ErrorParser {
             stripeError.charge = StripeJsonUtils.optString(jSONObject, "charge");
             stripeError.code = StripeJsonUtils.optString(jSONObject, "code");
             stripeError.decline_code = StripeJsonUtils.optString(jSONObject, "decline_code");
-            stripeError.message = StripeJsonUtils.optString(jSONObject, "message");
-            stripeError.param = StripeJsonUtils.optString(jSONObject, "param");
+            stripeError.message = StripeJsonUtils.optString(jSONObject, CrashHianalyticsData.MESSAGE);
+            stripeError.param = StripeJsonUtils.optString(jSONObject, RemoteMessageConst.MessageBody.PARAM);
             StripeJsonUtils.optString(jSONObject, "type");
         } catch (JSONException unused) {
             stripeError.message = "An improperly formatted error response was found.";

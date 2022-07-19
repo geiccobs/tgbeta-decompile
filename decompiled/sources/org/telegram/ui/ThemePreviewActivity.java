@@ -33,6 +33,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
+import com.huawei.hms.opendevice.c;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -54,10 +55,10 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -1014,7 +1015,7 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
             float f = overrideWallpaperInfo.intensity;
             themeAccent.patternIntensity = f;
             this.currentIntensity = f;
-            if (str != null && !"c".equals(str)) {
+            if (str != null && !c.a.equals(str)) {
                 int size = this.patterns.size();
                 int i2 = 0;
                 while (true) {
@@ -1320,21 +1321,21 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
             org.telegram.ui.ActionBar.AlertDialog$Builder r0 = new org.telegram.ui.ActionBar.AlertDialog$Builder
             android.app.Activity r1 = r7.getParentActivity()
             r0.<init>(r1)
-            r1 = 2131628112(0x7f0e1050, float:1.8883507E38)
+            r1 = 2131628124(0x7f0e105c, float:1.8883532E38)
             java.lang.String r2 = "SaveChangesAlertTitle"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             r0.setTitle(r1)
-            r1 = 2131628111(0x7f0e104f, float:1.8883505E38)
+            r1 = 2131628123(0x7f0e105b, float:1.888353E38)
             java.lang.String r2 = "SaveChangesAlertText"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             r0.setMessage(r1)
-            r1 = 2131628110(0x7f0e104e, float:1.8883503E38)
+            r1 = 2131628122(0x7f0e105a, float:1.8883528E38)
             java.lang.String r2 = "Save"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             org.telegram.ui.ThemePreviewActivity$$ExternalSyntheticLambda1 r2 = new org.telegram.ui.ThemePreviewActivity$$ExternalSyntheticLambda1
             r2.<init>()
             r0.setPositiveButton(r1, r2)
-            r1 = 2131627262(0x7f0e0cfe, float:1.8881783E38)
+            r1 = 2131627272(0x7f0e0d08, float:1.8881804E38)
             java.lang.String r2 = "PassportDiscard"
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r2, r1)
             org.telegram.ui.ThemePreviewActivity$$ExternalSyntheticLambda2 r2 = new org.telegram.ui.ThemePreviewActivity$$ExternalSyntheticLambda2

@@ -71,7 +71,7 @@ public final class PgsDecoder extends SimpleSubtitleDecoder {
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                     cueBuilder.parsePaletteSection(parsableByteArray, readUnsignedShort);
                     break;
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                     cueBuilder.parseBitmapSection(parsableByteArray, readUnsignedShort);
                     break;
                 case R.styleable.MapAttrs_useViewLifecycle /* 22 */:

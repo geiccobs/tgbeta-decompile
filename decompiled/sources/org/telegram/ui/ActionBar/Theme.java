@@ -51,6 +51,7 @@ import android.util.SparseArray;
 import android.util.StateSet;
 import android.view.View;
 import androidx.core.graphics.ColorUtils;
+import com.huawei.hms.opendevice.c;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -81,11 +82,11 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.time.SunDate;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -1482,7 +1483,7 @@ public class Theme {
         }
 
         public boolean isColor() {
-            return "c".equals(this.slug);
+            return c.a.equals(this.slug);
         }
 
         public boolean isTheme() {
@@ -2629,7 +2630,7 @@ public class Theme {
         if (r2 == 1) goto L22;
      */
     /* JADX WARN: Code restructure failed: missing block: B:22:0x005c, code lost:
-        org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawable = org.telegram.messenger.ApplicationLoader.applicationContext.getResources().getDrawable(org.telegram.messenger.R.drawable.newyear);
+        org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawable = org.telegram.messenger.ApplicationLoader.applicationContext.getResources().getDrawable(org.telegram.messenger.beta.R.drawable.newyear);
         org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawableOffsetX = -org.telegram.messenger.AndroidUtilities.dp(3.0f);
         org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawableOffsetY = -org.telegram.messenger.AndroidUtilities.dp(1.0f);
      */
@@ -3146,7 +3147,7 @@ public class Theme {
             Color.colorToHSV(i, tempHSV);
             float[] fArr = tempHSV;
             if (fArr[1] > 0.01f) {
-                fArr[1] = Math.min(1.0f, Math.max(0.0f, fArr[1] + (Theme.isCurrentThemeDark() ? -0.25f : 0.25f)));
+                fArr[1] = Math.min(1.0f, Math.max(0.0f, fArr[1] + (Theme.isCurrentThemeDark() ? 0.25f : -0.25f)));
                 float[] fArr2 = tempHSV;
                 fArr2[2] = Math.min(1.0f, Math.max(0.0f, fArr2[2] + (Theme.isCurrentThemeDark() ? 0.05f : -0.05f)));
             } else {
@@ -6072,7 +6073,7 @@ public class Theme {
     }
 
     @SuppressLint({"DiscouragedPrivateApi"})
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public static void setRippleDrawableForceSoftware(RippleDrawable rippleDrawable) {
         if (rippleDrawable == null) {
             return;

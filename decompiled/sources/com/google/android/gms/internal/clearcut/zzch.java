@@ -3,7 +3,6 @@ package com.google.android.gms.internal.clearcut;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 final class zzch extends zzav<Integer> implements zzcn<Integer> {
     private int size;
@@ -76,7 +75,7 @@ final class zzch extends zzav<Integer> implements zzcn<Integer> {
             return false;
         }
         int i2 = this.size;
-        if (ConnectionsManager.DEFAULT_DATACENTER_ID - i2 < i) {
+        if (Integer.MAX_VALUE - i2 < i) {
             throw new OutOfMemoryError();
         }
         int i3 = i2 + i;

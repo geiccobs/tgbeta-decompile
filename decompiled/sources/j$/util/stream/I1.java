@@ -17,6 +17,6 @@ public final /* synthetic */ class I1 implements j$.util.function.b {
 
     @Override // j$.util.function.BiFunction
     public final Object apply(Object obj, Object obj2) {
-        return new P1((AbstractC0177w1) obj, (AbstractC0177w1) obj2);
+        return new P1((AbstractC0182w1) obj, (AbstractC0182w1) obj2);
     }
 }

@@ -64,12 +64,12 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -527,7 +527,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.recentSearchObjects = new ArrayList<>();
         new LongSparseArray();
         this.showSendersName = true;
-        this.lastOffset = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        this.lastOffset = Integer.MAX_VALUE;
         this.resourcesProvider = resourcesProvider;
         if (context instanceof Activity) {
             this.parentActivity = (Activity) context;
@@ -1945,7 +1945,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             this.lastOffset = childAt.getTop();
             runShadowAnimation(0, false);
         } else {
-            this.lastOffset = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            this.lastOffset = Integer.MAX_VALUE;
             runShadowAnimation(0, true);
             top = i2;
         }

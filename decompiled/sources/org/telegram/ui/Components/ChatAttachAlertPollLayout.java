@@ -29,9 +29,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$MessageEntity;
@@ -484,7 +483,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
             }
             return y + AndroidUtilities.dp(25.0f);
         }
-        return ConnectionsManager.DEFAULT_DATACENTER_ID;
+        return Integer.MAX_VALUE;
     }
 
     @Override // org.telegram.ui.Components.ChatAttachAlert.AttachAlertLayout

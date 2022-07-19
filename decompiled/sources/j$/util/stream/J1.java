@@ -8,6 +8,6 @@ public final /* synthetic */ class J1 implements j$.util.function.r {
 
     @Override // j$.util.function.r
     public final Object apply(long j) {
-        return AbstractC0183x2.p(j);
+        return AbstractC0188x2.p(j);
     }
 }

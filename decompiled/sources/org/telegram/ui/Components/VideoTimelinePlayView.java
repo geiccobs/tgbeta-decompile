@@ -16,7 +16,7 @@ import android.view.View;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 /* loaded from: classes3.dex */
 public class VideoTimelinePlayView extends View {
     public static int TYPE_LEFT = 0;

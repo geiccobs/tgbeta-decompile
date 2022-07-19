@@ -56,6 +56,7 @@ import android.text.TextUtils;
 import android.util.LruCache;
 import android.view.KeyEvent;
 import android.widget.Toast;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -87,13 +88,13 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.StatsController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.voip.Instance;
 import org.telegram.messenger.voip.NativeInstance;
 import org.telegram.messenger.voip.VoIPController;
@@ -2642,7 +2643,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
     }
 
     /* JADX WARN: Type inference failed for: r0v6, types: [org.telegram.messenger.AccountInstance, java.lang.String] */
-    /* JADX WARN: Type inference failed for: r0v8, types: [int, java.lang.String] */
+    /* JADX WARN: Type inference failed for: r0v8, types: [java.lang.String, int] */
     public /* synthetic */ void lambda$createGroupInstance$45(final int i, final long j, long j2, final int i2, final int i3) {
         StringBuilder sb;
         if (i != 0) {
@@ -4014,7 +4015,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
         return LaunchActivity.class;
     }
 
-    @TargetApi(26)
+    @TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
     public CallConnection getConnectionAndStartCall() {
         if (this.systemCallConnection == null) {
             if (BuildVars.LOGS_ENABLED) {
@@ -4713,7 +4714,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
     */
     private void showIncomingNotification(java.lang.String r19, java.lang.CharSequence r20, org.telegram.tgnet.TLObject r21, boolean r22, int r23) {
         /*
-            Method dump skipped, instructions count: 846
+            Method dump skipped, instructions count: 847
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.voip.VoIPService.showIncomingNotification(java.lang.String, java.lang.CharSequence, org.telegram.tgnet.TLObject, boolean, int):void");
@@ -5149,7 +5150,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
         return this.remoteVideoState;
     }
 
-    @TargetApi(26)
+    @TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
     private PhoneAccountHandle addAccountToTelecomManager() {
         TLRPC$User currentUser = UserConfig.getInstance(this.currentAccount).getCurrentUser();
         ComponentName componentName = new ComponentName(this, TelegramConnectionService.class);

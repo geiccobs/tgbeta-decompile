@@ -23,8 +23,8 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -523,7 +523,7 @@ public class TrendingStickersLayout extends FrameLayout implements NotificationC
             }
         } else if (i != NotificationCenter.featuredStickersDidLoad) {
         } else {
-            if (this.hash != MediaDataController.getInstance(this.currentAccount).getFeaturesStickersHashWithoutUnread()) {
+            if (this.hash != MediaDataController.getInstance(this.currentAccount).getFeaturedStickersHashWithoutUnread(false)) {
                 this.loaded = false;
             }
             if (this.loaded) {
@@ -956,7 +956,7 @@ public class TrendingStickersLayout extends FrameLayout implements NotificationC
             }
             if (this.totalItems != 0) {
                 TrendingStickersLayout.this.loaded = true;
-                TrendingStickersLayout.this.hash = mediaDataController.getFeaturesStickersHashWithoutUnread();
+                TrendingStickersLayout.this.hash = mediaDataController.getFeaturedStickersHashWithoutUnread(false);
             }
             notifyDataSetChanged();
         }

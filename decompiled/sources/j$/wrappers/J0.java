@@ -20,7 +20,7 @@ public final /* synthetic */ class J0 {
     }
 
     public BiConsumer a() {
-        return C0227q.a(this.a.accumulator());
+        return C0232q.a(this.a.accumulator());
     }
 
     public Set b() {
@@ -28,7 +28,7 @@ public final /* synthetic */ class J0 {
     }
 
     public j$.util.function.b c() {
-        return C0230u.a(this.a.combiner());
+        return C0235u.a(this.a.combiner());
     }
 
     public Function e() {

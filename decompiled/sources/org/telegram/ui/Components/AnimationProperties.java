@@ -5,6 +5,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.Property;
 import android.view.animation.OvershootInterpolator;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.PhotoViewer;
 /* loaded from: classes3.dex */
@@ -66,7 +67,7 @@ public class AnimationProperties {
     };
 
     static {
-        new IntProperty<Paint>("color") { // from class: org.telegram.ui.Components.AnimationProperties.2
+        new IntProperty<Paint>(RemoteMessageConst.Notification.COLOR) { // from class: org.telegram.ui.Components.AnimationProperties.2
             public void setValue(Paint paint, int i) {
                 paint.setColor(i);
             }

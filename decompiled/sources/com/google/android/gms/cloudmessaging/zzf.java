@@ -15,6 +15,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.stats.ConnectionTracker;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -237,7 +238,7 @@ public final class zzf implements ServiceConnection {
                     Bundle bundle = new Bundle();
                     bundle.putBoolean("oneWay", poll.zza());
                     bundle.putString("pkg", zza.getPackageName());
-                    bundle.putBundle("data", poll.zzd);
+                    bundle.putBundle(RemoteMessageConst.DATA, poll.zzd);
                     obtain.setData(bundle);
                     try {
                         zzfVar.zzc.zza(obtain);

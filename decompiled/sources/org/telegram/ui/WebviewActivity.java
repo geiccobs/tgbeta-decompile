@@ -21,6 +21,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import com.huawei.hms.framework.common.ContainerUtils;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
@@ -30,8 +31,8 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -389,7 +390,7 @@ public class WebviewActivity extends BaseFragment {
                 if (substring.indexOf(61) < 0 && substring.indexOf(63) < 0) {
                     str4 = substring.length() > 0 ? str + "?" + ((Object) sb2) : str + ((Object) sb2);
                 }
-                str4 = str + "&" + ((Object) sb2);
+                str4 = str + ContainerUtils.FIELD_DELIMITER + ((Object) sb2);
             }
             SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putInt(((Object) sb) + "_date", (int) (System.currentTimeMillis() / 1000));

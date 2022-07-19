@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 import androidx.annotation.Keep;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -122,7 +123,7 @@ public class EditTextBoldCursor extends EditTextEffects {
     }
 
     @Override // android.widget.TextView, android.view.View
-    @TargetApi(26)
+    @TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
     public int getAutofillType() {
         return 0;
     }
@@ -336,7 +337,7 @@ public class EditTextBoldCursor extends EditTextEffects {
                 }
                 Field field = mCursorDrawableResField;
                 if (field != null) {
-                    field.set(this, Integer.valueOf((int) R.drawable.field_carret_empty));
+                    field.set(this, Integer.valueOf((int) org.telegram.messenger.beta.R.drawable.field_carret_empty));
                 }
             } catch (Throwable unused5) {
             }
@@ -423,7 +424,7 @@ public class EditTextBoldCursor extends EditTextEffects {
 
     public void setLineColors(int i, int i2, int i3) {
         this.lineVisible = true;
-        getContext().getResources().getDrawable(R.drawable.search_dark).getPadding(this.padding);
+        getContext().getResources().getDrawable(org.telegram.messenger.beta.R.drawable.search_dark).getPadding(this.padding);
         android.graphics.Rect rect = this.padding;
         setPadding(rect.left, rect.top, rect.right, rect.bottom);
         this.lineColor = i;

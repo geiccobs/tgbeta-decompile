@@ -1,6 +1,7 @@
 package org.telegram.messenger;
 
 import android.os.Build;
+import com.huawei.hms.android.HwBuildEx;
 import java.lang.reflect.Field;
 /* loaded from: classes.dex */
 public class OneUIUtilities {
@@ -28,8 +29,8 @@ public class OneUIUtilities {
         }
         int i = intValue - 90000;
         oneUIEncodedVersion = i;
-        oneUIMajorVersion = i / 10000;
-        oneUIMinorVersion = (i % 10000) / 100.0f;
+        oneUIMajorVersion = i / HwBuildEx.VersionCodes.CUR_DEVELOPMENT;
+        oneUIMinorVersion = (i % HwBuildEx.VersionCodes.CUR_DEVELOPMENT) / 100.0f;
         isOneUI = Boolean.TRUE;
         return isOneUI.booleanValue();
     }

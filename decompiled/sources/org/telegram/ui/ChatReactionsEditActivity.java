@@ -15,7 +15,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$ChatFull;
 import org.telegram.tgnet.TLRPC$TL_availableReaction;
@@ -148,7 +148,7 @@ public class ChatReactionsEditActivity extends BaseFragment implements Notificat
             public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
                 if (i != 0) {
                     if (i != 1) {
-                        return new RecyclerListView.Holder(new AvailableReactionCell(context, false));
+                        return new RecyclerListView.Holder(new AvailableReactionCell(context, false, false));
                     }
                     return new RecyclerListView.Holder(new HeaderCell(context, 23));
                 }
@@ -169,7 +169,7 @@ public class ChatReactionsEditActivity extends BaseFragment implements Notificat
                 } else if (itemViewType != 2) {
                 } else {
                     TLRPC$TL_availableReaction tLRPC$TL_availableReaction = (TLRPC$TL_availableReaction) ChatReactionsEditActivity.this.availableReactions.get(i - 2);
-                    ((AvailableReactionCell) viewHolder.itemView).bind(tLRPC$TL_availableReaction, ChatReactionsEditActivity.this.chatReactions.contains(tLRPC$TL_availableReaction.reaction));
+                    ((AvailableReactionCell) viewHolder.itemView).bind(tLRPC$TL_availableReaction, ChatReactionsEditActivity.this.chatReactions.contains(tLRPC$TL_availableReaction.reaction), ((BaseFragment) ChatReactionsEditActivity.this).currentAccount);
                 }
             }
 

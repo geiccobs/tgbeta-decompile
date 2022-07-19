@@ -7,6 +7,7 @@ import android.media.AudioRecord;
 import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Process;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -302,7 +303,7 @@ public class WebRtcAudioRecord {
         return -1;
     }
 
-    @TargetApi(29)
+    @TargetApi(AvailableCode.HMS_IS_SPOOF)
     public void initDeviceAudioRecord(MediaProjection mediaProjection) {
         if (Build.VERSION.SDK_INT < 29) {
             return;
@@ -349,7 +350,7 @@ public class WebRtcAudioRecord {
         }
     }
 
-    @TargetApi(29)
+    @TargetApi(AvailableCode.HMS_IS_SPOOF)
     public void stopDeviceAudioRecord() {
         AudioRecord audioRecord = this.deviceAudioRecord;
         if (audioRecord == null) {

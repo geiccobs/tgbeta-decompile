@@ -3,6 +3,7 @@ package com.google.android.exoplayer2.extractor.ogg;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.ogg.StreamReader;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.huawei.hms.android.HwBuildEx;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -73,6 +74,6 @@ final class OpusReader extends StreamReader {
         }
         int i4 = i >> 3;
         int i5 = i4 & 3;
-        return i3 * (i4 >= 16 ? 2500 << i5 : i4 >= 12 ? 10000 << (i5 & 1) : i5 == 3 ? 60000 : 10000 << i5);
+        return i3 * (i4 >= 16 ? 2500 << i5 : i4 >= 12 ? HwBuildEx.VersionCodes.CUR_DEVELOPMENT << (i5 & 1) : i5 == 3 ? 60000 : HwBuildEx.VersionCodes.CUR_DEVELOPMENT << i5);
     }
 }

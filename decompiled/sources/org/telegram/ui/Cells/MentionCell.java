@@ -2,6 +2,7 @@ package org.telegram.ui.Cells;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -9,18 +10,21 @@ import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MediaDataController;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$ChatPhoto;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.tgnet.TLRPC$UserProfilePhoto;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 /* loaded from: classes3.dex */
 public class MentionCell extends LinearLayout {
     private AvatarDrawable avatarDrawable;
+    private Drawable emojiDrawable;
     private BackupImageView imageView;
     private TextView nameTextView;
     private boolean needsDivider = false;
@@ -29,6 +33,7 @@ public class MentionCell extends LinearLayout {
 
     public MentionCell(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
+        this.resourcesProvider = resourcesProvider;
         setOrientation(0);
         AvatarDrawable avatarDrawable = new AvatarDrawable();
         this.avatarDrawable = avatarDrawable;
@@ -127,6 +132,7 @@ public class MentionCell extends LinearLayout {
     }
 
     public void setText(String str) {
+        resetEmojiSuggestion();
         this.imageView.setVisibility(4);
         this.usernameTextView.setVisibility(4);
         this.nameTextView.setText(str);
@@ -138,18 +144,66 @@ public class MentionCell extends LinearLayout {
         this.nameTextView.invalidate();
     }
 
+    public void resetEmojiSuggestion() {
+        this.nameTextView.setPadding(0, 0, 0, 0);
+        Drawable drawable = this.emojiDrawable;
+        if (drawable instanceof AnimatedEmojiDrawable) {
+            ((AnimatedEmojiDrawable) drawable).removeView(this);
+            this.emojiDrawable = null;
+        }
+    }
+
     public void setEmojiSuggestion(MediaDataController.KeywordResult keywordResult) {
         this.imageView.setVisibility(4);
         this.usernameTextView.setVisibility(4);
-        StringBuilder sb = new StringBuilder(keywordResult.emoji.length() + keywordResult.keyword.length() + 4);
-        sb.append(keywordResult.emoji);
-        sb.append("   :");
-        sb.append(keywordResult.keyword);
-        TextView textView = this.nameTextView;
-        textView.setText(Emoji.replaceEmoji(sb, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false));
+        String str = keywordResult.emoji;
+        if (str != null && str.startsWith("animated_")) {
+            try {
+                Drawable drawable = this.emojiDrawable;
+                if (drawable instanceof AnimatedEmojiDrawable) {
+                    ((AnimatedEmojiDrawable) drawable).removeView(this);
+                }
+                AnimatedEmojiDrawable make = AnimatedEmojiDrawable.make(UserConfig.selectedAccount, 1, Long.parseLong(keywordResult.emoji.substring(9)));
+                this.emojiDrawable = make;
+                make.addView(this);
+            } catch (Exception unused) {
+                this.emojiDrawable = Emoji.getEmojiDrawable(keywordResult.emoji);
+            }
+        } else {
+            this.emojiDrawable = Emoji.getEmojiDrawable(keywordResult.emoji);
+        }
+        if (this.emojiDrawable == null) {
+            this.nameTextView.setPadding(0, 0, 0, 0);
+            TextView textView = this.nameTextView;
+            StringBuilder sb = new StringBuilder();
+            sb.append(keywordResult.emoji);
+            sb.append(":  ");
+            sb.append(keywordResult.keyword);
+            textView.setText(sb);
+            return;
+        }
+        this.nameTextView.setPadding(AndroidUtilities.dp(22.0f), 0, 0, 0);
+        TextView textView2 = this.nameTextView;
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append(":  ");
+        sb2.append(keywordResult.keyword);
+        textView2.setText(sb2);
+    }
+
+    @Override // android.view.ViewGroup, android.view.View
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        Drawable drawable = this.emojiDrawable;
+        if (drawable != null) {
+            int dp = AndroidUtilities.dp(drawable instanceof AnimatedEmojiDrawable ? 24.0f : 20.0f);
+            int dp2 = AndroidUtilities.dp(this.emojiDrawable instanceof AnimatedEmojiDrawable ? -2.0f : 0.0f);
+            this.emojiDrawable.setBounds(this.nameTextView.getLeft() + dp2, ((this.nameTextView.getTop() + this.nameTextView.getBottom()) - dp) / 2, this.nameTextView.getLeft() + dp2 + dp, ((this.nameTextView.getTop() + this.nameTextView.getBottom()) + dp) / 2);
+            this.emojiDrawable.draw(canvas);
+        }
     }
 
     public void setBotCommand(String str, String str2, TLRPC$User tLRPC$User) {
+        resetEmojiSuggestion();
         if (tLRPC$User != null) {
             this.imageView.setVisibility(0);
             this.avatarDrawable.setInfo(tLRPC$User);
@@ -182,5 +236,23 @@ public class MentionCell extends LinearLayout {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
         Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
         return color != null ? color.intValue() : Theme.getColor(str);
+    }
+
+    @Override // android.view.ViewGroup, android.view.View
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Drawable drawable = this.emojiDrawable;
+        if (drawable instanceof AnimatedEmojiDrawable) {
+            ((AnimatedEmojiDrawable) drawable).removeView(this);
+        }
+    }
+
+    @Override // android.view.ViewGroup, android.view.View
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Drawable drawable = this.emojiDrawable;
+        if (drawable instanceof AnimatedEmojiDrawable) {
+            ((AnimatedEmojiDrawable) drawable).addView(this);
+        }
     }
 }

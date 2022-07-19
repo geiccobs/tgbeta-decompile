@@ -57,13 +57,13 @@ public class MessageContainsEmojiButton extends FrameLayout implements Notificat
     }
 
     /* JADX WARN: Code restructure failed: missing block: B:29:0x00ec, code lost:
-        r0 = null;
+        r5 = null;
      */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public MessageContainsEmojiButton(int r11, android.content.Context r12, org.telegram.ui.ActionBar.Theme.ResourcesProvider r13, java.util.ArrayList<org.telegram.tgnet.TLRPC$InputStickerSet> r14) {
+    public MessageContainsEmojiButton(int r12, android.content.Context r13, org.telegram.ui.ActionBar.Theme.ResourcesProvider r14, java.util.ArrayList<org.telegram.tgnet.TLRPC$InputStickerSet> r15) {
         /*
             Method dump skipped, instructions count: 391
             To view this dump add '--comments-level debug' option
@@ -185,7 +185,7 @@ public class MessageContainsEmojiButton extends FrameLayout implements Notificat
     */
     public void didReceivedNotification(int r8, int r9, java.lang.Object... r10) {
         /*
-            Method dump skipped, instructions count: 349
+            Method dump skipped, instructions count: 361
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.MessageContainsEmojiButton.didReceivedNotification(int, int, java.lang.Object[]):void");

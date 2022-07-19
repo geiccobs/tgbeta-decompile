@@ -1,5 +1,6 @@
 package org.telegram.messenger;
 
+import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -144,7 +145,7 @@ public class LruCache<T> {
         if (sizeOf >= 0) {
             return sizeOf;
         }
-        throw new IllegalStateException("Negative size: " + str + "=" + t);
+        throw new IllegalStateException("Negative size: " + str + ContainerUtils.KEY_VALUE_DELIMITER + t);
     }
 
     public final void evictAll() {

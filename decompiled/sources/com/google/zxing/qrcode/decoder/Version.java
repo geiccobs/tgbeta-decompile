@@ -67,7 +67,7 @@ public final class Version {
     public static Version decodeVersionInformation(int i) {
         int i2 = 0;
         int i3 = 0;
-        int i4 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i4 = Integer.MAX_VALUE;
         while (true) {
             int[] iArr = VERSION_DECODE_INFO;
             if (i2 >= iArr.length) {

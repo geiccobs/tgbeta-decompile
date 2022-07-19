@@ -1,6 +1,7 @@
 package com.google.android.gms.internal.vision;
 
 import com.google.android.gms.internal.vision.zzjb;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -270,19 +271,19 @@ public final class zzko<T> implements zzlc<T> {
                     i3 = (i3 * 53) + i6;
                     break;
                 case 18:
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                 case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 case 24:
-                case 25:
-                case 26:
-                case 27:
-                case 28:
-                case 29:
-                case 30:
-                case 31:
+                case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
+                case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
+                case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
+                case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
+                case AvailableCode.HMS_IS_SPOOF /* 29 */:
+                case AvailableCode.USER_ALREADY_KNOWS_SERVICE_UNAVAILABLE /* 30 */:
+                case AvailableCode.CURRENT_SHOWING_SERVICE_UNAVAILABLE /* 31 */:
                 case ConnectionsManager.RequestFlagForceDownload /* 32 */:
                 case 33:
                 case 34:
@@ -621,19 +622,19 @@ public final class zzko<T> implements zzlc<T> {
                     zza(t, t2, i);
                     break;
                 case 18:
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                 case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 case 24:
-                case 25:
-                case 26:
-                case 27:
-                case 28:
-                case 29:
-                case 30:
-                case 31:
+                case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
+                case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
+                case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
+                case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
+                case AvailableCode.HMS_IS_SPOOF /* 29 */:
+                case AvailableCode.USER_ALREADY_KNOWS_SERVICE_UNAVAILABLE /* 30 */:
+                case AvailableCode.CURRENT_SHOWING_SERVICE_UNAVAILABLE /* 31 */:
                 case ConnectionsManager.RequestFlagForceDownload /* 32 */:
                 case 33:
                 case 34:
@@ -943,13 +944,13 @@ public final class zzko<T> implements zzlc<T> {
                     case 18:
                         zzb3 = zzle.zzi(i17, zza(t, j2), false);
                         break;
-                    case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                    case 19:
                         zzb3 = zzle.zzh(i17, zza(t, j2), false);
                         break;
                     case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                         zzb3 = zzle.zza(i17, (List<Long>) zza(t, j2), false);
                         break;
-                    case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                    case 21:
                         zzb3 = zzle.zzb(i17, (List<Long>) zza(t, j2), false);
                         break;
                     case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
@@ -961,25 +962,25 @@ public final class zzko<T> implements zzlc<T> {
                     case 24:
                         zzb3 = zzle.zzh(i17, zza(t, j2), false);
                         break;
-                    case 25:
+                    case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
                         zzb3 = zzle.zzj(i17, zza(t, j2), false);
                         break;
-                    case 26:
+                    case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
                         zzb3 = zzle.zza(i17, zza(t, j2));
                         break;
-                    case 27:
+                    case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
                         zzb3 = zzle.zza(i17, zza(t, j2), zza(i14));
                         break;
-                    case 28:
+                    case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
                         zzb3 = zzle.zzb(i17, zza(t, j2));
                         break;
-                    case 29:
+                    case AvailableCode.HMS_IS_SPOOF /* 29 */:
                         zzb3 = zzle.zzf(i17, zza(t, j2), false);
                         break;
-                    case 30:
+                    case AvailableCode.USER_ALREADY_KNOWS_SERVICE_UNAVAILABLE /* 30 */:
                         zzb3 = zzle.zzd(i17, zza(t, j2), false);
                         break;
-                    case 31:
+                    case AvailableCode.CURRENT_SHOWING_SERVICE_UNAVAILABLE /* 31 */:
                         zzb3 = zzle.zzh(i17, zza(t, j2), false);
                         break;
                     case ConnectionsManager.RequestFlagForceDownload /* 32 */:
@@ -1537,7 +1538,7 @@ public final class zzko<T> implements zzlc<T> {
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                     i4 = zzle.zzh(i23, (List) unsafe2.getObject(t, j3), false);
                     i20 += i4;
                     j = 0;
@@ -1551,7 +1552,7 @@ public final class zzko<T> implements zzlc<T> {
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                     i4 = zzle.zzb(i23, (List<Long>) unsafe2.getObject(t, j3), false);
                     i20 += i4;
                     j = 0;
@@ -1579,49 +1580,49 @@ public final class zzko<T> implements zzlc<T> {
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 25:
+                case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
                     i4 = zzle.zzj(i23, (List) unsafe2.getObject(t, j3), false);
                     i20 += i4;
                     j = 0;
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 26:
+                case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
                     zzb2 = zzle.zza(i23, (List) unsafe2.getObject(t, j3));
                     i20 += zzb2;
                     j = 0;
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 27:
+                case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
                     zzb2 = zzle.zza(i23, (List<?>) unsafe2.getObject(t, j3), zza(i19));
                     i20 += zzb2;
                     j = 0;
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 28:
+                case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
                     zzb2 = zzle.zzb(i23, (List) unsafe2.getObject(t, j3));
                     i20 += zzb2;
                     j = 0;
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 29:
+                case AvailableCode.HMS_IS_SPOOF /* 29 */:
                     zzb2 = zzle.zzf(i23, (List) unsafe2.getObject(t, j3), false);
                     i20 += zzb2;
                     j = 0;
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 30:
+                case AvailableCode.USER_ALREADY_KNOWS_SERVICE_UNAVAILABLE /* 30 */:
                     i4 = zzle.zzd(i23, (List) unsafe2.getObject(t, j3), false);
                     i20 += i4;
                     j = 0;
                     i19 += 3;
                     i12 = 1048575;
                     i13 = 1;
-                case 31:
+                case AvailableCode.CURRENT_SHOWING_SERVICE_UNAVAILABLE /* 31 */:
                     i4 = zzle.zzh(i23, (List) unsafe2.getObject(t, j3), false);
                     i20 += i4;
                     j = 0;

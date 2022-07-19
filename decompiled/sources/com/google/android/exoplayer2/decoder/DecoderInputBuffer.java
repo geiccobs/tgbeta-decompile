@@ -1,5 +1,6 @@
 package com.google.android.exoplayer2.decoder;
 
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.nio.ByteBuffer;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 /* loaded from: classes.dex */
@@ -29,7 +30,7 @@ public class DecoderInputBuffer extends Buffer {
         }
     }
 
-    @EnsuresNonNull({"data"})
+    @EnsuresNonNull({RemoteMessageConst.DATA})
     public void ensureSpaceForWrite(int i) {
         ByteBuffer byteBuffer = this.data;
         if (byteBuffer == null) {

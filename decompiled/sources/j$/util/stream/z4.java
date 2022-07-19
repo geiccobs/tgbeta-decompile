@@ -1,6 +1,6 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0034a;
+import j$.util.AbstractC0039a;
 import java.util.Comparator;
 /* loaded from: classes2.dex */
 public abstract class z4 extends D4 implements j$.util.w {
@@ -45,12 +45,12 @@ public abstract class z4 extends D4 implements j$.util.w {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0034a.e(this);
+        return AbstractC0039a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0034a.f(this, i);
+        return AbstractC0039a.f(this, i);
     }
 
     @Override // j$.util.w
@@ -77,7 +77,7 @@ public abstract class z4 extends D4 implements j$.util.w {
         return ((j$.util.w) this.c).tryAdvance(obj);
     }
 
-    public z4(j$.util.w wVar, long j, long j2, long j3, long j4, AbstractC0135o1 abstractC0135o1) {
+    public z4(j$.util.w wVar, long j, long j2, long j3, long j4, AbstractC0140o1 abstractC0140o1) {
         super(wVar, j, j2, j3, j4);
     }
 }

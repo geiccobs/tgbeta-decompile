@@ -20,7 +20,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DownloadController;
@@ -31,9 +33,9 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Document;
@@ -58,6 +60,7 @@ import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.LaunchActivity;
 /* loaded from: classes3.dex */
 public class ChatActionCell extends BaseCell implements DownloadController.FileDownloadProgressListener, NotificationCenter.NotificationCenterDelegate {
+    private static Map<Integer, String> monthsToEmoticon;
     private int TAG;
     private SpannableStringBuilder accessibilityText;
     private AvatarDrawable avatarDrawable;
@@ -177,6 +180,16 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     public void onProgressUpload(String str, long j, long j2, boolean z) {
     }
 
+    static {
+        HashMap hashMap = new HashMap();
+        monthsToEmoticon = hashMap;
+        hashMap.put(1, "1⃣");
+        monthsToEmoticon.put(3, "2⃣");
+        monthsToEmoticon.put(6, "3⃣");
+        monthsToEmoticon.put(12, "4⃣");
+        monthsToEmoticon.put(24, "5⃣");
+    }
+
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
     public void didReceivedNotification(int i, int i2, Object... objArr) {
         MessageObject messageObject;
@@ -197,7 +210,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     }
 
     public /* synthetic */ void lambda$new$0(ImageReceiver imageReceiver, boolean z, boolean z2, boolean z3) {
-        final RLottieDrawable lottieAnimation;
+        RLottieDrawable lottieAnimation;
         ChatActionCellDelegate chatActionCellDelegate;
         if (!z || (lottieAnimation = this.imageReceiver.getLottieAnimation()) == null) {
             return;
@@ -217,12 +230,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
                 chatActionCellDelegate.needShowEffectOverlay(this, this.giftSticker, tLRPC$VideoSize);
             }
             lottieAnimation.setCurrentFrame(0, false);
-            AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Cells.ChatActionCell$$ExternalSyntheticLambda2
-                @Override // java.lang.Runnable
-                public final void run() {
-                    RLottieDrawable.this.start();
-                }
-            });
+            AndroidUtilities.runOnUIThread(new ChatActionCell$$ExternalSyntheticLambda2(lottieAnimation));
             return;
         }
         lottieAnimation.stop();
@@ -348,16 +356,15 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         this.overrideText = str2;
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:100:0x00e0, code lost:
-        continue;
-     */
+    /* JADX WARN: Removed duplicated region for block: B:95:0x0225  */
+    /* JADX WARN: Removed duplicated region for block: B:96:0x0244  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void setMessageObject(org.telegram.messenger.MessageObject r32) {
+    public void setMessageObject(org.telegram.messenger.MessageObject r18) {
         /*
-            Method dump skipped, instructions count: 658
+            Method dump skipped, instructions count: 666
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatActionCell.setMessageObject(org.telegram.messenger.MessageObject):void");
@@ -427,8 +434,8 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         invalidate();
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:66:0x00e9  */
-    /* JADX WARN: Removed duplicated region for block: B:92:0x015e  */
+    /* JADX WARN: Removed duplicated region for block: B:66:0x00e3  */
+    /* JADX WARN: Removed duplicated region for block: B:92:0x0156  */
     /* JADX WARN: Removed duplicated region for block: B:94:? A[RETURN, SYNTHETIC] */
     @Override // android.view.View
     @android.annotation.SuppressLint({"ClickableViewAccessibility"})
@@ -436,9 +443,9 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public boolean onTouchEvent(android.view.MotionEvent r10) {
+    public boolean onTouchEvent(android.view.MotionEvent r11) {
         /*
-            Method dump skipped, instructions count: 355
+            Method dump skipped, instructions count: 347
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatActionCell.onTouchEvent(android.view.MotionEvent):boolean");
@@ -551,9 +558,8 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             buildLayout();
         }
         int i4 = 0;
-        MessageObject messageObject2 = this.currentMessageObject;
-        if (messageObject2 != null) {
-            int i5 = messageObject2.type;
+        if (messageObject != null) {
+            int i5 = messageObject.type;
             if (i5 == 11) {
                 i3 = AndroidUtilities.roundMessageSize;
                 dp = AndroidUtilities.dp(10.0f);
@@ -564,8 +570,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             i4 = i3 + dp;
         }
         setMeasuredDimension(max, this.textHeight + i4 + AndroidUtilities.dp(14.0f));
-        MessageObject messageObject3 = this.currentMessageObject;
-        if (messageObject3 == null || messageObject3.type != 18) {
+        if (messageObject == null || messageObject.type != 18) {
             return;
         }
         float dp2 = this.textY + this.textHeight + (this.giftRectSize * 0.075f) + this.stickerSize + AndroidUtilities.dp(4.0f) + this.giftPremiumTitleLayout.getHeight() + AndroidUtilities.dp(4.0f) + this.giftPremiumSubtitleLayout.getHeight();
@@ -603,15 +608,14 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             charSequence = this.customText;
         }
         createLayout(charSequence, this.previousWidth);
-        MessageObject messageObject2 = this.currentMessageObject;
-        if (messageObject2 != null) {
-            int i = messageObject2.type;
+        if (messageObject != null) {
+            int i = messageObject.type;
             if (i == 11) {
                 int i2 = AndroidUtilities.roundMessageSize;
                 this.imageReceiver.setImageCoords((this.previousWidth - AndroidUtilities.roundMessageSize) / 2.0f, this.textHeight + AndroidUtilities.dp(19.0f), i2, i2);
             } else if (i != 18) {
             } else {
-                createGiftPremiumLayouts(LocaleController.getString((int) R.string.ActionGiftPremiumTitle), LocaleController.formatString(R.string.ActionGiftPremiumSubtitle, LocaleController.formatPluralString("Months", this.currentMessageObject.messageOwner.action.months, new Object[0])), LocaleController.getString((int) R.string.ActionGiftPremiumView), this.giftRectSize);
+                createGiftPremiumLayouts(LocaleController.getString((int) R.string.ActionGiftPremiumTitle), LocaleController.formatString(R.string.ActionGiftPremiumSubtitle, LocaleController.formatPluralString("Months", messageObject.messageOwner.action.months, new Object[0])), LocaleController.getString((int) R.string.ActionGiftPremiumView), this.giftRectSize);
             }
         }
     }
@@ -661,8 +665,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
                 }
             }
         }
-        MessageObject messageObject2 = this.currentMessageObject;
-        if (messageObject2 != null && ((i = messageObject2.type) == 11 || i == 18)) {
+        if (messageObject != null && ((i = messageObject.type) == 11 || i == 18)) {
             this.imageReceiver.draw(canvas);
         }
         if (this.textLayout == null) {
@@ -685,8 +688,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             }
             canvas.restore();
         }
-        MessageObject messageObject3 = this.currentMessageObject;
-        if (messageObject3 == null || messageObject3.type != 18) {
+        if (messageObject == null || messageObject.type != 18) {
             return;
         }
         canvas.save();
@@ -974,14 +976,14 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             if (i >= size) {
                 break;
             }
-            TLRPC$PhotoSize tLRPC$PhotoSize2 = this.currentMessageObject.photoThumbs.get(i);
+            TLRPC$PhotoSize tLRPC$PhotoSize2 = messageObject.photoThumbs.get(i);
             if (tLRPC$PhotoSize2 instanceof TLRPC$TL_photoStrippedSize) {
                 tLRPC$PhotoSize = tLRPC$PhotoSize2;
                 break;
             }
             i++;
         }
-        this.imageReceiver.setImage(this.currentVideoLocation, ImageLoader.AUTOPLAY_FILTER, ImageLocation.getForObject(tLRPC$PhotoSize, this.currentMessageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, this.currentMessageObject, 1);
+        this.imageReceiver.setImage(this.currentVideoLocation, ImageLoader.AUTOPLAY_FILTER, ImageLocation.getForObject(tLRPC$PhotoSize, messageObject.photoThumbsObject), "50_50_b", this.avatarDrawable, 0L, null, messageObject, 1);
         DownloadController.getInstance(this.currentAccount).removeLoadingFileObserver(this);
     }
 
@@ -994,9 +996,10 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
         CharacterStyle[] characterStyleArr;
         super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
-        if (!TextUtils.isEmpty(this.customText) || this.currentMessageObject != null) {
+        MessageObject messageObject = this.currentMessageObject;
+        if (!TextUtils.isEmpty(this.customText) || messageObject != null) {
             if (this.accessibilityText == null) {
-                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(!TextUtils.isEmpty(this.customText) ? this.customText : this.currentMessageObject.messageText);
+                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(!TextUtils.isEmpty(this.customText) ? this.customText : messageObject.messageText);
                 for (final CharacterStyle characterStyle : (CharacterStyle[]) spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ClickableSpan.class)) {
                     int spanStart = spannableStringBuilder.getSpanStart(characterStyle);
                     int spanEnd = spannableStringBuilder.getSpanEnd(characterStyle);

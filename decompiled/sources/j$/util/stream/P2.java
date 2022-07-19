@@ -5,8 +5,8 @@ class P2 extends U2 {
     final /* synthetic */ long c;
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public P2(EnumC0078e4 enumC0078e4, j$.util.function.o oVar, long j) {
-        super(enumC0078e4);
+    public P2(EnumC0083e4 enumC0083e4, j$.util.function.o oVar, long j) {
+        super(enumC0083e4);
         this.b = oVar;
         this.c = j;
     }

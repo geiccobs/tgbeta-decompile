@@ -13,6 +13,7 @@ import com.googlecode.mp4parser.boxes.mp4.objectdescriptors.AudioSpecificConfig;
 import com.googlecode.mp4parser.boxes.mp4.objectdescriptors.DecoderConfigDescriptor;
 import com.googlecode.mp4parser.boxes.mp4.objectdescriptors.ESDescriptor;
 import com.googlecode.mp4parser.boxes.mp4.objectdescriptors.SLConfigDescriptor;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import com.mp4parser.iso14496.part15.AvcConfigurationBox;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class Track {
         samplingFrequencyIndexMap.put(16000, 8);
         samplingFrequencyIndexMap.put(12000, 9);
         samplingFrequencyIndexMap.put(11025, 10);
-        samplingFrequencyIndexMap.put(8000, 11);
+        samplingFrequencyIndexMap.put(Integer.valueOf((int) JosStatusCodes.RTN_CODE_COMMON_ERROR), 11);
     }
 
     public Track(int i, MediaFormat mediaFormat, boolean z) {

@@ -16,6 +16,7 @@ import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.util.ClientLibraryUtils;
 import com.google.android.gms.signin.SignInOptions;
 import com.google.android.gms.signin.zae;
+import com.huawei.hms.framework.network.grs.GrsBaseInfo;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -90,7 +91,7 @@ public final class zaar extends GoogleApiClient implements zabn {
     }
 
     private static String zab(int i) {
-        return i != 1 ? i != 2 ? i != 3 ? "UNKNOWN" : "SIGN_IN_MODE_NONE" : "SIGN_IN_MODE_OPTIONAL" : "SIGN_IN_MODE_REQUIRED";
+        return i != 1 ? i != 2 ? i != 3 ? GrsBaseInfo.CountryCodeSource.UNKNOWN : "SIGN_IN_MODE_NONE" : "SIGN_IN_MODE_OPTIONAL" : "SIGN_IN_MODE_REQUIRED";
     }
 
     @Override // com.google.android.gms.common.api.GoogleApiClient

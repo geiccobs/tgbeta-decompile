@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ class MediaCodecUtils {
         return !isSoftwareOnly(mediaCodecInfo);
     }
 
-    @TargetApi(29)
+    @TargetApi(AvailableCode.HMS_IS_SPOOF)
     private static boolean isHardwareAcceleratedQOrHigher(MediaCodecInfo mediaCodecInfo) {
         return mediaCodecInfo.isHardwareAccelerated();
     }
@@ -141,7 +142,7 @@ class MediaCodecUtils {
         return false;
     }
 
-    @TargetApi(29)
+    @TargetApi(AvailableCode.HMS_IS_SPOOF)
     private static boolean isSoftwareOnlyQOrHigher(MediaCodecInfo mediaCodecInfo) {
         return mediaCodecInfo.isSoftwareOnly();
     }

@@ -23,7 +23,7 @@ public class ScrollableHorizontalScrollView extends HorizontalScrollView {
         if (getChildCount() <= 0) {
             return false;
         }
-        int dp = AndroidUtilities.dp(45.0f);
+        int dp = AndroidUtilities.dp(50.0f);
         if (i < getScrollX() + dp) {
             i3 = i - dp;
         } else if (i2 <= getScrollX() + (getMeasuredWidth() - dp)) {

@@ -1,6 +1,4 @@
 package org.telegram.messenger;
-
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class SegmentTree {
     private int[] array;
@@ -89,7 +87,7 @@ public class SegmentTree {
     public int rMinQ(int i, int i2) {
         int[] iArr = this.array;
         if (iArr.length < 30) {
-            int i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i3 = Integer.MAX_VALUE;
             if (i < 0) {
                 i = 0;
             }
@@ -117,7 +115,7 @@ public class SegmentTree {
             return this.heap[i].min;
         }
         if (!intersects(i2, i3, node.from, node.to)) {
-            return ConnectionsManager.DEFAULT_DATACENTER_ID;
+            return Integer.MAX_VALUE;
         }
         propagate(i);
         int i4 = i * 2;

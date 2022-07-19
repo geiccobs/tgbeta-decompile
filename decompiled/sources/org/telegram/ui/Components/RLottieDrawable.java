@@ -26,8 +26,8 @@ import org.telegram.messenger.DispatchQueuePool;
 import org.telegram.messenger.DispatchQueuePoolBackground;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.utils.BitmapsCache;
 import org.telegram.ui.Components.RLottieDrawable;
 /* loaded from: classes3.dex */
@@ -1467,6 +1467,10 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
         for (int i = 0; i < this.parentViews.size(); i++) {
             this.parentViews.get(i).invalidate();
         }
+        View view = this.masterParent;
+        if (view != null) {
+            view.invalidate();
+        }
         if (getCallback() != null) {
             invalidateSelf();
         }
@@ -1774,7 +1778,9 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
     public void drawInBackground(Canvas canvas, float f, float f2, float f3, float f4, int i) {
         if (this.dstRectBackground == null) {
             this.dstRectBackground = new RectF();
-            this.backgroundPaint = new Paint();
+            Paint paint = new Paint(1);
+            this.backgroundPaint = paint;
+            paint.setFilterBitmap(true);
         }
         this.backgroundPaint.setAlpha(i);
         this.dstRectBackground.set(f, f2, f3 + f, f4 + f2);

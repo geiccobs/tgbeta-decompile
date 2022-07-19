@@ -35,9 +35,8 @@ import org.telegram.messenger.LocationController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
@@ -494,7 +493,7 @@ public class PeopleNearbyActivity extends BaseFragment implements NotificationCe
     }
 
     public /* synthetic */ void lambda$createView$1(UserConfig userConfig, DialogInterface dialogInterface, int i) {
-        userConfig.sharingMyLocationUntil = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        userConfig.sharingMyLocationUntil = Integer.MAX_VALUE;
         userConfig.saveConfig(false);
         sendRequest(false, 1);
         updateRows(null);
@@ -773,7 +772,7 @@ public class PeopleNearbyActivity extends BaseFragment implements NotificationCe
         if (i != 0) {
             tLRPC$TL_contacts_getLocated.flags |= 1;
             if (i == 1) {
-                i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+                i2 = Integer.MAX_VALUE;
             }
             tLRPC$TL_contacts_getLocated.self_expires = i2;
         }
@@ -970,7 +969,7 @@ public class PeopleNearbyActivity extends BaseFragment implements NotificationCe
         DiffCallback diffCallback = null;
         int i = 0;
         boolean z2 = false;
-        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i2 = Integer.MAX_VALUE;
         while (i < 2) {
             ArrayList<TLRPC$TL_peerLocated> arrayList = i == 0 ? this.users : this.chats;
             int size = arrayList.size();

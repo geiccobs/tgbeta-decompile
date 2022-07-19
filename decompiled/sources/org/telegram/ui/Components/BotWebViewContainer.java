@@ -53,9 +53,9 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserObject;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -163,14 +163,14 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         BackupImageView backupImageView = new BackupImageView(context) { // from class: org.telegram.ui.Components.BotWebViewContainer.1
             {
                 BotWebViewContainer.this = this;
-                this.imageReceiver = new C00161(this);
+                this.imageReceiver = new C00201(this);
             }
 
             /* renamed from: org.telegram.ui.Components.BotWebViewContainer$1$1 */
             /* loaded from: classes3.dex */
-            public class C00161 extends ImageReceiver {
+            public class C00201 extends ImageReceiver {
                 /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-                C00161(View view) {
+                C00201(View view) {
                     super(view);
                     AnonymousClass1.this = r1;
                 }
@@ -183,7 +183,7 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
                     duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.BotWebViewContainer$1$1$$ExternalSyntheticLambda0
                         @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                         public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                            BotWebViewContainer.AnonymousClass1.C00161.this.lambda$setImageBitmapByKey$0(valueAnimator);
+                            BotWebViewContainer.AnonymousClass1.C00201.this.lambda$setImageBitmapByKey$0(valueAnimator);
                         }
                     });
                     duration.start();
@@ -1024,49 +1024,29 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
     }
 
     /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    /* JADX WARN: Code restructure failed: missing block: B:75:0x014b, code lost:
-        if (r7 == 1) goto L77;
+    /* JADX WARN: Code restructure failed: missing block: B:78:0x015a, code lost:
+        if (r7 == 1) goto L80;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:77:0x014e, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:80:0x015d, code lost:
         r12 = "windowBackgroundGray";
      */
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:123:0x0214  */
-    /* JADX WARN: Removed duplicated region for block: B:145:0x0258  */
-    /* JADX WARN: Removed duplicated region for block: B:150:0x0264 A[Catch: Exception -> 0x02e2, TryCatch #12 {Exception -> 0x02e2, blocks: (B:105:0x01d4, B:112:0x01f3, B:115:0x01fd, B:118:0x0207, B:126:0x021a, B:127:0x021e, B:134:0x0238, B:137:0x0242, B:140:0x024b, B:148:0x025e, B:149:0x0261, B:150:0x0264, B:152:0x0268, B:153:0x0272, B:155:0x0276, B:158:0x0280, B:161:0x0289, B:164:0x0293, B:167:0x029d, B:177:0x02b3, B:178:0x02b6, B:179:0x02b9, B:180:0x02bc, B:181:0x02bf, B:183:0x02c4, B:185:0x02ca, B:186:0x02d7), top: B:287:0x01d4 }] */
-    /* JADX WARN: Removed duplicated region for block: B:152:0x0268 A[Catch: Exception -> 0x02e2, TryCatch #12 {Exception -> 0x02e2, blocks: (B:105:0x01d4, B:112:0x01f3, B:115:0x01fd, B:118:0x0207, B:126:0x021a, B:127:0x021e, B:134:0x0238, B:137:0x0242, B:140:0x024b, B:148:0x025e, B:149:0x0261, B:150:0x0264, B:152:0x0268, B:153:0x0272, B:155:0x0276, B:158:0x0280, B:161:0x0289, B:164:0x0293, B:167:0x029d, B:177:0x02b3, B:178:0x02b6, B:179:0x02b9, B:180:0x02bc, B:181:0x02bf, B:183:0x02c4, B:185:0x02ca, B:186:0x02d7), top: B:287:0x01d4 }] */
-    /* JADX WARN: Removed duplicated region for block: B:183:0x02c4 A[Catch: Exception -> 0x02e2, TryCatch #12 {Exception -> 0x02e2, blocks: (B:105:0x01d4, B:112:0x01f3, B:115:0x01fd, B:118:0x0207, B:126:0x021a, B:127:0x021e, B:134:0x0238, B:137:0x0242, B:140:0x024b, B:148:0x025e, B:149:0x0261, B:150:0x0264, B:152:0x0268, B:153:0x0272, B:155:0x0276, B:158:0x0280, B:161:0x0289, B:164:0x0293, B:167:0x029d, B:177:0x02b3, B:178:0x02b6, B:179:0x02b9, B:180:0x02bc, B:181:0x02bf, B:183:0x02c4, B:185:0x02ca, B:186:0x02d7), top: B:287:0x01d4 }] */
-    /* JADX WARN: Removed duplicated region for block: B:300:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:126:0x0223  */
+    /* JADX WARN: Removed duplicated region for block: B:148:0x0267  */
+    /* JADX WARN: Removed duplicated region for block: B:153:0x0273 A[Catch: Exception -> 0x02f1, TryCatch #8 {Exception -> 0x02f1, blocks: (B:108:0x01e3, B:115:0x0202, B:118:0x020c, B:121:0x0216, B:129:0x0229, B:130:0x022d, B:137:0x0247, B:140:0x0251, B:143:0x025a, B:151:0x026d, B:152:0x0270, B:153:0x0273, B:155:0x0277, B:156:0x0281, B:158:0x0285, B:161:0x028f, B:164:0x0298, B:167:0x02a2, B:170:0x02ac, B:180:0x02c2, B:181:0x02c5, B:182:0x02c8, B:183:0x02cb, B:184:0x02ce, B:186:0x02d3, B:188:0x02d9, B:189:0x02e6), top: B:284:0x01e3 }] */
+    /* JADX WARN: Removed duplicated region for block: B:155:0x0277 A[Catch: Exception -> 0x02f1, TryCatch #8 {Exception -> 0x02f1, blocks: (B:108:0x01e3, B:115:0x0202, B:118:0x020c, B:121:0x0216, B:129:0x0229, B:130:0x022d, B:137:0x0247, B:140:0x0251, B:143:0x025a, B:151:0x026d, B:152:0x0270, B:153:0x0273, B:155:0x0277, B:156:0x0281, B:158:0x0285, B:161:0x028f, B:164:0x0298, B:167:0x02a2, B:170:0x02ac, B:180:0x02c2, B:181:0x02c5, B:182:0x02c8, B:183:0x02cb, B:184:0x02ce, B:186:0x02d3, B:188:0x02d9, B:189:0x02e6), top: B:284:0x01e3 }] */
+    /* JADX WARN: Removed duplicated region for block: B:186:0x02d3 A[Catch: Exception -> 0x02f1, TryCatch #8 {Exception -> 0x02f1, blocks: (B:108:0x01e3, B:115:0x0202, B:118:0x020c, B:121:0x0216, B:129:0x0229, B:130:0x022d, B:137:0x0247, B:140:0x0251, B:143:0x025a, B:151:0x026d, B:152:0x0270, B:153:0x0273, B:155:0x0277, B:156:0x0281, B:158:0x0285, B:161:0x028f, B:164:0x0298, B:167:0x02a2, B:170:0x02ac, B:180:0x02c2, B:181:0x02c5, B:182:0x02c8, B:183:0x02cb, B:184:0x02ce, B:186:0x02d3, B:188:0x02d9, B:189:0x02e6), top: B:284:0x01e3 }] */
+    /* JADX WARN: Removed duplicated region for block: B:304:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void onEventReceived(java.lang.String r20, java.lang.String r21) {
         /*
-            Method dump skipped, instructions count: 1468
+            Method dump skipped, instructions count: 1488
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.BotWebViewContainer.onEventReceived(java.lang.String, java.lang.String):void");
-    }
-
-    public /* synthetic */ void lambda$onEventReceived$7(PopupButton popupButton, AtomicBoolean atomicBoolean, DialogInterface dialogInterface, int i) {
-        dialogInterface.dismiss();
-        try {
-            notifyEvent("popup_closed", new JSONObject().put("button_id", popupButton.id));
-            atomicBoolean.set(true);
-        } catch (JSONException e) {
-            FileLog.e(e);
-        }
-    }
-
-    public /* synthetic */ void lambda$onEventReceived$8(PopupButton popupButton, AtomicBoolean atomicBoolean, DialogInterface dialogInterface, int i) {
-        dialogInterface.dismiss();
-        try {
-            notifyEvent("popup_closed", new JSONObject().put("button_id", popupButton.id));
-            atomicBoolean.set(true);
-        } catch (JSONException e) {
-            FileLog.e(e);
-        }
     }
 
     public /* synthetic */ void lambda$onEventReceived$9(PopupButton popupButton, AtomicBoolean atomicBoolean, DialogInterface dialogInterface, int i) {
@@ -1079,7 +1059,27 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         }
     }
 
-    public /* synthetic */ void lambda$onEventReceived$10(AtomicBoolean atomicBoolean, DialogInterface dialogInterface) {
+    public /* synthetic */ void lambda$onEventReceived$10(PopupButton popupButton, AtomicBoolean atomicBoolean, DialogInterface dialogInterface, int i) {
+        dialogInterface.dismiss();
+        try {
+            notifyEvent("popup_closed", new JSONObject().put("button_id", popupButton.id));
+            atomicBoolean.set(true);
+        } catch (JSONException e) {
+            FileLog.e(e);
+        }
+    }
+
+    public /* synthetic */ void lambda$onEventReceived$11(PopupButton popupButton, AtomicBoolean atomicBoolean, DialogInterface dialogInterface, int i) {
+        dialogInterface.dismiss();
+        try {
+            notifyEvent("popup_closed", new JSONObject().put("button_id", popupButton.id));
+            atomicBoolean.set(true);
+        } catch (JSONException e) {
+            FileLog.e(e);
+        }
+    }
+
+    public /* synthetic */ void lambda$onEventReceived$12(AtomicBoolean atomicBoolean, DialogInterface dialogInterface) {
         if (!atomicBoolean.get()) {
             notifyEvent("popup_closed", new JSONObject());
         }
@@ -1087,16 +1087,16 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         this.lastDialogClosed = System.currentTimeMillis();
     }
 
-    public /* synthetic */ void lambda$onEventReceived$12(final String str, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
+    public /* synthetic */ void lambda$onEventReceived$14(final String str, final TLObject tLObject, final TLRPC$TL_error tLRPC$TL_error) {
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.BotWebViewContainer$$ExternalSyntheticLambda10
             @Override // java.lang.Runnable
             public final void run() {
-                BotWebViewContainer.this.lambda$onEventReceived$11(tLRPC$TL_error, str, tLObject);
+                BotWebViewContainer.this.lambda$onEventReceived$13(tLRPC$TL_error, str, tLObject);
             }
         });
     }
 
-    public /* synthetic */ void lambda$onEventReceived$11(TLRPC$TL_error tLRPC$TL_error, String str, TLObject tLObject) {
+    public /* synthetic */ void lambda$onEventReceived$13(TLRPC$TL_error tLRPC$TL_error, String str, TLObject tLObject) {
         if (tLRPC$TL_error != null) {
             onInvoiceStatusUpdate(str, "failed");
         } else {
@@ -1245,17 +1245,17 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
                 r7.textColorKey = r0
                 goto L7d
             L5f:
-                r0 = 2131624828(0x7f0e037c, float:1.8876847E38)
+                r0 = 2131624832(0x7f0e0380, float:1.8876855E38)
                 java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r0)
                 r7.text = r0
                 goto L7c
             L69:
-                r0 = 2131625176(0x7f0e04d8, float:1.8877553E38)
+                r0 = 2131625183(0x7f0e04df, float:1.8877567E38)
                 java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r0)
                 r7.text = r0
                 goto L7c
             L73:
-                r0 = 2131627117(0x7f0e0c6d, float:1.888149E38)
+                r0 = 2131627127(0x7f0e0c77, float:1.888151E38)
                 java.lang.String r0 = org.telegram.messenger.LocaleController.getString(r0)
                 r7.text = r0
             L7c:

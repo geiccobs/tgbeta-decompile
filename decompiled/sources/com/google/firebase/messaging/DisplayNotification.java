@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat;
 import com.google.android.gms.common.util.PlatformVersion;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.messaging.CommonNotificationBuilder;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -61,7 +62,7 @@ class DisplayNotification {
         if (Log.isLoggable("FirebaseMessaging", 3)) {
             Log.d("FirebaseMessaging", "Showing notification");
         }
-        ((NotificationManager) this.context.getSystemService("notification")).notify(displayNotificationInfo.tag, displayNotificationInfo.id, displayNotificationInfo.notificationBuilder.build());
+        ((NotificationManager) this.context.getSystemService(RemoteMessageConst.NOTIFICATION)).notify(displayNotificationInfo.tag, displayNotificationInfo.id, displayNotificationInfo.notificationBuilder.build());
     }
 
     private ImageDownload startImageDownloadInBackground() {

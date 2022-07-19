@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public final class ColorCutQuantizer {
     private static final Comparator<Vbox> VBOX_COMPARATOR_VOLUME = new Comparator<Vbox>() { // from class: androidx.palette.graphics.ColorCutQuantizer.1
@@ -142,9 +141,9 @@ public final class ColorCutQuantizer {
             ColorCutQuantizer colorCutQuantizer = ColorCutQuantizer.this;
             int[] iArr = colorCutQuantizer.mColors;
             int[] iArr2 = colorCutQuantizer.mHistogram;
-            int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            int i3 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i = Integer.MAX_VALUE;
+            int i2 = Integer.MAX_VALUE;
+            int i3 = Integer.MAX_VALUE;
             int i4 = Integer.MIN_VALUE;
             int i5 = Integer.MIN_VALUE;
             int i6 = Integer.MIN_VALUE;

@@ -1,5 +1,6 @@
 package com.google.android.gms.internal.vision;
 
+import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.Map;
 /* compiled from: com.google.android.gms:play-services-vision-common@@19.1.3 */
 /* loaded from: classes.dex */
@@ -61,7 +62,7 @@ public final class zzlm implements Comparable<zzlm>, Map.Entry<K, V> {
         String valueOf2 = String.valueOf(this.zzb);
         StringBuilder sb = new StringBuilder(valueOf.length() + 1 + valueOf2.length());
         sb.append(valueOf);
-        sb.append("=");
+        sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
         sb.append(valueOf2);
         return sb.toString();
     }

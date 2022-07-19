@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -45,12 +46,12 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SecretChatHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$EncryptedChat;
 import org.telegram.tgnet.TLRPC$User;
@@ -147,7 +148,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
             this.needForwardCount = this.arguments.getBoolean("needForwardCount", true);
             this.allowBots = this.arguments.getBoolean("allowBots", true);
             this.allowSelf = this.arguments.getBoolean("allowSelf", true);
-            this.channelId = this.arguments.getLong("channelId", 0L);
+            this.channelId = this.arguments.getLong(RemoteMessageConst.Notification.CHANNEL_ID, 0L);
             this.needFinishFragment = this.arguments.getBoolean("needFinishFragment", true);
             this.chatId = this.arguments.getLong("chat_id", 0L);
             this.disableSections = this.arguments.getBoolean("disableSections", false);
@@ -615,7 +616,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
         askForPermissons(false);
     }
 
-    @TargetApi(R.styleable.MapAttrs_zOrderOnTop)
+    @TargetApi(org.telegram.messenger.R.styleable.MapAttrs_zOrderOnTop)
     private void askForPermissons(boolean z) {
         Activity parentActivity = getParentActivity();
         if (parentActivity == null || !UserConfig.getInstance(this.currentAccount).syncContacts || parentActivity.checkSelfPermission("android.permission.READ_CONTACTS") == 0) {

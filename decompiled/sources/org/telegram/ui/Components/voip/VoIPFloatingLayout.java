@@ -24,7 +24,7 @@ import android.widget.FrameLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 /* loaded from: classes3.dex */
 public class VoIPFloatingLayout extends FrameLayout {
@@ -109,7 +109,7 @@ public class VoIPFloatingLayout extends FrameLayout {
         if (Build.VERSION.SDK_INT >= 21) {
             setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.voip.VoIPFloatingLayout.2
                 @Override // android.view.ViewOutlineProvider
-                @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+                @TargetApi(21)
                 public void getOutline(View view, Outline outline) {
                     if (VoIPFloatingLayout.this.overrideCornerRadius >= 0.0f) {
                         if (VoIPFloatingLayout.this.overrideCornerRadius >= 1.0f) {

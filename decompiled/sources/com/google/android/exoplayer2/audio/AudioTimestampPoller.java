@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.media.AudioTimestamp;
 import android.media.AudioTrack;
 import com.google.android.exoplayer2.util.Util;
-import org.telegram.messenger.R;
 /* loaded from: classes.dex */
 final class AudioTimestampPoller {
     private final AudioTimestampV19 audioTimestamp;
@@ -118,7 +117,7 @@ final class AudioTimestampPoller {
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
+    @TargetApi(19)
     /* loaded from: classes.dex */
     public static final class AudioTimestampV19 {
         private final AudioTimestamp audioTimestamp = new AudioTimestamp();

@@ -7,8 +7,8 @@ final class R3 extends F3 {
     private Object[] d;
     private int e;
 
-    public R3(AbstractC0125m3 abstractC0125m3, Comparator comparator) {
-        super(abstractC0125m3, comparator);
+    public R3(AbstractC0130m3 abstractC0130m3, Comparator comparator) {
+        super(abstractC0130m3, comparator);
     }
 
     @Override // j$.util.function.Consumer
@@ -19,19 +19,19 @@ final class R3 extends F3 {
         objArr[i] = obj;
     }
 
-    @Override // j$.util.stream.AbstractC0101i3, j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0106i3, j$.util.stream.AbstractC0130m3
     public void m() {
         int i = 0;
         Arrays.sort(this.d, 0, this.e, this.b);
         this.a.n(this.e);
         if (!this.c) {
             while (i < this.e) {
-                this.a.accept((AbstractC0125m3) this.d[i]);
+                this.a.accept((AbstractC0130m3) this.d[i]);
                 i++;
             }
         } else {
             while (i < this.e && !this.a.o()) {
-                this.a.accept((AbstractC0125m3) this.d[i]);
+                this.a.accept((AbstractC0130m3) this.d[i]);
                 i++;
             }
         }
@@ -39,7 +39,7 @@ final class R3 extends F3 {
         this.d = null;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public void n(long j) {
         if (j < 2147483639) {
             this.d = new Object[(int) j];

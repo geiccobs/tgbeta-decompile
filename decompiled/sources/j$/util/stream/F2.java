@@ -2,7 +2,7 @@ package j$.util.stream;
 
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-class F2 extends T2 implements S2, AbstractC0107j3 {
+class F2 extends T2 implements S2, AbstractC0112j3 {
     final /* synthetic */ j$.util.function.y b;
     final /* synthetic */ j$.util.function.u c;
     final /* synthetic */ j$.util.function.b d;
@@ -13,20 +13,20 @@ class F2 extends T2 implements S2, AbstractC0107j3 {
         this.d = bVar;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public void accept(double d) {
         this.c.accept(this.a, d);
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(int i) {
-        AbstractC0135o1.d(this);
+        AbstractC0140o1.d(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3, j$.util.stream.AbstractC0119l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0135o1.e(this);
+        AbstractC0140o1.e(this);
         throw null;
     }
 
@@ -37,7 +37,7 @@ class F2 extends T2 implements S2, AbstractC0107j3 {
 
     /* renamed from: b */
     public /* synthetic */ void accept(Double d) {
-        AbstractC0135o1.a(this, d);
+        AbstractC0140o1.a(this, d);
     }
 
     @Override // j$.util.stream.S2
@@ -51,16 +51,16 @@ class F2 extends T2 implements S2, AbstractC0107j3 {
         return new j$.util.function.e(this, fVar);
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public void n(long j) {
         this.a = this.b.get();
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ boolean o() {
         return false;
     }

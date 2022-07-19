@@ -888,10 +888,6 @@ public class WindowInsetsCompat {
             return 8;
         }
 
-        public static int navigationBars() {
-            return 2;
-        }
-
         static int indexOf(int type) {
             if (type != 1) {
                 if (type == 2) {

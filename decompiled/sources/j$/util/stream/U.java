@@ -1,12 +1,12 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0048n;
-import j$.util.C0041g;
-import j$.util.C0044j;
+import j$.util.AbstractC0053n;
+import j$.util.C0046g;
+import j$.util.C0049j;
 import j$.util.function.BiConsumer;
 /* loaded from: classes2.dex */
-public interface U extends AbstractC0085g {
-    C0044j G(j$.util.function.d dVar);
+public interface U extends AbstractC0090g {
+    C0049j G(j$.util.function.d dVar);
 
     Object H(j$.util.function.y yVar, j$.util.function.u uVar, BiConsumer biConsumer);
 
@@ -18,7 +18,7 @@ public interface U extends AbstractC0085g {
 
     boolean Y(j$.wrappers.E e);
 
-    C0044j average();
+    C0049j average();
 
     U b(j$.util.function.f fVar);
 
@@ -28,17 +28,17 @@ public interface U extends AbstractC0085g {
 
     U distinct();
 
-    C0044j findAny();
+    C0049j findAny();
 
-    C0044j findFirst();
+    C0049j findFirst();
 
     boolean h0(j$.wrappers.E e);
 
     boolean i0(j$.wrappers.E e);
 
-    @Override // j$.util.stream.AbstractC0085g
+    @Override // j$.util.stream.AbstractC0090g
     /* renamed from: iterator */
-    AbstractC0048n mo66iterator();
+    AbstractC0053n mo66iterator();
 
     void j(j$.util.function.f fVar);
 
@@ -46,34 +46,34 @@ public interface U extends AbstractC0085g {
 
     U limit(long j);
 
-    C0044j max();
+    C0049j max();
 
-    C0044j min();
+    C0049j min();
 
-    @Override // j$.util.stream.AbstractC0085g, j$.util.stream.IntStream
+    @Override // j$.util.stream.AbstractC0090g, j$.util.stream.IntStream
     U parallel();
 
     U r(j$.wrappers.E e);
 
-    @Override // j$.util.stream.AbstractC0085g, j$.util.stream.IntStream
+    @Override // j$.util.stream.AbstractC0090g, j$.util.stream.IntStream
     U sequential();
 
     U skip(long j);
 
     U sorted();
 
-    @Override // j$.util.stream.AbstractC0085g
+    @Override // j$.util.stream.AbstractC0090g
     j$.util.t spliterator();
 
     double sum();
 
-    C0041g summaryStatistics();
+    C0046g summaryStatistics();
 
     double[] toArray();
 
     U w(j$.util.function.g gVar);
 
-    AbstractC0075e1 x(j$.util.function.h hVar);
+    AbstractC0080e1 x(j$.util.function.h hVar);
 
     U y(j$.wrappers.K k);
 }

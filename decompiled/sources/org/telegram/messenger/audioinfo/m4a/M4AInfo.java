@@ -2,11 +2,11 @@ package org.telegram.messenger.audioinfo.m4a;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.telegram.messenger.R;
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.messenger.audioinfo.mp3.ID3v1Genre;
 /* loaded from: classes.dex */
@@ -196,7 +196,7 @@ public class M4AInfo extends AudioInfo {
                     logger2.log(level, nextChild.getPath() + ": contains no value");
                 }
             } else {
-                data(nextChild.nextChildUpTo("data"));
+                data(nextChild.nextChildUpTo(RemoteMessageConst.DATA));
             }
         }
     }
@@ -424,7 +424,7 @@ public class M4AInfo extends AudioInfo {
                 this.comment = mP4Atom.readString("UTF-8");
                 return;
             case '\f':
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
                 String str3 = this.composer;
                 if (str3 != null && str3.trim().length() != 0) {
                     return;

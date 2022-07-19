@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.huawei.hms.opendevice.i;
 import j$.util.DesugarTimeZone;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -325,7 +326,7 @@ public final class Util {
             lowerInvariant = str3 + lowerInvariant.substring(str2.length());
             str2 = str3;
         }
-        return ("no".equals(str2) || "i".equals(str2) || "zh".equals(str2)) ? maybeReplaceGrandfatheredLanguageTags(lowerInvariant) : lowerInvariant;
+        return ("no".equals(str2) || i.TAG.equals(str2) || "zh".equals(str2)) ? maybeReplaceGrandfatheredLanguageTags(lowerInvariant) : lowerInvariant;
     }
 
     public static String fromUtf8Bytes(byte[] bArr) {
@@ -895,7 +896,7 @@ public final class Util {
         return split(configuration.getLocales().toLanguageTags(), ",");
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static String getLocaleLanguageTagV21(Locale locale) {
         return locale.toLanguageTag();
     }
@@ -922,7 +923,7 @@ public final class Util {
             case 13:
                 return 5;
             case 16:
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
             default:
                 return 6;
             case 18:

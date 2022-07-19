@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.util.Base64;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.IOException;
 import java.net.URLDecoder;
 /* loaded from: classes.dex */
@@ -24,7 +25,7 @@ public final class DataSchemeDataSource extends BaseDataSource {
         this.readPosition = (int) dataSpec.position;
         Uri uri = dataSpec.uri;
         String scheme = uri.getScheme();
-        if (!"data".equals(scheme)) {
+        if (!RemoteMessageConst.DATA.equals(scheme)) {
             throw new ParserException("Unsupported scheme: " + scheme);
         }
         String[] split = Util.split(uri.getSchemeSpecificPart(), ",");

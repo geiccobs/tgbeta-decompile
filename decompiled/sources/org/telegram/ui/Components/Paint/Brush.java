@@ -3,7 +3,7 @@ package org.telegram.ui.Components.Paint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 /* loaded from: classes3.dex */
 public interface Brush {
     float getAlpha();

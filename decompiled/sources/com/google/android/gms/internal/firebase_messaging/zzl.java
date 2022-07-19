@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
 /* loaded from: classes.dex */
 public final class zzl {
@@ -31,7 +30,7 @@ public final class zzl {
             }
             long j = i;
             long j2 = j + j;
-            i = j2 > 2147483647L ? ConnectionsManager.DEFAULT_DATACENTER_ID : j2 < -2147483648L ? Integer.MIN_VALUE : (int) j2;
+            i = j2 > 2147483647L ? Integer.MAX_VALUE : j2 < -2147483648L ? Integer.MIN_VALUE : (int) j2;
         }
         if (inputStream.read() == -1) {
             return zzc(arrayDeque, 2147483639);

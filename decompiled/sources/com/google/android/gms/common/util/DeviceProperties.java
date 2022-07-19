@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import androidx.annotation.RecentlyNonNull;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
@@ -27,7 +28,7 @@ public final class DeviceProperties {
         return zzc.booleanValue();
     }
 
-    @TargetApi(26)
+    @TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
     public static boolean isWearableWithoutPlayStore(@RecentlyNonNull Context context) {
         if (isWearable(context)) {
             if (!PlatformVersion.isAtLeastN()) {
@@ -38,7 +39,7 @@ public final class DeviceProperties {
         return false;
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static boolean zzb(Context context) {
         if (zzd == null) {
             zzd = Boolean.valueOf(PlatformVersion.isAtLeastLollipop() && context.getPackageManager().hasSystemFeature("cn.google"));

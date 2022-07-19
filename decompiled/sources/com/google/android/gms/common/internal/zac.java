@@ -57,7 +57,7 @@ public final class zac {
             case 13:
             case 14:
             case 15:
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
             default:
                 StringBuilder sb = new StringBuilder(33);
                 sb.append("Unexpected error code ");

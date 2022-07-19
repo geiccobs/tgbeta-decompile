@@ -28,7 +28,7 @@ public final class Optional<T> {
             return true;
         }
         if (obj instanceof Optional) {
-            return AbstractC0034a.x(this.a, ((Optional) obj).a);
+            return AbstractC0039a.x(this.a, ((Optional) obj).a);
         }
         return false;
     }

@@ -85,7 +85,7 @@ public interface Map<K, V> {
 
         public static boolean $default$remove(java.util.Map map, Object obj, Object obj2) {
             Object obj3 = map.get(obj);
-            if (AbstractC0034a.x(obj3, obj2)) {
+            if (AbstractC0039a.x(obj3, obj2)) {
                 if (obj3 == null && !map.containsKey(obj)) {
                     return false;
                 }
@@ -97,7 +97,7 @@ public interface Map<K, V> {
 
         public static boolean $default$replace(java.util.Map map, Object obj, Object obj2, Object obj3) {
             Object obj4 = map.get(obj);
-            if (AbstractC0034a.x(obj4, obj2)) {
+            if (AbstractC0039a.x(obj4, obj2)) {
                 if (obj4 == null && !map.containsKey(obj)) {
                     return false;
                 }

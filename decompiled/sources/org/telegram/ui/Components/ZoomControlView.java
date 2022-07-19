@@ -10,7 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Property;
 import android.view.View;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.Components.AnimationProperties;
 /* loaded from: classes3.dex */
 public class ZoomControlView extends View {

@@ -5,7 +5,6 @@ import android.util.SparseIntArray;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes3.dex */
 public class ExtendedGridLayoutManager extends GridLayoutManager {
     private int calculatedWidth;
@@ -177,7 +176,7 @@ public class ExtendedGridLayoutManager extends GridLayoutManager {
 
     public boolean isLastInRow(int i) {
         checkLayout();
-        return this.itemsToRow.get(i, ConnectionsManager.DEFAULT_DATACENTER_ID) != Integer.MAX_VALUE;
+        return this.itemsToRow.get(i, Integer.MAX_VALUE) != Integer.MAX_VALUE;
     }
 
     public boolean isFirstRow(int i) {

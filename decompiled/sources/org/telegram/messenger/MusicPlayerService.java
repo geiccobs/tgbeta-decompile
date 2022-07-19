@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.File;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.NotificationCenter;
@@ -98,7 +99,7 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
             this.mediaSession = new MediaSession(this, "telegramAudioPlayer");
             this.playbackState = new PlaybackState.Builder();
             this.albumArtPlaceholder = Bitmap.createBitmap(AndroidUtilities.dp(102.0f), AndroidUtilities.dp(102.0f), Bitmap.Config.ARGB_8888);
-            Drawable drawable = getResources().getDrawable(R.drawable.nocover_big);
+            Drawable drawable = getResources().getDrawable(org.telegram.messenger.beta.R.drawable.nocover_big);
             drawable.setBounds(0, 0, this.albumArtPlaceholder.getWidth(), this.albumArtPlaceholder.getHeight());
             drawable.draw(new Canvas(this.albumArtPlaceholder));
             this.mediaSession.setCallback(new MediaSession.Callback() { // from class: org.telegram.messenger.MusicPlayerService.2
@@ -262,7 +263,7 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
             PendingIntent broadcast3 = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_NEXT).setComponent(new ComponentName(this, MusicPlayerReceiver.class)), 268435456);
             PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_SEEK).setComponent(new ComponentName(this, MusicPlayerReceiver.class)), 268435456);
             Notification.Builder builder = new Notification.Builder(this);
-            builder.setSmallIcon(R.drawable.player).setOngoing(z2).setContentTitle(musicTitle).setContentText(musicAuthor).setSubText(audioInfo != null ? audioInfo.getAlbum() : null).setContentIntent(activity).setDeleteIntent(service).setShowWhen(false).setCategory("transport").setPriority(2).setStyle(new Notification.MediaStyle().setMediaSession(this.mediaSession.getSessionToken()).setShowActionsInCompactView(0, 1, 2));
+            builder.setSmallIcon(org.telegram.messenger.beta.R.drawable.player).setOngoing(z2).setContentTitle(musicTitle).setContentText(musicAuthor).setSubText(audioInfo != null ? audioInfo.getAlbum() : null).setContentIntent(activity).setDeleteIntent(service).setShowWhen(false).setCategory("transport").setPriority(2).setStyle(new Notification.MediaStyle().setMediaSession(this.mediaSession.getSessionToken()).setShowActionsInCompactView(0, 1, 2));
             if (i3 >= 26) {
                 NotificationsController.checkOtherNotificationsChannel();
                 builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
@@ -272,12 +273,12 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
             } else {
                 builder.setLargeIcon(this.albumArtPlaceholder);
             }
-            String string = LocaleController.getString("Next", R.string.Next);
-            String string2 = LocaleController.getString("AccDescrPrevious", R.string.AccDescrPrevious);
+            String string = LocaleController.getString("Next", org.telegram.messenger.beta.R.string.Next);
+            String string2 = LocaleController.getString("AccDescrPrevious", org.telegram.messenger.beta.R.string.AccDescrPrevious);
             if (MediaController.getInstance().isDownloadingCurrentMessage()) {
                 f = 1.0f;
                 this.playbackState.setState(6, 0L, 1.0f).setActions(0L);
-                builder.addAction(new Notification.Action.Builder((int) R.drawable.ic_action_previous, string2, broadcast).build()).addAction(new Notification.Action.Builder((int) R.drawable.loading_animation2, LocaleController.getString("Loading", R.string.Loading), (PendingIntent) null).build()).addAction(new Notification.Action.Builder((int) R.drawable.ic_action_next, string, broadcast3).build());
+                builder.addAction(new Notification.Action.Builder((int) org.telegram.messenger.beta.R.drawable.ic_action_previous, string2, broadcast).build()).addAction(new Notification.Action.Builder((int) org.telegram.messenger.beta.R.drawable.loading_animation2, LocaleController.getString("Loading", org.telegram.messenger.beta.R.string.Loading), (PendingIntent) null).build()).addAction(new Notification.Action.Builder((int) org.telegram.messenger.beta.R.drawable.ic_action_next, string, broadcast3).build());
                 str3 = musicTitle;
                 str2 = musicAuthor;
             } else {
@@ -286,13 +287,13 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
                 str2 = musicAuthor;
                 this.playbackState.setState(z2 ? 3 : 2, MediaController.getInstance().getPlayingMessageObject().audioProgressSec * 1000, z2 ? 1.0f : 0.0f).setActions(822L);
                 if (z2) {
-                    i2 = R.string.AccActionPause;
+                    i2 = org.telegram.messenger.beta.R.string.AccActionPause;
                     str4 = "AccActionPause";
                 } else {
-                    i2 = R.string.AccActionPlay;
+                    i2 = org.telegram.messenger.beta.R.string.AccActionPlay;
                     str4 = "AccActionPlay";
                 }
-                builder.addAction(new Notification.Action.Builder((int) R.drawable.ic_action_previous, string2, broadcast).build()).addAction(new Notification.Action.Builder(z2 ? R.drawable.ic_action_pause : R.drawable.ic_action_play, LocaleController.getString(str4, i2), broadcast2).build()).addAction(new Notification.Action.Builder((int) R.drawable.ic_action_next, string, broadcast3).build());
+                builder.addAction(new Notification.Action.Builder((int) org.telegram.messenger.beta.R.drawable.ic_action_previous, string2, broadcast).build()).addAction(new Notification.Action.Builder(z2 ? org.telegram.messenger.beta.R.drawable.ic_action_pause : org.telegram.messenger.beta.R.drawable.ic_action_play, LocaleController.getString(str4, i2), broadcast2).build()).addAction(new Notification.Action.Builder((int) org.telegram.messenger.beta.R.drawable.ic_action_next, string, broadcast3).build());
             }
             this.mediaSession.setPlaybackState(this.playbackState.build());
             musicAuthor = str2;
@@ -304,14 +305,14 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
                 startForeground(5, build);
             } else {
                 stopForeground(false);
-                ((NotificationManager) getSystemService("notification")).notify(5, build);
+                ((NotificationManager) getSystemService(RemoteMessageConst.NOTIFICATION)).notify(5, build);
             }
         } else {
             str = musicTitle;
             f = 1.0f;
-            RemoteViews remoteViews = new RemoteViews(getApplicationContext().getPackageName(), (int) R.layout.player_small_notification);
-            RemoteViews remoteViews2 = supportBigNotifications ? new RemoteViews(getApplicationContext().getPackageName(), (int) R.layout.player_big_notification) : null;
-            Notification build2 = new NotificationCompat.Builder(getApplicationContext()).setSmallIcon(R.drawable.player).setContentIntent(activity).setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL).setContentTitle(str).build();
+            RemoteViews remoteViews = new RemoteViews(getApplicationContext().getPackageName(), (int) org.telegram.messenger.beta.R.layout.player_small_notification);
+            RemoteViews remoteViews2 = supportBigNotifications ? new RemoteViews(getApplicationContext().getPackageName(), (int) org.telegram.messenger.beta.R.layout.player_big_notification) : null;
+            Notification build2 = new NotificationCompat.Builder(getApplicationContext()).setSmallIcon(org.telegram.messenger.beta.R.drawable.player).setContentIntent(activity).setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL).setContentTitle(str).build();
             build2.contentView = remoteViews;
             if (supportBigNotifications) {
                 build2.bigContentView = remoteViews2;
@@ -321,63 +322,63 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
                 setListeners(remoteViews2);
             }
             if (bitmap != null) {
-                build2.contentView.setImageViewBitmap(R.id.player_album_art, bitmap);
+                build2.contentView.setImageViewBitmap(org.telegram.messenger.beta.R.id.player_album_art, bitmap);
                 if (supportBigNotifications) {
-                    build2.bigContentView.setImageViewBitmap(R.id.player_album_art, bitmap);
+                    build2.bigContentView.setImageViewBitmap(org.telegram.messenger.beta.R.id.player_album_art, bitmap);
                 }
             } else {
-                build2.contentView.setImageViewResource(R.id.player_album_art, R.drawable.nocover_small);
+                build2.contentView.setImageViewResource(org.telegram.messenger.beta.R.id.player_album_art, org.telegram.messenger.beta.R.drawable.nocover_small);
                 if (supportBigNotifications) {
-                    build2.bigContentView.setImageViewResource(R.id.player_album_art, R.drawable.nocover_big);
+                    build2.bigContentView.setImageViewResource(org.telegram.messenger.beta.R.id.player_album_art, org.telegram.messenger.beta.R.drawable.nocover_big);
                 }
             }
             if (MediaController.getInstance().isDownloadingCurrentMessage()) {
-                build2.contentView.setViewVisibility(R.id.player_pause, 8);
-                build2.contentView.setViewVisibility(R.id.player_play, 8);
-                build2.contentView.setViewVisibility(R.id.player_next, 8);
-                build2.contentView.setViewVisibility(R.id.player_previous, 8);
-                build2.contentView.setViewVisibility(R.id.player_progress_bar, 0);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_pause, 8);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_play, 8);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_next, 8);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_previous, 8);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_progress_bar, 0);
                 if (supportBigNotifications) {
-                    build2.bigContentView.setViewVisibility(R.id.player_pause, 8);
-                    build2.bigContentView.setViewVisibility(R.id.player_play, 8);
-                    build2.bigContentView.setViewVisibility(R.id.player_next, 8);
-                    build2.bigContentView.setViewVisibility(R.id.player_previous, 8);
-                    build2.bigContentView.setViewVisibility(R.id.player_progress_bar, 0);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_pause, 8);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_play, 8);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_next, 8);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_previous, 8);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_progress_bar, 0);
                 }
             } else {
-                build2.contentView.setViewVisibility(R.id.player_progress_bar, 8);
-                build2.contentView.setViewVisibility(R.id.player_next, 0);
-                build2.contentView.setViewVisibility(R.id.player_previous, 0);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_progress_bar, 8);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_next, 0);
+                build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_previous, 0);
                 if (supportBigNotifications) {
-                    build2.bigContentView.setViewVisibility(R.id.player_next, 0);
-                    build2.bigContentView.setViewVisibility(R.id.player_previous, 0);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_next, 0);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_previous, 0);
                     i = 8;
-                    build2.bigContentView.setViewVisibility(R.id.player_progress_bar, 8);
+                    build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_progress_bar, 8);
                 } else {
                     i = 8;
                 }
                 if (MediaController.getInstance().isMessagePaused()) {
-                    build2.contentView.setViewVisibility(R.id.player_pause, i);
-                    build2.contentView.setViewVisibility(R.id.player_play, 0);
+                    build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_pause, i);
+                    build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_play, 0);
                     if (supportBigNotifications) {
-                        build2.bigContentView.setViewVisibility(R.id.player_pause, i);
-                        build2.bigContentView.setViewVisibility(R.id.player_play, 0);
+                        build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_pause, i);
+                        build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_play, 0);
                     }
                 } else {
-                    build2.contentView.setViewVisibility(R.id.player_pause, 0);
-                    build2.contentView.setViewVisibility(R.id.player_play, i);
+                    build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_pause, 0);
+                    build2.contentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_play, i);
                     if (supportBigNotifications) {
-                        build2.bigContentView.setViewVisibility(R.id.player_pause, 0);
-                        build2.bigContentView.setViewVisibility(R.id.player_play, i);
+                        build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_pause, 0);
+                        build2.bigContentView.setViewVisibility(org.telegram.messenger.beta.R.id.player_play, i);
                     }
                 }
             }
-            build2.contentView.setTextViewText(R.id.player_song_name, str);
-            build2.contentView.setTextViewText(R.id.player_author_name, musicAuthor);
+            build2.contentView.setTextViewText(org.telegram.messenger.beta.R.id.player_song_name, str);
+            build2.contentView.setTextViewText(org.telegram.messenger.beta.R.id.player_author_name, musicAuthor);
             if (supportBigNotifications) {
-                build2.bigContentView.setTextViewText(R.id.player_song_name, str);
-                build2.bigContentView.setTextViewText(R.id.player_author_name, musicAuthor);
-                build2.bigContentView.setTextViewText(R.id.player_album_title, (audioInfo == null || TextUtils.isEmpty(audioInfo.getAlbum())) ? "" : audioInfo.getAlbum());
+                build2.bigContentView.setTextViewText(org.telegram.messenger.beta.R.id.player_song_name, str);
+                build2.bigContentView.setTextViewText(org.telegram.messenger.beta.R.id.player_author_name, musicAuthor);
+                build2.bigContentView.setTextViewText(org.telegram.messenger.beta.R.id.player_album_title, (audioInfo == null || TextUtils.isEmpty(audioInfo.getAlbum())) ? "" : audioInfo.getAlbum());
             }
             build2.flags |= 2;
             startForeground(5, build2);
@@ -472,11 +473,11 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
     }
 
     public void setListeners(RemoteViews remoteViews) {
-        remoteViews.setOnClickPendingIntent(R.id.player_previous, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_PREVIOUS), 134217728));
-        remoteViews.setOnClickPendingIntent(R.id.player_close, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_CLOSE), 134217728));
-        remoteViews.setOnClickPendingIntent(R.id.player_pause, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_PAUSE), 134217728));
-        remoteViews.setOnClickPendingIntent(R.id.player_next, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_NEXT), 134217728));
-        remoteViews.setOnClickPendingIntent(R.id.player_play, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_PLAY), 134217728));
+        remoteViews.setOnClickPendingIntent(org.telegram.messenger.beta.R.id.player_previous, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_PREVIOUS), 134217728));
+        remoteViews.setOnClickPendingIntent(org.telegram.messenger.beta.R.id.player_close, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_CLOSE), 134217728));
+        remoteViews.setOnClickPendingIntent(org.telegram.messenger.beta.R.id.player_pause, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_PAUSE), 134217728));
+        remoteViews.setOnClickPendingIntent(org.telegram.messenger.beta.R.id.player_next, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_NEXT), 134217728));
+        remoteViews.setOnClickPendingIntent(org.telegram.messenger.beta.R.id.player_play, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFY_PLAY), 134217728));
     }
 
     @Override // android.app.Service

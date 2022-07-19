@@ -10,7 +10,6 @@ import android.view.accessibility.AccessibilityEvent;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class LinearLayoutManager extends RecyclerView.LayoutManager implements ItemTouchHelper.ViewDropHandler, RecyclerView.SmoothScroller.ScrollVectorProvider {
     final AnchorInfo mAnchorInfo;
@@ -1353,7 +1352,7 @@ public class LinearLayoutManager extends RecyclerView.LayoutManager implements I
             int viewLayoutPosition;
             int size = this.mScrapList.size();
             View view2 = null;
-            int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i = Integer.MAX_VALUE;
             for (int i2 = 0; i2 < size; i2++) {
                 View view3 = this.mScrapList.get(i2).itemView;
                 RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) view3.getLayoutParams();

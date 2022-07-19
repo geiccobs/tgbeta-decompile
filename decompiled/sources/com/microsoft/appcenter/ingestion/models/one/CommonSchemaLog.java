@@ -1,5 +1,7 @@
 package com.microsoft.appcenter.ingestion.models.one;
 
+import com.huawei.hms.framework.common.hianalytics.CrashHianalyticsData;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import com.microsoft.appcenter.ingestion.models.AbstractLog;
 import com.microsoft.appcenter.ingestion.models.json.JSONDateUtils;
 import com.microsoft.appcenter.ingestion.models.json.JSONUtils;
@@ -85,7 +87,7 @@ public abstract class CommonSchemaLog extends AbstractLog {
     public void read(JSONObject jSONObject) throws JSONException {
         setVer(jSONObject.getString("ver"));
         setName(jSONObject.getString("name"));
-        setTimestamp(JSONDateUtils.toDate(jSONObject.getString("time")));
+        setTimestamp(JSONDateUtils.toDate(jSONObject.getString(CrashHianalyticsData.TIME)));
         if (jSONObject.has("popSample")) {
             setPopSample(Double.valueOf(jSONObject.getDouble("popSample")));
         }
@@ -97,9 +99,9 @@ public abstract class CommonSchemaLog extends AbstractLog {
             extensions.read(jSONObject.getJSONObject("ext"));
             setExt(extensions);
         }
-        if (jSONObject.has("data")) {
+        if (jSONObject.has(RemoteMessageConst.DATA)) {
             Data data = new Data();
-            data.read(jSONObject.getJSONObject("data"));
+            data.read(jSONObject.getJSONObject(RemoteMessageConst.DATA));
             setData(data);
         }
     }
@@ -108,7 +110,7 @@ public abstract class CommonSchemaLog extends AbstractLog {
     public void write(JSONStringer jSONStringer) throws JSONException {
         jSONStringer.key("ver").value(getVer());
         jSONStringer.key("name").value(getName());
-        jSONStringer.key("time").value(JSONDateUtils.toString(getTimestamp()));
+        jSONStringer.key(CrashHianalyticsData.TIME).value(JSONDateUtils.toString(getTimestamp()));
         JSONUtils.write(jSONStringer, "popSample", getPopSample());
         JSONUtils.write(jSONStringer, "iKey", getIKey());
         JSONUtils.write(jSONStringer, "flags", getFlags());
@@ -119,7 +121,7 @@ public abstract class CommonSchemaLog extends AbstractLog {
             jSONStringer.endObject();
         }
         if (getData() != null) {
-            jSONStringer.key("data").object();
+            jSONStringer.key(RemoteMessageConst.DATA).object();
             getData().write(jSONStringer);
             jSONStringer.endObject();
         }

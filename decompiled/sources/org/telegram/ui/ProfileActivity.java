@@ -108,14 +108,13 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.browser.Browser;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
@@ -232,7 +231,6 @@ import org.telegram.ui.Components.HintView;
 import org.telegram.ui.Components.ImageUpdater;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.GiftPremiumBottomSheet;
-import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.Premium.PremiumPreviewBottomSheet;
 import org.telegram.ui.Components.Premium.ProfilePremiumCell;
 import org.telegram.ui.Components.ProfileGalleryView;
@@ -3300,7 +3298,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         TLRPC$TL_peerNotifySettings tLRPC$TL_peerNotifySettings = new TLRPC$TL_peerNotifySettings();
                         tLRPC$Dialog2.notify_settings = tLRPC$TL_peerNotifySettings;
                         if (isGlobalNotificationsEnabled) {
-                            tLRPC$TL_peerNotifySettings.mute_until = ConnectionsManager.DEFAULT_DATACENTER_ID;
+                            tLRPC$TL_peerNotifySettings.mute_until = Integer.MAX_VALUE;
                         }
                     }
                 }
@@ -3725,52 +3723,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             int r8 = r7.numberRow
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)
             org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
-            boolean r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26500(r0)
+            boolean r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26600(r0)
             r1 = 0
             r2 = 1
             if (r0 == 0) goto L50
             org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
-            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26600(r0)
-            int r0 = r0.size()
-            if (r9 >= r0) goto L2b
-            org.telegram.ui.ProfileActivity$SearchAdapter r8 = r7.searchAdapter
-            java.util.ArrayList r8 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26600(r8)
-            java.lang.Object r8 = r8.get(r9)
-            goto L9d
-        L2b:
-            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
-            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26600(r0)
-            int r0 = r0.size()
-            int r0 = r0 + r2
-            int r9 = r9 - r0
-            if (r9 < 0) goto L9d
-            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
             java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26700(r0)
             int r0 = r0.size()
-            if (r9 >= r0) goto L9d
+            if (r9 >= r0) goto L2b
             org.telegram.ui.ProfileActivity$SearchAdapter r8 = r7.searchAdapter
             java.util.ArrayList r8 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26700(r8)
             java.lang.Object r8 = r8.get(r9)
             goto L9d
-        L50:
+        L2b:
             org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
-            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26400(r0)
-            boolean r0 = r0.isEmpty()
-            if (r0 != 0) goto L5e
-            int r9 = r9 + (-1)
-        L5e:
-            if (r9 < 0) goto L77
-            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
-            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26400(r0)
-            int r0 = r0.size()
-            if (r9 >= r0) goto L77
-            org.telegram.ui.ProfileActivity$SearchAdapter r8 = r7.searchAdapter
-            java.util.ArrayList r8 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26400(r8)
-            java.lang.Object r8 = r8.get(r9)
-            goto L9d
-        L77:
-            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
-            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26400(r0)
+            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26700(r0)
             int r0 = r0.size()
             int r0 = r0 + r2
             int r9 = r9 - r0
@@ -3782,6 +3749,37 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             org.telegram.ui.ProfileActivity$SearchAdapter r8 = r7.searchAdapter
             java.util.ArrayList r8 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26800(r8)
             java.lang.Object r8 = r8.get(r9)
+            goto L9d
+        L50:
+            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
+            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26500(r0)
+            boolean r0 = r0.isEmpty()
+            if (r0 != 0) goto L5e
+            int r9 = r9 + (-1)
+        L5e:
+            if (r9 < 0) goto L77
+            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
+            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26500(r0)
+            int r0 = r0.size()
+            if (r9 >= r0) goto L77
+            org.telegram.ui.ProfileActivity$SearchAdapter r8 = r7.searchAdapter
+            java.util.ArrayList r8 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26500(r8)
+            java.lang.Object r8 = r8.get(r9)
+            goto L9d
+        L77:
+            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
+            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26500(r0)
+            int r0 = r0.size()
+            int r0 = r0 + r2
+            int r9 = r9 - r0
+            if (r9 < 0) goto L9d
+            org.telegram.ui.ProfileActivity$SearchAdapter r0 = r7.searchAdapter
+            java.util.ArrayList r0 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26900(r0)
+            int r0 = r0.size()
+            if (r9 >= r0) goto L9d
+            org.telegram.ui.ProfileActivity$SearchAdapter r8 = r7.searchAdapter
+            java.util.ArrayList r8 = org.telegram.ui.ProfileActivity.SearchAdapter.access$26900(r8)
+            java.lang.Object r8 = r8.get(r9)
             r9 = 0
             goto L9e
         L9d:
@@ -3791,7 +3789,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (r0 == 0) goto La9
             r0 = r8
             org.telegram.ui.ProfileActivity$SearchAdapter$SearchResult r0 = (org.telegram.ui.ProfileActivity.SearchAdapter.SearchResult) r0
-            org.telegram.ui.ProfileActivity.SearchAdapter.SearchResult.access$26900(r0)
+            org.telegram.ui.ProfileActivity.SearchAdapter.SearchResult.access$27000(r0)
             goto Lca
         La9:
             boolean r0 = r8 instanceof org.telegram.messenger.MessagesController.FaqSearchResult
@@ -3804,7 +3802,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             r5 = 2
             java.lang.Object[] r5 = new java.lang.Object[r5]
             org.telegram.ui.ProfileActivity$SearchAdapter r6 = r7.searchAdapter
-            org.telegram.tgnet.TLRPC$WebPage r6 = org.telegram.ui.ProfileActivity.SearchAdapter.access$27000(r6)
+            org.telegram.tgnet.TLRPC$WebPage r6 = org.telegram.ui.ProfileActivity.SearchAdapter.access$27100(r6)
             r5[r1] = r6
             java.lang.String r0 = r0.url
             r5[r2] = r0
@@ -7699,10 +7697,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         public /* synthetic */ void lambda$new$23() {
             if (!ProfileActivity.this.getUserConfig().isPremium()) {
-                ProfileActivity.this.showDialog(new PremiumFeatureBottomSheet(ProfileActivity.this, 10, true));
-            } else {
-                ProfileActivity.this.presentFragment(new PrivacyControlActivity(8, true));
+                try {
+                    ((BaseFragment) ProfileActivity.this).fragmentView.performHapticFeedback(3, 2);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+                BulletinFactory.of(ProfileActivity.this).createRestrictVoiceMessagesPremiumBulletin().show();
+                return;
             }
+            ProfileActivity.this.presentFragment(new PrivacyControlActivity(8, true));
         }
 
         public /* synthetic */ void lambda$new$24() {
@@ -9224,7 +9227,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             return;
         }
         View view = null;
-        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i = Integer.MAX_VALUE;
         int i2 = -1;
         for (int i3 = 0; i3 < this.listView.getChildCount(); i3++) {
             RecyclerListView recyclerListView2 = this.listView;

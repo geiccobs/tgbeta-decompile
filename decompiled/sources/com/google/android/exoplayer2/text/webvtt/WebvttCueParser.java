@@ -17,6 +17,8 @@ import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.opendevice.c;
+import com.huawei.hms.opendevice.i;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -357,13 +359,13 @@ public final class WebvttCueParser {
                 }
                 break;
             case 99:
-                if (str.equals("c")) {
+                if (str.equals(c.a)) {
                     c = 1;
                     break;
                 }
                 break;
             case 105:
-                if (str.equals("i")) {
+                if (str.equals(i.TAG)) {
                     c = 2;
                     break;
                 }
@@ -420,13 +422,13 @@ public final class WebvttCueParser {
                 }
                 break;
             case 99:
-                if (str2.equals("c")) {
+                if (str2.equals(c.a)) {
                     c = 2;
                     break;
                 }
                 break;
             case 105:
-                if (str2.equals("i")) {
+                if (str2.equals(i.TAG)) {
                     c = 3;
                     break;
                 }

@@ -19,7 +19,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.telegram.messenger.R;
 /* loaded from: classes.dex */
 public final class DefaultAudioSink implements AudioSink {
     public static boolean enablePreV21AudioSessionWorkaround = false;
@@ -909,12 +908,12 @@ public final class DefaultAudioSink implements AudioSink {
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static int writeNonBlockingV21(AudioTrack audioTrack, ByteBuffer byteBuffer, int i) {
         return audioTrack.write(byteBuffer, i, 1);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private int writeNonBlockingWithAvSyncV21(AudioTrack audioTrack, ByteBuffer byteBuffer, int i, long j) {
         if (Util.SDK_INT >= 26) {
             return audioTrack.write(byteBuffer, i, 1, j * 1000);
@@ -950,7 +949,7 @@ public final class DefaultAudioSink implements AudioSink {
         return writeNonBlockingV21;
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static void setVolumeInternalV21(AudioTrack audioTrack, float f) {
         audioTrack.setVolume(f);
     }
@@ -1086,7 +1085,7 @@ public final class DefaultAudioSink implements AudioSink {
             throw new AudioSink.InitializationException(state, this.outputSampleRate, this.outputChannelConfig, this.bufferSize);
         }
 
-        @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+        @TargetApi(21)
         private AudioTrack createAudioTrackV21(boolean z, AudioAttributes audioAttributes, int i) {
             android.media.AudioAttributes audioAttributes2;
             if (z) {

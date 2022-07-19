@@ -27,7 +27,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -262,7 +262,7 @@ public class GroupStickersActivity extends BaseFragment implements NotificationC
                 boolean z3;
                 int findFirstVisibleItemPosition = GroupStickersActivity.this.layoutManager.findFirstVisibleItemPosition();
                 RecyclerListView.Holder holder = (RecyclerListView.Holder) GroupStickersActivity.this.listView.findViewHolderForAdapterPosition(findFirstVisibleItemPosition);
-                int top = holder != null ? holder.itemView.getTop() : ConnectionsManager.DEFAULT_DATACENTER_ID;
+                int top = holder != null ? holder.itemView.getTop() : Integer.MAX_VALUE;
                 int i = GroupStickersActivity.this.selectedStickerSetIndex;
                 if (isChecked) {
                     GroupStickersActivity.this.selectedStickerSet = null;

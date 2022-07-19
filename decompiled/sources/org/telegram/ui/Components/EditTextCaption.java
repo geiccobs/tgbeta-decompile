@@ -1,6 +1,8 @@
 package org.telegram.ui.Components;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -8,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Layout;
+import android.text.Spannable;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -23,10 +26,12 @@ import android.widget.FrameLayout;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import java.util.List;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
+import org.telegram.messenger.utils.CopyUtilities;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.TextStyleSpan;
@@ -502,5 +507,32 @@ public class EditTextCaption extends EditTextBoldCursor {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
         Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
         return color != null ? color.intValue() : Theme.getColor(str);
+    }
+
+    @Override // android.widget.TextView
+    public boolean onTextContextMenuItem(int i) {
+        ClipData primaryClip = ((ClipboardManager) getContext().getSystemService("clipboard")).getPrimaryClip();
+        if (primaryClip.getItemCount() == 1 && i == 16908322 && primaryClip.getDescription().hasMimeType("text/html")) {
+            int selectionEnd = getSelectionEnd();
+            if (selectionEnd < 0) {
+                selectionEnd = 0;
+            }
+            try {
+                Spannable fromHTML = CopyUtilities.fromHTML(primaryClip.getItemAt(0).getHtmlText());
+                Emoji.replaceEmoji(fromHTML, getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
+                AnimatedEmojiSpan[] animatedEmojiSpanArr = (AnimatedEmojiSpan[]) fromHTML.getSpans(0, fromHTML.length(), AnimatedEmojiSpan.class);
+                if (animatedEmojiSpanArr != null) {
+                    for (int i2 = 0; i2 < animatedEmojiSpanArr.length; i2++) {
+                        animatedEmojiSpanArr[selectionEnd].applyFontMetrics(getPaint().getFontMetricsInt(), 1);
+                    }
+                }
+                setText(getText().insert(selectionEnd, fromHTML));
+                setSelection(fromHTML.length() + selectionEnd, selectionEnd + fromHTML.length());
+                return true;
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+        }
+        return super.onTextContextMenuItem(i);
     }
 }

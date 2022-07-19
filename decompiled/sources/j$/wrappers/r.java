@@ -13,7 +13,7 @@ public final /* synthetic */ class r implements BiConsumer {
         if (biConsumer == null) {
             return null;
         }
-        return biConsumer instanceof C0227q ? ((C0227q) biConsumer).a : new r(biConsumer);
+        return biConsumer instanceof C0232q ? ((C0232q) biConsumer).a : new r(biConsumer);
     }
 
     @Override // java.util.function.BiConsumer
@@ -23,6 +23,6 @@ public final /* synthetic */ class r implements BiConsumer {
 
     @Override // java.util.function.BiConsumer
     public /* synthetic */ BiConsumer andThen(BiConsumer biConsumer) {
-        return a(this.a.b(C0227q.a(biConsumer)));
+        return a(this.a.b(C0232q.a(biConsumer)));
     }
 }

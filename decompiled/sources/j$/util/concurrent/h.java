@@ -1,6 +1,6 @@
 package j$.util.concurrent;
 
-import j$.util.AbstractC0034a;
+import j$.util.AbstractC0039a;
 import j$.util.function.Consumer;
 import j$.util.function.q;
 import j$.util.v;
@@ -32,7 +32,7 @@ final class h implements v {
 
     @Override // j$.util.v, j$.util.u
     public /* synthetic */ boolean b(Consumer consumer) {
-        return AbstractC0034a.l(this, consumer);
+        return AbstractC0039a.l(this, consumer);
     }
 
     @Override // j$.util.u
@@ -65,7 +65,7 @@ final class h implements v {
 
     @Override // j$.util.v, j$.util.u
     public /* synthetic */ void forEachRemaining(Consumer consumer) {
-        AbstractC0034a.d(this, consumer);
+        AbstractC0039a.d(this, consumer);
     }
 
     @Override // j$.util.u
@@ -75,12 +75,12 @@ final class h implements v {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0034a.e(this);
+        return AbstractC0039a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0034a.f(this, i);
+        return AbstractC0039a.f(this, i);
     }
 
     @Override // j$.util.v

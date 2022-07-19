@@ -4,15 +4,15 @@ import j$.util.function.Function;
 import java.util.HashSet;
 import java.util.Set;
 /* loaded from: classes2.dex */
-class r extends AbstractC0101i3 {
+class r extends AbstractC0106i3 {
     public final /* synthetic */ int b = 3;
     Object c;
     final /* synthetic */ Object d;
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public r(C0155s c0155s, AbstractC0125m3 abstractC0125m3) {
-        super(abstractC0125m3);
-        this.d = c0155s;
+    public r(C0160s c0160s, AbstractC0130m3 abstractC0130m3) {
+        super(abstractC0130m3);
+        this.d = c0160s;
     }
 
     @Override // j$.util.function.Consumer
@@ -24,10 +24,10 @@ class r extends AbstractC0101i3 {
                     return;
                 }
                 ((Set) this.c).add(obj);
-                this.a.accept((AbstractC0125m3) obj);
+                this.a.accept((AbstractC0130m3) obj);
                 return;
             case 1:
-                intStream = (AbstractC0075e1) ((Function) ((N) this.d).m).apply(obj);
+                intStream = (AbstractC0080e1) ((Function) ((N) this.d).m).apply(obj);
                 if (intStream != null) {
                     try {
                         intStream.sequential().d((j$.util.function.q) this.c);
@@ -75,7 +75,7 @@ class r extends AbstractC0101i3 {
         }
     }
 
-    @Override // j$.util.stream.AbstractC0101i3, j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0106i3, j$.util.stream.AbstractC0130m3
     public void m() {
         switch (this.b) {
             case 0:
@@ -88,7 +88,7 @@ class r extends AbstractC0101i3 {
         }
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public void n(long j) {
         switch (this.b) {
             case 0:
@@ -108,23 +108,23 @@ class r extends AbstractC0101i3 {
     }
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public r(K k, AbstractC0125m3 abstractC0125m3) {
-        super(abstractC0125m3);
+    public r(K k, AbstractC0130m3 abstractC0130m3) {
+        super(abstractC0130m3);
         this.d = k;
-        this.c = new F(abstractC0125m3);
+        this.c = new F(abstractC0130m3);
     }
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public r(M m, AbstractC0125m3 abstractC0125m3) {
-        super(abstractC0125m3);
+    public r(M m, AbstractC0130m3 abstractC0130m3) {
+        super(abstractC0130m3);
         this.d = m;
-        this.c = new B0(abstractC0125m3);
+        this.c = new B0(abstractC0130m3);
     }
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public r(N n, AbstractC0125m3 abstractC0125m3) {
-        super(abstractC0125m3);
+    public r(N n, AbstractC0130m3 abstractC0130m3) {
+        super(abstractC0130m3);
         this.d = n;
-        this.c = new W0(abstractC0125m3);
+        this.c = new W0(abstractC0130m3);
     }
 }

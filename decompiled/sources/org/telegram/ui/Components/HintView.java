@@ -15,7 +15,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
@@ -376,6 +376,10 @@ public class HintView extends FrameLayout {
     }
 
     public void hide() {
+        hide(true);
+    }
+
+    public void hide(boolean z) {
         if (getTag() == null) {
             return;
         }
@@ -390,20 +394,27 @@ public class HintView extends FrameLayout {
             animatorSet.cancel();
             this.animatorSet = null;
         }
-        AnimatorSet animatorSet2 = new AnimatorSet();
-        this.animatorSet = animatorSet2;
-        animatorSet2.playTogether(ObjectAnimator.ofFloat(this, View.ALPHA, 0.0f));
-        this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.HintView.3
-            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
-            public void onAnimationEnd(Animator animator) {
-                HintView.this.setVisibility(4);
-                HintView.this.currentView = null;
-                HintView.this.messageCell = null;
-                HintView.this.animatorSet = null;
-            }
-        });
-        this.animatorSet.setDuration(300L);
-        this.animatorSet.start();
+        if (z) {
+            AnimatorSet animatorSet2 = new AnimatorSet();
+            this.animatorSet = animatorSet2;
+            animatorSet2.playTogether(ObjectAnimator.ofFloat(this, View.ALPHA, 0.0f));
+            this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.HintView.3
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationEnd(Animator animator) {
+                    HintView.this.setVisibility(4);
+                    HintView.this.currentView = null;
+                    HintView.this.messageCell = null;
+                    HintView.this.animatorSet = null;
+                }
+            });
+            this.animatorSet.setDuration(300L);
+            this.animatorSet.start();
+            return;
+        }
+        setVisibility(4);
+        this.currentView = null;
+        this.messageCell = null;
+        this.animatorSet = null;
     }
 
     public void setText(CharSequence charSequence) {

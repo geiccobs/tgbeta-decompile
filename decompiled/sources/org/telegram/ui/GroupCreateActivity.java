@@ -40,6 +40,7 @@ import androidx.annotation.Keep;
 import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,9 +54,9 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$ChatFull;
@@ -369,7 +370,7 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
         this.addToGroup = bundle.getBoolean("addToGroup", false);
         this.chatAddType = bundle.getInt("chatAddType", 0);
         this.chatId = bundle.getLong("chatId");
-        this.channelId = bundle.getLong("channelId");
+        this.channelId = bundle.getLong(RemoteMessageConst.Notification.CHANNEL_ID);
         if (this.isAlwaysShare || this.isNeverShare || this.addToGroup) {
             this.maxCount = 0;
         } else {

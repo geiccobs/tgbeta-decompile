@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /* loaded from: classes.dex */
@@ -38,7 +39,7 @@ public class SmsReceiver extends BroadcastReceiver {
             }
             if (string != null) {
                 SharedPreferences.Editor edit = sharedPreferences.edit();
-                edit.putString("sms_hash_code", string + "|" + replace).commit();
+                edit.putString("sms_hash_code", string + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + replace).commit();
             }
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.SmsReceiver$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable

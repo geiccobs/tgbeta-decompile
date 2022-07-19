@@ -19,11 +19,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$TL_chatInviteExported;
 import org.telegram.tgnet.TLRPC$TL_error;
@@ -72,7 +73,7 @@ public class LinkEditActivity extends BaseFragment {
     private HeaderCell usesHeaderCell;
     private boolean firstLayout = true;
     private ArrayList<Integer> dispalyedDates = new ArrayList<>();
-    private final int[] defaultDates = {3600, 86400, 604800};
+    private final int[] defaultDates = {3600, RemoteMessageConst.DEFAULT_TTL, 604800};
     private ArrayList<Integer> dispalyedUses = new ArrayList<>();
     private final int[] defaultUses = {1, 10, 100};
 

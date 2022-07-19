@@ -61,8 +61,8 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
 import org.telegram.messenger.XiaomiUtilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$InputPeer;
@@ -371,7 +371,7 @@ public class TranslateAlert extends Dialog {
         paint.setColor(Theme.getColor("dialogBackground"));
         paint.setShadowLayer(AndroidUtilities.dp(2.0f), 0.0f, AndroidUtilities.dp(-0.66f), 503316480);
         FrameLayout frameLayout2 = new FrameLayout(context) { // from class: org.telegram.ui.Components.TranslateAlert.2
-            private int contentHeight = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            private int contentHeight = Integer.MAX_VALUE;
             private RectF containerRect = new RectF();
 
             {

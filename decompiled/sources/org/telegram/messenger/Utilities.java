@@ -30,6 +30,11 @@ public class Utilities {
     public static volatile DispatchQueue themeQueue = new DispatchQueue("themeQueue");
     protected static final char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+    /* loaded from: classes.dex */
+    public interface Callback<T> {
+        void run(T t);
+    }
+
     public static native void aesCbcEncryption(ByteBuffer byteBuffer, byte[] bArr, byte[] bArr2, int i, int i2, int i3);
 
     private static native void aesCbcEncryptionByteArray(byte[] bArr, byte[] bArr2, byte[] bArr3, int i, int i2, int i3, int i4);

@@ -92,11 +92,8 @@ public class VoiceMessageEnterTransition implements MessageEnterTransitionContai
     public void onDraw(Canvas canvas) {
         float f;
         float f2;
-        float f3;
-        float f4;
-        int i;
-        float f5 = this.progress;
-        float f6 = f5 > 0.6f ? 1.0f : f5 / 0.6f;
+        float f3 = this.progress;
+        float f4 = f3 > 0.6f ? 1.0f : f3 / 0.6f;
         ChatActivityEnterView.RecordCircle recordCircle = this.recordCircle;
         float x = (recordCircle.drawingCx + recordCircle.getX()) - this.container.getX();
         ChatActivityEnterView.RecordCircle recordCircle2 = this.recordCircle;
@@ -110,34 +107,21 @@ public class VoiceMessageEnterTransition implements MessageEnterTransitionContai
         }
         this.lastToCx = f2;
         this.lastToCy = f;
-        float interpolation = CubicBezierInterpolator.DEFAULT.getInterpolation(f5);
-        float interpolation2 = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(f5);
-        float f7 = ((1.0f - interpolation2) * x) + (f2 * interpolation2);
-        float f8 = 1.0f - interpolation;
-        float f9 = (y * f8) + (f * interpolation);
+        float interpolation = CubicBezierInterpolator.DEFAULT.getInterpolation(f3);
+        float interpolation2 = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(f3);
+        float f5 = ((1.0f - interpolation2) * x) + (f2 * interpolation2);
+        float f6 = 1.0f - interpolation;
+        float f7 = (y * f6) + (f * interpolation);
         float height = this.messageView.getRadialProgress().getProgressRect().height() / 2.0f;
-        float f10 = (this.fromRadius * f8) + (height * interpolation);
-        float y2 = (this.listView.getY() - this.container.getY()) + this.listView.getMeasuredHeight();
-        if (this.container.getMeasuredHeight() > 0) {
-            f4 = f10;
-            f3 = f9;
-            canvas.saveLayerAlpha(0.0f, this.container.getMeasuredHeight() - AndroidUtilities.dp(400.0f), this.container.getMeasuredWidth(), this.container.getMeasuredHeight(), 255, 31);
-            i = (int) ((this.container.getMeasuredHeight() * f8) + (y2 * interpolation));
-        } else {
-            f4 = f10;
-            f3 = f9;
-            canvas.save();
-            i = 0;
-        }
+        float f8 = (this.fromRadius * f6) + (height * interpolation);
+        int measuredHeight = this.container.getMeasuredHeight() > 0 ? (int) ((this.container.getMeasuredHeight() * f6) + (((this.listView.getY() - this.container.getY()) + this.listView.getMeasuredHeight()) * interpolation)) : 0;
         this.circlePaint.setColor(ColorUtils.blendARGB(getThemedColor("chat_messagePanelVoiceBackground"), getThemedColor(this.messageView.getRadialProgress().getCircleColorKey()), interpolation));
-        float f11 = f3;
-        this.recordCircle.drawWaves(canvas, f7, f11, 1.0f - f6);
-        float f12 = f4;
-        canvas.drawCircle(f7, f11, f12, this.circlePaint);
+        this.recordCircle.drawWaves(canvas, f5, f7, 1.0f - f4);
+        canvas.drawCircle(f5, f7, f8, this.circlePaint);
         canvas.save();
-        float f13 = f12 / height;
-        canvas.scale(f13, f13, f7, f11);
-        canvas.translate(f7 - this.messageView.getRadialProgress().getProgressRect().centerX(), f11 - this.messageView.getRadialProgress().getProgressRect().centerY());
+        float f9 = f8 / height;
+        canvas.scale(f9, f9, f5, f7);
+        canvas.translate(f5 - this.messageView.getRadialProgress().getProgressRect().centerX(), f7 - this.messageView.getRadialProgress().getProgressRect().centerY());
         this.messageView.getRadialProgress().setOverrideAlpha(interpolation);
         this.messageView.getRadialProgress().setDrawBackground(false);
         this.messageView.getRadialProgress().draw(canvas);
@@ -145,13 +129,10 @@ public class VoiceMessageEnterTransition implements MessageEnterTransitionContai
         this.messageView.getRadialProgress().setOverrideAlpha(1.0f);
         canvas.restore();
         if (this.container.getMeasuredHeight() > 0) {
-            float f14 = i;
-            this.gradientMatrix.setTranslate(0.0f, f14);
+            this.gradientMatrix.setTranslate(0.0f, measuredHeight);
             this.gradientShader.setLocalMatrix(this.gradientMatrix);
-            canvas.drawRect(0.0f, f14, this.container.getMeasuredWidth(), this.container.getMeasuredHeight(), this.gradientPaint);
         }
-        canvas.restore();
-        this.recordCircle.drawIcon(canvas, (int) x, (int) y, 1.0f - f5);
+        this.recordCircle.drawIcon(canvas, (int) x, (int) y, 1.0f - f3);
     }
 
     private int getThemedColor(String str) {
