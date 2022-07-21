@@ -1,21 +1,21 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0034a;
+import j$.util.AbstractC0039a;
 import j$.util.function.Consumer;
 /* JADX INFO: Access modifiers changed from: package-private */
 /* loaded from: classes2.dex */
-public final class s4 extends AbstractC0084f4 implements j$.util.v {
-    public s4(AbstractC0188y2 abstractC0188y2, j$.util.function.y yVar, boolean z) {
-        super(abstractC0188y2, yVar, z);
+public final class s4 extends AbstractC0089f4 implements j$.util.v {
+    public s4(AbstractC0193y2 abstractC0193y2, j$.util.function.y yVar, boolean z) {
+        super(abstractC0193y2, yVar, z);
     }
 
-    s4(AbstractC0188y2 abstractC0188y2, j$.util.u uVar, boolean z) {
-        super(abstractC0188y2, uVar, z);
+    s4(AbstractC0193y2 abstractC0193y2, j$.util.u uVar, boolean z) {
+        super(abstractC0193y2, uVar, z);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean b(Consumer consumer) {
-        return AbstractC0034a.l(this, consumer);
+        return AbstractC0039a.l(this, consumer);
     }
 
     @Override // j$.util.v
@@ -34,7 +34,7 @@ public final class s4 extends AbstractC0084f4 implements j$.util.v {
 
     @Override // j$.util.u
     public /* synthetic */ void forEachRemaining(Consumer consumer) {
-        AbstractC0034a.d(this, consumer);
+        AbstractC0039a.d(this, consumer);
     }
 
     @Override // j$.util.v
@@ -51,20 +51,20 @@ public final class s4 extends AbstractC0084f4 implements j$.util.v {
         return a;
     }
 
-    @Override // j$.util.stream.AbstractC0084f4
+    @Override // j$.util.stream.AbstractC0089f4
     void j() {
         Y3 y3 = new Y3();
         this.h = y3;
         this.e = this.b.v0(new r4(y3));
-        this.f = new C0055b(this);
+        this.f = new C0060b(this);
     }
 
-    @Override // j$.util.stream.AbstractC0084f4
-    AbstractC0084f4 l(j$.util.u uVar) {
+    @Override // j$.util.stream.AbstractC0089f4
+    AbstractC0089f4 l(j$.util.u uVar) {
         return new s4(this.b, uVar, this.a);
     }
 
-    @Override // j$.util.stream.AbstractC0084f4, j$.util.u
+    @Override // j$.util.stream.AbstractC0089f4, j$.util.u
     public j$.util.v trySplit() {
         return (j$.util.v) super.trySplit();
     }

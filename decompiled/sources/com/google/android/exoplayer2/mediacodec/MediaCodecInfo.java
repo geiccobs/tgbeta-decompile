@@ -11,7 +11,6 @@ import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import org.telegram.messenger.MediaController;
-import org.telegram.messenger.R;
 /* loaded from: classes.dex */
 public final class MediaCodecInfo {
     public final boolean adaptive;
@@ -156,7 +155,7 @@ public final class MediaCodecInfo {
         return false;
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public boolean isVideoSizeAndRateSupportedV21(int i, int i2, double d) {
         MediaCodecInfo.CodecCapabilities codecCapabilities = this.capabilities;
         if (codecCapabilities == null) {
@@ -179,7 +178,7 @@ public final class MediaCodecInfo {
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public Point alignVideoSizeV21(int i, int i2) {
         MediaCodecInfo.VideoCapabilities videoCapabilities;
         MediaCodecInfo.CodecCapabilities codecCapabilities = this.capabilities;
@@ -189,7 +188,7 @@ public final class MediaCodecInfo {
         return alignVideoSizeV21(videoCapabilities, i, i2);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public boolean isAudioSampleRateSupportedV21(int i) {
         MediaCodecInfo.CodecCapabilities codecCapabilities = this.capabilities;
         if (codecCapabilities == null) {
@@ -208,7 +207,7 @@ public final class MediaCodecInfo {
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public boolean isAudioChannelCountSupportedV21(int i) {
         MediaCodecInfo.CodecCapabilities codecCapabilities = this.capabilities;
         if (codecCapabilities == null) {
@@ -253,7 +252,7 @@ public final class MediaCodecInfo {
         return Util.SDK_INT >= 19 && isAdaptiveV19(codecCapabilities);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
+    @TargetApi(19)
     private static boolean isAdaptiveV19(MediaCodecInfo.CodecCapabilities codecCapabilities) {
         return codecCapabilities.isFeatureSupported("adaptive-playback");
     }
@@ -262,7 +261,7 @@ public final class MediaCodecInfo {
         return Util.SDK_INT >= 21 && isTunnelingV21(codecCapabilities);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static boolean isTunnelingV21(MediaCodecInfo.CodecCapabilities codecCapabilities) {
         return codecCapabilities.isFeatureSupported("tunneled-playback");
     }
@@ -271,12 +270,12 @@ public final class MediaCodecInfo {
         return Util.SDK_INT >= 21 && isSecureV21(codecCapabilities);
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static boolean isSecureV21(MediaCodecInfo.CodecCapabilities codecCapabilities) {
         return codecCapabilities.isFeatureSupported("secure-playback");
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static boolean areSizeAndRateSupportedV21(MediaCodecInfo.VideoCapabilities videoCapabilities, int i, int i2, double d) {
         Point alignVideoSizeV21 = alignVideoSizeV21(videoCapabilities, i, i2);
         int i3 = alignVideoSizeV21.x;
@@ -287,7 +286,7 @@ public final class MediaCodecInfo {
         return videoCapabilities.areSizeAndRateSupported(i3, i4, Math.floor(d));
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static Point alignVideoSizeV21(MediaCodecInfo.VideoCapabilities videoCapabilities, int i, int i2) {
         int widthAlignment = videoCapabilities.getWidthAlignment();
         int heightAlignment = videoCapabilities.getHeightAlignment();

@@ -8,7 +8,6 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.os.Process;
 import java.nio.ByteBuffer;
-import org.telegram.messenger.R;
 import org.webrtc.ContextUtils;
 import org.webrtc.Logging;
 import org.webrtc.MediaStreamTrack;
@@ -299,7 +298,7 @@ public class WebRtcAudioTrack {
         Logging.d(TAG, "AudioTrack: session ID: " + this.audioTrack.getAudioSessionId() + ", channels: " + this.audioTrack.getChannelCount() + ", sample rate: " + this.audioTrack.getSampleRate() + ", max gain: " + AudioTrack.getMaxVolume());
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static AudioTrack createAudioTrackOnLollipopOrHigher(int i, int i2, int i3) {
         Logging.d(TAG, "createAudioTrackOnLollipopOrHigher");
         int nativeOutputSampleRate = AudioTrack.getNativeOutputSampleRate(streamType);

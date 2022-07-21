@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.os.Handler;
 import android.os.HandlerThread;
+import com.huawei.hms.framework.common.ContainerUtils;
 import com.microsoft.appcenter.channel.Channel;
 import com.microsoft.appcenter.channel.DefaultChannel;
 import com.microsoft.appcenter.channel.OneCollectorChannelListener;
@@ -162,7 +163,7 @@ public class AppCenter {
         this.mConfiguredFromApp = true;
         if (str != null) {
             for (String str2 : str.split(";")) {
-                String[] split = str2.split("=", -1);
+                String[] split = str2.split(ContainerUtils.KEY_VALUE_DELIMITER, -1);
                 String str3 = split[0];
                 if (split.length == 1) {
                     if (!str3.isEmpty()) {

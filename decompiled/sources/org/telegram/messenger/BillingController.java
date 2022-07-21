@@ -267,7 +267,7 @@ public class BillingController implements PurchasesUpdatedListener, BillingClien
                                     public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
                                         BillingController.this.lambda$onPurchasesUpdated$4(accountInstance2, purchase, billingResult, tLRPC$TL_payments_assignPlayMarketTransaction, tLObject, tLRPC$TL_error);
                                     }
-                                });
+                                }, 66);
                                 accountInstance2.getUserConfig().billingPaymentPurpose = null;
                                 accountInstance2.getUserConfig().saveConfig(false);
                             }

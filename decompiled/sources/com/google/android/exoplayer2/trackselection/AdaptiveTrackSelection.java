@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.android.HwBuildEx;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
 
         @Deprecated
         public Factory(BandwidthMeter bandwidthMeter) {
-            this(bandwidthMeter, 10000, 25000, 25000, 0.7f, 0.75f, 2000L, Clock.DEFAULT);
+            this(bandwidthMeter, HwBuildEx.VersionCodes.CUR_DEVELOPMENT, 25000, 25000, 0.7f, 0.75f, 2000L, Clock.DEFAULT);
         }
 
         @Deprecated

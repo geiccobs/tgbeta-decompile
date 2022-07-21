@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.SystemClock;
+import com.huawei.hms.android.HwBuildEx;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -27,8 +28,8 @@ public class Camera1Session implements CameraSession {
     private final Camera.CameraInfo info;
     private SessionState state;
     private final SurfaceTextureHelper surfaceTextureHelper;
-    private static final Histogram camera1StartTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera1.StartTimeMs", 1, 10000, 50);
-    private static final Histogram camera1StopTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera1.StopTimeMs", 1, 10000, 50);
+    private static final Histogram camera1StartTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera1.StartTimeMs", 1, HwBuildEx.VersionCodes.CUR_DEVELOPMENT, 50);
+    private static final Histogram camera1StopTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera1.StopTimeMs", 1, HwBuildEx.VersionCodes.CUR_DEVELOPMENT, 50);
     private static final Histogram camera1ResolutionHistogram = Histogram.createEnumeration("WebRTC.Android.Camera1.Resolution", CameraEnumerationAndroid.COMMON_RESOLUTIONS.size());
     private final Handler cameraThreadHandler = new Handler();
     private OrientationHelper orientationHelper = new OrientationHelper();

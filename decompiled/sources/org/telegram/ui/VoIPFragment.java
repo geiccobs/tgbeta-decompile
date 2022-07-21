@@ -56,10 +56,10 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.voip.EncryptionKeyEmojifier;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.messenger.voip.VoIPService;
@@ -2156,7 +2156,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_zOrderOnTop)
+    @TargetApi(org.telegram.messenger.R.styleable.MapAttrs_zOrderOnTop)
     private void onRequestPermissionsResultInternal(int i, String[] strArr, int[] iArr) {
         if (i == 101) {
             if (VoIPService.getSharedInstance() == null) {

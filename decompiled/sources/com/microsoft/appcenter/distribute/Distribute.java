@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.widget.Toast;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import com.microsoft.appcenter.AbstractAppCenterService;
 import com.microsoft.appcenter.DependencyConfiguration;
 import com.microsoft.appcenter.channel.Channel;
@@ -420,7 +421,7 @@ public class Distribute extends AbstractAppCenterService {
     private synchronized void cancelNotification() {
         if (DistributeUtils.getStoredDownloadState() == 3) {
             AppCenterLog.debug("AppCenterDistribute", "Delete notification");
-            ((NotificationManager) this.mContext.getSystemService("notification")).cancel(DistributeUtils.getNotificationId());
+            ((NotificationManager) this.mContext.getSystemService(RemoteMessageConst.NOTIFICATION)).cancel(DistributeUtils.getNotificationId());
         }
     }
 
@@ -957,7 +958,7 @@ public class Distribute extends AbstractAppCenterService {
         }
         if (this.mForegroundActivity == null && DistributeUtils.getStoredDownloadState() != 3) {
             AppCenterLog.debug("AppCenterDistribute", "Post a notification as the download finished in background.");
-            NotificationManager notificationManager = (NotificationManager) this.mContext.getSystemService("notification");
+            NotificationManager notificationManager = (NotificationManager) this.mContext.getSystemService(RemoteMessageConst.NOTIFICATION);
             if (Build.VERSION.SDK_INT >= 26) {
                 notificationManager.createNotificationChannel(new NotificationChannel("appcenter.distribute", this.mContext.getString(R$string.appcenter_distribute_notification_category), 3));
                 builder = new Notification.Builder(this.mContext, "appcenter.distribute");

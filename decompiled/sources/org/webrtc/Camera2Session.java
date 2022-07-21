@@ -12,15 +12,15 @@ import android.hardware.camera2.CaptureRequest;
 import android.os.Handler;
 import android.util.Range;
 import android.view.Surface;
+import com.huawei.hms.android.HwBuildEx;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.telegram.messenger.R;
 import org.webrtc.Camera2Session;
 import org.webrtc.CameraEnumerationAndroid;
 import org.webrtc.CameraSession;
 import org.webrtc.VideoSink;
-@TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+@TargetApi(21)
 /* loaded from: classes3.dex */
 public class Camera2Session implements CameraSession {
     private static final String TAG = "Camera2Session";
@@ -42,8 +42,8 @@ public class Camera2Session implements CameraSession {
     private Surface surface;
     private final SurfaceTextureHelper surfaceTextureHelper;
     private final int width;
-    private static final Histogram camera2StartTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera2.StartTimeMs", 1, 10000, 50);
-    private static final Histogram camera2StopTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera2.StopTimeMs", 1, 10000, 50);
+    private static final Histogram camera2StartTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera2.StartTimeMs", 1, HwBuildEx.VersionCodes.CUR_DEVELOPMENT, 50);
+    private static final Histogram camera2StopTimeMsHistogram = Histogram.createCounts("WebRTC.Android.Camera2.StopTimeMs", 1, HwBuildEx.VersionCodes.CUR_DEVELOPMENT, 50);
     private static final Histogram camera2ResolutionHistogram = Histogram.createEnumeration("WebRTC.Android.Camera2.Resolution", CameraEnumerationAndroid.COMMON_RESOLUTIONS.size());
     private SessionState state = SessionState.RUNNING;
     private final long constructionTimeNs = System.nanoTime();

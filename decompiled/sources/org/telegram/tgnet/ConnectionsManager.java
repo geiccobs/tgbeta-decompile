@@ -11,6 +11,7 @@ import android.util.Base64;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -279,11 +280,14 @@ public class ConnectionsManager extends BaseController {
 
     private String getRegId() {
         String str = SharedConfig.pushString;
+        if (!TextUtils.isEmpty(str) && SharedConfig.pushType == 13) {
+            str = "huawei://" + str;
+        }
         if (TextUtils.isEmpty(str) && !TextUtils.isEmpty(SharedConfig.pushStringStatus)) {
             str = SharedConfig.pushStringStatus;
         }
         if (TextUtils.isEmpty(str)) {
-            String str2 = "__FIREBASE_GENERATING_SINCE_" + getCurrentTime() + "__";
+            String str2 = "__" + (SharedConfig.pushType == 2 ? "FIREBASE" : "HUAWEI") + "_GENERATING_SINCE_" + getCurrentTime() + "__";
             SharedConfig.pushStringStatus = str2;
             return str2;
         }
@@ -319,11 +323,11 @@ public class ConnectionsManager extends BaseController {
     }
 
     public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, int i) {
-        return sendRequest(tLObject, requestDelegate, null, null, null, i, DEFAULT_DATACENTER_ID, 1, true);
+        return sendRequest(tLObject, requestDelegate, null, null, null, i, Integer.MAX_VALUE, 1, true);
     }
 
     public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, int i, int i2) {
-        return sendRequest(tLObject, requestDelegate, null, null, null, i, DEFAULT_DATACENTER_ID, i2, true);
+        return sendRequest(tLObject, requestDelegate, null, null, null, i, Integer.MAX_VALUE, i2, true);
     }
 
     public int sendRequest(TLObject tLObject, RequestDelegateTimestamp requestDelegateTimestamp, int i, int i2, int i3) {
@@ -331,7 +335,7 @@ public class ConnectionsManager extends BaseController {
     }
 
     public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, QuickAckDelegate quickAckDelegate, int i) {
-        return sendRequest(tLObject, requestDelegate, null, quickAckDelegate, null, i, DEFAULT_DATACENTER_ID, 1, true);
+        return sendRequest(tLObject, requestDelegate, null, quickAckDelegate, null, i, Integer.MAX_VALUE, 1, true);
     }
 
     public int sendRequest(TLObject tLObject, RequestDelegate requestDelegate, QuickAckDelegate quickAckDelegate, WriteToSocketDelegate writeToSocketDelegate, int i, int i2, int i3, boolean z) {
@@ -500,16 +504,19 @@ public class ConnectionsManager extends BaseController {
         }
     }
 
-    public static void setRegId(String str, String str2) {
-        if (TextUtils.isEmpty(str) && !TextUtils.isEmpty(str2)) {
-            str = str2;
+    public static void setRegId(String str, int i, String str2) {
+        if (!TextUtils.isEmpty(str) && i == 13) {
+            str = "huawei://" + str;
         }
-        if (TextUtils.isEmpty(str)) {
-            str = "__FIREBASE_GENERATING_SINCE_" + getInstance(0).getCurrentTime() + "__";
-            SharedConfig.pushStringStatus = str;
+        if (!TextUtils.isEmpty(str) || TextUtils.isEmpty(str2)) {
+            str2 = str;
         }
-        for (int i = 0; i < 4; i++) {
-            native_setRegId(i, str);
+        if (TextUtils.isEmpty(str2)) {
+            str2 = "__" + (i == 2 ? "FIREBASE" : "HUAWEI") + "_GENERATING_SINCE_" + getInstance(0).getCurrentTime() + "__";
+            SharedConfig.pushStringStatus = str2;
+        }
+        for (int i2 = 0; i2 < 4; i2++) {
+            native_setRegId(i2, str2);
         }
     }
 
@@ -1038,7 +1045,7 @@ public class ConnectionsManager extends BaseController {
                         for (int i3 = 0; i3 < length; i3++) {
                             JSONObject jSONObject = jSONArray.getJSONObject(i3);
                             if (jSONObject.getInt("type") == 16) {
-                                arrayList.add(jSONObject.getString("data"));
+                                arrayList.add(jSONObject.getString(RemoteMessageConst.DATA));
                             }
                         }
                         Collections.sort(arrayList, ConnectionsManager$DnsTxtLoadTask$$ExternalSyntheticLambda1.INSTANCE);
@@ -1184,7 +1191,7 @@ public class ConnectionsManager extends BaseController {
                 for (int i2 = 0; i2 < length; i2++) {
                     JSONObject jSONObject = jSONArray.getJSONObject(i2);
                     if (jSONObject.getInt("type") == 16) {
-                        arrayList.add(jSONObject.getString("data"));
+                        arrayList.add(jSONObject.getString(RemoteMessageConst.DATA));
                     }
                 }
                 Collections.sort(arrayList, ConnectionsManager$GoogleDnsLoadTask$$ExternalSyntheticLambda1.INSTANCE);
@@ -1323,7 +1330,7 @@ public class ConnectionsManager extends BaseController {
                         for (int i2 = 0; i2 < length; i2++) {
                             JSONObject jSONObject = jSONArray.getJSONObject(i2);
                             if (jSONObject.getInt("type") == 16) {
-                                arrayList.add(jSONObject.getString("data"));
+                                arrayList.add(jSONObject.getString(RemoteMessageConst.DATA));
                             }
                         }
                         Collections.sort(arrayList, ConnectionsManager$MozillaDnsLoadTask$$ExternalSyntheticLambda1.INSTANCE);

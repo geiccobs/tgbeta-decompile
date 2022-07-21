@@ -23,9 +23,9 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.SimpleTextView;
@@ -95,7 +95,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView {
         this.giftTier = giftTier;
         this.dummyCell = new PremiumFeatureCell(getContext());
         PremiumPreviewFragment.fillPremiumFeaturesList(this.premiumFeatures, i);
-        if (this.giftTier != null) {
+        if (this.giftTier != null || UserConfig.getInstance(i).isPremium()) {
             this.buttonContainer.setVisibility(8);
         }
         PremiumGradient.GradientTools gradientTools = new PremiumGradient.GradientTools("premiumGradient1", "premiumGradient2", "premiumGradient3", "premiumGradient4");

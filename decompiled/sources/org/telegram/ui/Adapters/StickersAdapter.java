@@ -116,7 +116,7 @@ public class StickersAdapter extends RecyclerListView.SelectionAdapter implement
             public final void run(ArrayList arrayList, String str2) {
                 StickersAdapter.this.lambda$searchEmojiByKeyword$0(str, arrayList, str2);
             }
-        });
+        }, true);
     }
 
     public /* synthetic */ void lambda$searchEmojiByKeyword$0(String str, ArrayList arrayList, String str2) {

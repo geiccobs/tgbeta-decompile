@@ -8,7 +8,6 @@ import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.ReflectedParcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
 /* loaded from: classes.dex */
 public final class LocationRequest extends AbstractSafeParcelable implements ReflectedParcelable {
@@ -31,7 +30,7 @@ public final class LocationRequest extends AbstractSafeParcelable implements Ref
         this.zzc = 600000L;
         this.zzd = false;
         this.zze = Long.MAX_VALUE;
-        this.zzf = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        this.zzf = Integer.MAX_VALUE;
         this.zzg = 0.0f;
         this.zzh = 0L;
         this.zzi = false;

@@ -35,7 +35,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.core.view.accessibility.AccessibilityRecordCompat;
 import java.util.ArrayList;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class NestedScrollView extends FrameLayout implements NestedScrollingParent3, NestedScrollingChild {
     private static final AccessibilityDelegate ACCESSIBILITY_DELEGATE = new AccessibilityDelegate();
@@ -1306,7 +1305,7 @@ public class NestedScrollView extends FrameLayout implements NestedScrollingPare
 
     public void fling(int velocityY) {
         if (getChildCount() > 0) {
-            this.mScroller.fling(getScrollX(), getScrollY(), 0, velocityY, 0, 0, Integer.MIN_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID, 0, 0);
+            this.mScroller.fling(getScrollX(), getScrollY(), 0, velocityY, 0, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0);
             runAnimatedScroll(true);
         }
     }

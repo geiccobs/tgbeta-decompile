@@ -25,6 +25,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import androidx.core.content.ContextCompat;
 import androidx.versionedparcelable.CustomVersionedParcelable;
+import com.huawei.hms.framework.network.grs.GrsBaseInfo;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,7 +63,7 @@ public class IconCompat extends CustomVersionedParcelable {
             case 6:
                 return "URI_MASKABLE";
             default:
-                return "UNKNOWN";
+                return GrsBaseInfo.CountryCodeSource.UNKNOWN;
         }
     }
 
@@ -287,7 +289,7 @@ public class IconCompat extends CustomVersionedParcelable {
     public InputStream getUriInputStream(Context context) {
         Uri uri = getUri();
         String scheme = uri.getScheme();
-        if ("content".equals(scheme) || "file".equals(scheme)) {
+        if (RemoteMessageConst.Notification.CONTENT.equals(scheme) || "file".equals(scheme)) {
             try {
                 return context.getContentResolver().openInputStream(uri);
             } catch (Exception e) {

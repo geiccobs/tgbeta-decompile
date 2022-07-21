@@ -79,7 +79,7 @@ public class AnimatedTextView extends View {
         }
 
         public AnimatedTextDrawable(boolean z, boolean z2, boolean z3) {
-            this.textPaint = new TextPaint();
+            this.textPaint = new TextPaint(1);
             this.gravity = 0;
             this.isRTL = false;
             this.t = 0.0f;
@@ -140,10 +140,10 @@ public class AnimatedTextView extends View {
                             intValue2 = ((i3 - intValue2) - this.currentLayout[i2].getWidth()) - (width - i3);
                         }
                         int i4 = this.gravity;
-                        if ((i4 & 5) > 0) {
-                            f4 = width - i3;
-                        } else if ((i4 & 1) > 0) {
+                        if ((i4 & 1) > 0) {
                             f4 = (width - i3) / 2.0f;
+                        } else if ((i4 & 5) > 0) {
+                            f4 = width - i3;
                         } else {
                             canvas.translate(intValue2, f3);
                             this.currentLayout[i2].draw(canvas);
@@ -169,11 +169,11 @@ public class AnimatedTextView extends View {
                             intValue3 = ((this.oldWidth - intValue3) - this.oldLayout[i].getWidth()) - (width - this.oldWidth);
                         }
                         int i5 = this.gravity;
-                        if ((i5 & 5) > 0) {
-                            f2 = width - this.oldWidth;
+                        if ((i5 & 1) > 0) {
+                            f2 = (width - this.oldWidth) / 2.0f;
                         } else {
-                            if ((i5 & 1) > 0) {
-                                f2 = (width - this.oldWidth) / 2.0f;
+                            if ((i5 & 5) > 0) {
+                                f2 = width - this.oldWidth;
                             }
                             canvas.translate(intValue3, f10);
                             this.oldLayout[i].draw(canvas);
@@ -197,10 +197,10 @@ public class AnimatedTextView extends View {
                             intValue4 = ((this.currentWidth - intValue4) - this.currentLayout[i].getWidth()) - (width - this.currentWidth);
                         }
                         int i6 = this.gravity;
-                        if ((i6 & 5) > 0) {
-                            f = width - this.currentWidth;
-                        } else if ((i6 & 1) > 0) {
+                        if ((i6 & 1) > 0) {
                             f = (width - this.currentWidth) / 2.0f;
+                        } else if ((i6 & 5) > 0) {
+                            f = width - this.currentWidth;
                         } else {
                             canvas.translate(intValue4, 0.0f);
                             this.currentLayout[i].draw(canvas);
@@ -664,15 +664,15 @@ public class AnimatedTextView extends View {
                     int i14 = i10 - i12;
                     int i15 = i11 - i13;
                     if (i14 > 0 || i15 > 0) {
-                        if (i14 == i15 && z6) {
-                            regionCallback.run(charSequence2.subSequence(i12, i10), i12, i10);
-                        } else if (!z6) {
+                        if (i14 != i15 || !z6) {
                             if (i14 > 0) {
                                 regionCallback2.run(charSequence2.subSequence(i12, i10), i12, i10);
                             }
                             if (i15 > 0) {
                                 regionCallback3.run(charSequence.subSequence(i13, i11), i13, i11);
                             }
+                        } else {
+                            regionCallback.run(charSequence2.subSequence(i12, i10), i12, i10);
                         }
                     }
                     i12 = i10;
@@ -813,7 +813,7 @@ public class AnimatedTextView extends View {
         int width = this.drawable.getWidth();
         this.drawable.setBounds(getPaddingLeft(), getPaddingTop(), this.lastMaxWidth - getPaddingRight(), getMeasuredHeight() - getPaddingBottom());
         this.drawable.setText(charSequence, z3, z2);
-        if (width >= this.drawable.getWidth()) {
+        if (width >= this.drawable.getWidth() && (z3 || width == this.drawable.getWidth())) {
             return;
         }
         requestLayout();
@@ -841,6 +841,10 @@ public class AnimatedTextView extends View {
 
     public void setAnimationProperties(float f, long j, long j2, TimeInterpolator timeInterpolator) {
         this.drawable.setAnimationProperties(f, j, j2, timeInterpolator);
+    }
+
+    public AnimatedTextDrawable getDrawable() {
+        return this.drawable;
     }
 
     public TextPaint getPaint() {

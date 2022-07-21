@@ -2616,7 +2616,7 @@ public class RecyclerView extends ViewGroup implements NestedScrollingChild {
             iArr[1] = -1;
             return;
         }
-        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i = Integer.MAX_VALUE;
         int i2 = Integer.MIN_VALUE;
         for (int i3 = 0; i3 < childCount; i3++) {
             ViewHolder childViewHolderInt = getChildViewHolderInt(this.mChildHelper.getChildAt(i3));
@@ -3397,7 +3397,7 @@ public class RecyclerView extends ViewGroup implements NestedScrollingChild {
                 this.mInterpolator = interpolator2;
                 this.mOverScroller = new OverScroller(RecyclerView.this.getContext(), interpolator2);
             }
-            this.mOverScroller.fling(0, 0, i, i2, Integer.MIN_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID, Integer.MIN_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID);
+            this.mOverScroller.fling(0, 0, i, i2, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
             postOnAnimation();
         }
 
@@ -4664,8 +4664,8 @@ public class RecyclerView extends ViewGroup implements NestedScrollingChild {
             }
             int i3 = Integer.MIN_VALUE;
             int i4 = Integer.MIN_VALUE;
-            int i5 = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            int i6 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i5 = Integer.MAX_VALUE;
+            int i6 = Integer.MAX_VALUE;
             for (int i7 = 0; i7 < childCount; i7++) {
                 View childAt = getChildAt(i7);
                 Rect rect = this.mRecyclerView.mTempRect;
@@ -6516,6 +6516,10 @@ public class RecyclerView extends ViewGroup implements NestedScrollingChild {
         public void setChangeDuration(long j) {
             this.mChangeAddDuration = j;
             this.mChangeRemoveDuration = j;
+        }
+
+        public void setAddDelay(long j) {
+            this.mAddDelay = j;
         }
 
         public void setRemoveDelay(long j) {

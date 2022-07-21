@@ -23,8 +23,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$KeyboardButton;
 import org.telegram.tgnet.TLRPC$TL_message;
@@ -200,8 +200,8 @@ public class ThemePreviewMessagesCell extends LinearLayout {
 
                     /* renamed from: org.telegram.ui.Cells.ThemePreviewMessagesCell$1$1 */
                     /* loaded from: classes3.dex */
-                    public class C00101 extends GestureDetector.SimpleOnGestureListener {
-                        C00101() {
+                    public class C00141 extends GestureDetector.SimpleOnGestureListener {
+                        C00141() {
                             AnonymousClass1.this = r1;
                         }
 
@@ -217,15 +217,15 @@ public class ThemePreviewMessagesCell extends LinearLayout {
                                 ReactionsEffectOverlay.show(themePreviewMessagesCell.fragment, null, themePreviewMessagesCell.cells[1], motionEvent.getX(), motionEvent.getY(), MediaDataController.getInstance(AnonymousClass1.this.val$currentAccount).getDoubleTapReaction(), AnonymousClass1.this.val$currentAccount, 0);
                                 ReactionsEffectOverlay.startAnimation();
                             }
-                            getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver$OnPreDrawListenerC00111());
+                            getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver$OnPreDrawListenerC00151());
                             return true;
                         }
 
                         /* renamed from: org.telegram.ui.Cells.ThemePreviewMessagesCell$1$1$1 */
                         /* loaded from: classes3.dex */
-                        public class ViewTreeObserver$OnPreDrawListenerC00111 implements ViewTreeObserver.OnPreDrawListener {
-                            ViewTreeObserver$OnPreDrawListenerC00111() {
-                                C00101.this = r1;
+                        public class ViewTreeObserver$OnPreDrawListenerC00151 implements ViewTreeObserver.OnPreDrawListener {
+                            ViewTreeObserver$OnPreDrawListenerC00151() {
+                                C00141.this = r1;
                             }
 
                             @Override // android.view.ViewTreeObserver.OnPreDrawListener
@@ -239,7 +239,7 @@ public class ThemePreviewMessagesCell extends LinearLayout {
                                 ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Cells.ThemePreviewMessagesCell$1$1$1$$ExternalSyntheticLambda0
                                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                                     public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                        ThemePreviewMessagesCell.AnonymousClass1.C00101.ViewTreeObserver$OnPreDrawListenerC00111.this.lambda$onPreDraw$0(valueAnimator);
+                                        ThemePreviewMessagesCell.AnonymousClass1.C00141.ViewTreeObserver$OnPreDrawListenerC00151.this.lambda$onPreDraw$0(valueAnimator);
                                     }
                                 });
                                 ofFloat.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Cells.ThemePreviewMessagesCell.1.1.1.1
@@ -267,7 +267,7 @@ public class ThemePreviewMessagesCell extends LinearLayout {
                         this.val$context = context;
                         this.val$currentAccount = i2;
                         this.val$type = i;
-                        this.gestureDetector = new GestureDetector(context, new C00101());
+                        this.gestureDetector = new GestureDetector(context, new C00141());
                     }
 
                     @Override // org.telegram.ui.Cells.ChatMessageCell, android.view.View

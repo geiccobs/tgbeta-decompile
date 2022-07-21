@@ -60,6 +60,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     private ColorFilter colorFilter;
     private ComposeShader composeShader;
     private byte crossfadeAlpha;
+    private boolean crossfadeDelay;
     private int crossfadeDuration;
     private Drawable crossfadeImage;
     private String crossfadeKey;
@@ -1113,16 +1114,15 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         this.useRoundForThumb = z;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:228:0x05c4  */
-    /* JADX WARN: Removed duplicated region for block: B:261:0x0683  */
-    /* JADX WARN: Removed duplicated region for block: B:262:0x068d  */
+    /* JADX WARN: Removed duplicated region for block: B:266:0x0661  */
+    /* JADX WARN: Removed duplicated region for block: B:267:0x066b  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private void drawDrawable(android.graphics.Canvas r28, android.graphics.drawable.Drawable r29, int r30, android.graphics.BitmapShader r31, int r32, int r33, org.telegram.messenger.ImageReceiver.BackgroundThreadDrawHolder r34) {
         /*
-            Method dump skipped, instructions count: 1868
+            Method dump skipped, instructions count: 1826
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.ImageReceiver.drawDrawable(android.graphics.Canvas, android.graphics.drawable.Drawable, int, android.graphics.BitmapShader, int, int, org.telegram.messenger.ImageReceiver$BackgroundThreadDrawHolder):void");
@@ -1132,8 +1132,19 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         if (backgroundThreadDrawHolder != null) {
             if (!(bitmapDrawable instanceof RLottieDrawable)) {
                 if (!(bitmapDrawable instanceof AnimatedFileDrawable)) {
-                    bitmapDrawable.setAlpha(i);
-                    bitmapDrawable.draw(canvas);
+                    Bitmap bitmap = bitmapDrawable.getBitmap();
+                    if (bitmap == null) {
+                        return;
+                    }
+                    if (backgroundThreadDrawHolder.paint == null) {
+                        backgroundThreadDrawHolder.paint = new Paint(1);
+                    }
+                    backgroundThreadDrawHolder.paint.setAlpha(i);
+                    canvas.save();
+                    canvas.translate(backgroundThreadDrawHolder.imageX, backgroundThreadDrawHolder.imageY);
+                    canvas.scale(backgroundThreadDrawHolder.imageW / bitmap.getWidth(), backgroundThreadDrawHolder.imageH / bitmap.getHeight());
+                    canvas.drawBitmap(bitmap, 0.0f, 0.0f, backgroundThreadDrawHolder.paint);
+                    canvas.restore();
                     return;
                 }
                 ((AnimatedFileDrawable) bitmapDrawable).drawInBackground(canvas, backgroundThreadDrawHolder.imageX, backgroundThreadDrawHolder.imageY, backgroundThreadDrawHolder.imageW, backgroundThreadDrawHolder.imageH, i);
@@ -1145,6 +1156,8 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         bitmapDrawable.setAlpha(i);
         if (bitmapDrawable instanceof RLottieDrawable) {
             ((RLottieDrawable) bitmapDrawable).drawInternal(canvas, false, this.currentTime);
+        } else if (bitmapDrawable instanceof AnimatedFileDrawable) {
+            ((AnimatedFileDrawable) bitmapDrawable).drawInternal(canvas, false, this.currentTime);
         } else {
             bitmapDrawable.draw(canvas);
         }
@@ -1199,13 +1212,16 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         if (f == 1.0f) {
             return;
         }
-        if (!z) {
+        if (!z && !this.crossfadeDelay) {
             if (z2) {
                 long currentTimeMillis = System.currentTimeMillis();
                 long j = this.lastUpdateAlphaTime;
                 long j2 = currentTimeMillis - j;
                 if (j == 0) {
                     j2 = 18;
+                }
+                if (j2 > 36) {
+                    j2 = 36;
                 }
                 this.currentAlpha += ((float) j2) / this.crossfadeDuration;
             } else {
@@ -1237,24 +1253,31 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         return draw(canvas, null);
     }
 
-    /* JADX WARN: Code restructure failed: missing block: B:95:0x01c9, code lost:
-        if (r29.useRoundForThumb == false) goto L102;
+    /* JADX WARN: Code restructure failed: missing block: B:102:0x01d2, code lost:
+        if (r29.useRoundForThumb == false) goto L109;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:96:0x01cb, code lost:
-        if (r14 != null) goto L102;
+    /* JADX WARN: Code restructure failed: missing block: B:103:0x01d4, code lost:
+        if (r14 != null) goto L109;
      */
-    /* JADX WARN: Code restructure failed: missing block: B:97:0x01cd, code lost:
+    /* JADX WARN: Code restructure failed: missing block: B:104:0x01d6, code lost:
         updateDrawableRadius(r11);
      */
-    /* JADX WARN: Removed duplicated region for block: B:110:0x01ed A[Catch: Exception -> 0x028e, TryCatch #0 {Exception -> 0x028e, blocks: (B:11:0x002a, B:12:0x0084, B:14:0x00b0, B:17:0x00b8, B:23:0x00d6, B:26:0x00dd, B:30:0x00e8, B:33:0x00ee, B:35:0x00f5, B:37:0x00fa, B:41:0x0104, B:46:0x0116, B:49:0x0123, B:50:0x012d, B:52:0x0131, B:55:0x0137, B:56:0x013a, B:58:0x0142, B:63:0x0158, B:70:0x0168, B:73:0x016e, B:74:0x0171, B:76:0x0192, B:79:0x0198, B:94:0x01c7, B:97:0x01cd, B:104:0x01de, B:107:0x01e4, B:110:0x01ed, B:112:0x01f1, B:115:0x01f6, B:116:0x01fb, B:117:0x0201, B:119:0x0214, B:121:0x0218, B:124:0x0220, B:125:0x0234, B:127:0x024d, B:131:0x0258, B:134:0x0263, B:135:0x0277), top: B:154:0x0028 }] */
-    /* JADX WARN: Removed duplicated region for block: B:122:0x021c  */
+    /* JADX WARN: Removed duplicated region for block: B:117:0x01f6 A[Catch: Exception -> 0x029f, TryCatch #0 {Exception -> 0x029f, blocks: (B:11:0x002a, B:12:0x0084, B:14:0x00b0, B:17:0x00b8, B:23:0x00d6, B:30:0x00e4, B:33:0x00eb, B:37:0x00f6, B:40:0x00fc, B:42:0x0103, B:44:0x0108, B:48:0x0112, B:53:0x0121, B:56:0x012e, B:57:0x0137, B:59:0x013b, B:62:0x0141, B:63:0x0144, B:65:0x014d, B:70:0x0161, B:77:0x0171, B:80:0x0177, B:81:0x017a, B:83:0x019b, B:86:0x01a1, B:101:0x01d0, B:104:0x01d6, B:111:0x01e7, B:114:0x01ed, B:117:0x01f6, B:119:0x01fa, B:122:0x01ff, B:123:0x0204, B:124:0x020a, B:126:0x021d, B:128:0x0221, B:131:0x0229, B:133:0x022d, B:134:0x0241, B:136:0x024b, B:138:0x025e, B:142:0x0269, B:145:0x0274, B:146:0x0288), top: B:165:0x0028 }] */
+    /* JADX WARN: Removed duplicated region for block: B:129:0x0225  */
+    /* JADX WARN: Removed duplicated region for block: B:143:0x026d  */
+    /* JADX WARN: Removed duplicated region for block: B:161:0x02aa  */
+    /* JADX WARN: Removed duplicated region for block: B:30:0x00e4 A[Catch: Exception -> 0x029f, TryCatch #0 {Exception -> 0x029f, blocks: (B:11:0x002a, B:12:0x0084, B:14:0x00b0, B:17:0x00b8, B:23:0x00d6, B:30:0x00e4, B:33:0x00eb, B:37:0x00f6, B:40:0x00fc, B:42:0x0103, B:44:0x0108, B:48:0x0112, B:53:0x0121, B:56:0x012e, B:57:0x0137, B:59:0x013b, B:62:0x0141, B:63:0x0144, B:65:0x014d, B:70:0x0161, B:77:0x0171, B:80:0x0177, B:81:0x017a, B:83:0x019b, B:86:0x01a1, B:101:0x01d0, B:104:0x01d6, B:111:0x01e7, B:114:0x01ed, B:117:0x01f6, B:119:0x01fa, B:122:0x01ff, B:123:0x0204, B:124:0x020a, B:126:0x021d, B:128:0x0221, B:131:0x0229, B:133:0x022d, B:134:0x0241, B:136:0x024b, B:138:0x025e, B:142:0x0269, B:145:0x0274, B:146:0x0288), top: B:165:0x0028 }] */
+    /* JADX WARN: Removed duplicated region for block: B:42:0x0103 A[Catch: Exception -> 0x029f, TryCatch #0 {Exception -> 0x029f, blocks: (B:11:0x002a, B:12:0x0084, B:14:0x00b0, B:17:0x00b8, B:23:0x00d6, B:30:0x00e4, B:33:0x00eb, B:37:0x00f6, B:40:0x00fc, B:42:0x0103, B:44:0x0108, B:48:0x0112, B:53:0x0121, B:56:0x012e, B:57:0x0137, B:59:0x013b, B:62:0x0141, B:63:0x0144, B:65:0x014d, B:70:0x0161, B:77:0x0171, B:80:0x0177, B:81:0x017a, B:83:0x019b, B:86:0x01a1, B:101:0x01d0, B:104:0x01d6, B:111:0x01e7, B:114:0x01ed, B:117:0x01f6, B:119:0x01fa, B:122:0x01ff, B:123:0x0204, B:124:0x020a, B:126:0x021d, B:128:0x0221, B:131:0x0229, B:133:0x022d, B:134:0x0241, B:136:0x024b, B:138:0x025e, B:142:0x0269, B:145:0x0274, B:146:0x0288), top: B:165:0x0028 }] */
+    /* JADX WARN: Removed duplicated region for block: B:59:0x013b A[Catch: Exception -> 0x029f, TryCatch #0 {Exception -> 0x029f, blocks: (B:11:0x002a, B:12:0x0084, B:14:0x00b0, B:17:0x00b8, B:23:0x00d6, B:30:0x00e4, B:33:0x00eb, B:37:0x00f6, B:40:0x00fc, B:42:0x0103, B:44:0x0108, B:48:0x0112, B:53:0x0121, B:56:0x012e, B:57:0x0137, B:59:0x013b, B:62:0x0141, B:63:0x0144, B:65:0x014d, B:70:0x0161, B:77:0x0171, B:80:0x0177, B:81:0x017a, B:83:0x019b, B:86:0x01a1, B:101:0x01d0, B:104:0x01d6, B:111:0x01e7, B:114:0x01ed, B:117:0x01f6, B:119:0x01fa, B:122:0x01ff, B:123:0x0204, B:124:0x020a, B:126:0x021d, B:128:0x0221, B:131:0x0229, B:133:0x022d, B:134:0x0241, B:136:0x024b, B:138:0x025e, B:142:0x0269, B:145:0x0274, B:146:0x0288), top: B:165:0x0028 }] */
+    /* JADX WARN: Removed duplicated region for block: B:64:0x014b  */
+    /* JADX WARN: Removed duplicated region for block: B:70:0x0161 A[Catch: Exception -> 0x029f, TryCatch #0 {Exception -> 0x029f, blocks: (B:11:0x002a, B:12:0x0084, B:14:0x00b0, B:17:0x00b8, B:23:0x00d6, B:30:0x00e4, B:33:0x00eb, B:37:0x00f6, B:40:0x00fc, B:42:0x0103, B:44:0x0108, B:48:0x0112, B:53:0x0121, B:56:0x012e, B:57:0x0137, B:59:0x013b, B:62:0x0141, B:63:0x0144, B:65:0x014d, B:70:0x0161, B:77:0x0171, B:80:0x0177, B:81:0x017a, B:83:0x019b, B:86:0x01a1, B:101:0x01d0, B:104:0x01d6, B:111:0x01e7, B:114:0x01ed, B:117:0x01f6, B:119:0x01fa, B:122:0x01ff, B:123:0x0204, B:124:0x020a, B:126:0x021d, B:128:0x0221, B:131:0x0229, B:133:0x022d, B:134:0x0241, B:136:0x024b, B:138:0x025e, B:142:0x0269, B:145:0x0274, B:146:0x0288), top: B:165:0x0028 }] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public boolean draw(android.graphics.Canvas r30, org.telegram.messenger.ImageReceiver.BackgroundThreadDrawHolder r31) {
         /*
-            Method dump skipped, instructions count: 673
+            Method dump skipped, instructions count: 690
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.ImageReceiver.draw(android.graphics.Canvas, org.telegram.messenger.ImageReceiver$BackgroundThreadDrawHolder):boolean");
@@ -2107,6 +2130,10 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         this.crossfadeDuration = i;
     }
 
+    public void setCrossfadeDelay(boolean z) {
+        this.crossfadeDelay = z;
+    }
+
     @Override // org.telegram.messenger.NotificationCenter.NotificationCenterDelegate
     public void didReceivedNotification(int i, int i2, Object... objArr) {
         int i3;
@@ -2299,12 +2326,14 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         private Drawable mediaDrawable;
         private BitmapShader mediaShader;
         public float overrideAlpha;
+        Paint paint;
         private float previousAlpha;
-        private int[] roundRadius = new int[4];
         private Drawable staticThumbDrawable;
         private Drawable thumbDrawable;
         private BitmapShader thumbShader;
         public long time;
+        private int[] roundRadius = new int[4];
+        private RectF drawRegion = new RectF();
 
         public void release() {
             this.animation = null;
@@ -2336,9 +2365,10 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             if (rectF != null) {
                 float f = this.imageX;
                 rectF.left = f;
-                rectF.right = this.imageY;
+                float f2 = this.imageY;
+                rectF.top = f2;
                 rectF.right = f + this.imageW;
-                rectF.bottom = rectF.top + this.imageH;
+                rectF.bottom = f2 + this.imageH;
             }
         }
     }

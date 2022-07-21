@@ -1,12 +1,26 @@
 package org.telegram.ui.Components;
 
 import android.content.Context;
+import java.util.HashMap;
+import java.util.Map;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
+import org.telegram.ui.Cells.ChatActionCell$$ExternalSyntheticLambda2;
 /* loaded from: classes3.dex */
 public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
+    private TransitState animatingState;
     private State currentState;
-    private Runnable lastCallback;
+    private Map<TransitState, RLottieDrawable> stateMap = new HashMap<TransitState, RLottieDrawable>(this) { // from class: org.telegram.ui.Components.ChatActivityEnterViewAnimatedIconView.1
+        @Override // java.util.HashMap, java.util.AbstractMap, java.util.Map
+        public RLottieDrawable get(Object obj) {
+            RLottieDrawable rLottieDrawable = (RLottieDrawable) super.get(obj);
+            if (rLottieDrawable == null) {
+                int i = ((TransitState) obj).resource;
+                return new RLottieDrawable(i, String.valueOf(i), AndroidUtilities.dp(32.0f), AndroidUtilities.dp(32.0f));
+            }
+            return rLottieDrawable;
+        }
+    };
 
     /* loaded from: classes3.dex */
     public enum State {
@@ -23,55 +37,38 @@ public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
     }
 
     public void setState(State state, boolean z) {
-        setState(state, z, false);
-    }
-
-    private void setState(final State state, final boolean z, boolean z2) {
         if (!z || state != this.currentState) {
-            if (getAnimatedDrawable() != null && getAnimatedDrawable().isRunning() && !z2) {
-                this.lastCallback = new Runnable() { // from class: org.telegram.ui.Components.ChatActivityEnterViewAnimatedIconView$$ExternalSyntheticLambda1
-                    @Override // java.lang.Runnable
-                    public final void run() {
-                        ChatActivityEnterViewAnimatedIconView.this.lambda$setState$0(state, z);
-                    }
-                };
-                return;
-            }
             State state2 = this.currentState;
             this.currentState = state;
             if (!z || state2 == null || getState(state2, state) == null) {
-                int i = getAnyState(this.currentState).resource;
-                RLottieDrawable rLottieDrawable = new RLottieDrawable(i, String.valueOf(i), AndroidUtilities.dp(32.0f), AndroidUtilities.dp(32.0f));
-                rLottieDrawable.setProgress(0.0f, false);
+                RLottieDrawable rLottieDrawable = this.stateMap.get(getAnyState(this.currentState));
                 rLottieDrawable.stop();
+                rLottieDrawable.setProgress(0.0f, false);
                 setAnimation(rLottieDrawable);
                 return;
             }
-            int i2 = getState(state2, this.currentState).resource;
-            RLottieDrawable rLottieDrawable2 = new RLottieDrawable(i2, String.valueOf(i2), AndroidUtilities.dp(32.0f), AndroidUtilities.dp(32.0f));
+            TransitState state3 = getState(state2, this.currentState);
+            if (state3 == this.animatingState) {
+                return;
+            }
+            this.animatingState = state3;
+            RLottieDrawable rLottieDrawable2 = this.stateMap.get(state3);
+            rLottieDrawable2.stop();
             rLottieDrawable2.setProgress(0.0f, false);
             rLottieDrawable2.setAutoRepeat(0);
             rLottieDrawable2.setOnAnimationEndListener(new Runnable() { // from class: org.telegram.ui.Components.ChatActivityEnterViewAnimatedIconView$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    ChatActivityEnterViewAnimatedIconView.this.lambda$setState$1();
+                    ChatActivityEnterViewAnimatedIconView.this.lambda$setState$0();
                 }
             });
-            rLottieDrawable2.start();
             setAnimation(rLottieDrawable2);
+            AndroidUtilities.runOnUIThread(new ChatActionCell$$ExternalSyntheticLambda2(rLottieDrawable2));
         }
     }
 
-    public /* synthetic */ void lambda$setState$0(State state, boolean z) {
-        setState(state, z, true);
-    }
-
-    public /* synthetic */ void lambda$setState$1() {
-        Runnable runnable = this.lastCallback;
-        if (runnable != null) {
-            runnable.run();
-            this.lastCallback = null;
-        }
+    public /* synthetic */ void lambda$setState$0() {
+        this.animatingState = null;
     }
 
     private TransitState getAnyState(State state) {
@@ -95,11 +92,15 @@ public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
     }
 
     /* JADX WARN: Init of enum GIF_TO_KEYBOARD can be incorrect */
+    /* JADX WARN: Init of enum GIF_TO_SMILE can be incorrect */
     /* JADX WARN: Init of enum KEYBOARD_TO_GIF can be incorrect */
     /* JADX WARN: Init of enum KEYBOARD_TO_SMILE can be incorrect */
     /* JADX WARN: Init of enum KEYBOARD_TO_STICKER can be incorrect */
+    /* JADX WARN: Init of enum SMILE_TO_GIF can be incorrect */
     /* JADX WARN: Init of enum SMILE_TO_KEYBOARD can be incorrect */
+    /* JADX WARN: Init of enum SMILE_TO_STICKER can be incorrect */
     /* JADX WARN: Init of enum STICKER_TO_KEYBOARD can be incorrect */
+    /* JADX WARN: Init of enum STICKER_TO_SMILE can be incorrect */
     /* JADX WARN: Init of enum VIDEO_TO_VOICE can be incorrect */
     /* JADX WARN: Init of enum VOICE_TO_VIDEO can be incorrect */
     /* loaded from: classes3.dex */
@@ -111,7 +112,11 @@ public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
         KEYBOARD_TO_STICKER(r17, r16, R.raw.keyboard_to_sticker),
         KEYBOARD_TO_GIF(r17, r12, R.raw.keyboard_to_gif),
         KEYBOARD_TO_SMILE(r17, r10, R.raw.keyboard_to_smile),
-        GIF_TO_KEYBOARD(r12, r17, R.raw.gif_to_keyboard);
+        GIF_TO_KEYBOARD(r12, r17, R.raw.gif_to_keyboard),
+        GIF_TO_SMILE(r12, r10, R.raw.gif_to_smile),
+        SMILE_TO_GIF(r10, r12, R.raw.smile_to_gif),
+        SMILE_TO_STICKER(r10, r16, R.raw.smile_to_sticker),
+        STICKER_TO_SMILE(r16, r10, R.raw.sticker_to_smile);
         
         final State firstState;
         final int resource;

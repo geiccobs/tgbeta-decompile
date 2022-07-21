@@ -26,6 +26,8 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.internal.GmsClientSupervisor;
 import com.google.android.gms.common.internal.IGmsCallbacks;
+import com.huawei.hms.api.HuaweiApiClientImpl;
+import com.huawei.hms.framework.network.grs.GrsBaseInfo;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -818,7 +820,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
         if (requiresSignIn()) {
             Account account = getAccount();
             if (account == null) {
-                account = new Account("<<default account>>", "com.google");
+                account = new Account(HuaweiApiClientImpl.DEFAULT_ACCOUNT, "com.google");
             }
             getServiceRequest.zze = account;
             if (iAccountAccessor != null) {
@@ -894,7 +896,7 @@ public abstract class BaseGmsClient<T extends IInterface> {
         } else if (i == 5) {
             printWriter.print("DISCONNECTING");
         } else {
-            printWriter.print("UNKNOWN");
+            printWriter.print(GrsBaseInfo.CountryCodeSource.UNKNOWN);
         }
         printWriter.append(" mService=");
         if (t == null) {

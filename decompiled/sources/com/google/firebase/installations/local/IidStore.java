@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
 import com.google.firebase.FirebaseApp;
+import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +45,7 @@ public class IidStore {
     }
 
     private String createTokenKey(String str, String str2) {
-        return "|T|" + str + "|" + str2;
+        return "|T|" + str + HiAnalyticsConstant.REPORT_VAL_SEPARATOR + str2;
     }
 
     public String readToken() {

@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.extractor.PositionHolder;
 import com.google.android.exoplayer2.extractor.SeekMap;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -115,7 +116,7 @@ public final class AmrExtractor implements Extractor {
         if (!this.hasOutputFormat) {
             this.hasOutputFormat = true;
             boolean z = this.isWideBand;
-            this.trackOutput.format(Format.createAudioSampleFormat(null, z ? "audio/amr-wb" : "audio/3gpp", null, -1, MAX_FRAME_SIZE_BYTES, 1, z ? 16000 : 8000, -1, null, null, 0, null));
+            this.trackOutput.format(Format.createAudioSampleFormat(null, z ? "audio/amr-wb" : "audio/3gpp", null, -1, MAX_FRAME_SIZE_BYTES, 1, z ? 16000 : JosStatusCodes.RTN_CODE_COMMON_ERROR, -1, null, null, 0, null));
         }
     }
 

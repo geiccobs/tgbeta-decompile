@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 /* loaded from: classes3.dex */
 public class VideoTimelineView extends View {

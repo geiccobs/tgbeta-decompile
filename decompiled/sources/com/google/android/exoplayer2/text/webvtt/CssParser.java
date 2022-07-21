@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import com.google.android.exoplayer2.util.ColorParser;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -97,7 +98,7 @@ final class CssParser {
                 }
                 parsableByteArray.setPosition(position);
             }
-            if ("color".equals(parseIdentifier)) {
+            if (RemoteMessageConst.Notification.COLOR.equals(parseIdentifier)) {
                 webvttCssStyle.setFontColor(ColorParser.parseCssColor(parsePropertyValue));
             } else if ("background-color".equals(parseIdentifier)) {
                 webvttCssStyle.setBackgroundColor(ColorParser.parseCssColor(parsePropertyValue));

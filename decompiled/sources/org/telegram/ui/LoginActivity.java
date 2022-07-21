@@ -58,6 +58,9 @@ import android.widget.ViewSwitcher;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.util.ObjectsCompat$$ExternalSyntheticBackport0;
 import androidx.dynamicanimation.animation.DynamicAnimation;
+import com.huawei.hms.framework.common.hianalytics.CrashHianalyticsData;
+import com.huawei.hms.push.constant.RemoteMessageConst;
+import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import j$.util.Comparator$CC;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -86,11 +89,11 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.SerializedData;
@@ -781,7 +784,7 @@ public class LoginActivity extends BaseFragment {
             builder.setTitle(LocaleController.getString((int) R.string.RestorePasswordNoEmailTitle));
             builder.setMessage(LocaleController.getString((int) R.string.InvalidPhoneNumber));
         } else {
-            int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i = Integer.MAX_VALUE;
             for (String str2 : phoneInputData.patterns) {
                 int length = str2.replace(" ", "").length();
                 if (length < i) {
@@ -3633,7 +3636,7 @@ public class LoginActivity extends BaseFragment {
             }
             int i = this.time;
             if (i != 0) {
-                bundle.putInt("time", i);
+                bundle.putInt(CrashHianalyticsData.TIME, i);
             }
             int i2 = this.openTime;
             if (i2 != 0) {
@@ -3659,7 +3662,7 @@ public class LoginActivity extends BaseFragment {
                     codeFieldContainer.setText(string2);
                 }
             }
-            int i = bundle.getInt("time");
+            int i = bundle.getInt(CrashHianalyticsData.TIME);
             if (i != 0) {
                 this.time = i;
             }
@@ -4195,7 +4198,7 @@ public class LoginActivity extends BaseFragment {
         public void updateTimeText() {
             int i = 0;
             int max = Math.max(0, this.waitTime - (ConnectionsManager.getInstance(((BaseFragment) LoginActivity.this).currentAccount).getCurrentTime() - this.startTime));
-            int i2 = max / 86400;
+            int i2 = max / RemoteMessageConst.DEFAULT_TTL;
             int round = Math.round(max / 86400.0f);
             int i3 = max / 3600;
             int i4 = (max / 60) % 60;
@@ -4237,7 +4240,7 @@ public class LoginActivity extends BaseFragment {
             this.phoneHash = bundle.getString("phoneHash");
             this.phoneCode = bundle.getString("code");
             this.startTime = bundle.getInt("startTime");
-            this.waitTime = bundle.getInt("waitTime");
+            this.waitTime = bundle.getInt(HiAnalyticsConstant.HaKey.BI_KEY_WAITTIME);
             TextView textView = this.confirmTextView;
             PhoneFormat phoneFormat = PhoneFormat.getInstance();
             textView.setText(AndroidUtilities.replaceTags(LocaleController.formatString("ResetAccountInfo", R.string.ResetAccountInfo, LocaleController.addNbsp(phoneFormat.format("+" + this.requestPhone)))));
@@ -6113,7 +6116,7 @@ public class LoginActivity extends BaseFragment {
             bundle2.putString("phoneHash", str2);
             bundle2.putString("code", str3);
             bundle2.putInt("startTime", ConnectionsManager.getInstance(this.currentAccount).getCurrentTime());
-            bundle2.putInt("waitTime", Utilities.parseInt((CharSequence) tLRPC$TL_error.text.replace("2FA_CONFIRM_WAIT_", "")).intValue());
+            bundle2.putInt(HiAnalyticsConstant.HaKey.BI_KEY_WAITTIME, Utilities.parseInt((CharSequence) tLRPC$TL_error.text.replace("2FA_CONFIRM_WAIT_", "")).intValue());
             setPage(8, true, bundle2, false);
         } else {
             needShowAlert(LocaleController.getString((int) R.string.RestorePasswordNoEmailTitle), tLRPC$TL_error.text);

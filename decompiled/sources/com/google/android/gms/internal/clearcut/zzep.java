@@ -1,5 +1,6 @@
 package com.google.android.gms.internal.clearcut;
 
+import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.Map;
 /* loaded from: classes.dex */
 public final class zzep implements Comparable<zzep>, Map.Entry<K, V> {
@@ -74,7 +75,7 @@ public final class zzep implements Comparable<zzep>, Map.Entry<K, V> {
         String valueOf2 = String.valueOf(this.value);
         StringBuilder sb = new StringBuilder(valueOf.length() + 1 + valueOf2.length());
         sb.append(valueOf);
-        sb.append("=");
+        sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
         sb.append(valueOf2);
         return sb.toString();
     }

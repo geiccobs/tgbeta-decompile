@@ -1,12 +1,12 @@
 package j$.wrappers;
 
-import j$.util.AbstractC0034a;
-import j$.util.C0042h;
-import j$.util.C0044j;
-import j$.util.C0045k;
+import j$.util.AbstractC0039a;
+import j$.util.C0047h;
+import j$.util.C0049j;
+import j$.util.C0050k;
 import j$.util.function.BiConsumer;
-import j$.util.stream.AbstractC0075e1;
-import j$.util.stream.AbstractC0085g;
+import j$.util.stream.AbstractC0080e1;
+import j$.util.stream.AbstractC0090g;
 import j$.util.stream.IntStream;
 import j$.util.stream.Stream;
 /* renamed from: j$.wrappers.$r8$wrapper$java$util$stream$IntStream$-V-WRP */
@@ -66,8 +66,8 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ C0045k a0(j$.util.function.j jVar) {
-        return AbstractC0034a.r(this.a.reduce(P.a(jVar)));
+    public /* synthetic */ C0050k a0(j$.util.function.j jVar) {
+        return AbstractC0039a.r(this.a.reduce(P.a(jVar)));
     }
 
     @Override // j$.util.stream.IntStream
@@ -76,13 +76,13 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ AbstractC0075e1 asLongStream() {
+    public /* synthetic */ AbstractC0080e1 asLongStream() {
         return N0.n0(this.a.asLongStream());
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ C0044j average() {
-        return AbstractC0034a.q(this.a.average());
+    public /* synthetic */ C0049j average() {
+        return AbstractC0039a.q(this.a.average());
     }
 
     @Override // j$.util.stream.IntStream
@@ -95,7 +95,7 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
         return convert(this.a.peek(S.a(lVar)));
     }
 
-    @Override // j$.util.stream.AbstractC0085g, java.lang.AutoCloseable
+    @Override // j$.util.stream.AbstractC0090g, java.lang.AutoCloseable
     public /* synthetic */ void close() {
         this.a.close();
     }
@@ -111,18 +111,18 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ AbstractC0075e1 f(j$.util.function.n nVar) {
-        return N0.n0(this.a.mapToLong(C0196a0.a(nVar)));
+    public /* synthetic */ AbstractC0080e1 f(j$.util.function.n nVar) {
+        return N0.n0(this.a.mapToLong(C0201a0.a(nVar)));
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ C0045k findAny() {
-        return AbstractC0034a.r(this.a.findAny());
+    public /* synthetic */ C0050k findAny() {
+        return AbstractC0039a.r(this.a.findAny());
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ C0045k findFirst() {
-        return AbstractC0034a.r(this.a.findFirst());
+    public /* synthetic */ C0050k findFirst() {
+        return AbstractC0039a.r(this.a.findFirst());
     }
 
     @Override // j$.util.stream.IntStream
@@ -130,7 +130,7 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
         return convert(this.a.filter(W.a(v)));
     }
 
-    @Override // j$.util.stream.AbstractC0085g
+    @Override // j$.util.stream.AbstractC0090g
     public /* synthetic */ boolean isParallel() {
         return this.a.isParallel();
     }
@@ -146,23 +146,23 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ C0045k max() {
-        return AbstractC0034a.r(this.a.max());
+    public /* synthetic */ C0050k max() {
+        return AbstractC0039a.r(this.a.max());
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ C0045k min() {
-        return AbstractC0034a.r(this.a.min());
+    public /* synthetic */ C0050k min() {
+        return AbstractC0039a.r(this.a.min());
     }
 
-    @Override // j$.util.stream.AbstractC0085g
-    public /* synthetic */ AbstractC0085g onClose(Runnable runnable) {
+    @Override // j$.util.stream.AbstractC0090g
+    public /* synthetic */ AbstractC0090g onClose(Runnable runnable) {
         return H0.n0(this.a.onClose(runnable));
     }
 
     @Override // j$.util.stream.IntStream
-    public /* synthetic */ IntStream q(C0198b0 c0198b0) {
-        return convert(this.a.map(AbstractC0200c0.a(c0198b0)));
+    public /* synthetic */ IntStream q(C0203b0 c0203b0) {
+        return convert(this.a.map(AbstractC0205c0.a(c0203b0)));
     }
 
     @Override // j$.util.stream.IntStream
@@ -181,7 +181,7 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
     }
 
     @Override // j$.util.stream.IntStream
-    public C0042h summaryStatistics() {
+    public C0047h summaryStatistics() {
         this.a.summaryStatistics();
         throw new Error("Java 8+ API desugaring (library desugaring) cannot convert from java.util.IntSummaryStatistics");
     }
@@ -191,8 +191,8 @@ public final /* synthetic */ class C$r8$wrapper$java$util$stream$IntStream$VWRP 
         return this.a.toArray();
     }
 
-    @Override // j$.util.stream.AbstractC0085g
-    public /* synthetic */ AbstractC0085g unordered() {
+    @Override // j$.util.stream.AbstractC0090g
+    public /* synthetic */ AbstractC0090g unordered() {
         return H0.n0(this.a.unordered());
     }
 

@@ -1,7 +1,6 @@
 package com.google.android.gms.internal.clearcut;
 
 import com.google.android.gms.internal.clearcut.zzcg;
-import org.telegram.messenger.R;
 /* loaded from: classes.dex */
 public final class zzge$zzs extends zzcg<zzge$zzs, zza> implements zzdq {
     private static final zzge$zzs zzbfc;
@@ -93,7 +92,7 @@ public final class zzge$zzs extends zzcg<zzge$zzs, zza> implements zzdq {
                         return TD_SCDMA;
                     case 18:
                         return IWLAN;
-                    case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                    case 19:
                         return LTE_CA;
                     default:
                         return null;

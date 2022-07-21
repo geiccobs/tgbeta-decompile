@@ -60,6 +60,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textservice.TextServicesManager;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.File;
 import java.util.HashMap;
 import org.webrtc.MediaStreamTrack;
@@ -219,7 +220,7 @@ public class ContextCompat {
             hashMap.put(LayoutInflater.class, "layout_inflater");
             hashMap.put(LocationManager.class, "location");
             hashMap.put(NfcManager.class, "nfc");
-            hashMap.put(NotificationManager.class, "notification");
+            hashMap.put(NotificationManager.class, RemoteMessageConst.NOTIFICATION);
             hashMap.put(PowerManager.class, "power");
             hashMap.put(SearchManager.class, "search");
             hashMap.put(SensorManager.class, "sensor");

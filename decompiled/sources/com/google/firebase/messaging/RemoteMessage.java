@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.firebase.messaging.Constants;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.Map;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
 /* loaded from: classes.dex */
@@ -26,7 +27,7 @@ public final class RemoteMessage extends AbstractSafeParcelable {
     }
 
     public String getFrom() {
-        return this.bundle.getString("from");
+        return this.bundle.getString(RemoteMessageConst.FROM);
     }
 
     public long getSentTime() {

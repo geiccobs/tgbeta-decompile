@@ -1,6 +1,6 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0034a;
+import j$.util.AbstractC0039a;
 import j$.util.function.Consumer;
 import java.util.Comparator;
 /* loaded from: classes2.dex */
@@ -10,16 +10,16 @@ public class S3 implements j$.util.u {
     int c;
     final int d;
     Object[] e;
-    final /* synthetic */ C0054a4 f;
+    final /* synthetic */ C0059a4 f;
 
-    public S3(C0054a4 c0054a4, int i, int i2, int i3, int i4) {
-        this.f = c0054a4;
+    public S3(C0059a4 c0059a4, int i, int i2, int i3, int i4) {
+        this.f = c0059a4;
         this.a = i;
         this.b = i2;
         this.c = i3;
         this.d = i4;
-        Object[][] objArr = c0054a4.f;
-        this.e = objArr == null ? c0054a4.e : objArr[i];
+        Object[][] objArr = c0059a4.f;
+        this.e = objArr == null ? c0059a4.e : objArr[i];
     }
 
     @Override // j$.util.u
@@ -101,12 +101,12 @@ public class S3 implements j$.util.u {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0034a.e(this);
+        return AbstractC0039a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0034a.f(this, i);
+        return AbstractC0039a.f(this, i);
     }
 
     @Override // j$.util.u
@@ -114,9 +114,9 @@ public class S3 implements j$.util.u {
         int i = this.a;
         int i2 = this.b;
         if (i < i2) {
-            C0054a4 c0054a4 = this.f;
+            C0059a4 c0059a4 = this.f;
             int i3 = i2 - 1;
-            S3 s3 = new S3(c0054a4, i, i3, this.c, c0054a4.f[i3].length);
+            S3 s3 = new S3(c0059a4, i, i3, this.c, c0059a4.f[i3].length);
             int i4 = this.b;
             this.a = i4;
             this.c = 0;

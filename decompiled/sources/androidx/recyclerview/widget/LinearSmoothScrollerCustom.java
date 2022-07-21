@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import androidx.recyclerview.widget.RecyclerView;
+import com.huawei.hms.android.HwBuildEx;
 import org.telegram.messenger.AndroidUtilities;
 /* loaded from: classes.dex */
 public class LinearSmoothScrollerCustom extends RecyclerView.SmoothScroller {
@@ -89,7 +90,7 @@ public class LinearSmoothScrollerCustom extends RecyclerView.SmoothScroller {
         normalize(computeScrollVectorForPosition);
         this.mInterimTargetDx = (int) (computeScrollVectorForPosition.x * 10000.0f);
         this.mInterimTargetDy = (int) (computeScrollVectorForPosition.y * 10000.0f);
-        action.update((int) (this.mInterimTargetDx * 1.2f), (int) (this.mInterimTargetDy * 1.2f), (int) (calculateTimeForScrolling(10000) * 1.2f), this.mLinearInterpolator);
+        action.update((int) (this.mInterimTargetDx * 1.2f), (int) (this.mInterimTargetDy * 1.2f), (int) (calculateTimeForScrolling(HwBuildEx.VersionCodes.CUR_DEVELOPMENT) * 1.2f), this.mLinearInterpolator);
     }
 
     public int calculateDyToMakeVisible(View view) {

@@ -3,7 +3,6 @@ package com.google.android.gms.location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelReader;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
 /* loaded from: classes.dex */
 public final class zzt implements Parcelable.Creator<zzs> {
@@ -14,7 +13,7 @@ public final class zzt implements Parcelable.Creator<zzs> {
         long j2 = Long.MAX_VALUE;
         boolean z = true;
         float f = 0.0f;
-        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i = Integer.MAX_VALUE;
         while (parcel.dataPosition() < validateObjectHeader) {
             int readHeader = SafeParcelReader.readHeader(parcel);
             int fieldId = SafeParcelReader.getFieldId(readHeader);

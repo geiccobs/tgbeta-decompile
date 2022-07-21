@@ -12,6 +12,6 @@ public final /* synthetic */ class PaymentFormActivity$$ExternalSyntheticLambda6
 
     @Override // org.telegram.tgnet.RequestDelegate
     public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-        PaymentFormActivity.lambda$createView$27(tLObject, tLRPC$TL_error);
+        PaymentFormActivity.lambda$sendForm$51(tLObject, tLRPC$TL_error);
     }
 }

@@ -3,8 +3,7 @@ package com.googlecode.mp4parser.boxes.mp4.objectdescriptors;
 import com.coremedia.iso.Hex;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import org.telegram.messenger.R;
-@Descriptor(tags = {R.styleable.MapAttrs_uiTiltGestures})
+@Descriptor(tags = {19})
 /* loaded from: classes.dex */
 public class ExtensionProfileLevelDescriptor extends BaseDescriptor {
     byte[] bytes;

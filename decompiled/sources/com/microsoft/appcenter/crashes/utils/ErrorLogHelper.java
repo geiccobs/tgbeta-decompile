@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class ErrorLogHelper {
@@ -78,7 +77,7 @@ public class ErrorLogHelper {
         return managedErrorLog;
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     private static String getArchitecture() {
         if (Build.VERSION.SDK_INT >= 21) {
             return Build.SUPPORTED_ABIS[0];

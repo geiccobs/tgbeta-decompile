@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes3.dex */
 public class SideMenultItemAnimator extends SimpleItemAnimator {
     private static TimeInterpolator sDefaultInterpolator;
@@ -490,9 +489,8 @@ public class SideMenultItemAnimator extends SimpleItemAnimator {
         if (!this.shouldClipChildren) {
             return 0;
         }
-        boolean isEmpty = this.mRemoveAnimations.isEmpty();
-        int i2 = ConnectionsManager.DEFAULT_DATACENTER_ID;
-        if (!isEmpty) {
+        int i2 = Integer.MAX_VALUE;
+        if (!this.mRemoveAnimations.isEmpty()) {
             int size = this.mRemoveAnimations.size();
             while (i < size) {
                 i2 = Math.min(i2, this.mRemoveAnimations.get(i).itemView.getTop());

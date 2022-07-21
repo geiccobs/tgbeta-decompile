@@ -28,9 +28,9 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -370,7 +370,7 @@ public class NotificationsSettingsActivity extends BaseFragment implements Notif
             NotificationsCheckCell notificationsCheckCell = (NotificationsCheckCell) view;
             boolean isGlobalNotificationsEnabled = getNotificationsController().isGlobalNotificationsEnabled(i3);
             if ((LocaleController.isRTL && f <= AndroidUtilities.dp(76.0f)) || (!LocaleController.isRTL && f >= view.getMeasuredWidth() - AndroidUtilities.dp(76.0f))) {
-                getNotificationsController().setGlobalNotificationsEnabled(i3, !isGlobalNotificationsEnabled ? 0 : ConnectionsManager.DEFAULT_DATACENTER_ID);
+                getNotificationsController().setGlobalNotificationsEnabled(i3, !isGlobalNotificationsEnabled ? 0 : Integer.MAX_VALUE);
                 showExceptionsAlert(i);
                 notificationsCheckCell.setChecked(!isGlobalNotificationsEnabled, 0);
                 this.adapter.notifyItemChanged(i);

@@ -6,11 +6,11 @@ final class O3 extends C3 {
     private double[] c;
     private int d;
 
-    public O3(AbstractC0125m3 abstractC0125m3) {
-        super(abstractC0125m3);
+    public O3(AbstractC0130m3 abstractC0130m3) {
+        super(abstractC0130m3);
     }
 
-    @Override // j$.util.stream.AbstractC0107j3, j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0112j3, j$.util.stream.AbstractC0130m3
     public void accept(double d) {
         double[] dArr = this.c;
         int i = this.d;
@@ -18,7 +18,7 @@ final class O3 extends C3 {
         dArr[i] = d;
     }
 
-    @Override // j$.util.stream.AbstractC0083f3, j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0088f3, j$.util.stream.AbstractC0130m3
     public void m() {
         int i = 0;
         Arrays.sort(this.c, 0, this.d);
@@ -38,7 +38,7 @@ final class O3 extends C3 {
         this.c = null;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public void n(long j) {
         if (j < 2147483639) {
             this.c = new double[(int) j];

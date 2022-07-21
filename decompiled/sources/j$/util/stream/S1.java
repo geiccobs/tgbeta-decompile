@@ -37,13 +37,13 @@ public final class S1 extends C1 {
             return this;
         }
         long count = this.a.count();
-        return j >= count ? this.b.r(j - count, j2 - count, mVar) : j2 <= count ? this.a.r(j, j2, mVar) : AbstractC0183x2.i(EnumC0078e4.REFERENCE, this.a.r(j, count, mVar), this.b.r(0L, j2 - count, mVar));
+        return j >= count ? this.b.r(j - count, j2 - count, mVar) : j2 <= count ? this.a.r(j, j2, mVar) : AbstractC0188x2.i(EnumC0083e4.REFERENCE, this.a.r(j, count, mVar), this.b.r(0L, j2 - count, mVar));
     }
 
     @Override // j$.util.stream.A1
     /* renamed from: spliterator */
     public j$.util.u mo69spliterator() {
-        return new C0106j2(this);
+        return new C0111j2(this);
     }
 
     public String toString() {

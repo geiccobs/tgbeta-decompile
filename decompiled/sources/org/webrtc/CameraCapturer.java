@@ -272,7 +272,7 @@ public abstract class CameraCapturer implements CameraVideoCapturer {
     }
 
     public void createSessionInternal(int i) {
-        this.uiThreadHandler.postDelayed(this.openCameraTimeoutRunnable, i + OPEN_CAMERA_TIMEOUT);
+        this.uiThreadHandler.postDelayed(this.openCameraTimeoutRunnable, i + 10000);
         this.cameraThreadHandler.postDelayed(new Runnable() { // from class: org.webrtc.CameraCapturer.5
             @Override // java.lang.Runnable
             public void run() {

@@ -10,7 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$KeyboardButton;
 import org.telegram.tgnet.TLRPC$TL_keyboardButtonRow;
 import org.telegram.tgnet.TLRPC$TL_keyboardButtonSimpleWebView;

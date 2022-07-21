@@ -26,7 +26,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes3.dex */
 public class MotionBackgroundDrawable extends Drawable {
     private static boolean errorWhileGenerateLegacyBitmap;
@@ -214,10 +213,7 @@ public class MotionBackgroundDrawable extends Drawable {
 
     public static int getPatternColor(int i, int i2, int i3, int i4) {
         if (isDark(i, i2, i3, i4)) {
-            if (useSoftLight) {
-                return -1;
-            }
-            return ConnectionsManager.DEFAULT_DATACENTER_ID;
+            return !useSoftLight ? Integer.MAX_VALUE : -1;
         } else if (useSoftLight) {
             return -16777216;
         } else {

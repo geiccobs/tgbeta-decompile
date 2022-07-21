@@ -8,7 +8,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 /* loaded from: classes3.dex */
 public class ProxyDrawable extends Drawable {

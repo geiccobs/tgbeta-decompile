@@ -7,7 +7,6 @@ import android.util.Log;
 import androidx.annotation.RecentlyNonNull;
 import com.google.android.gms.common.GoogleSignatureVerifier;
 import com.google.android.gms.common.wrappers.Wrappers;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
 public final class UidVerifier {
@@ -25,7 +24,7 @@ public final class UidVerifier {
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiTiltGestures)
+    @TargetApi(19)
     public static boolean uidHasPackageName(@RecentlyNonNull Context context, int i, @RecentlyNonNull String str) {
         return Wrappers.packageManager(context).zza(i, str);
     }

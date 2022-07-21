@@ -6,6 +6,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import androidx.collection.LongSparseArray;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +26,6 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.support.LongSparseIntArray;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -75,6 +75,7 @@ import org.telegram.tgnet.TLRPC$TL_messageActionGameScore;
 import org.telegram.tgnet.TLRPC$TL_messageActionGeoProximityReached;
 import org.telegram.tgnet.TLRPC$TL_messageActionPaymentSent;
 import org.telegram.tgnet.TLRPC$TL_messageActionPinMessage;
+import org.telegram.tgnet.TLRPC$TL_messageEntityCustomEmoji;
 import org.telegram.tgnet.TLRPC$TL_messageEntityMentionName;
 import org.telegram.tgnet.TLRPC$TL_messageMediaDocument;
 import org.telegram.tgnet.TLRPC$TL_messageMediaPhoto;
@@ -94,6 +95,7 @@ import org.telegram.tgnet.TLRPC$TL_messages_dialogs;
 import org.telegram.tgnet.TLRPC$TL_messages_messages;
 import org.telegram.tgnet.TLRPC$TL_peerChannel;
 import org.telegram.tgnet.TLRPC$TL_peerChat;
+import org.telegram.tgnet.TLRPC$TL_peerNotifySettings;
 import org.telegram.tgnet.TLRPC$TL_peerNotifySettingsEmpty_layer77;
 import org.telegram.tgnet.TLRPC$TL_peerUser;
 import org.telegram.tgnet.TLRPC$TL_photoEmpty;
@@ -119,7 +121,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DialogsSearchAdapter;
 /* loaded from: classes.dex */
 public class MessagesStorage extends BaseController {
-    private static final int LAST_DB_VERSION = 98;
+    private static final int LAST_DB_VERSION = 100;
     private int archiveUnreadCount;
     private File cacheFile;
     private SQLiteDatabase database;
@@ -443,7 +445,7 @@ public class MessagesStorage extends BaseController {
                 this.database.executeFast("CREATE TABLE dialog_settings(did INTEGER PRIMARY KEY, flags INTEGER);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE web_recent_v3(id TEXT, type INTEGER, image_url TEXT, thumb_url TEXT, local_url TEXT, width INTEGER, height INTEGER, size INTEGER, date INTEGER, document BLOB, PRIMARY KEY (id, type));").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE stickers_v2(id INTEGER PRIMARY KEY, data BLOB, date INTEGER, hash INTEGER);").stepThis().dispose();
-                this.database.executeFast("CREATE TABLE stickers_featured(id INTEGER PRIMARY KEY, data BLOB, unread BLOB, date INTEGER, hash INTEGER, premium INTEGER);").stepThis().dispose();
+                this.database.executeFast("CREATE TABLE stickers_featured(id INTEGER PRIMARY KEY, data BLOB, unread BLOB, date INTEGER, hash INTEGER, premium INTEGER, emoji INTEGER);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE stickers_dice(emoji TEXT PRIMARY KEY, data BLOB, date INTEGER);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE hashtag_recent_v2(id TEXT PRIMARY KEY, date INTEGER);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE webpage_pending_v2(id INTEGER, mid INTEGER, uid INTEGER, PRIMARY KEY (id, mid, uid));").stepThis().dispose();
@@ -471,9 +473,10 @@ public class MessagesStorage extends BaseController {
                 this.database.executeFast("CREATE TABLE reaction_mentions(message_id INTEGER, state INTEGER, dialog_id INTEGER, PRIMARY KEY(message_id, dialog_id))").stepThis().dispose();
                 this.database.executeFast("CREATE INDEX IF NOT EXISTS reaction_mentions_did ON reaction_mentions(dialog_id);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE downloading_documents(data BLOB, hash INTEGER, id INTEGER, state INTEGER, date INTEGER, PRIMARY KEY(hash, id));").stepThis().dispose();
+                this.database.executeFast("CREATE TABLE animated_emoji(document_id INTEGER PRIMARY KEY, data BLOB);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE attach_menu_bots(data BLOB, hash INTEGER, date INTEGER);").stepThis().dispose();
                 this.database.executeFast("CREATE TABLE premium_promo(data BLOB, date INTEGER);").stepThis().dispose();
-                this.database.executeFast("PRAGMA user_version = 98").stepThis().dispose();
+                this.database.executeFast("PRAGMA user_version = 100").stepThis().dispose();
             } else {
                 int intValue = this.database.executeInt("PRAGMA user_version", new Object[0]).intValue();
                 if (BuildVars.LOGS_ENABLED) {
@@ -514,7 +517,7 @@ public class MessagesStorage extends BaseController {
                         FileLog.e(e2);
                     }
                 }
-                if (intValue < LAST_DB_VERSION) {
+                if (intValue < 100) {
                     try {
                         updateDbToLastVersion(intValue);
                     } catch (Exception e3) {
@@ -605,7 +608,7 @@ public class MessagesStorage extends BaseController {
                 MessagesStorage.this.lambda$updateDbToLastVersion$3();
             }
         });
-        FileLog.d("MessagesStorage start db migration from " + i4 + " to " + LAST_DB_VERSION);
+        FileLog.d("MessagesStorage start db migration from " + i4 + " to 100");
         int i5 = 4;
         if (i4 < 4) {
             messagesStorage.database.executeFast("CREATE TABLE IF NOT EXISTS user_photos(uid INTEGER, id INTEGER, data BLOB, PRIMARY KEY (uid, id))").stepThis().dispose();
@@ -1625,6 +1628,16 @@ public class MessagesStorage extends BaseController {
             messagesStorage.database.executeFast("DROP TABLE IF EXISTS stickers_featured;").stepThis().dispose();
             messagesStorage.database.executeFast("CREATE TABLE stickers_featured(id INTEGER PRIMARY KEY, data BLOB, unread BLOB, date INTEGER, hash INTEGER, premium INTEGER);").stepThis().dispose();
             messagesStorage.database.executeFast("PRAGMA user_version = 98").stepThis().dispose();
+            i4 = 98;
+        }
+        if (i4 == 98) {
+            messagesStorage.database.executeFast("CREATE TABLE animated_emoji(document_id INTEGER PRIMARY KEY, data BLOB);").stepThis().dispose();
+            messagesStorage.database.executeFast("PRAGMA user_version = 99").stepThis().dispose();
+            i4 = 99;
+        }
+        if (i4 == 99) {
+            messagesStorage.database.executeFast("ALTER TABLE stickers_featured ADD COLUMN emoji INTEGER default 0").stepThis().dispose();
+            messagesStorage.database.executeFast("PRAGMA user_version = 100").stepThis().dispose();
         }
         FileLog.d("MessagesStorage db migration finished");
         AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.MessagesStorage$$ExternalSyntheticLambda7
@@ -1996,7 +2009,7 @@ public class MessagesStorage extends BaseController {
                                 });
                                 break;
                             case 12:
-                            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                            case 19:
                             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                                 removePendingTask(longValue);
                                 break;
@@ -2067,7 +2080,7 @@ public class MessagesStorage extends BaseController {
                                     });
                                     break;
                                 }
-                            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                            case 21:
                                 final Theme.OverrideWallpaperInfo overrideWallpaperInfo = new Theme.OverrideWallpaperInfo();
                                 byteBufferValue.readInt64(false);
                                 overrideWallpaperInfo.isBlurred = byteBufferValue.readBool(false);
@@ -2124,7 +2137,7 @@ public class MessagesStorage extends BaseController {
                                     });
                                     break;
                                 }
-                            case 25:
+                            case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
                                 final long readInt647 = byteBufferValue.readInt64(false);
                                 final int readInt3220 = byteBufferValue.readInt32(false);
                                 final TLRPC$InputChannel TLdeserialize16 = TLRPC$InputChannel.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(false), false);
@@ -2384,15 +2397,15 @@ public class MessagesStorage extends BaseController {
         });
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:46:0x0211 A[Catch: all -> 0x0260, Exception -> 0x0262, TryCatch #4 {Exception -> 0x0262, blocks: (B:3:0x0004, B:4:0x0043, B:6:0x0049, B:8:0x0053, B:9:0x005b, B:10:0x006e, B:12:0x0074, B:14:0x0098, B:16:0x009e, B:19:0x00a8, B:21:0x00c5, B:43:0x0144, B:44:0x0147, B:46:0x0211, B:49:0x0220, B:50:0x0223, B:51:0x022a), top: B:61:0x0004, outer: #0 }] */
-    /* JADX WARN: Removed duplicated region for block: B:47:0x021b  */
+    /* JADX WARN: Removed duplicated region for block: B:46:0x021e A[Catch: all -> 0x026d, Exception -> 0x026f, TryCatch #0 {Exception -> 0x026f, blocks: (B:3:0x0004, B:4:0x0050, B:6:0x0056, B:8:0x0060, B:9:0x0068, B:10:0x007b, B:12:0x0081, B:14:0x00a5, B:16:0x00ab, B:19:0x00b5, B:21:0x00d2, B:43:0x0151, B:44:0x0154, B:46:0x021e, B:49:0x022d, B:50:0x0230, B:51:0x0237), top: B:61:0x0004, outer: #4 }] */
+    /* JADX WARN: Removed duplicated region for block: B:47:0x0228  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public /* synthetic */ void lambda$clearLocalDatabase$37() {
         /*
-            Method dump skipped, instructions count: 634
+            Method dump skipped, instructions count: 647
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesStorage.lambda$clearLocalDatabase$37():void");
@@ -2496,19 +2509,148 @@ public class MessagesStorage extends BaseController {
         }
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:63:0x017f  */
-    /* JADX WARN: Removed duplicated region for block: B:68:0x018e  */
-    /* JADX WARN: Removed duplicated region for block: B:71:0x01a4  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    private org.telegram.tgnet.TLRPC$messages_Dialogs loadDialogsByIds(java.lang.String r17, java.util.ArrayList<java.lang.Long> r18, java.util.ArrayList<java.lang.Long> r19, java.util.ArrayList<java.lang.Integer> r20) throws java.lang.Exception {
-        /*
-            Method dump skipped, instructions count: 605
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesStorage.loadDialogsByIds(java.lang.String, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList):org.telegram.tgnet.TLRPC$messages_Dialogs");
+    private TLRPC$messages_Dialogs loadDialogsByIds(String str, ArrayList<Long> arrayList, ArrayList<Long> arrayList2, ArrayList<Integer> arrayList3) throws Exception {
+        int i;
+        TLRPC$Message tLRPC$Message;
+        NativeByteBuffer byteBufferValue;
+        TLRPC$TL_messages_dialogs tLRPC$TL_messages_dialogs = new TLRPC$TL_messages_dialogs();
+        LongSparseArray longSparseArray = new LongSparseArray();
+        int i2 = 1;
+        SQLiteCursor queryFinalized = this.database.queryFinalized(String.format(Locale.US, "SELECT d.did, d.last_mid, d.unread_count, d.date, m.data, m.read_state, m.mid, m.send_state, s.flags, m.date, d.pts, d.inbox_max, d.outbox_max, m.replydata, d.pinned, d.unread_count_i, d.flags, d.folder_id, d.data, d.unread_reactions FROM dialogs as d LEFT JOIN messages_v2 as m ON d.last_mid = m.mid AND d.did = m.uid LEFT JOIN dialog_settings as s ON d.did = s.did WHERE d.did IN (%s) ORDER BY d.pinned DESC, d.date DESC", str), new Object[0]);
+        while (true) {
+            i = 2;
+            if (!queryFinalized.next()) {
+                break;
+            }
+            long longValue = queryFinalized.longValue(0);
+            TLRPC$TL_dialog tLRPC$TL_dialog = new TLRPC$TL_dialog();
+            tLRPC$TL_dialog.id = longValue;
+            tLRPC$TL_dialog.top_message = queryFinalized.intValue(i2);
+            tLRPC$TL_dialog.unread_count = queryFinalized.intValue(2);
+            tLRPC$TL_dialog.last_message_date = queryFinalized.intValue(3);
+            int intValue = queryFinalized.intValue(10);
+            tLRPC$TL_dialog.pts = intValue;
+            tLRPC$TL_dialog.flags = (intValue == 0 || DialogObject.isUserDialog(tLRPC$TL_dialog.id)) ? 0 : 1;
+            tLRPC$TL_dialog.read_inbox_max_id = queryFinalized.intValue(11);
+            tLRPC$TL_dialog.read_outbox_max_id = queryFinalized.intValue(12);
+            int intValue2 = queryFinalized.intValue(14);
+            tLRPC$TL_dialog.pinnedNum = intValue2;
+            tLRPC$TL_dialog.pinned = intValue2 != 0;
+            tLRPC$TL_dialog.unread_mentions_count = queryFinalized.intValue(15);
+            tLRPC$TL_dialog.unread_mark = (queryFinalized.intValue(16) & i2) != 0;
+            long longValue2 = queryFinalized.longValue(8);
+            TLRPC$TL_peerNotifySettings tLRPC$TL_peerNotifySettings = new TLRPC$TL_peerNotifySettings();
+            tLRPC$TL_dialog.notify_settings = tLRPC$TL_peerNotifySettings;
+            if ((((int) longValue2) & i2) != 0) {
+                int i3 = (int) (longValue2 >> 32);
+                tLRPC$TL_peerNotifySettings.mute_until = i3;
+                if (i3 == 0) {
+                    tLRPC$TL_peerNotifySettings.mute_until = Integer.MAX_VALUE;
+                }
+            }
+            tLRPC$TL_dialog.folder_id = queryFinalized.intValue(17);
+            tLRPC$TL_dialog.unread_reactions_count = queryFinalized.intValue(19);
+            tLRPC$TL_messages_dialogs.dialogs.add(tLRPC$TL_dialog);
+            NativeByteBuffer byteBufferValue2 = queryFinalized.byteBufferValue(4);
+            if (byteBufferValue2 != null) {
+                TLRPC$Message TLdeserialize = TLRPC$Message.TLdeserialize(byteBufferValue2, byteBufferValue2.readInt32(false), false);
+                if (TLdeserialize != null) {
+                    TLdeserialize.readAttachPath(byteBufferValue2, getUserConfig().clientUserId);
+                    byteBufferValue2.reuse();
+                    MessageObject.setUnreadFlags(TLdeserialize, queryFinalized.intValue(5));
+                    TLdeserialize.id = queryFinalized.intValue(6);
+                    int intValue3 = queryFinalized.intValue(9);
+                    if (intValue3 != 0) {
+                        tLRPC$TL_dialog.last_message_date = intValue3;
+                    }
+                    TLdeserialize.send_state = queryFinalized.intValue(7);
+                    TLdeserialize.dialog_id = tLRPC$TL_dialog.id;
+                    tLRPC$TL_messages_dialogs.messages.add(TLdeserialize);
+                    addUsersAndChatsFromMessage(TLdeserialize, arrayList, arrayList2, null);
+                    try {
+                        TLRPC$TL_messageReplyHeader tLRPC$TL_messageReplyHeader = TLdeserialize.reply_to;
+                        if (tLRPC$TL_messageReplyHeader != null && tLRPC$TL_messageReplyHeader.reply_to_msg_id != 0) {
+                            TLRPC$MessageAction tLRPC$MessageAction = TLdeserialize.action;
+                            if ((tLRPC$MessageAction instanceof TLRPC$TL_messageActionPinMessage) || (tLRPC$MessageAction instanceof TLRPC$TL_messageActionPaymentSent) || (tLRPC$MessageAction instanceof TLRPC$TL_messageActionGameScore)) {
+                                if (queryFinalized.isNull(13) || (byteBufferValue = queryFinalized.byteBufferValue(13)) == null) {
+                                    tLRPC$Message = TLdeserialize;
+                                } else {
+                                    TLRPC$Message TLdeserialize2 = TLRPC$Message.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(false), false);
+                                    TLdeserialize.replyMessage = TLdeserialize2;
+                                    TLdeserialize2.readAttachPath(byteBufferValue, getUserConfig().clientUserId);
+                                    byteBufferValue.reuse();
+                                    tLRPC$Message = TLdeserialize;
+                                    TLRPC$Message tLRPC$Message2 = tLRPC$Message.replyMessage;
+                                    if (tLRPC$Message2 != null) {
+                                        addUsersAndChatsFromMessage(tLRPC$Message2, arrayList, arrayList2, null);
+                                    }
+                                }
+                                if (tLRPC$Message.replyMessage == null) {
+                                    longSparseArray.put(tLRPC$TL_dialog.id, tLRPC$Message);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        FileLog.e(e);
+                    }
+                } else {
+                    byteBufferValue2.reuse();
+                }
+            }
+            if (!DialogObject.isEncryptedDialog(longValue) && tLRPC$TL_dialog.read_inbox_max_id > tLRPC$TL_dialog.top_message) {
+                tLRPC$TL_dialog.read_inbox_max_id = 0;
+            }
+            if (DialogObject.isEncryptedDialog(longValue)) {
+                int encryptedChatId = DialogObject.getEncryptedChatId(longValue);
+                if (!arrayList3.contains(Integer.valueOf(encryptedChatId))) {
+                    arrayList3.add(Integer.valueOf(encryptedChatId));
+                }
+            } else if (DialogObject.isUserDialog(longValue)) {
+                if (!arrayList.contains(Long.valueOf(longValue))) {
+                    arrayList.add(Long.valueOf(longValue));
+                }
+            } else {
+                long j = -longValue;
+                if (!arrayList2.contains(Long.valueOf(j))) {
+                    arrayList2.add(Long.valueOf(j));
+                }
+            }
+            i2 = 1;
+        }
+        queryFinalized.dispose();
+        if (!longSparseArray.isEmpty()) {
+            int size = longSparseArray.size();
+            int i4 = 0;
+            while (i4 < size) {
+                long keyAt = longSparseArray.keyAt(i4);
+                TLRPC$Message tLRPC$Message3 = (TLRPC$Message) longSparseArray.valueAt(i4);
+                SQLiteDatabase sQLiteDatabase = this.database;
+                Locale locale = Locale.US;
+                Object[] objArr = new Object[i];
+                objArr[0] = Integer.valueOf(tLRPC$Message3.id);
+                objArr[1] = Long.valueOf(keyAt);
+                SQLiteCursor queryFinalized2 = sQLiteDatabase.queryFinalized(String.format(locale, "SELECT data, mid, date, uid FROM messages_v2 WHERE mid = %d and uid = %d", objArr), new Object[0]);
+                while (queryFinalized2.next()) {
+                    NativeByteBuffer byteBufferValue3 = queryFinalized2.byteBufferValue(0);
+                    if (byteBufferValue3 != null) {
+                        TLRPC$Message TLdeserialize3 = TLRPC$Message.TLdeserialize(byteBufferValue3, byteBufferValue3.readInt32(false), false);
+                        TLdeserialize3.readAttachPath(byteBufferValue3, getUserConfig().clientUserId);
+                        byteBufferValue3.reuse();
+                        TLdeserialize3.id = queryFinalized2.intValue(1);
+                        TLdeserialize3.date = queryFinalized2.intValue(i);
+                        TLdeserialize3.dialog_id = queryFinalized2.longValue(3);
+                        addUsersAndChatsFromMessage(TLdeserialize3, arrayList, arrayList2, null);
+                        tLRPC$Message3.replyMessage = TLdeserialize3;
+                        TLdeserialize3.dialog_id = tLRPC$Message3.dialog_id;
+                    }
+                    i = 2;
+                }
+                queryFinalized2.dispose();
+                i4++;
+                i = 2;
+            }
+        }
+        return tLRPC$TL_messages_dialogs;
     }
 
     private void loadDialogFilters() {
@@ -3025,7 +3167,7 @@ public class MessagesStorage extends BaseController {
                         TLdeserialize.id = sQLiteCursor.intValue(1);
                         TLdeserialize.date = sQLiteCursor.intValue(2);
                         TLdeserialize.dialog_id = sQLiteCursor.longValue(3);
-                        addUsersAndChatsFromMessage(TLdeserialize, arrayList, arrayList2);
+                        addUsersAndChatsFromMessage(TLdeserialize, arrayList, arrayList2, null);
                         ArrayList<TLRPC$Message> arrayList4 = valueAt.get(TLdeserialize.id);
                         if (arrayList4 != null) {
                             int size2 = arrayList4.size();
@@ -3061,18 +3203,19 @@ public class MessagesStorage extends BaseController {
         ArrayList<TLRPC$EncryptedChat> arrayList4;
         final LongSparseArray longSparseArray;
         LongSparseArray longSparseArray2;
-        ArrayList<TLRPC$EncryptedChat> arrayList5;
-        LongSparseArray longSparseArray3;
-        ArrayList<TLRPC$User> arrayList6;
         String str2;
         int i;
+        LongSparseArray longSparseArray3;
+        ArrayList<TLRPC$User> arrayList5;
+        String str3;
+        int i2;
         Exception e;
         TLRPC$TL_messageReplyHeader tLRPC$TL_messageReplyHeader;
         NativeByteBuffer byteBufferValue;
         try {
+            ArrayList<Long> arrayList6 = new ArrayList<>();
             ArrayList<Long> arrayList7 = new ArrayList<>();
-            ArrayList<Long> arrayList8 = new ArrayList<>();
-            ArrayList arrayList9 = new ArrayList();
+            ArrayList arrayList8 = new ArrayList();
             LongSparseArray longSparseArray4 = new LongSparseArray();
             SQLiteCursor queryFinalized = this.database.queryFinalized("SELECT d.did, d.unread_count, s.flags FROM dialogs as d LEFT JOIN dialog_settings as s ON d.did = s.did WHERE d.unread_count > 0", new Object[0]);
             StringBuilder sb = new StringBuilder();
@@ -3084,8 +3227,8 @@ public class MessagesStorage extends BaseController {
                 }
                 long longValue = queryFinalized.longValue(2);
                 boolean z = (longValue & 1) != 0;
-                int i2 = (int) (longValue >> 32);
-                if (queryFinalized.isNull(2) || !z || (i2 != 0 && i2 < currentTime)) {
+                int i3 = (int) (longValue >> 32);
+                if (queryFinalized.isNull(2) || !z || (i3 != 0 && i3 < currentTime)) {
                     long longValue2 = queryFinalized.longValue(0);
                     if (!DialogObject.isFolderDialogId(longValue2)) {
                         longSparseArray4.put(longValue2, Integer.valueOf(queryFinalized.intValue(1)));
@@ -3095,17 +3238,17 @@ public class MessagesStorage extends BaseController {
                         sb.append(longValue2);
                         if (DialogObject.isEncryptedDialog(longValue2)) {
                             int encryptedChatId = DialogObject.getEncryptedChatId(longValue2);
-                            if (!arrayList9.contains(Integer.valueOf(encryptedChatId))) {
-                                arrayList9.add(Integer.valueOf(encryptedChatId));
+                            if (!arrayList8.contains(Integer.valueOf(encryptedChatId))) {
+                                arrayList8.add(Integer.valueOf(encryptedChatId));
                             }
                         } else if (DialogObject.isUserDialog(longValue2)) {
-                            if (!arrayList7.contains(Long.valueOf(longValue2))) {
-                                arrayList7.add(Long.valueOf(longValue2));
+                            if (!arrayList6.contains(Long.valueOf(longValue2))) {
+                                arrayList6.add(Long.valueOf(longValue2));
                             }
                         } else {
                             long j = -longValue2;
-                            if (!arrayList8.contains(Long.valueOf(j))) {
-                                arrayList8.add(Long.valueOf(j));
+                            if (!arrayList7.contains(Long.valueOf(j))) {
+                                arrayList7.add(Long.valueOf(j));
                             }
                         }
                     }
@@ -3114,18 +3257,18 @@ public class MessagesStorage extends BaseController {
             queryFinalized.dispose();
             LongSparseArray<SparseArray<ArrayList<TLRPC$Message>>> longSparseArray5 = new LongSparseArray<>();
             LongSparseArray<ArrayList<Integer>> longSparseArray6 = new LongSparseArray<>();
-            final ArrayList arrayList10 = new ArrayList();
-            ArrayList arrayList11 = new ArrayList();
-            ArrayList<TLRPC$User> arrayList12 = new ArrayList<>();
-            ArrayList<TLRPC$Chat> arrayList13 = new ArrayList<>();
-            ArrayList<TLRPC$EncryptedChat> arrayList14 = new ArrayList<>();
+            final ArrayList arrayList9 = new ArrayList();
+            ArrayList arrayList10 = new ArrayList();
+            ArrayList<TLRPC$User> arrayList11 = new ArrayList<>();
+            ArrayList<TLRPC$Chat> arrayList12 = new ArrayList<>();
+            ArrayList<TLRPC$EncryptedChat> arrayList13 = new ArrayList<>();
             if (sb.length() > 0) {
                 SQLiteCursor queryFinalized2 = this.database.queryFinalized("SELECT read_state, data, send_state, mid, date, uid, replydata FROM messages_v2 WHERE uid IN (" + sb.toString() + ") AND out = 0 AND read_state IN(0,2) ORDER BY date DESC LIMIT 50", new Object[0]);
-                int i3 = 0;
+                int i4 = 0;
                 while (queryFinalized2.next()) {
                     NativeByteBuffer byteBufferValue2 = queryFinalized2.byteBufferValue(1);
                     if (byteBufferValue2 != null) {
-                        arrayList6 = arrayList12;
+                        arrayList5 = arrayList11;
                         TLRPC$Message TLdeserialize = TLRPC$Message.TLdeserialize(byteBufferValue2, byteBufferValue2.readInt32(false), false);
                         longSparseArray3 = longSparseArray4;
                         TLdeserialize.readAttachPath(byteBufferValue2, getUserConfig().clientUserId);
@@ -3133,11 +3276,11 @@ public class MessagesStorage extends BaseController {
                         MessageObject.setUnreadFlags(TLdeserialize, queryFinalized2.intValue(0));
                         TLdeserialize.id = queryFinalized2.intValue(3);
                         TLdeserialize.date = queryFinalized2.intValue(4);
-                        str2 = str;
+                        str3 = str;
                         TLdeserialize.dialog_id = queryFinalized2.longValue(5);
-                        arrayList10.add(TLdeserialize);
-                        int max = Math.max(i3, TLdeserialize.date);
-                        addUsersAndChatsFromMessage(TLdeserialize, arrayList7, arrayList8);
+                        arrayList9.add(TLdeserialize);
+                        int max = Math.max(i4, TLdeserialize.date);
+                        addUsersAndChatsFromMessage(TLdeserialize, arrayList6, arrayList7, null);
                         TLdeserialize.send_state = queryFinalized2.intValue(2);
                         if ((TLdeserialize.peer_id.channel_id == 0 && !MessageObject.isUnread(TLdeserialize) && !DialogObject.isEncryptedDialog(TLdeserialize.dialog_id)) || TLdeserialize.id > 0) {
                             TLdeserialize.send_state = 0;
@@ -3149,153 +3292,156 @@ public class MessagesStorage extends BaseController {
                             tLRPC$TL_messageReplyHeader = TLdeserialize.reply_to;
                         } catch (Exception e2) {
                             e = e2;
-                            i = max;
+                            i2 = max;
                         }
                         if (tLRPC$TL_messageReplyHeader != null && tLRPC$TL_messageReplyHeader.reply_to_msg_id != 0) {
                             TLRPC$MessageAction tLRPC$MessageAction = TLdeserialize.action;
                             if ((tLRPC$MessageAction instanceof TLRPC$TL_messageActionPinMessage) || (tLRPC$MessageAction instanceof TLRPC$TL_messageActionPaymentSent) || (tLRPC$MessageAction instanceof TLRPC$TL_messageActionGameScore)) {
                                 if (queryFinalized2.isNull(6) || (byteBufferValue = queryFinalized2.byteBufferValue(6)) == null) {
-                                    i = max;
+                                    i2 = max;
                                 } else {
                                     TLRPC$Message TLdeserialize2 = TLRPC$Message.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(false), false);
                                     TLdeserialize.replyMessage = TLdeserialize2;
-                                    i = max;
+                                    i2 = max;
                                     try {
                                         TLdeserialize2.readAttachPath(byteBufferValue, getUserConfig().clientUserId);
                                         byteBufferValue.reuse();
                                         TLRPC$Message tLRPC$Message = TLdeserialize.replyMessage;
                                         if (tLRPC$Message != null) {
-                                            addUsersAndChatsFromMessage(tLRPC$Message, arrayList7, arrayList8);
+                                            addUsersAndChatsFromMessage(tLRPC$Message, arrayList6, arrayList7, null);
                                         }
                                     } catch (Exception e3) {
                                         e = e3;
                                         FileLog.e(e);
-                                        i3 = i;
-                                        str = str2;
-                                        arrayList12 = arrayList6;
+                                        i4 = i2;
+                                        str = str3;
+                                        arrayList11 = arrayList5;
                                         longSparseArray4 = longSparseArray3;
                                     }
                                 }
                                 if (TLdeserialize.replyMessage == null) {
                                     addReplyMessages(TLdeserialize, longSparseArray5, longSparseArray6);
                                 }
-                                i3 = i;
+                                i4 = i2;
                             }
                         }
-                        i = max;
-                        i3 = i;
+                        i2 = max;
+                        i4 = i2;
                     } else {
-                        arrayList6 = arrayList12;
+                        arrayList5 = arrayList11;
                         longSparseArray3 = longSparseArray4;
-                        str2 = str;
+                        str3 = str;
                     }
-                    str = str2;
-                    arrayList12 = arrayList6;
+                    str = str3;
+                    arrayList11 = arrayList5;
                     longSparseArray4 = longSparseArray3;
                 }
-                ArrayList<TLRPC$User> arrayList15 = arrayList12;
+                ArrayList<TLRPC$User> arrayList14 = arrayList11;
                 LongSparseArray longSparseArray7 = longSparseArray4;
-                String str3 = str;
+                String str4 = str;
                 queryFinalized2.dispose();
-                this.database.executeFast("DELETE FROM unread_push_messages WHERE date <= " + i3).stepThis().dispose();
+                this.database.executeFast("DELETE FROM unread_push_messages WHERE date <= " + i4).stepThis().dispose();
                 boolean z2 = false;
                 SQLiteCursor queryFinalized3 = this.database.queryFinalized("SELECT data, mid, date, uid, random, fm, name, uname, flags FROM unread_push_messages WHERE 1 ORDER BY date DESC LIMIT 50", new Object[0]);
                 while (queryFinalized3.next()) {
-                    int i4 = z2 ? 1 : 0;
                     int i5 = z2 ? 1 : 0;
-                    NativeByteBuffer byteBufferValue3 = queryFinalized3.byteBufferValue(i4);
+                    int i6 = z2 ? 1 : 0;
+                    NativeByteBuffer byteBufferValue3 = queryFinalized3.byteBufferValue(i5);
                     if (byteBufferValue3 != null) {
                         TLRPC$Message TLdeserialize3 = TLRPC$Message.TLdeserialize(byteBufferValue3, byteBufferValue3.readInt32(z2), z2);
                         byteBufferValue3.reuse();
                         TLdeserialize3.id = queryFinalized3.intValue(1);
                         TLdeserialize3.date = queryFinalized3.intValue(2);
                         TLdeserialize3.dialog_id = queryFinalized3.longValue(3);
-                        ArrayList<TLRPC$EncryptedChat> arrayList16 = arrayList14;
+                        ArrayList<TLRPC$EncryptedChat> arrayList15 = arrayList13;
                         TLdeserialize3.random_id = queryFinalized3.longValue(4);
-                        String stringValue = queryFinalized3.isNull(5) ? null : queryFinalized3.stringValue(5);
-                        String stringValue2 = queryFinalized3.isNull(6) ? null : queryFinalized3.stringValue(6);
-                        String stringValue3 = queryFinalized3.isNull(7) ? null : queryFinalized3.stringValue(7);
+                        if (queryFinalized3.isNull(5)) {
+                            i = 6;
+                            str2 = null;
+                        } else {
+                            str2 = queryFinalized3.stringValue(5);
+                            i = 6;
+                        }
+                        String stringValue = queryFinalized3.isNull(i) ? null : queryFinalized3.stringValue(i);
+                        String stringValue2 = queryFinalized3.isNull(7) ? null : queryFinalized3.stringValue(7);
                         int intValue = queryFinalized3.intValue(8);
                         if (MessageObject.getFromChatId(TLdeserialize3) != 0 || !DialogObject.isUserDialog(TLdeserialize3.dialog_id)) {
-                            arrayList5 = arrayList16;
+                            arrayList13 = arrayList15;
                         } else {
                             TLRPC$TL_peerUser tLRPC$TL_peerUser = new TLRPC$TL_peerUser();
                             TLdeserialize3.from_id = tLRPC$TL_peerUser;
-                            arrayList5 = arrayList16;
+                            arrayList13 = arrayList15;
                             tLRPC$TL_peerUser.user_id = TLdeserialize3.dialog_id;
                         }
                         if (DialogObject.isUserDialog(TLdeserialize3.dialog_id)) {
-                            if (!arrayList7.contains(Long.valueOf(TLdeserialize3.dialog_id))) {
-                                arrayList7.add(Long.valueOf(TLdeserialize3.dialog_id));
+                            if (!arrayList6.contains(Long.valueOf(TLdeserialize3.dialog_id))) {
+                                arrayList6.add(Long.valueOf(TLdeserialize3.dialog_id));
                             }
-                        } else if (DialogObject.isChatDialog(TLdeserialize3.dialog_id) && !arrayList8.contains(Long.valueOf(-TLdeserialize3.dialog_id))) {
-                            arrayList8.add(Long.valueOf(-TLdeserialize3.dialog_id));
+                        } else if (DialogObject.isChatDialog(TLdeserialize3.dialog_id) && !arrayList7.contains(Long.valueOf(-TLdeserialize3.dialog_id))) {
+                            arrayList7.add(Long.valueOf(-TLdeserialize3.dialog_id));
                         }
-                        arrayList11.add(new MessageObject(this.currentAccount, TLdeserialize3, stringValue, stringValue2, stringValue3, (intValue & 1) != 0, (intValue & 2) != 0, (TLdeserialize3.flags & Integer.MIN_VALUE) != 0, false));
-                        addUsersAndChatsFromMessage(TLdeserialize3, arrayList7, arrayList8);
-                    } else {
-                        arrayList5 = arrayList14;
+                        arrayList10.add(new MessageObject(this.currentAccount, TLdeserialize3, str2, stringValue, stringValue2, (intValue & 1) != 0, (intValue & 2) != 0, (TLdeserialize3.flags & Integer.MIN_VALUE) != 0, false));
+                        addUsersAndChatsFromMessage(TLdeserialize3, arrayList6, arrayList7, null);
                     }
-                    arrayList14 = arrayList5;
                     z2 = false;
                 }
                 queryFinalized3.dispose();
-                arrayList3 = arrayList15;
-                arrayList = arrayList11;
-                arrayList4 = arrayList14;
-                arrayList2 = arrayList13;
-                loadReplyMessages(longSparseArray5, longSparseArray6, arrayList7, arrayList8, false);
-                if (!arrayList9.isEmpty()) {
-                    getEncryptedChatsInternal(TextUtils.join(str3, arrayList9), arrayList4, arrayList7);
+                arrayList3 = arrayList14;
+                arrayList = arrayList10;
+                arrayList2 = arrayList12;
+                arrayList4 = arrayList13;
+                loadReplyMessages(longSparseArray5, longSparseArray6, arrayList6, arrayList7, false);
+                if (!arrayList8.isEmpty()) {
+                    getEncryptedChatsInternal(TextUtils.join(str4, arrayList8), arrayList4, arrayList6);
+                }
+                if (!arrayList6.isEmpty()) {
+                    getUsersInternal(TextUtils.join(str4, arrayList6), arrayList3);
                 }
                 if (!arrayList7.isEmpty()) {
-                    getUsersInternal(TextUtils.join(str3, arrayList7), arrayList3);
-                }
-                if (!arrayList8.isEmpty()) {
-                    getChatsInternal(TextUtils.join(str3, arrayList8), arrayList2);
-                    int i6 = 0;
-                    while (i6 < arrayList2.size()) {
-                        TLRPC$Chat tLRPC$Chat = arrayList2.get(i6);
+                    getChatsInternal(TextUtils.join(str4, arrayList7), arrayList2);
+                    int i7 = 0;
+                    while (i7 < arrayList2.size()) {
+                        TLRPC$Chat tLRPC$Chat = arrayList2.get(i7);
                         if (tLRPC$Chat == null || (!ChatObject.isNotInChat(tLRPC$Chat) && !tLRPC$Chat.min && tLRPC$Chat.migrated_to == null)) {
                             longSparseArray2 = longSparseArray7;
                         } else {
                             long j2 = -tLRPC$Chat.id;
                             this.database.executeFast("UPDATE dialogs SET unread_count = 0 WHERE did = " + j2).stepThis().dispose();
                             this.database.executeFast(String.format(Locale.US, "UPDATE messages_v2 SET read_state = 3 WHERE uid = %d AND mid > 0 AND read_state IN(0,2) AND out = 0", Long.valueOf(j2))).stepThis().dispose();
-                            arrayList2.remove(i6);
-                            i6 += -1;
+                            arrayList2.remove(i7);
+                            i7 += -1;
                             longSparseArray2 = longSparseArray7;
                             longSparseArray2.remove(j2);
-                            int i7 = 0;
-                            while (i7 < arrayList10.size()) {
-                                if (((TLRPC$Message) arrayList10.get(i7)).dialog_id == j2) {
-                                    arrayList10.remove(i7);
-                                    i7--;
+                            int i8 = 0;
+                            while (i8 < arrayList9.size()) {
+                                if (((TLRPC$Message) arrayList9.get(i8)).dialog_id == j2) {
+                                    arrayList9.remove(i8);
+                                    i8--;
                                 }
-                                i7++;
+                                i8++;
                             }
                         }
-                        i6++;
+                        i7++;
                         longSparseArray7 = longSparseArray2;
                     }
                 }
                 longSparseArray = longSparseArray7;
             } else {
-                arrayList = arrayList11;
-                arrayList3 = arrayList12;
+                arrayList = arrayList10;
+                arrayList3 = arrayList11;
                 longSparseArray = longSparseArray4;
-                arrayList2 = arrayList13;
-                arrayList4 = arrayList14;
+                arrayList2 = arrayList12;
+                arrayList4 = arrayList13;
             }
-            Collections.reverse(arrayList10);
-            final ArrayList arrayList17 = arrayList;
-            final ArrayList<TLRPC$User> arrayList18 = arrayList3;
-            final ArrayList<TLRPC$Chat> arrayList19 = arrayList2;
-            final ArrayList<TLRPC$EncryptedChat> arrayList20 = arrayList4;
+            Collections.reverse(arrayList9);
+            final ArrayList arrayList16 = arrayList;
+            final ArrayList<TLRPC$User> arrayList17 = arrayList3;
+            final ArrayList<TLRPC$Chat> arrayList18 = arrayList2;
+            final ArrayList<TLRPC$EncryptedChat> arrayList19 = arrayList4;
             AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.messenger.MessagesStorage$$ExternalSyntheticLambda121
                 @Override // java.lang.Runnable
                 public final void run() {
-                    MessagesStorage.this.lambda$loadUnreadMessages$50(longSparseArray, arrayList10, arrayList17, arrayList18, arrayList19, arrayList20);
+                    MessagesStorage.this.lambda$loadUnreadMessages$50(longSparseArray, arrayList9, arrayList16, arrayList17, arrayList18, arrayList19);
                 }
             });
         } catch (Exception e4) {
@@ -4436,7 +4582,7 @@ public class MessagesStorage extends BaseController {
             } else {
                 sQLiteCursor = this.database.queryFinalized(String.format(Locale.US, "SELECT m.mid, m.ttl FROM messages_v2 as m INNER JOIN randoms_v2 as r ON m.mid = r.mid AND m.uid = r.uid WHERE r.random_id IN (%s)", TextUtils.join(",", arrayList)), new Object[0]);
             }
-            int i5 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i5 = Integer.MAX_VALUE;
             while (sQLiteCursor.next()) {
                 int intValue = sQLiteCursor.intValue(1);
                 int intValue2 = sQLiteCursor.intValue(0);
@@ -5982,7 +6128,7 @@ public class MessagesStorage extends BaseController {
                 }
                 NativeByteBuffer byteBufferValue = queryFinalized.byteBufferValue(1);
                 if (byteBufferValue != null) {
-                    TLRPC$Message TLdeserialize = TLRPC$Message.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(z), z);
+                    TLRPC$Message TLdeserialize = TLRPC$Message.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(false), false);
                     TLdeserialize.send_state = queryFinalized.intValue(2);
                     TLdeserialize.readAttachPath(byteBufferValue, getUserConfig().clientUserId);
                     byteBufferValue.reuse();
@@ -6011,23 +6157,21 @@ public class MessagesStorage extends BaseController {
                         } else if (!arrayList7.contains(Long.valueOf(-TLdeserialize.dialog_id))) {
                             arrayList7.add(Long.valueOf(-TLdeserialize.dialog_id));
                         }
-                        addUsersAndChatsFromMessage(TLdeserialize, arrayList6, arrayList7);
+                        addUsersAndChatsFromMessage(TLdeserialize, arrayList6, arrayList7, null);
                         if (TLdeserialize.send_state != 3 && ((TLdeserialize.peer_id.channel_id == 0 && !MessageObject.isUnread(TLdeserialize) && !DialogObject.isEncryptedDialog(TLdeserialize.dialog_id)) || TLdeserialize.id > 0)) {
                             TLdeserialize.send_state = 0;
                         }
                     }
                 }
-                z = false;
             }
             queryFinalized.dispose();
-            boolean z2 = false;
             SQLiteCursor queryFinalized2 = this.database.queryFinalized("SELECT m.data, m.send_state, m.mid, m.date, r.random_id, m.uid, m.ttl FROM scheduled_messages_v2 as m LEFT JOIN randoms_v2 as r ON r.mid = m.mid AND r.uid = m.uid WHERE (m.mid < 0 AND m.send_state = 1) OR (m.mid > 0 AND m.send_state = 3) ORDER BY date ASC", new Object[0]);
             while (queryFinalized2.next()) {
-                int i3 = z2 ? 1 : 0;
-                int i4 = z2 ? 1 : 0;
+                int i3 = z ? 1 : 0;
+                int i4 = z ? 1 : 0;
                 NativeByteBuffer byteBufferValue2 = queryFinalized2.byteBufferValue(i3);
                 if (byteBufferValue2 != null) {
-                    TLRPC$Message TLdeserialize2 = TLRPC$Message.TLdeserialize(byteBufferValue2, byteBufferValue2.readInt32(z2), z2);
+                    TLRPC$Message TLdeserialize2 = TLRPC$Message.TLdeserialize(byteBufferValue2, byteBufferValue2.readInt32(z), z);
                     TLdeserialize2.send_state = queryFinalized2.intValue(i2);
                     TLdeserialize2.readAttachPath(byteBufferValue2, getUserConfig().clientUserId);
                     byteBufferValue2.reuse();
@@ -6053,17 +6197,20 @@ public class MessagesStorage extends BaseController {
                         } else if (!arrayList7.contains(Long.valueOf(-TLdeserialize2.dialog_id))) {
                             arrayList7.add(Long.valueOf(-TLdeserialize2.dialog_id));
                         }
-                        addUsersAndChatsFromMessage(TLdeserialize2, arrayList6, arrayList7);
+                        addUsersAndChatsFromMessage(TLdeserialize2, arrayList6, arrayList7, null);
                         if (TLdeserialize2.send_state != 3) {
                             if ((TLdeserialize2.peer_id.channel_id == 0 && !MessageObject.isUnread(TLdeserialize2) && !DialogObject.isEncryptedDialog(TLdeserialize2.dialog_id)) || TLdeserialize2.id > 0) {
                                 TLdeserialize2.send_state = 0;
                             }
-                            z2 = false;
+                            z = false;
+                            i2 = 1;
+                        } else {
+                            z = false;
                             i2 = 1;
                         }
                     }
                 }
-                z2 = false;
+                z = false;
                 i2 = 1;
             }
             queryFinalized2.dispose();
@@ -6277,35 +6424,15 @@ public class MessagesStorage extends BaseController {
         }
     }
 
-    /* JADX WARN: Can't wrap try/catch for region: R(8:68|(7:800|(3:96|(1:188)(4:103|(6:105|(10:107|108|109|110|111|879|112|113|(1:115)(1:116)|117)(1:120)|790|121|868|(10:123|124|829|125|126|127|(4:129|130|766|131)(1:132)|133|(5:135|(1:137)(1:138)|788|139|140)(1:143)|144)(2:149|(5:151|(1:153)(1:154)|155|(3:157|(1:159)|160)|161)(5:162|(1:164)(1:165)|166|(3:168|(1:170)|171)|172)))(1:178)|179|(4:183|775|184|(1:186)(1:187))(1:182))|189)(6:71|72|(8:74|75|76|77|78|79|794|80)(1:88)|862|89|90)|190|191|768|192|780)|(5:(12:(3:194|195|(6:197|777|205|206|820|(12:257|(1:259)(1:260)|860|261|262|(1:297)(10:802|265|(2:864|267)(1:269)|270|271|804|272|(1:274)(1:275)|276|(6:(1:280)(4:281|(1:283)|284|(5:286|(1:288)|289|290|(1:292)))|(1:300)(1:301)|(7:786|303|304|851|305|(1:307)|308)(1:313)|(10:315|(1:317)(1:318)|319|(1:321)(1:322)|323|(2:328|333)|329|(1:331)|332|333)(3:336|(6:839|338|(1:340)(1:341)|342|343|(4:835|345|346|354))(1:351)|352)|353|354))|298|(0)(0)|(0)(0)|(0)(0)|353|354)(4:213|(4:215|(1:217)(1:218)|219|(1:221)(1:222))(1:(1:(4:227|(1:229)(1:230)|231|(1:233)(1:234))(1:235))(12:238|(1:240)(1:241)|770|242|243|774|244|(1:246)(1:247)|248|(1:250)(1:251)|252|237))|236|237)))(21:199|(2:201|(1:203))|204|777|205|206|820|(1:208)|257|(0)(0)|860|261|262|(0)|297|298|(0)(0)|(0)(0)|(0)(0)|353|354)|860|261|262|(0)|297|298|(0)(0)|(0)(0)|(0)(0)|353|354)|820|(0)|257|(0)(0))|779|204|777|205|206) */
-    /* JADX WARN: Code restructure failed: missing block: B:359:0x0b5e, code lost:
-        r0 = e;
-     */
-    /* JADX WARN: Code restructure failed: missing block: B:557:0x109f, code lost:
-        if (r1.reply_to_random_id != 0) goto L560;
-     */
-    /* JADX WARN: Removed duplicated region for block: B:208:0x0530  */
-    /* JADX WARN: Removed duplicated region for block: B:259:0x081d A[Catch: Exception -> 0x0607, TRY_ENTER, TRY_LEAVE, TryCatch #31 {Exception -> 0x0607, blocks: (B:215:0x053d, B:217:0x0571, B:219:0x0577, B:221:0x057c, B:222:0x05c5, B:227:0x060e, B:229:0x0632, B:231:0x0638, B:233:0x063d, B:234:0x0686, B:235:0x06c7, B:238:0x0718, B:240:0x0734, B:259:0x081d), top: B:820:0x052e }] */
-    /* JADX WARN: Removed duplicated region for block: B:260:0x0822  */
-    /* JADX WARN: Removed duplicated region for block: B:264:0x0829 A[ADDED_TO_REGION] */
-    /* JADX WARN: Removed duplicated region for block: B:300:0x091e  */
-    /* JADX WARN: Removed duplicated region for block: B:301:0x0920  */
-    /* JADX WARN: Removed duplicated region for block: B:313:0x0966  */
-    /* JADX WARN: Removed duplicated region for block: B:315:0x096a A[Catch: Exception -> 0x0a9d, TryCatch #47 {Exception -> 0x0a9d, blocks: (B:305:0x092a, B:308:0x0956, B:315:0x096a, B:317:0x0990, B:319:0x0996, B:321:0x09bd, B:323:0x09c3, B:328:0x09cc, B:332:0x0a30, B:340:0x0ac5), top: B:851:0x092a }] */
-    /* JADX WARN: Removed duplicated region for block: B:336:0x0aa2  */
-    /* JADX WARN: Removed duplicated region for block: B:611:0x11a4  */
-    /* JADX WARN: Removed duplicated region for block: B:758:0x1525  */
-    /* JADX WARN: Removed duplicated region for block: B:760:0x1549  */
-    /* JADX WARN: Removed duplicated region for block: B:761:0x1551  */
-    /* JADX WARN: Removed duplicated region for block: B:786:0x0923 A[EXC_TOP_SPLITTER, SYNTHETIC] */
-    /* JADX WARN: Removed duplicated region for block: B:852:0x115a A[EXC_TOP_SPLITTER, SYNTHETIC] */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct add '--show-bad-code' argument
-    */
-    public java.lang.Runnable getMessagesInternal(final long r46, final long r48, int r50, int r51, final int r52, int r53, final int r54, final int r55, final boolean r56, final int r57, final int r58, final boolean r59) {
+    /*  JADX ERROR: JadxRuntimeException in pass: BlockProcessor
+        jadx.core.utils.exceptions.JadxRuntimeException: Unreachable block: B:742:0x14cf
+        	at jadx.core.dex.visitors.blocks.BlockProcessor.checkForUnreachableBlocks(BlockProcessor.java:92)
+        	at jadx.core.dex.visitors.blocks.BlockProcessor.processBlocksTree(BlockProcessor.java:52)
+        	at jadx.core.dex.visitors.blocks.BlockProcessor.visit(BlockProcessor.java:44)
+        */
+    public java.lang.Runnable getMessagesInternal(long r49, long r51, int r53, int r54, int r55, int r56, int r57, int r58, boolean r59, int r60, int r61, boolean r62) {
         /*
-            Method dump skipped, instructions count: 5489
+            Method dump skipped, instructions count: 5480
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesStorage.getMessagesInternal(long, long, int, int, int, int, int, int, boolean, int, int, boolean):java.lang.Runnable");
@@ -6337,6 +6464,28 @@ public class MessagesStorage extends BaseController {
 
     public /* synthetic */ void lambda$getMessagesInternal$126(TLRPC$TL_messages_messages tLRPC$TL_messages_messages, int i, long j, long j2, int i2, int i3, int i4, int i5, int i6, int i7, int i8, int i9, int i10, boolean z, boolean z2, int i11, int i12, boolean z3, int i13, boolean z4) {
         getMessagesController().processLoadedMessages(tLRPC$TL_messages_messages, i, j, j2, i2, i3, i4, true, i5, i6, i7, i8, i9, i10, z, z2 ? 1 : 0, i11, i12, z3, i13, z4);
+    }
+
+    private void getAnimatedEmoji(String str, ArrayList<TLRPC$Document> arrayList) {
+        try {
+            SQLiteCursor queryFinalized = this.database.queryFinalized(String.format(Locale.US, "SELECT data FROM animated_emoji WHERE document_id IN (%s)", str), new Object[0]);
+            while (queryFinalized.next()) {
+                NativeByteBuffer byteBufferValue = queryFinalized.byteBufferValue(0);
+                try {
+                    TLRPC$Document TLdeserialize = TLRPC$Document.TLdeserialize(byteBufferValue, byteBufferValue.readInt32(true), true);
+                    if (TLdeserialize != null && TLdeserialize.id != 0) {
+                        arrayList.add(TLdeserialize);
+                    }
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+                if (byteBufferValue != null) {
+                    byteBufferValue.reuse();
+                }
+            }
+        } catch (SQLiteException e2) {
+            e2.printStackTrace();
+        }
     }
 
     public void getMessages(final long j, final long j2, boolean z, final int i, final int i2, final int i3, final int i4, final int i5, final int i6, final boolean z2, final int i7, final int i8, final boolean z3) {
@@ -6439,7 +6588,7 @@ public class MessagesStorage extends BaseController {
                 if (appWidgetManager == null) {
                     appWidgetManager = AppWidgetManager.getInstance(ApplicationLoader.applicationContext);
                 }
-                appWidgetManager.notifyAppWidgetViewDataChanged(queryFinalized.intValue(0), R.id.list_view);
+                appWidgetManager.notifyAppWidgetViewDataChanged(queryFinalized.intValue(0), org.telegram.messenger.beta.R.id.list_view);
             }
             queryFinalized.dispose();
         } catch (Exception e) {
@@ -6670,7 +6819,7 @@ public class MessagesStorage extends BaseController {
                             long j = tLRPC$TL_dialog.id;
                             TLdeserialize.dialog_id = j;
                             longSparseArray2.put(j, TLdeserialize);
-                            addUsersAndChatsFromMessage(TLdeserialize, arrayList4, arrayList5);
+                            addUsersAndChatsFromMessage(TLdeserialize, arrayList4, arrayList5, null);
                         }
                     }
                 }
@@ -8703,7 +8852,7 @@ public class MessagesStorage extends BaseController {
                     }
                     TLdeserialize.dialog_id = tLRPC$TL_dialog.id;
                     tLRPC$TL_messages_dialogs.messages.add(TLdeserialize);
-                    addUsersAndChatsFromMessage(TLdeserialize, arrayList5, arrayList6);
+                    addUsersAndChatsFromMessage(TLdeserialize, arrayList5, arrayList6, null);
                 }
                 if (!DialogObject.isEncryptedDialog(longValue2) && tLRPC$TL_dialog.read_inbox_max_id > tLRPC$TL_dialog.top_message) {
                     tLRPC$TL_dialog.read_inbox_max_id = 0;
@@ -9169,7 +9318,7 @@ public class MessagesStorage extends BaseController {
         getFileLoader().cancelLoadFiles(arrayList);
     }
 
-    public static void addUsersAndChatsFromMessage(TLRPC$Message tLRPC$Message, ArrayList<Long> arrayList, ArrayList<Long> arrayList2) {
+    public static void addUsersAndChatsFromMessage(TLRPC$Message tLRPC$Message, ArrayList<Long> arrayList, ArrayList<Long> arrayList2, ArrayList<Long> arrayList3) {
         String str;
         TLRPC$Peer tLRPC$Peer;
         long fromChatId = MessageObject.getFromChatId(tLRPC$Message);
@@ -9243,6 +9392,8 @@ public class MessagesStorage extends BaseController {
                     arrayList.add(Long.valueOf(((TLRPC$TL_messageEntityMentionName) tLRPC$MessageEntity).user_id));
                 } else if (tLRPC$MessageEntity instanceof TLRPC$TL_inputMessageEntityMentionName) {
                     arrayList.add(Long.valueOf(((TLRPC$TL_inputMessageEntityMentionName) tLRPC$MessageEntity).user_id.user_id));
+                } else if (arrayList3 != null && (tLRPC$MessageEntity instanceof TLRPC$TL_messageEntityCustomEmoji)) {
+                    arrayList3.add(Long.valueOf(((TLRPC$TL_messageEntityCustomEmoji) tLRPC$MessageEntity).document_id));
                 }
             }
         }
@@ -9364,28 +9515,28 @@ public class MessagesStorage extends BaseController {
     }
 
     /* JADX WARN: Multi-variable type inference failed */
-    /* JADX WARN: Removed duplicated region for block: B:101:0x027c A[Catch: Exception -> 0x03ff, TryCatch #0 {Exception -> 0x03ff, blocks: (B:88:0x023f, B:89:0x0243, B:91:0x024f, B:93:0x0255, B:95:0x025b, B:96:0x025e, B:98:0x0264, B:100:0x0274, B:101:0x027c, B:103:0x0284, B:105:0x028e, B:106:0x0296, B:108:0x029c, B:110:0x02a7, B:114:0x02be, B:120:0x02e3, B:123:0x02fb, B:124:0x0301, B:126:0x0304, B:131:0x0315, B:133:0x031f, B:134:0x0327, B:136:0x0332, B:137:0x0339, B:139:0x0347, B:140:0x0350, B:141:0x0355, B:143:0x035b), top: B:186:0x023f }] */
-    /* JADX WARN: Removed duplicated region for block: B:38:0x013c  */
-    /* JADX WARN: Removed duplicated region for block: B:39:0x013e  */
-    /* JADX WARN: Removed duplicated region for block: B:42:0x0153  */
-    /* JADX WARN: Removed duplicated region for block: B:43:0x0155  */
-    /* JADX WARN: Removed duplicated region for block: B:46:0x016c A[Catch: Exception -> 0x02b9, TryCatch #5 {Exception -> 0x02b9, blocks: (B:16:0x0099, B:18:0x00a3, B:20:0x00b0, B:22:0x00b6, B:23:0x00c7, B:26:0x00db, B:27:0x00e7, B:28:0x00ee, B:30:0x0110, B:36:0x0120, B:40:0x013f, B:44:0x0156, B:46:0x016c, B:48:0x0174, B:49:0x0179, B:51:0x0190, B:53:0x019c, B:55:0x01a3, B:57:0x01ae, B:59:0x01d3, B:60:0x01d5), top: B:196:0x0099 }] */
-    /* JADX WARN: Removed duplicated region for block: B:51:0x0190 A[Catch: Exception -> 0x02b9, TryCatch #5 {Exception -> 0x02b9, blocks: (B:16:0x0099, B:18:0x00a3, B:20:0x00b0, B:22:0x00b6, B:23:0x00c7, B:26:0x00db, B:27:0x00e7, B:28:0x00ee, B:30:0x0110, B:36:0x0120, B:40:0x013f, B:44:0x0156, B:46:0x016c, B:48:0x0174, B:49:0x0179, B:51:0x0190, B:53:0x019c, B:55:0x01a3, B:57:0x01ae, B:59:0x01d3, B:60:0x01d5), top: B:196:0x0099 }] */
-    /* JADX WARN: Removed duplicated region for block: B:52:0x019a  */
-    /* JADX WARN: Removed duplicated region for block: B:55:0x01a3 A[Catch: Exception -> 0x02b9, TryCatch #5 {Exception -> 0x02b9, blocks: (B:16:0x0099, B:18:0x00a3, B:20:0x00b0, B:22:0x00b6, B:23:0x00c7, B:26:0x00db, B:27:0x00e7, B:28:0x00ee, B:30:0x0110, B:36:0x0120, B:40:0x013f, B:44:0x0156, B:46:0x016c, B:48:0x0174, B:49:0x0179, B:51:0x0190, B:53:0x019c, B:55:0x01a3, B:57:0x01ae, B:59:0x01d3, B:60:0x01d5), top: B:196:0x0099 }] */
-    /* JADX WARN: Removed duplicated region for block: B:90:0x024b  */
-    /* JADX WARN: Removed duplicated region for block: B:93:0x0255 A[Catch: Exception -> 0x03ff, TryCatch #0 {Exception -> 0x03ff, blocks: (B:88:0x023f, B:89:0x0243, B:91:0x024f, B:93:0x0255, B:95:0x025b, B:96:0x025e, B:98:0x0264, B:100:0x0274, B:101:0x027c, B:103:0x0284, B:105:0x028e, B:106:0x0296, B:108:0x029c, B:110:0x02a7, B:114:0x02be, B:120:0x02e3, B:123:0x02fb, B:124:0x0301, B:126:0x0304, B:131:0x0315, B:133:0x031f, B:134:0x0327, B:136:0x0332, B:137:0x0339, B:139:0x0347, B:140:0x0350, B:141:0x0355, B:143:0x035b), top: B:186:0x023f }] */
-    /* JADX WARN: Removed duplicated region for block: B:98:0x0264 A[Catch: Exception -> 0x03ff, TryCatch #0 {Exception -> 0x03ff, blocks: (B:88:0x023f, B:89:0x0243, B:91:0x024f, B:93:0x0255, B:95:0x025b, B:96:0x025e, B:98:0x0264, B:100:0x0274, B:101:0x027c, B:103:0x0284, B:105:0x028e, B:106:0x0296, B:108:0x029c, B:110:0x02a7, B:114:0x02be, B:120:0x02e3, B:123:0x02fb, B:124:0x0301, B:126:0x0304, B:131:0x0315, B:133:0x031f, B:134:0x0327, B:136:0x0332, B:137:0x0339, B:139:0x0347, B:140:0x0350, B:141:0x0355, B:143:0x035b), top: B:186:0x023f }] */
-    /* JADX WARN: Type inference failed for: r0v101, types: [org.telegram.tgnet.TLRPC$TL_dialog] */
-    /* JADX WARN: Type inference failed for: r0v102, types: [org.telegram.tgnet.TLRPC$TL_dialogFolder] */
+    /* JADX WARN: Removed duplicated region for block: B:101:0x026e A[Catch: Exception -> 0x03f6, TryCatch #5 {Exception -> 0x03f6, blocks: (B:12:0x006f, B:13:0x0099, B:15:0x009f, B:17:0x00a9, B:19:0x00b6, B:21:0x00bc, B:22:0x00cd, B:25:0x00e1, B:26:0x00ed, B:27:0x00f4, B:29:0x0116, B:35:0x0126, B:39:0x0145, B:43:0x015c, B:45:0x0172, B:47:0x017a, B:48:0x017f, B:50:0x0196, B:52:0x01a2, B:54:0x01a9, B:56:0x01b4, B:58:0x01d9, B:59:0x01db, B:90:0x0247, B:91:0x024b, B:94:0x0259, B:96:0x025f, B:98:0x0265, B:99:0x0268, B:101:0x026e, B:103:0x027e, B:104:0x0286, B:106:0x028e, B:108:0x0298, B:109:0x02a0, B:111:0x02a6, B:113:0x02b1, B:115:0x02c4, B:118:0x02e2, B:121:0x02fa, B:122:0x0300, B:124:0x0303, B:129:0x0314, B:131:0x031e, B:132:0x0326, B:134:0x0331, B:135:0x0338, B:137:0x0346, B:138:0x034f, B:139:0x0354, B:141:0x035a), top: B:189:0x006f }] */
+    /* JADX WARN: Removed duplicated region for block: B:104:0x0286 A[Catch: Exception -> 0x03f6, TryCatch #5 {Exception -> 0x03f6, blocks: (B:12:0x006f, B:13:0x0099, B:15:0x009f, B:17:0x00a9, B:19:0x00b6, B:21:0x00bc, B:22:0x00cd, B:25:0x00e1, B:26:0x00ed, B:27:0x00f4, B:29:0x0116, B:35:0x0126, B:39:0x0145, B:43:0x015c, B:45:0x0172, B:47:0x017a, B:48:0x017f, B:50:0x0196, B:52:0x01a2, B:54:0x01a9, B:56:0x01b4, B:58:0x01d9, B:59:0x01db, B:90:0x0247, B:91:0x024b, B:94:0x0259, B:96:0x025f, B:98:0x0265, B:99:0x0268, B:101:0x026e, B:103:0x027e, B:104:0x0286, B:106:0x028e, B:108:0x0298, B:109:0x02a0, B:111:0x02a6, B:113:0x02b1, B:115:0x02c4, B:118:0x02e2, B:121:0x02fa, B:122:0x0300, B:124:0x0303, B:129:0x0314, B:131:0x031e, B:132:0x0326, B:134:0x0331, B:135:0x0338, B:137:0x0346, B:138:0x034f, B:139:0x0354, B:141:0x035a), top: B:189:0x006f }] */
+    /* JADX WARN: Removed duplicated region for block: B:37:0x0142  */
+    /* JADX WARN: Removed duplicated region for block: B:38:0x0144  */
+    /* JADX WARN: Removed duplicated region for block: B:41:0x0159  */
+    /* JADX WARN: Removed duplicated region for block: B:42:0x015b  */
+    /* JADX WARN: Removed duplicated region for block: B:45:0x0172 A[Catch: Exception -> 0x03f6, TryCatch #5 {Exception -> 0x03f6, blocks: (B:12:0x006f, B:13:0x0099, B:15:0x009f, B:17:0x00a9, B:19:0x00b6, B:21:0x00bc, B:22:0x00cd, B:25:0x00e1, B:26:0x00ed, B:27:0x00f4, B:29:0x0116, B:35:0x0126, B:39:0x0145, B:43:0x015c, B:45:0x0172, B:47:0x017a, B:48:0x017f, B:50:0x0196, B:52:0x01a2, B:54:0x01a9, B:56:0x01b4, B:58:0x01d9, B:59:0x01db, B:90:0x0247, B:91:0x024b, B:94:0x0259, B:96:0x025f, B:98:0x0265, B:99:0x0268, B:101:0x026e, B:103:0x027e, B:104:0x0286, B:106:0x028e, B:108:0x0298, B:109:0x02a0, B:111:0x02a6, B:113:0x02b1, B:115:0x02c4, B:118:0x02e2, B:121:0x02fa, B:122:0x0300, B:124:0x0303, B:129:0x0314, B:131:0x031e, B:132:0x0326, B:134:0x0331, B:135:0x0338, B:137:0x0346, B:138:0x034f, B:139:0x0354, B:141:0x035a), top: B:189:0x006f }] */
+    /* JADX WARN: Removed duplicated region for block: B:50:0x0196 A[Catch: Exception -> 0x03f6, TryCatch #5 {Exception -> 0x03f6, blocks: (B:12:0x006f, B:13:0x0099, B:15:0x009f, B:17:0x00a9, B:19:0x00b6, B:21:0x00bc, B:22:0x00cd, B:25:0x00e1, B:26:0x00ed, B:27:0x00f4, B:29:0x0116, B:35:0x0126, B:39:0x0145, B:43:0x015c, B:45:0x0172, B:47:0x017a, B:48:0x017f, B:50:0x0196, B:52:0x01a2, B:54:0x01a9, B:56:0x01b4, B:58:0x01d9, B:59:0x01db, B:90:0x0247, B:91:0x024b, B:94:0x0259, B:96:0x025f, B:98:0x0265, B:99:0x0268, B:101:0x026e, B:103:0x027e, B:104:0x0286, B:106:0x028e, B:108:0x0298, B:109:0x02a0, B:111:0x02a6, B:113:0x02b1, B:115:0x02c4, B:118:0x02e2, B:121:0x02fa, B:122:0x0300, B:124:0x0303, B:129:0x0314, B:131:0x031e, B:132:0x0326, B:134:0x0331, B:135:0x0338, B:137:0x0346, B:138:0x034f, B:139:0x0354, B:141:0x035a), top: B:189:0x006f }] */
+    /* JADX WARN: Removed duplicated region for block: B:51:0x01a0  */
+    /* JADX WARN: Removed duplicated region for block: B:54:0x01a9 A[Catch: Exception -> 0x03f6, TryCatch #5 {Exception -> 0x03f6, blocks: (B:12:0x006f, B:13:0x0099, B:15:0x009f, B:17:0x00a9, B:19:0x00b6, B:21:0x00bc, B:22:0x00cd, B:25:0x00e1, B:26:0x00ed, B:27:0x00f4, B:29:0x0116, B:35:0x0126, B:39:0x0145, B:43:0x015c, B:45:0x0172, B:47:0x017a, B:48:0x017f, B:50:0x0196, B:52:0x01a2, B:54:0x01a9, B:56:0x01b4, B:58:0x01d9, B:59:0x01db, B:90:0x0247, B:91:0x024b, B:94:0x0259, B:96:0x025f, B:98:0x0265, B:99:0x0268, B:101:0x026e, B:103:0x027e, B:104:0x0286, B:106:0x028e, B:108:0x0298, B:109:0x02a0, B:111:0x02a6, B:113:0x02b1, B:115:0x02c4, B:118:0x02e2, B:121:0x02fa, B:122:0x0300, B:124:0x0303, B:129:0x0314, B:131:0x031e, B:132:0x0326, B:134:0x0331, B:135:0x0338, B:137:0x0346, B:138:0x034f, B:139:0x0354, B:141:0x035a), top: B:189:0x006f }] */
+    /* JADX WARN: Removed duplicated region for block: B:92:0x0254  */
+    /* JADX WARN: Removed duplicated region for block: B:96:0x025f A[Catch: Exception -> 0x03f6, TryCatch #5 {Exception -> 0x03f6, blocks: (B:12:0x006f, B:13:0x0099, B:15:0x009f, B:17:0x00a9, B:19:0x00b6, B:21:0x00bc, B:22:0x00cd, B:25:0x00e1, B:26:0x00ed, B:27:0x00f4, B:29:0x0116, B:35:0x0126, B:39:0x0145, B:43:0x015c, B:45:0x0172, B:47:0x017a, B:48:0x017f, B:50:0x0196, B:52:0x01a2, B:54:0x01a9, B:56:0x01b4, B:58:0x01d9, B:59:0x01db, B:90:0x0247, B:91:0x024b, B:94:0x0259, B:96:0x025f, B:98:0x0265, B:99:0x0268, B:101:0x026e, B:103:0x027e, B:104:0x0286, B:106:0x028e, B:108:0x0298, B:109:0x02a0, B:111:0x02a6, B:113:0x02b1, B:115:0x02c4, B:118:0x02e2, B:121:0x02fa, B:122:0x0300, B:124:0x0303, B:129:0x0314, B:131:0x031e, B:132:0x0326, B:134:0x0331, B:135:0x0338, B:137:0x0346, B:138:0x034f, B:139:0x0354, B:141:0x035a), top: B:189:0x006f }] */
+    /* JADX WARN: Type inference failed for: r0v103, types: [org.telegram.tgnet.TLRPC$TL_dialog] */
+    /* JADX WARN: Type inference failed for: r0v104, types: [org.telegram.tgnet.TLRPC$TL_dialogFolder] */
     /* JADX WARN: Type inference failed for: r0v27 */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public /* synthetic */ void lambda$getDialogs$180(int r23, int r24, int r25, long[] r26) {
+    public /* synthetic */ void lambda$getDialogs$180(int r24, int r25, int r26, long[] r27) {
         /*
-            Method dump skipped, instructions count: 1077
+            Method dump skipped, instructions count: 1067
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessagesStorage.lambda$getDialogs$180(int, int, int, long[]):void");

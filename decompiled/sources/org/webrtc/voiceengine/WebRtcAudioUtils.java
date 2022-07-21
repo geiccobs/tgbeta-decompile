@@ -59,11 +59,11 @@ public final class WebRtcAudioUtils {
                 return "TYPE_TV_TUNER";
             case 18:
                 return "TYPE_TELEPHONY";
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
                 return "TYPE_AUX_LINE";
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 return "TYPE_IP";
-            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+            case 21:
                 return "TYPE_BUS";
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 return "TYPE_USB_HEADSET";

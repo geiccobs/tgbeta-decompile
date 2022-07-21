@@ -30,6 +30,7 @@ public class PremiumButtonView extends FrameLayout {
     RLottieImageView iconView;
     private boolean inc;
     private boolean isButtonTextSet;
+    private boolean isFlickerDisabled;
     ValueAnimator overlayAnimator;
     private float overlayProgress;
     public TextView overlayTextView;
@@ -123,7 +124,7 @@ public class PremiumButtonView extends FrameLayout {
             canvas.drawRoundRect(rectF, i, i, PremiumGradient.getInstance().getMainGradientPaint());
             invalidate();
         }
-        if (!BuildVars.IS_BILLING_UNAVAILABLE) {
+        if (!BuildVars.IS_BILLING_UNAVAILABLE && !this.isFlickerDisabled) {
             this.flickerDrawable.setParentWidth(getMeasuredWidth());
             this.flickerDrawable.draw(canvas, rectF, this.radius, null);
         }
@@ -238,6 +239,17 @@ public class PremiumButtonView extends FrameLayout {
     public void hideIcon() {
         this.flickerDrawable.setOnRestartCallback(null);
         this.iconView.setVisibility(8);
+    }
+
+    public void setFlickerDisabled(boolean z) {
+        this.isFlickerDisabled = z;
+        invalidate();
+    }
+
+    @Override // android.view.View
+    public void setEnabled(boolean z) {
+        super.setEnabled(z);
+        this.buttonLayout.setEnabled(z);
     }
 
     public void setButton(String str, View.OnClickListener onClickListener) {

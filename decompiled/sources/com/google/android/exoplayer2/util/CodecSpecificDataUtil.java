@@ -2,13 +2,14 @@ package com.google.android.exoplayer2.util;
 
 import android.util.Pair;
 import com.google.android.exoplayer2.ParserException;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import java.util.ArrayList;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public final class CodecSpecificDataUtil {
     private static final byte[] NAL_START_CODE = {0, 0, 0, 1};
-    private static final int[] AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350};
+    private static final int[] AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, JosStatusCodes.RTN_CODE_COMMON_ERROR, 7350};
     private static final int[] AUDIO_SPECIFIC_CONFIG_CHANNEL_COUNT_TABLE = {0, 1, 2, 3, 4, 5, 6, 8, -1, -1, -1, 7, 8, -1, 8, -1};
 
     public static byte[] buildAacAudioSpecificConfig(int i, int i2, int i3) {
@@ -34,9 +35,9 @@ public final class CodecSpecificDataUtil {
         if (z) {
             if (aacAudioObjectType != 1 && aacAudioObjectType != 2 && aacAudioObjectType != 3 && aacAudioObjectType != 4 && aacAudioObjectType != 6 && aacAudioObjectType != 7 && aacAudioObjectType != 17) {
                 switch (aacAudioObjectType) {
-                    case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                    case 19:
                     case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                    case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                    case 21:
                     case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                     case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                         break;
@@ -47,9 +48,9 @@ public final class CodecSpecificDataUtil {
             parseGaSpecificConfig(parsableBitArray, aacAudioObjectType, readBits);
             switch (aacAudioObjectType) {
                 case 17:
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                 case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                     int readBits2 = parsableBitArray.readBits(2);

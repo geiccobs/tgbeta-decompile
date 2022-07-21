@@ -4,9 +4,10 @@ import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
@@ -91,7 +92,7 @@ public class AutoDeletePopupWrapper {
 
     public /* synthetic */ void lambda$new$1(Callback callback, View view) {
         dismiss();
-        callback.setAutoDeleteHistory(86400, 70);
+        callback.setAutoDeleteHistory(RemoteMessageConst.DEFAULT_TTL, 70);
     }
 
     public /* synthetic */ void lambda$new$2(Callback callback, View view) {

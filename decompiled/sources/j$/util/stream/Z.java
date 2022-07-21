@@ -8,6 +8,6 @@ public final /* synthetic */ class Z implements j$.util.function.y {
 
     @Override // j$.util.function.y
     public final Object get() {
-        return new C0074e0();
+        return new C0079e0();
     }
 }

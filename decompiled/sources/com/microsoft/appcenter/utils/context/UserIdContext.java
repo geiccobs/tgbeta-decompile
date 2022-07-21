@@ -1,6 +1,7 @@
 package com.microsoft.appcenter.utils.context;
 
 import android.text.TextUtils;
+import com.huawei.hms.opendevice.c;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import j$.util.concurrent.ConcurrentHashMap;
 import java.util.Collections;
@@ -38,8 +39,8 @@ public class UserIdContext {
         int indexOf = str.indexOf(":");
         if (indexOf >= 0) {
             String substring = str.substring(0, indexOf);
-            if (!substring.equals("c")) {
-                AppCenterLog.error("AppCenter", String.format("userId prefix must be '%s%s', '%s%s' is not supported.", "c", ":", substring, ":"));
+            if (!substring.equals(c.a)) {
+                AppCenterLog.error("AppCenter", String.format("userId prefix must be '%s%s', '%s%s' is not supported.", c.a, ":", substring, ":"));
                 return false;
             } else if (indexOf == str.length() - 1) {
                 AppCenterLog.error("AppCenter", "userId must not be empty.");

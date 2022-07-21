@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$BotInfo;
 import org.telegram.tgnet.TLRPC$TL_botCommand;
 import org.telegram.ui.ActionBar.MenuDrawable;

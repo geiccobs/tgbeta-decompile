@@ -66,6 +66,20 @@ public class EventBus implements Subscriber, Publisher {
         subscribe(cls, this.defaultExecutor, eventHandler);
     }
 
+    @Override // com.google.firebase.events.Subscriber
+    public synchronized <T> void unsubscribe(Class<T> cls, EventHandler<? super T> eventHandler) {
+        Preconditions.checkNotNull(cls);
+        Preconditions.checkNotNull(eventHandler);
+        if (!this.handlerMap.containsKey(cls)) {
+            return;
+        }
+        ConcurrentHashMap<EventHandler<Object>, Executor> concurrentHashMap = this.handlerMap.get(cls);
+        concurrentHashMap.remove(eventHandler);
+        if (concurrentHashMap.isEmpty()) {
+            this.handlerMap.remove(cls);
+        }
+    }
+
     public void enablePublishingAndFlushPending() {
         Queue<Event<?>> queue;
         synchronized (this) {

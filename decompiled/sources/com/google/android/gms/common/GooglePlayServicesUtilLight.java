@@ -18,8 +18,8 @@ import com.google.android.gms.common.internal.zzt;
 import com.google.android.gms.common.util.DeviceProperties;
 import com.google.android.gms.common.util.PlatformVersion;
 import com.google.android.gms.common.wrappers.Wrappers;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
 public class GooglePlayServicesUtilLight {
@@ -140,7 +140,7 @@ public class GooglePlayServicesUtilLight {
             return;
         }
         try {
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification");
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(RemoteMessageConst.NOTIFICATION);
             if (notificationManager == null) {
                 return;
             }
@@ -178,7 +178,7 @@ public class GooglePlayServicesUtilLight {
         return zza(context, "com.google.android.gms");
     }
 
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public static boolean zza(Context context, String str) {
         ApplicationInfo applicationInfo;
         boolean equals = str.equals("com.google.android.gms");

@@ -27,6 +27,7 @@ import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.MediaClock;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -454,7 +455,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
         MediaFormatUtil.maybeSetInteger(mediaFormat, "max-input-size", i);
         int i2 = Util.SDK_INT;
         if (i2 >= 23) {
-            mediaFormat.setInteger("priority", 0);
+            mediaFormat.setInteger(RemoteMessageConst.Notification.PRIORITY, 0);
             if (f != -1.0f && !deviceDoesntSupportOperatingRate()) {
                 mediaFormat.setFloat("operating-rate", f);
             }

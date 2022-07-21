@@ -25,7 +25,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.TLRPC$TL_groupCallParticipant;
 import org.telegram.ui.Components.GroupCallPip;
@@ -202,7 +202,7 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         RLottieImageView rLottieImageView = new RLottieImageView(context);
         this.iconView = rLottieImageView;
         rLottieImageView.setScaleType(ImageView.ScaleType.CENTER);
-        RLottieDrawable rLottieDrawable = new RLottieDrawable(R.raw.group_pip_delete_icon, "2131558458", AndroidUtilities.dp(40.0f), AndroidUtilities.dp(40.0f), true, null);
+        RLottieDrawable rLottieDrawable = new RLottieDrawable(R.raw.group_pip_delete_icon, "2131558459", AndroidUtilities.dp(40.0f), AndroidUtilities.dp(40.0f), true, null);
         this.deleteIcon = rLottieDrawable;
         rLottieDrawable.setPlayInDirectionOfCustomEndFrame(true);
         rLottieImageView.setAnimation(this.deleteIcon);

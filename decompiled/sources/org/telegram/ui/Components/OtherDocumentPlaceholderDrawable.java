@@ -16,8 +16,8 @@ import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$Message;
 /* loaded from: classes3.dex */

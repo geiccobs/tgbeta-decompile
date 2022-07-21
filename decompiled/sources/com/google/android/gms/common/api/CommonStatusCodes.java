@@ -47,11 +47,11 @@ public class CommonStatusCodes {
                 return "API_NOT_CONNECTED";
             case 18:
                 return "DEAD_CLIENT";
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
                 return "REMOTE_EXCEPTION";
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
                 return "CONNECTION_SUSPENDED_DURING_CALL";
-            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+            case 21:
                 return "RECONNECTION_TIMED_OUT_DURING_UPDATE";
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 return "RECONNECTION_TIMED_OUT";

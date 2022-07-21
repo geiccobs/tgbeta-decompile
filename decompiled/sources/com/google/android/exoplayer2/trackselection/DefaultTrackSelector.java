@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class DefaultTrackSelector extends MappingTrackSelector {
     private static final int[] NO_TRACKS = new int[0];
@@ -86,18 +85,18 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         }
 
         private void setInitialValuesWithoutContext() {
-            this.maxVideoWidth = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            this.maxVideoHeight = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            this.maxVideoFrameRate = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            this.maxVideoBitrate = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            this.maxVideoWidth = Integer.MAX_VALUE;
+            this.maxVideoHeight = Integer.MAX_VALUE;
+            this.maxVideoFrameRate = Integer.MAX_VALUE;
+            this.maxVideoBitrate = Integer.MAX_VALUE;
             this.exceedVideoConstraintsIfNecessary = true;
             this.allowVideoMixedMimeTypeAdaptiveness = false;
             this.allowVideoNonSeamlessAdaptiveness = true;
-            this.viewportWidth = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            this.viewportHeight = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            this.viewportWidth = Integer.MAX_VALUE;
+            this.viewportHeight = Integer.MAX_VALUE;
             this.viewportOrientationMayChange = true;
-            this.maxAudioChannelCount = ConnectionsManager.DEFAULT_DATACENTER_ID;
-            this.maxAudioBitrate = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            this.maxAudioChannelCount = Integer.MAX_VALUE;
+            this.maxAudioBitrate = Integer.MAX_VALUE;
             this.exceedAudioConstraintsIfNecessary = true;
             this.allowAudioMixedMimeTypeAdaptiveness = false;
             this.allowAudioMixedSampleRateAdaptiveness = false;
@@ -910,7 +909,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             arrayList.add(Integer.valueOf(i4));
         }
         if (i != Integer.MAX_VALUE && i2 != Integer.MAX_VALUE) {
-            int i5 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i5 = Integer.MAX_VALUE;
             for (int i6 = 0; i6 < trackGroup.length; i6++) {
                 Format format = trackGroup.getFormat(i6);
                 int i7 = format.width;
@@ -1014,7 +1013,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             }
             this.isWithinConstraints = z;
             String[] systemLanguageCodes = Util.getSystemLanguageCodes();
-            int i5 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i5 = Integer.MAX_VALUE;
             int i6 = 0;
             while (true) {
                 if (i6 >= systemLanguageCodes.length) {

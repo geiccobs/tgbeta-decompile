@@ -13,12 +13,12 @@ public final /* synthetic */ class q0 implements LongUnaryOperator {
         if (tVar == null) {
             return null;
         }
-        return tVar instanceof C0226p0 ? ((C0226p0) tVar).a : new q0(tVar);
+        return tVar instanceof C0231p0 ? ((C0231p0) tVar).a : new q0(tVar);
     }
 
     @Override // java.util.function.LongUnaryOperator
     public /* synthetic */ LongUnaryOperator andThen(LongUnaryOperator longUnaryOperator) {
-        return a(this.a.a(C0226p0.c(longUnaryOperator)));
+        return a(this.a.a(C0231p0.c(longUnaryOperator)));
     }
 
     @Override // java.util.function.LongUnaryOperator
@@ -28,6 +28,6 @@ public final /* synthetic */ class q0 implements LongUnaryOperator {
 
     @Override // java.util.function.LongUnaryOperator
     public /* synthetic */ LongUnaryOperator compose(LongUnaryOperator longUnaryOperator) {
-        return a(this.a.b(C0226p0.c(longUnaryOperator)));
+        return a(this.a.b(C0231p0.c(longUnaryOperator)));
     }
 }

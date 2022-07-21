@@ -9,7 +9,7 @@ import j$.util.function.Predicate;
 import j$.util.function.ToIntFunction;
 import java.util.Comparator;
 /* loaded from: classes2.dex */
-public interface Stream<T> extends AbstractC0085g {
+public interface Stream<T> extends AbstractC0090g {
     Object B(Object obj, BiFunction biFunction, j$.util.function.b bVar);
 
     U E(Function function);
@@ -20,7 +20,7 @@ public interface Stream<T> extends AbstractC0085g {
 
     boolean W(Predicate predicate);
 
-    AbstractC0075e1 X(Function function);
+    AbstractC0080e1 X(Function function);
 
     boolean a(Predicate predicate);
 
@@ -28,7 +28,7 @@ public interface Stream<T> extends AbstractC0085g {
 
     IntStream c(Function function);
 
-    @Override // j$.util.stream.AbstractC0085g, java.lang.AutoCloseable
+    @Override // j$.util.stream.AbstractC0090g, java.lang.AutoCloseable
     /* synthetic */ void close();
 
     long count();
@@ -45,7 +45,7 @@ public interface Stream<T> extends AbstractC0085g {
 
     void forEach(Consumer<? super T> consumer);
 
-    AbstractC0075e1 g0(j$.util.function.A a);
+    AbstractC0080e1 g0(j$.util.function.A a);
 
     Object i(j$.util.function.y yVar, BiConsumer biConsumer, BiConsumer biConsumer2);
 

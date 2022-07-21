@@ -35,7 +35,7 @@ import org.telegram.messenger.ForwardingMessagesParams;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$KeyboardButton;
 import org.telegram.tgnet.TLRPC$Peer;
@@ -154,7 +154,7 @@ public class ForwardingPreviewView extends FrameLayout {
         if (Build.VERSION.SDK_INT >= 21) {
             this.chatPreviewContainer.setOutlineProvider(new ViewOutlineProvider() { // from class: org.telegram.ui.Components.ForwardingPreviewView.3
                 @Override // android.view.ViewOutlineProvider
-                @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+                @TargetApi(21)
                 public void getOutline(View view, Outline outline) {
                     outline.setRoundRect(0, ForwardingPreviewView.this.currentTopOffset + 1, view.getMeasuredWidth(), view.getMeasuredHeight(), AndroidUtilities.dp(6.0f));
                 }

@@ -11,6 +11,7 @@ import com.google.android.datatransport.runtime.logging.Logging;
 import com.google.android.datatransport.runtime.scheduling.persistence.EventStore;
 import com.google.android.datatransport.runtime.time.Clock;
 import com.google.android.datatransport.runtime.util.PriorityMapping;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 /* loaded from: classes.dex */
 public class AlarmManagerScheduler implements WorkScheduler {
     private AlarmManager alarmManager;
@@ -44,7 +45,7 @@ public class AlarmManagerScheduler implements WorkScheduler {
     public void schedule(TransportContext transportContext, int i, boolean z) {
         Uri.Builder builder = new Uri.Builder();
         builder.appendQueryParameter("backendName", transportContext.getBackendName());
-        builder.appendQueryParameter("priority", String.valueOf(PriorityMapping.toInt(transportContext.getPriority())));
+        builder.appendQueryParameter(RemoteMessageConst.Notification.PRIORITY, String.valueOf(PriorityMapping.toInt(transportContext.getPriority())));
         if (transportContext.getExtras() != null) {
             builder.appendQueryParameter("extras", Base64.encodeToString(transportContext.getExtras(), 0));
         }

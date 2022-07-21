@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;

@@ -10,7 +10,6 @@ import android.opengl.EGLExt;
 import android.opengl.EGLSurface;
 import android.os.Build;
 import android.view.Surface;
-import org.telegram.messenger.R;
 import org.webrtc.EglBase;
 import org.webrtc.EglBase14;
 @TargetApi(18)
@@ -46,7 +45,7 @@ public class EglBase14Impl implements EglBase14 {
         }
 
         @Override // org.webrtc.EglBase.Context
-        @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+        @TargetApi(21)
         public long getNativeEglContext() {
             return EglBase14Impl.CURRENT_SDK_VERSION >= 21 ? this.egl14Context.getNativeHandle() : this.egl14Context.getHandle();
         }

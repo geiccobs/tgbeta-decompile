@@ -15,6 +15,7 @@ import com.google.firebase.inject.Provider;
 import com.google.firebase.installations.FirebaseInstallationsApi;
 import com.google.firebase.installations.InstallationTokenResult;
 import com.google.firebase.platforminfo.UserAgentPublisher;
+import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -79,7 +80,7 @@ public class GmsRpc {
         bundle.putString("scope", str3);
         bundle.putString("sender", str2);
         bundle.putString("subtype", str2);
-        bundle.putString("appid", str);
+        bundle.putString(HiAnalyticsConstant.HaKey.BI_KEY_APPID, str);
         bundle.putString("gmp_app_id", this.app.getOptions().getApplicationId());
         bundle.putString("gmsv", Integer.toString(this.metadata.getGmsVersionCode()));
         bundle.putString("osv", Integer.toString(Build.VERSION.SDK_INT));

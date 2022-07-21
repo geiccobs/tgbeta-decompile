@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.MessagesController;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.RecyclerAnimationScrollHelper;
 import org.telegram.ui.Components.RecyclerListView;
@@ -29,8 +28,14 @@ public class RecyclerAnimationScrollHelper {
 
     /* loaded from: classes3.dex */
     public static class AnimationCallback {
+        public void ignoreView(View view, boolean z) {
+        }
+
         public void onEndAnimation() {
             throw null;
+        }
+
+        public void onPreAnimation() {
         }
 
         public void onStartAnimation() {
@@ -168,7 +173,7 @@ public class RecyclerAnimationScrollHelper {
             }
             RecyclerAnimationScrollHelper.this.oldStableIds.clear();
             Iterator it = this.val$oldViews.iterator();
-            int i14 = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            int i14 = Integer.MAX_VALUE;
             int i15 = 0;
             while (it.hasNext()) {
                 View view3 = (View) it.next();
@@ -183,6 +188,9 @@ public class RecyclerAnimationScrollHelper {
                 if (view3.getParent() == null) {
                     RecyclerAnimationScrollHelper.this.recyclerView.addView(view3);
                     RecyclerAnimationScrollHelper.this.layoutManager.ignoreView(view3);
+                    if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
+                        RecyclerAnimationScrollHelper.this.animationCallback.ignoreView(view3, true);
+                    }
                 }
                 if (view3 instanceof ChatMessageCell) {
                     ((ChatMessageCell) view3).setAnimationRunning(true, true);
@@ -190,6 +198,9 @@ public class RecyclerAnimationScrollHelper {
             }
             if (i14 != Integer.MAX_VALUE) {
                 i9 = i14;
+            }
+            if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
+                RecyclerAnimationScrollHelper.this.animationCallback.onPreAnimation();
             }
             if (this.val$oldViews.isEmpty()) {
                 height = Math.abs(i12);
@@ -231,6 +242,7 @@ public class RecyclerAnimationScrollHelper {
                         RecyclerAnimationScrollHelper.this.layoutManager.stopIgnoringView(view4);
                         RecyclerAnimationScrollHelper.this.recyclerView.removeView(view4);
                         if (RecyclerAnimationScrollHelper.this.animationCallback != null) {
+                            RecyclerAnimationScrollHelper.this.animationCallback.ignoreView(view4, false);
                             RecyclerAnimationScrollHelper.this.animationCallback.recycleView(view4);
                         }
                     }

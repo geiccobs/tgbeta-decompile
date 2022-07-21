@@ -11,14 +11,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -720,7 +721,7 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
             final ArrayList arrayList = new ArrayList();
             for (int i = 0; i < tLRPC$TL_messages_inactiveChats.chats.size(); i++) {
                 TLRPC$Chat tLRPC$Chat = tLRPC$TL_messages_inactiveChats.chats.get(i);
-                int currentTime = (ConnectionsManager.getInstance(this.currentAccount).getCurrentTime() - tLRPC$TL_messages_inactiveChats.dates.get(i).intValue()) / 86400;
+                int currentTime = (ConnectionsManager.getInstance(this.currentAccount).getCurrentTime() - tLRPC$TL_messages_inactiveChats.dates.get(i).intValue()) / RemoteMessageConst.DEFAULT_TTL;
                 if (currentTime < 30) {
                     str = LocaleController.formatPluralString("Days", currentTime, new Object[0]);
                 } else if (currentTime < 365) {

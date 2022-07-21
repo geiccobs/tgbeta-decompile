@@ -52,13 +52,12 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.audioinfo.AudioInfo;
-import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Chat;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$DocumentAttribute;
@@ -142,7 +141,7 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
     private View[] buttons = new View[5];
     private boolean scrollToSong = true;
     private int searchOpenPosition = -1;
-    private int scrollOffsetY = ConnectionsManager.DEFAULT_DATACENTER_ID;
+    private int scrollOffsetY = Integer.MAX_VALUE;
     float rewindingProgress = -1.0f;
     private final Runnable forwardSeek = new Runnable() { // from class: org.telegram.ui.Components.AudioPlayerAlert.1
         @Override // java.lang.Runnable

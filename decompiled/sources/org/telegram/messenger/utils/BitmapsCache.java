@@ -19,7 +19,6 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public class BitmapsCache {
     private static final int N = Utilities.clamp(Runtime.getRuntime().availableProcessors() - 2, 8, 1);
@@ -216,14 +215,14 @@ public class BitmapsCache {
         return frame;
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:59:0x00cd A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:61:0x00d0 A[EXC_TOP_SPLITTER, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public int getFrame(int r10, android.graphics.Bitmap r11) {
         /*
-            Method dump skipped, instructions count: 214
+            Method dump skipped, instructions count: 217
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.utils.BitmapsCache.getFrame(int, android.graphics.Bitmap):int");
@@ -285,10 +284,7 @@ public class BitmapsCache {
 
         private static int hugeCapacity(int i) {
             if (i >= 0) {
-                if (i <= 2147483639) {
-                    return 2147483639;
-                }
-                return ConnectionsManager.DEFAULT_DATACENTER_ID;
+                return i > 2147483639 ? Integer.MAX_VALUE : 2147483639;
             }
             throw new OutOfMemoryError();
         }

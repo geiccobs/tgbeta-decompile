@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.upstream.ParsingLoadable;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.CodecSpecificDataUtil;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.opendevice.c;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -384,12 +385,12 @@ public class SsManifestParser implements ParsingLoadable.Parser<SsManifest> {
 
         @Override // com.google.android.exoplayer2.source.smoothstreaming.manifest.SsManifestParser.ElementParser
         public boolean handleChildInline(String str) {
-            return "c".equals(str);
+            return c.a.equals(str);
         }
 
         @Override // com.google.android.exoplayer2.source.smoothstreaming.manifest.SsManifestParser.ElementParser
         public void parseStartTag(XmlPullParser xmlPullParser) throws ParserException {
-            if ("c".equals(xmlPullParser.getName())) {
+            if (c.a.equals(xmlPullParser.getName())) {
                 parseStreamFragmentStartTag(xmlPullParser);
             } else {
                 parseStreamElementStartTag(xmlPullParser);

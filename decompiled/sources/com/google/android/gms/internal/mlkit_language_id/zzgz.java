@@ -1,5 +1,6 @@
 package com.google.android.gms.internal.mlkit_language_id;
 
+import com.huawei.hms.framework.common.ContainerUtils;
 import java.util.Map;
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
 /* loaded from: classes.dex */
@@ -61,7 +62,7 @@ public final class zzgz implements Comparable<zzgz>, Map.Entry<K, V> {
         String valueOf2 = String.valueOf(this.zzb);
         StringBuilder sb = new StringBuilder(valueOf.length() + 1 + valueOf2.length());
         sb.append(valueOf);
-        sb.append("=");
+        sb.append(ContainerUtils.KEY_VALUE_DELIMITER);
         sb.append(valueOf2);
         return sb.toString();
     }

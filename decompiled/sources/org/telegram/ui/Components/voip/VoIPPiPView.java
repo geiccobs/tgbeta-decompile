@@ -29,7 +29,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -498,7 +498,7 @@ public class VoIPPiPView implements VoIPService.StateListener, NotificationCente
             if (Build.VERSION.SDK_INT >= 21) {
                 setOutlineProvider(new ViewOutlineProvider(this, r2) { // from class: org.telegram.ui.Components.voip.VoIPPiPView.FloatingView.1
                     @Override // android.view.ViewOutlineProvider
-                    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+                    @TargetApi(21)
                     public void getOutline(View view, Outline outline) {
                         outline.setRoundRect(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight(), (1.0f / view.getScaleX()) * AndroidUtilities.dp(4.0f));
                     }

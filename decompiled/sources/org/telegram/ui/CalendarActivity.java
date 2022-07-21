@@ -26,6 +26,7 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import j$.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,9 +39,8 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
-import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC$Document;
@@ -328,7 +328,7 @@ public class CalendarActivity extends BaseFragment {
                     if (!(baseFragment instanceof ChatActivity)) {
                         return;
                     }
-                    ((ChatActivity) baseFragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + 86400, z);
+                    ((ChatActivity) baseFragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + RemoteMessageConst.DEFAULT_TTL, z);
                 }
             }
         }, null);
@@ -437,7 +437,7 @@ public class CalendarActivity extends BaseFragment {
                     periodDay2.date = (int) (calendar.getTimeInMillis() / 1000);
                     sparseArray2.put(i10, periodDay2);
                 }
-                i8 += 86400;
+                i8 += RemoteMessageConst.DEFAULT_TTL;
                 i = 5;
                 i2 = 2;
             }
@@ -472,7 +472,7 @@ public class CalendarActivity extends BaseFragment {
         if (this.loading || this.endReached) {
             return;
         }
-        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i = Integer.MAX_VALUE;
         for (int i2 = 0; i2 < this.listView.getChildCount(); i2++) {
             View childAt = this.listView.getChildAt(i2);
             if (childAt instanceof MonthView) {
@@ -849,7 +849,7 @@ public class CalendarActivity extends BaseFragment {
                             @Override // org.telegram.messenger.MessagesStorage.BooleanCallback
                             public void run(boolean z) {
                                 CalendarActivity.this.finishFragment();
-                                ((ChatActivity) baseFragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + 86400, z);
+                                ((ChatActivity) baseFragment).deleteHistory(CalendarActivity.this.dateSelectedStart, CalendarActivity.this.dateSelectedEnd + RemoteMessageConst.DEFAULT_TTL, z);
                             }
                         }, null);
                     }
@@ -1123,7 +1123,7 @@ public class CalendarActivity extends BaseFragment {
                     periodDay2 = sparseArray.get(i6, null);
                 }
                 int i7 = i6 + 1;
-                if (currentTimeMillis < this.startMonthTime + (i7 * 86400) || (CalendarActivity.this.minDate > 0 && CalendarActivity.this.minDate > this.startMonthTime + ((i6 + 2) * 86400))) {
+                if (currentTimeMillis < this.startMonthTime + (i7 * RemoteMessageConst.DEFAULT_TTL) || (CalendarActivity.this.minDate > 0 && CalendarActivity.this.minDate > this.startMonthTime + ((i6 + 2) * RemoteMessageConst.DEFAULT_TTL))) {
                     f = measuredWidth;
                     f2 = dp;
                     i = i5;
@@ -1299,7 +1299,7 @@ public class CalendarActivity extends BaseFragment {
         }
         int i = this.dateSelectedStart;
         int i2 = this.dateSelectedEnd;
-        int abs = (i == i2 && i == 0) ? 0 : (Math.abs(i - i2) / 86400) + 1;
+        int abs = (i == i2 && i == 0) ? 0 : (Math.abs(i - i2) / RemoteMessageConst.DEFAULT_TTL) + 1;
         boolean z = this.lastInSelectionMode;
         int i3 = this.lastDaysSelected;
         if (abs == i3 && z == this.inSelectionMode) {

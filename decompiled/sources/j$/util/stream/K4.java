@@ -2,18 +2,18 @@ package j$.util.stream;
 
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-public final /* synthetic */ class K4 implements AbstractC0125m3 {
+public final /* synthetic */ class K4 implements AbstractC0130m3 {
     public final /* synthetic */ int a = 0;
     public final /* synthetic */ Object b;
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(double d) {
         switch (this.a) {
             case 0:
-                AbstractC0135o1.f(this);
+                AbstractC0140o1.f(this);
                 throw null;
             default:
-                AbstractC0135o1.f(this);
+                AbstractC0140o1.f(this);
                 throw null;
         }
     }
@@ -28,39 +28,39 @@ public final /* synthetic */ class K4 implements AbstractC0125m3 {
         }
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void n(long j) {
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ boolean o() {
         return false;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(int i) {
         switch (this.a) {
             case 0:
-                AbstractC0135o1.d(this);
+                AbstractC0140o1.d(this);
                 throw null;
             default:
-                AbstractC0135o1.d(this);
+                AbstractC0140o1.d(this);
                 throw null;
         }
     }
 
-    @Override // j$.util.stream.AbstractC0125m3, j$.util.stream.AbstractC0119l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
         switch (this.a) {
             case 0:
-                AbstractC0135o1.e(this);
+                AbstractC0140o1.e(this);
                 throw null;
             default:
-                AbstractC0135o1.e(this);
+                AbstractC0140o1.e(this);
                 throw null;
         }
     }
@@ -72,7 +72,7 @@ public final /* synthetic */ class K4 implements AbstractC0125m3 {
                 ((Consumer) this.b).accept(obj);
                 return;
             default:
-                ((C0054a4) this.b).accept(obj);
+                ((C0059a4) this.b).accept(obj);
                 return;
         }
     }

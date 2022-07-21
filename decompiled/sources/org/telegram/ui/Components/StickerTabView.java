@@ -29,6 +29,7 @@ public class StickerTabView extends FrameLayout {
     boolean roundImage;
     public SvgHelper.SvgDrawable svgThumb;
     TextView textView;
+    private float textWidth;
     public int type;
     View visibleView;
 
@@ -43,6 +44,7 @@ public class StickerTabView extends FrameLayout {
             this.imageView = backupImageView;
             backupImageView.setLayerNum(1);
             this.imageView.setAspectFit(false);
+            this.imageView.setRoundRadius(AndroidUtilities.dp(6.0f));
             addView(this.imageView, LayoutHelper.createFrame(26, 26, 17));
             this.visibleView = this.imageView;
         } else if (i == 1) {
@@ -56,18 +58,42 @@ public class StickerTabView extends FrameLayout {
             this.imageView = backupImageView2;
             backupImageView2.setLayerNum(1);
             this.imageView.setAspectFit(true);
+            this.imageView.setRoundRadius(AndroidUtilities.dp(6.0f));
             addView(this.imageView, LayoutHelper.createFrame(26, 26, 17));
             this.visibleView = this.imageView;
         }
-        TextView textView = new TextView(context);
+        TextView textView = new TextView(this, context) { // from class: org.telegram.ui.Components.StickerTabView.1
+            @Override // android.widget.TextView
+            public void setText(CharSequence charSequence, TextView.BufferType bufferType) {
+                super.setText(charSequence, bufferType);
+            }
+        };
         this.textView = textView;
-        textView.setLines(1);
+        textView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() { // from class: org.telegram.ui.Components.StickerTabView$$ExternalSyntheticLambda0
+            @Override // android.view.View.OnLayoutChangeListener
+            public final void onLayoutChange(View view, int i3, int i4, int i5, int i6, int i7, int i8, int i9, int i10) {
+                StickerTabView.this.lambda$new$0(view, i3, i4, i5, i6, i7, i8, i9, i10);
+            }
+        });
+        this.textView.setLines(1);
         this.textView.setEllipsize(TextUtils.TruncateAt.END);
         this.textView.setTextSize(1, 11.0f);
         this.textView.setGravity(1);
         this.textView.setTextColor(Theme.getColor("windowBackgroundWhiteBlackText"));
         addView(this.textView, LayoutHelper.createFrame(-1, -2.0f, 81, 8.0f, 0.0f, 8.0f, 10.0f));
         this.textView.setVisibility(8);
+    }
+
+    public /* synthetic */ void lambda$new$0(View view, int i, int i2, int i3, int i4, int i5, int i6, int i7, int i8) {
+        TextView textView = this.textView;
+        if (textView == null || textView.getLayout() == null) {
+            return;
+        }
+        this.textWidth = this.textView.getLayout().getLineWidth(0);
+    }
+
+    public float getTextWidth() {
+        return this.textWidth;
     }
 
     public void setExpanded(boolean z) {
@@ -99,18 +125,17 @@ public class StickerTabView extends FrameLayout {
         if (this.expanded) {
             float f2 = i == 1 ? 24.0f : 26.0f;
             float f3 = i == 1 ? 38.0f : 56.0f;
-            float f4 = 86.0f - f3;
-            float f5 = 1.0f - f;
-            this.visibleView.setTranslationY((((AndroidUtilities.dp(36.0f - f2) / 2.0f) - (AndroidUtilities.dp(f4) / 2.0f)) * f5) - (AndroidUtilities.dp(8.0f) * f));
-            this.visibleView.setTranslationX(((AndroidUtilities.dp(38.0f - f2) / 2.0f) - (AndroidUtilities.dp(f4) / 2.0f)) * f5);
+            float f4 = 1.0f - f;
+            this.visibleView.setTranslationY((((AndroidUtilities.dp(36.0f - f2) / 2.0f) - (AndroidUtilities.dp(86.0f - f3) / 2.0f)) * f4) - (AndroidUtilities.dp(8.0f) * f));
+            this.visibleView.setTranslationX(((AndroidUtilities.dp(33.0f - f2) / 2.0f) - (AndroidUtilities.dp(ScrollSlidingTabStrip.EXPANDED_WIDTH - f3) / 2.0f)) * f4);
             this.textView.setAlpha(Math.max(0.0f, (f - 0.5f) / 0.5f));
-            this.textView.setTranslationY((-AndroidUtilities.dp(40.0f)) * f5);
-            this.textView.setTranslationX((-AndroidUtilities.dp(12.0f)) * f5);
+            this.textView.setTranslationY((-AndroidUtilities.dp(40.0f)) * f4);
+            this.textView.setTranslationX((-AndroidUtilities.dp(12.0f)) * f4);
             this.visibleView.setPivotX(0.0f);
             this.visibleView.setPivotY(0.0f);
-            float f6 = ((f2 / f3) * f5) + f;
-            this.visibleView.setScaleX(f6);
-            this.visibleView.setScaleY(f6);
+            float f5 = ((f2 / f3) * f4) + f;
+            this.visibleView.setScaleX(f5);
+            this.visibleView.setScaleY(f5);
             return;
         }
         this.visibleView.setTranslationX(0.0f);
@@ -136,7 +161,7 @@ public class StickerTabView extends FrameLayout {
             }
             ValueAnimator ofFloat = ValueAnimator.ofFloat(this.dragOffset, 0.0f);
             this.dragOffsetAnimator = ofFloat;
-            ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.StickerTabView.1
+            ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.StickerTabView.2
                 @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                 public void onAnimationUpdate(ValueAnimator valueAnimator2) {
                     StickerTabView.this.dragOffset = ((Float) valueAnimator2.getAnimatedValue()).floatValue();
@@ -144,7 +169,7 @@ public class StickerTabView extends FrameLayout {
                     viewGroup.invalidate();
                 }
             });
-            this.dragOffsetAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.StickerTabView.2
+            this.dragOffsetAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.StickerTabView.3
                 @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
                 public void onAnimationEnd(Animator animator) {
                     StickerTabView stickerTabView = StickerTabView.this;

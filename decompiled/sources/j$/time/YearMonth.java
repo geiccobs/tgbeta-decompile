@@ -1,5 +1,6 @@
 package j$.time;
 
+import com.huawei.hms.android.HwBuildEx;
 import j$.time.format.p;
 import j$.time.format.s;
 import java.io.Serializable;
@@ -68,7 +69,7 @@ public final class YearMonth implements Comparable<YearMonth>, Serializable {
                 sb.append(i2 - 10000);
                 i = 1;
             } else {
-                sb.append(i2 + 10000);
+                sb.append(i2 + HwBuildEx.VersionCodes.CUR_DEVELOPMENT);
                 i = 0;
             }
             sb.deleteCharAt(i);

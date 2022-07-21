@@ -14,6 +14,8 @@ import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
+import com.huawei.hms.push.constant.RemoteMessageConst;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +42,7 @@ public final class ExtendedDefaultDataSource implements DataSource {
     private final List<TransferListener> transferListeners;
 
     public ExtendedDefaultDataSource(Context context, String str, boolean z) {
-        this(context, str, 8000, 8000, z);
+        this(context, str, JosStatusCodes.RTN_CODE_COMMON_ERROR, JosStatusCodes.RTN_CODE_COMMON_ERROR, z);
     }
 
     public ExtendedDefaultDataSource(Context context, String str, int i, int i2, boolean z) {
@@ -55,7 +57,7 @@ public final class ExtendedDefaultDataSource implements DataSource {
 
     @Deprecated
     public ExtendedDefaultDataSource(Context context, TransferListener transferListener, String str, boolean z) {
-        this(context, transferListener, str, 8000, 8000, z);
+        this(context, transferListener, str, JosStatusCodes.RTN_CODE_COMMON_ERROR, JosStatusCodes.RTN_CODE_COMMON_ERROR, z);
     }
 
     @Deprecated
@@ -101,11 +103,11 @@ public final class ExtendedDefaultDataSource implements DataSource {
             this.dataSource = getStreamDataSource();
         } else if (SCHEME_ASSET.equals(scheme)) {
             this.dataSource = getAssetDataSource();
-        } else if (SCHEME_CONTENT.equals(scheme)) {
+        } else if ("content".equals(scheme)) {
             this.dataSource = getContentDataSource();
         } else if (SCHEME_RTMP.equals(scheme)) {
             this.dataSource = getRtmpDataSource();
-        } else if ("data".equals(scheme)) {
+        } else if (RemoteMessageConst.DATA.equals(scheme)) {
             this.dataSource = getDataSchemeDataSource();
         } else if (SCHEME_RAW.equals(scheme)) {
             this.dataSource = getRawResourceDataSource();

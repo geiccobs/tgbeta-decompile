@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import com.huawei.hms.adapter.internal.AvailableCode;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.firebase:firebase-messaging@@22.0.0 */
@@ -154,7 +155,7 @@ public final class CommonNotificationBuilder {
         return Bundle.EMPTY;
     }
 
-    @TargetApi(26)
+    @TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
     public static String getOrCreateChannel(Context context, String str, Bundle bundle) {
         String str2;
         if (Build.VERSION.SDK_INT < 26) {
@@ -265,7 +266,7 @@ public final class CommonNotificationBuilder {
         return sb.toString();
     }
 
-    @TargetApi(26)
+    @TargetApi(AvailableCode.ERROR_NO_ACTIVITY)
     private static boolean isValidIcon(Resources resources, int i) {
         if (Build.VERSION.SDK_INT != 26) {
             return true;

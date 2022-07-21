@@ -24,6 +24,8 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.AvcConfig;
 import com.google.android.exoplayer2.video.ColorInfo;
 import com.google.android.exoplayer2.video.HevcConfig;
+import com.huawei.hms.adapter.internal.AvailableCode;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -1255,7 +1257,7 @@ public class MatroskaExtractor implements Extractor {
             this.minMasteringLuminance = -1.0f;
             this.channelCount = 1;
             this.audioBitDepth = -1;
-            this.sampleRate = 8000;
+            this.sampleRate = JosStatusCodes.RTN_CODE_COMMON_ERROR;
             this.codecDelayNs = 0L;
             this.seekPreRollNs = 0L;
             this.flagDefault = true;
@@ -1607,7 +1609,7 @@ public class MatroskaExtractor implements Extractor {
                     i2 = -1;
                     break;
                 case 15:
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                     str2 = "audio/vnd.dts";
                     str5 = str2;
                     list = null;
@@ -1635,7 +1637,7 @@ public class MatroskaExtractor implements Extractor {
                     i3 = -1;
                     i2 = -1;
                     break;
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                     str5 = "application/pgs";
                     list = null;
                     i3 = -1;
@@ -1677,34 +1679,34 @@ public class MatroskaExtractor implements Extractor {
                     i3 = -1;
                     i2 = -1;
                     break;
-                case 25:
+                case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
                     str5 = "application/x-subrip";
                     list = null;
                     i3 = -1;
                     i2 = -1;
                     break;
-                case 26:
+                case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
                     str2 = "video/mpeg2";
                     str5 = str2;
                     list = null;
                     i3 = -1;
                     i2 = -1;
                     break;
-                case 27:
+                case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
                     str2 = "audio/eac3";
                     str5 = str2;
                     list = null;
                     i3 = -1;
                     i2 = -1;
                     break;
-                case 28:
+                case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
                     list = Collections.singletonList(this.codecPrivate);
                     str = "audio/flac";
                     str5 = str;
                     i3 = -1;
                     i2 = -1;
                     break;
-                case 29:
+                case AvailableCode.HMS_IS_SPOOF /* 29 */:
                     list = new ArrayList<>(3);
                     list.add(this.codecPrivate);
                     ByteBuffer allocate = ByteBuffer.allocate(8);

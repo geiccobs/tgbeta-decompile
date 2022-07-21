@@ -59,7 +59,7 @@ public class D1 implements A1 {
 
     @Override // j$.util.stream.A1
     public /* synthetic */ A1 r(long j, long j2, j$.util.function.m mVar) {
-        return AbstractC0135o1.q(this, j, j2, mVar);
+        return AbstractC0140o1.q(this, j, j2, mVar);
     }
 
     @Override // j$.util.stream.A1

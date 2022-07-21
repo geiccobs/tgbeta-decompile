@@ -9,17 +9,13 @@ public class TLRPC$TL_userFull extends TLRPC$UserFull {
     public void readParams(AbstractSerializedData abstractSerializedData, boolean z) {
         int readInt32 = abstractSerializedData.readInt32(z);
         this.flags = readInt32;
-        boolean z2 = false;
         this.blocked = (readInt32 & 1) != 0;
         this.phone_calls_available = (readInt32 & 16) != 0;
         this.phone_calls_private = (readInt32 & 32) != 0;
         this.can_pin_message = (readInt32 & ConnectionsManager.RequestFlagNeedQuickAck) != 0;
         this.has_scheduled = (readInt32 & 4096) != 0;
         this.video_calls_available = (readInt32 & 8192) != 0;
-        if ((readInt32 & 1048576) != 0) {
-            z2 = true;
-        }
-        this.voice_messages_forbidden = z2;
+        this.voice_messages_forbidden = (readInt32 & 1048576) != 0;
         this.id = abstractSerializedData.readInt64(z);
         if ((this.flags & 2) != 0) {
             this.about = abstractSerializedData.readString(z);
@@ -53,6 +49,23 @@ public class TLRPC$TL_userFull extends TLRPC$UserFull {
         }
         if ((this.flags & 262144) != 0) {
             this.bot_broadcast_admin_rights = TLRPC$TL_chatAdminRights.TLdeserialize(abstractSerializedData, abstractSerializedData.readInt32(z), z);
+        }
+        if ((this.flags & 524288) != 0) {
+            int readInt322 = abstractSerializedData.readInt32(z);
+            if (readInt322 != 481674261) {
+                if (z) {
+                    throw new RuntimeException(String.format("wrong Vector magic, got %x", Integer.valueOf(readInt322)));
+                }
+                return;
+            }
+            int readInt323 = abstractSerializedData.readInt32(z);
+            for (int i = 0; i < readInt323; i++) {
+                TLRPC$TL_premiumGiftOption TLdeserialize = TLRPC$TL_premiumGiftOption.TLdeserialize(abstractSerializedData, abstractSerializedData.readInt32(z), z);
+                if (TLdeserialize == null) {
+                    return;
+                }
+                this.premium_gifts.add(TLdeserialize);
+            }
         }
     }
 
@@ -107,6 +120,14 @@ public class TLRPC$TL_userFull extends TLRPC$UserFull {
         }
         if ((this.flags & 262144) != 0) {
             this.bot_broadcast_admin_rights.serializeToStream(abstractSerializedData);
+        }
+        if ((this.flags & 524288) != 0) {
+            abstractSerializedData.writeInt32(481674261);
+            int size = this.premium_gifts.size();
+            abstractSerializedData.writeInt32(size);
+            for (int i8 = 0; i8 < size; i8++) {
+                this.premium_gifts.get(i8).serializeToStream(abstractSerializedData);
+            }
         }
     }
 }

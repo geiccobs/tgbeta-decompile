@@ -21,6 +21,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.app.INotificationSideChannel;
 import android.util.Log;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public final class NotificationManagerCompat {
 
     private NotificationManagerCompat(Context context) {
         this.mContext = context;
-        this.mNotificationManager = (NotificationManager) context.getSystemService("notification");
+        this.mNotificationManager = (NotificationManager) context.getSystemService(RemoteMessageConst.NOTIFICATION);
     }
 
     public void cancel(int id) {

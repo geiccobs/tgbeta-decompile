@@ -9,6 +9,18 @@ public class TLRPC$TL_premiumGiftOption extends TLObject {
     public int months;
     public String store_product;
 
+    public static TLRPC$TL_premiumGiftOption TLdeserialize(AbstractSerializedData abstractSerializedData, int i, boolean z) {
+        if (constructor != i) {
+            if (z) {
+                throw new RuntimeException(String.format("can't parse magic %x in TL_premiumGiftOption", Integer.valueOf(i)));
+            }
+            return null;
+        }
+        TLRPC$TL_premiumGiftOption tLRPC$TL_premiumGiftOption = new TLRPC$TL_premiumGiftOption();
+        tLRPC$TL_premiumGiftOption.readParams(abstractSerializedData, z);
+        return tLRPC$TL_premiumGiftOption;
+    }
+
     @Override // org.telegram.tgnet.TLObject
     public void readParams(AbstractSerializedData abstractSerializedData, boolean z) {
         this.flags = abstractSerializedData.readInt32(z);

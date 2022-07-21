@@ -6,6 +6,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import com.microsoft.appcenter.distribute.PermissionUtils;
 import com.microsoft.appcenter.distribute.R$string;
 import com.microsoft.appcenter.distribute.ReleaseDetails;
@@ -37,7 +38,7 @@ public class HttpConnectionReleaseDownloader extends AbstractReleaseDownloader {
     }
 
     private NotificationManager getNotificationManager() {
-        return (NotificationManager) this.mContext.getSystemService("notification");
+        return (NotificationManager) this.mContext.getSystemService(RemoteMessageConst.NOTIFICATION);
     }
 
     public synchronized String getDownloadedReleaseFilePath() {

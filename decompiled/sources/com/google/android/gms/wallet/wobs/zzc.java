@@ -89,7 +89,7 @@ public final class zzc implements Parcelable.Creator<CommonWalletObject> {
                 case 18:
                     newArrayList4 = SafeParcelReader.createTypedList(parcel, readHeader, UriData.CREATOR);
                     break;
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                     newArrayList5 = SafeParcelReader.createTypedList(parcel, readHeader, TextModuleData.CREATOR);
                     break;
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:

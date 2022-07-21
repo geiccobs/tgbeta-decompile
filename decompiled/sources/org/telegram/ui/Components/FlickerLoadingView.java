@@ -686,9 +686,9 @@ public class FlickerLoadingView extends View {
                 return AndroidUtilities.dp(107.0f);
             case 16:
                 return AndroidUtilities.dp(48.0f);
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
                 return AndroidUtilities.dp(58.0f);
-            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+            case 21:
                 return AndroidUtilities.dp(58.0f);
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 return AndroidUtilities.dp(60.0f);

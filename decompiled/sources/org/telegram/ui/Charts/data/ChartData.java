@@ -13,13 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.SegmentTree;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes3.dex */
 public class ChartData {
     public String[] daysLookup;
     public ArrayList<Line> lines = new ArrayList<>();
     public int maxValue = 0;
-    public int minValue = ConnectionsManager.DEFAULT_DATACENTER_ID;
+    public int minValue = Integer.MAX_VALUE;
     public float oneDayPercentage = 0.0f;
     protected long timeStep;
     public long[] x;
@@ -228,7 +227,7 @@ public class ChartData {
         public SegmentTree segmentTree;
         public int[] y;
         public int maxValue = 0;
-        public int minValue = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        public int minValue = Integer.MAX_VALUE;
         public int color = -16777216;
         public int colorDark = -1;
 

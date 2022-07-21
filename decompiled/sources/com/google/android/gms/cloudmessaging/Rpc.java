@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
+import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
@@ -92,7 +93,7 @@ public class Rpc {
                     if (Log.isLoggable("Rpc", 3)) {
                         Log.d("Rpc", stringExtra2.length() != 0 ? "Received InstanceID error ".concat(stringExtra2) : new String("Received InstanceID error "));
                     }
-                    if (stringExtra2.startsWith("|")) {
+                    if (stringExtra2.startsWith(HiAnalyticsConstant.REPORT_VAL_SEPARATOR)) {
                         String[] split = stringExtra2.split("\\|");
                         if (split.length <= 2 || !"ID".equals(split[1])) {
                             Log.w("Rpc", stringExtra2.length() != 0 ? "Unexpected structured response ".concat(stringExtra2) : new String("Unexpected structured response "));
@@ -218,7 +219,7 @@ public class Rpc {
         StringBuilder sb = new StringBuilder(String.valueOf(zza2).length() + 5);
         sb.append("|ID|");
         sb.append(zza2);
-        sb.append("|");
+        sb.append(HiAnalyticsConstant.REPORT_VAL_SEPARATOR);
         intent.putExtra("kid", sb.toString());
         if (Log.isLoggable("Rpc", 3)) {
             String valueOf = String.valueOf(intent.getExtras());

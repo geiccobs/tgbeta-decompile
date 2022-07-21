@@ -208,18 +208,21 @@ public class SvgHelper {
                     imageReceiver.getParentPosition(parentPosition);
                     i = parentPosition[0];
                 }
-                this.placeholderMatrix[z ? 1 : 0].reset();
-                if (z != 0) {
-                    this.placeholderMatrix[z].postTranslate(((-i) + totalTranslationBackground) - f, 0.0f);
-                } else {
-                    this.placeholderMatrix[z].postTranslate(((-i) + totalTranslation) - f, 0.0f);
-                }
-                float f9 = 1.0f / scale;
-                this.placeholderMatrix[z].postScale(f9, f9);
-                this.placeholderGradient[z].setLocalMatrix(this.placeholderMatrix[z]);
-                ImageReceiver imageReceiver2 = this.parentImageReceiver;
-                if (imageReceiver2 != null && z == 0) {
-                    imageReceiver2.invalidate();
+                Matrix[] matrixArr = this.placeholderMatrix;
+                if (matrixArr[z ? 1 : 0] != null) {
+                    matrixArr[z].reset();
+                    if (z != 0) {
+                        this.placeholderMatrix[z].postTranslate(((-i) + totalTranslationBackground) - f, 0.0f);
+                    } else {
+                        this.placeholderMatrix[z].postTranslate(((-i) + totalTranslation) - f, 0.0f);
+                    }
+                    float f9 = 1.0f / scale;
+                    this.placeholderMatrix[z].postScale(f9, f9);
+                    this.placeholderGradient[z].setLocalMatrix(this.placeholderMatrix[z]);
+                    ImageReceiver imageReceiver2 = this.parentImageReceiver;
+                    if (imageReceiver2 != null && z == 0) {
+                        imageReceiver2.invalidate();
+                    }
                 }
             }
             canvas.save();

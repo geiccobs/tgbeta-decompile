@@ -1,15 +1,20 @@
 package org.telegram.ui.Components;
 
 import android.content.Context;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
+import android.text.style.ClickableSpan;
+import android.view.View;
 import android.widget.FrameLayout;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$Document;
 import org.telegram.tgnet.TLRPC$User;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.Bulletin;
+import org.telegram.ui.PremiumPreviewFragment;
 /* loaded from: classes3.dex */
 public final class BulletinFactory {
     private final FrameLayout containerLayout;
@@ -191,6 +196,32 @@ public final class BulletinFactory {
         return create(lottieLayout, 1500);
     }
 
+    public Bulletin createRestrictVoiceMessagesPremiumBulletin() {
+        Bulletin.LottieLayout lottieLayout = new Bulletin.LottieLayout(getContext(), null);
+        lottieLayout.setAnimation(R.raw.voip_muted, new String[0]);
+        String string = LocaleController.getString((int) R.string.PrivacyVoiceMessagesPremiumOnly);
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(string);
+        int indexOf = string.indexOf(42);
+        int lastIndexOf = string.lastIndexOf(42);
+        spannableStringBuilder.replace(indexOf, lastIndexOf + 1, (CharSequence) string.substring(indexOf + 1, lastIndexOf));
+        spannableStringBuilder.setSpan(new ClickableSpan() { // from class: org.telegram.ui.Components.BulletinFactory.1
+            @Override // android.text.style.ClickableSpan
+            public void onClick(View view) {
+                BulletinFactory.this.fragment.presentFragment(new PremiumPreviewFragment("settings"));
+            }
+
+            @Override // android.text.style.ClickableSpan, android.text.style.CharacterStyle
+            public void updateDrawState(TextPaint textPaint) {
+                super.updateDrawState(textPaint);
+                textPaint.setUnderlineText(false);
+            }
+        }, indexOf - 1, lastIndexOf - 1, 33);
+        lottieLayout.textView.setText(spannableStringBuilder);
+        lottieLayout.textView.setSingleLine(false);
+        lottieLayout.textView.setMaxLines(2);
+        return create(lottieLayout, 2750);
+    }
+
     public Bulletin createErrorBulletinSubtitle(CharSequence charSequence, CharSequence charSequence2, Theme.ResourcesProvider resourcesProvider) {
         Bulletin.TwoLineLottieLayout twoLineLottieLayout = new Bulletin.TwoLineLottieLayout(getContext(), resourcesProvider);
         twoLineLottieLayout.setAnimation(R.raw.chats_infotip, new String[0]);
@@ -276,7 +307,7 @@ public final class BulletinFactory {
             r1 = 5
             r2 = 4
             r3 = 3
-            r4 = 2131627088(0x7f0e0c50, float:1.888143E38)
+            r4 = 2131627098(0x7f0e0c5a, float:1.888145E38)
             java.lang.String r5 = "NotificationsMutedForHint"
             r6 = 2
             r7 = 0
@@ -298,14 +329,14 @@ public final class BulletinFactory {
             r10.<init>()
             throw r10
         L36:
-            r11 = 2131627113(0x7f0e0c69, float:1.8881481E38)
+            r11 = 2131627123(0x7f0e0c73, float:1.8881502E38)
             java.lang.String r12 = "NotificationsUnmutedHint"
             java.lang.String r11 = org.telegram.messenger.LocaleController.getString(r12, r11)
             r12 = 0
             r13 = 0
             goto L7e
         L42:
-            r11 = 2131627089(0x7f0e0c51, float:1.8881433E38)
+            r11 = 2131627099(0x7f0e0c5b, float:1.8881453E38)
             java.lang.String r12 = "NotificationsMutedHint"
             java.lang.String r11 = org.telegram.messenger.LocaleController.getString(r12, r11)
             goto L7c
@@ -337,13 +368,13 @@ public final class BulletinFactory {
             r13 = 1
         L7e:
             if (r12 == 0) goto L89
-            r12 = 2131558489(0x7f0d0059, float:1.8742295E38)
+            r12 = 2131558498(0x7f0d0062, float:1.8742314E38)
             java.lang.String[] r13 = new java.lang.String[r7]
             r0.setAnimation(r12, r13)
             goto Lc0
         L89:
             if (r13 == 0) goto La8
-            r12 = 2131558465(0x7f0d0041, float:1.8742247E38)
+            r12 = 2131558466(0x7f0d0042, float:1.8742249E38)
             java.lang.String[] r13 = new java.lang.String[r1]
             java.lang.String r1 = "Body Main"
             r13[r7] = r1
@@ -358,7 +389,7 @@ public final class BulletinFactory {
             r0.setAnimation(r12, r13)
             goto Lc0
         La8:
-            r12 = 2131558471(0x7f0d0047, float:1.8742259E38)
+            r12 = 2131558472(0x7f0d0048, float:1.874226E38)
             java.lang.String[] r13 = new java.lang.String[r2]
             java.lang.String r1 = "BODY"
             r13[r7] = r1
@@ -452,11 +483,11 @@ public final class BulletinFactory {
             long r2 = r6.clientUserId
             int r6 = (r7 > r2 ? 1 : (r7 == r2 ? 0 : -1))
             if (r6 != 0) goto L34
-            r4 = 2131626281(0x7f0e0929, float:1.8879794E38)
+            r4 = 2131626291(0x7f0e0933, float:1.8879814E38)
             java.lang.String r6 = "InvLinkToSavedMessages"
             java.lang.String r4 = org.telegram.messenger.LocaleController.getString(r6, r4)
             android.text.SpannableStringBuilder r4 = org.telegram.messenger.AndroidUtilities.replaceTags(r4)
-            r6 = 2131558533(0x7f0d0085, float:1.8742384E38)
+            r6 = 2131558542(0x7f0d008e, float:1.8742403E38)
             java.lang.String[] r7 = new java.lang.String[r1]
             r9.setAnimation(r6, r0, r0, r7)
             r6 = -1
@@ -469,7 +500,7 @@ public final class BulletinFactory {
             long r7 = -r7
             java.lang.Long r7 = java.lang.Long.valueOf(r7)
             org.telegram.tgnet.TLRPC$Chat r6 = r6.getChat(r7)
-            r7 = 2131626280(0x7f0e0928, float:1.8879792E38)
+            r7 = 2131626290(0x7f0e0932, float:1.8879812E38)
             java.lang.Object[] r8 = new java.lang.Object[r11]
             java.lang.String r6 = r6.title
             r8[r1] = r6
@@ -482,7 +513,7 @@ public final class BulletinFactory {
             org.telegram.messenger.MessagesController r6 = org.telegram.messenger.MessagesController.getInstance(r6)
             java.lang.Long r7 = java.lang.Long.valueOf(r7)
             org.telegram.tgnet.TLRPC$User r6 = r6.getUser(r7)
-            r7 = 2131626282(0x7f0e092a, float:1.8879796E38)
+            r7 = 2131626292(0x7f0e0934, float:1.8879816E38)
             java.lang.Object[] r8 = new java.lang.Object[r11]
             java.lang.String r6 = org.telegram.messenger.UserObject.getFirstName(r6)
             r8[r1] = r6
@@ -494,7 +525,7 @@ public final class BulletinFactory {
             r9.setAnimation(r10, r0, r0, r7)
             goto La4
         L86:
-            r7 = 2131626279(0x7f0e0927, float:1.887979E38)
+            r7 = 2131626289(0x7f0e0931, float:1.887981E38)
             java.lang.Object[] r8 = new java.lang.Object[r11]
             java.lang.Object[] r11 = new java.lang.Object[r1]
             java.lang.String r2 = "Chats"

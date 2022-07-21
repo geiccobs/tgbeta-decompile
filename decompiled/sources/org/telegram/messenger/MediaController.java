@@ -41,6 +41,7 @@ import android.widget.FrameLayout;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.gms.internal.mlkit_language_id.zzdp$$ExternalSyntheticBackport0;
+import com.huawei.hms.push.constant.RemoteMessageConst;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -236,7 +237,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
     private HashMap<Integer, MessageObject> playlistMap = new HashMap<>();
     private ArrayList<MessageObject> shuffledPlaylist = new ArrayList<>();
     private boolean[] playlistEndReached = {false, false};
-    private int[] playlistMaxId = {ConnectionsManager.DEFAULT_DATACENTER_ID, ConnectionsManager.DEFAULT_DATACENTER_ID};
+    private int[] playlistMaxId = {Integer.MAX_VALUE, Integer.MAX_VALUE};
     private Runnable setLoadingRunnable = new Runnable() { // from class: org.telegram.messenger.MediaController.1
         @Override // java.lang.Runnable
         public void run() {
@@ -315,9 +316,9 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             return true;
         }
         switch (i) {
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+            case 21:
                 return true;
             default:
                 return false;
@@ -2456,7 +2457,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         if (!arrayList.isEmpty() && DialogObject.isEncryptedDialog(arrayList.get(0).getDialogId())) {
             z2 = true;
         }
-        int i = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        int i = Integer.MAX_VALUE;
         int i2 = Integer.MIN_VALUE;
         for (int size = arrayList.size() - 1; size >= 0; size--) {
             MessageObject messageObject2 = arrayList.get(size);
@@ -4366,7 +4367,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             this.currentAccount.getNotificationCenter().addObserver(this, NotificationCenter.fileLoadFailed);
             AlertDialog alertDialog = new AlertDialog(context, 2);
             this.progressDialog = alertDialog;
-            alertDialog.setMessage(LocaleController.getString("Loading", R.string.Loading));
+            alertDialog.setMessage(LocaleController.getString("Loading", org.telegram.messenger.beta.R.string.Loading));
             this.progressDialog.setCanceledOnTouchOutside(false);
             this.progressDialog.setCancelable(true);
             this.progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() { // from class: org.telegram.messenger.MediaController$MediaLoader$$ExternalSyntheticLambda0
@@ -4670,7 +4671,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             r5 = 2
             r4.<init>(r14, r5)     // Catch: java.lang.Exception -> L67
             java.lang.String r1 = "Loading"
-            r5 = 2131626510(0x7f0e0a0e, float:1.8880258E38)
+            r5 = 2131626520(0x7f0e0a18, float:1.8880279E38)
             java.lang.String r1 = org.telegram.messenger.LocaleController.getString(r1, r5)     // Catch: java.lang.Exception -> L67
             r4.setMessage(r1)     // Catch: java.lang.Exception -> L67
             r4.setCanceledOnTouchOutside(r2)     // Catch: java.lang.Exception -> L67
@@ -4934,7 +4935,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         }
         String str = null;
         try {
-            if (uri.getScheme().equals("content")) {
+            if (uri.getScheme().equals(RemoteMessageConst.Notification.CONTENT)) {
                 try {
                     Cursor query = ApplicationLoader.applicationContext.getContentResolver().query(uri, new String[]{"_display_name"}, null, null, null);
                     if (query.moveToFirst()) {

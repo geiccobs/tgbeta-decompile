@@ -6,7 +6,6 @@ import android.os.SystemClock;
 import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import org.telegram.tgnet.ConnectionsManager;
 /* compiled from: com.google.android.gms:play-services-location@@18.0.0 */
 /* loaded from: classes.dex */
 public final class zzs extends AbstractSafeParcelable {
@@ -18,7 +17,7 @@ public final class zzs extends AbstractSafeParcelable {
     int zze;
 
     public zzs() {
-        this(true, 50L, 0.0f, Long.MAX_VALUE, ConnectionsManager.DEFAULT_DATACENTER_ID);
+        this(true, 50L, 0.0f, Long.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     public final boolean equals(Object obj) {

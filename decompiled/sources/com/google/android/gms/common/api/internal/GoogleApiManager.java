@@ -47,7 +47,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.concurrent.GuardedBy;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
-import org.telegram.messenger.R;
 /* compiled from: com.google.android.gms:play-services-base@@17.5.0 */
 /* loaded from: classes.dex */
 public class GoogleApiManager implements Handler.Callback {
@@ -949,7 +948,7 @@ public class GoogleApiManager implements Handler.Callback {
                     }
                 }
                 break;
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
                 this.zaf = false;
                 break;
             default:

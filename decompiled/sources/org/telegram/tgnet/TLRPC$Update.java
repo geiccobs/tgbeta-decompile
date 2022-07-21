@@ -321,6 +321,16 @@ public abstract class TLRPC$Update extends TLObject {
             case -99664734:
                 tLRPC$Update = new TLRPC$TL_updatePinnedDialogs();
                 break;
+            case -78886548:
+                tLRPC$Update = new TLRPC$Update() { // from class: org.telegram.tgnet.TLRPC$TL_updateReadFeaturedEmojiStickers
+                    public static int constructor = -78886548;
+
+                    @Override // org.telegram.tgnet.TLObject
+                    public void serializeToStream(AbstractSerializedData abstractSerializedData2) {
+                        abstractSerializedData2.writeInt32(constructor);
+                    }
+                };
+                break;
             case 8703322:
                 tLRPC$Update = new TLRPC$TL_updateTranscribedAudio();
                 break;

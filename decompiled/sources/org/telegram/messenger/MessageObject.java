@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.util.Base64;
 import androidx.collection.LongSparseArray;
+import com.huawei.hms.framework.common.ContainerUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.StringReader;
@@ -58,6 +59,7 @@ import org.telegram.tgnet.TLRPC$Peer;
 import org.telegram.tgnet.TLRPC$Photo;
 import org.telegram.tgnet.TLRPC$PhotoSize;
 import org.telegram.tgnet.TLRPC$PollResults;
+import org.telegram.tgnet.TLRPC$StickerSet;
 import org.telegram.tgnet.TLRPC$TL_channelAdminLogEvent;
 import org.telegram.tgnet.TLRPC$TL_chatAdminRights;
 import org.telegram.tgnet.TLRPC$TL_chatBannedRights;
@@ -114,6 +116,7 @@ import org.telegram.tgnet.TLRPC$TL_messageReactions;
 import org.telegram.tgnet.TLRPC$TL_messageReplyHeader;
 import org.telegram.tgnet.TLRPC$TL_messageService;
 import org.telegram.tgnet.TLRPC$TL_message_secret;
+import org.telegram.tgnet.TLRPC$TL_messages_stickerSet;
 import org.telegram.tgnet.TLRPC$TL_pageBlockCollage;
 import org.telegram.tgnet.TLRPC$TL_pageBlockPhoto;
 import org.telegram.tgnet.TLRPC$TL_pageBlockSlideshow;
@@ -404,7 +407,7 @@ public class MessageObject {
                                 readLine = str2 + readLine;
                                 str2 = null;
                             }
-                            if (readLine.contains("=QUOTED-PRINTABLE") && readLine.endsWith("=")) {
+                            if (readLine.contains("=QUOTED-PRINTABLE") && readLine.endsWith(ContainerUtils.KEY_VALUE_DELIMITER)) {
                                 str2 = readLine.substring(0, readLine.length() - 1);
                             } else {
                                 int indexOf = readLine.indexOf(":");
@@ -418,7 +421,7 @@ public class MessageObject {
                                         String str3 = null;
                                         String str4 = null;
                                         while (i2 < length) {
-                                            String[] split2 = split[i2].split("=");
+                                            String[] split2 = split[i2].split(ContainerUtils.KEY_VALUE_DELIMITER);
                                             if (split2.length == i) {
                                                 if (split2[0].equals("CHARSET")) {
                                                     str4 = split2[1];
@@ -590,7 +593,7 @@ public class MessageObject {
         */
         public void calculate() {
             /*
-                Method dump skipped, instructions count: 2079
+                Method dump skipped, instructions count: 2080
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.GroupedMessages.calculate():void");
@@ -855,40 +858,38 @@ public class MessageObject {
     private void checkEmojiOnly(int[] iArr) {
         TextPaint textPaint;
         int i;
-        if (iArr != null) {
-            if (iArr[0] < 1 || iArr[0] > 3) {
-                return;
+        if (iArr == null || iArr[0] < 1 || iArr[0] > 3) {
+            return;
+        }
+        int i2 = iArr[0];
+        if (i2 == 1) {
+            textPaint = Theme.chat_msgTextPaintOneEmoji;
+            i = AndroidUtilities.dp(32.0f);
+            this.emojiOnlyCount = 1;
+        } else if (i2 == 2) {
+            textPaint = Theme.chat_msgTextPaintTwoEmoji;
+            int dp = AndroidUtilities.dp(28.0f);
+            this.emojiOnlyCount = 2;
+            i = dp;
+        } else {
+            textPaint = Theme.chat_msgTextPaintThreeEmoji;
+            i = AndroidUtilities.dp(24.0f);
+            this.emojiOnlyCount = 3;
+        }
+        CharSequence charSequence = this.messageText;
+        Emoji.EmojiSpan[] emojiSpanArr = (Emoji.EmojiSpan[]) ((Spannable) charSequence).getSpans(0, charSequence.length(), Emoji.EmojiSpan.class);
+        if (emojiSpanArr != null && emojiSpanArr.length > 0) {
+            for (Emoji.EmojiSpan emojiSpan : emojiSpanArr) {
+                emojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i);
             }
-            int i2 = iArr[0];
-            if (i2 == 1) {
-                textPaint = Theme.chat_msgTextPaintOneEmoji;
-                i = AndroidUtilities.dp(32.0f);
-                this.emojiOnlyCount = 1;
-            } else if (i2 == 2) {
-                textPaint = Theme.chat_msgTextPaintTwoEmoji;
-                int dp = AndroidUtilities.dp(28.0f);
-                this.emojiOnlyCount = 2;
-                i = dp;
-            } else {
-                textPaint = Theme.chat_msgTextPaintThreeEmoji;
-                i = AndroidUtilities.dp(24.0f);
-                this.emojiOnlyCount = 3;
-            }
-            CharSequence charSequence = this.messageText;
-            Emoji.EmojiSpan[] emojiSpanArr = (Emoji.EmojiSpan[]) ((Spannable) charSequence).getSpans(0, charSequence.length(), Emoji.EmojiSpan.class);
-            if (emojiSpanArr != null && emojiSpanArr.length > 0) {
-                for (Emoji.EmojiSpan emojiSpan : emojiSpanArr) {
-                    emojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i);
-                }
-            }
-            CharSequence charSequence2 = this.messageText;
-            AnimatedEmojiSpan[] animatedEmojiSpanArr = (AnimatedEmojiSpan[]) ((Spannable) charSequence2).getSpans(0, charSequence2.length(), AnimatedEmojiSpan.class);
-            if (animatedEmojiSpanArr == null || animatedEmojiSpanArr.length <= 0) {
-                return;
-            }
-            for (AnimatedEmojiSpan animatedEmojiSpan : animatedEmojiSpanArr) {
-                animatedEmojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i, 1);
-            }
+        }
+        CharSequence charSequence2 = this.messageText;
+        AnimatedEmojiSpan[] animatedEmojiSpanArr = (AnimatedEmojiSpan[]) ((Spannable) charSequence2).getSpans(0, charSequence2.length(), AnimatedEmojiSpan.class);
+        if (animatedEmojiSpanArr == null || animatedEmojiSpanArr.length <= 0) {
+            return;
+        }
+        for (AnimatedEmojiSpan animatedEmojiSpan : animatedEmojiSpanArr) {
+            animatedEmojiSpan.replaceFontMetrics(textPaint.getFontMetricsInt(), i, 0);
         }
     }
 
@@ -934,7 +935,7 @@ public class MessageObject {
             if (tLObject instanceof TLRPC$User) {
                 TLRPC$User tLRPC$User = (TLRPC$User) tLObject;
                 if (tLRPC$User.deleted) {
-                    str4 = LocaleController.getString("HiddenName", R.string.HiddenName);
+                    str4 = LocaleController.getString("HiddenName", org.telegram.messenger.beta.R.string.HiddenName);
                 } else {
                     str4 = ContactsController.formatName(tLRPC$User.first_name, tLRPC$User.last_name);
                 }
@@ -1029,17 +1030,17 @@ public class MessageObject {
         }
         if (tLRPC$TL_game2 == null) {
             if (tLRPC$User == null || tLRPC$User.id != UserConfig.getInstance(this.currentAccount).getClientUserId()) {
-                this.messageText = replaceWithLink(LocaleController.formatString("ActionUserScored", R.string.ActionUserScored, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0])), "un1", tLRPC$User);
+                this.messageText = replaceWithLink(LocaleController.formatString("ActionUserScored", org.telegram.messenger.beta.R.string.ActionUserScored, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0])), "un1", tLRPC$User);
                 return;
             } else {
-                this.messageText = LocaleController.formatString("ActionYouScored", R.string.ActionYouScored, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0]));
+                this.messageText = LocaleController.formatString("ActionYouScored", org.telegram.messenger.beta.R.string.ActionYouScored, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0]));
                 return;
             }
         }
         if (tLRPC$User == null || tLRPC$User.id != UserConfig.getInstance(this.currentAccount).getClientUserId()) {
-            this.messageText = replaceWithLink(LocaleController.formatString("ActionUserScoredInGame", R.string.ActionUserScoredInGame, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0])), "un1", tLRPC$User);
+            this.messageText = replaceWithLink(LocaleController.formatString("ActionUserScoredInGame", org.telegram.messenger.beta.R.string.ActionUserScoredInGame, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0])), "un1", tLRPC$User);
         } else {
-            this.messageText = LocaleController.formatString("ActionYouScoredInGame", R.string.ActionYouScoredInGame, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0]));
+            this.messageText = LocaleController.formatString("ActionYouScoredInGame", org.telegram.messenger.beta.R.string.ActionYouScoredInGame, LocaleController.formatPluralString("Points", this.messageOwner.action.score, new Object[0]));
         }
         this.messageText = replaceWithLink(this.messageText, "un2", tLRPC$TL_game2);
     }
@@ -1074,18 +1075,18 @@ public class MessageObject {
             TLRPC$MessageMedia tLRPC$MessageMedia = messageObject.messageOwner.media;
             if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaInvoice) {
                 if (this.messageOwner.action.recurring_init) {
-                    this.messageText = LocaleController.formatString(R.string.PaymentSuccessfullyPaidRecurrent, str, firstName, tLRPC$MessageMedia.title);
+                    this.messageText = LocaleController.formatString(org.telegram.messenger.beta.R.string.PaymentSuccessfullyPaidRecurrent, str, firstName, tLRPC$MessageMedia.title);
                     return;
                 } else {
-                    this.messageText = LocaleController.formatString("PaymentSuccessfullyPaid", R.string.PaymentSuccessfullyPaid, str, firstName, tLRPC$MessageMedia.title);
+                    this.messageText = LocaleController.formatString("PaymentSuccessfullyPaid", org.telegram.messenger.beta.R.string.PaymentSuccessfullyPaid, str, firstName, tLRPC$MessageMedia.title);
                     return;
                 }
             }
         }
         if (this.messageOwner.action.recurring_init) {
-            this.messageText = LocaleController.formatString(R.string.PaymentSuccessfullyPaidNoItemRecurrent, str, firstName);
+            this.messageText = LocaleController.formatString(org.telegram.messenger.beta.R.string.PaymentSuccessfullyPaidNoItemRecurrent, str, firstName);
         } else {
-            this.messageText = LocaleController.formatString("PaymentSuccessfullyPaidNoItem", R.string.PaymentSuccessfullyPaidNoItem, str, firstName);
+            this.messageText = LocaleController.formatString("PaymentSuccessfullyPaidNoItem", org.telegram.messenger.beta.R.string.PaymentSuccessfullyPaidNoItem, str, firstName);
         }
     }
 
@@ -1108,42 +1109,42 @@ public class MessageObject {
             TLRPC$Message tLRPC$Message = messageObject.messageOwner;
             if (!(tLRPC$Message instanceof TLRPC$TL_messageEmpty) && !(tLRPC$Message.action instanceof TLRPC$TL_messageActionHistoryClear)) {
                 if (messageObject.isMusic()) {
-                    String string = LocaleController.getString("ActionPinnedMusic", R.string.ActionPinnedMusic);
+                    String string = LocaleController.getString("ActionPinnedMusic", org.telegram.messenger.beta.R.string.ActionPinnedMusic);
                     if (tLRPC$User == null) {
                         tLRPC$User = tLRPC$Chat;
                     }
                     this.messageText = replaceWithLink(string, "un1", tLRPC$User);
                     return;
                 } else if (this.replyMessageObject.isVideo()) {
-                    String string2 = LocaleController.getString("ActionPinnedVideo", R.string.ActionPinnedVideo);
+                    String string2 = LocaleController.getString("ActionPinnedVideo", org.telegram.messenger.beta.R.string.ActionPinnedVideo);
                     if (tLRPC$User == null) {
                         tLRPC$User = tLRPC$Chat;
                     }
                     this.messageText = replaceWithLink(string2, "un1", tLRPC$User);
                     return;
                 } else if (this.replyMessageObject.isGif()) {
-                    String string3 = LocaleController.getString("ActionPinnedGif", R.string.ActionPinnedGif);
+                    String string3 = LocaleController.getString("ActionPinnedGif", org.telegram.messenger.beta.R.string.ActionPinnedGif);
                     if (tLRPC$User == null) {
                         tLRPC$User = tLRPC$Chat;
                     }
                     this.messageText = replaceWithLink(string3, "un1", tLRPC$User);
                     return;
                 } else if (this.replyMessageObject.isVoice()) {
-                    String string4 = LocaleController.getString("ActionPinnedVoice", R.string.ActionPinnedVoice);
+                    String string4 = LocaleController.getString("ActionPinnedVoice", org.telegram.messenger.beta.R.string.ActionPinnedVoice);
                     if (tLRPC$User == null) {
                         tLRPC$User = tLRPC$Chat;
                     }
                     this.messageText = replaceWithLink(string4, "un1", tLRPC$User);
                     return;
                 } else if (this.replyMessageObject.isRoundVideo()) {
-                    String string5 = LocaleController.getString("ActionPinnedRound", R.string.ActionPinnedRound);
+                    String string5 = LocaleController.getString("ActionPinnedRound", org.telegram.messenger.beta.R.string.ActionPinnedRound);
                     if (tLRPC$User == null) {
                         tLRPC$User = tLRPC$Chat;
                     }
                     this.messageText = replaceWithLink(string5, "un1", tLRPC$User);
                     return;
                 } else if ((this.replyMessageObject.isSticker() || this.replyMessageObject.isAnimatedSticker()) && !this.replyMessageObject.isAnimatedEmoji()) {
-                    String string6 = LocaleController.getString("ActionPinnedSticker", R.string.ActionPinnedSticker);
+                    String string6 = LocaleController.getString("ActionPinnedSticker", org.telegram.messenger.beta.R.string.ActionPinnedSticker);
                     if (tLRPC$User == null) {
                         tLRPC$User = tLRPC$Chat;
                     }
@@ -1153,28 +1154,28 @@ public class MessageObject {
                     MessageObject messageObject2 = this.replyMessageObject;
                     TLRPC$MessageMedia tLRPC$MessageMedia = messageObject2.messageOwner.media;
                     if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaDocument) {
-                        String string7 = LocaleController.getString("ActionPinnedFile", R.string.ActionPinnedFile);
+                        String string7 = LocaleController.getString("ActionPinnedFile", org.telegram.messenger.beta.R.string.ActionPinnedFile);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
                         this.messageText = replaceWithLink(string7, "un1", tLRPC$User);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGeo) {
-                        String string8 = LocaleController.getString("ActionPinnedGeo", R.string.ActionPinnedGeo);
+                        String string8 = LocaleController.getString("ActionPinnedGeo", org.telegram.messenger.beta.R.string.ActionPinnedGeo);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
                         this.messageText = replaceWithLink(string8, "un1", tLRPC$User);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGeoLive) {
-                        String string9 = LocaleController.getString("ActionPinnedGeoLive", R.string.ActionPinnedGeoLive);
+                        String string9 = LocaleController.getString("ActionPinnedGeoLive", org.telegram.messenger.beta.R.string.ActionPinnedGeoLive);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
                         this.messageText = replaceWithLink(string9, "un1", tLRPC$User);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaContact) {
-                        String string10 = LocaleController.getString("ActionPinnedContact", R.string.ActionPinnedContact);
+                        String string10 = LocaleController.getString("ActionPinnedContact", org.telegram.messenger.beta.R.string.ActionPinnedContact);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
@@ -1182,28 +1183,28 @@ public class MessageObject {
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPoll) {
                         if (((TLRPC$TL_messageMediaPoll) tLRPC$MessageMedia).poll.quiz) {
-                            String string11 = LocaleController.getString("ActionPinnedQuiz", R.string.ActionPinnedQuiz);
+                            String string11 = LocaleController.getString("ActionPinnedQuiz", org.telegram.messenger.beta.R.string.ActionPinnedQuiz);
                             if (tLRPC$User == null) {
                                 tLRPC$User = tLRPC$Chat;
                             }
                             this.messageText = replaceWithLink(string11, "un1", tLRPC$User);
                             return;
                         }
-                        String string12 = LocaleController.getString("ActionPinnedPoll", R.string.ActionPinnedPoll);
+                        String string12 = LocaleController.getString("ActionPinnedPoll", org.telegram.messenger.beta.R.string.ActionPinnedPoll);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
                         this.messageText = replaceWithLink(string12, "un1", tLRPC$User);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPhoto) {
-                        String string13 = LocaleController.getString("ActionPinnedPhoto", R.string.ActionPinnedPhoto);
+                        String string13 = LocaleController.getString("ActionPinnedPhoto", org.telegram.messenger.beta.R.string.ActionPinnedPhoto);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
                         this.messageText = replaceWithLink(string13, "un1", tLRPC$User);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGame) {
-                        String formatString = LocaleController.formatString("ActionPinnedGame", R.string.ActionPinnedGame, "🎮 " + this.replyMessageObject.messageOwner.media.game.title);
+                        String formatString = LocaleController.formatString("ActionPinnedGame", org.telegram.messenger.beta.R.string.ActionPinnedGame, "🎮 " + this.replyMessageObject.messageOwner.media.game.title);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
@@ -1220,14 +1221,14 @@ public class MessageObject {
                             }
                             CharSequence replaceEmoji = Emoji.replaceEmoji(charSequence2, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
                             MediaDataController.addTextStyleRuns(this.replyMessageObject, (Spannable) replaceEmoji);
-                            SpannableStringBuilder formatSpannable = AndroidUtilities.formatSpannable(LocaleController.getString("ActionPinnedText", R.string.ActionPinnedText), replaceEmoji);
+                            SpannableStringBuilder formatSpannable = AndroidUtilities.formatSpannable(LocaleController.getString("ActionPinnedText", org.telegram.messenger.beta.R.string.ActionPinnedText), replaceEmoji);
                             if (tLRPC$User == null) {
                                 tLRPC$User = tLRPC$Chat;
                             }
                             this.messageText = replaceWithLink(formatSpannable, "un1", tLRPC$User);
                             return;
                         }
-                        String string14 = LocaleController.getString("ActionPinnedNoText", R.string.ActionPinnedNoText);
+                        String string14 = LocaleController.getString("ActionPinnedNoText", org.telegram.messenger.beta.R.string.ActionPinnedNoText);
                         if (tLRPC$User == null) {
                             tLRPC$User = tLRPC$Chat;
                         }
@@ -1237,7 +1238,7 @@ public class MessageObject {
                 }
             }
         }
-        String string15 = LocaleController.getString("ActionPinnedNoText", R.string.ActionPinnedNoText);
+        String string15 = LocaleController.getString("ActionPinnedNoText", org.telegram.messenger.beta.R.string.ActionPinnedNoText);
         if (tLRPC$User == null) {
             tLRPC$User = tLRPC$Chat;
         }
@@ -1619,7 +1620,7 @@ public class MessageObject {
                     sb2.append(i2);
                     sb2.append(i4);
                     if ((tLRPC$KeyboardButton instanceof TLRPC$TL_keyboardButtonBuy) && (this.messageOwner.media.flags & 4) != 0) {
-                        charSequence = LocaleController.getString("PaymentReceipt", R.string.PaymentReceipt);
+                        charSequence = LocaleController.getString("PaymentReceipt", org.telegram.messenger.beta.R.string.PaymentReceipt);
                     } else {
                         String str = tLRPC$KeyboardButton.text;
                         if (str == null) {
@@ -1708,7 +1709,7 @@ public class MessageObject {
     /* JADX WARN: Removed duplicated region for block: B:276:0x077e  */
     /* JADX WARN: Removed duplicated region for block: B:280:0x07b8  */
     /* JADX WARN: Removed duplicated region for block: B:500:0x0d76  */
-    /* JADX WARN: Removed duplicated region for block: B:597:0x0f9c  */
+    /* JADX WARN: Removed duplicated region for block: B:597:0x0f9d  */
     /* JADX WARN: Removed duplicated region for block: B:617:? A[RETURN, SYNTHETIC] */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
@@ -1716,7 +1717,7 @@ public class MessageObject {
     */
     private void updateMessageText(java.util.AbstractMap<java.lang.Long, org.telegram.tgnet.TLRPC$User> r21, java.util.AbstractMap<java.lang.Long, org.telegram.tgnet.TLRPC$Chat> r22, androidx.collection.LongSparseArray<org.telegram.tgnet.TLRPC$User> r23, androidx.collection.LongSparseArray<org.telegram.tgnet.TLRPC$Chat> r24) {
         /*
-            Method dump skipped, instructions count: 3999
+            Method dump skipped, instructions count: 4000
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.MessageObject.updateMessageText(java.util.AbstractMap, java.util.AbstractMap, androidx.collection.LongSparseArray, androidx.collection.LongSparseArray):void");
@@ -2507,7 +2508,7 @@ public class MessageObject {
             return null;
         }
         if (TextUtils.isEmpty(str)) {
-            SpannableString spannableString = new SpannableString(LocaleController.getString("NoWordsRecognized", R.string.NoWordsRecognized));
+            SpannableString spannableString = new SpannableString(LocaleController.getString("NoWordsRecognized", org.telegram.messenger.beta.R.string.NoWordsRecognized));
             spannableString.setSpan(new CharacterStyle() { // from class: org.telegram.messenger.MessageObject.1
                 @Override // android.text.style.CharacterStyle
                 public void updateDrawState(TextPaint textPaint) {
@@ -2690,6 +2691,9 @@ public class MessageObject {
 
     public static Spannable replaceAnimatedEmoji(CharSequence charSequence, ArrayList<TLRPC$MessageEntity> arrayList, Paint.FontMetricsInt fontMetricsInt) {
         Spannable spannableString = charSequence instanceof Spannable ? (Spannable) charSequence : new SpannableString(charSequence);
+        if (arrayList == null) {
+            return spannableString;
+        }
         Emoji.EmojiSpan[] emojiSpanArr = (Emoji.EmojiSpan[]) spannableString.getSpans(0, spannableString.length(), Emoji.EmojiSpan.class);
         for (int i = 0; i < arrayList.size(); i++) {
             TLRPC$MessageEntity tLRPC$MessageEntity = arrayList.get(i);
@@ -3619,8 +3623,12 @@ public class MessageObject {
     }
 
     public static String findAnimatedEmojiEmoticon(TLRPC$Document tLRPC$Document) {
+        return findAnimatedEmojiEmoticon(tLRPC$Document, "😀");
+    }
+
+    public static String findAnimatedEmojiEmoticon(TLRPC$Document tLRPC$Document, String str) {
         if (tLRPC$Document == null) {
-            return "😀";
+            return str;
         }
         int size = tLRPC$Document.attributes.size();
         for (int i = 0; i < size; i++) {
@@ -3629,7 +3637,7 @@ public class MessageObject {
                 return tLRPC$DocumentAttribute.alt;
             }
         }
-        return "😀";
+        return str;
     }
 
     public static boolean isFreeEmoji(TLRPC$Document tLRPC$Document) {
@@ -3641,6 +3649,18 @@ public class MessageObject {
             TLRPC$DocumentAttribute tLRPC$DocumentAttribute = tLRPC$Document.attributes.get(i);
             if (tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeCustomEmoji) {
                 return ((TLRPC$TL_documentAttributeCustomEmoji) tLRPC$DocumentAttribute).free;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isPremiumEmojiPack(TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet) {
+        TLRPC$StickerSet tLRPC$StickerSet;
+        if ((tLRPC$TL_messages_stickerSet == null || (tLRPC$StickerSet = tLRPC$TL_messages_stickerSet.set) == null || tLRPC$StickerSet.emojis) && tLRPC$TL_messages_stickerSet != null && tLRPC$TL_messages_stickerSet.documents != null) {
+            for (int i = 0; i < tLRPC$TL_messages_stickerSet.documents.size(); i++) {
+                if (!isFreeEmoji(tLRPC$TL_messages_stickerSet.documents.get(i))) {
+                    return true;
+                }
             }
         }
         return false;
@@ -4034,7 +4054,7 @@ public class MessageObject {
                         return str;
                     }
                     String documentFileName = FileLoader.getDocumentFileName(document);
-                    return (!TextUtils.isEmpty(documentFileName) || !z) ? documentFileName : LocaleController.getString("AudioUnknownTitle", R.string.AudioUnknownTitle);
+                    return (!TextUtils.isEmpty(documentFileName) || !z) ? documentFileName : LocaleController.getString("AudioUnknownTitle", org.telegram.messenger.beta.R.string.AudioUnknownTitle);
                 } else if ((tLRPC$DocumentAttribute instanceof TLRPC$TL_documentAttributeVideo) && tLRPC$DocumentAttribute.round_message) {
                     return LocaleController.formatDateAudio(this.messageOwner.date, true);
                 }
@@ -4044,7 +4064,7 @@ public class MessageObject {
                 return documentFileName2;
             }
         }
-        return LocaleController.getString("AudioUnknownTitle", R.string.AudioUnknownTitle);
+        return LocaleController.getString("AudioUnknownTitle", org.telegram.messenger.beta.R.string.AudioUnknownTitle);
     }
 
     public int getDuration() {

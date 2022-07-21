@@ -17,8 +17,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
@@ -139,7 +139,6 @@ public class DoubledLimitsBottomSheet extends BottomSheetWithRecyclerListView im
         }
     }
 
-    /* JADX INFO: Access modifiers changed from: protected */
     @Override // org.telegram.ui.Components.BottomSheetWithRecyclerListView
     public void onPreMeasure(int i, int i2) {
         super.onPreMeasure(i, i2);

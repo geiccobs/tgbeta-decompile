@@ -13,6 +13,8 @@ import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.common.internal.ReflectedParcelable;
 import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
+import com.huawei.hms.adapter.internal.CommonCode;
+import com.huawei.hms.support.hianalytics.HiAnalyticsConstant;
 /* compiled from: com.google.android.gms:play-services-basement@@17.5.0 */
 /* loaded from: classes.dex */
 public final class Status extends AbstractSafeParcelable implements Result, ReflectedParcelable {
@@ -122,7 +124,7 @@ public final class Status extends AbstractSafeParcelable implements Result, Refl
 
     @RecentlyNonNull
     public final String toString() {
-        return Objects.toStringHelper(this).add("statusCode", zza()).add("resolution", this.zze).toString();
+        return Objects.toStringHelper(this).add(HiAnalyticsConstant.HaKey.BI_KEY_RESULT, zza()).add(CommonCode.MapKey.HAS_RESOLUTION, this.zze).toString();
     }
 
     @Override // android.os.Parcelable

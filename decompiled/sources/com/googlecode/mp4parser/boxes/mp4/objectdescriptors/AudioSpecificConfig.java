@@ -2,6 +2,8 @@ package com.googlecode.mp4parser.boxes.mp4.objectdescriptors;
 
 import com.coremedia.iso.Hex;
 import com.coremedia.iso.IsoTypeWriter;
+import com.huawei.hms.adapter.internal.AvailableCode;
+import com.huawei.hms.support.api.entity.core.JosStatusCodes;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -74,7 +76,7 @@ public class AudioSpecificConfig extends BaseDescriptor {
         samplingFrequencyIndexMap.put(8, 16000);
         samplingFrequencyIndexMap.put(9, 12000);
         samplingFrequencyIndexMap.put(10, 11025);
-        samplingFrequencyIndexMap.put(11, 8000);
+        samplingFrequencyIndexMap.put(11, Integer.valueOf((int) JosStatusCodes.RTN_CODE_COMMON_ERROR));
         audioObjectTypeMap.put(1, "AAC main");
         audioObjectTypeMap.put(2, "AAC LC");
         audioObjectTypeMap.put(3, "AAC SSR");
@@ -164,9 +166,9 @@ public class AudioSpecificConfig extends BaseDescriptor {
             case 6:
             case 7:
             case 17:
-            case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+            case 19:
             case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-            case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+            case 21:
             case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
             case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 parseGaSpecificConfig(this.samplingFrequencyIndex, this.channelConfiguration, i2, bitReaderBuffer);
@@ -184,15 +186,15 @@ public class AudioSpecificConfig extends BaseDescriptor {
                 throw new UnsupportedOperationException("can't parse StructuredAudioSpecificConfig yet");
             case 24:
                 throw new UnsupportedOperationException("can't parse ErrorResilientCelpSpecificConfig yet");
-            case 25:
+            case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
                 throw new UnsupportedOperationException("can't parse ErrorResilientHvxcSpecificConfig yet");
-            case 26:
-            case 27:
+            case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
+            case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
                 parseParametricSpecificConfig(this.samplingFrequencyIndex, this.channelConfiguration, i2, bitReaderBuffer);
                 break;
-            case 28:
+            case AvailableCode.APP_IS_BACKGROUND_OR_LOCKED /* 28 */:
                 throw new UnsupportedOperationException("can't parse SSCSpecificConfig yet");
-            case 30:
+            case AvailableCode.USER_ALREADY_KNOWS_SERVICE_UNAVAILABLE /* 30 */:
                 this.sacPayloadEmbedding = bitReaderBuffer.readBits(1);
                 throw new UnsupportedOperationException("can't parse SpatialSpecificConfig yet");
             case ConnectionsManager.RequestFlagForceDownload /* 32 */:
@@ -217,15 +219,15 @@ public class AudioSpecificConfig extends BaseDescriptor {
         int i3 = this.audioObjectType;
         if (i3 != 17 && i3 != 39) {
             switch (i3) {
-                case R.styleable.MapAttrs_uiTiltGestures /* 19 */:
+                case 19:
                 case R.styleable.MapAttrs_uiZoomControls /* 20 */:
-                case R.styleable.MapAttrs_uiZoomGestures /* 21 */:
+                case 21:
                 case R.styleable.MapAttrs_useViewLifecycle /* 22 */:
                 case R.styleable.MapAttrs_zOrderOnTop /* 23 */:
                 case 24:
-                case 25:
-                case 26:
-                case 27:
+                case AvailableCode.ERROR_ON_ACTIVITY_RESULT /* 25 */:
+                case AvailableCode.ERROR_NO_ACTIVITY /* 26 */:
+                case AvailableCode.USER_IGNORE_PREVIOUS_POPUP /* 27 */:
                     break;
                 default:
                     if (this.extensionAudioObjectType == 5 || bitReaderBuffer.remainingBits() < 16) {

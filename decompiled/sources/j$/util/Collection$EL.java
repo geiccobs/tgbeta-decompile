@@ -11,16 +11,16 @@ import java.util.SortedSet;
 /* loaded from: classes2.dex */
 public final /* synthetic */ class Collection$EL {
     public static /* synthetic */ void a(Collection collection, Consumer consumer) {
-        if (collection instanceof AbstractC0035b) {
-            ((AbstractC0035b) collection).forEach(consumer);
+        if (collection instanceof AbstractC0040b) {
+            ((AbstractC0040b) collection).forEach(consumer);
         } else {
-            AbstractC0034a.a(collection, consumer);
+            AbstractC0039a.a(collection, consumer);
         }
     }
 
     public static u b(Collection collection) {
-        if (collection instanceof AbstractC0035b) {
-            return ((AbstractC0035b) collection).mo71spliterator();
+        if (collection instanceof AbstractC0040b) {
+            return ((AbstractC0040b) collection).mo71spliterator();
         }
         if (collection instanceof LinkedHashSet) {
             LinkedHashSet linkedHashSet = (LinkedHashSet) collection;
@@ -44,6 +44,6 @@ public final /* synthetic */ class Collection$EL {
     }
 
     public static /* synthetic */ boolean removeIf(Collection collection, Predicate predicate) {
-        return collection instanceof AbstractC0035b ? ((AbstractC0035b) collection).k(predicate) : AbstractC0034a.h(collection, predicate);
+        return collection instanceof AbstractC0040b ? ((AbstractC0040b) collection).k(predicate) : AbstractC0039a.h(collection, predicate);
     }
 }

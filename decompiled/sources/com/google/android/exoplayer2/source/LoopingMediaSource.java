@@ -8,7 +8,6 @@ import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Assertions;
 import java.util.HashMap;
 import java.util.Map;
-import org.telegram.tgnet.ConnectionsManager;
 /* loaded from: classes.dex */
 public final class LoopingMediaSource extends CompositeMediaSource<Void> {
     private final Map<MediaSource.MediaPeriodId, MediaSource.MediaPeriodId> childMediaPeriodIdToMediaPeriodId;
@@ -17,7 +16,7 @@ public final class LoopingMediaSource extends CompositeMediaSource<Void> {
     private final Map<MediaPeriod, MediaSource.MediaPeriodId> mediaPeriodToChildMediaPeriodId;
 
     public LoopingMediaSource(MediaSource mediaSource) {
-        this(mediaSource, ConnectionsManager.DEFAULT_DATACENTER_ID);
+        this(mediaSource, Integer.MAX_VALUE);
     }
 
     public LoopingMediaSource(MediaSource mediaSource, int i) {
@@ -86,7 +85,7 @@ public final class LoopingMediaSource extends CompositeMediaSource<Void> {
             this.childWindowCount = timeline.getWindowCount();
             this.loopCount = i;
             if (periodCount > 0) {
-                Assertions.checkState(i <= ConnectionsManager.DEFAULT_DATACENTER_ID / periodCount ? true : z, "LoopingMediaSource contains too many periods");
+                Assertions.checkState(i <= Integer.MAX_VALUE / periodCount ? true : z, "LoopingMediaSource contains too many periods");
             }
         }
 

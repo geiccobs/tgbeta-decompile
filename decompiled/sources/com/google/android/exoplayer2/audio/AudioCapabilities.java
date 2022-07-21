@@ -8,8 +8,7 @@ import android.content.IntentFilter;
 import android.provider.Settings;
 import com.google.android.exoplayer2.util.Util;
 import java.util.Arrays;
-import org.telegram.messenger.R;
-@TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+@TargetApi(21)
 /* loaded from: classes.dex */
 public final class AudioCapabilities {
     public static final AudioCapabilities DEFAULT_AUDIO_CAPABILITIES = new AudioCapabilities(new int[]{2}, 8);

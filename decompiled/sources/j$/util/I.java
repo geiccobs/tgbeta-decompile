@@ -20,7 +20,7 @@ public final class I implements u.a {
 
     @Override // j$.util.u.a, j$.util.u
     public /* synthetic */ boolean b(Consumer consumer) {
-        return AbstractC0034a.k(this, consumer);
+        return AbstractC0039a.k(this, consumer);
     }
 
     @Override // j$.util.u.a
@@ -56,7 +56,7 @@ public final class I implements u.a {
 
     @Override // j$.util.u.a, j$.util.u
     public /* synthetic */ void forEachRemaining(Consumer consumer) {
-        AbstractC0034a.c(this, consumer);
+        AbstractC0039a.c(this, consumer);
     }
 
     @Override // j$.util.u.a
@@ -75,7 +75,7 @@ public final class I implements u.a {
 
     @Override // j$.util.u
     public Comparator getComparator() {
-        if (AbstractC0034a.f(this, 4)) {
+        if (AbstractC0039a.f(this, 4)) {
             return null;
         }
         throw new IllegalStateException();
@@ -83,12 +83,12 @@ public final class I implements u.a {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0034a.e(this);
+        return AbstractC0039a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0034a.f(this, i);
+        return AbstractC0039a.f(this, i);
     }
 
     @Override // j$.util.u.a, j$.util.w, j$.util.u

@@ -49,9 +49,9 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -158,7 +158,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             case 10:
                 return "app_icons";
             case 11:
-                return "premium_emoji";
+                return "animated_emoji";
             default:
                 return null;
         }
@@ -205,50 +205,50 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 }
                 c = 65535;
                 break;
+            case -1425144150:
+                if (str.equals("animated_emoji")) {
+                    c = 2;
+                    break;
+                }
+                c = 65535;
+                break;
             case -1040323278:
                 if (str.equals("no_ads")) {
-                    c = 2;
+                    c = 3;
                     break;
                 }
                 c = 65535;
                 break;
             case -1023650261:
                 if (str.equals("more_upload")) {
-                    c = 3;
+                    c = 4;
                     break;
                 }
                 c = 65535;
                 break;
             case -730864243:
                 if (str.equals("profile_badge")) {
-                    c = 4;
+                    c = 5;
                     break;
                 }
                 c = 65535;
                 break;
             case -448825858:
                 if (str.equals("faster_download")) {
-                    c = 5;
+                    c = 6;
                     break;
                 }
                 c = 65535;
                 break;
             case -165039170:
                 if (str.equals("premium_stickers")) {
-                    c = 6;
+                    c = 7;
                     break;
                 }
                 c = 65535;
                 break;
             case -96210874:
                 if (str.equals("double_limits")) {
-                    c = 7;
-                    break;
-                }
-                c = 65535;
-                break;
-            case -3189666:
-                if (str.equals("premium_emoji")) {
                     c = '\b';
                     break;
                 }
@@ -285,19 +285,19 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             case 1:
                 return 8;
             case 2:
-                return 3;
-            case 3:
-                return 1;
-            case 4:
-                return 6;
-            case 5:
-                return 2;
-            case 6:
-                return 5;
-            case 7:
-                return 0;
-            case '\b':
                 return 11;
+            case 3:
+                return 3;
+            case 4:
+                return 1;
+            case 5:
+                return 6;
+            case 6:
+                return 2;
+            case 7:
+                return 5;
+            case '\b':
+                return 0;
             case '\t':
                 return 4;
             case '\n':
@@ -672,7 +672,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     }
 
     public static /* synthetic */ int lambda$fillPremiumFeaturesList$3(MessagesController messagesController, PremiumFeatureData premiumFeatureData, PremiumFeatureData premiumFeatureData2) {
-        return messagesController.premiumFeaturesTypesToPosition.get(premiumFeatureData.type, ConnectionsManager.DEFAULT_DATACENTER_ID) - messagesController.premiumFeaturesTypesToPosition.get(premiumFeatureData2.type, ConnectionsManager.DEFAULT_DATACENTER_ID);
+        return messagesController.premiumFeaturesTypesToPosition.get(premiumFeatureData.type, Integer.MAX_VALUE) - messagesController.premiumFeaturesTypesToPosition.get(premiumFeatureData2.type, Integer.MAX_VALUE);
     }
 
     public void updateBackgroundImage() {
@@ -739,7 +739,6 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         });
     }
 
-    /* JADX WARN: Type inference failed for: r3v3, types: [org.telegram.tgnet.TLRPC$TL_payments_canPurchasePremium, org.telegram.tgnet.TLObject] */
     public static /* synthetic */ void lambda$buyPremium$10(BillingResult billingResult, final BaseFragment baseFragment, List list, final List list2) {
         if (billingResult.getResponseCode() == 0) {
             final Runnable runnable = new Runnable() { // from class: org.telegram.ui.PremiumPreviewFragment$$ExternalSyntheticLambda5
@@ -757,13 +756,15 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                         TLRPC$TL_dataJSON tLRPC$TL_dataJSON = new TLRPC$TL_dataJSON();
                         tLRPC$TL_payments_assignPlayMarketTransaction.receipt = tLRPC$TL_dataJSON;
                         tLRPC$TL_dataJSON.data = purchase.getOriginalJson();
-                        tLRPC$TL_payments_assignPlayMarketTransaction.purpose = new TLRPC$TL_inputStorePaymentPremiumSubscription();
+                        TLRPC$TL_inputStorePaymentPremiumSubscription tLRPC$TL_inputStorePaymentPremiumSubscription = new TLRPC$TL_inputStorePaymentPremiumSubscription();
+                        tLRPC$TL_inputStorePaymentPremiumSubscription.restore = true;
+                        tLRPC$TL_payments_assignPlayMarketTransaction.purpose = tLRPC$TL_inputStorePaymentPremiumSubscription;
                         baseFragment.getConnectionsManager().sendRequest(tLRPC$TL_payments_assignPlayMarketTransaction, new RequestDelegate() { // from class: org.telegram.ui.PremiumPreviewFragment$$ExternalSyntheticLambda9
                             @Override // org.telegram.tgnet.RequestDelegate
                             public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
                                 PremiumPreviewFragment.lambda$buyPremium$6(BaseFragment.this, runnable, tLRPC$TL_payments_assignPlayMarketTransaction, tLObject, tLRPC$TL_error);
                             }
-                        });
+                        }, 66);
                         return;
                     }
                 }
@@ -774,23 +775,12 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     PremiumPreviewFragment.lambda$buyPremium$7(runnable, (BillingResult) obj);
                 }
             });
-            final ?? r3 = new TLObject() { // from class: org.telegram.tgnet.TLRPC$TL_payments_canPurchasePremium
-                public static int constructor = -1435856696;
-
-                @Override // org.telegram.tgnet.TLObject
-                public TLObject deserializeResponse(AbstractSerializedData abstractSerializedData, int i, boolean z) {
-                    return TLRPC$Bool.TLdeserialize(abstractSerializedData, i, z);
-                }
-
-                @Override // org.telegram.tgnet.TLObject
-                public void serializeToStream(AbstractSerializedData abstractSerializedData) {
-                    abstractSerializedData.writeInt32(constructor);
-                }
-            };
-            baseFragment.getConnectionsManager().sendRequest(r3, new RequestDelegate() { // from class: org.telegram.ui.PremiumPreviewFragment$$ExternalSyntheticLambda10
+            final TLRPC$TL_payments_canPurchasePremium tLRPC$TL_payments_canPurchasePremium = new TLRPC$TL_payments_canPurchasePremium();
+            tLRPC$TL_payments_canPurchasePremium.purpose = new TLRPC$TL_inputStorePaymentPremiumSubscription();
+            baseFragment.getConnectionsManager().sendRequest(tLRPC$TL_payments_canPurchasePremium, new RequestDelegate() { // from class: org.telegram.ui.PremiumPreviewFragment$$ExternalSyntheticLambda10
                 @Override // org.telegram.tgnet.RequestDelegate
                 public final void run(TLObject tLObject, TLRPC$TL_error tLRPC$TL_error) {
-                    PremiumPreviewFragment.lambda$buyPremium$9(BaseFragment.this, list2, r3, tLObject, tLRPC$TL_error);
+                    PremiumPreviewFragment.lambda$buyPremium$9(BaseFragment.this, list2, tLRPC$TL_payments_canPurchasePremium, tLObject, tLRPC$TL_error);
                 }
             });
         }

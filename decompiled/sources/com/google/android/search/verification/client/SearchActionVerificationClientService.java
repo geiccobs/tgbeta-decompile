@@ -221,7 +221,7 @@ public abstract class SearchActionVerificationClientService extends IntentServic
 
     protected void postForegroundNotification() {
         createChannel();
-        startForeground(NOTIFICATION_ID, new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID).setGroup(NOTIFICATION_CHANNEL_ID).setContentTitle(getApplicationContext().getResources().getString(R$string.google_assistant_verification_notification_title)).setSmallIcon(17301545).setPriority(-2).setVisibility(1).build());
+        startForeground(10000, new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID).setGroup(NOTIFICATION_CHANNEL_ID).setContentTitle(getApplicationContext().getResources().getString(R$string.google_assistant_verification_notification_title)).setSmallIcon(17301545).setPriority(-2).setVisibility(1).build());
     }
 
     private void createChannel() {

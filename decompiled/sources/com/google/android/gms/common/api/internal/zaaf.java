@@ -15,6 +15,7 @@ import com.google.android.gms.common.internal.IAccountAccessor;
 import com.google.android.gms.common.internal.Preconditions;
 import com.google.android.gms.signin.SignInOptions;
 import com.google.android.gms.signin.zae;
+import com.huawei.hms.framework.network.grs.GrsBaseInfo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public final class zaaf implements zaaw {
     }
 
     private static String zac(int i) {
-        return i != 0 ? i != 1 ? "UNKNOWN" : "STEP_GETTING_REMOTE_SERVICE" : "STEP_SERVICE_BINDINGS_AND_SIGN_IN";
+        return i != 0 ? i != 1 ? GrsBaseInfo.CountryCodeSource.UNKNOWN : "STEP_GETTING_REMOTE_SERVICE" : "STEP_SERVICE_BINDINGS_AND_SIGN_IN";
     }
 
     @Override // com.google.android.gms.common.api.internal.zaaw

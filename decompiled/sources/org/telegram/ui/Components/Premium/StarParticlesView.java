@@ -18,10 +18,10 @@ import androidx.core.graphics.ColorUtils;
 import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.GLIconSettingsView;
 /* loaded from: classes3.dex */

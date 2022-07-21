@@ -35,6 +35,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.graphics.drawable.shapes.RectShape;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
@@ -51,6 +52,7 @@ import android.util.SparseArray;
 import android.util.StateSet;
 import android.view.View;
 import androidx.core.graphics.ColorUtils;
+import com.huawei.hms.opendevice.c;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -81,11 +83,11 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.time.SunDate;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -1482,7 +1484,7 @@ public class Theme {
         }
 
         public boolean isColor() {
-            return "c".equals(this.slug);
+            return c.a.equals(this.slug);
         }
 
         public boolean isTheme() {
@@ -2629,7 +2631,7 @@ public class Theme {
         if (r2 == 1) goto L22;
      */
     /* JADX WARN: Code restructure failed: missing block: B:22:0x005c, code lost:
-        org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawable = org.telegram.messenger.ApplicationLoader.applicationContext.getResources().getDrawable(org.telegram.messenger.R.drawable.newyear);
+        org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawable = org.telegram.messenger.ApplicationLoader.applicationContext.getResources().getDrawable(org.telegram.messenger.beta.R.drawable.newyear);
         org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawableOffsetX = -org.telegram.messenger.AndroidUtilities.dp(3.0f);
         org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawableOffsetY = -org.telegram.messenger.AndroidUtilities.dp(1.0f);
      */
@@ -2688,7 +2690,7 @@ public class Theme {
         L5c:
             android.content.Context r0 = org.telegram.messenger.ApplicationLoader.applicationContext
             android.content.res.Resources r0 = r0.getResources()
-            r1 = 2131166000(0x7f070330, float:1.7946233E38)
+            r1 = 2131166003(0x7f070333, float:1.794624E38)
             android.graphics.drawable.Drawable r0 = r0.getDrawable(r1)
             org.telegram.ui.ActionBar.Theme.dialogs_holidayDrawable = r0
             r0 = 1077936128(0x40400000, float:3.0)
@@ -3085,7 +3087,7 @@ public class Theme {
         }
 
         /* JADX WARN: Multi-variable type inference failed */
-        private static Drawable createRect(int i, int i2, float... fArr) {
+        public static Drawable createRect(int i, int i2, float... fArr) {
             ColorDrawable colorDrawable = null;
             if (i != 0) {
                 if (hasNonzeroRadii(fArr)) {
@@ -3099,27 +3101,28 @@ public class Theme {
             return createRect(colorDrawable, i2, fArr);
         }
 
-        /* JADX WARN: Multi-variable type inference failed */
         private static Drawable createRect(Drawable drawable, int i, float... fArr) {
-            ColorDrawable colorDrawable;
-            ShapeDrawable shapeDrawable = null;
+            ShapeDrawable shapeDrawable;
+            ShapeDrawable shapeDrawable2;
             if (Build.VERSION.SDK_INT >= 21) {
                 if (hasNonzeroRadii(fArr)) {
-                    ShapeDrawable shapeDrawable2 = new ShapeDrawable(new RoundRectShape(calcRadii(fArr), null, null));
+                    shapeDrawable2 = new ShapeDrawable(new RoundRectShape(calcRadii(fArr), null, null));
                     shapeDrawable2.getPaint().setColor(-1);
-                    shapeDrawable = shapeDrawable2;
+                } else {
+                    shapeDrawable2 = new ShapeDrawable(new RectShape());
+                    shapeDrawable2.getPaint().setColor(-1);
                 }
-                return new RippleDrawable(new ColorStateList(new int[][]{StateSet.WILD_CARD}, new int[]{i}), drawable, shapeDrawable);
+                return new RippleDrawable(new ColorStateList(new int[][]{StateSet.WILD_CARD}, new int[]{i}), drawable, shapeDrawable2);
             }
             StateListDrawable stateListDrawable = new StateListDrawable();
             if (hasNonzeroRadii(fArr)) {
-                ShapeDrawable shapeDrawable3 = new ShapeDrawable(new RoundRectShape(calcRadii(fArr), null, null));
-                shapeDrawable3.getPaint().setColor(i);
-                colorDrawable = shapeDrawable3;
+                shapeDrawable = new ShapeDrawable(new RoundRectShape(calcRadii(fArr), null, null));
+                shapeDrawable.getPaint().setColor(i);
             } else {
-                colorDrawable = new ColorDrawable(i);
+                shapeDrawable = new ShapeDrawable(new RectShape());
+                shapeDrawable.getPaint().setColor(i);
             }
-            LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{drawable, colorDrawable});
+            LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{drawable, shapeDrawable});
             stateListDrawable.addState(new int[]{16842919}, layerDrawable);
             stateListDrawable.addState(new int[]{16842913}, layerDrawable);
             stateListDrawable.addState(StateSet.WILD_CARD, drawable);
@@ -3139,14 +3142,14 @@ public class Theme {
             return false;
         }
 
-        private static int calcRippleColor(int i) {
+        public static int calcRippleColor(int i) {
             if (tempHSV == null) {
                 tempHSV = new float[3];
             }
             Color.colorToHSV(i, tempHSV);
             float[] fArr = tempHSV;
             if (fArr[1] > 0.01f) {
-                fArr[1] = Math.min(1.0f, Math.max(0.0f, fArr[1] + (Theme.isCurrentThemeDark() ? -0.25f : 0.25f)));
+                fArr[1] = Math.min(1.0f, Math.max(0.0f, fArr[1] + (Theme.isCurrentThemeDark() ? 0.25f : -0.25f)));
                 float[] fArr2 = tempHSV;
                 fArr2[2] = Math.min(1.0f, Math.max(0.0f, fArr2[2] + (Theme.isCurrentThemeDark() ? 0.05f : -0.05f)));
             } else {
@@ -6072,7 +6075,7 @@ public class Theme {
     }
 
     @SuppressLint({"DiscouragedPrivateApi"})
-    @TargetApi(R.styleable.MapAttrs_uiZoomGestures)
+    @TargetApi(21)
     public static void setRippleDrawableForceSoftware(RippleDrawable rippleDrawable) {
         if (rippleDrawable == null) {
             return;

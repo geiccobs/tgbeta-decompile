@@ -15,7 +15,7 @@ import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MediaDataController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.TLRPC$TL_attachMenuBot;
 import org.telegram.tgnet.TLRPC$TL_attachMenuBotIcon;
 /* loaded from: classes3.dex */

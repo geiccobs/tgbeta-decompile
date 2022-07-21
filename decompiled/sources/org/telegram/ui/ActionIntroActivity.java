@@ -87,7 +87,7 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
         int i2 = 0;
         if (actionBar != null) {
             actionBar.setBackgroundColor(Theme.getColor("windowBackgroundWhite"));
-            this.actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+            this.actionBar.setBackButtonImage(org.telegram.messenger.beta.R.drawable.ic_ab_back);
             this.actionBar.setItemsColor(Theme.getColor("windowBackgroundWhiteGrayText2"), false);
             this.actionBar.setItemsBackgroundColor(Theme.getColor("actionBarWhiteSelector"), false);
             this.actionBar.setCastShadows(false);
@@ -530,7 +530,7 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                 if (i7 == 0) {
                     this.desctiptionLines[i10].setLinkTextColor(Theme.getColor("windowBackgroundWhiteLinkText"));
                     this.desctiptionLines[i10].setHighlightColor(Theme.getColor("windowBackgroundWhiteLinkSelection"));
-                    String string = LocaleController.getString("AuthAnotherClientInfo1", R.string.AuthAnotherClientInfo1);
+                    String string = LocaleController.getString("AuthAnotherClientInfo1", org.telegram.messenger.beta.R.string.AuthAnotherClientInfo1);
                     SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(string);
                     int indexOf = string.indexOf(42);
                     int lastIndexOf = string.lastIndexOf(42);
@@ -538,13 +538,13 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                         this.desctiptionLines[i10].setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
                         spannableStringBuilder.replace(lastIndexOf, lastIndexOf + 1, (CharSequence) str);
                         spannableStringBuilder.replace(indexOf, indexOf + 1, (CharSequence) str);
-                        spannableStringBuilder.setSpan(new URLSpanNoUnderline(LocaleController.getString("AuthAnotherClientDownloadClientUrl", R.string.AuthAnotherClientDownloadClientUrl)), indexOf, lastIndexOf - 1, 33);
+                        spannableStringBuilder.setSpan(new URLSpanNoUnderline(LocaleController.getString("AuthAnotherClientDownloadClientUrl", org.telegram.messenger.beta.R.string.AuthAnotherClientDownloadClientUrl)), indexOf, lastIndexOf - 1, 33);
                     }
                     this.desctiptionLines[i10].setText(spannableStringBuilder);
                 } else if (i7 == 1) {
-                    this.desctiptionLines[i10].setText(LocaleController.getString("AuthAnotherClientInfo2", R.string.AuthAnotherClientInfo2));
+                    this.desctiptionLines[i10].setText(LocaleController.getString("AuthAnotherClientInfo2", org.telegram.messenger.beta.R.string.AuthAnotherClientInfo2));
                 } else {
-                    this.desctiptionLines[i10].setText(LocaleController.getString("AuthAnotherClientInfo3", R.string.AuthAnotherClientInfo3));
+                    this.desctiptionLines[i10].setText(LocaleController.getString("AuthAnotherClientInfo3", org.telegram.messenger.beta.R.string.AuthAnotherClientInfo3));
                 }
                 if (LocaleController.isRTL) {
                     linearLayout2.setGravity(5);
@@ -617,10 +617,10 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
         switch (this.currentType) {
             case 0:
                 this.imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                this.imageView.setAnimation(R.raw.channel_create, 200, 200);
-                this.titleTextView.setText(LocaleController.getString("ChannelAlertTitle", R.string.ChannelAlertTitle));
-                this.descriptionText.setText(LocaleController.getString("ChannelAlertText", R.string.ChannelAlertText));
-                this.buttonTextView.setText(LocaleController.getString("ChannelAlertCreate2", R.string.ChannelAlertCreate2));
+                this.imageView.setAnimation(org.telegram.messenger.beta.R.raw.channel_create, 200, 200);
+                this.titleTextView.setText(LocaleController.getString("ChannelAlertTitle", org.telegram.messenger.beta.R.string.ChannelAlertTitle));
+                this.descriptionText.setText(LocaleController.getString("ChannelAlertText", org.telegram.messenger.beta.R.string.ChannelAlertText));
+                this.buttonTextView.setText(LocaleController.getString("ChannelAlertCreate2", org.telegram.messenger.beta.R.string.ChannelAlertCreate2));
                 this.imageView.playAnimation();
                 this.flickerButton = true;
                 break;
@@ -628,14 +628,14 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                 this.imageView.setBackgroundDrawable(Theme.createCircleDrawable(AndroidUtilities.dp(100.0f), Theme.getColor("chats_archiveBackground")));
                 this.imageView.setImageDrawable(new ShareLocationDrawable(context, 3));
                 this.imageView.setScaleType(ImageView.ScaleType.CENTER);
-                this.titleTextView.setText(LocaleController.getString("PeopleNearby", R.string.PeopleNearby));
-                this.descriptionText.setText(LocaleController.getString("PeopleNearbyAccessInfo", R.string.PeopleNearbyAccessInfo));
-                this.buttonTextView.setText(LocaleController.getString("PeopleNearbyAllowAccess", R.string.PeopleNearbyAllowAccess));
+                this.titleTextView.setText(LocaleController.getString("PeopleNearby", org.telegram.messenger.beta.R.string.PeopleNearby));
+                this.descriptionText.setText(LocaleController.getString("PeopleNearbyAccessInfo", org.telegram.messenger.beta.R.string.PeopleNearbyAccessInfo));
+                this.buttonTextView.setText(LocaleController.getString("PeopleNearbyAllowAccess", org.telegram.messenger.beta.R.string.PeopleNearbyAllowAccess));
                 break;
             case 2:
                 this.subtitleTextView.setVisibility(0);
                 this.descriptionText2.setVisibility(0);
-                this.imageView.setImageResource(Theme.getCurrentTheme().isDark() ? R.drawable.groupsintro2 : R.drawable.groupsintro);
+                this.imageView.setImageResource(Theme.getCurrentTheme().isDark() ? org.telegram.messenger.beta.R.drawable.groupsintro2 : org.telegram.messenger.beta.R.drawable.groupsintro);
                 this.imageView.setScaleType(ImageView.ScaleType.CENTER);
                 TextView textView7 = this.subtitleTextView;
                 String str3 = this.currentGroupCreateDisplayAddress;
@@ -643,15 +643,15 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                     str = str3;
                 }
                 textView7.setText(str);
-                this.titleTextView.setText(LocaleController.getString("NearbyCreateGroup", R.string.NearbyCreateGroup));
-                this.descriptionText.setText(LocaleController.getString("NearbyCreateGroupInfo", R.string.NearbyCreateGroupInfo));
-                this.descriptionText2.setText(LocaleController.getString("NearbyCreateGroupInfo2", R.string.NearbyCreateGroupInfo2));
-                this.buttonTextView.setText(LocaleController.getString("NearbyStartGroup", R.string.NearbyStartGroup));
+                this.titleTextView.setText(LocaleController.getString("NearbyCreateGroup", org.telegram.messenger.beta.R.string.NearbyCreateGroup));
+                this.descriptionText.setText(LocaleController.getString("NearbyCreateGroupInfo", org.telegram.messenger.beta.R.string.NearbyCreateGroupInfo));
+                this.descriptionText2.setText(LocaleController.getString("NearbyCreateGroupInfo2", org.telegram.messenger.beta.R.string.NearbyCreateGroupInfo2));
+                this.buttonTextView.setText(LocaleController.getString("NearbyStartGroup", org.telegram.messenger.beta.R.string.NearbyStartGroup));
                 break;
             case 3:
                 this.subtitleTextView.setVisibility(0);
                 this.imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                this.imageView.setAnimation(R.raw.utyan_change_number, 200, 200);
+                this.imageView.setAnimation(org.telegram.messenger.beta.R.raw.utyan_change_number, 200, 200);
                 this.imageView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda4
                     @Override // android.view.View.OnClickListener
                     public final void onClick(View view) {
@@ -666,7 +666,7 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                 if (user != null) {
                     TextView textView8 = this.subtitleTextView;
                     PhoneFormat phoneFormat = PhoneFormat.getInstance();
-                    textView8.setText(LocaleController.formatString("PhoneNumberKeepButton", R.string.PhoneNumberKeepButton, phoneFormat.format("+" + user.phone)));
+                    textView8.setText(LocaleController.formatString("PhoneNumberKeepButton", org.telegram.messenger.beta.R.string.PhoneNumberKeepButton, phoneFormat.format("+" + user.phone)));
                 }
                 this.subtitleTextView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda2
                     @Override // android.view.View.OnClickListener
@@ -674,9 +674,9 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                         ActionIntroActivity.this.lambda$createView$5(view);
                     }
                 });
-                this.titleTextView.setText(LocaleController.getString("PhoneNumberChange2", R.string.PhoneNumberChange2));
-                this.descriptionText.setText(AndroidUtilities.replaceTags(LocaleController.getString("PhoneNumberHelp", R.string.PhoneNumberHelp)));
-                this.buttonTextView.setText(LocaleController.getString("PhoneNumberChange2", R.string.PhoneNumberChange2));
+                this.titleTextView.setText(LocaleController.getString("PhoneNumberChange2", org.telegram.messenger.beta.R.string.PhoneNumberChange2));
+                this.descriptionText.setText(AndroidUtilities.replaceTags(LocaleController.getString("PhoneNumberHelp", org.telegram.messenger.beta.R.string.PhoneNumberHelp)));
+                this.buttonTextView.setText(LocaleController.getString("PhoneNumberChange2", org.telegram.messenger.beta.R.string.PhoneNumberChange2));
                 this.imageView.playAnimation();
                 this.flickerButton = true;
                 break;
@@ -684,22 +684,22 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                 this.imageView.setBackgroundDrawable(Theme.createCircleDrawable(AndroidUtilities.dp(100.0f), Theme.getColor("chats_archiveBackground")));
                 this.imageView.setImageDrawable(new ShareLocationDrawable(context, 3));
                 this.imageView.setScaleType(ImageView.ScaleType.CENTER);
-                this.titleTextView.setText(LocaleController.getString("PeopleNearby", R.string.PeopleNearby));
-                this.descriptionText.setText(LocaleController.getString("PeopleNearbyGpsInfo", R.string.PeopleNearbyGpsInfo));
-                this.buttonTextView.setText(LocaleController.getString("PeopleNearbyGps", R.string.PeopleNearbyGps));
+                this.titleTextView.setText(LocaleController.getString("PeopleNearby", org.telegram.messenger.beta.R.string.PeopleNearby));
+                this.descriptionText.setText(LocaleController.getString("PeopleNearbyGpsInfo", org.telegram.messenger.beta.R.string.PeopleNearbyGpsInfo));
+                this.buttonTextView.setText(LocaleController.getString("PeopleNearbyGps", org.telegram.messenger.beta.R.string.PeopleNearbyGps));
                 break;
             case 5:
                 this.colors = new int[8];
                 updateColors();
-                this.imageView.setAnimation(R.raw.qr_login, 334, 334, this.colors);
+                this.imageView.setAnimation(org.telegram.messenger.beta.R.raw.qr_login, 334, 334, this.colors);
                 this.imageView.setScaleType(ImageView.ScaleType.CENTER);
-                this.titleTextView.setText(LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient));
-                this.buttonTextView.setText(LocaleController.getString("AuthAnotherClientScan", R.string.AuthAnotherClientScan));
+                this.titleTextView.setText(LocaleController.getString("AuthAnotherClient", org.telegram.messenger.beta.R.string.AuthAnotherClient));
+                this.buttonTextView.setText(LocaleController.getString("AuthAnotherClientScan", org.telegram.messenger.beta.R.string.AuthAnotherClientScan));
                 this.imageView.playAnimation();
                 break;
             case 6:
                 this.imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                this.imageView.setAnimation(R.raw.utyan_passcode, 200, 200);
+                this.imageView.setAnimation(org.telegram.messenger.beta.R.raw.utyan_passcode, 200, 200);
                 this.imageView.setFocusable(false);
                 this.imageView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda5
                     @Override // android.view.View.OnClickListener
@@ -707,9 +707,9 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                         ActionIntroActivity.this.lambda$createView$3(view);
                     }
                 });
-                this.titleTextView.setText(LocaleController.getString("Passcode", R.string.Passcode));
-                this.descriptionText.setText(LocaleController.getString("ChangePasscodeInfoShort", R.string.ChangePasscodeInfoShort));
-                this.buttonTextView.setText(LocaleController.getString("EnablePasscode", R.string.EnablePasscode));
+                this.titleTextView.setText(LocaleController.getString("Passcode", org.telegram.messenger.beta.R.string.Passcode));
+                this.descriptionText.setText(LocaleController.getString("ChangePasscodeInfoShort", org.telegram.messenger.beta.R.string.ChangePasscodeInfoShort));
+                this.buttonTextView.setText(LocaleController.getString("EnablePasscode", org.telegram.messenger.beta.R.string.EnablePasscode));
                 this.imageView.playAnimation();
                 this.flickerButton = true;
                 break;
@@ -747,15 +747,15 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
                 return;
             case 3:
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                builder.setTitle(LocaleController.getString("PhoneNumberChangeTitle", R.string.PhoneNumberChangeTitle));
-                builder.setMessage(LocaleController.getString("PhoneNumberAlert", R.string.PhoneNumberAlert));
-                builder.setPositiveButton(LocaleController.getString("Change", R.string.Change), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda1
+                builder.setTitle(LocaleController.getString("PhoneNumberChangeTitle", org.telegram.messenger.beta.R.string.PhoneNumberChangeTitle));
+                builder.setMessage(LocaleController.getString("PhoneNumberAlert", org.telegram.messenger.beta.R.string.PhoneNumberAlert));
+                builder.setPositiveButton(LocaleController.getString("Change", org.telegram.messenger.beta.R.string.Change), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda1
                     @Override // android.content.DialogInterface.OnClickListener
                     public final void onClick(DialogInterface dialogInterface, int i) {
                         ActionIntroActivity.this.lambda$createView$1(dialogInterface, i);
                     }
                 });
-                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                builder.setNegativeButton(LocaleController.getString("Cancel", org.telegram.messenger.beta.R.string.Cancel), null);
                 showDialog(builder.create());
                 return;
             case 4:
@@ -899,12 +899,12 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
             if (iArr.length > 0 && iArr[0] == 0) {
                 processOpenQrReader();
             } else {
-                new AlertDialog.Builder(getParentActivity()).setMessage(AndroidUtilities.replaceTags(LocaleController.getString("QRCodePermissionNoCameraWithHint", R.string.QRCodePermissionNoCameraWithHint))).setPositiveButton(LocaleController.getString("PermissionOpenSettings", R.string.PermissionOpenSettings), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda0
+                new AlertDialog.Builder(getParentActivity()).setMessage(AndroidUtilities.replaceTags(LocaleController.getString("QRCodePermissionNoCameraWithHint", org.telegram.messenger.beta.R.string.QRCodePermissionNoCameraWithHint))).setPositiveButton(LocaleController.getString("PermissionOpenSettings", org.telegram.messenger.beta.R.string.PermissionOpenSettings), new DialogInterface.OnClickListener() { // from class: org.telegram.ui.ActionIntroActivity$$ExternalSyntheticLambda0
                     @Override // android.content.DialogInterface.OnClickListener
                     public final void onClick(DialogInterface dialogInterface, int i2) {
                         ActionIntroActivity.this.lambda$onRequestPermissionsResultFragment$7(dialogInterface, i2);
                     }
-                }).setNegativeButton(LocaleController.getString("ContactsPermissionAlertNotNow", R.string.ContactsPermissionAlertNotNow), null).setTopAnimation(R.raw.permission_request_camera, 72, false, Theme.getColor("dialogTopBackground")).show();
+                }).setNegativeButton(LocaleController.getString("ContactsPermissionAlertNotNow", org.telegram.messenger.beta.R.string.ContactsPermissionAlertNotNow), null).setTopAnimation(org.telegram.messenger.beta.R.raw.permission_request_camera, 72, false, Theme.getColor("dialogTopBackground")).show();
             }
         }
     }

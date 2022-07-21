@@ -14,21 +14,21 @@ class J2 extends T2 implements S2 {
         this.d = bVar;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(double d) {
-        AbstractC0135o1.f(this);
+        AbstractC0140o1.f(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void accept(int i) {
-        AbstractC0135o1.d(this);
+        AbstractC0140o1.d(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0125m3, j$.util.stream.AbstractC0119l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0135o1.e(this);
+        AbstractC0140o1.e(this);
         throw null;
     }
 
@@ -47,16 +47,16 @@ class J2 extends T2 implements S2 {
         this.a = this.d.apply(this.a, ((J2) s2).a);
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public void n(long j) {
         this.a = this.b.get();
     }
 
-    @Override // j$.util.stream.AbstractC0125m3
+    @Override // j$.util.stream.AbstractC0130m3
     public /* synthetic */ boolean o() {
         return false;
     }

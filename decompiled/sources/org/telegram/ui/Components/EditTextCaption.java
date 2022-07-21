@@ -1,6 +1,8 @@
 package org.telegram.ui.Components;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -8,6 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Layout;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -23,10 +27,12 @@ import android.widget.FrameLayout;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import java.util.List;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.beta.R;
+import org.telegram.messenger.utils.CopyUtilities;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.TextStyleSpan;
@@ -206,14 +212,16 @@ public class EditTextCaption extends EditTextBoldCursor {
         CharacterStyle[] characterStyleArr = (CharacterStyle[]) text.getSpans(i, i2, CharacterStyle.class);
         if (characterStyleArr != null && characterStyleArr.length > 0) {
             for (CharacterStyle characterStyle : characterStyleArr) {
-                int spanStart = text.getSpanStart(characterStyle);
-                int spanEnd = text.getSpanEnd(characterStyle);
-                text.removeSpan(characterStyle);
-                if (spanStart < i) {
-                    text.setSpan(characterStyle, spanStart, i, 33);
-                }
-                if (spanEnd > i2) {
-                    text.setSpan(characterStyle, i2, spanEnd, 33);
+                if (!(characterStyle instanceof AnimatedEmojiSpan)) {
+                    int spanStart = text.getSpanStart(characterStyle);
+                    int spanEnd = text.getSpanEnd(characterStyle);
+                    text.removeSpan(characterStyle);
+                    if (spanStart < i) {
+                        text.setSpan(characterStyle, spanStart, i, 33);
+                    }
+                    if (spanEnd > i2) {
+                        text.setSpan(characterStyle, i2, spanEnd, 33);
+                    }
                 }
             }
         }
@@ -502,5 +510,52 @@ public class EditTextCaption extends EditTextBoldCursor {
         Theme.ResourcesProvider resourcesProvider = this.resourcesProvider;
         Integer color = resourcesProvider != null ? resourcesProvider.getColor(str) : null;
         return color != null ? color.intValue() : Theme.getColor(str);
+    }
+
+    @Override // android.widget.TextView
+    public boolean onTextContextMenuItem(int i) {
+        if (i == 16908322) {
+            ClipData primaryClip = ((ClipboardManager) getContext().getSystemService("clipboard")).getPrimaryClip();
+            if (primaryClip != null && primaryClip.getItemCount() == 1 && primaryClip.getDescription().hasMimeType("text/html")) {
+                try {
+                    Spannable fromHTML = CopyUtilities.fromHTML(primaryClip.getItemAt(0).getHtmlText());
+                    Emoji.replaceEmoji(fromHTML, getPaint().getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
+                    AnimatedEmojiSpan[] animatedEmojiSpanArr = (AnimatedEmojiSpan[]) fromHTML.getSpans(0, fromHTML.length(), AnimatedEmojiSpan.class);
+                    if (animatedEmojiSpanArr != null) {
+                        for (AnimatedEmojiSpan animatedEmojiSpan : animatedEmojiSpanArr) {
+                            animatedEmojiSpan.applyFontMetrics(getPaint().getFontMetricsInt(), AnimatedEmojiDrawable.getCacheTypeForEnterView());
+                        }
+                    }
+                    int max = Math.max(0, getSelectionStart());
+                    setText(getText().replace(max, Math.min(getText().length(), getSelectionEnd()), fromHTML));
+                    setSelection(fromHTML.length() + max, max + fromHTML.length());
+                    return true;
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            }
+        } else {
+            try {
+                if (i == 16908321) {
+                    AndroidUtilities.addToClipboard(getText().subSequence(Math.max(0, getSelectionStart()), Math.min(getText().length(), getSelectionEnd())));
+                    return true;
+                } else if (i == 16908320) {
+                    int max2 = Math.max(0, getSelectionStart());
+                    int min = Math.min(getText().length(), getSelectionEnd());
+                    AndroidUtilities.addToClipboard(getText().subSequence(max2, min));
+                    SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+                    if (max2 != 0) {
+                        spannableStringBuilder.append(getText().subSequence(0, max2));
+                    }
+                    if (min != getText().length()) {
+                        spannableStringBuilder.append(getText().subSequence(min, getText().length()));
+                    }
+                    setText(spannableStringBuilder);
+                    return true;
+                }
+            } catch (Exception unused) {
+            }
+        }
+        return super.onTextContextMenuItem(i);
     }
 }

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -53,7 +53,7 @@ public class PermanentLinkBottomSheet extends BottomSheet {
         linkActionView.setPermanent(true);
         RLottieImageView rLottieImageView = new RLottieImageView(context);
         this.imageView = rLottieImageView;
-        RLottieDrawable rLottieDrawable = new RLottieDrawable(R.raw.shared_link_enter, "2131558534", AndroidUtilities.dp(90.0f), AndroidUtilities.dp(90.0f), false, null);
+        RLottieDrawable rLottieDrawable = new RLottieDrawable(R.raw.shared_link_enter, "2131558543", AndroidUtilities.dp(90.0f), AndroidUtilities.dp(90.0f), false, null);
         this.linkIcon = rLottieDrawable;
         rLottieDrawable.setCustomEndFrame(42);
         rLottieImageView.setAnimation(this.linkIcon);

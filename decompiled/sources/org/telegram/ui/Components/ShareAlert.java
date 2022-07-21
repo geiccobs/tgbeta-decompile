@@ -64,12 +64,12 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -527,7 +527,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.recentSearchObjects = new ArrayList<>();
         new LongSparseArray();
         this.showSendersName = true;
-        this.lastOffset = ConnectionsManager.DEFAULT_DATACENTER_ID;
+        this.lastOffset = Integer.MAX_VALUE;
         this.resourcesProvider = resourcesProvider;
         if (context instanceof Activity) {
             this.parentActivity = (Activity) context;
@@ -1837,15 +1837,30 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 i2++;
             } else {
                 if (this.sendingMessageObjects != null) {
+                    ArrayList<Long> arrayList = new ArrayList();
                     while (i < this.selectedDialogs.size()) {
                         long keyAt2 = this.selectedDialogs.keyAt(i);
                         if (this.frameLayout2.getTag() != null && this.commentTextView.length() > 0) {
                             SendMessagesHelper.getInstance(this.currentAccount).sendMessage(this.commentTextView.getText().toString(), keyAt2, null, null, null, true, null, null, null, z, 0, null);
                         }
-                        SendMessagesHelper.getInstance(this.currentAccount).sendMessage(this.sendingMessageObjects, keyAt2, !this.showSendersName, false, z, 0);
+                        int sendMessage = SendMessagesHelper.getInstance(this.currentAccount).sendMessage(this.sendingMessageObjects, keyAt2, !this.showSendersName, false, z, 0);
+                        if (sendMessage != 0) {
+                            arrayList.add(Long.valueOf(keyAt2));
+                        }
+                        if (this.selectedDialogs.size() == 1) {
+                            AlertsCreator.showSendMediaAlert(sendMessage, this.parentFragment, null);
+                            if (sendMessage != 0) {
+                                break;
+                            }
+                        }
                         i++;
                     }
-                    onSend(this.selectedDialogs, this.sendingMessageObjects.size());
+                    for (Long l : arrayList) {
+                        this.selectedDialogs.remove(l.longValue());
+                    }
+                    if (!this.selectedDialogs.isEmpty()) {
+                        onSend(this.selectedDialogs, this.sendingMessageObjects.size());
+                    }
                 } else {
                     SwitchView switchView = this.switchView;
                     int i4 = switchView != null ? switchView.currentTab : 0;
@@ -1945,7 +1960,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             this.lastOffset = childAt.getTop();
             runShadowAnimation(0, false);
         } else {
-            this.lastOffset = ConnectionsManager.DEFAULT_DATACENTER_ID;
+            this.lastOffset = Integer.MAX_VALUE;
             runShadowAnimation(0, true);
             top = i2;
         }

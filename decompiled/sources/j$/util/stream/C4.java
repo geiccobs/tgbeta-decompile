@@ -1,6 +1,6 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0034a;
+import j$.util.AbstractC0039a;
 import j$.util.function.Consumer;
 import java.util.Comparator;
 /* JADX INFO: Access modifiers changed from: package-private */
@@ -76,11 +76,11 @@ public final class C4 extends D4 implements j$.util.u {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0034a.e(this);
+        return AbstractC0039a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0034a.f(this, i);
+        return AbstractC0039a.f(this, i);
     }
 }

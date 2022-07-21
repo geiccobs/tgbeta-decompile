@@ -35,9 +35,9 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.beta.R;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -449,7 +449,7 @@ public class VoIPHelper {
         }
     }
 
-    @TargetApi(R.styleable.MapAttrs_zOrderOnTop)
+    @TargetApi(org.telegram.messenger.R.styleable.MapAttrs_zOrderOnTop)
     public static void permissionDenied(final Activity activity, final Runnable runnable, int i) {
         String str;
         int i2;
