@@ -1,9 +1,9 @@
 package j$.util.stream;
 
-import j$.util.C0049j;
+import j$.util.C0048j;
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-class E2 implements S2, AbstractC0112j3 {
+class E2 implements S2, AbstractC0111j3 {
     private boolean a;
     private double b;
     final /* synthetic */ j$.util.function.d c;
@@ -12,7 +12,7 @@ class E2 implements S2, AbstractC0112j3 {
         this.c = dVar;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void accept(double d) {
         if (this.a) {
             this.a = false;
@@ -22,15 +22,15 @@ class E2 implements S2, AbstractC0112j3 {
         this.b = d;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void accept(int i) {
-        AbstractC0140o1.d(this);
+        AbstractC0139o1.d(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0129m3, j$.util.stream.AbstractC0123l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0140o1.e(this);
+        AbstractC0139o1.e(this);
         throw null;
     }
 
@@ -41,12 +41,12 @@ class E2 implements S2, AbstractC0112j3 {
 
     /* renamed from: b */
     public /* synthetic */ void accept(Double d) {
-        AbstractC0140o1.a(this, d);
+        AbstractC0139o1.a(this, d);
     }
 
     @Override // j$.util.function.y
     public Object get() {
-        return this.a ? C0049j.a() : C0049j.d(this.b);
+        return this.a ? C0048j.a() : C0048j.d(this.b);
     }
 
     @Override // j$.util.stream.S2
@@ -63,17 +63,17 @@ class E2 implements S2, AbstractC0112j3 {
         return new j$.util.function.e(this, fVar);
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void n(long j) {
         this.a = true;
         this.b = 0.0d;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ boolean o() {
         return false;
     }

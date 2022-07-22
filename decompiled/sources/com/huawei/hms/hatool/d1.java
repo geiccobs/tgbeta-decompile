@@ -66,9 +66,9 @@ public class d1 extends v {
         return a2;
     }
 
-    public static C0038r a(List<q> list, String str, String str2, String str3, String str4) {
+    public static C0037r a(List<q> list, String str, String str2, String str3, String str4) {
         y.c("hmsSdk", "generate UploadData");
-        C0038r b = v.b(str, str2);
+        C0037r b = v.b(str, str2);
         if (b == null) {
             return null;
         }

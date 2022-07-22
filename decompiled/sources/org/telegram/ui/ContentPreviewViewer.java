@@ -273,12 +273,12 @@ public class ContentPreviewViewer {
                     for (int i7 = 0; i7 < arrayList3.size(); i7++) {
                         iArr[i7] = ((Integer) arrayList3.get(i7)).intValue();
                     }
-                    View$OnClickListenerC00361 view$OnClickListenerC00361 = new View$OnClickListenerC00361(arrayList2, isStickerInFavorites);
+                    View$OnClickListenerC00351 view$OnClickListenerC00351 = new View$OnClickListenerC00351(arrayList2, isStickerInFavorites);
                     ActionBarPopupWindow.ActionBarPopupWindowLayout actionBarPopupWindowLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(ContentPreviewViewer.this.containerView.getContext(), R.drawable.popup_fixed_alert2, ContentPreviewViewer.this.resourcesProvider);
                     for (int i8 = 0; i8 < arrayList.size(); i8++) {
                         ActionBarMenuSubItem addItem = ActionBarMenuItem.addItem(actionBarPopupWindowLayout, ((Integer) arrayList3.get(i8)).intValue(), (CharSequence) arrayList.get(i8), false, ContentPreviewViewer.this.resourcesProvider);
                         addItem.setTag(Integer.valueOf(i8));
-                        addItem.setOnClickListener(view$OnClickListenerC00361);
+                        addItem.setOnClickListener(view$OnClickListenerC00351);
                     }
                     ContentPreviewViewer.this.popupWindow = new ActionBarPopupWindow(actionBarPopupWindowLayout, -2, -2) { // from class: org.telegram.ui.ContentPreviewViewer.1.2
                         {
@@ -437,11 +437,11 @@ public class ContentPreviewViewer {
 
         /* renamed from: org.telegram.ui.ContentPreviewViewer$1$1 */
         /* loaded from: classes3.dex */
-        class View$OnClickListenerC00361 implements View.OnClickListener {
+        class View$OnClickListenerC00351 implements View.OnClickListener {
             final /* synthetic */ ArrayList val$actions;
             final /* synthetic */ boolean val$inFavs;
 
-            View$OnClickListenerC00361(ArrayList arrayList, boolean z) {
+            View$OnClickListenerC00351(ArrayList arrayList, boolean z) {
                 AnonymousClass1.this = r1;
                 this.val$actions = arrayList;
                 this.val$inFavs = z;

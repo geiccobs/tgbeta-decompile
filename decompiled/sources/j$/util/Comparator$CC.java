@@ -8,17 +8,17 @@ import java.util.Comparator;
 /* loaded from: classes2.dex */
 public final /* synthetic */ class Comparator$CC {
     public static Comparator a() {
-        return EnumC0044f.INSTANCE;
+        return EnumC0043f.INSTANCE;
     }
 
     public static <T, U extends Comparable<? super U>> Comparator<T> comparing(Function<? super T, ? extends U> function) {
         function.getClass();
-        return new C0042d(function);
+        return new C0041d(function);
     }
 
     public static <T> Comparator<T> comparingInt(ToIntFunction<? super T> toIntFunction) {
         toIntFunction.getClass();
-        return new C0042d(toIntFunction);
+        return new C0041d(toIntFunction);
     }
 
     public static <T extends Comparable<? super T>> Comparator<T> reverseOrder() {

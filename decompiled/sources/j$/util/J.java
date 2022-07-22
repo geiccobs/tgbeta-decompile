@@ -66,7 +66,7 @@ public class J implements u {
 
     @Override // j$.util.u
     public Comparator getComparator() {
-        if (AbstractC0039a.f(this, 4)) {
+        if (AbstractC0038a.f(this, 4)) {
             return null;
         }
         throw new IllegalStateException();
@@ -74,12 +74,12 @@ public class J implements u {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0039a.e(this);
+        return AbstractC0038a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0039a.f(this, i);
+        return AbstractC0038a.f(this, i);
     }
 
     @Override // j$.util.u

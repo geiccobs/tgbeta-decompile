@@ -3,12 +3,12 @@ package org.telegram.ui.Components;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,18 +48,29 @@ public class AnimatedEmojiDrawable extends Drawable {
     private static HashMap<Integer, HashMap<Long, AnimatedEmojiDrawable>> globalEmojiCache = null;
     private static Paint placeholderPaint = null;
     public static int sizedp = 30;
-    private float alpha = 1.0f;
     private boolean attached;
     private int cacheType;
+    private int currentAccount;
     private TLRPC$Document document;
     private long documentId;
     private ArrayList<AnimatedEmojiSpan.AnimatedEmojiHolder> holders;
     private ImageReceiver imageReceiver;
     private ArrayList<View> views;
+    private float alpha = 1.0f;
+    private AnimatedFloat placeholderAlpha = new AnimatedFloat(1.0f, new Runnable() { // from class: org.telegram.ui.Components.AnimatedEmojiDrawable$$ExternalSyntheticLambda0
+        @Override // java.lang.Runnable
+        public final void run() {
+            AnimatedEmojiDrawable.this.invalidate();
+        }
+    }, 0, 150, new LinearInterpolator());
+    private boolean shouldDrawPlaceholder = false;
 
     /* loaded from: classes3.dex */
     public interface ReceivedDocument {
         void run(TLRPC$Document tLRPC$Document);
+    }
+
+    private void drawDebugCacheType(Canvas canvas) {
     }
 
     @Override // android.graphics.drawable.Drawable
@@ -410,6 +421,7 @@ public class AnimatedEmojiDrawable extends Drawable {
     }
 
     public AnimatedEmojiDrawable(int i, int i2, long j) {
+        this.currentAccount = i2;
         this.cacheType = i;
         if (i == 0) {
             TextPaint textPaint = Theme.chat_msgTextPaint;
@@ -418,7 +430,7 @@ public class AnimatedEmojiDrawable extends Drawable {
             sizedp = 34;
         }
         this.documentId = j;
-        getDocumentFetcher(i2).fetchDocument(j, new ReceivedDocument() { // from class: org.telegram.ui.Components.AnimatedEmojiDrawable$$ExternalSyntheticLambda1
+        getDocumentFetcher(i2).fetchDocument(j, new ReceivedDocument() { // from class: org.telegram.ui.Components.AnimatedEmojiDrawable$$ExternalSyntheticLambda2
             @Override // org.telegram.ui.Components.AnimatedEmojiDrawable.ReceivedDocument
             public final void run(TLRPC$Document tLRPC$Document) {
                 AnimatedEmojiDrawable.this.lambda$new$0(tLRPC$Document);
@@ -433,8 +445,9 @@ public class AnimatedEmojiDrawable extends Drawable {
 
     public AnimatedEmojiDrawable(int i, int i2, TLRPC$Document tLRPC$Document) {
         this.cacheType = i;
+        this.currentAccount = i2;
         this.document = tLRPC$Document;
-        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.AnimatedEmojiDrawable$$ExternalSyntheticLambda0
+        AndroidUtilities.runOnUIThread(new Runnable() { // from class: org.telegram.ui.Components.AnimatedEmojiDrawable$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
                 AnimatedEmojiDrawable.this.initDocument();
@@ -533,7 +546,7 @@ public class AnimatedEmojiDrawable extends Drawable {
         updateAttachState();
     }
 
-    void invalidate() {
+    public void invalidate() {
         if (this.views != null) {
             for (int i = 0; i < this.views.size(); i++) {
                 View view = this.views.get(i);
@@ -554,31 +567,47 @@ public class AnimatedEmojiDrawable extends Drawable {
 
     @Override // android.graphics.drawable.Drawable
     public void draw(Canvas canvas) {
+        drawDebugCacheType(canvas);
         ImageReceiver imageReceiver = this.imageReceiver;
         if (imageReceiver != null) {
             imageReceiver.setImageCoords(getBounds());
             this.imageReceiver.draw(canvas);
-            return;
+        } else {
+            this.shouldDrawPlaceholder = true;
         }
-        if (placeholderPaint == null) {
-            Paint paint = new Paint(1);
-            placeholderPaint = paint;
-            paint.setColor(Theme.isCurrentThemeDark() ? 268435455 : AndroidUtilities.LIGHT_STATUS_BAR_OVERLAY);
-        }
-        int alpha = placeholderPaint.getAlpha();
-        placeholderPaint.setAlpha((int) (alpha * this.alpha));
-        RectF rectF = AndroidUtilities.rectTmp;
-        rectF.set(getBounds());
-        canvas.drawCircle(rectF.centerX(), rectF.centerY(), rectF.width() * 0.4f, placeholderPaint);
-        placeholderPaint.setAlpha(alpha);
+        drawPlaceholder(canvas, getBounds());
     }
 
     public void draw(Canvas canvas, android.graphics.Rect rect, float f) {
+        drawDebugCacheType(canvas);
         ImageReceiver imageReceiver = this.imageReceiver;
         if (imageReceiver != null) {
             imageReceiver.setImageCoords(rect);
             this.imageReceiver.setAlpha(f);
             this.imageReceiver.draw(canvas);
+        } else {
+            this.shouldDrawPlaceholder = true;
+        }
+        drawPlaceholder(canvas, getBounds());
+    }
+
+    public void draw(Canvas canvas, ImageReceiver.BackgroundThreadDrawHolder backgroundThreadDrawHolder) {
+        drawDebugCacheType(canvas);
+        ImageReceiver imageReceiver = this.imageReceiver;
+        if (imageReceiver != null) {
+            imageReceiver.draw(canvas, backgroundThreadDrawHolder);
+        } else {
+            this.shouldDrawPlaceholder = true;
+        }
+        drawPlaceholder(canvas, getBounds());
+    }
+
+    private void drawPlaceholder(Canvas canvas, android.graphics.Rect rect) {
+        if (!this.shouldDrawPlaceholder) {
+            return;
+        }
+        float f = this.placeholderAlpha.set(this.imageReceiver == null ? 1.0f : 0.0f);
+        if (f < 0.0f) {
             return;
         }
         if (placeholderPaint == null) {
@@ -588,28 +617,7 @@ public class AnimatedEmojiDrawable extends Drawable {
         }
         int alpha = placeholderPaint.getAlpha();
         placeholderPaint.setAlpha((int) (alpha * f));
-        RectF rectF = AndroidUtilities.rectTmp;
-        rectF.set(rect);
-        canvas.drawCircle(rectF.centerX(), rectF.centerY(), rectF.width() * 0.4f, placeholderPaint);
-        placeholderPaint.setAlpha(alpha);
-    }
-
-    public void draw(Canvas canvas, ImageReceiver.BackgroundThreadDrawHolder backgroundThreadDrawHolder) {
-        ImageReceiver imageReceiver = this.imageReceiver;
-        if (imageReceiver != null) {
-            imageReceiver.draw(canvas, backgroundThreadDrawHolder);
-            return;
-        }
-        if (placeholderPaint == null) {
-            Paint paint = new Paint(1);
-            placeholderPaint = paint;
-            paint.setColor(Theme.isCurrentThemeDark() ? 268435455 : AndroidUtilities.LIGHT_STATUS_BAR_OVERLAY);
-        }
-        int alpha = placeholderPaint.getAlpha();
-        placeholderPaint.setAlpha((int) (alpha * this.alpha));
-        RectF rectF = AndroidUtilities.rectTmp;
-        rectF.set(getBounds());
-        canvas.drawCircle(rectF.centerX(), rectF.centerY(), rectF.width() * 0.4f, placeholderPaint);
+        canvas.drawCircle(rect.centerX(), rect.centerY(), rect.width() * 0.4f, placeholderPaint);
         placeholderPaint.setAlpha(alpha);
     }
 
@@ -650,23 +658,32 @@ public class AnimatedEmojiDrawable extends Drawable {
     }
 
     private void updateAttachState() {
+        HashMap<Long, AnimatedEmojiDrawable> hashMap;
         ArrayList<AnimatedEmojiSpan.AnimatedEmojiHolder> arrayList;
         if (this.imageReceiver == null) {
             return;
         }
         ArrayList<View> arrayList2 = this.views;
         boolean z = (arrayList2 != null && arrayList2.size() > 0) || ((arrayList = this.holders) != null && arrayList.size() > 0);
-        if (z == this.attached) {
+        if (z != this.attached) {
+            this.attached = z;
+            if (z) {
+                count++;
+                this.imageReceiver.onAttachedToWindow();
+            } else {
+                count--;
+                this.imageReceiver.onDetachedFromWindow();
+            }
+        }
+        ArrayList<View> arrayList3 = this.views;
+        if (arrayList3 != null && arrayList3.size() > 0) {
             return;
         }
-        this.attached = z;
-        if (z) {
-            count++;
-            this.imageReceiver.onAttachedToWindow();
+        ArrayList<AnimatedEmojiSpan.AnimatedEmojiHolder> arrayList4 = this.holders;
+        if ((arrayList4 != null && arrayList4.size() > 0) || (hashMap = globalEmojiCache.get(Integer.valueOf(this.currentAccount))) == null) {
             return;
         }
-        count--;
-        this.imageReceiver.onDetachedFromWindow();
+        hashMap.remove(Long.valueOf(this.documentId));
     }
 
     @Override // android.graphics.drawable.Drawable

@@ -1286,13 +1286,30 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         if (context == null) {
             context = getContext();
         }
-        ShareAlert shareAlert = new ShareAlert(context, null, str2, false, str2, false, this.resourcesProvider);
+        ShareAlert shareAlert = new ShareAlert(context, null, str2, false, str2, false, this.resourcesProvider) { // from class: org.telegram.ui.Components.StickersAlert.10
+            @Override // org.telegram.ui.Components.ShareAlert, org.telegram.ui.ActionBar.BottomSheet
+            public void dismissInternal() {
+                super.dismissInternal();
+                if (StickersAlert.this.parentFragment instanceof ChatActivity) {
+                    AndroidUtilities.requestAdjustResize(StickersAlert.this.parentFragment.getParentActivity(), StickersAlert.this.parentFragment.getClassGuid());
+                    if (((ChatActivity) StickersAlert.this.parentFragment).getChatActivityEnterView().getVisibility() != 0) {
+                        return;
+                    }
+                    StickersAlert.this.parentFragment.getFragmentView().requestLayout();
+                }
+            }
+        };
         BaseFragment baseFragment2 = this.parentFragment;
         if (baseFragment2 != null) {
             baseFragment2.showDialog(shareAlert);
-        } else {
-            shareAlert.show();
+            BaseFragment baseFragment3 = this.parentFragment;
+            if (!(baseFragment3 instanceof ChatActivity)) {
+                return;
+            }
+            shareAlert.setCalcMandatoryInsets(((ChatActivity) baseFragment3).isKeyboardVisible());
+            return;
         }
+        shareAlert.show();
     }
 
     /* JADX WARN: Removed duplicated region for block: B:30:0x0086  */
@@ -1447,7 +1464,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         editTextBoldCursor.setCursorSize(AndroidUtilities.dp(20.0f));
         editTextBoldCursor.setCursorWidth(1.5f);
         editTextBoldCursor.setPadding(0, AndroidUtilities.dp(4.0f), 0, 0);
-        editTextBoldCursor.addTextChangedListener(new TextWatcher() { // from class: org.telegram.ui.Components.StickersAlert.11
+        editTextBoldCursor.addTextChangedListener(new TextWatcher() { // from class: org.telegram.ui.Components.StickersAlert.12
             @Override // android.text.TextWatcher
             public void afterTextChanged(Editable editable) {
             }
@@ -1732,7 +1749,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(ObjectAnimator.ofFloat(this.stickerPreviewLayout, View.ALPHA, 0.0f));
         animatorSet.setDuration(200L);
-        animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.StickersAlert.12
+        animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.StickersAlert.13
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
             public void onAnimationEnd(Animator animator) {
                 StickersAlert.this.stickerPreviewLayout.setVisibility(8);
@@ -1767,7 +1784,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         animatorArr[0] = ObjectAnimator.ofFloat(view, property, fArr);
         animatorSet.playTogether(animatorArr);
         this.shadowAnimation[i].setDuration(150L);
-        this.shadowAnimation[i].addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.StickersAlert.13
+        this.shadowAnimation[i].addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.StickersAlert.14
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
             public void onAnimationEnd(Animator animator) {
                 if (StickersAlert.this.shadowAnimation[i] == null || !StickersAlert.this.shadowAnimation[i].equals(animator)) {
@@ -1835,7 +1852,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
     @Override // org.telegram.ui.ActionBar.BottomSheet, android.app.Dialog
     public void onStart() {
         super.onStart();
-        Bulletin.addDelegate((FrameLayout) this.containerView, new Bulletin.Delegate() { // from class: org.telegram.ui.Components.StickersAlert.14
+        Bulletin.addDelegate((FrameLayout) this.containerView, new Bulletin.Delegate() { // from class: org.telegram.ui.Components.StickersAlert.15
             @Override // org.telegram.ui.Components.Bulletin.Delegate
             public /* synthetic */ void onHide(Bulletin bulletin) {
                 Bulletin.Delegate.CC.$default$onHide(this, bulletin);

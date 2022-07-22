@@ -12,21 +12,21 @@ class H2 implements S2 {
         this.c = bVar;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void accept(double d) {
-        AbstractC0140o1.f(this);
+        AbstractC0139o1.f(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void accept(int i) {
-        AbstractC0140o1.d(this);
+        AbstractC0139o1.d(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0129m3, j$.util.stream.AbstractC0123l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0140o1.e(this);
+        AbstractC0139o1.e(this);
         throw null;
     }
 
@@ -58,17 +58,17 @@ class H2 implements S2 {
         }
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void n(long j) {
         this.a = true;
         this.b = null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ boolean o() {
         return false;
     }

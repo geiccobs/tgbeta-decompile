@@ -1090,7 +1090,10 @@ public class MessageObject {
         }
     }
 
+    /* JADX WARN: Multi-variable type inference failed */
+    /* JADX WARN: Type inference failed for: r10v1 */
     public void generatePinMessageText(TLRPC$User tLRPC$User, TLRPC$Chat tLRPC$Chat) {
+        boolean z;
         if (tLRPC$User == null && tLRPC$Chat == 0) {
             if (isFromUser()) {
                 tLRPC$User = MessagesController.getInstance(this.currentAccount).getUser(Long.valueOf(this.messageOwner.from_id.user_id));
@@ -1110,105 +1113,119 @@ public class MessageObject {
             if (!(tLRPC$Message instanceof TLRPC$TL_messageEmpty) && !(tLRPC$Message.action instanceof TLRPC$TL_messageActionHistoryClear)) {
                 if (messageObject.isMusic()) {
                     String string = LocaleController.getString("ActionPinnedMusic", org.telegram.messenger.beta.R.string.ActionPinnedMusic);
+                    TLRPC$Chat tLRPC$Chat2 = tLRPC$User;
                     if (tLRPC$User == null) {
-                        tLRPC$User = tLRPC$Chat;
+                        tLRPC$Chat2 = tLRPC$Chat;
                     }
-                    this.messageText = replaceWithLink(string, "un1", tLRPC$User);
+                    this.messageText = replaceWithLink(string, "un1", tLRPC$Chat2);
                     return;
                 } else if (this.replyMessageObject.isVideo()) {
                     String string2 = LocaleController.getString("ActionPinnedVideo", org.telegram.messenger.beta.R.string.ActionPinnedVideo);
+                    TLRPC$Chat tLRPC$Chat3 = tLRPC$User;
                     if (tLRPC$User == null) {
-                        tLRPC$User = tLRPC$Chat;
+                        tLRPC$Chat3 = tLRPC$Chat;
                     }
-                    this.messageText = replaceWithLink(string2, "un1", tLRPC$User);
+                    this.messageText = replaceWithLink(string2, "un1", tLRPC$Chat3);
                     return;
                 } else if (this.replyMessageObject.isGif()) {
                     String string3 = LocaleController.getString("ActionPinnedGif", org.telegram.messenger.beta.R.string.ActionPinnedGif);
+                    TLRPC$Chat tLRPC$Chat4 = tLRPC$User;
                     if (tLRPC$User == null) {
-                        tLRPC$User = tLRPC$Chat;
+                        tLRPC$Chat4 = tLRPC$Chat;
                     }
-                    this.messageText = replaceWithLink(string3, "un1", tLRPC$User);
+                    this.messageText = replaceWithLink(string3, "un1", tLRPC$Chat4);
                     return;
                 } else if (this.replyMessageObject.isVoice()) {
                     String string4 = LocaleController.getString("ActionPinnedVoice", org.telegram.messenger.beta.R.string.ActionPinnedVoice);
+                    TLRPC$Chat tLRPC$Chat5 = tLRPC$User;
                     if (tLRPC$User == null) {
-                        tLRPC$User = tLRPC$Chat;
+                        tLRPC$Chat5 = tLRPC$Chat;
                     }
-                    this.messageText = replaceWithLink(string4, "un1", tLRPC$User);
+                    this.messageText = replaceWithLink(string4, "un1", tLRPC$Chat5);
                     return;
                 } else if (this.replyMessageObject.isRoundVideo()) {
                     String string5 = LocaleController.getString("ActionPinnedRound", org.telegram.messenger.beta.R.string.ActionPinnedRound);
+                    TLRPC$Chat tLRPC$Chat6 = tLRPC$User;
                     if (tLRPC$User == null) {
-                        tLRPC$User = tLRPC$Chat;
+                        tLRPC$Chat6 = tLRPC$Chat;
                     }
-                    this.messageText = replaceWithLink(string5, "un1", tLRPC$User);
+                    this.messageText = replaceWithLink(string5, "un1", tLRPC$Chat6);
                     return;
                 } else if ((this.replyMessageObject.isSticker() || this.replyMessageObject.isAnimatedSticker()) && !this.replyMessageObject.isAnimatedEmoji()) {
                     String string6 = LocaleController.getString("ActionPinnedSticker", org.telegram.messenger.beta.R.string.ActionPinnedSticker);
+                    TLRPC$Chat tLRPC$Chat7 = tLRPC$User;
                     if (tLRPC$User == null) {
-                        tLRPC$User = tLRPC$Chat;
+                        tLRPC$Chat7 = tLRPC$Chat;
                     }
-                    this.messageText = replaceWithLink(string6, "un1", tLRPC$User);
+                    this.messageText = replaceWithLink(string6, "un1", tLRPC$Chat7);
                     return;
                 } else {
                     MessageObject messageObject2 = this.replyMessageObject;
                     TLRPC$MessageMedia tLRPC$MessageMedia = messageObject2.messageOwner.media;
                     if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaDocument) {
                         String string7 = LocaleController.getString("ActionPinnedFile", org.telegram.messenger.beta.R.string.ActionPinnedFile);
+                        TLRPC$Chat tLRPC$Chat8 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat8 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string7, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string7, "un1", tLRPC$Chat8);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGeo) {
                         String string8 = LocaleController.getString("ActionPinnedGeo", org.telegram.messenger.beta.R.string.ActionPinnedGeo);
+                        TLRPC$Chat tLRPC$Chat9 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat9 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string8, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string8, "un1", tLRPC$Chat9);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGeoLive) {
                         String string9 = LocaleController.getString("ActionPinnedGeoLive", org.telegram.messenger.beta.R.string.ActionPinnedGeoLive);
+                        TLRPC$Chat tLRPC$Chat10 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat10 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string9, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string9, "un1", tLRPC$Chat10);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaContact) {
                         String string10 = LocaleController.getString("ActionPinnedContact", org.telegram.messenger.beta.R.string.ActionPinnedContact);
+                        TLRPC$Chat tLRPC$Chat11 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat11 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string10, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string10, "un1", tLRPC$Chat11);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPoll) {
                         if (((TLRPC$TL_messageMediaPoll) tLRPC$MessageMedia).poll.quiz) {
                             String string11 = LocaleController.getString("ActionPinnedQuiz", org.telegram.messenger.beta.R.string.ActionPinnedQuiz);
+                            TLRPC$Chat tLRPC$Chat12 = tLRPC$User;
                             if (tLRPC$User == null) {
-                                tLRPC$User = tLRPC$Chat;
+                                tLRPC$Chat12 = tLRPC$Chat;
                             }
-                            this.messageText = replaceWithLink(string11, "un1", tLRPC$User);
+                            this.messageText = replaceWithLink(string11, "un1", tLRPC$Chat12);
                             return;
                         }
                         String string12 = LocaleController.getString("ActionPinnedPoll", org.telegram.messenger.beta.R.string.ActionPinnedPoll);
+                        TLRPC$Chat tLRPC$Chat13 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat13 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string12, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string12, "un1", tLRPC$Chat13);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaPhoto) {
                         String string13 = LocaleController.getString("ActionPinnedPhoto", org.telegram.messenger.beta.R.string.ActionPinnedPhoto);
+                        TLRPC$Chat tLRPC$Chat14 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat14 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string13, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string13, "un1", tLRPC$Chat14);
                         return;
                     } else if (tLRPC$MessageMedia instanceof TLRPC$TL_messageMediaGame) {
                         String formatString = LocaleController.formatString("ActionPinnedGame", org.telegram.messenger.beta.R.string.ActionPinnedGame, "🎮 " + this.replyMessageObject.messageOwner.media.game.title);
+                        TLRPC$Chat tLRPC$Chat15 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat15 = tLRPC$Chat;
                         }
-                        CharSequence replaceWithLink = replaceWithLink(formatString, "un1", tLRPC$User);
+                        CharSequence replaceWithLink = replaceWithLink(formatString, "un1", tLRPC$Chat15);
                         this.messageText = replaceWithLink;
                         this.messageText = Emoji.replaceEmoji(replaceWithLink, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
                         return;
@@ -1217,32 +1234,58 @@ public class MessageObject {
                         if (charSequence != null && charSequence.length() > 0) {
                             CharSequence charSequence2 = this.replyMessageObject.messageText;
                             if (charSequence2.length() > 20) {
-                                charSequence2 = ((Object) charSequence2.subSequence(0, 20)) + "...";
+                                charSequence2 = charSequence2.subSequence(0, 20);
+                                z = true;
+                            } else {
+                                z = false;
                             }
                             CharSequence replaceEmoji = Emoji.replaceEmoji(charSequence2, Theme.chat_msgTextPaint.getFontMetricsInt(), AndroidUtilities.dp(20.0f), false);
-                            MediaDataController.addTextStyleRuns(this.replyMessageObject, (Spannable) replaceEmoji);
-                            SpannableStringBuilder formatSpannable = AndroidUtilities.formatSpannable(LocaleController.getString("ActionPinnedText", org.telegram.messenger.beta.R.string.ActionPinnedText), replaceEmoji);
-                            if (tLRPC$User == null) {
-                                tLRPC$User = tLRPC$Chat;
+                            MessageObject messageObject3 = this.replyMessageObject;
+                            Spannable spannable = replaceEmoji;
+                            if (messageObject3 != null) {
+                                TLRPC$Message tLRPC$Message2 = messageObject3.messageOwner;
+                                spannable = replaceEmoji;
+                                if (tLRPC$Message2 != null) {
+                                    spannable = replaceAnimatedEmoji(replaceEmoji, tLRPC$Message2.entities, Theme.chat_msgTextPaint.getFontMetricsInt());
+                                }
                             }
-                            this.messageText = replaceWithLink(formatSpannable, "un1", tLRPC$User);
+                            MediaDataController.addTextStyleRuns(this.replyMessageObject, (Spannable) spannable);
+                            SpannableStringBuilder spannableStringBuilder = spannable;
+                            if (z) {
+                                boolean z2 = spannable instanceof SpannableStringBuilder;
+                                spannableStringBuilder = spannable;
+                                if (z2) {
+                                    ((SpannableStringBuilder) spannable).append((CharSequence) "...");
+                                    spannableStringBuilder = spannable;
+                                } else if (spannable != null) {
+                                    spannableStringBuilder = new SpannableStringBuilder(spannable).append((CharSequence) "...");
+                                }
+                            }
+                            SpannableStringBuilder formatSpannable = AndroidUtilities.formatSpannable(LocaleController.getString("ActionPinnedText", org.telegram.messenger.beta.R.string.ActionPinnedText), spannableStringBuilder);
+                            TLRPC$Chat tLRPC$Chat16 = tLRPC$User;
+                            if (tLRPC$User == null) {
+                                tLRPC$Chat16 = tLRPC$Chat;
+                            }
+                            this.messageText = replaceWithLink(formatSpannable, "un1", tLRPC$Chat16);
                             return;
                         }
                         String string14 = LocaleController.getString("ActionPinnedNoText", org.telegram.messenger.beta.R.string.ActionPinnedNoText);
+                        TLRPC$Chat tLRPC$Chat17 = tLRPC$User;
                         if (tLRPC$User == null) {
-                            tLRPC$User = tLRPC$Chat;
+                            tLRPC$Chat17 = tLRPC$Chat;
                         }
-                        this.messageText = replaceWithLink(string14, "un1", tLRPC$User);
+                        this.messageText = replaceWithLink(string14, "un1", tLRPC$Chat17);
                         return;
                     }
                 }
             }
         }
         String string15 = LocaleController.getString("ActionPinnedNoText", org.telegram.messenger.beta.R.string.ActionPinnedNoText);
+        TLRPC$Chat tLRPC$Chat18 = tLRPC$User;
         if (tLRPC$User == null) {
-            tLRPC$User = tLRPC$Chat;
+            tLRPC$Chat18 = tLRPC$Chat;
         }
-        this.messageText = replaceWithLink(string15, "un1", tLRPC$User);
+        this.messageText = replaceWithLink(string15, "un1", tLRPC$Chat18);
     }
 
     public static void updateReactions(TLRPC$Message tLRPC$Message, TLRPC$TL_messageReactions tLRPC$TL_messageReactions) {

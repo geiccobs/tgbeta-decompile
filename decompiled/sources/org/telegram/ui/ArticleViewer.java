@@ -1926,7 +1926,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     }
                 };
                 builder.setDelegate(new BottomSheet.BottomSheetDelegate() { // from class: org.telegram.ui.ArticleViewer.6
-                    @Override // org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegateInterface
+                    @Override // org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegate, org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegateInterface
                     public boolean canDismiss() {
                         TextSelectionHelper.ArticleTextSelectionHelper articleTextSelectionHelper2 = ArticleViewer.this.textSelectionHelperBottomSheet;
                         if (articleTextSelectionHelper2 == null || !articleTextSelectionHelper2.isSelectionMode()) {

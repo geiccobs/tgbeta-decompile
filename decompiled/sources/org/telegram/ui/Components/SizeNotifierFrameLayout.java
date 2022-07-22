@@ -259,6 +259,7 @@ public class SizeNotifierFrameLayout extends FrameLayout {
         };
         this.backgroundView = view;
         addView(view, LayoutHelper.createFrame(-1, -1.0f));
+        checkLayerType();
     }
 
     public void setBackgroundImage(Drawable drawable, boolean z) {
@@ -297,12 +298,21 @@ public class SizeNotifierFrameLayout extends FrameLayout {
             }
         }
         this.backgroundView.invalidate();
+        checkLayerType();
     }
 
     public /* synthetic */ void lambda$setBackgroundImage$0(int i, int i2, float f) {
         this.translationX = i;
         this.translationY = i2;
         this.backgroundView.invalidate();
+    }
+
+    private void checkLayerType() {
+        if (this.parallaxEffect == null && (this.backgroundDrawable instanceof MotionBackgroundDrawable) && SharedConfig.getDevicePerformanceClass() == 2) {
+            this.backgroundView.setLayerType(2, null);
+        } else {
+            this.backgroundView.setLayerType(0, null);
+        }
     }
 
     public Drawable getBackgroundImage() {

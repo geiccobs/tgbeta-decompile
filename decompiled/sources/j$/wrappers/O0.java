@@ -1,7 +1,7 @@
 package j$.wrappers;
 
-import j$.util.AbstractC0039a;
-import j$.util.stream.AbstractC0080e1;
+import j$.util.AbstractC0038a;
+import j$.util.stream.AbstractC0079e1;
 import java.util.LongSummaryStatistics;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -21,27 +21,27 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 /* loaded from: classes2.dex */
 public final /* synthetic */ class O0 implements LongStream {
-    final /* synthetic */ AbstractC0080e1 a;
+    final /* synthetic */ AbstractC0079e1 a;
 
-    private /* synthetic */ O0(AbstractC0080e1 abstractC0080e1) {
-        this.a = abstractC0080e1;
+    private /* synthetic */ O0(AbstractC0079e1 abstractC0079e1) {
+        this.a = abstractC0079e1;
     }
 
-    public static /* synthetic */ LongStream n0(AbstractC0080e1 abstractC0080e1) {
-        if (abstractC0080e1 == null) {
+    public static /* synthetic */ LongStream n0(AbstractC0079e1 abstractC0079e1) {
+        if (abstractC0079e1 == null) {
             return null;
         }
-        return abstractC0080e1 instanceof N0 ? ((N0) abstractC0080e1).a : new O0(abstractC0080e1);
+        return abstractC0079e1 instanceof N0 ? ((N0) abstractC0079e1).a : new O0(abstractC0079e1);
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ boolean allMatch(LongPredicate longPredicate) {
-        return this.a.L(C0219j0.a(longPredicate));
+        return this.a.L(C0218j0.a(longPredicate));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ boolean anyMatch(LongPredicate longPredicate) {
-        return this.a.k(C0219j0.a(longPredicate));
+        return this.a.k(C0218j0.a(longPredicate));
     }
 
     @Override // java.util.stream.LongStream
@@ -51,7 +51,7 @@ public final /* synthetic */ class O0 implements LongStream {
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ OptionalDouble average() {
-        return AbstractC0039a.u(this.a.average());
+        return AbstractC0038a.u(this.a.average());
     }
 
     @Override // java.util.stream.LongStream
@@ -66,7 +66,7 @@ public final /* synthetic */ class O0 implements LongStream {
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ Object collect(Supplier supplier, ObjLongConsumer objLongConsumer, BiConsumer biConsumer) {
-        return this.a.f0(z0.a(supplier), v0.a(objLongConsumer), C0232q.a(biConsumer));
+        return this.a.f0(z0.a(supplier), v0.a(objLongConsumer), C0231q.a(biConsumer));
     }
 
     @Override // java.util.stream.LongStream
@@ -81,32 +81,32 @@ public final /* synthetic */ class O0 implements LongStream {
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ LongStream filter(LongPredicate longPredicate) {
-        return n0(this.a.u(C0219j0.a(longPredicate)));
+        return n0(this.a.u(C0218j0.a(longPredicate)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ OptionalLong findAny() {
-        return AbstractC0039a.w(this.a.findAny());
+        return AbstractC0038a.w(this.a.findAny());
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ OptionalLong findFirst() {
-        return AbstractC0039a.w(this.a.findFirst());
+        return AbstractC0038a.w(this.a.findFirst());
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ LongStream flatMap(LongFunction longFunction) {
-        return n0(this.a.s(C0215h0.a(longFunction)));
+        return n0(this.a.s(C0214h0.a(longFunction)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ void forEach(LongConsumer longConsumer) {
-        this.a.d(C0211f0.b(longConsumer));
+        this.a.d(C0210f0.b(longConsumer));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ void forEachOrdered(LongConsumer longConsumer) {
-        this.a.Z(C0211f0.b(longConsumer));
+        this.a.Z(C0210f0.b(longConsumer));
     }
 
     @Override // java.util.stream.BaseStream
@@ -121,37 +121,37 @@ public final /* synthetic */ class O0 implements LongStream {
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ LongStream map(LongUnaryOperator longUnaryOperator) {
-        return n0(this.a.z(C0231p0.c(longUnaryOperator)));
+        return n0(this.a.z(C0230p0.c(longUnaryOperator)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ DoubleStream mapToDouble(LongToDoubleFunction longToDoubleFunction) {
-        return M0.n0(this.a.O(C0223l0.b(longToDoubleFunction)));
+        return M0.n0(this.a.O(C0222l0.b(longToDoubleFunction)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ IntStream mapToInt(LongToIntFunction longToIntFunction) {
-        return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(this.a.e0(C0227n0.b(longToIntFunction)));
+        return C$r8$wrapper$java$util$stream$IntStream$WRP.convert(this.a.e0(C0226n0.b(longToIntFunction)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ Stream mapToObj(LongFunction longFunction) {
-        return P0.n0(this.a.Q(C0215h0.a(longFunction)));
+        return P0.n0(this.a.Q(C0214h0.a(longFunction)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ OptionalLong max() {
-        return AbstractC0039a.w(this.a.max());
+        return AbstractC0038a.w(this.a.max());
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ OptionalLong min() {
-        return AbstractC0039a.w(this.a.min());
+        return AbstractC0038a.w(this.a.min());
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ boolean noneMatch(LongPredicate longPredicate) {
-        return this.a.S(C0219j0.a(longPredicate));
+        return this.a.S(C0218j0.a(longPredicate));
     }
 
     /* JADX WARN: Type inference failed for: r2v2, types: [java.util.stream.LongStream, java.util.stream.BaseStream] */
@@ -162,17 +162,17 @@ public final /* synthetic */ class O0 implements LongStream {
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ LongStream peek(LongConsumer longConsumer) {
-        return n0(this.a.p(C0211f0.b(longConsumer)));
+        return n0(this.a.p(C0210f0.b(longConsumer)));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ long reduce(long j, LongBinaryOperator longBinaryOperator) {
-        return this.a.D(j, C0207d0.a(longBinaryOperator));
+        return this.a.D(j, C0206d0.a(longBinaryOperator));
     }
 
     @Override // java.util.stream.LongStream
     public /* synthetic */ OptionalLong reduce(LongBinaryOperator longBinaryOperator) {
-        return AbstractC0039a.w(this.a.g(C0207d0.a(longBinaryOperator)));
+        return AbstractC0038a.w(this.a.g(C0206d0.a(longBinaryOperator)));
     }
 
     @Override // java.util.stream.LongStream

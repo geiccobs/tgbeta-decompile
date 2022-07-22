@@ -9,8 +9,8 @@ class I2 extends U2 {
     final /* synthetic */ j$.wrappers.J0 e;
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public I2(EnumC0083e4 enumC0083e4, j$.util.function.b bVar, BiConsumer biConsumer, j$.util.function.y yVar, j$.wrappers.J0 j0) {
-        super(enumC0083e4);
+    public I2(EnumC0082e4 enumC0082e4, j$.util.function.b bVar, BiConsumer biConsumer, j$.util.function.y yVar, j$.wrappers.J0 j0) {
+        super(enumC0082e4);
         this.b = bVar;
         this.c = biConsumer;
         this.d = yVar;
@@ -24,8 +24,8 @@ class I2 extends U2 {
 
     @Override // j$.util.stream.U2, j$.util.stream.N4
     public int b() {
-        if (this.e.b().contains(EnumC0096h.UNORDERED)) {
-            return EnumC0077d4.r;
+        if (this.e.b().contains(EnumC0095h.UNORDERED)) {
+            return EnumC0076d4.r;
         }
         return 0;
     }

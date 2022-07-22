@@ -51,6 +51,7 @@ import org.telegram.tgnet.TLRPC$TL_premiumGiftOption;
 import org.telegram.tgnet.TLRPC$VideoSize;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.Components.RLottieDrawable;
@@ -63,6 +64,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
     private static Map<Integer, String> monthsToEmoticon;
     private int TAG;
     private SpannableStringBuilder accessibilityText;
+    private AnimatedEmojiSpan.EmojiGroupedSpans animatedEmojiStack;
     private AvatarDrawable avatarDrawable;
     private int backgroundHeight;
     private Path backgroundPath;
@@ -407,6 +409,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         this.imageReceiver.onDetachedFromWindow();
         setStarsPaused(true);
         this.wasLayout = false;
+        AnimatedEmojiSpan.release(this, this.animatedEmojiStack);
         NotificationCenter.getInstance(this.currentAccount).removeObserver(this, NotificationCenter.didUpdatePremiumGiftStickers);
     }
 
@@ -415,6 +418,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         super.onAttachedToWindow();
         this.imageReceiver.onAttachedToWindow();
         setStarsPaused(false);
+        this.animatedEmojiStack = AnimatedEmojiSpan.update(0, this, this.animatedEmojiStack, this.textLayout);
         NotificationCenter.getInstance(this.currentAccount).addObserver(this, NotificationCenter.didUpdatePremiumGiftStickers);
     }
 
@@ -511,6 +515,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
         if (charSequence instanceof Spannable) {
             SpoilerEffect.addSpoilers(this, this.textLayout, (Spannable) charSequence, this.spoilersPool, this.spoilers);
         }
+        this.animatedEmojiStack = AnimatedEmojiSpan.update(0, this, this.animatedEmojiStack, this.textLayout);
         this.textHeight = 0;
         this.textWidth = 0;
         try {
@@ -680,6 +685,7 @@ public class ChatActionCell extends BaseCell implements DownloadController.FileD
             }
             canvas.save();
             SpoilerEffect.clipOutCanvas(canvas, this.spoilers);
+            AnimatedEmojiSpan.drawAnimatedEmojis(canvas, this.textLayout, this.animatedEmojiStack, 0.0f, this.spoilers, 0.0f, 0.0f, 0.0f, 1.0f);
             this.textLayout.draw(canvas);
             canvas.restore();
             for (SpoilerEffect spoilerEffect : this.spoilers) {

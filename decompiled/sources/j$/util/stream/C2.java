@@ -2,7 +2,7 @@ package j$.util.stream;
 
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-class C2 implements S2, AbstractC0112j3 {
+class C2 implements S2, AbstractC0111j3 {
     private double a;
     final /* synthetic */ double b;
     final /* synthetic */ j$.util.function.d c;
@@ -12,20 +12,20 @@ class C2 implements S2, AbstractC0112j3 {
         this.c = dVar;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void accept(double d) {
         this.a = this.c.applyAsDouble(this.a, d);
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void accept(int i) {
-        AbstractC0140o1.d(this);
+        AbstractC0139o1.d(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0129m3, j$.util.stream.AbstractC0123l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0140o1.e(this);
+        AbstractC0139o1.e(this);
         throw null;
     }
 
@@ -36,7 +36,7 @@ class C2 implements S2, AbstractC0112j3 {
 
     /* renamed from: b */
     public /* synthetic */ void accept(Double d) {
-        AbstractC0140o1.a(this, d);
+        AbstractC0139o1.a(this, d);
     }
 
     @Override // j$.util.function.y
@@ -55,16 +55,16 @@ class C2 implements S2, AbstractC0112j3 {
         return new j$.util.function.e(this, fVar);
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void n(long j) {
         this.a = this.b;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ boolean o() {
         return false;
     }

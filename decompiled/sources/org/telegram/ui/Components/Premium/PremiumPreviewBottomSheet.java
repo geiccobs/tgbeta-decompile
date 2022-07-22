@@ -465,7 +465,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView {
         float f3 = measuredHeight / intrinsicWidth;
         float f4 = intrinsicWidth / measuredHeight;
         float measuredWidth = this.iconTextureView.getMeasuredWidth() / 2.0f;
-        for (View view = this.iconTextureView; view != this.container; view = (View) view.getParent()) {
+        for (View view = this.iconTextureView; view != this.container && view != null; view = (View) view.getParent()) {
             measuredWidth += view.getX();
         }
         float y = this.iconTextureView.getY() + ((View) this.iconTextureView.getParent()).getY() + ((View) this.iconTextureView.getParent().getParent()).getY() + (this.iconTextureView.getMeasuredHeight() / 2.0f);

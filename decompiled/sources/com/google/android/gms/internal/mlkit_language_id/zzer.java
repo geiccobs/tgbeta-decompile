@@ -3,9 +3,10 @@ package com.google.android.gms.internal.mlkit_language_id;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
+/* JADX INFO: Access modifiers changed from: package-private */
 /* compiled from: com.google.mlkit:language-id@@16.1.1 */
 /* loaded from: classes.dex */
-final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
+public final class zzer extends zzdi<Integer> implements zzew<Integer>, zzgi {
     private static final zzer zza;
     private int[] zzb;
     private int zzc;

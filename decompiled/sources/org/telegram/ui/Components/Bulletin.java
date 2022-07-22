@@ -237,7 +237,7 @@ public class Bulletin {
                 }
                 if (Bulletin.isTransitionsEnabled()) {
                     Bulletin.this.ensureLayoutTransitionCreated();
-                    Bulletin.this.layout.transitionRunning = true;
+                    Bulletin.this.layout.transitionRunningEnter = true;
                     Bulletin.this.layout.delegate = Bulletin.this.currentDelegate;
                     Bulletin.this.layout.invalidate();
                     Layout.Transition transition = Bulletin.this.layoutTransition;
@@ -273,7 +273,7 @@ public class Bulletin {
         }
 
         public /* synthetic */ void lambda$onLayoutChange$0() {
-            Bulletin.this.layout.transitionRunning = false;
+            Bulletin.this.layout.transitionRunningEnter = false;
             Bulletin.this.layout.onEnterTransitionEnd();
             Bulletin.this.setCanHide(true);
         }
@@ -327,7 +327,7 @@ public class Bulletin {
                 this.layout.removeCallbacks(this.hideRunnable);
                 if (z) {
                     Layout layout2 = this.layout;
-                    layout2.transitionRunning = true;
+                    layout2.transitionRunningExit = true;
                     layout2.delegate = this.currentDelegate;
                     layout2.invalidate();
                     if (j >= 0) {
@@ -386,7 +386,7 @@ public class Bulletin {
             this.currentDelegate.onHide(this);
         }
         Layout layout = this.layout;
-        layout.transitionRunning = false;
+        layout.transitionRunningExit = false;
         layout.onExitTransitionEnd();
         this.layout.onHide();
         this.containerLayout.removeView(this.parentLayout);
@@ -651,7 +651,8 @@ public class Bulletin {
         Delegate delegate;
         public float inOutOffset;
         private final Theme.ResourcesProvider resourcesProvider;
-        public boolean transitionRunning;
+        public boolean transitionRunningEnter;
+        public boolean transitionRunningExit;
         private final List<Callback> callbacks = new ArrayList();
         private int wideScreenWidth = -2;
         private int wideScreenGravity = 1;
@@ -684,6 +685,10 @@ public class Bulletin {
 
         protected CharSequence getAccessibilityText() {
             return null;
+        }
+
+        public boolean isTransitionRunning() {
+            return this.transitionRunningEnter || this.transitionRunningExit;
         }
 
         public Layout(Context context, Theme.ResourcesProvider resourcesProvider) {
@@ -1019,7 +1024,7 @@ public class Bulletin {
         @Override // android.view.ViewGroup, android.view.View
         protected void dispatchDraw(Canvas canvas) {
             this.background.setBounds(AndroidUtilities.dp(8.0f), AndroidUtilities.dp(8.0f), getMeasuredWidth() - AndroidUtilities.dp(8.0f), getMeasuredHeight() - AndroidUtilities.dp(8.0f));
-            if (this.transitionRunning && this.delegate != null) {
+            if (isTransitionRunning() && this.delegate != null) {
                 int measuredHeight = ((View) getParent()).getMeasuredHeight() - this.delegate.getBottomOffset(this.bulletin.tag);
                 canvas.save();
                 canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight() - (((int) (getY() + getMeasuredHeight())) - measuredHeight));

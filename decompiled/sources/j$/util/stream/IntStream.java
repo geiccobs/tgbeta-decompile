@@ -1,14 +1,14 @@
 package j$.util.stream;
 
-import j$.util.C0047h;
-import j$.util.C0049j;
-import j$.util.C0050k;
+import j$.util.C0046h;
+import j$.util.C0048j;
+import j$.util.C0049k;
 import j$.util.function.BiConsumer;
 import j$.util.p;
 import j$.util.u;
-import j$.wrappers.C0203b0;
+import j$.wrappers.C0202b0;
 /* loaded from: classes2.dex */
-public interface IntStream extends AbstractC0090g {
+public interface IntStream extends AbstractC0089g {
     U A(j$.wrappers.X x);
 
     boolean C(j$.wrappers.V v);
@@ -25,13 +25,13 @@ public interface IntStream extends AbstractC0090g {
 
     void U(j$.util.function.l lVar);
 
-    C0050k a0(j$.util.function.j jVar);
+    C0049k a0(j$.util.function.j jVar);
 
     U asDoubleStream();
 
-    AbstractC0080e1 asLongStream();
+    AbstractC0079e1 asLongStream();
 
-    C0049j average();
+    C0048j average();
 
     Stream boxed();
 
@@ -41,15 +41,15 @@ public interface IntStream extends AbstractC0090g {
 
     IntStream distinct();
 
-    AbstractC0080e1 f(j$.util.function.n nVar);
+    AbstractC0079e1 f(j$.util.function.n nVar);
 
-    C0050k findAny();
+    C0049k findAny();
 
-    C0050k findFirst();
+    C0049k findFirst();
 
     IntStream h(j$.wrappers.V v);
 
-    @Override // j$.util.stream.AbstractC0090g
+    @Override // j$.util.stream.AbstractC0089g
     /* renamed from: iterator */
     p.a mo66iterator();
 
@@ -57,14 +57,14 @@ public interface IntStream extends AbstractC0090g {
 
     IntStream limit(long j);
 
-    C0050k max();
+    C0049k max();
 
-    C0050k min();
+    C0049k min();
 
     @Override // 
     IntStream parallel();
 
-    IntStream q(C0203b0 c0203b0);
+    IntStream q(C0202b0 c0202b0);
 
     @Override // 
     IntStream sequential();
@@ -73,12 +73,12 @@ public interface IntStream extends AbstractC0090g {
 
     IntStream sorted();
 
-    @Override // j$.util.stream.AbstractC0090g
+    @Override // j$.util.stream.AbstractC0089g
     u.a spliterator();
 
     int sum();
 
-    C0047h summaryStatistics();
+    C0046h summaryStatistics();
 
     int[] toArray();
 

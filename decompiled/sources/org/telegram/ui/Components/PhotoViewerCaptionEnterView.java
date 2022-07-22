@@ -599,6 +599,11 @@ public class PhotoViewerCaptionEnterView extends FrameLayout implements Notifica
             }
 
             @Override // org.telegram.ui.Components.EmojiView.EmojiViewDelegate
+            public /* synthetic */ void onEmojiSettingsClick() {
+                EmojiView.EmojiViewDelegate.CC.$default$onEmojiSettingsClick(this);
+            }
+
+            @Override // org.telegram.ui.Components.EmojiView.EmojiViewDelegate
             public /* synthetic */ void onGifSelected(View view, Object obj, String str, Object obj2, boolean z, int i) {
                 EmojiView.EmojiViewDelegate.CC.$default$onGifSelected(this, view, obj, str, obj2, z, i);
             }

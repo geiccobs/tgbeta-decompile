@@ -4,7 +4,7 @@ import j$.util.Iterator;
 import j$.util.function.Consumer;
 import java.util.NoSuchElementException;
 /* loaded from: classes2.dex */
-class A implements AbstractC0053n, j$.util.function.f, Iterator {
+class A implements AbstractC0052n, j$.util.function.f, Iterator {
     boolean a = false;
     double b;
     final /* synthetic */ t c;
@@ -19,7 +19,7 @@ class A implements AbstractC0053n, j$.util.function.f, Iterator {
         this.b = d;
     }
 
-    @Override // j$.util.AbstractC0053n
+    @Override // j$.util.AbstractC0052n
     /* renamed from: e */
     public void forEachRemaining(j$.util.function.f fVar) {
         fVar.getClass();
@@ -28,7 +28,7 @@ class A implements AbstractC0053n, j$.util.function.f, Iterator {
         }
     }
 
-    @Override // j$.util.AbstractC0053n, j$.util.Iterator
+    @Override // j$.util.AbstractC0052n, j$.util.Iterator
     public void forEachRemaining(Consumer consumer) {
         if (consumer instanceof j$.util.function.f) {
             forEachRemaining((j$.util.function.f) consumer);
@@ -36,7 +36,7 @@ class A implements AbstractC0053n, j$.util.function.f, Iterator {
         }
         consumer.getClass();
         if (!N.a) {
-            forEachRemaining(new C0052m(consumer));
+            forEachRemaining(new C0051m(consumer));
         } else {
             N.a(A.class, "{0} calling PrimitiveIterator.OfDouble.forEachRemainingDouble(action::accept)");
             throw null;
@@ -57,7 +57,7 @@ class A implements AbstractC0053n, j$.util.function.f, Iterator {
         return new j$.util.function.e(this, fVar);
     }
 
-    @Override // j$.util.AbstractC0053n, java.util.Iterator, j$.util.Iterator
+    @Override // j$.util.AbstractC0052n, java.util.Iterator, j$.util.Iterator
     public Double next() {
         if (!N.a) {
             return Double.valueOf(nextDouble());
@@ -66,7 +66,7 @@ class A implements AbstractC0053n, j$.util.function.f, Iterator {
         throw null;
     }
 
-    @Override // j$.util.AbstractC0053n
+    @Override // j$.util.AbstractC0052n
     public double nextDouble() {
         if (this.a || hasNext()) {
             this.a = false;

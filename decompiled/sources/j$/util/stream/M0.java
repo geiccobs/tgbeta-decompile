@@ -1,6 +1,6 @@
 package j$.util.stream;
 
-import j$.util.C0048i;
+import j$.util.C0047i;
 import j$.util.function.BiConsumer;
 /* loaded from: classes2.dex */
 public final /* synthetic */ class M0 implements BiConsumer {
@@ -11,7 +11,7 @@ public final /* synthetic */ class M0 implements BiConsumer {
 
     @Override // j$.util.function.BiConsumer
     public final void accept(Object obj, Object obj2) {
-        ((C0048i) obj).b((C0048i) obj2);
+        ((C0047i) obj).b((C0047i) obj2);
     }
 
     @Override // j$.util.function.BiConsumer

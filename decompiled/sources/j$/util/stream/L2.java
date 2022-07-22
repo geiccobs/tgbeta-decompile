@@ -5,8 +5,8 @@ class L2 extends U2 {
     final /* synthetic */ int c;
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    public L2(EnumC0083e4 enumC0083e4, j$.util.function.j jVar, int i) {
-        super(enumC0083e4);
+    public L2(EnumC0082e4 enumC0082e4, j$.util.function.j jVar, int i) {
+        super(enumC0082e4);
         this.b = jVar;
         this.c = i;
     }

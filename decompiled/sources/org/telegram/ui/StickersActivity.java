@@ -32,9 +32,11 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
+import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.beta.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
@@ -132,7 +134,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
         public boolean isLongPressDragEnabled() {
-            return StickersActivity.this.listAdapter.hasSelected();
+            return StickersActivity.this.listAdapter.hasSelected() && StickersActivity.this.currentType != 5;
         }
 
         @Override // androidx.recyclerview.widget.ItemTouchHelper.Callback
@@ -260,33 +262,43 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
             createActionMode.addItemWithWidth(0, R.drawable.msg_archive, AndroidUtilities.dp(54.0f));
         }
         this.deleteMenuItem = createActionMode.addItemWithWidth(1, R.drawable.msg_delete, AndroidUtilities.dp(54.0f));
-        ArrayList<TLRPC$TL_messages_stickerSet> filterPremiumStickers = MessagesController.getInstance(this.currentAccount).filterPremiumStickers(MediaDataController.getInstance(this.currentAccount).getStickerSets(this.currentType));
+        ArrayList<TLRPC$TL_messages_stickerSet> arrayList = new ArrayList<>(MessagesController.getInstance(this.currentAccount).filterPremiumStickers(MediaDataController.getInstance(this.currentAccount).getStickerSets(this.currentType)));
         ArrayList<TLRPC$StickerSetCovered> featuredEmojiSets = this.currentType == 5 ? MediaDataController.getInstance(this.currentAccount).getFeaturedEmojiSets() : MediaDataController.getInstance(this.currentAccount).getFeaturedStickerSets();
         if (this.currentType == 5) {
-            ArrayList<TLRPC$TL_messages_stickerSet> arrayList = new ArrayList<>();
-            this.emojiPacks = arrayList;
-            arrayList.addAll(filterPremiumStickers);
-            for (int i2 = 0; i2 < featuredEmojiSets.size(); i2++) {
-                int i3 = 0;
+            this.emojiPacks = new ArrayList<>();
+            if (!UserConfig.getInstance(this.currentAccount).isPremium()) {
+                int i2 = 0;
+                while (i2 < arrayList.size()) {
+                    if (arrayList.get(i2) != null && !MessageObject.isPremiumEmojiPack(arrayList.get(i2))) {
+                        this.emojiPacks.add(arrayList.get(i2));
+                        arrayList.remove(i2);
+                        i2--;
+                    }
+                    i2++;
+                }
+            }
+            this.emojiPacks.addAll(arrayList);
+            for (int i3 = 0; i3 < featuredEmojiSets.size(); i3++) {
+                int i4 = 0;
                 while (true) {
-                    if (i3 >= filterPremiumStickers.size()) {
+                    if (i4 >= this.emojiPacks.size()) {
                         z = false;
                         break;
-                    } else if (featuredEmojiSets.get(i2).set.id == filterPremiumStickers.get(i3).set.id) {
+                    } else if (featuredEmojiSets.get(i3).set.id == this.emojiPacks.get(i4).set.id) {
                         z = true;
                         break;
                     } else {
-                        i3++;
+                        i4++;
                     }
                 }
                 if (!z) {
-                    this.emojiPacks.add(convertFeatured(featuredEmojiSets.get(i2)));
+                    this.emojiPacks.add(convertFeatured(featuredEmojiSets.get(i3)));
                 }
             }
-            filterPremiumStickers = this.emojiPacks;
+            arrayList = this.emojiPacks;
             featuredEmojiSets = new ArrayList<>();
         }
-        this.listAdapter = new ListAdapter(context, filterPremiumStickers, featuredEmojiSets);
+        this.listAdapter = new ListAdapter(context, arrayList, featuredEmojiSets);
         FrameLayout frameLayout = new FrameLayout(context);
         this.fragmentView = frameLayout;
         FrameLayout frameLayout2 = frameLayout;
@@ -319,15 +331,15 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
         this.listView.setAdapter(this.listAdapter);
         this.listView.setOnItemClickListener(new RecyclerListView.OnItemClickListener() { // from class: org.telegram.ui.StickersActivity$$ExternalSyntheticLambda4
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemClickListener
-            public final void onItemClick(View view, int i4) {
-                StickersActivity.this.lambda$createView$2(context, view, i4);
+            public final void onItemClick(View view, int i5) {
+                StickersActivity.this.lambda$createView$2(context, view, i5);
             }
         });
         this.listView.setOnItemLongClickListener(new RecyclerListView.OnItemLongClickListener() { // from class: org.telegram.ui.StickersActivity$$ExternalSyntheticLambda5
             @Override // org.telegram.ui.Components.RecyclerListView.OnItemLongClickListener
-            public final boolean onItemClick(View view, int i4) {
+            public final boolean onItemClick(View view, int i5) {
                 boolean lambda$createView$3;
-                lambda$createView$3 = StickersActivity.this.lambda$createView$3(view, i4);
+                lambda$createView$3 = StickersActivity.this.lambda$createView$3(view, i5);
                 return lambda$createView$3;
             }
         });
@@ -503,7 +515,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
         TLRPC$TL_messages_reorderStickerSets tLRPC$TL_messages_reorderStickerSets = new TLRPC$TL_messages_reorderStickerSets();
         int i = this.currentType;
         tLRPC$TL_messages_reorderStickerSets.masks = i == 1;
-        tLRPC$TL_messages_reorderStickerSets.masks = i == 5;
+        tLRPC$TL_messages_reorderStickerSets.emojis = i == 5;
         for (int i2 = 0; i2 < this.listAdapter.stickerSets.size(); i2++) {
             tLRPC$TL_messages_reorderStickerSets.order.add(Long.valueOf(((TLRPC$TL_messages_stickerSet) this.listAdapter.stickerSets.get(i2)).set.id));
         }
@@ -997,7 +1009,13 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
             } else {
                 try {
                     Locale locale = Locale.US;
-                    ((ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("label", String.format(locale, "https://" + MessagesController.getInstance(((BaseFragment) StickersActivity.this).currentAccount).linkPrefix + "/addstickers/%s", tLRPC$TL_messages_stickerSet.set.short_name)));
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("https://");
+                    sb.append(MessagesController.getInstance(((BaseFragment) StickersActivity.this).currentAccount).linkPrefix);
+                    sb.append("/");
+                    sb.append(tLRPC$TL_messages_stickerSet.set.emojis ? "addemoji" : "addstickers");
+                    sb.append("/%s");
+                    ((ClipboardManager) ApplicationLoader.applicationContext.getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("label", String.format(locale, sb.toString(), tLRPC$TL_messages_stickerSet.set.short_name)));
                     BulletinFactory.createCopyLinkBulletin(StickersActivity.this).show();
                 } catch (Exception e2) {
                     FileLog.e(e2);
@@ -1006,7 +1024,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
         }
 
         /* JADX WARN: Code restructure failed: missing block: B:118:0x03ae, code lost:
-            if (r1 == false) goto L120;
+            if (r5 == false) goto L120;
          */
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         /*
@@ -1015,7 +1033,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
         */
         public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder r11, int r12) {
             /*
-                Method dump skipped, instructions count: 986
+                Method dump skipped, instructions count: 992
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.StickersActivity.ListAdapter.onBindViewHolder(androidx.recyclerview.widget.RecyclerView$ViewHolder, int):void");
@@ -1326,18 +1344,13 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
             if (hasSelected()) {
                 int size = this.stickerSets.size();
                 int i = 0;
-                int i2 = 0;
-                while (true) {
-                    if (i2 >= size) {
-                        z = true;
-                        break;
-                    } else if (this.selectedItems.get(this.stickerSets.get(i2).set.id, Boolean.FALSE).booleanValue() && this.stickerSets.get(i2).set.official) {
+                for (int i2 = 0; i2 < size; i2++) {
+                    if (this.stickerSets.get(i2).set.emojis || (this.selectedItems.get(this.stickerSets.get(i2).set.id, Boolean.FALSE).booleanValue() && this.stickerSets.get(i2).set.official)) {
                         z = false;
                         break;
-                    } else {
-                        i2++;
                     }
                 }
+                z = true;
                 if (!z) {
                     i = 8;
                 }
@@ -1446,7 +1459,13 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
 
     public String getLinkForSet(TLRPC$TL_messages_stickerSet tLRPC$TL_messages_stickerSet) {
         Locale locale = Locale.US;
-        return String.format(locale, "https://" + MessagesController.getInstance(this.currentAccount).linkPrefix + "/addstickers/%s", tLRPC$TL_messages_stickerSet.set.short_name);
+        StringBuilder sb = new StringBuilder();
+        sb.append("https://");
+        sb.append(MessagesController.getInstance(this.currentAccount).linkPrefix);
+        sb.append("/");
+        sb.append(tLRPC$TL_messages_stickerSet.set.emojis ? "addemoji" : "addstickers");
+        sb.append("/%s");
+        return String.format(locale, sb.toString(), tLRPC$TL_messages_stickerSet.set.short_name);
     }
 
     @Override // org.telegram.ui.ActionBar.BaseFragment

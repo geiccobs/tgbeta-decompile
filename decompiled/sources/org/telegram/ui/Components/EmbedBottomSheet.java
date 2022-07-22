@@ -730,7 +730,7 @@ public class EmbedBottomSheet extends BottomSheet {
                 }
             }
 
-            @Override // org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegateInterface
+            @Override // org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegate, org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegateInterface
             public boolean canDismiss() {
                 if (EmbedBottomSheet.this.videoView.isInFullscreen()) {
                     EmbedBottomSheet.this.videoView.exitFullscreen();

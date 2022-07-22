@@ -3940,6 +3940,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         @Override // org.telegram.ui.Components.RecyclerListView, android.view.ViewGroup, android.view.View
         public void dispatchDraw(Canvas canvas) {
             ChatActivity.this.drawLaterRoundProgressCell = null;
+            boolean z = false;
             this.invalidated = false;
             canvas.save();
             if (ChatActivity.this.fragmentTransition == null || (ChatActivity.this.fromPullingDownTransition && !ChatActivity.this.toPullingDownTransition)) {
@@ -3960,6 +3961,69 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 drawChatBackgroundElements(canvas);
                 super.dispatchDraw(canvas);
             }
+            int size = this.drawTimeAfter.size();
+            if (size > 0) {
+                for (int i = 0; i < size; i++) {
+                    ChatMessageCell chatMessageCell = this.drawTimeAfter.get(i);
+                    canvas.save();
+                    canvas.translate(chatMessageCell.getLeft() + chatMessageCell.getNonAnimationTranslationX(false), chatMessageCell.getY());
+                    chatMessageCell.drawTime(canvas, chatMessageCell.shouldDrawAlphaLayer() ? chatMessageCell.getAlpha() : 1.0f, true);
+                    canvas.restore();
+                }
+                this.drawTimeAfter.clear();
+            }
+            int size2 = this.drawNamesAfter.size();
+            if (size2 > 0) {
+                for (int i2 = 0; i2 < size2; i2++) {
+                    ChatMessageCell chatMessageCell2 = this.drawNamesAfter.get(i2);
+                    float left = chatMessageCell2.getLeft() + chatMessageCell2.getNonAnimationTranslationX(false);
+                    float y = chatMessageCell2.getY();
+                    float alpha = chatMessageCell2.shouldDrawAlphaLayer() ? chatMessageCell2.getAlpha() : 1.0f;
+                    canvas.save();
+                    canvas.translate(left, y);
+                    chatMessageCell2.setInvalidatesParent(true);
+                    chatMessageCell2.drawNamesLayout(canvas, alpha);
+                    chatMessageCell2.setInvalidatesParent(false);
+                    canvas.restore();
+                }
+                this.drawNamesAfter.clear();
+            }
+            int size3 = this.drawCaptionAfter.size();
+            if (size3 > 0) {
+                for (int i3 = 0; i3 < size3; i3++) {
+                    ChatMessageCell chatMessageCell3 = this.drawCaptionAfter.get(i3);
+                    boolean z2 = chatMessageCell3.getCurrentPosition() != null && (chatMessageCell3.getCurrentPosition().flags & 1) == 0;
+                    float alpha2 = chatMessageCell3.shouldDrawAlphaLayer() ? chatMessageCell3.getAlpha() : 1.0f;
+                    float left2 = chatMessageCell3.getLeft() + chatMessageCell3.getNonAnimationTranslationX(z);
+                    float y2 = chatMessageCell3.getY();
+                    canvas.save();
+                    MessageObject.GroupedMessages currentMessagesGroup = chatMessageCell3.getCurrentMessagesGroup();
+                    if (currentMessagesGroup != null && currentMessagesGroup.transitionParams.backgroundChangeBounds) {
+                        float nonAnimationTranslationX = chatMessageCell3.getNonAnimationTranslationX(true);
+                        MessageObject.GroupedMessages.TransitionParams transitionParams = currentMessagesGroup.transitionParams;
+                        float f2 = transitionParams.left + nonAnimationTranslationX + transitionParams.offsetLeft;
+                        float f3 = transitionParams.top + transitionParams.offsetTop;
+                        float f4 = transitionParams.right + nonAnimationTranslationX + transitionParams.offsetRight;
+                        float f5 = transitionParams.bottom + transitionParams.offsetBottom;
+                        if (!transitionParams.backgroundChangeBounds) {
+                            f3 += chatMessageCell3.getTranslationY();
+                            f5 += chatMessageCell3.getTranslationY();
+                        }
+                        canvas.clipRect(f2 + AndroidUtilities.dp(8.0f), f3 + AndroidUtilities.dp(8.0f), f4 - AndroidUtilities.dp(8.0f), f5 - AndroidUtilities.dp(8.0f));
+                    }
+                    if (chatMessageCell3.getTransitionParams().wasDraw) {
+                        canvas.translate(left2, y2);
+                        chatMessageCell3.setInvalidatesParent(true);
+                        chatMessageCell3.drawCaptionLayout(canvas, z2, alpha2);
+                        z = false;
+                        chatMessageCell3.setInvalidatesParent(false);
+                        canvas.restore();
+                    } else {
+                        z = false;
+                    }
+                }
+                this.drawCaptionAfter.clear();
+            }
             canvas.restore();
         }
 
@@ -3978,20 +4042,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ChatActivity.AnonymousClass14.drawChatBackgroundElements(android.graphics.Canvas):void");
         }
 
-        /* JADX WARN: Removed duplicated region for block: B:140:0x0318  */
-        /* JADX WARN: Removed duplicated region for block: B:142:0x0324  */
+        /* JADX WARN: Removed duplicated region for block: B:281:0x057f  */
         /* JADX WARN: Removed duplicated region for block: B:34:0x0099  */
         /* JADX WARN: Removed duplicated region for block: B:36:0x00a0  */
-        /* JADX WARN: Removed duplicated region for block: B:381:0x0808  */
         /* JADX WARN: Removed duplicated region for block: B:44:0x00c1  */
         @Override // androidx.recyclerview.widget.RecyclerView, android.view.ViewGroup
         /*
             Code decompiled incorrectly, please refer to instructions dump.
             To view partially-correct add '--show-bad-code' argument
         */
-        public boolean drawChild(android.graphics.Canvas r23, android.view.View r24, long r25) {
+        public boolean drawChild(android.graphics.Canvas r19, android.view.View r20, long r21) {
             /*
-                Method dump skipped, instructions count: 2060
+                Method dump skipped, instructions count: 1411
                 To view this dump add '--comments-level debug' option
             */
             throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ChatActivity.AnonymousClass14.drawChild(android.graphics.Canvas, android.view.View, long):boolean");
@@ -9700,19 +9762,26 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         return arrayList.get(i4);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:261:0x055d  */
-    /* JADX WARN: Removed duplicated region for block: B:264:0x0569  */
+    /* JADX WARN: Removed duplicated region for block: B:260:0x0543  */
+    /* JADX WARN: Removed duplicated region for block: B:263:0x054f  */
+    /* JADX WARN: Removed duplicated region for block: B:333:0x06ce  */
+    /* JADX WARN: Removed duplicated region for block: B:355:0x0730  */
+    /* JADX WARN: Removed duplicated region for block: B:372:0x076c  */
     /* JADX WARN: Removed duplicated region for block: B:39:0x00ce  */
     /* JADX WARN: Removed duplicated region for block: B:40:0x00d3  */
+    /* JADX WARN: Removed duplicated region for block: B:422:0x087f  */
+    /* JADX WARN: Removed duplicated region for block: B:425:0x088d  */
     /* JADX WARN: Removed duplicated region for block: B:42:0x00d6  */
-    /* JADX WARN: Removed duplicated region for block: B:55:0x0126  */
+    /* JADX WARN: Removed duplicated region for block: B:434:0x08ae  */
+    /* JADX WARN: Removed duplicated region for block: B:473:0x0959  */
+    /* JADX WARN: Removed duplicated region for block: B:54:0x0102  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     public void updateMessagesVisiblePart(boolean r52) {
         /*
-            Method dump skipped, instructions count: 2789
+            Method dump skipped, instructions count: 2770
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.ChatActivity.updateMessagesVisiblePart(boolean):void");

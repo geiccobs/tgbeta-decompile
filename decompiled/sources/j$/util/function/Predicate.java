@@ -6,7 +6,7 @@ public interface Predicate<T> {
     /* loaded from: classes2.dex */
     public final /* synthetic */ class CC {
         public static Predicate $default$negate(Predicate predicate) {
-            return new C0045a(predicate);
+            return new C0044a(predicate);
         }
     }
 

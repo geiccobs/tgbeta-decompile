@@ -13,7 +13,7 @@ public final /* synthetic */ class Z implements j$.util.function.n {
         if (intToLongFunction == null) {
             return null;
         }
-        return intToLongFunction instanceof C0201a0 ? ((C0201a0) intToLongFunction).a : new Z(intToLongFunction);
+        return intToLongFunction instanceof C0200a0 ? ((C0200a0) intToLongFunction).a : new Z(intToLongFunction);
     }
 
     @Override // j$.util.function.n

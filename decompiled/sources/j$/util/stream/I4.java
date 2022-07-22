@@ -1,6 +1,6 @@
 package j$.util.stream;
 
-import j$.util.AbstractC0039a;
+import j$.util.AbstractC0038a;
 import j$.util.function.Consumer;
 import java.util.Comparator;
 import org.telegram.tgnet.ConnectionsManager;
@@ -43,18 +43,18 @@ public final class I4 extends J4 implements j$.util.u, Consumer {
     @Override // j$.util.u
     public void forEachRemaining(Consumer consumer) {
         consumer.getClass();
-        C0119k4 c0119k4 = null;
+        C0118k4 c0118k4 = null;
         while (true) {
             int r = r();
             if (r != 1) {
                 if (r == 2) {
-                    if (c0119k4 == null) {
-                        c0119k4 = new C0119k4(ConnectionsManager.RequestFlagNeedQuickAck);
+                    if (c0118k4 == null) {
+                        c0118k4 = new C0118k4(ConnectionsManager.RequestFlagNeedQuickAck);
                     } else {
-                        c0119k4.a = 0;
+                        c0118k4.a = 0;
                     }
                     long j = 0;
-                    while (this.a.b(c0119k4)) {
+                    while (this.a.b(c0118k4)) {
                         j++;
                         if (j >= 128) {
                             break;
@@ -65,7 +65,7 @@ public final class I4 extends J4 implements j$.util.u, Consumer {
                     }
                     long p = p(j);
                     for (int i = 0; i < p; i++) {
-                        consumer.accept(c0119k4.b[i]);
+                        consumer.accept(c0118k4.b[i]);
                     }
                 } else {
                     this.a.forEachRemaining(consumer);
@@ -84,12 +84,12 @@ public final class I4 extends J4 implements j$.util.u, Consumer {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0039a.e(this);
+        return AbstractC0038a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0039a.f(this, i);
+        return AbstractC0038a.f(this, i);
     }
 
     @Override // j$.util.stream.J4

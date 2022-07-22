@@ -5,16 +5,16 @@ import java.util.Arrays;
 final class G3 extends C3 {
     private U3 c;
 
-    public G3(AbstractC0130m3 abstractC0130m3) {
-        super(abstractC0130m3);
+    public G3(AbstractC0129m3 abstractC0129m3) {
+        super(abstractC0129m3);
     }
 
-    @Override // j$.util.stream.AbstractC0112j3, j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0111j3, j$.util.stream.AbstractC0129m3
     public void accept(double d) {
         this.c.accept(d);
     }
 
-    @Override // j$.util.stream.AbstractC0088f3, j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0087f3, j$.util.stream.AbstractC0129m3
     public void m() {
         double[] dArr = (double[]) this.c.e();
         Arrays.sort(dArr);
@@ -40,7 +40,7 @@ final class G3 extends C3 {
         this.a.m();
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void n(long j) {
         if (j < 2147483639) {
             this.c = j > 0 ? new U3((int) j) : new U3();

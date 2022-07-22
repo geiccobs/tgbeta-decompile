@@ -6,7 +6,7 @@ import java.util.Comparator;
 final class F extends H implements v {
     @Override // j$.util.v, j$.util.u
     public /* synthetic */ boolean b(Consumer consumer) {
-        return AbstractC0039a.l(this, consumer);
+        return AbstractC0038a.l(this, consumer);
     }
 
     @Override // j$.util.v
@@ -16,7 +16,7 @@ final class F extends H implements v {
 
     @Override // j$.util.v, j$.util.u
     public /* synthetic */ void forEachRemaining(Consumer consumer) {
-        AbstractC0039a.d(this, consumer);
+        AbstractC0038a.d(this, consumer);
     }
 
     @Override // j$.util.u
@@ -26,12 +26,12 @@ final class F extends H implements v {
 
     @Override // j$.util.u
     public /* synthetic */ long getExactSizeIfKnown() {
-        return AbstractC0039a.e(this);
+        return AbstractC0038a.e(this);
     }
 
     @Override // j$.util.u
     public /* synthetic */ boolean hasCharacteristics(int i) {
-        return AbstractC0039a.f(this, i);
+        return AbstractC0038a.f(this, i);
     }
 
     @Override // j$.util.v

@@ -2,7 +2,7 @@ package j$.util.stream;
 
 import j$.util.function.Consumer;
 /* loaded from: classes2.dex */
-class O2 extends T2 implements S2, AbstractC0118k3 {
+class O2 extends T2 implements S2, AbstractC0117k3 {
     final /* synthetic */ j$.util.function.y b;
     final /* synthetic */ j$.util.function.v c;
     final /* synthetic */ j$.util.function.b d;
@@ -13,20 +13,20 @@ class O2 extends T2 implements S2, AbstractC0118k3 {
         this.d = bVar;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void accept(double d) {
-        AbstractC0140o1.f(this);
+        AbstractC0139o1.f(this);
         throw null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void accept(int i) {
         this.c.accept(this.a, i);
     }
 
-    @Override // j$.util.stream.AbstractC0130m3, j$.util.stream.AbstractC0124l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0129m3, j$.util.stream.AbstractC0123l3, j$.util.function.q
     public /* synthetic */ void accept(long j) {
-        AbstractC0140o1.e(this);
+        AbstractC0139o1.e(this);
         throw null;
     }
 
@@ -37,7 +37,7 @@ class O2 extends T2 implements S2, AbstractC0118k3 {
 
     /* renamed from: b */
     public /* synthetic */ void accept(Integer num) {
-        AbstractC0140o1.b(this, num);
+        AbstractC0139o1.b(this, num);
     }
 
     @Override // j$.util.stream.S2
@@ -51,16 +51,16 @@ class O2 extends T2 implements S2, AbstractC0118k3 {
         return new j$.util.function.k(this, lVar);
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ void m() {
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void n(long j) {
         this.a = this.b.get();
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public /* synthetic */ boolean o() {
         return false;
     }

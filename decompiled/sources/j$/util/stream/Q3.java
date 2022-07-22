@@ -6,11 +6,11 @@ final class Q3 extends E3 {
     private long[] c;
     private int d;
 
-    public Q3(AbstractC0130m3 abstractC0130m3) {
-        super(abstractC0130m3);
+    public Q3(AbstractC0129m3 abstractC0129m3) {
+        super(abstractC0129m3);
     }
 
-    @Override // j$.util.stream.AbstractC0124l3, j$.util.function.q
+    @Override // j$.util.stream.AbstractC0123l3, j$.util.function.q
     public void accept(long j) {
         long[] jArr = this.c;
         int i = this.d;
@@ -18,7 +18,7 @@ final class Q3 extends E3 {
         jArr[i] = j;
     }
 
-    @Override // j$.util.stream.AbstractC0100h3, j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0099h3, j$.util.stream.AbstractC0129m3
     public void m() {
         int i = 0;
         Arrays.sort(this.c, 0, this.d);
@@ -38,7 +38,7 @@ final class Q3 extends E3 {
         this.c = null;
     }
 
-    @Override // j$.util.stream.AbstractC0130m3
+    @Override // j$.util.stream.AbstractC0129m3
     public void n(long j) {
         if (j < 2147483639) {
             this.c = new long[(int) j];

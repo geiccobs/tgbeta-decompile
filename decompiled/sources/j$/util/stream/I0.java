@@ -7,13 +7,13 @@ public class I0 extends L0 {
         super(uVar, i, z);
     }
 
-    @Override // j$.util.stream.AbstractC0066c
+    @Override // j$.util.stream.AbstractC0065c
     final boolean G0() {
         throw new UnsupportedOperationException();
     }
 
-    @Override // j$.util.stream.AbstractC0066c
-    public final AbstractC0130m3 H0(int i, AbstractC0130m3 abstractC0130m3) {
+    @Override // j$.util.stream.AbstractC0065c
+    public final AbstractC0129m3 H0(int i, AbstractC0129m3 abstractC0129m3) {
         throw new UnsupportedOperationException();
     }
 
@@ -26,7 +26,7 @@ public class I0 extends L0 {
             return;
         }
         lVar.getClass();
-        x0(new C0121l0(lVar, true));
+        x0(new C0120l0(lVar, true));
     }
 
     @Override // j$.util.stream.L0, j$.util.stream.IntStream
@@ -40,13 +40,13 @@ public class I0 extends L0 {
         M0.c(lVar);
     }
 
-    @Override // j$.util.stream.AbstractC0066c, j$.util.stream.AbstractC0090g, j$.util.stream.IntStream
+    @Override // j$.util.stream.AbstractC0065c, j$.util.stream.AbstractC0089g, j$.util.stream.IntStream
     public /* bridge */ /* synthetic */ IntStream parallel() {
         parallel();
         return this;
     }
 
-    @Override // j$.util.stream.AbstractC0066c, j$.util.stream.AbstractC0090g, j$.util.stream.IntStream
+    @Override // j$.util.stream.AbstractC0065c, j$.util.stream.AbstractC0089g, j$.util.stream.IntStream
     public /* bridge */ /* synthetic */ IntStream sequential() {
         sequential();
         return this;

@@ -118,6 +118,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
     private TLRPC$TL_exportedMessageLink exportedMessageLink;
     private FrameLayout frameLayout;
     private FrameLayout frameLayout2;
+    private boolean fullyShown;
     private RecyclerListView gridView;
     private int hasPoll;
     private boolean isChannel;
@@ -520,6 +521,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.shadowAnimation = new AnimatorSet[2];
         this.selectedDialogs = new LongSparseArray<>();
         this.containerViewTop = -1;
+        this.fullyShown = false;
         this.rect = new RectF();
         this.paint = new Paint(1);
         this.textPaint = new TextPaint(1);
@@ -552,6 +554,16 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         strArr2[0] = str;
         strArr2[1] = str2;
         this.useSmoothKeyboard = true;
+        super.setDelegate(new BottomSheet.BottomSheetDelegate() { // from class: org.telegram.ui.Components.ShareAlert.1
+            {
+                ShareAlert.this = this;
+            }
+
+            @Override // org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegate, org.telegram.ui.ActionBar.BottomSheet.BottomSheetDelegateInterface
+            public void onOpenAnimationEnd() {
+                ShareAlert.this.fullyShown = true;
+            }
+        });
         ArrayList<MessageObject> arrayList2 = this.sendingMessageObjects;
         if (arrayList2 != null) {
             int size = arrayList2.size();
@@ -578,7 +590,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 }
             });
         }
-        SizeNotifierFrameLayout sizeNotifierFrameLayout = new SizeNotifierFrameLayout(context) { // from class: org.telegram.ui.Components.ShareAlert.1
+        SizeNotifierFrameLayout sizeNotifierFrameLayout = new SizeNotifierFrameLayout(context) { // from class: org.telegram.ui.Components.ShareAlert.2
             private int fromOffsetTop;
             private int fromScrollY;
             private boolean fullHeight;
@@ -589,40 +601,40 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             private int topOffset;
             private boolean ignoreLayout = false;
             private RectF rect1 = new RectF();
-            AdjustPanLayoutHelper adjustPanLayoutHelper = new AdjustPanLayoutHelper(this) { // from class: org.telegram.ui.Components.ShareAlert.1.1
+            AdjustPanLayoutHelper adjustPanLayoutHelper = new AdjustPanLayoutHelper(this) { // from class: org.telegram.ui.Components.ShareAlert.2.1
                 {
-                    AnonymousClass1.this = this;
+                    AnonymousClass2.this = this;
                 }
 
                 @Override // org.telegram.ui.ActionBar.AdjustPanLayoutHelper
                 public void onTransitionStart(boolean z4, int i3) {
                     super.onTransitionStart(z4, i3);
                     if (ShareAlert.this.previousScrollOffsetY == ShareAlert.this.scrollOffsetY) {
-                        AnonymousClass1.this.fromScrollY = -1;
+                        AnonymousClass2.this.fromScrollY = -1;
                     } else {
-                        AnonymousClass1 anonymousClass1 = AnonymousClass1.this;
-                        anonymousClass1.fromScrollY = ShareAlert.this.previousScrollOffsetY;
-                        AnonymousClass1 anonymousClass12 = AnonymousClass1.this;
-                        anonymousClass12.toScrollY = ShareAlert.this.scrollOffsetY;
+                        AnonymousClass2 anonymousClass2 = AnonymousClass2.this;
+                        anonymousClass2.fromScrollY = ShareAlert.this.previousScrollOffsetY;
+                        AnonymousClass2 anonymousClass22 = AnonymousClass2.this;
+                        anonymousClass22.toScrollY = ShareAlert.this.scrollOffsetY;
                         ShareAlert.this.panTranslationMoveLayout = true;
-                        AnonymousClass1 anonymousClass13 = AnonymousClass1.this;
-                        ShareAlert.this.scrollOffsetY = anonymousClass13.fromScrollY;
+                        AnonymousClass2 anonymousClass23 = AnonymousClass2.this;
+                        ShareAlert.this.scrollOffsetY = anonymousClass23.fromScrollY;
                     }
-                    if (AnonymousClass1.this.topOffset != AnonymousClass1.this.previousTopOffset) {
-                        AnonymousClass1.this.fromOffsetTop = 0;
-                        AnonymousClass1.this.toOffsetTop = 0;
+                    if (AnonymousClass2.this.topOffset != AnonymousClass2.this.previousTopOffset) {
+                        AnonymousClass2.this.fromOffsetTop = 0;
+                        AnonymousClass2.this.toOffsetTop = 0;
                         ShareAlert.this.panTranslationMoveLayout = true;
                         if (!z4) {
-                            AnonymousClass1 anonymousClass14 = AnonymousClass1.this;
-                            AnonymousClass1.access$3320(anonymousClass14, anonymousClass14.topOffset - AnonymousClass1.this.previousTopOffset);
+                            AnonymousClass2 anonymousClass24 = AnonymousClass2.this;
+                            AnonymousClass2.access$3420(anonymousClass24, anonymousClass24.topOffset - AnonymousClass2.this.previousTopOffset);
                         } else {
-                            AnonymousClass1 anonymousClass15 = AnonymousClass1.this;
-                            AnonymousClass1.access$3312(anonymousClass15, anonymousClass15.topOffset - AnonymousClass1.this.previousTopOffset);
+                            AnonymousClass2 anonymousClass25 = AnonymousClass2.this;
+                            AnonymousClass2.access$3412(anonymousClass25, anonymousClass25.topOffset - AnonymousClass2.this.previousTopOffset);
                         }
-                        AnonymousClass1 anonymousClass16 = AnonymousClass1.this;
-                        ShareAlert.this.scrollOffsetY = z4 ? anonymousClass16.fromScrollY : anonymousClass16.toScrollY;
+                        AnonymousClass2 anonymousClass26 = AnonymousClass2.this;
+                        ShareAlert.this.scrollOffsetY = z4 ? anonymousClass26.fromScrollY : anonymousClass26.toScrollY;
                     } else {
-                        AnonymousClass1.this.fromOffsetTop = -1;
+                        AnonymousClass2.this.fromOffsetTop = -1;
                     }
                     ShareAlert.this.gridView.setTopGlowOffset((int) (ShareAlert.this.currentPanTranslationY + ShareAlert.this.scrollOffsetY));
                     ShareAlert.this.frameLayout.setTranslationY(ShareAlert.this.currentPanTranslationY + ShareAlert.this.scrollOffsetY);
@@ -652,28 +664,28 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                         }
                     }
                     ShareAlert.this.currentPanTranslationY = f;
-                    if (AnonymousClass1.this.fromScrollY == -1) {
-                        if (AnonymousClass1.this.fromOffsetTop != -1) {
-                            AnonymousClass1 anonymousClass1 = AnonymousClass1.this;
+                    if (AnonymousClass2.this.fromScrollY == -1) {
+                        if (AnonymousClass2.this.fromOffsetTop != -1) {
+                            AnonymousClass2 anonymousClass2 = AnonymousClass2.this;
                             float f3 = 1.0f - f2;
-                            ShareAlert.this.scrollOffsetY = (int) ((anonymousClass1.fromOffsetTop * f3) + (AnonymousClass1.this.toOffsetTop * f2));
+                            ShareAlert.this.scrollOffsetY = (int) ((anonymousClass2.fromOffsetTop * f3) + (AnonymousClass2.this.toOffsetTop * f2));
                             if (!z4) {
                                 f3 = f2;
                             }
                             if (z4) {
-                                ShareAlert.this.gridView.setTranslationY(ShareAlert.this.currentPanTranslationY - ((AnonymousClass1.this.fromOffsetTop - AnonymousClass1.this.toOffsetTop) * f2));
+                                ShareAlert.this.gridView.setTranslationY(ShareAlert.this.currentPanTranslationY - ((AnonymousClass2.this.fromOffsetTop - AnonymousClass2.this.toOffsetTop) * f2));
                             } else {
-                                ShareAlert.this.gridView.setTranslationY(ShareAlert.this.currentPanTranslationY + ((AnonymousClass1.this.toOffsetTop - AnonymousClass1.this.fromOffsetTop) * f3));
+                                ShareAlert.this.gridView.setTranslationY(ShareAlert.this.currentPanTranslationY + ((AnonymousClass2.this.toOffsetTop - AnonymousClass2.this.fromOffsetTop) * f3));
                             }
                         }
                     } else {
                         if (!z4) {
                             f2 = 1.0f - f2;
                         }
-                        AnonymousClass1 anonymousClass12 = AnonymousClass1.this;
+                        AnonymousClass2 anonymousClass22 = AnonymousClass2.this;
                         float f4 = 1.0f - f2;
-                        ShareAlert.this.scrollOffsetY = (int) ((anonymousClass12.fromScrollY * f4) + (AnonymousClass1.this.toScrollY * f2));
-                        float f5 = ShareAlert.this.currentPanTranslationY + ((AnonymousClass1.this.fromScrollY - AnonymousClass1.this.toScrollY) * f4);
+                        ShareAlert.this.scrollOffsetY = (int) ((anonymousClass22.fromScrollY * f4) + (AnonymousClass2.this.toScrollY * f2));
+                        float f5 = ShareAlert.this.currentPanTranslationY + ((AnonymousClass2.this.fromScrollY - AnonymousClass2.this.toScrollY) * f4);
                         ShareAlert.this.gridView.setTranslationY(f5);
                         if (z4) {
                             ShareAlert.this.searchGridView.setTranslationY(f5);
@@ -692,7 +704,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
 
                 @Override // org.telegram.ui.ActionBar.AdjustPanLayoutHelper
                 protected boolean heightAnimationEnabled() {
-                    if (ShareAlert.this.isDismissed()) {
+                    if (ShareAlert.this.isDismissed() || !ShareAlert.this.fullyShown) {
                         return false;
                     }
                     return !ShareAlert.this.commentTextView.isPopupVisible();
@@ -705,15 +717,15 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 this.lightStatusBar = AndroidUtilities.computePerceivedBrightness(this.getThemedColor(this.darkTheme ? "voipgroup_inviteMembersBackground" : "dialogBackground")) > 0.721f ? true : z4;
             }
 
-            static /* synthetic */ int access$3312(AnonymousClass1 anonymousClass1, int i3) {
-                int i4 = anonymousClass1.toOffsetTop + i3;
-                anonymousClass1.toOffsetTop = i4;
+            static /* synthetic */ int access$3412(AnonymousClass2 anonymousClass2, int i3) {
+                int i4 = anonymousClass2.toOffsetTop + i3;
+                anonymousClass2.toOffsetTop = i4;
                 return i4;
             }
 
-            static /* synthetic */ int access$3320(AnonymousClass1 anonymousClass1, int i3) {
-                int i4 = anonymousClass1.toOffsetTop - i3;
-                anonymousClass1.toOffsetTop = i4;
+            static /* synthetic */ int access$3420(AnonymousClass2 anonymousClass2, int i3) {
+                int i4 = anonymousClass2.toOffsetTop - i3;
+                anonymousClass2.toOffsetTop = i4;
                 return i4;
             }
 
@@ -837,7 +849,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                     Method dump skipped, instructions count: 252
                     To view this dump add '--comments-level debug' option
                 */
-                throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ShareAlert.AnonymousClass1.onLayout(boolean, int, int, int, int):void");
+                throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ShareAlert.AnonymousClass2.onLayout(boolean, int, int, int, int):void");
             }
 
             @Override // android.view.ViewGroup
@@ -881,7 +893,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                     Method dump skipped, instructions count: 430
                     To view this dump add '--comments-level debug' option
                 */
-                throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ShareAlert.AnonymousClass1.onDraw(android.graphics.Canvas):void");
+                throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Components.ShareAlert.AnonymousClass2.onDraw(android.graphics.Canvas):void");
             }
 
             @Override // org.telegram.ui.Components.SizeNotifierFrameLayout, android.view.ViewGroup, android.view.View
@@ -902,7 +914,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.frameLayout = frameLayout;
         frameLayout.setBackgroundColor(getThemedColor(this.darkTheme ? "voipgroup_inviteMembersBackground" : str5));
         if (this.darkTheme && this.linkToCopy[1] != null) {
-            SwitchView switchView = new SwitchView(context) { // from class: org.telegram.ui.Components.ShareAlert.2
+            SwitchView switchView = new SwitchView(context) { // from class: org.telegram.ui.Components.ShareAlert.3
                 {
                     ShareAlert.this = this;
                 }
@@ -925,7 +937,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         SearchField searchField = new SearchField(context);
         this.searchView = searchField;
         this.frameLayout.addView(searchField, LayoutHelper.createFrame(-1, 58, 83));
-        RecyclerListView recyclerListView = new RecyclerListView(context, resourcesProvider) { // from class: org.telegram.ui.Components.ShareAlert.3
+        RecyclerListView recyclerListView = new RecyclerListView(context, resourcesProvider) { // from class: org.telegram.ui.Components.ShareAlert.4
             {
                 ShareAlert.this = this;
             }
@@ -943,7 +955,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
         this.layoutManager = gridLayoutManager;
         recyclerListView2.setLayoutManager(gridLayoutManager);
-        this.layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() { // from class: org.telegram.ui.Components.ShareAlert.4
+        this.layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() { // from class: org.telegram.ui.Components.ShareAlert.5
             {
                 ShareAlert.this = this;
             }
@@ -958,7 +970,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         });
         this.gridView.setHorizontalScrollBarEnabled(false);
         this.gridView.setVerticalScrollBarEnabled(false);
-        this.gridView.addItemDecoration(new RecyclerView.ItemDecoration(this) { // from class: org.telegram.ui.Components.ShareAlert.5
+        this.gridView.addItemDecoration(new RecyclerView.ItemDecoration(this) { // from class: org.telegram.ui.Components.ShareAlert.6
             @Override // androidx.recyclerview.widget.RecyclerView.ItemDecoration
             public void getItemOffsets(android.graphics.Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
                 RecyclerListView.Holder holder = (RecyclerListView.Holder) recyclerView.getChildViewHolder(view);
@@ -989,7 +1001,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 ShareAlert.this.lambda$new$2(view, i4);
             }
         });
-        this.gridView.setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.Components.ShareAlert.6
+        this.gridView.setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.Components.ShareAlert.7
             {
                 ShareAlert.this = this;
             }
@@ -1003,7 +1015,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 }
             }
         });
-        RecyclerListView recyclerListView4 = new RecyclerListView(context, resourcesProvider) { // from class: org.telegram.ui.Components.ShareAlert.7
+        RecyclerListView recyclerListView4 = new RecyclerListView(context, resourcesProvider) { // from class: org.telegram.ui.Components.ShareAlert.8
             {
                 ShareAlert.this = this;
             }
@@ -1021,7 +1033,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         FillLastGridLayoutManager fillLastGridLayoutManager = new FillLastGridLayoutManager(getContext(), 4, 0, this.searchGridView);
         this.searchLayoutManager = fillLastGridLayoutManager;
         recyclerListView5.setLayoutManager(fillLastGridLayoutManager);
-        this.searchLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() { // from class: org.telegram.ui.Components.ShareAlert.8
+        this.searchLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() { // from class: org.telegram.ui.Components.ShareAlert.9
             {
                 ShareAlert.this = this;
             }
@@ -1041,7 +1053,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.searchGridView.setItemAnimator(null);
         this.searchGridView.setHorizontalScrollBarEnabled(false);
         this.searchGridView.setVerticalScrollBarEnabled(false);
-        this.searchGridView.setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.Components.ShareAlert.9
+        this.searchGridView.setOnScrollListener(new RecyclerView.OnScrollListener() { // from class: org.telegram.ui.Components.ShareAlert.10
             {
                 ShareAlert.this = this;
             }
@@ -1055,7 +1067,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 }
             }
         });
-        this.searchGridView.addItemDecoration(new RecyclerView.ItemDecoration(this) { // from class: org.telegram.ui.Components.ShareAlert.10
+        this.searchGridView.addItemDecoration(new RecyclerView.ItemDecoration(this) { // from class: org.telegram.ui.Components.ShareAlert.11
             @Override // androidx.recyclerview.widget.RecyclerView.ItemDecoration
             public void getItemOffsets(android.graphics.Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
                 RecyclerListView.Holder holder = (RecyclerListView.Holder) recyclerView.getChildViewHolder(view);
@@ -1162,17 +1174,17 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         } else {
             this.shadow[1].setAlpha(0.0f);
         }
-        AnonymousClass11 anonymousClass11 = new AnonymousClass11(context);
-        this.frameLayout2 = anonymousClass11;
-        anonymousClass11.setWillNotDraw(false);
+        AnonymousClass12 anonymousClass12 = new AnonymousClass12(context);
+        this.frameLayout2 = anonymousClass12;
+        anonymousClass12.setWillNotDraw(false);
         this.frameLayout2.setAlpha(0.0f);
         this.frameLayout2.setVisibility(4);
         this.containerView.addView(this.frameLayout2, LayoutHelper.createFrame(-1, -2, 83));
         this.frameLayout2.setOnTouchListener(ShareAlert$$ExternalSyntheticLambda8.INSTANCE);
-        AnonymousClass12 anonymousClass12 = new AnonymousClass12(context, sizeNotifierFrameLayout, null, 1, true, resourcesProvider);
-        this.commentTextView = anonymousClass12;
+        AnonymousClass13 anonymousClass13 = new AnonymousClass13(context, sizeNotifierFrameLayout, null, 1, true, resourcesProvider);
+        this.commentTextView = anonymousClass13;
         if (this.darkTheme) {
-            anonymousClass12.getEditText().setTextColor(getThemedColor("voipgroup_nameText"));
+            anonymousClass13.getEditText().setTextColor(getThemedColor("voipgroup_nameText"));
             this.commentTextView.getEditText().setCursorColor(getThemedColor("voipgroup_nameText"));
         }
         this.commentTextView.setBackgroundColor(themedColor);
@@ -1183,7 +1195,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.frameLayout2.setClipChildren(false);
         this.frameLayout2.setClipToPadding(false);
         this.commentTextView.setClipChildren(false);
-        FrameLayout frameLayout2 = new FrameLayout(context) { // from class: org.telegram.ui.Components.ShareAlert.13
+        FrameLayout frameLayout2 = new FrameLayout(context) { // from class: org.telegram.ui.Components.ShareAlert.14
             {
                 ShareAlert.this = this;
             }
@@ -1224,7 +1236,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         imageView2.setColorFilter(new PorterDuffColorFilter(getThemedColor("dialogFloatingIcon"), PorterDuff.Mode.MULTIPLY));
         imageView2.setScaleType(ImageView.ScaleType.CENTER);
         if (i4 >= 21) {
-            imageView2.setOutlineProvider(new ViewOutlineProvider(this) { // from class: org.telegram.ui.Components.ShareAlert.14
+            imageView2.setOutlineProvider(new ViewOutlineProvider(this) { // from class: org.telegram.ui.Components.ShareAlert.15
                 @Override // android.view.ViewOutlineProvider
                 @SuppressLint({"NewApi"})
                 public void getOutline(View view, Outline outline) {
@@ -1249,7 +1261,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         });
         this.textPaint.setTextSize(AndroidUtilities.dp(12.0f));
         this.textPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        View view = new View(context) { // from class: org.telegram.ui.Components.ShareAlert.15
+        View view = new View(context) { // from class: org.telegram.ui.Components.ShareAlert.16
             {
                 ShareAlert.this = this;
             }
@@ -1286,7 +1298,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         if (this.listAdapter.dialogs.isEmpty()) {
             NotificationCenter.getInstance(this.currentAccount).addObserver(this, NotificationCenter.dialogsNeedReload);
         }
-        DialogsSearchAdapter.loadRecentSearch(this.currentAccount, 0, new DialogsSearchAdapter.OnRecentSearchLoaded() { // from class: org.telegram.ui.Components.ShareAlert.16
+        DialogsSearchAdapter.loadRecentSearch(this.currentAccount, 0, new DialogsSearchAdapter.OnRecentSearchLoaded() { // from class: org.telegram.ui.Components.ShareAlert.17
             {
                 ShareAlert.this = this;
             }
@@ -1366,11 +1378,11 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.parentFragment.presentFragment(new MessageStatisticActivity(messageObject));
     }
 
-    /* renamed from: org.telegram.ui.Components.ShareAlert$11 */
+    /* renamed from: org.telegram.ui.Components.ShareAlert$12 */
     /* loaded from: classes3.dex */
-    public class AnonymousClass11 extends FrameLayout {
+    public class AnonymousClass12 extends FrameLayout {
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        AnonymousClass11(Context context) {
+        AnonymousClass12(Context context) {
             super(context);
             ShareAlert.this = r1;
             new Paint();
@@ -1400,10 +1412,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 shareAlert.captionEditTextTopOffset = shareAlert.chatActivityEnterViewAnimateFromTop - (ShareAlert.this.frameLayout2.getTop() + ShareAlert.this.captionEditTextTopOffset);
                 ShareAlert shareAlert2 = ShareAlert.this;
                 shareAlert2.topBackgroundAnimator = ValueAnimator.ofFloat(shareAlert2.captionEditTextTopOffset, 0.0f);
-                ShareAlert.this.topBackgroundAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ShareAlert$11$$ExternalSyntheticLambda0
+                ShareAlert.this.topBackgroundAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ShareAlert$12$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        ShareAlert.AnonymousClass11.this.lambda$onDraw$0(valueAnimator);
+                        ShareAlert.AnonymousClass12.this.lambda$onDraw$0(valueAnimator);
                     }
                 });
                 ShareAlert.this.topBackgroundAnimator.setInterpolator(CubicBezierInterpolator.DEFAULT);
@@ -1429,16 +1441,16 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         }
     }
 
-    /* renamed from: org.telegram.ui.Components.ShareAlert$12 */
+    /* renamed from: org.telegram.ui.Components.ShareAlert$13 */
     /* loaded from: classes3.dex */
-    public class AnonymousClass12 extends EditTextEmoji {
+    public class AnonymousClass13 extends EditTextEmoji {
         private ValueAnimator messageEditTextAnimator;
         private int messageEditTextPredrawHeigth;
         private int messageEditTextPredrawScrollY;
         private boolean shouldAnimateEditTextWithBounds;
 
         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-        AnonymousClass12(Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, BaseFragment baseFragment, int i, boolean z, Theme.ResourcesProvider resourcesProvider) {
+        AnonymousClass13(Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, BaseFragment baseFragment, int i, boolean z, Theme.ResourcesProvider resourcesProvider) {
             super(context, sizeNotifierFrameLayout, baseFragment, i, z, resourcesProvider);
             ShareAlert.this = r8;
         }
@@ -1449,10 +1461,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 final EditTextCaption editText = ShareAlert.this.commentTextView.getEditText();
                 editText.setOffsetY(editText.getOffsetY() - ((this.messageEditTextPredrawHeigth - editText.getMeasuredHeight()) + (this.messageEditTextPredrawScrollY - editText.getScrollY())));
                 ValueAnimator ofFloat = ValueAnimator.ofFloat(editText.getOffsetY(), 0.0f);
-                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ShareAlert$12$$ExternalSyntheticLambda0
+                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ShareAlert$13$$ExternalSyntheticLambda0
                     @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                     public final void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        ShareAlert.AnonymousClass12.lambda$dispatchDraw$0(EditTextCaption.this, valueAnimator);
+                        ShareAlert.AnonymousClass13.lambda$dispatchDraw$0(EditTextCaption.this, valueAnimator);
                     }
                 });
                 ValueAnimator valueAnimator = this.messageEditTextAnimator;
@@ -1494,10 +1506,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             super.showPopup(i);
             if (ShareAlert.this.darkTheme) {
                 ((BottomSheet) ShareAlert.this).navBarColorKey = null;
-                AndroidUtilities.setNavigationBarColor(ShareAlert.this.getWindow(), ShareAlert.this.getThemedColor("windowBackgroundGray"), true, new AndroidUtilities.IntColorCallback() { // from class: org.telegram.ui.Components.ShareAlert$12$$ExternalSyntheticLambda2
+                AndroidUtilities.setNavigationBarColor(ShareAlert.this.getWindow(), ShareAlert.this.getThemedColor("windowBackgroundGray"), true, new AndroidUtilities.IntColorCallback() { // from class: org.telegram.ui.Components.ShareAlert$13$$ExternalSyntheticLambda1
                     @Override // org.telegram.messenger.AndroidUtilities.IntColorCallback
                     public final void run(int i2) {
-                        ShareAlert.AnonymousClass12.this.lambda$showPopup$1(i2);
+                        ShareAlert.AnonymousClass13.this.lambda$showPopup$1(i2);
                     }
                 });
             }
@@ -1513,10 +1525,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             super.hidePopup(z);
             if (ShareAlert.this.darkTheme) {
                 ((BottomSheet) ShareAlert.this).navBarColorKey = null;
-                AndroidUtilities.setNavigationBarColor(ShareAlert.this.getWindow(), ShareAlert.this.getThemedColor("voipgroup_inviteMembersBackground"), true, new AndroidUtilities.IntColorCallback() { // from class: org.telegram.ui.Components.ShareAlert$12$$ExternalSyntheticLambda1
+                AndroidUtilities.setNavigationBarColor(ShareAlert.this.getWindow(), ShareAlert.this.getThemedColor("voipgroup_inviteMembersBackground"), true, new AndroidUtilities.IntColorCallback() { // from class: org.telegram.ui.Components.ShareAlert$13$$ExternalSyntheticLambda2
                     @Override // org.telegram.messenger.AndroidUtilities.IntColorCallback
                     public final void run(int i) {
-                        ShareAlert.AnonymousClass12.this.lambda$hidePopup$2(i);
+                        ShareAlert.AnonymousClass13.this.lambda$hidePopup$2(i);
                     }
                 });
             }
@@ -1628,7 +1640,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 actionBarPopupWindowLayout.setBackgroundColor(getThemedColor("voipgroup_inviteMembersBackground"));
             }
             actionBarPopupWindowLayout.setAnimationEnabled(false);
-            actionBarPopupWindowLayout.setOnTouchListener(new View.OnTouchListener() { // from class: org.telegram.ui.Components.ShareAlert.17
+            actionBarPopupWindowLayout.setOnTouchListener(new View.OnTouchListener() { // from class: org.telegram.ui.Components.ShareAlert.18
                 private android.graphics.Rect popupRect = new android.graphics.Rect();
 
                 {
@@ -1690,7 +1702,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             actionBarPopupWindowLayout2.setBackgroundColor(Theme.getColor("voipgroup_inviteMembersBackground"));
         }
         actionBarPopupWindowLayout2.setAnimationEnabled(false);
-        actionBarPopupWindowLayout2.setOnTouchListener(new View.OnTouchListener() { // from class: org.telegram.ui.Components.ShareAlert.18
+        actionBarPopupWindowLayout2.setOnTouchListener(new View.OnTouchListener() { // from class: org.telegram.ui.Components.ShareAlert.19
             private android.graphics.Rect popupRect = new android.graphics.Rect();
 
             {
@@ -2005,7 +2017,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         animatorArr[0] = ObjectAnimator.ofFloat(view, property, fArr);
         animatorSet.playTogether(animatorArr);
         this.shadowAnimation[i].setDuration(150L);
-        this.shadowAnimation[i].addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ShareAlert.19
+        this.shadowAnimation[i].addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ShareAlert.20
             {
                 ShareAlert.this = this;
             }
@@ -2160,7 +2172,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this.animatorSet.playTogether(arrayList);
         this.animatorSet.setInterpolator(new DecelerateInterpolator());
         this.animatorSet.setDuration(180L);
-        this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ShareAlert.20
+        this.animatorSet.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.ShareAlert.21
             {
                 ShareAlert.this = this;
             }
@@ -2232,6 +2244,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         if (editTextEmoji != null) {
             AndroidUtilities.hideKeyboard(editTextEmoji.getEditText());
         }
+        this.fullyShown = false;
         super.dismiss();
         NotificationCenter.getInstance(this.currentAccount).removeObserver(this, NotificationCenter.dialogsNeedReload);
     }

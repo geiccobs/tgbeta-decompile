@@ -12,8 +12,8 @@ public final /* synthetic */ class A implements BiConsumer {
     public final void accept(Object obj, Object obj2) {
         double[] dArr = (double[]) obj;
         double[] dArr2 = (double[]) obj2;
-        AbstractC0120l.b(dArr, dArr2[0]);
-        AbstractC0120l.b(dArr, dArr2[1]);
+        AbstractC0119l.b(dArr, dArr2[0]);
+        AbstractC0119l.b(dArr, dArr2[1]);
         dArr[2] = dArr[2] + dArr2[2];
         dArr[3] = dArr[3] + dArr2[3];
     }

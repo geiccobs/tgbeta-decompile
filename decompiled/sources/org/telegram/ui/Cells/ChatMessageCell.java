@@ -4598,17 +4598,17 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatMessageCell.updatePollAnimations(long):void");
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:387:0x08a3  */
-    /* JADX WARN: Removed duplicated region for block: B:392:0x08eb  */
-    /* JADX WARN: Removed duplicated region for block: B:395:0x08f2  */
-    /* JADX WARN: Removed duplicated region for block: B:405:0x0985  */
+    /* JADX WARN: Removed duplicated region for block: B:391:0x08ac  */
+    /* JADX WARN: Removed duplicated region for block: B:396:0x08f4  */
+    /* JADX WARN: Removed duplicated region for block: B:399:0x08fb  */
+    /* JADX WARN: Removed duplicated region for block: B:409:0x098e  */
     /*
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
     private void drawContent(android.graphics.Canvas r32) {
         /*
-            Method dump skipped, instructions count: 4428
+            Method dump skipped, instructions count: 4437
             To view this dump add '--comments-level debug' option
         */
         throw new UnsupportedOperationException("Method not decompiled: org.telegram.ui.Cells.ChatMessageCell.drawContent(android.graphics.Canvas):void");

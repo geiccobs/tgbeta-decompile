@@ -11,7 +11,7 @@ import org.telegram.messenger.AndroidUtilities;
 /* loaded from: classes3.dex */
 public class ScrollableHorizontalScrollView extends HorizontalScrollView {
     private ValueAnimator scrollAnimator;
-    private boolean scrollingAnimation;
+    protected boolean scrollingAnimation;
     private int scrollingTo = -1;
 
     public ScrollableHorizontalScrollView(Context context) {
@@ -44,6 +44,9 @@ public class ScrollableHorizontalScrollView extends HorizontalScrollView {
         if (valueAnimator != null) {
             valueAnimator.cancel();
         }
+        if (getScrollX() == i) {
+            return;
+        }
         ValueAnimator ofFloat = ValueAnimator.ofFloat(getScrollX(), i);
         this.scrollAnimator = ofFloat;
         ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Components.ScrollableHorizontalScrollView$$ExternalSyntheticLambda0
@@ -62,8 +65,9 @@ public class ScrollableHorizontalScrollView extends HorizontalScrollView {
 
             @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
             public void onAnimationStart(Animator animator) {
-                ScrollableHorizontalScrollView.this.scrollingAnimation = true;
-                if (ScrollableHorizontalScrollView.this.getParent() instanceof HorizontalScrollView) {
+                ScrollableHorizontalScrollView scrollableHorizontalScrollView = ScrollableHorizontalScrollView.this;
+                scrollableHorizontalScrollView.scrollingAnimation = true;
+                if (scrollableHorizontalScrollView.getParent() instanceof HorizontalScrollView) {
                     ((HorizontalScrollView) ScrollableHorizontalScrollView.this.getParent()).requestDisallowInterceptTouchEvent(false);
                 }
             }

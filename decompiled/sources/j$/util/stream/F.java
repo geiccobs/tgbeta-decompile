@@ -8,7 +8,7 @@ public final /* synthetic */ class F implements j$.util.function.f {
     public final void accept(double d) {
         switch (this.a) {
             case 0:
-                ((AbstractC0130m3) this.b).accept(d);
+                ((AbstractC0129m3) this.b).accept(d);
                 return;
             default:
                 ((J) this.b).a.accept(d);
